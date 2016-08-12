@@ -22,9 +22,10 @@ using System.Runtime.InteropServices;
 #if (RELEASE_DELAY_SIGN)
 [assembly: AssemblyDelaySignAttribute(true)]
 [assembly: AssemblyKeyFileAttribute("35MSSharedLib1024.snk")]
+#else
+[assembly:InternalsVisibleTo("Microsoft.Azure.Devices.Client.Tests.PCLTests")]
 #endif
 
 // Version information for an assembly follows semantic versioning 1.0.0 (because
 // NuGet didn't support semver 2.0.0 before VS 2015). See semver.org for details.
-[assembly: AssemblyInformationalVersion("1.0.9")]
-[assembly:InternalsVisibleTo("Microsoft.Azure.Devices.Client.Tests.PCLTests")]
+[assembly: AssemblyInformationalVersion("1.0.16")]

@@ -6,6 +6,7 @@
 var assert = require('chai').assert;
 var debug = require('debug')('e2etests');
 var uuid = require('uuid');
+var chalk = require('chalk');
 
 var serviceSdk = require('azure-iothub');
 var Message = require('azure-iot-common').Message;
@@ -13,6 +14,8 @@ var createDeviceClient = require('./testUtils.js').createDeviceClient;
 var closeDeviceServiceClients = require('./testUtils.js').closeDeviceServiceClients;
 var closeDeviceEventHubClients = require('./testUtils.js').closeDeviceEventHubClients;
 var eventHubClient = require('azure-event-hubs').Client;
+var errors = require('azure-iot-common').errors;
+var numberOfc2dMessages = 1;
 
 var runTests = function (hubConnectionString, deviceTransport, provisionedDevice) {
   describe('Device utilizing ' + provisionedDevice.authenticationDescription + ' authentication, connected over ' + deviceTransport.name + ' using device/service clients c2d', function () {
@@ -20,25 +23,41 @@ var runTests = function (hubConnectionString, deviceTransport, provisionedDevice
     var serviceClient, deviceClient;
 
     beforeEach(function () {
+      this.timeout(20000);
       serviceClient = serviceSdk.Client.fromConnectionString(hubConnectionString);
       deviceClient = createDeviceClient(deviceTransport, provisionedDevice);
     });
 
     afterEach(function (done) {
+      this.timeout(20000);
       closeDeviceServiceClients(deviceClient, serviceClient, done);
     });
 
-    it('Service sends 5 C2D messages and they are all received by the device', function (done) {
-      this.timeout(120000);
-      var deviceMessageCounter = 0;
-
+    it('Service sends ' + numberOfc2dMessages + ' C2D messages and they are all received by the device', function (done) {
+      this.timeout(180000);
+      var messageToSend = new Message(uuid.v4());
+      messageToSend.expiryTimeUtc = Date.now() + 60000; // Expire 60s from now, to reduce the chance of us hitting the 50-message limit on the IoT Hub
       deviceClient.open(function (openErr) {
+        debug('device has opened.');
         if (openErr) {
           done(openErr);
         } else {
+          var myInterval = {};
+          debug('about to connect a listener.');
           deviceClient.on('message', function (msg) {
-            deviceMessageCounter++;
-            debug('Received ' + deviceMessageCounter + ' message(s)');
+            var foundTheMessage = false;
+            debug('msg delivered with payload: '+msg.data.toString());
+            //
+            // Make sure that the message we are looking at is one of the messages that we just sent.
+            //
+            if (msg.data.toString() === messageToSend.data.toString()) {
+              foundTheMessage = true;
+              deviceClient.removeAllListeners('message');
+              clearInterval(myInterval);
+            }
+            //
+            // It doesn't matter whether this was a message we want, complete it so that the message queue stays clean.
+            //
             deviceClient.complete(msg, function (err, result) {
               if (err) {
                 done(err);
@@ -47,33 +66,37 @@ var runTests = function (hubConnectionString, deviceTransport, provisionedDevice
               }
             });
 
-            if (deviceMessageCounter === 5) {
+            if (foundTheMessage) {
               done();
             }
           });
-        }
-      });
-
-      serviceClient.open(function (serviceErr) {
-        if (serviceErr) {
-          done(serviceErr);
-        } else {
-          var msgSentCounter = 0;
-          var sendCallback = function (sendErr) {
-            if (sendErr) {
-              done(sendErr);
-            } else {
-              msgSentCounter++;
-              debug('Sent ' + msgSentCounter + ' message(s)');
-            }
-          };
-
-          for (var i = 0; i < 5; i++) {
-            debug('Sending message #' + i);
-            var msg = new Message({ 'counter': i });
-            msg.expiryTimeUtc = Date.now() + 10000; // Expire 10s from now, to reduce the chance of us hitting the 50-message limit on the IoT Hub
-            serviceClient.send(provisionedDevice.deviceId, msg, sendCallback);
-          }
+          debug('about to open the service client');
+          setTimeout( function() {
+            serviceClient.open(function (serviceErr) {
+              if (serviceErr) {
+                done(serviceErr);
+              } else {
+                var msgSentCounter = 0;
+                myInterval = setInterval(function () {
+                  serviceClient.send(provisionedDevice.deviceId, messageToSend, function (sendErr) {
+                    if (sendErr) {
+                      clearInterval(myInterval);
+                      done(sendErr);
+                    } else {
+                      if (msgSentCounter < 7) {
+                        msgSentCounter++;
+                        debug('Sent ' + msgSentCounter + ' message(s)');
+                      } else {
+                        clearInterval(myInterval);
+                        console.log(chalk.red('exceeding retries on c2d'));
+                        done(new errors.NotConnectedError('exceeding retries on c2d'));
+                      }
+                    }
+                  });
+                }, 2000);
+              }
+            });
+          } ,1000);
         }
       });
     });
@@ -84,11 +107,13 @@ var runTests = function (hubConnectionString, deviceTransport, provisionedDevice
     var deviceClient, ehClient;
 
     beforeEach(function () {
+      this.timeout(20000);
       ehClient = eventHubClient.fromConnectionString(hubConnectionString);
       deviceClient = createDeviceClient(deviceTransport, provisionedDevice);
     });
 
     afterEach(function (done) {
+      this.timeout(20000);
       closeDeviceEventHubClients(deviceClient, ehClient, done);
     });
 

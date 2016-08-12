@@ -6,13 +6,13 @@
   "author": "Microsoft Corp.",
   "license": "MIT",
   "dependencies": {
-    "azure-iot-device": "1.0.10",
-    "azure-iot-device-amqp": "1.0.10",
-    "azure-iot-device-http": "1.0.11",
-    "azure-iot-device-mqtt": "1.0.10"
+    "azure-iot-device": "1.0.11",
+    "azure-iot-device-amqp": "1.0.11",
+    "azure-iot-device-http": "1.0.12",
+    "azure-iot-device-mqtt": "1.0.11"
   },
   "devDependencies": {
-    "jshint": "^2.8.0"
+    "jshint": "^2.9.2"
   },
   "scripts": {
     "lint": "jshint --show-non-errors .",

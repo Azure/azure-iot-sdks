@@ -3,6 +3,8 @@
 
 'use strict';
 
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
 var Base = require('azure-iot-amqp-base').Amqp;
 var endpoint = require('azure-iot-common').endpoint;
 var PackageJson = require('../package.json');
@@ -22,9 +24,15 @@ hubName - (string) the name of the IoT Hub instance (without suffix such as .azu
 keyName – (string) the name of a key that can be used to communicate with the IoT Hub instance
 sharedAccessSignature – (string) the key associated with the key name.] */
 function Amqp(config, amqpBase) {
+  EventEmitter.call(this);
   this._amqp = amqpBase ? amqpBase : new Base(true, PackageJson.name + '/' + PackageJson.version);
   this._config = config;
+  this._amqp.setDisconnectHandler(function (err) {
+    this.emit('disconnect', err);
+  }.bind(this));
 }
+
+util.inherits(Amqp, EventEmitter);
 
 var handleResult = function (errorMessage, done) {
   return function (err, result) {

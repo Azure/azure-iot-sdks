@@ -11,7 +11,13 @@
 
 XIO_HANDLE getWebSocketsIOTransport(const char* fqdn, int port)
 {
-	WSIO_CONFIG ws_io_config = { fqdn, port, DEFAULT_WS_PROTOCOL_NAME, DEFAULT_WS_RELATIVE_PATH, true, NULL };
+	WSIO_CONFIG ws_io_config;
+	ws_io_config.host = fqdn;
+	ws_io_config.port = port;
+	ws_io_config.protocol_name = DEFAULT_WS_PROTOCOL_NAME;
+	ws_io_config.relative_path = DEFAULT_WS_RELATIVE_PATH;
+	ws_io_config.use_ssl = true;
+	ws_io_config.trusted_ca = NULL;
 
 	return xio_create(wsio_get_interface_description(), &ws_io_config);
 }

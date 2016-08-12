@@ -11,6 +11,7 @@ import com.microsoft.azure.iothub.transport.IotHubTransport;
 import com.microsoft.azure.iothub.transport.mqtt.MqttTransport;
 import java.io.Closeable;
 
+import java.io.IOError;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
@@ -20,7 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
 
 /**
  * <p>
@@ -48,6 +48,10 @@ public final class DeviceClient implements Closeable
         OPEN, CLOSED
     }
 
+    protected final static String SET_MINIMUM_POLLING_INTERVAL = "SetMinimumPollingInterval";
+    protected final static String SET_CERTIFICATE_PATH = "SetCertificatePath";
+    protected final static String SET_SAS_TOKEN_EXPIRY_TIME = "SetSASTokenExpiryTime";
+
     /**
      * The number of milliseconds the transport will wait between
      * sending out messages.
@@ -67,7 +71,8 @@ public final class DeviceClient implements Closeable
     public static final String DEVICE_ID_ATTRIBUTE = "DeviceId=";
     /** The shared access key attribute name in a connection string. */
     public static final String SHARED_ACCESS_KEY_ATTRIBUTE = "SharedAccessKey=";
-
+    /** The shared access signature attribute name in a connection string. */
+    public static final String SHARED_ACCESS_TOKEN_ATTRIBUTE = "SharedAccessSignature=";
 
     /**
      * The charset used for URL-encoding the device ID in the connection
@@ -113,6 +118,7 @@ public final class DeviceClient implements Closeable
         String hostname = null;
         String deviceId = null;
         String sharedAccessKey = null;
+        String sharedAccessToken = null;
         for (String attr : connStringAttrs)
         {
             // Codes_SRS_DEVICECLIENT_11_043: [The constructor shall save the IoT Hub hostname as the value of 'HostName' in the connection string.]
@@ -139,9 +145,14 @@ public final class DeviceClient implements Closeable
             {
                 sharedAccessKey = attr.substring(SHARED_ACCESS_KEY_ATTRIBUTE.length());
             }
+            // Codes_SRS_DEVICECLIENT_25_052: [The constructor shall save the shared access token as the value of 'sharedAccessToken' in the connection string.]
+            else if (attr.startsWith(SHARED_ACCESS_TOKEN_ATTRIBUTE))
+            {
+                sharedAccessToken = attr.substring(SHARED_ACCESS_TOKEN_ATTRIBUTE.length());
+            }
         }
 
-        initIotHubClient(hostname, deviceId, sharedAccessKey, protocol);
+        initIotHubClient(hostname, deviceId, sharedAccessKey, sharedAccessToken, protocol);
     }
 
     /**
@@ -288,7 +299,7 @@ public final class DeviceClient implements Closeable
      * RFC 3986.
      */
     protected void initIotHubClient(String iotHubHostname, String deviceId,
-            String deviceKey, IotHubClientProtocol protocol)
+            String deviceKey, String sharedAccessToken, IotHubClientProtocol protocol)
             throws URISyntaxException
     {
         // Codes_SRS_DEVICECLIENT_11_048: [If no value for 'HostName' is found in the connection string, the function shall throw an IllegalArgumentException.]
@@ -304,12 +315,20 @@ public final class DeviceClient implements Closeable
         {
             throw new IllegalArgumentException("Device ID cannot be null.");
         }
-        // Codes_SRS_DEVICECLIENT_11_050: [If no argument for 'SharedAccessKey' is found in the connection string, the function shall throw an IllegalArgumentException.]
+        // Codes_SRS_DEVICECLIENT_25_053: [**If no argument for 'sharedAccessToken' and 'SharedAccessKey' is found in the connection string, the function shall throw an IllegalArgumentException.**]**
         // Codes_SRS_DEVICECLIENT_11_027: [If deviceKey is null, the constructor shall throw an IllegalArgumentException.]
-        if (deviceKey == null)
+        if (deviceKey == null && sharedAccessToken == null)
         {
-            throw new IllegalArgumentException("Device key cannot be null.");
+            throw new IllegalArgumentException("Device key and Shared Access Signature both cannot be null.");
         }
+
+        // Codes_SRS_DEVICECLIENT_25_054: [**The constructor shall only accept either 'sharedAccessToken' or 'SharedAccessKey' from the connection string and throw an IllegalArgumentException if both are found**]**
+        if (sharedAccessToken != null && deviceKey != null)
+        {
+            throw new IllegalArgumentException("Either of device key or Shared Access Signature should be provided.");
+
+        }
+
         // Codes_SRS_DEVICECLIENT_11_051: [If protocol is null, the function shall throw an IllegalArgumentException.]
         // Codes_SRS_DEVICECLIENT_11_034: [If protocol is null, the constructor shall throw an IllegalArgumentException.]
         if (protocol == null)
@@ -318,7 +337,7 @@ public final class DeviceClient implements Closeable
         }
 
         // Codes_SRS_DEVICECLIENT_11_052: [The constructor shall save the IoT Hub hostname, device ID, and device key as configuration parameters.]
-        this.config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+        this.config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
         // Codes_SRS_DEVICECLIENT_11_046: [The constructor shall initialize the IoT Hub transport that uses the protocol specified.]
         // Codes_SRS_DEVICECLIENT_11_004: [The constructor shall initialize the IoT Hub transport that uses the protocol specified.]
         switch (protocol)
@@ -355,6 +374,95 @@ public final class DeviceClient implements Closeable
         this.taskScheduler = null;
     }
 
+    private void setOption_SetMinimumPollingInterval(Object value)
+    {
+        if (!value.equals(null)) {
+            if (this.state != IotHubClientState.CLOSED) {
+                throw new IllegalStateException("setOption " + SET_MINIMUM_POLLING_INTERVAL +
+                        " only works when the transport is closed");
+            } else {
+                // Codes_SRS_DEVICECLIENT_02_004: [Value needs to have type long].
+                if (value instanceof Long) {
+                    this.RECEIVE_PERIOD_MILLIS = (long) value;
+                } else {
+                    throw new IllegalArgumentException("value is not long = " + value);
+                }
+            }
+        }
+        else
+            throw new IllegalArgumentException("value cannot be null");
+
+    }
+
+    private void setOption_SetCertificatePath(Object value)
+    {
+        if (this.state != IotHubClientState.CLOSED) {
+            throw new IllegalStateException("setOption " + SET_CERTIFICATE_PATH +
+                    "only works when the transport is closed");
+        } else {
+            if (!value.equals(null))
+                this.config.setPathToCert((String) value);
+            else
+                throw new IllegalArgumentException("value cannot be null");
+        }
+
+    }
+
+    private void setOption_SetSASTokenExpiryTime(Object value)
+    {
+        if (!value.equals(null)) {
+            //**Codes_SRS_DEVICECLIENT_25_009: [**"SetSASTokenExpiryTime" should have value type long**.]**
+            long validTimeInSeconds;
+
+            if (value instanceof Long) {
+                validTimeInSeconds = (long) value;
+            } else {
+                throw new IllegalArgumentException("value is not long = " + value);
+            }
+
+            boolean restart = false;
+            if (this.state != IotHubClientState.CLOSED) {
+                try {
+                    /* Codes_SRS_DEVICECLIENT_25_010: [**"SetSASTokenExpiryTime" shall restart the transport
+                     *                                  1. If the device currently uses device key and
+                     *                                  2. If transport is already open
+                     *                                 after updating expiry time
+                    */
+                    if (this.config.getDeviceKey() != null)
+                    {
+                        restart = true;
+                        this.close();
+                    }
+                } catch (IOException e) {
+
+                    throw new IOError(e);
+                }
+
+            }
+
+            this.config.setTokenValidSecs(validTimeInSeconds);
+
+            if (restart) {
+                if (this.state == IotHubClientState.CLOSED) {
+                    try {
+                        restart = false;
+                        this.open();
+                    } catch (IOException e) {
+
+                        throw new IOError(e);
+                    }
+
+                }
+            }
+        } else {
+            throw new IllegalArgumentException("value should be in secs");
+        }
+
+
+    }
+
+
+
     /**
      * Sets a runtime option identified by parameter {@code optionName}
      * to {@code value}.
@@ -365,73 +473,82 @@ public final class DeviceClient implements Closeable
      *	      option specifies the interval in milliseconds between calls to
      *	      the service checking for availability of new messages. The value
      *	      is expected to be of type {@code long}.
+     *	    - <b>SetCertificatePath</b> - this option is applicable only
+     *	      when the transport configured with this client is AMQP. This
+     *	      option specifies the path to the certificate used to verify peer.
+     *	      The value is expected to be of type {@code String}.
+     *      - <b>SetSASTokenExpiryTime</b> - this option is applicable for HTTP/
+     *         AMQP/MQTT. This option specifies the interval in seconds after which
+     *         SASToken expires. If the transport is already open then setting this
+     *         option will restart the transport with the updated expiry time. The
+     *         value is expected to be of type {@code long}.
      *
      * @param optionName the option name to modify
      * @param value an object of the appropriate type for the option's value
      */
-    public void setOption(String optionName, Object value)
-    {
-        // Codes_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option handled by the client, then it shall throw IllegalArgumentException.]
-        if(optionName == null)
-        {
+    public void setOption(String optionName, Object value) {
+        // Codes_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option handled by the client, then
+        // it shall throw IllegalArgumentException.]
+        if (optionName == null) {
             throw new IllegalArgumentException("optionName is null");
-        }
-        else
-        {
-            // Codes_SRS_DEVICECLIENT_02_003: [Available only for HTTP.]
-            if(this.transport.getClass() == HttpsTransport.class)
-            {
-                if(optionName.equals("SetMinimumPollingInterval"))
-                {
-                    if(this.state!=IotHubClientState.CLOSED)
+        } else {
+            switch (optionName) {
+                //**Codes_SRS_DEVICECLIENT_02_002: [**"SetMinimumPollingInterval" - time in miliseconds
+                // between 2 consecutive polls.**]**
+                case SET_MINIMUM_POLLING_INTERVAL: {
+                    // Codes_SRS_DEVICECLIENT_02_003: [Available only for HTTP.]
+                    if (this.transport.getClass() == HttpsTransport.class)
                     {
-                        throw new IllegalStateException("setOption only works when the transport is closed");
-                    }
-                    else
-                    {
-                        // Codes_SRS_DEVICECLIENT_02_004: [Value needs to have type long].
-                        if (value instanceof Long)
-                        {
-                            this.RECEIVE_PERIOD_MILLIS = (long) value;
-                        }
-                        else
-                        {
-                            throw new IllegalArgumentException("value is not long = " + value);
-                        }
-                    }
-                }
-                else
-                {
-                        // Codes_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option handled by the client, then it shall throw IllegalArgumentException.]
-                    if (optionName.equals("SetCertificatePath"))
-                        throw new IllegalArgumentException("HTTPs does not support "+ optionName);
+                        setOption_SetMinimumPollingInterval(value);
 
-                    throw new IllegalArgumentException("optionName is unknown = "+optionName);
-                }
-            }
-            else if (this.transport.getClass() == AmqpsTransport.class)
-            {
-                if(optionName.equals("SetCertificatePath"))
-                {
-                    if(this.state != IotHubClientState.CLOSED)
-                    {
-                        throw new IllegalStateException("setOption only works when the transport is closed");
+                    } else {
+                        // Codes_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option
+                        // handled by the client, then it shall throw IllegalArgumentException.]
+                        throw new IllegalArgumentException("optionName is unknown = " + optionName
+                                + " for " + this.transport.getClass());
+
                     }
-                    else
+                    break;
+                }
+                //**Codes_SRS_DEVICECLIENT_25_005: [**"SetCertificatePath" - path to the certificate to verify peer.**]**
+                case SET_CERTIFICATE_PATH: {
+                    //**Codes_SRS_DEVICECLIENT_25_006: [**"SetCertificatePath" is available only for AMQP.**]**
+
+                    if (this.transport.getClass() == AmqpsTransport.class)
                     {
-                        if (!value.equals(null))
-                            this.config.setPathToCert((String)value);
+                        setOption_SetCertificatePath(value);
+
+                    } else {
+                        // Codes_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option handled by the
+                        // client, then it shall throw IllegalArgumentException.]
+                        throw new IllegalArgumentException("optionName is unknown = " + optionName +
+                                " for " + this.transport.getClass());
                     }
+                    break;
                 }
-                else
-                {
-                    throw new IllegalArgumentException("optionName is unknown = "+optionName);
+                case SET_SAS_TOKEN_EXPIRY_TIME: {
+                    //**Codes__SRS_DEVICECLIENT_25_008: ["SetSASTokenExpiryTime" is available for HTTPS/AMQP/MQTT.]
+                    if (this.transport.getClass() == AmqpsTransport.class ||
+                            this.transport.getClass() == HttpsTransport.class ||
+                            this.transport.getClass() == MqttTransport.class)
+                    {
+                        setOption_SetSASTokenExpiryTime(value);
+
+                    } else {
+                        // Codes_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option handled by the
+                        // client, then it shall throw IllegalArgumentException.]
+                        throw new IllegalArgumentException("optionName is unknown = " + optionName +
+                                " for " + this.transport.getClass());
+                    }
+                    break;
                 }
+
+                default:
+                    throw new IllegalArgumentException("optionName is unknown = " + optionName);
             }
-            else
-            {
-                throw new IllegalArgumentException("MQTT does not have setOption");
-            }
+
         }
+
     }
+
 }

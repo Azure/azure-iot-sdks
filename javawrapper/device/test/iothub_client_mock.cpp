@@ -57,7 +57,7 @@ void Map_Destroy(MAP_HANDLE handle)
 MAP_HANDLE Map_Clone(MAP_HANDLE handle)
 {
     (void)handle;
-	return (MAP_HANDLE)(rand() * 10 + 1);
+	return Map_Create(mockFilterFunc);
 }
 
 MAP_RESULT Map_Add(MAP_HANDLE handle, const char* key, const char* value)
@@ -187,6 +187,7 @@ MAP_RESULT Map_GetInternals(MAP_HANDLE handle, const char*const** keys, const ch
 // "iothub_client.h"
 
 IOTHUB_CLIENT_HANDLE mockClientHandle = (IOTHUB_CLIENT_HANDLE)0x12345678;
+IOTHUB_CLIENT_CONFIG* mockConfig = NULL;
 
 IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
@@ -330,8 +331,8 @@ IOTHUB_MESSAGE_HANDLE IoTHubMessage_Clone(IOTHUB_MESSAGE_HANDLE iotHubMessageHan
 	{
 		return NULL;
 	}
-	
-	return (IOTHUB_MESSAGE_HANDLE)(rand() * 10 + 1);
+
+	return mockMessageHandle;
 }
 
 IOTHUB_MESSAGE_RESULT IoTHubMessage_GetByteArray(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle, const unsigned char** buffer, size_t* size)

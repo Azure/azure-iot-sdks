@@ -21,7 +21,7 @@ if "%current_git_branch%" neq "master" (
 rem -----------------------------------------------------------------------------
 rem -- Call gen_docs.cmd to generate API docs afresh
 rem -----------------------------------------------------------------------------
-call %build-root%\build\gen_docs.cmd
+call %build-root%\jenkins\gen_docs.cmd
 
 rem -----------------------------------------------------------------------------
 rem -- First, copy all the docs out to a temp folder.

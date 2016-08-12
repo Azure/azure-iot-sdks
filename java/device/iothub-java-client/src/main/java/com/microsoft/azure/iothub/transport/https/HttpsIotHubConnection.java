@@ -64,9 +64,8 @@ public class HttpsIotHubConnection
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_002: [The function shall send a request to the URL 'https://[iotHubHostname]/devices/[deviceId]/messages/events?api-version=2016-02-03'.]
             IotHubEventUri eventUri = new IotHubEventUri(iotHubHostname, deviceId);
             URL eventUrl = new URL("https://" + eventUri.toString());
-            IotHubSasToken sasToken = new IotHubSasToken(IotHubUri.getResourceUri(this.config.getIotHubHostname(), this.config.getDeviceId()),
-                    this.config.getDeviceKey(),
-                    System.currentTimeMillis() / 1000l + this.config.getTokenValidSecs() + 1l);
+            IotHubSasToken sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000l +
+                    this.config.getTokenValidSecs() + 1l);
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_003: [The function shall send a POST request.]
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_004: [The function shall set the request body to the message body.]
@@ -116,9 +115,8 @@ public class HttpsIotHubConnection
             IotHubMessageUri messageUri = new IotHubMessageUri(iotHubHostname, deviceId);
             URL messageUrl = new URL("https://" + messageUri.toString());
 
-            IotHubSasToken sasToken = new IotHubSasToken(IotHubUri.getResourceUri(this.config.getIotHubHostname(), this.config.getDeviceId()),
-                    this.config.getDeviceKey(),
-                    System.currentTimeMillis() / 1000l + this.config.getTokenValidSecs() + 1l);
+            IotHubSasToken sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000l +
+                    this.config.getTokenValidSecs() + 1l);
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_014: [The function shall send a GET request.]
             HttpsRequest request =
@@ -237,9 +235,8 @@ public class HttpsIotHubConnection
                             "Invalid message result specified.");
             }
 
-            IotHubSasToken sasToken = new IotHubSasToken(IotHubUri.getResourceUri(this.config.getIotHubHostname(), this.config.getDeviceId()),
-                    this.config.getDeviceKey(),
-                    System.currentTimeMillis() / 1000l + this.config.getTokenValidSecs() + 1l);
+            IotHubSasToken sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000l +
+                                    this.config.getTokenValidSecs() + 1l);
 
             // Codes_SRS_HTTPSIOTHUBCONNECTION_11_033: [The function shall set the request read timeout to be the configuration parameter readTimeoutMillis.]
             request.setReadTimeoutMillis(readTimeoutMillis).

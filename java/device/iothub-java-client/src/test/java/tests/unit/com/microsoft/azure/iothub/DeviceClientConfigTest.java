@@ -25,8 +25,9 @@ public class DeviceClientConfigTest
         final String illegalIotHubHostname = "test.iothubhostname}{";
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
+        final String sharedAccessSig = null;
 
-        new DeviceClientConfig(illegalIotHubHostname, deviceId, deviceKey);
+        new DeviceClientConfig(illegalIotHubHostname, deviceId, deviceKey, sharedAccessSig);
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_11_015: [If the IoT Hub hostname does not contain a '.',
@@ -38,8 +39,9 @@ public class DeviceClientConfigTest
         final String illegalIotHubHostname = "badiothubhostname";
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
+        final String sharedAccessSig = null;
 
-        new DeviceClientConfig(illegalIotHubHostname, deviceId, deviceKey);
+        new DeviceClientConfig(illegalIotHubHostname, deviceId, deviceKey, sharedAccessSig);
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_11_001: [The constructor shall save the IoT Hub hostname,
@@ -52,8 +54,9 @@ public class DeviceClientConfigTest
         final String iotHubHostname = "test.iothubhostname";
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
+        final String sharedAccessSig = null;
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessSig);
         String testIotHubHostname = config.getIotHubHostname();
 
         final String expectedIotHubHostname = iotHubHostname;
@@ -68,8 +71,9 @@ public class DeviceClientConfigTest
         final String iotHubHostname = "test.iothubhostname";
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
+        final String sharedAccessSig = null;
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessSig);
         String testIotHubName = config.getIotHubName();
 
         final String expectedIotHubName = "test";
@@ -83,8 +87,9 @@ public class DeviceClientConfigTest
         final String iotHubHostname = "test.iothubhostname";
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
+        final String sharedAccessSig = null;
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessSig);
         String testDeviceId = config.getDeviceId();
 
         final String expectedDeviceId = deviceId;
@@ -98,27 +103,65 @@ public class DeviceClientConfigTest
         final String iotHubHostname = "test.iothubhostname";
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
         String testDeviceKey = config.getDeviceKey();
 
         final String expectedDeviceKey = deviceKey;
         assertThat(testDeviceKey, is(expectedDeviceKey));
     }
 
-    // Tests_SRS_DEVICECLIENTCONFIG_11_005: [The function shall return the value of TOKEN_VALID_SECS.]
+    // Tests_SRS_DEVICECLIENTCONFIG_25_017: [**The constructor shall save sharedAccessToken.**] **
+    // Tests_SRS_DEVICECLIENTCONFIG_25_018: [**The function shall return the SharedAccessToken given in the constructor.**] **
+    @Test
+    public void getSasTokenReturnsSasToken() throws URISyntaxException
+    {
+        final String iotHubHostname = "test.iothubhostname";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=1469813873";
+
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
+        String testSasToken = config.getSharedAccessToken();
+
+        final String expectedSasToken = sharedAccessToken;
+        assertThat(testSasToken, is(expectedSasToken));
+    }
+
+    // Tests_SRS_DEVICECLIENTCONFIG_11_005: [The function shall return the value of tokenValidSecs.]
     @Test
     public void getMessageValidSecsReturnsConstant() throws URISyntaxException
     {
         final String iotHubHostname = "test.iothubhostname";
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
         long testMessageValidSecs = config.getTokenValidSecs();
 
-        final long expectedMessageValidSecs = config.TOKEN_VALID_SECS;
+        final long expectedMessageValidSecs = 3600;
         assertThat(testMessageValidSecs, is(expectedMessageValidSecs));
+    }
+
+    // Tests_SRS_DEVICECLIENTCONFIG_25_016: [The function shall set the value of tokenValidSecs.]
+    @Test
+    public void getandsetMessageValidSecsReturnsConstant() throws URISyntaxException
+    {
+        final String iotHubHostname = "test.iothubhostname";
+        final String deviceId = "test-deviceid";
+        final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
+
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
+
+        long testsetMessageValidSecs = 60;
+        config.setTokenValidSecs(testsetMessageValidSecs);
+        long testgetMessageValidSecs= config.getTokenValidSecs();
+
+        final long expectedMessageValidSecs = testsetMessageValidSecs;
+        assertThat(testgetMessageValidSecs, is(expectedMessageValidSecs));
     }
 
     // Tests_SRS_DEVICECLIENTCONFIG_11_006: [The function shall set the message callback, with its associated context.]
@@ -131,8 +174,9 @@ public class DeviceClientConfigTest
         final String iotHubHostname = "test.iothubhostname";
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
         Object context = new Object();
         config.setMessageCallback(mockCallback, context);
         MessageCallback testCallback = config.getMessageCallback();
@@ -151,8 +195,9 @@ public class DeviceClientConfigTest
         final String iotHubHostname = "test.iothubhostname";
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
         Object context = new Object();
         config.setMessageCallback(mockCallback, context);
         Object testContext = config.getMessageContext();
@@ -168,8 +213,9 @@ public class DeviceClientConfigTest
         final String iotHubHostname = "test.iothubhostname";
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
         int testReadTimeoutMillis = config.getReadTimeoutMillis();
 
         final int expectedReadTimeoutMillis = 240000;
@@ -184,8 +230,9 @@ public class DeviceClientConfigTest
         final String iotHubHostname = "test.iothubhostname";
         final String deviceId = "test-deviceid";
         final String deviceKey = "test-devicekey";
+        final String sharedAccessToken = null;
 
-        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+        DeviceClientConfig config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
         int testMessageLockTimeoutSecs = config.getMessageLockTimeoutSecs();
 
         final int expectedMessageLockTimeoutSecs = 180;

@@ -53,6 +53,9 @@
     <Compile Include="..\..\Microsoft.Azure.Devices.Client\Common\Security\SharedAccessSignatureConstants.cs">
       <Link>Common\Security\SharedAccessSignatureConstants.cs</Link>
     </Compile>
+    <Compile Include="..\..\Microsoft.Azure.Devices.Client\Common\Utils.cs">
+      <Link>Common\Utils.cs</Link>
+    </Compile>
     <Compile Include="..\..\Microsoft.Azure.Devices.Client\Common\WebApi\CustomHeaderConstants.cs">
       <Link>Common\WebApi\CustomHeaderConstants.cs</Link>
     </Compile>

@@ -38,8 +38,8 @@ popd
 rem -----------------------------------------------------------------------------
 rem -- Create Service Client NuGet Package
 rem -----------------------------------------------------------------------------
-pushd %build-root%\csharp\service\Microsoft.Azure.Devices\nuget\
-powershell.exe %build-root%\csharp\service\Microsoft.Azure.Devices\nuget\make_nuget_package.ps1
+pushd %build-root%\csharp\service\nuget\
+powershell.exe %build-root%\csharp\service\nuget\make_nuget_package.ps1
 if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 popd
 
@@ -50,12 +50,12 @@ if not defined nuget_feed (
 	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\csharp\device\nuget\
 	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\csharp\service\Microsoft.Azure.Devices\nuget\
+	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\csharp\service\nuget\
 	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 ) else (
 	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\csharp\device\nuget\ --feed %nuget_feed%
 	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\csharp\service\Microsoft.Azure.Devices\nuget\ --feed %nuget_feed%
+	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\csharp\service\nuget\ --feed %nuget_feed%
 	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 )

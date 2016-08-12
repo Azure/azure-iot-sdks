@@ -15,7 +15,7 @@
 #include "certs.h"
 #endif // MBED_BUILD_TIMESTAMP
 
-static const char* connectionString = "[IoT Hub Device Connection String]";
+static const char* connectionString = "HostName=iot-sdks-test.azure-devices.net;DeviceId=SaidF0620;SharedAccessKey=3mY8a+jG1SiN5qoVjIf/Y0nFzT8724PKUXTPZRWbso4=";
 static int callbackCounter;
 
 
@@ -53,7 +53,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
 		}
 		else if (contentType == IOTHUBMESSAGE_STRING)
 		{
-			if ((buffer = IoTHubMessage_GetString(message)) != NULL && (size = strlen(buffer)) > 0)
+			if ((buffer = (const unsigned char*)IoTHubMessage_GetString(message)) != NULL && (size = strlen((const char*)buffer)) > 0)
 			{
 				(void)printf("Received Message [%d] with STRING Data: <<<%.*s>>> & Size=%d\r\n", *counter, (int)size, buffer, (int)size);
 			}
@@ -162,10 +162,10 @@ void iothub_client_sample_amqp_websockets_run(void)
                 }
                 else
                 {
-                    messages[i].messageTrackingId = i;
+                    messages[i].messageTrackingId = (int)i;
                     
                     MAP_HANDLE propMap = IoTHubMessage_Properties(messages[i].messageHandle);
-                    sprintf_s(propText, sizeof(propText), "PropMsg_%d", i);
+                    (void)sprintf_s(propText, sizeof(propText), "PropMsg_%d", (int)i);
                     if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
                     {
                         (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");

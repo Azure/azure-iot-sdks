@@ -1,18 +1,18 @@
 {
   "name": "azure-iot-http-base",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "HTTP operations used by Azure IoT device and service SDKs",
   "author": "Microsoft Corporation",
   "license": "MIT",
   "dependencies": {
-    "azure-iot-common": "1.0.10",
+    "azure-iot-common": "1.0.11",
     "debug": "^2.2.0"
   },
   "devDependencies": {
-    "chai": "^3.3.0",
-    "jshint": "^2.8.0",
-    "mocha": "^2.3.3",
-    "istanbul": "^0.4.3"
+    "chai": "^3.5.0",
+    "istanbul": "^0.4.4",
+    "jshint": "^2.9.2",
+    "mocha": "^3.0.1"
   },
   "scripts": {
     "lint": "jshint --show-non-errors .",

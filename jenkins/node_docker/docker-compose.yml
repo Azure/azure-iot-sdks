@@ -1,0 +1,33 @@
+version: '2'
+
+services:
+  node4:
+    image: nodebuild:node4
+    build: 
+      context: ../..
+      dockerfile: ./jenkins/node_docker/dockerfiles/aziot-node4.dockerfile
+    env_file: ./env/aziot-node4.env
+  node5:
+    image: nodebuild:node5
+    build: 
+      context: ../..
+      dockerfile: ./jenkins/node_docker/dockerfiles/aziot-node5.dockerfile
+    env_file: ./env/aziot-node5.env
+  node6:
+    image: nodebuild:node6
+    build: 
+      context: ../..
+      dockerfile: ./jenkins/node_docker/dockerfiles/aziot-node6.dockerfile
+    env_file: ./env/aziot-node6.env
+  node010:
+    image: nodebuild:node010
+    build: 
+      context: ../..
+      dockerfile: ./jenkins/node_docker/dockerfiles/aziot-node010.dockerfile
+    env_file: ./env/aziot-node010.env
+  node012:
+    image: nodebuild:node012
+    build: 
+      context: ../..
+      dockerfile: ./jenkins/node_docker/dockerfiles/aziot-node012.dockerfile
+    env_file: ./env/aziot-node012.env
