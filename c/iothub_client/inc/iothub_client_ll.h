@@ -56,6 +56,8 @@ DEFINE_ENUM(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
 #include "azure_c_shared_utility/doublylinkedlist.h"
 #include "iothub_message.h"
 #include "iothub_transport_ll.h"
+#include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -94,6 +96,10 @@ extern "C"
 	typedef void(*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
 	typedef IOTHUBMESSAGE_DISPOSITION_RESULT (*IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC)(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback);
 	typedef const TRANSPORT_PROVIDER*(*IOTHUB_CLIENT_TRANSPORT_PROVIDER)(void);
+
+	typedef void(*IOTHUB_CLIENT_GET_DESIRED_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, const unsigned char* desiredState, size_t size, uint32_t desiredVersion, uint32_t lastSeenReportedVersion, void* userContextCallback);
+	typedef void(*IOTHUB_CLIENT_PATCH_DESIRED_CALLBACK)(const unsigned char* payLoad, size_t size, uint32_t desiredVersion, uint32_t lastSeenReportedVersion, void* userContextCallback);
+	typedef void(*IOTHUB_CLIENT_PATCH_REPORTED_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
 
 	/** @brief	This struct captures IoTHub client configuration. */
 	typedef struct IOTHUB_CLIENT_CONFIG_TAG
@@ -329,6 +335,67 @@ extern "C"
 	* @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
 	*/
 	extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* optionName, const void* value);
+
+	/**
+	* @brief	This API sends a request for desired state. The device will receive a call back via the getDesiredCallback with
+	*			a byte array containing the payload.
+	*
+	* @param	iotHubClientHandle		The handle created by a call to the create function.
+	* @param	getDesiredCallback		The callback specified by the device client to return the IoTHub response
+	*									to a GetDesired request. The callback will be called with the status
+	*									of the request. If the GetDesired request is successful, the payload will be
+	*									passed to the callback, along with two version numbers:
+	*										- Desired:
+	*										- LastSeenReported:
+	* @param	userContextCallback		User specified context that will be provided to the
+	* 									callback. This can be @c NULL.
+	*
+	*			@b NOTE: The application behavior is undefined if the user calls
+	*			the ::IoTHubClient_LL_Destroy function from within any callback.
+	*
+	* @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
+	*/
+	extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetDesiredState(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_GET_DESIRED_CALLBACK getDesiredCallback, void* userContextCallback);
+
+	/**
+	* @brief	This API specifies a call back to be used when the device receives a desired state update.
+	*
+	* @param	iotHubClientHandle		The handle created by a call to the create function.
+	* @param	patchDesiredCallback	The callback specified by the device client to be used for updating
+	*									the desired state. The callback will be called in response to a PatchDesried
+	*									request send by the IoTHub services. The payload will be passed to the
+	*									callback, along with two version numbers:
+	*										- Desired:
+	*										- LastSeenReported:
+	* @param	userContextCallback		User specified context that will be provided to the
+	* 									callback. This can be @c NULL.
+	*
+	*			@b NOTE: The application behavior is undefined if the user calls
+	*			the ::IoTHubClient_LL_Destroy function from within any callback.
+	*
+	* @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
+	*/
+	extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetPatchDesiredStateCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_PATCH_DESIRED_CALLBACK patchDesiredCallback, void* userContextCallback);
+
+	/**
+	* @brief	This API sneds a report of the device's properties and their current values.
+	*
+	* @param	iotHubClientHandle		The handle created by a call to the create function.
+	* @param	reportedState			The current device property values to be 'reported' to the IoTHub.
+	* @param	patchDesiredCallback	The callback specified by the device client to be called with the
+	*									result of the transaction.
+	* @param    reportedVersion			
+	* @param    lastSeenDesiredVersion
+	* @param	userContextCallback		User specified context that will be provided to the
+	* 									callback. This can be @c NULL.
+	*
+	*			@b NOTE: The application behavior is undefined if the user calls
+	*			the ::IoTHubClient_LL_Destroy function from within any callback.
+	*
+	* @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
+	*/
+	extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendReportedState(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, uint32_t reportedVersion, uint32_t lastSeenDesiredVersion, IOTHUB_CLIENT_PATCH_REPORTED_CALLBACK patchReportedCallback, void* userContextCallback);
+
 
 #ifndef DONT_USE_UPLOADTOBLOB
     /**
