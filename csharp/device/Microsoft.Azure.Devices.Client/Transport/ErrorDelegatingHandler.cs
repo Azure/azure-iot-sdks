@@ -67,7 +67,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                     this.InnerHandler = this.handlerFactory();
                     try
                     {
-                        await this.ExecuteWithErrorHandlingAsync(() => base.OpenAsync(explicitOpen), false);
+                        await this.ExecuteWithErrorHandlingAsync(() => base.OpenAsync(explicitOpen), false).ConfigureAwait(false);
                         openPromise.TrySetResult(0);
                     }
                     catch (Exception ex) when (this.IsTranportTransient(ex))
@@ -82,12 +82,12 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 }
                 else
                 {
-                    await currentOpenPromise.Task;
+                    await currentOpenPromise.Task.ConfigureAwait(false);
                 }
             }
             else
             {
-                await openPromise.Task;
+                await openPromise.Task.ConfigureAwait(false);
             }
         }
 
@@ -128,14 +128,14 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
         async Task<T> ExecuteWithErrorHandlingAsync<T>(Func<Task<T>> asyncOperation)
         {
-            await this.EnsureOpenAsync();
+            await this.EnsureOpenAsync().ConfigureAwait(false);
 
             TaskCompletionSource<int> completedPromise = this.openCompletion;
 
             IDelegatingHandler handler = this.InnerHandler;
             try
             {
-                return await asyncOperation();
+                return await asyncOperation().ConfigureAwait(false);
             }
             catch (Exception ex) when (!ex.IsFatal())
             {
@@ -165,7 +165,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         {
             if (ensureOpen)
             {
-                await this.EnsureOpenAsync();
+                await this.EnsureOpenAsync().ConfigureAwait(false);
             }
 
             TaskCompletionSource<int> completedPromise = this.openCompletion;
@@ -173,7 +173,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
             try
             {
-                await asyncOperation();
+                await asyncOperation().ConfigureAwait(false);
             }
             catch (Exception ex) when (!ex.IsFatal())
             {
@@ -236,7 +236,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             {
                 if (handler != null)
                 {
-                    await handler.CloseAsync();
+                    await handler.CloseAsync().ConfigureAwait(false);
                 }
             }
             catch (Exception ex) when (!ex.IsFatal())

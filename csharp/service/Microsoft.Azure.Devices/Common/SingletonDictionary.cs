@@ -41,7 +41,7 @@ namespace Microsoft.Azure.Devices.Common
                 TaskCompletionSource<TValue> tcs;
                 if (this.dictionary.TryGetValue(key, out tcs))
                 {
-                    return await tcs.Task;
+                    return await tcs.Task.ConfigureAwait(false);
                 }
 
                 tcs = new TaskCompletionSource<TValue>();
@@ -75,7 +75,7 @@ namespace Microsoft.Azure.Devices.Common
         {
             try
             {
-                TValue value = await OnCreateAsync(key, timeout);
+                TValue value = await OnCreateAsync(key, timeout).ConfigureAwait(false);
                 tcs.SetResult(value);
 
                 if (this.disposed)

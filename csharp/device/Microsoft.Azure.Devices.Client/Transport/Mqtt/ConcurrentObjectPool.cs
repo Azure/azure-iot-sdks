@@ -125,7 +125,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
         {
             try
             {
-                await this.disposeCallback(obj);
+                await this.disposeCallback(obj).ConfigureAwait(false);
             }
             catch (Exception ex) when (!ex.IsFatal())
             {

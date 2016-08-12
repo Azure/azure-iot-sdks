@@ -53,7 +53,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
 
         protected override async Task DoWorkAsync(IChannelHandlerContext context, TWork work)
         {
-            await base.DoWorkAsync(context, work);
+            await base.DoWorkAsync(context, work).ConfigureAwait(false);
             this.incompleteQueue.Enqueue(new IncompleteWorkItem(this.getWorkId(work), work));
         }
 

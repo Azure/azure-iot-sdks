@@ -104,7 +104,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             {
                 await Task.WhenAll(
                     this.faultTolerantEventSendingLink.OpenAsync(this.openTimeout),
-                    this.faultTolerantDeviceBoundReceivingLink.OpenAsync(this.openTimeout));
+                    this.faultTolerantDeviceBoundReceivingLink.OpenAsync(this.openTimeout)).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -134,7 +134,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             Outcome outcome;
             using (AmqpMessage amqpMessage = message.ToAmqpMessage())
             {
-                outcome = await this.SendAmqpMessageAsync(amqpMessage);
+                outcome = await this.SendAmqpMessageAsync(amqpMessage).ConfigureAwait(false);
             }
 
             if (outcome.DescriptorCode != Accepted.Code)
@@ -161,7 +161,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             using (AmqpMessage amqpMessage = AmqpMessage.Create(messageList))
             {
                 amqpMessage.MessageFormat = AmqpConstants.AmqpBatchedMessageFormat;
-                outcome = await this.SendAmqpMessageAsync(amqpMessage);
+                outcome = await this.SendAmqpMessageAsync(amqpMessage).ConfigureAwait(false);
             }
 
             if (outcome.DescriptorCode != Accepted.Code)
@@ -191,8 +191,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
             AmqpMessage amqpMessage;
             try
             {
-                ReceivingAmqpLink deviceBoundReceivingLink = await this.GetDeviceBoundReceivingLinkAsync();
-                amqpMessage = await deviceBoundReceivingLink.ReceiveMessageAsync(timeout);
+                ReceivingAmqpLink deviceBoundReceivingLink = await this.GetDeviceBoundReceivingLinkAsync().ConfigureAwait(false);
+                amqpMessage = await deviceBoundReceivingLink.ReceiveMessageAsync(timeout).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -240,8 +240,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
             Outcome outcome;
             try
             {
-                SendingAmqpLink eventSendingLink = await this.GetEventSendingLinkAsync();
-                outcome = await eventSendingLink.SendMessageAsync(amqpMessage, IotHubConnection.GetNextDeliveryTag(ref this.eventsDeliveryTag), AmqpConstants.NullBinary, this.operationTimeout);
+                SendingAmqpLink eventSendingLink = await this.GetEventSendingLinkAsync().ConfigureAwait(false);
+                outcome = await eventSendingLink.SendMessageAsync(amqpMessage, IotHubConnection.GetNextDeliveryTag(ref this.eventsDeliveryTag), AmqpConstants.NullBinary, this.operationTimeout).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -263,8 +263,8 @@ namespace Microsoft.Azure.Devices.Client.Transport
             Outcome disposeOutcome;
             try
             {
-                ReceivingAmqpLink deviceBoundReceivingLink = await this.GetDeviceBoundReceivingLinkAsync();
-                disposeOutcome = await deviceBoundReceivingLink.DisposeMessageAsync(deliveryTag, outcome, batchable: true, timeout: this.operationTimeout);
+                ReceivingAmqpLink deviceBoundReceivingLink = await this.GetDeviceBoundReceivingLinkAsync().ConfigureAwait(false);
+                disposeOutcome = await deviceBoundReceivingLink.DisposeMessageAsync(deliveryTag, outcome, batchable: true, timeout: this.operationTimeout).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -298,7 +298,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             SendingAmqpLink eventSendingLink;
             if (!this.faultTolerantEventSendingLink.TryGetOpenedObject(out eventSendingLink))
             {
-                eventSendingLink = await this.faultTolerantEventSendingLink.GetOrCreateAsync(this.openTimeout);
+                eventSendingLink = await this.faultTolerantEventSendingLink.GetOrCreateAsync(this.openTimeout).ConfigureAwait(false);
             }
             return eventSendingLink;
         }
@@ -307,7 +307,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         {
             string path = string.Format(CultureInfo.InvariantCulture, CommonConstants.DeviceEventPathTemplate, System.Net.WebUtility.UrlEncode(this.deviceId));
 
-            return await this.IotHubConnection.CreateSendingLinkAsync(path, this.iotHubConnectionString, timeout);
+            return await this.IotHubConnection.CreateSendingLinkAsync(path, this.iotHubConnectionString, timeout).ConfigureAwait(false);
         }
 
         async Task<ReceivingAmqpLink> GetDeviceBoundReceivingLinkAsync()
@@ -315,7 +315,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             ReceivingAmqpLink deviceBoundReceivingLink;
             if (!this.faultTolerantDeviceBoundReceivingLink.TryGetOpenedObject(out deviceBoundReceivingLink))
             {
-                deviceBoundReceivingLink = await this.faultTolerantDeviceBoundReceivingLink.GetOrCreateAsync(this.openTimeout);
+                deviceBoundReceivingLink = await this.faultTolerantDeviceBoundReceivingLink.GetOrCreateAsync(this.openTimeout).ConfigureAwait(false);
             }
 
             return deviceBoundReceivingLink;
@@ -325,7 +325,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         {
             string path = string.Format(CultureInfo.InvariantCulture, CommonConstants.DeviceBoundPathTemplate, System.Net.WebUtility.UrlEncode(this.deviceId));
 
-            return await this.IotHubConnection.CreateReceivingLinkAsync(path, this.iotHubConnectionString, timeout, this.prefetchCount);
+            return await this.IotHubConnection.CreateReceivingLinkAsync(path, this.iotHubConnectionString, timeout, this.prefetchCount).ConfigureAwait(false);
         }
     }
 }

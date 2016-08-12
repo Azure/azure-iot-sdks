@@ -51,7 +51,7 @@ namespace Microsoft.Azure.Devices.Client
             AmqpSession session;
             if (!this.FaultTolerantSession.TryGetOpenedObject(out session))
             {
-                session = await this.FaultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
+                session = await this.FaultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime()).ConfigureAwait(false);
             }
 
             var linkAddress = this.BuildLinkAddress(connectionString, path);
@@ -72,7 +72,7 @@ namespace Microsoft.Azure.Devices.Client
             link.AttachTo(session);
 
             var audience = this.BuildAudience(connectionString, path);
-            await this.OpenLinkAsync(link, connectionString, audience, timeoutHelper.RemainingTime());
+            await this.OpenLinkAsync(link, connectionString, audience, timeoutHelper.RemainingTime()).ConfigureAwait(false);
 
             return link;
         }
@@ -86,7 +86,7 @@ namespace Microsoft.Azure.Devices.Client
             AmqpSession session;
             if (!this.FaultTolerantSession.TryGetOpenedObject(out session))
             {
-                session = await this.FaultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
+                session = await this.FaultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime()).ConfigureAwait(false);
             }
 
             var linkAddress = this.BuildLinkAddress(connectionString, path);
@@ -108,7 +108,7 @@ namespace Microsoft.Azure.Devices.Client
             link.AttachTo(session);
 
             var audience = this.BuildAudience(connectionString, path);
-            await this.OpenLinkAsync(link, connectionString, audience, timeoutHelper.RemainingTime());
+            await this.OpenLinkAsync(link, connectionString, audience, timeoutHelper.RemainingTime()).ConfigureAwait(false);
 
             return link;
         }
@@ -161,13 +161,13 @@ namespace Microsoft.Azure.Devices.Client
             {
 #if !WINDOWS_UWP
                 case TransportType.Amqp_WebSocket_Only:
-                    transport = await this.CreateClientWebSocketTransportAsync(timeoutHelper.RemainingTime());
+                    transport = await this.CreateClientWebSocketTransportAsync(timeoutHelper.RemainingTime()).ConfigureAwait(false);
                     break;
 #endif
                 case TransportType.Amqp_Tcp_Only:
                     TlsTransportSettings tlsTransportSettings = this.CreateTlsTransportSettings();
                     var amqpTransportInitiator = new AmqpTransportInitiator(amqpSettings, tlsTransportSettings);
-                    transport = await amqpTransportInitiator.ConnectTaskAsync(timeoutHelper.RemainingTime());
+                    transport = await amqpTransportInitiator.ConnectTaskAsync(timeoutHelper.RemainingTime()).ConfigureAwait(false);
                     break;
                 default:
                     throw new InvalidOperationException("AmqpTransportSettings must specify WebSocketOnly or TcpOnly");
@@ -181,7 +181,7 @@ namespace Microsoft.Azure.Devices.Client
             };
 
             var amqpConnection = new AmqpConnection(transport, amqpSettings, amqpConnectionSettings);
-            await amqpConnection.OpenAsync(timeoutHelper.RemainingTime());
+            await amqpConnection.OpenAsync(timeoutHelper.RemainingTime()).ConfigureAwait(false);
 
             var sessionSettings = new AmqpSessionSettings()
             {
@@ -189,7 +189,7 @@ namespace Microsoft.Azure.Devices.Client
             };
 
             var amqpSession = amqpConnection.CreateSession(sessionSettings);
-            await amqpSession.OpenAsync(timeoutHelper.RemainingTime());
+            await amqpSession.OpenAsync(timeoutHelper.RemainingTime()).ConfigureAwait(false);
 
             // This adds itself to amqpConnection.Extensions
             var cbsLink = new AmqpCbsLink(amqpConnection);
@@ -229,7 +229,7 @@ namespace Microsoft.Azure.Devices.Client
 
             using (var cancellationTokenSource = new CancellationTokenSource(timeout))
             {
-                await websocket.ConnectAsync(websocketUri, cancellationTokenSource.Token);
+                await websocket.ConnectAsync(websocketUri, cancellationTokenSource.Token).ConfigureAwait(false);
             }
 
             return websocket;
@@ -243,7 +243,7 @@ namespace Microsoft.Azure.Devices.Client
             // Use Legacy WebSocket if it is running on Windows 7 or older. Windows 7/Windows 2008 R2 is version 6.1
             if (Environment.OSVersion.Version.Major < 6 || (Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor <= 1))
             {
-                var websocket = await CreateLegacyClientWebSocketAsync(websocketUri, timeoutHelper.RemainingTime());
+                var websocket = await CreateLegacyClientWebSocketAsync(websocketUri, timeoutHelper.RemainingTime()).ConfigureAwait(false);
                 return new LegacyClientWebSocketTransport(
                     websocket,
                     this.AmqpTransportSettings.OperationTimeout,
@@ -252,7 +252,7 @@ namespace Microsoft.Azure.Devices.Client
             }
             else
             {
-                var websocket = await this.CreateClientWebSocketAsync(websocketUri, timeoutHelper.RemainingTime());
+                var websocket = await this.CreateClientWebSocketAsync(websocketUri, timeoutHelper.RemainingTime()).ConfigureAwait(false);
                 return new ClientWebSocketTransport(
                     websocket,
                     null,
@@ -263,7 +263,7 @@ namespace Microsoft.Azure.Devices.Client
         static async Task<IotHubClientWebSocket> CreateLegacyClientWebSocketAsync(Uri webSocketUri,  TimeSpan timeout)
         {
             var websocket = new IotHubClientWebSocket(WebSocketConstants.SubProtocols.Amqpwsb10);
-            await websocket.ConnectAsync(webSocketUri.Host, webSocketUri.Port, WebSocketConstants.Scheme, timeout);
+            await websocket.ConnectAsync(webSocketUri.Host, webSocketUri.Port, WebSocketConstants.Scheme, timeout).ConfigureAwait(false);
             return websocket;
         }
 #endif

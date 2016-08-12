@@ -48,8 +48,8 @@ namespace Microsoft.Azure.Devices
         {
             try
             {
-                ReceivingAmqpLink receivingLink = await this.faultTolerantReceivingLink.GetReceivingLinkAsync();
-                AmqpMessage amqpMessage = await receivingLink.ReceiveMessageAsync(timeout);
+                ReceivingAmqpLink receivingLink = await this.faultTolerantReceivingLink.GetReceivingLinkAsync().ConfigureAwait(false);
+                AmqpMessage amqpMessage = await receivingLink.ReceiveMessageAsync(timeout).ConfigureAwait(false);
 
                 if (amqpMessage != null)
                 {
@@ -57,7 +57,7 @@ namespace Microsoft.Azure.Devices
                     {
                         AmqpClientHelper.ValidateContentType(amqpMessage, CommonConstants.FileNotificationContentType);
 
-                        var fileNotification = await AmqpClientHelper.GetObjectFromAmqpMessageAsync<FileNotification>(amqpMessage);
+                        var fileNotification = await AmqpClientHelper.GetObjectFromAmqpMessageAsync<FileNotification>(amqpMessage).ConfigureAwait(false);
                         fileNotification.LockToken = new Guid(amqpMessage.DeliveryTag.Array).ToString();
 
                         return fileNotification;

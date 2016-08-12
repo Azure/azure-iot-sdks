@@ -114,11 +114,11 @@ namespace Microsoft.Azure.Devices.Client
                     });
 
                     // Send Cbs token for new link first
-                    await iotHubLinkTokenRefresher.SendCbsTokenAsync(timeoutHelper.RemainingTime());
+                    await iotHubLinkTokenRefresher.SendCbsTokenAsync(timeoutHelper.RemainingTime()).ConfigureAwait(false);
                 }
 
                 // Open Amqp Link
-                await link.OpenAsync(timeoutHelper.RemainingTime());
+                await link.OpenAsync(timeoutHelper.RemainingTime()).ConfigureAwait(false);
             }
             catch (Exception exception)
             {

@@ -85,13 +85,13 @@ namespace Microsoft.Azure.Devices
             {
                 if (args.Buffer != null)
                 {
-                    await this.webSocket.SendAsync(args.Buffer, args.Offset, args.Count, IotHubClientWebSocket.WebSocketMessageType.Binary, this.operationTimeout);
+                    await this.webSocket.SendAsync(args.Buffer, args.Offset, args.Count, IotHubClientWebSocket.WebSocketMessageType.Binary, this.operationTimeout).ConfigureAwait(false);
                 }
                 else
                 {
                     foreach (ByteBuffer byteBuffer in args.ByteBufferList)
                     {
-                        await this.webSocket.SendAsync(byteBuffer.Buffer, byteBuffer.Offset, byteBuffer.Length, IotHubClientWebSocket.WebSocketMessageType.Binary, this.operationTimeout);
+                        await this.webSocket.SendAsync(byteBuffer.Buffer, byteBuffer.Offset, byteBuffer.Length, IotHubClientWebSocket.WebSocketMessageType.Binary, this.operationTimeout).ConfigureAwait(false);
                     }
                 }
 
@@ -123,7 +123,7 @@ namespace Microsoft.Azure.Devices
             bool succeeded = false;
             try
             {
-                int numBytes = await this.webSocket.ReceiveAsync(this.asyncReadBuffer, this.asyncReadBufferOffset, this.asyncReadBufferSize, this.operationTimeout);
+                int numBytes = await this.webSocket.ReceiveAsync(this.asyncReadBuffer, this.asyncReadBufferOffset, this.asyncReadBufferSize, this.operationTimeout).ConfigureAwait(false);
 
                 succeeded = true;
                 return numBytes;
@@ -206,7 +206,7 @@ namespace Microsoft.Azure.Devices
         {
             try
             {
-               await this.webSocket.CloseAsync();
+               await this.webSocket.CloseAsync().ConfigureAwait(false);
             }
             catch (Exception e)
             {

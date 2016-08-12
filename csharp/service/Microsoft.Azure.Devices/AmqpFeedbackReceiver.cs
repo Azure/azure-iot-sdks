@@ -71,15 +71,15 @@ namespace Microsoft.Azure.Devices
         {
             try
             {
-                ReceivingAmqpLink receivingLink = await this.faultTolerantReceivingLink.GetReceivingLinkAsync();
-                AmqpMessage amqpMessage = await receivingLink.ReceiveMessageAsync(timeout);
+                ReceivingAmqpLink receivingLink = await this.faultTolerantReceivingLink.GetReceivingLinkAsync().ConfigureAwait(false);
+                AmqpMessage amqpMessage = await receivingLink.ReceiveMessageAsync(timeout).ConfigureAwait(false);
 
                 if (amqpMessage != null)
                 {
                     using (amqpMessage)
                     {
                         AmqpClientHelper.ValidateContentType(amqpMessage, CommonConstants.BatchedFeedbackContentType);
-                        var records = await AmqpClientHelper.GetObjectFromAmqpMessageAsync<IEnumerable<FeedbackRecord>>(amqpMessage);
+                        var records = await AmqpClientHelper.GetObjectFromAmqpMessageAsync<IEnumerable<FeedbackRecord>>(amqpMessage).ConfigureAwait(false);
 
                         return new FeedbackBatch
                         {

@@ -21,7 +21,7 @@ namespace Microsoft.Azure.Devices.Common.Extensions
             ReceivingAmqpLink receivingLink;
             if (!faultTolerantReceivingLink.TryGetOpenedObject(out receivingLink))
             {
-                receivingLink = await faultTolerantReceivingLink.GetOrCreateAsync(IotHubConnection.DefaultOpenTimeout);
+                receivingLink = await faultTolerantReceivingLink.GetOrCreateAsync(IotHubConnection.DefaultOpenTimeout).ConfigureAwait(false);
             }
 
             return receivingLink;
