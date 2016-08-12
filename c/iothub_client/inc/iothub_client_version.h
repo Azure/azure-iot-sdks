@@ -8,7 +8,7 @@
 #ifndef IOTHUB_CLIENT_VERSION_H
 #define IOTHUB_CLIENT_VERSION_H
 
-#define IOTHUB_SDK_VERSION "1.0.12"
+#define IOTHUB_SDK_VERSION "1.0.13"
 
 #ifdef __cplusplus
 extern "C"

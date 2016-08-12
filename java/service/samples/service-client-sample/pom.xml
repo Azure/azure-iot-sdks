@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.iothub.service.sdk</groupId>
     <artifactId>ServiceClientSample</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
     <name>Service Client Sample</name>
     <developers>
         <developer>
@@ -43,7 +43,7 @@
         <dependency>
             <groupId>com.microsoft.azure.iothub.service.sdk</groupId>
             <artifactId>iothub-service-sdk</artifactId>
-            <version>1.0.7</version>
+            <version>1.0.8</version>
             <type>jar</type>
         </dependency>
     </dependencies>

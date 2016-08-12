@@ -550,6 +550,11 @@ module.exports = [
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-common",
                 "replaceString": "node.common"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-http-base",
+                "replaceString": "node.http-base"
             }
         ]
     },
@@ -673,6 +678,11 @@ module.exports = [
             },
             {
                 "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-common",
+                "replaceString": "node.common"
+            },
+            {
+                "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-mqtt-base",
                 "replaceString": "node.mqtt-base"
             },
@@ -745,8 +755,18 @@ module.exports = [
             },
             {
                 "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-amqp-ws",
+                "replaceString": "node.device-amqp-ws"
+            },
+            {
+                "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-device-http",
                 "replaceString": "node.device-http"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-mqtt",
+                "replaceString": "node.device-mqtt"
             },
             {
                 "taskType": "jsonReplaceTask",
