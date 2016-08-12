@@ -55,6 +55,65 @@ namespace Microsoft.Azure.Devices.Client
         Mqtt = 4
     }
 
+
+    /*
+     * Class Diagramm and Chain of Responsibility in Device Client 
+                             +--------------------+
+                             | <<interface>>      |
+                             | IDelegatingHandler |
+                             |  * Open            |
+                             |  * Close           |
+                             |  * SendEvent       |
+                             |  * SendEvents      |
+                             |  * Receive         |
+                             |  * Complete        |
+                             |  * Abandon         |
+                             |  * Reject          |
+                             +-------+------------+
+                                     |
+                                     |implements
+                                     |
+                                     |
+                             +-------+-------+
+                             |  <<abstract>> |     
+                             |  Default      |
+     +---+inherits----------->  Delegating   <------inherits-----------------+
+     |                       |  Handler      |                               |
+     |           +--inherits->               <--inherits----+                |
+     |           |           +-------^-------+              |                |
+     |           |                   |inherits              |                |
+     |           |                   |                      |                |
++------------+       +---+---------+      +--+----------+       +---+--------+       +--------------+
+|            |       |             |      |             |       |            |       | <<abstract>> |
+| GateKeeper |  use  | Retry       | use  |  Error      |  use  | Routing    |  use  | Transport    |
+| Delegating +-------> Delegating  +------>  Delegating +-------> Delegating +-------> Delegating   |
+| Handler    |       | Handler     |      |  Handler    |       | Handler    |       | Handler      |
+|            |       |             |      |             |       |            |       |              |
+| overrides: |       | overrides:  |      |  overrides  |       | overrides: |       | overrides:   |
+|  Open      |       |  Open       |      |   Open      |       |  Open      |       |  Receive     |
+|  Close     |       |  SendEvent  |      |   SendEvent |       |            |       |              |
+|            |       |  SendEvents |      |   SendEvents|       +------------+       +--^--^---^----+
++------------+       |  Receive    |      |   Receive   |                               |  |   |
+             |  Reject     |      |   Reject    |                               |  |   |
+             |  Abandon    |      |   Abandon   |                               |  |   |
+             |  Complete   |      |   Complete  |                               |  |   |
+             |             |      |             |                               |  |   |
+             +-------------+      +-------------+     +-------------+-+inherits-+  |   +---inherits-+-------------+
+                                                      |             |              |                |             |
+                                                      | AMQP        |              inherits         | HTTP        |
+                                                      | Transport   |              |                | Transport   |
+                                                      | Handler     |          +---+---------+      | Handler     |
+                                                      |             |          |             |      |             |
+                                                      | overrides:  |          | MQTT        |      | overrides:  |
+                                                      |  everything |          | Transport   |      |  everything |
+                                                      |             |          | Handler     |      |             |
+                                                      +-------------+          |             |      +-------------+
+                                                                               | overrides:  |
+                                                                               |  everything |
+                                                                               |             |
+                                                                               +-------------+
+
+*/
     /// <summary>
     /// Contains methods that a device can use to send messages to and receive from the service.
     /// </summary>
