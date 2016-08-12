@@ -27,9 +27,9 @@
         "service": "1.0.14",
         "node-red-contrib-azureiothubnode": "0.0.1"
     },
-    "c_shared_utility_nuget": "1.0.15",
-    "uamqp_c_nuget": "1.0.16",
-    "umqtt_c_nuget": "1.0.15",
+    "c_shared_utility_nuget": "1.0.16",
+    "uamqp_c_nuget": "1.0.17",
+    "umqtt_c_nuget": "1.0.16",
     "iothub-diagnostics": "1.0.0",
     "iothub-explorer": "1.0.11",
     "device-explorer": "1.0.10",
