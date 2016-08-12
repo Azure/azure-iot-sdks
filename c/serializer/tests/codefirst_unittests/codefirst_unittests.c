@@ -159,7 +159,7 @@ WITH_REPORTED_PROPERTY(double, reported_this_is_double),
 WITH_REPORTED_PROPERTY(int, reported_this_is_int),
 WITH_REPORTED_PROPERTY(float, reported_this_is_float),
 WITH_REPORTED_PROPERTY(long, reported_this_is_long),
-WITH_REPORTED_PROPERTY(int8_t, reported_this_is_sint8_t),
+WITH_REPORTED_PROPERTY(int8_t, reported_this_is_int8_t),
 WITH_REPORTED_PROPERTY(uint8_t, reported_this_is_uint8_t),
 WITH_REPORTED_PROPERTY(int16_t, reported_this_is_int16_t),
 WITH_REPORTED_PROPERTY(int32_t, reported_this_is_int32_t),
@@ -469,13 +469,15 @@ static TRANSACTION_HANDLE my_Device_StartTransaction(DEVICE_HANDLE deviceHandle)
 static DEVICE_RESULT my_Device_EndTransaction(TRANSACTION_HANDLE transactionHandle, unsigned char** destination, size_t* destinationSize)
 {
     (void)(destination, destinationSize);
-    my_gballoc_free(transactionHandle);
+    ASSERT_ARE_EQUAL(void_ptr, transactionHandle, toBeCleaned);
+    my_gballoc_free((void*)transactionHandle);
     toBeCleaned = NULL;
     return DEVICE_OK;
 }
 
 static DEVICE_RESULT my_Device_CancelTransaction(TRANSACTION_HANDLE transactionHandle)
 {
+    ASSERT_ARE_EQUAL(void_ptr, transactionHandle, toBeCleaned);
     my_gballoc_free((void*)transactionHandle);
     toBeCleaned = NULL;
     return DEVICE_OK;
@@ -2536,7 +2538,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
     /* Tests_SRS_CODEFIRST_99_133:[CodeFirst_SendAsync shall allow sending of properties that are part of a child model.] */
     /* Tests_SRS_CODEFIRST_99_136:[CodeFirst_SendAsync shall build the full path for each property and then pass it to Device_PublishTransacted.] */
-    TEST_FUNCTION(CodeFirst_CodeFirst_SendAsync_Can_Send_A_Property_From_A_Child_Model)
+    TEST_FUNCTION(CodeFirst_SendAsync_Can_Send_A_Property_From_A_Child_Model)
     {
         // arrange
         OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &testModelInModelReflected, sizeof(OuterType), false);
@@ -2584,7 +2586,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
     /* Tests_SRS_CODEFIRST_99_133:[CodeFirst_SendAsync shall allow sending of properties that are part of a child model.] */
     /* Tests_SRS_CODEFIRST_99_136:[CodeFirst_SendAsync shall build the full path for each property and then pass it to Device_PublishTransacted.] */
-    TEST_FUNCTION(CodeFirst_CodeFirst_SendAsync_Can_Send_The_Last_Property_From_A_Child_Model_With_2_Properties)
+    TEST_FUNCTION(CodeFirst_SendAsync_Can_Send_The_Last_Property_From_A_Child_Model_With_2_Properties)
     {
         // arrange
         OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &testModelInModelReflected, sizeof(OuterType), false);
@@ -3309,7 +3311,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
         for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
         {
             size_t j;
-            for (j = 0;j < sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++) /*not running the tests that have failed that cannot fail*/
+            for (j = 0;j < sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++) /*not running the tests that cannot fail*/
             {
                 if (calls_that_cannot_fail[j] == i)
                     break;
@@ -3417,7 +3419,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
         for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
         {
             size_t j;
-            for (j = 0;j < sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++) /*not running the tests that have failed that cannot fail*/
+            for (j = 0;j < sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++) /*not running the tests that cannot fail*/
             {
                 if (calls_that_cannot_fail[j] == i)
                     break;
@@ -3444,7 +3446,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
         my_gballoc_free(destination);
     }
 
-    TEST_FUNCTION(CodeFirst_CodeFirst_SendAsync_Can_Send_The_Last_reportedProperty_From_A_Child_Model)
+    TEST_FUNCTION(CodeFirst_SendAsyncReported_Can_Send_The_Last_reportedProperty_From_A_Child_Model)
     {
         /// arrange
         size_t destinationSize = 1000;
@@ -3488,6 +3490,7 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        my_gballoc_free(destination);
     }
 
 
