@@ -26,7 +26,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
             return new MqttIotHubAdapter(
                 iotHubConnectionString.DeviceId,
                 iotHubConnectionString.HostName,
-                iotHubConnectionString.GetPassword(),
+                mqttTransportSettings.ClientCertificate != null ? null : iotHubConnectionString.GetPassword(),
                 mqttTransportSettings,
                 willMessage,
                 onConnected,

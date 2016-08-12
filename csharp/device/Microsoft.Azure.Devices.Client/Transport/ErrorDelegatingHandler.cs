@@ -54,25 +54,26 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
         public override async Task OpenAsync(bool explicitOpen)
         {
-            TaskCompletionSource<int> openPromise = this.openCompletion;
-            IDelegatingHandler handler = this.InnerHandler;
-            if (openPromise == null)
+            TaskCompletionSource<int> openCompletionBeforeOperationStarted = this.openCompletion;
+            IDelegatingHandler handlerBeforeOperationStarted = this.InnerHandler;
+
+            if (openCompletionBeforeOperationStarted == null)
             {
-                openPromise = new TaskCompletionSource<int>();
+                openCompletionBeforeOperationStarted = new TaskCompletionSource<int>();
 #pragma warning disable 420 //Reference to volitile variable will not be treated as volatile which is not quite true in this case.
                 TaskCompletionSource<int> currentOpenPromise;
-                if ((currentOpenPromise = Interlocked.CompareExchange(ref this.openCompletion, openPromise, null)) == null)
+                if ((currentOpenPromise = Interlocked.CompareExchange(ref this.openCompletion, openCompletionBeforeOperationStarted, null)) == null)
 #pragma warning restore 420
                 {
                     this.InnerHandler = this.handlerFactory();
                     try
                     {
                         await this.ExecuteWithErrorHandlingAsync(() => base.OpenAsync(explicitOpen), false);
-                        openPromise.TrySetResult(0);
+                        openCompletionBeforeOperationStarted.TrySetResult(0);
                     }
-                    catch (Exception ex) when (this.IsTranportTransient(ex))
+                    catch (Exception ex) when (IsTransportHandlerStillUsable(ex))
                     {
-                        Reset(openPromise, handler);
+                        this.Reset(openCompletionBeforeOperationStarted, handlerBeforeOperationStarted);
                         throw;
                     }
                     catch (Exception ex) when (!ex.IsFatal())
@@ -87,18 +88,18 @@ namespace Microsoft.Azure.Devices.Client.Transport
             }
             else
             {
-                await openPromise.Task;
+                await openCompletionBeforeOperationStarted.Task;
             }
         }
 
         public override Task<Message> ReceiveAsync()
         {
-            return this.ExecuteWithErrorHandlingAsync(() => base.ReceiveAsync());
+            return this.ExecuteWithErrorHandlingAsync(() => base.ReceiveAsync(), true);
         }
 
         public override Task<Message> ReceiveAsync(TimeSpan timeout)
         {
-            return this.ExecuteWithErrorHandlingAsync(() => base.ReceiveAsync(timeout));
+            return this.ExecuteWithErrorHandlingAsync(() => base.ReceiveAsync(timeout), true);
         }
 
         public override Task AbandonAsync(string lockToken)
@@ -126,60 +127,30 @@ namespace Microsoft.Azure.Devices.Client.Transport
             return this.ExecuteWithErrorHandlingAsync(() => base.SendEventAsync(message), true);
         }
 
-        async Task<T> ExecuteWithErrorHandlingAsync<T>(Func<Task<T>> asyncOperation)
+        Task ExecuteWithErrorHandlingAsync(Func<Task> asyncOperation, bool ensureOpen)
         {
-            await this.EnsureOpenAsync();
-
-            TaskCompletionSource<int> completedPromise = this.openCompletion;
-
-            IDelegatingHandler handler = this.InnerHandler;
-            try
-            {
-                return await asyncOperation();
-            }
-            catch (Exception ex) when (!ex.IsFatal())
-            {
-                if (this.IsTransient(ex))
-                {
-                    if (this.IsTranportTransient(ex))
-                    {
-                        if (ex is IotHubClientTransientException)
-                        {
-                            throw;
-                        }
-                        throw new IotHubClientTransientException("Transient error occured, please retry.", ex);
-                    }
-                    this.Reset(completedPromise, handler);
-                    if (ex is IotHubClientTransientException)
-                    {
-                        throw;
-                    }
-                    throw new IotHubClientTransientException("Transient error occured, please retry.", ex);
-                }
-                this.Reset(completedPromise, handler);
-                throw;
-            }
+            return ExecuteWithErrorHandlingAsync(async () => { await asyncOperation(); return 0; }, ensureOpen);
         }
 
-        async Task ExecuteWithErrorHandlingAsync(Func<Task> asyncOperation, bool ensureOpen)
+        async Task<T> ExecuteWithErrorHandlingAsync<T>(Func<Task<T>> asyncOperation, bool ensureOpen)
         {
             if (ensureOpen)
             {
                 await this.EnsureOpenAsync();
             }
 
-            TaskCompletionSource<int> completedPromise = this.openCompletion;
-            IDelegatingHandler handler = this.InnerHandler;
+            TaskCompletionSource<int> openCompletionBeforeOperationStarted = this.openCompletion;
+            IDelegatingHandler handlerBeforeOperationStarted = this.InnerHandler;
 
             try
             {
-                await asyncOperation();
+                return await asyncOperation();
             }
             catch (Exception ex) when (!ex.IsFatal())
             {
-                if (this.IsTransient(ex))
+                if (IsTransient(ex))
                 {
-                    if (this.IsTranportTransient(ex))
+                    if (IsTransportHandlerStillUsable(ex))
                     {
                         if (ex is IotHubClientTransientException)
                         {
@@ -187,15 +158,18 @@ namespace Microsoft.Azure.Devices.Client.Transport
                         }
                         throw new IotHubClientTransientException("Transient error occured, please retry.", ex);
                     }
-                    this.Reset(completedPromise, handler);
+                    this.Reset(openCompletionBeforeOperationStarted, handlerBeforeOperationStarted);
                     if (ex is IotHubClientTransientException)
                     {
                         throw;
                     }
                     throw new IotHubClientTransientException("Transient error occured, please retry.", ex);
                 }
-                this.Reset(completedPromise, handler);
-                throw;
+                else
+                {
+                    this.Reset(openCompletionBeforeOperationStarted, handlerBeforeOperationStarted);
+                    throw;
+                }
             }
         }
 
@@ -204,33 +178,30 @@ namespace Microsoft.Azure.Devices.Client.Transport
             return this.OpenAsync(false);
         }
 
-        bool IsTranportTransient(Exception exception)
+        static bool IsTransportHandlerStillUsable(Exception exception)
         {
             return exception.Unwind(true).Any(e => TransportTransientExceptions.Contains(e.GetType()));
         }
 
-        bool IsTransient(Exception exception)
+        static bool IsTransient(Exception exception)
         {
             return exception.Unwind(true).Any(e => TransientExceptions.Contains(e.GetType()));
         }
 
-        void Reset(TaskCompletionSource<int> completion, IDelegatingHandler handler)
+        void Reset(TaskCompletionSource<int> openCompletionBeforeOperationStarted, IDelegatingHandler handlerBeforeOperationStarted)
         {
-            if (completion == this.openCompletion)
+            if (openCompletionBeforeOperationStarted == this.openCompletion)
             {
 #pragma warning disable 420 //Reference to volitile variable will not be treated as volatile which is not quite true in this case.
-                if (Interlocked.CompareExchange(ref this.openCompletion, null, completion) == completion)
+                if (Interlocked.CompareExchange(ref this.openCompletion, null, openCompletionBeforeOperationStarted) == openCompletionBeforeOperationStarted)
 #pragma warning restore 420
                 {
-                    if (handler == this.InnerHandler)
-                    {
-                        this.Cleanup(handler);
-                    }
+                    Cleanup(handlerBeforeOperationStarted);
                 }
             }
         }
 
-        async void Cleanup(IDelegatingHandler handler)
+        static async void Cleanup(IDelegatingHandler handler)
         {
             try
             {
