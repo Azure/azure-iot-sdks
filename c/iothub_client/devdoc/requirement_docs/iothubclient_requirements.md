@@ -1,17 +1,17 @@
 ﻿#IoTHubClient Requirements
 
-##References
+## References
 [Azure Storage Services REST API Reference](https://msdn.microsoft.com/en-us/library/azure/dd179355.aspx)
 
 
-##Overview
+## Overview
 
 IoTHubClient is a module that extends the IoTHubCLient_LL module with 2 features:
 -	scheduling the work for the IoTHubCLient from a thread, so that the user does not need to create its own thread.
 -	Thread-safe APIs
-Undelaying layer in the following requirements refers to IoTHubClient_LL.
+Underlaying layer in the following requirements refers to IoTHubClient_LL.
  
-##Exposed API
+## Exposed API
 
 ```c
 typedef void* IOTHUB_CLIENT_HANDLE;
@@ -27,6 +27,11 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE
 extern IOTHUB_CLIENT_RESULT IoTHubClient_GetLastMessageReceiveTime(IOTHUB_CLIENT_HANDLE iotHubClientHandle, time_t* lastMessageReceiveTime);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* optionName, const void* value);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK iotHubClientFileUploadCallback, void* context);
+
+## Device Twin
+extern IOTHUB_CLIENT_RESULT IoTHubClient_GetDesiredState(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_GET_DESIRED_CALLBACK getDesiredCallback, void* userContextCallback);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SetPatchDesiredStateCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_PATCH_DESIRED_CALLBACK patchDesiredCallback, void* userContextCallback);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, uint32_t reportedVersion, uint32_t lastSeenDesiredVersion, IOTHUB_CLIENT_PATCH_REPORTED_CALLBACK patchReportedCallback, void* userContextCallback);
 ```
 
 ## IoTHubClient_GetVersionString
@@ -260,7 +265,55 @@ IoTHubClient_SetOption allows run-time changing of settings of the IoTHubClient.
 Options handled by IoTHubClient_SetOption:
 -none.
 
-##IoTHubClient_UploadToBlobAsync
+
+
+## IoTHubClient_GetDesiredState
+```c
+extern IOTHUB_CLIENT_RESULT IoTHubClient_GetDesiredState(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_GET_DESIRED_CALLBACK getDesiredCallback, void* userContextCallback);
+```
+
+`IoTHubClient_GetDesiredState` sends an asynchronous request for initial state to the IoTHub service. The response, pay load, and state versions will be passed
+back in the call to getDesiredCallback.
+
+**SRS_IOTHUBCLIENT_10_007: [** If `iotHubClientHandle` is `NULL`, `IoTHubClient_GetDesiredState` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+**SRS_IOTHUBCLIENT_10_008: [** If acquiring the lock fails, `IoTHubClient_GetDesiredState` shall return `IOTHUB_CLIENT_ERROR`. **]**
+**SRS_IOTHUBCLIENT_10_009: [** If the transport connection is shared, the thread shall be started by calling `IoTHubTransport_StartWorkerThread`. **]**
+**SRS_IOTHUBCLIENT_10_010: [** If starting the thread fails, `IoTHubClient_GetDesiredState` shall return `IOTHUB_CLIENT_ERROR`. **]**
+**SRS_IOTHUBCLIENT_10_011: [** `IoTHubClient_GetDesiredState` shall call `IoTHubClient_LL_GetDesiredState`, while passing the `IoTHubClient_LL handle` created by `IoTHubClient_LL_Create` along with the parameters `getDesiredCallback` and `userContextCallback`. **]**
+**SRS_IOTHUBCLIENT_10_012: [** When `IoTHubClient_LL_GetDesiredState` is called, `IoTHubClient_GetDesiredState` shall return the result of `IoTHubClient_LL_GetDesiredState`. **]**
+**SRS_IOTHUBCLIENT_10_019: [** `IoTHubClient_LL_GetDesiredState` shall be made thread-safe by using the lock created in IoTHubClient_Create. **]**
+
+## IoTHubClient_SetPatchDesiredStateCallback
+```c
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SetPatchDesiredStateCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_PATCH_DESIRED_CALLBACK patchDesiredCallback, void* userContextCallback);
+```
+
+`IoTHubClient_SetPatchDesiredStateCallback` sets up the callback for PATCH DESIRED events which are sent unsolicited by the IoTHub.
+
+**SRS_IOTHUBCLIENT_10_001: [** If `iotHubClientHandle` is `NULL`, `IoTHubClient_SetPatchDesiredStateCallback` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+**SRS_IOTHUBCLIENT_10_002: [** If acquiring the lock fails, `IoTHubClient_SetPatchDesiredStateCallback` shall return `IOTHUB_CLIENT_ERROR`. **]**
+**SRS_IOTHUBCLIENT_10_003: [** If the transport connection is shared, the thread shall be started by calling `IoTHubTransport_StartWorkerThread`. **]**
+**SRS_IOTHUBCLIENT_10_004: [** If starting the thread fails, `IoTHubClient_SetPatchDesiredStateCallback` shall return `IOTHUB_CLIENT_ERROR`. **]**
+**SRS_IOTHUBCLIENT_10_005: [** `IoTHubClient_SetPatchDesiredStateCallback` shall call `IoTHubClient_LL_SetPatchDesiredStateCallback`, while passing the `IoTHubClient_LL handle` created by `IoTHubClient_LL_Create` along with the parameters `patchDesiredCallback` and `userContextCallback`. **]**
+**SRS_IOTHUBCLIENT_10_006: [** When `IoTHubClient_LL_SetPatchDesiredStateCallback` is called, `IoTHubClient_SetPatchDesiredStateCallback` shall return the result of `IoTHubClient_LL_SetPatchDesiredStateCallback`. **]**
+**SRS_IOTHUBCLIENT_10_020: [** `IoTHubClient_SetPatchDesiredStateCallback` shall be made thread-safe by using the lock created in IoTHubClient_Create. **]**
+
+## IoTHubClient_SendReportedState
+```c
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, uint32_t reportedVersion, uint32_t lastSeenDesiredVersion, IOTHUB_CLIENT_PATCH_REPORTED_CALLBACK patchReportedCallback, void* userContextCallback);
+```
+
+`IoTHubClient_SendReportedState` sends an asynchronous reported state to the IoTHub. The response is returned via call to the specified patchReportedCallback.
+
+**SRS_IOTHUBCLIENT_10_013: [** If `iotHubClientHandle` is `NULL`, `IoTHubClient_SendReportedState` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+**SRS_IOTHUBCLIENT_10_014: [** If acquiring the lock fails, `IoTHubClient_SendReportedState` shall return `IOTHUB_CLIENT_ERROR`. **]**
+**SRS_IOTHUBCLIENT_10_015: [** If the transport connection is shared, the thread shall be started by calling `IoTHubTransport_StartWorkerThread`. **]**
+**SRS_IOTHUBCLIENT_10_016: [** If starting the thread fails, `IoTHubClient_SendReportedState` shall return `IOTHUB_CLIENT_ERROR`. **]**
+**SRS_IOTHUBCLIENT_10_017: [** `IoTHubClient_SendReportedState` shall call `IoTHubClient_LL_SendReportedState`, while passing the `IoTHubClient_LL handle` created by `IoTHubClient_LL_Create` along with the parameters `reportedState`, `size`, `reportedVersion`, `lastSeenDesiredVersion`, `patchReportedCallback`, and `userContextCallback`. **]**
+**SRS_IOTHUBCLIENT_10_018: [** When `IoTHubClient_LL_SendReportedState` is called, `IoTHubClient_SendReportedState` shall return the result of `IoTHubClient_LL_SendReportedState`. **]**
+**SRS_IOTHUBCLIENT_10_021: [** `IoTHubClient_SendReportedState` shall be made thread-safe by using the lock created in IoTHubClient_Create. **]**
+
+## IoTHubClient_UploadToBlobAsync
 ```c
 IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK iotHubClientFileUploadCallback, void* context);
 ```
