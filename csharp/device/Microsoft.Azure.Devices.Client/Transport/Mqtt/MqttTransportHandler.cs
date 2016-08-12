@@ -6,7 +6,9 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.IO;
     using System.Net;
+    using System.Net.Security;
     using System.Security.Cryptography.X509Certificates;
     using System.Threading;
     using System.Threading.Tasks;
@@ -429,6 +431,12 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
             return (address, port) =>
             {
                 IEventLoopGroup eventLoopGroup = EventLoopGroupPool.TakeOrAdd(this.eventLoopGroupKey);
+
+                Func<Stream, SslStream> streamFactory = stream => new SslStream(stream, true, settings.RemoteCertificateValidationCallback);
+                ClientTlsSettings clientTlsSettings;
+                clientTlsSettings = settings.ClientCertificate != null ? 
+                    new ClientTlsSettings(iotHubConnectionString.HostName, new List<X509Certificate> { settings.ClientCertificate }) : 
+                    new ClientTlsSettings(iotHubConnectionString.HostName);
                 Bootstrap bootstrap = new Bootstrap()
                     .Group(eventLoopGroup)
                     .Channel<TcpSocketChannel>()
@@ -436,7 +444,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
                     .Option(ChannelOption.Allocator, UnpooledByteBufferAllocator.Default)
                     .Handler(new ActionChannelInitializer<ISocketChannel>(ch =>
                     {
-                        TlsHandler tlsHandler = TlsHandler.Client(iotHubConnectionString.HostName, settings.ClientCertificate as X509Certificate2, settings.RemoteCertificateValidationCallback);
+                        var tlsHandler = new TlsHandler(streamFactory, clientTlsSettings);
 
                         ch.Pipeline
                             .AddLast(

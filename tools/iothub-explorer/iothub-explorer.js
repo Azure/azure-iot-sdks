@@ -241,7 +241,9 @@ else if (command === 'send') {
             }
             console.log(colorsTmpl('\n{green}Message sent{/green}' + id));
           }
-          client.close();
+          client.close(function (err) {
+            if (err) serviceError(err);
+          });
         }
       });
     }

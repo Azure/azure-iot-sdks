@@ -8,6 +8,7 @@ namespace Microsoft.Azure.Devices.Client
     using Microsoft.Azure.Devices.Client.Extensions;
 #if !NETMF
     using System.Collections.Generic;
+    using PCLCrypto;
 #endif
     using System.Globalization;
 #if WINDOWS_UWP
@@ -15,9 +16,6 @@ namespace Microsoft.Azure.Devices.Client
     using Windows.Security.Cryptography.Core;
     using System.Runtime.InteropServices.WindowsRuntime;
     using Windows.Storage.Streams;
-#endif
-#if !NETMF
-    using PCLCrypto;
 #endif
 
     using System.Text;

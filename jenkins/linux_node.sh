@@ -12,7 +12,7 @@ build/dev-setup.sh
 [ $? -eq 0 ] || exit $?
 
 # Lint all JavaScript code and run unit + integration tests
-build/build.sh --min --integration-tests
+build/build.sh --min --integration-tests --e2e-tests
 [ $? -eq 0 ] || exit $?
 
 # The 'npm link' commands in this script create symlinks to tracked repo

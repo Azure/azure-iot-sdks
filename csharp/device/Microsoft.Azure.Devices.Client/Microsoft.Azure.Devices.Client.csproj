@@ -59,30 +59,30 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <Choose>
-    <When Condition="'$(UseNuget)' == 'True' Or '$(UseNuget)' == ''">
+    <When Condition="'$(DotNettyPath)' == ''">
       <ItemGroup>
-        <Reference Include="DotNetty.Buffers, Version=0.3.1.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
-          <HintPath>$(SolutionDir)\packages\DotNetty.Buffers-signed.0.3.1\lib\net45\DotNetty.Buffers.dll</HintPath>
+        <Reference Include="DotNetty.Buffers, Version=0.3.2.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
+          <HintPath>$(SolutionDir)\packages\DotNetty.Buffers-signed.0.3.2\lib\net45\DotNetty.Buffers.dll</HintPath>
           <Private>True</Private>
         </Reference>
-        <Reference Include="DotNetty.Codecs, Version=0.3.1.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
-          <HintPath>$(SolutionDir)\packages\DotNetty.Codecs-signed.0.3.1\lib\net45\DotNetty.Codecs.dll</HintPath>
+        <Reference Include="DotNetty.Codecs, Version=0.3.2.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
+          <HintPath>$(SolutionDir)\packages\DotNetty.Codecs-signed.0.3.2\lib\net45\DotNetty.Codecs.dll</HintPath>
           <Private>True</Private>
         </Reference>
-        <Reference Include="DotNetty.Codecs.Mqtt, Version=0.3.1.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
-          <HintPath>$(SolutionDir)\packages\DotNetty.Codecs.Mqtt-signed.0.3.1\lib\net45\DotNetty.Codecs.Mqtt.dll</HintPath>
+        <Reference Include="DotNetty.Codecs.Mqtt, Version=0.3.2.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
+          <HintPath>$(SolutionDir)\packages\DotNetty.Codecs.Mqtt-signed.0.3.2\lib\net45\DotNetty.Codecs.Mqtt.dll</HintPath>
           <Private>True</Private>
         </Reference>
-        <Reference Include="DotNetty.Common, Version=0.3.1.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
-          <HintPath>$(SolutionDir)\packages\DotNetty.Common-signed.0.3.1\lib\net45\DotNetty.Common.dll</HintPath>
+        <Reference Include="DotNetty.Common, Version=0.3.2.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
+          <HintPath>$(SolutionDir)\packages\DotNetty.Common-signed.0.3.2\lib\net45\DotNetty.Common.dll</HintPath>
           <Private>True</Private>
         </Reference>
-        <Reference Include="DotNetty.Handlers, Version=0.3.1.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
-          <HintPath>$(SolutionDir)\packages\DotNetty.Handlers-signed.0.3.1\lib\net45\DotNetty.Handlers.dll</HintPath>
+        <Reference Include="DotNetty.Handlers, Version=0.3.2.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
+          <HintPath>$(SolutionDir)\packages\DotNetty.Handlers-signed.0.3.2\lib\net45\DotNetty.Handlers.dll</HintPath>
           <Private>True</Private>
         </Reference>
-        <Reference Include="DotNetty.Transport, Version=0.3.1.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
-          <HintPath>$(SolutionDir)\packages\DotNetty.Transport-signed.0.3.1\lib\net45\DotNetty.Transport.dll</HintPath>
+        <Reference Include="DotNetty.Transport, Version=0.3.2.0, Culture=neutral, PublicKeyToken=e7a0210a354f294a, processorArchitecture=MSIL">
+          <HintPath>$(SolutionDir)\packages\DotNetty.Transport-signed.0.3.2\lib\net45\DotNetty.Transport.dll</HintPath>
           <Private>True</Private>
         </Reference>
       </ItemGroup>
