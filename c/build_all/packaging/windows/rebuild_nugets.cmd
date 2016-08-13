@@ -53,16 +53,16 @@ xcopy /q /y /R %build-path%\iotsdk_win32\serializer\Release\*.* %build-path%\iot
 if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 rem -- Copy all x64 files from cmake build directory to the repo directory
-xcopy /q /y /R %build-path%\iotsdk_win64\iothub_client\Debug\*.* %build-path%\iot_sdk_output\c\x64\debug\*.*
+xcopy /q /y /R %build-path%\iotsdk_x64\iothub_client\Debug\*.* %build-path%\iot_sdk_output\c\x64\debug\*.*
 if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-xcopy /q /y /R %build-path%\iotsdk_win64\serializer\Debug\*.* %build-path%\iot_sdk_output\c\x64\debug\*.*
+xcopy /q /y /R %build-path%\iotsdk_x64\serializer\Debug\*.* %build-path%\iot_sdk_output\c\x64\debug\*.*
 if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-xcopy /q /y /R %build-path%\iotsdk_win64\iothub_client\Release\*.* %build-path%\iot_sdk_output\c\x64\release\*.*
+xcopy /q /y /R %build-path%\iotsdk_x64\iothub_client\Release\*.* %build-path%\iot_sdk_output\c\x64\release\*.*
 if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-xcopy /q /y /R %build-path%\iotsdk_win64\serializer\Release\*.* %build-path%\iot_sdk_output\c\x64\release\*.*
+xcopy /q /y /R %build-path%\iotsdk_x64\serializer\Release\*.* %build-path%\iot_sdk_output\c\x64\release\*.*
 if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 rem -- Copy all arm files from cmake build directory to the repo directory

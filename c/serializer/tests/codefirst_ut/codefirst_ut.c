@@ -595,7 +595,7 @@ static DEVICE_RESULT my_Device_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, pfDe
     return DEVICE_OK;
 }
 
-BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
+BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
@@ -3494,4 +3494,4 @@ BEGIN_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider)
     }
 
 
-END_TEST_SUITE(CodeFirst_UnitTests_Dummy_Data_Provider);
+END_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider);

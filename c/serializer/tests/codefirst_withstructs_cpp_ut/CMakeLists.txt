@@ -20,4 +20,10 @@ ${SHARED_UTIL_SRC_FOLDER}/strings.c
 set(${theseTestsName}_h_files
 )
 
+#CPP compiler on windows likes to complain about unused local function removed (C4505)
+#C compiler doesn't like to complain about the same thing
+if(WIN32)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4505")
+endif()
+
 build_test_artifacts(${theseTestsName} ON)

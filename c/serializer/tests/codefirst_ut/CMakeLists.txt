@@ -6,12 +6,11 @@ cmake_minimum_required(VERSION 2.8.11)
 
 compileAsC99()
 set(theseTestsName codefirst_ut)
-set(${theseTestsName}_cpp_files
-${theseTestsName}.cpp
+set(${theseTestsName}_test_files
+${theseTestsName}.c
 )
 
 set(${theseTestsName}_c_files
-    
     ../../src/codefirst.c
     ./c_bool_size.c
     ${SHARED_UTIL_SRC_FOLDER}/gballoc.c

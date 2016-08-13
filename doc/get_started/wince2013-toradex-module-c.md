@@ -49,7 +49,7 @@ These instructions apply to [Colibri Modules][colibri-modules] running the [Wind
 
 1. Start a new instance of Visual Studio 2015. Open the **azure_iot_sdks.sln** solution in the **cmake_ce8** folder in your home directory.
 
-2. In Visual Studio, in **Solution Explorer**, navigate to **simplesample_http** project, open the **simplesample_http.c** file.
+2. In Visual Studio, in **Solution Explorer**, navigate to **iothub_client\samples\iothub_client_sample_http** project, open the **iothub_client_sample_http.c** file.
 
 3. Locate the following code in the file:
 
@@ -63,31 +63,15 @@ These instructions apply to [Colibri Modules][colibri-modules] running the [Wind
   static const char* connectionString = "HostName=..."
   ```
 
-6. To enable secure connection using HTTPS you need to import the security certificates used by Azure IoT hub into the local certificate store of the device. To do this you can connect to your hub using a browser. The hub url is in the format: https://<yourhubname>.azure-devices.net and you can find it in the hub's properties window on Azure portal. Your browser will show a blank page and a lock icon close to the address, by clicking on that icon you should be able to inspect and save the security certificates used to secure the connection to your hub. Save them in CER format and copy them to a thumbdrive or SD card.
-
-7. Insert the USB thumb-drive or SD card in your Toradex board and boot your device.
-
-8. Open control panel by clicking on the "Start" button and then selecting Settings\Control Panel.
-
-9. Select the "Certificates" applet by double clicking on it.
-
-10. Click on "Import..." and the on the "OK" button in the title bar of the dialog box that will appear.
-
-11. Browse to the folder where your certificate file is stored (it can be "SD Card" or "USB HD", depending on the media you used to transfer it).
-
-12. double click on the certificate file, it will be imported in your local certificates storage.
-
-13. Save the registry by selecting "Start\Programs\ColibriTools\SaveReg". This will save the certificates permanently, so you don't need to repeat the operations described in points 7 to 13 every time you reboot your device.
-
-14. Check that date and time on your device are set correctly. Using a date outside of the validity period of your certificates can prevent your device from getting connected to the hub. To update your date and time you can open a command prompt and type:
+5. Check that date and time on your device are set correctly. Using a date outside of the validity period of your certificates can prevent your device from getting connected to the hub. To update your date and time you can open a command prompt and type:
 ```
   services refresh NTP0:
 ```  
-15. In **Solution Explorer**, right-click the **simplesample_http** project, click **Properties**, then select **Configuration Properties\Debugging** to build and then insert the ip address of your target device in the **IP Address** field. Select **OK** to save your changes.
+6. In **Solution Explorer**, right-click the **iothub_client_sample_http** project, click **Properties**, then select **Configuration Properties\Debugging** to build and then insert the ip address of your target device in the **IP Address** field. Select **OK** to save your changes.
 
-16. In **Solution Explorer**, right-click the **simplesample_http** project, click **Debug**, and then click **Start new instance** to build and run the sample. The console displays messages as the application sends device-to-cloud messages to IoT Hub.
+7. In **Solution Explorer**, right-click the **iothub_client_sample_http** project, click **Debug**, and then click **Start new instance** to build and run the sample. The console displays messages as the application sends device-to-cloud messages to IoT Hub.
 
-17.   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the **simplesample_http** application and how to send cloud-to-device messages to the **simplesample_http** application.
+8. See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the **iothub_client_sample_http** application and how to send cloud-to-device messages to the **iothub_client_sample_http** application.
 
 [devbox-setup]: https://github.com/Azure/azure-iot-sdks/blob/master/c/doc/devbox_setup.md
 [device-explorer]: https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/readme.md

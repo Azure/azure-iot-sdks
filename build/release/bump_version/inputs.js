@@ -39,7 +39,7 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
-        "filePath": "c/iothub_client/tests/version_unittests/version_unittests.cpp",
+        "filePath": "c/iothub_client/tests/version_ut/version_ut.cpp",
         "search": "(\\\".*\\\")([ \t]*\\,[ \t]*IOTHUB\\_SDK\\_VERSION)",
         "replaceString": function(versions) {
             return '"' + versions.c.device + '"$2';
@@ -47,7 +47,7 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
-        "filePath": "c/iothub_client/tests/iothubclient_ll_u2b_unittests/iothub_client_ll_u2b_unittests.c",
+        "filePath": "c/iothub_client/tests/iothubclient_ll_u2b_ut/iothub_client_ll_u2b_ut.c",
         "search": "(TEST\\_IOTHUB\\_SDK\\_VERSION)([ ]+)(\".*\")",
         "replaceString": function(versions) {
             return '$1' + '$2' + '"' + versions.c.device + '"';
@@ -550,6 +550,11 @@ module.exports = [
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-common",
                 "replaceString": "node.common"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-http-base",
+                "replaceString": "node.http-base"
             }
         ]
     },
@@ -673,6 +678,11 @@ module.exports = [
             },
             {
                 "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-common",
+                "replaceString": "node.common"
+            },
+            {
+                "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-mqtt-base",
                 "replaceString": "node.mqtt-base"
             },
@@ -745,8 +755,18 @@ module.exports = [
             },
             {
                 "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-amqp-ws",
+                "replaceString": "node.device-amqp-ws"
+            },
+            {
+                "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-device-http",
                 "replaceString": "node.device-http"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-mqtt",
+                "replaceString": "node.device-mqtt"
             },
             {
                 "taskType": "jsonReplaceTask",

@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.iothub.service.sdk</groupId>
     <artifactId>iothub-service-sdk</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
     <name>IotHub Java Service SDK</name>
     <description>The Microsoft Azure IoT Service SDK for Java</description>
     <developers>

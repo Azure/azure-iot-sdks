@@ -18,12 +18,13 @@ How to certify IoT devices running Linux with Azure IoT SDK
     -   [4.3 Next steps](#Next)
 -   [Step 5: Troubleshooting](#Troubleshooting)
 
-<a name="Introduction"/>
+<a name="Introduction"></a>
 # Introduction
 
 **About this document**
 
 This document provides step-by-step guidance to IoT hardware publishers on how to certify an IoT enabled hardware with Azure IoT SDK. This multi-step process includes:
+
 -   Configuring Azure IoT Hub
 -   Registering your IoT device
 -   Build and deploy Azure IoT SDK on device
@@ -40,7 +41,7 @@ Before executing any of the steps below, read through each process, step by step
 
 ***Note:*** *If you haven’t contacted Microsoft about being an Azure Certified for IoT partner, please submit this [form](<https://iotcert.cloudapp.net/>) first to request it and then follow these instructions.*
 
-<a name="Configure"/>
+<a name="Configure"></a>
 # Step 1: Sign Up To Azure IoT Hub
 
 Follow the instructions [here](https://account.windowsazure.com/signup?offer=ms-azr-0044p) on how to sign up to the Azure IoT Hub service.
@@ -51,7 +52,7 @@ As part of the sign up process, you will receive the connection string.
 
           HostName=[YourIoTHubName];CredentialType=SharedAccessSignature;CredentialScope=[ContosoIotHub];SharedAccessKeyName=[YourAccessKeyName];SharedAccessKey=[YourAccessKey]
 
-<a name="Register"/>
+<a name="Register"></a>
 # Step 2: Register Device
 
 In this section, you will register your device using DeviceExplorer. The DeviceExplorer is a Windows application that interfaces with Azure IoT Hub and can perform the following operations:
@@ -89,12 +90,12 @@ To run DeviceExplorer tool, follow the configuration strings as described in  [S
 
 ***Not running Windows on your PC?*** - Please follow the instructions [here](<https://github.com/Azure/azure-iot-sdks/blob/master/doc/manage_iot_hub.md>) to provision your device and get its credentials.
 
-<a name="Build"/>
+<a name="Build"></a>
 # Step 3: Build and validate the sample using Node JS client libraries
 
 This section walks you through building, deploying and validating the IoT Client SDK on your device running a Linux operating system. You will install necessary prerequisites on your device.  Once done,  you will build and deploy the IoT Client SDK and validate the sample tests required for IoT certification with the Azure IoT SDK.
 
-<a name="Load"/>
+<a name="Load"></a>
 ## 3.1 Load the Azure IoT bits and prerequisites on device
 
 -   Open a PuTTY session and connect to the device.
@@ -150,14 +151,20 @@ This section walks you through building, deploying and validating the IoT Client
 -   Download the SDK to the board by issuing the following command in
     PuTTY:
 
-        git clone https://github.com/Azure/azure-iot-sdks.git
+        git clone --recursive https://github.com/Azure/azure-iot-sdks.git
 
 -   Verify that you now have a copy of the source code under the directory ~/azure-iot-sdks.
 
-<a name="BuildSamples"/>
+<a name="BuildSamples"></a>
 ## 3.2 Build the samples
 
 -   To validate the source code run the following commands on the device.
+
+        export IOTHUB_CONNECTION_STRING='<iothub_connection_string>'
+
+    Replace the `<iothub_connection_string>` placeholder with IoTHub Connection String you got in [Step 1](#Configure).    
+
+-   Run the following commands 
 
         cd ~/azure-iot-sdks/node
         build/dev-setup.sh
@@ -165,22 +172,40 @@ This section walks you through building, deploying and validating the IoT Client
 
     ***Note:*** *LogFile.txt in above command should be replaced with a file name where build output will be written.*
 
--   To update samples run the following command on device.
-
-    **For simple_sample_http.js:**
+-   Install npm package to run sample.
 
         cd ~/azure-iot-sdks/node/device/samples
-        nano simple_sample_http.js
 
-    **For send_batch_http.js:**
+    **For AMQP Protocol:**
+	
+        npm install azure-iot-device-amqp
+	
+    **For HTTP Protocol:**
+	
+        npm install azure-iot-device-http
+	
+    **For MQTT Protocol:**
+
+        npm install azure-iot-device-mqtt	
+
+-   To update sample, run the following command on device.
 
         cd ~/azure-iot-sdks/node/device/samples
-        nano send_batch_http.js
+        nano simple_sample_device.js
 
 -   This launches a console-based text editor. Scroll down to the
-    connection information.
+    protocol information.
+    
+-   Find the below code:
 
--   Find the following place holder for IoT connection string:
+        var Protocol = require('azure-iot-device-amqp').Amqp;
+	
+    The default protocol used is AMQP. Code for other protocols(HTTP/MQTT) are mentioned just below the above line in the script.
+    Uncomment the line as per the protocol you want to use.
+
+
+-   Scroll down to the connection information.
+    Find the following place holder for IoT connection string:
 
         var connectionString = "[IoT Device Connection String]";
 
@@ -194,29 +219,7 @@ This section walks you through building, deploying and validating the IoT Client
 
         npm link azure-iot-device
 
-    **For registry_sample.js:**
-
-        cd ~/azure-iot-sdks/node/service/samples
-        nano registry_sample.js
-
--   This launches a console-based text editor. Scroll down to the
-    connection information.
-
--   Find the following place holder for IoT connection string:
-
-        var connectionString = "[IoT Connection String]";
-
--   Replace the above placeholder with "IoT Hub Connection String" which you used        in  [Step 2](#Register) for device registration.
-
--   Save your changes by pressing Ctrl+O and when nano prompts you to save it as the same file, just press ENTER.
-
--   Press Ctrl+X to exit nano.
-
--   Run the following command before leaving the **~/azure-iot-sdks/node/service/samples** directory
-
-        npm link azure-iothub
-
-<a name="Run"/>
+<a name="Run"></a>
 ## 3.3 Run and Validate the Samples
 
 In this section you will run the Azure IoT client SDK samples to validate communication between your device and Azure IoT Hub service. You will send messages to the Azure IoT Hub service and validate that IoT Hub has successfully receive the data. You will also monitor any messages send from the Azure IoT Hub to client.
@@ -233,7 +236,7 @@ In this section you will run the Azure IoT client SDK samples to validate commun
 
 3.  Run the sample by issuing following command:
 
-        node ~/azure-iot-sdks/node/device/samples/simple_sample_http.js
+        node ~/azure-iot-sdks/node/device/samples/simple_sample_device.js
 
 4. Verify that data has been successfully sent and received. If any, then you may have incorrectly copied the device hub connection information.
 
@@ -243,26 +246,6 @@ In this section you will run the Azure IoT client SDK samples to validate commun
 
     ![Simple_Sample_result_DeviceExplorer](images/3_3_1_03.png)
 
-6.  Run the sample by issuing following command and then repeat step 4 to 5:
-
-        node ~/azure-iot-sdks/node/device/samples/send_batch_http.js
-
-    ![Send_Batch_result_terminal](images/3_3_1_04.png)
-    ![Send_Batch_result_DeviceExplorer](images/3_3_1_05.png)
-
-7.  Run the sample to register a device by issuing following command:
-
-        node ~/azure-iot-sdks/node/service/samples/registry_sample.js
-
-8.  Verify that you receive information for new device created in the messages.
-
-    ![Registry_Sample_result_DeviceExplorer](images/3_3_1_06.PNG)
-
-9.  In DeviceExplorer, go to Management tab and click List button. Your new device should show up in the list.
-
-    ![Registry_Sample_result_DeviceExplorer](images/3_3_1_07.png)
-
-**Note:** The registry_sample.js sample will create and delete a device. In order to see it in the DeviceExplorer tool you will need to refresh your devices before the sample finishes running.
 
 ### 3.3.2 Receive messages from IoT Hub
 
@@ -280,10 +263,10 @@ In this section you will run the Azure IoT client SDK samples to validate commun
 
     ![MessageSend_terminal](images/3_3_2_02.png)
 
-<a name="PackageShare"/>
+<a name="PackageShare"></a>
 # Step 4: Package and Share
 
-<a name="Package"/>
+<a name="Package"></a>
 ## 4.1 Package build logs and sample test results
 
 Package following artifacts from your device:
@@ -299,17 +282,18 @@ Package following artifacts from your device:
     (explicitly highlighting the new steps for customers). Please use the template available [here](<https://github.com/Azure/azure-iot-sdks/blob/master/doc/iotcertification/templates/template-linux-nodejs.md>) to create your device-specific instructions.
     
     As a guideline on how the instructions should look please refer the examples published on GitHub repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/doc/get_started>).
-<a name="Share"/>
+
+<a name="Share"></a>
 ## 4.2 Share package with Engineering Support
 
 Share the package in email to <iotcert@microsoft.com>.
 
-<a name="Next"/>
+<a name="Next"></a>
 ## 4.3 Next steps
 
 Once you shared the documents with us, we will contact you in the following 48 to 72 business hours with next steps.
 
-<a name="Troubleshooting"/>
+<a name="Troubleshooting"></a>
 # Step 5: Troubleshooting
 
 Please contact engineering support on <iotcert@microsoft.com> for help with troubleshooting.

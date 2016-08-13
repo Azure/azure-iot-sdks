@@ -4,5 +4,5 @@
 #ifndef __cplusplus
 #error NO CHEATING!
 #endif
-#include "../codefirst_ut/codefirst_ut.cpp"
+#include "../codefirst_ut/codefirst_ut.c"
 
