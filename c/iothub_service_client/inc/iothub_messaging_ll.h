@@ -49,7 +49,7 @@ typedef struct IOTHUB_SERVICE_FEEDBACK_RECORD_TAG
 {
     char* description;
     const char* deviceId;
-    const char* correlationId;
+    const char* originalMessageId;
     const char* generationId;
     const char* enqueuedTimeUtc;
     IOTHUB_FEEDBACK_STATUS_CODE statusCode;
