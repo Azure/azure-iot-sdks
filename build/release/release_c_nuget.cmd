@@ -40,7 +40,7 @@ if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 
 rem -----------------------------------------------------------------------------
-rem -- Publish csharp NuGet Packages
+rem -- Publish C NuGet Packages
 rem -----------------------------------------------------------------------------
 if not defined nuget_feed (
 	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\c\azure-c-shared-utility\build_all\packaging\windows

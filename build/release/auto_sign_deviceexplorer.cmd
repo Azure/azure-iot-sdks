@@ -74,3 +74,7 @@ if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 rem -- Clean directories
 del /F /Q %client-build-root%\build\tosign
 del /F /Q %client-build-root%\build\signed
+
+echo ------------------------------------------
+echo Signed Device Explorer MSI File: %client-build-root%\tools\DeviceExplorer\SetupDeviceExplorer\Release\
+echo ------------------------------------------
