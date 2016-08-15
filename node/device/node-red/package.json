@@ -1,5 +1,6 @@
 {
   "name": "node-red-contrib-azureiothubnode",
+  "version": "0.0.1",
   "description": "An Azure IoT Hub node for node-red",
   "author": "Microsoft Corp.",
   "license": "MIT",
