@@ -22,7 +22,7 @@ cp ./../../c/cmake/iotsdk_linux/javawrapper/libiothub_client_java.so ./samples/s
 cp ./../../c/cmake/iotsdk_linux/javawrapper/libiothub_client_java.so ./samples/send-event-sample/target
 cp ./../../c/cmake/iotsdk_linux/javawrapper/libiothub_client_java.so ./samples/send-serialized-event/target
 cp ./../../c/cmake/iotsdk_linux/javawrapper/libiothub_client_mock.so ./test
-cd $build_root 
+cd $build_root
 
 
 
