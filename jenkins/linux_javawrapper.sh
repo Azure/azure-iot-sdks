@@ -9,4 +9,3 @@ export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/javawrapper/build_all/linux
 ./build.sh
 [ $? -eq 0 ] || exit $?
-
