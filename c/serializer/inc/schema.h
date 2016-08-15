@@ -53,6 +53,7 @@ MOCKABLE_FUNCTION(, const char*, Schema_GetStructTypeName, SCHEMA_STRUCT_TYPE_HA
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddStructTypeProperty, SCHEMA_STRUCT_TYPE_HANDLE, structTypeHandle, const char*, propertyName, const char*, propertyType);
 
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName, const char*, propertyType);
+MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelReportedProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, reportedPropertyName, const char*, reportedPropertyType);
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelModel, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName, SCHEMA_MODEL_TYPE_HANDLE, modelType);
 MOCKABLE_FUNCTION(, SCHEMA_ACTION_HANDLE, Schema_CreateModelAction, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, actionName);
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelActionArgument, SCHEMA_ACTION_HANDLE, actionHandle, const char*, argumentName, const char*, argumentType);
@@ -65,12 +66,18 @@ MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_GetModelPropertyCount, SCHEMA_MODEL_TY
 MOCKABLE_FUNCTION(, SCHEMA_PROPERTY_HANDLE, Schema_GetModelPropertyByName, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName);
 MOCKABLE_FUNCTION(, SCHEMA_PROPERTY_HANDLE, Schema_GetModelPropertyByIndex, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t, index);
 
+MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_GetModelReportedPropertyCount, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t*, reportedPropertyCount);
+MOCKABLE_FUNCTION(, SCHEMA_PROPERTY_HANDLE, Schema_GetModelReportedPropertyByName, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, reportedPropertyName);
+MOCKABLE_FUNCTION(, SCHEMA_PROPERTY_HANDLE, Schema_GetModelReportedPropertyByIndex, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t, index);
+
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_GetModelModelCount, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t*, modelCount);
 MOCKABLE_FUNCTION(, SCHEMA_MODEL_TYPE_HANDLE, Schema_GetModelModelByName, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName);
 MOCKABLE_FUNCTION(, SCHEMA_MODEL_TYPE_HANDLE, Schema_GetModelModelyByIndex, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t, index);
 MOCKABLE_FUNCTION(, const char*, Schema_GetModelModelPropertyNameByIndex, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t, index);
 
 MOCKABLE_FUNCTION(, bool, Schema_ModelPropertyByPathExists, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyPath);
+
+MOCKABLE_FUNCTION(, bool, Schema_ModelReportedPropertyByPathExists, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, reportedPropertyPath);
 
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_GetModelActionCount, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t*, actionCount);
 MOCKABLE_FUNCTION(, SCHEMA_ACTION_HANDLE, Schema_GetModelActionByName, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, actionName);

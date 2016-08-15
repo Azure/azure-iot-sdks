@@ -10,10 +10,12 @@ Schema
  |--- <Schema Namespace>
  |--- <0..n Struct Type> 
 	| -- <Struct Name>
-	| -- <0..n Property2> (Primitive, Structs, User Defined)
+	| -- <0..n Property> (Primitive, Structs, User Defined)
+    | -- <0..n ReportedProperty> (Primitive, Structs, User Defined)
 	|--- <0..n Model Type> 
              |--- <Model Name>
-             |--- <0..n Property2> (Primitive, Structs, User Defined) 
+             |--- <0..n Property> (Primitive, Structs, User Defined) 
+             |--- <0..n ReportedProperty> (Primitive, Structs, User Defined)
              |--- <0..n Actions>
              |--- <0..n Models>
 ```
@@ -53,6 +55,7 @@ extern const char* Schema_GetStructTypeName(SCHEMA_STRUCT_TYPE_HANDLE structType
 extern SCHEMA_RESULT Schema_AddStructTypeProperty(SCHEMA_STRUCT_TYPE_HANDLE structTypeHandle, const char* propertyName, const char* propertyType);
  
 extern SCHEMA_RESULT Schema_AddModelProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName, const char* propertyType);
+extern SCHEMA_RESULT Schema_AddModelReportedProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* reportedPropertyName, const char* reportedPropertyType);
 extern SCHEMA_RESULT Schema_AddModelModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName, SCHEMA_MODEL_TYPE_HANDLE modelType);
 
 extern SCHEMA_ACTION_HANDLE Schema_CreateModelAction(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* actionName);
@@ -65,11 +68,18 @@ extern SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelByIndex(SCHEMA_HANDLE schemaHandl
 extern SCHEMA_RESULT Schema_GetModelPropertyCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t* propertyCount);
 extern SCHEMA_PROPERTY_HANDLE Schema_GetModelPropertyByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName);
 extern SCHEMA_PROPERTY_HANDLE Schema_GetModelPropertyByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index);
- 
+
+extern SCHEMA_RESULT Schema_GetModelReportedPropertyCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t* reportedPropertyCount);
+extern SCHEMA_REPORTED_PROPERTY_HANDLE Schema_GetModelReportedPropertyByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* reportedPropertyName);
+extern SCHEMA_REPORTED_PROPERTY_HANDLE Schema_GetModelReportedPropertyByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index);
+
 extern SCHEMA_RESULT Schema_GetModelModelCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t* modelCount);
 extern SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelModelByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName);
 extern SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelModelyByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index);
-extern const char* Schema_GetModelModelPropertyNameByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index)
+extern const char* Schema_GetModelModelPropertyNameByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index);
+
+extern bool Schema_ModelPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyPath); 
+extern bool Schema_ModelReportedPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* reportedPropertyPath);
 
 extern SCHEMA_RESULT Schema_GetModelActionCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t* actionCount);
 extern SCHEMA_ACTION_HANDLE Schema_GetModelActionByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* actionName);
@@ -194,6 +204,27 @@ SCHEMA_HANDLE Schema_Create(const char* schemaNamespace);
 
 **SRS_SCHEMA_99_015: [** The property name shall be unique per model, if the same property name is added twice to a model, SCHEMA_PROPERTY_ELEMENT_EXISTS shall be returned. **]**
 
+### Schema_AddModelReportedProperty
+```c
+SCHEMA_RESULT Schema_AddModelReportedProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* reportedPropertyName, const char* reportedPropertyType);
+```
+
+`Schema_AddModelReportedProperty` adds one reported property to `modelTypeHandle`.
+
+**SRS_SCHEMA_02_001: [** If `modelTypeHandle` is `NULL` then `Schema_AddModelReportedProperty` shall fail and return `SCHEMA_INVALID_ARG`. **]**
+
+**SRS_SCHEMA_02_002: [** If `reportedPropertyName` is `NULL` then `Schema_AddModelReportedProperty` shall fail and return `SCHEMA_INVALID_ARG`. **]**
+
+**SRS_SCHEMA_02_003: [** If `reportedPropertyType` is `NULL` then `Schema_AddModelReportedProperty` shall fail and return `SCHEMA_INVALID_ARG`. **]**
+
+**SRS_SCHEMA_02_004: [** If `reportedPropertyName` has already been added then `Schema_AddModelReportedProperty` shall fail and return `SCHEMA_PROPERTY_ELEMENT_EXISTS`. **]**
+
+**SRS_SCHEMA_02_005: [** `Schema_AddModelReportedProperty` shall record `reportedPropertyName` and `reportedPropertyType`. **]**
+
+**SRS_SCHEMA_02_006: [** If any error occurs then `Schema_AddModelReportedProperty` shall fail and return `SCHEMA_ERROR`. **]**
+
+**SRS_SCHEMA_02_007: [** Otherwise `Schema_AddModelReportedProperty` shall succeed and return `SCHEMA_OK`. **]**
+
 
 ### SCHEMA_ACTION_HANDLE Schema_CreateModelAction(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* actionName);
 
@@ -256,6 +287,48 @@ SCHEMA_HANDLE Schema_Create(const char* schemaNamespace);
 **SRS_SCHEMA_99_091: [** On success, Schema_GetModelPropertyCount shall return SCHEMA_OK. **]**
 
 **SRS_SCHEMA_99_092: [** Schema_GetModelPropertyCount shall return SCHEMA_INVALID_ARG if any of the arguments is NULL. **]**
+
+### Schema_GetModelReportedPropertyCount
+```c
+SCHEMA_RESULT Schema_GetModelReportedPropertyCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t* reportedPropertyCount);
+```
+
+`Schema_GetModelReportedPropertyCount` returns the number of reported properties for a given model.
+
+**SRS_SCHEMA_02_008: [** If parameter `modelTypeHandle` is `NULL` then `Schema_GetModelReportedPropertyCount` shall fail and return `SCHEMA_INVALID_ARG`. **]**
+
+**SRS_SCHEMA_02_009: [** If parameter `reportedPropertyCount` is NULL then `Schema_GetModelReportedPropertyCount` shall fail and return `SCHEMA_INVALID_ARG`. **]**
+
+**SRS_SCHEMA_02_010: [** `Schema_GetModelReportedPropertyCount` shall provide in `reportedPropertyCount` the number of reported properties and return `SCHEMA_OK`. **]**
+
+### Schema_GetModelReportedPropertyByName
+```c
+SCHEMA_REPORTED_PROPERTY_HANDLE Schema_GetModelReportedPropertyByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* reportedPropertyName);
+```
+
+`Schema_GetModelReportedPropertyByName` returns `SCHEMA_REPORTED_PROPERTY_HANDLE` for a reported property given by its name (`reportedPropertyName`).
+
+**SRS_SCHEMA_02_011: [** If argument `modelTypeHandle` is `NULL` then `Schema_GetModelReportedPropertyByName` shall fail and return `NULL`. **]**
+
+**SRS_SCHEMA_02_012: [** If argument `reportedPropertyName` is `NULL` then `Schema_GetModelReportedPropertyByName` shall fail and return `NULL`. **]**
+
+**SRS_SCHEMA_02_013: [** If reported property by the name `reportedPropertyName` exists then `Schema_GetModelReportedPropertyByName` shall succeed and return a non-`NULL` value. **]**
+
+**SRS_SCHEMA_02_014: [** Otherwise `Schema_GetModelReportedPropertyByName` shall fail and return `NULL`. **]**
+
+### Schema_GetModelReportedPropertyByIndex
+```c
+SCHEMA_REPORTED_PROPERTY_HANDLE Schema_GetModelReportedPropertyByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index);
+```
+
+`Schema_GetModelReportedPropertyByIndex` returns the `index`th reported property for a model.
+
+**SRS_SCHEMA_02_015: [** If argument `modelTypeHandle` is `NULL` then `Schema_GetModelReportedPropertyByIndex` shall fail and return `NULL`. **]**
+
+**SRS_SCHEMA_02_016: [** If a reported property with index equal to `index` exists then `Schema_GetModelReportedPropertyByIndex` shall succeed and return the non-`NULL` handle of that REPORTED_PROPERTY. **]**
+
+**SRS_SCHEMA_02_017: [** Otherwise `Schema_GetModelReportedPropertyByIndex` shall fail and return `NULL`. **]**
+
 
 ### SCHEMA_PROPERTY_HANDLE Schema_GetModelPropertyByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName);
 
@@ -464,15 +537,32 @@ extern bool Schema_ModelPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeH
 
 **SRS_SCHEMA_99_178: [** The argument propertyPath shall be used to find the leaf property. **]**
 
-**SRS_SCHEMA_99_179: [** The propertyPath shall be assumed to be in the format model1/model2/…/propertyName. **]**
+**SRS_SCHEMA_99_179: [** The propertyPath shall be assumed to be in the format model1/model2/.../propertyName. **]**
 
 **SRS_SCHEMA_99_180: [** If any of the arguments are NULL, Schema_ModelPropertyByPathExists shall return false. **]**
 
 **SRS_SCHEMA_99_181: [** If the property cannot be found Schema_ModelPropertyByPathExists shall return false. **]**
 
-**SRS_SCHEMA_99_182: [** A single slash (‘/’) at the beginning of the path shall be ignored and the path shall still be valid. **]**
+**SRS_SCHEMA_99_182: [** A single slash ('/') at the beginning of the path shall be ignored and the path shall still be valid. **]**
 Example: /model1/PropertyName. 
-**SRS_SCHEMA_99_183: [** If the path propertyPathpoints to a sub-model, Schema_ModelPropertyByPathExists shall return true. **]**
+**SRS_SCHEMA_99_183: [** If the path propertyPath points to a sub-model, Schema_ModelPropertyByPathExists shall return true. **]**
+
+### Schema_ModelReportedPropertyByPathExists
+```c
+bool Schema_ModelReportedPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* reportedPropertyPath);
+```
+
+**SRS_SCHEMA_02_018: [** If argument `modelTypeHandle` is `NULL` then `Schema_ModelReportedPropertyByPathExists` shall fail and return `false`. **]**
+
+**SRS_SCHEMA_02_019: [** If argument `reportedPropertyPath` is `NULL` then `Schema_ModelReportedPropertyByPathExists` shall fail and return `false`. **]**
+
+**SRS_SCHEMA_02_020: [** `reportedPropertyPath` shall be assumed to be in the format model1/model2/.../reportedPropertyName. **]**
+
+**SRS_SCHEMA_02_021: [** If the reported property cannot be found `Schema_ModelReportedPropertyByPathExists` shall fail and return `false`. **]**
+
+**SRS_SCHEMA_02_022: [** If the path reportedPropertyPath points to a sub-model, `Schema_ModelReportedPropertyByPathExists` shall succeed and `true`. **]**
+
+**SRS_SCHEMA_02_023: [** If `reportedPropertyPath` exists then `Schema_ModelReportedPropertyByPathExists` shall succeed and return `true' **]**
 
 ### Schema_ReleaseDeviceRef
 ```c
