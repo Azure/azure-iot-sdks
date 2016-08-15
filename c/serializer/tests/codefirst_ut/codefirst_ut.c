@@ -27,7 +27,6 @@ void my_gballoc_free(void * t)
 #include <cstddef>
 #include <cstdint>
 #include <cinttypes>
-#include <string> /*TODO: errr... remove*/
 #else
 #include <stddef.h>
 #include <stdint.h>

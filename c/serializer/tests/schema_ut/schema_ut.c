@@ -1,57 +1,92 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifdef __cplusplus
 #include <cstdlib>
+#else
+#include <stdlib.h>
+#endif
+
+void* my_gballoc_malloc(size_t t)
+{
+    return malloc(t);
+}
+
+void my_gballoc_free(void * t)
+{
+    free(t);
+}
+
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
 
+#include "umock_c.h"
+#include "umocktypes_charptr.h"
+#include "umocktypes_bool.h"
+#include "umocktypes_stdint.h"
+#include "umock_c_negative_tests.h"
+
+#define ENABLE_MOCKS
+#include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/vector.h"
+#undef ENABLE_MOCKS
+
 #include "testrunnerswitcher.h"
-#include "micromock.h"
-#include "micromockcharstararenullterminatedstrings.h"
 #include "schema.h"
 
+static TEST_MUTEX_HANDLE g_testByTest;
+static TEST_MUTEX_HANDLE g_dllByDll;
 
-static MICROMOCK_MUTEX_HANDLE g_testByTest;
 
-DEFINE_MICROMOCK_ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE(SCHEMA_RESULT, SCHEMA_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(SCHEMA_RESULT, SCHEMA_RESULT_VALUES);
 
 static const char SCHEMA_NAMESPACE[] = "TestNamespace";
 static const char MODEL_NAME[] = "TestModelName";
 
-static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
+DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+
+static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
+{
+    char temp_str[256];
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    ASSERT_FAIL(temp_str);
+}
 
 BEGIN_TEST_SUITE(Schema_ut)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
         TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-
-        g_testByTest = MicroMockCreateMutex();
+        g_testByTest = TEST_MUTEX_CREATE();
         ASSERT_IS_NOT_NULL(g_testByTest);
+
+        (void)umock_c_init(on_umock_c_error);
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
     {
-        MicroMockDestroyMutex(g_testByTest);
+        umock_c_deinit();
+
+        TEST_MUTEX_DESTROY(g_testByTest);
         TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 
     }
 
     TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
     {
-        if (!MicroMockAcquireMutex(g_testByTest))
+        if (TEST_MUTEX_ACQUIRE(g_testByTest))
         {
             ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
         }
+
+        umock_c_reset_all_calls();
     }
 
     TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     {
-        if (!MicroMockReleaseMutex(g_testByTest))
-        {
-            ASSERT_FAIL("failure in test framework at ReleaseMutex");
-        }
+        TEST_MUTEX_RELEASE(g_testByTest);
     }
 
     /* Schema_Create */
@@ -2991,7 +3026,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
 
         ///act
-        auto result = Schema_AddModelModel(model, "ManicMiner", minerModel);
+        SCHEMA_RESULT result = Schema_AddModelModel(model, "ManicMiner", minerModel);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_OK, result);
@@ -3009,7 +3044,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
 
         ///act
-        auto result = Schema_AddModelModel(NULL, "ManicMiner", minerModel);
+        SCHEMA_RESULT result = Schema_AddModelModel(NULL, "ManicMiner", minerModel);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
@@ -3028,7 +3063,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
 
         ///act
-        auto result = Schema_AddModelModel(model, NULL, minerModel);
+        SCHEMA_RESULT result = Schema_AddModelModel(model, NULL, minerModel);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
@@ -3046,7 +3081,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
 
         ///act
-        auto result = Schema_AddModelModel(model, "ManicMiner", NULL);
+        SCHEMA_RESULT result = Schema_AddModelModel(model, "ManicMiner", NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
@@ -3069,7 +3104,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         size_t nModels = 444;
 
         ///act
-        auto result = Schema_GetModelModelCount(model, &nModels);
+        SCHEMA_RESULT result = Schema_GetModelModelCount(model, &nModels);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_OK, result);
@@ -3091,7 +3126,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         (void)Schema_AddModelModel(model, "ManicMiner", minerModel);
 
         ///act
-        auto result = Schema_GetModelModelCount(model, &nModels);
+        SCHEMA_RESULT result = Schema_GetModelModelCount(model, &nModels);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_OK, result);
@@ -3114,7 +3149,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         (void)Schema_AddModelModel(model, "ManicMiner2", minerModel);
 
         ///act
-        auto result = Schema_GetModelModelCount(model, &nModels);
+        SCHEMA_RESULT result = Schema_GetModelModelCount(model, &nModels);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_OK, result);
@@ -3131,7 +3166,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         size_t nModels = 444;
 
         ///act
-        auto result = Schema_GetModelModelCount(NULL, &nModels);
+        SCHEMA_RESULT result = Schema_GetModelModelCount(NULL, &nModels);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
@@ -3149,7 +3184,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         (void)Schema_AddModelModel(model, "ManicMiner2", minerModel);
 
         ///act
-        auto result = Schema_GetModelModelCount(model, NULL);
+        SCHEMA_RESULT result = Schema_GetModelModelCount(model, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
@@ -3170,9 +3205,9 @@ BEGIN_TEST_SUITE(Schema_ut)
         (void)Schema_AddModelModel(model, "ManicMiner2", minerModel);
 
         ///act
-        auto result1 = Schema_GetModelModelByName(model, "ManicMiner");
-        auto result2 = Schema_GetModelModelByName(model, "ManicMiner2");
-        auto result_intruder = Schema_GetModelModelByName(model, "INTRUDER_ALERT");
+        SCHEMA_MODEL_TYPE_HANDLE result1 = Schema_GetModelModelByName(model, "ManicMiner");
+        SCHEMA_MODEL_TYPE_HANDLE result2 = Schema_GetModelModelByName(model, "ManicMiner2");
+        SCHEMA_MODEL_TYPE_HANDLE result_intruder = Schema_GetModelModelByName(model, "INTRUDER_ALERT");
 
         ///assert
         ASSERT_IS_NOT_NULL(result1);
@@ -3194,8 +3229,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         (void)Schema_AddModelModel(model, "ManicMiner2", minerModel);
 
         ///act
-        auto result1 = Schema_GetModelModelByName(NULL, "ManicMiner");
-        auto result2 = Schema_GetModelModelByName(model, NULL);
+        SCHEMA_MODEL_TYPE_HANDLE result1 = Schema_GetModelModelByName(NULL, "ManicMiner");
+        SCHEMA_MODEL_TYPE_HANDLE result2 = Schema_GetModelModelByName(model, NULL);
 
         ///assert
         ASSERT_IS_NULL(result1);
@@ -3217,10 +3252,10 @@ BEGIN_TEST_SUITE(Schema_ut)
         (void)Schema_AddModelModel(model, "ManicMiner2", minerModel);
 
         ///act
-        auto result1 = Schema_GetModelModelyByIndex(model, 0);
-        auto result2 = Schema_GetModelModelyByIndex(model, 1);
-        auto result_intruder1 = Schema_GetModelModelyByIndex(model, 2);
-        auto result_intruder2 = Schema_GetModelModelyByIndex(NULL, 0);
+        SCHEMA_MODEL_TYPE_HANDLE result1 = Schema_GetModelModelyByIndex(model, 0);
+        SCHEMA_MODEL_TYPE_HANDLE result2 = Schema_GetModelModelyByIndex(model, 1);
+        SCHEMA_MODEL_TYPE_HANDLE result_intruder1 = Schema_GetModelModelyByIndex(model, 2);
+        SCHEMA_MODEL_TYPE_HANDLE result_intruder2 = Schema_GetModelModelyByIndex(NULL, 0);
 
         ///assert
         ASSERT_IS_NOT_NULL(result1); 
@@ -3247,10 +3282,10 @@ BEGIN_TEST_SUITE(Schema_ut)
         (void)Schema_AddModelModel(model, "ManicMiner2", minerModel);
 
         ///act
-        auto result1 = Schema_GetModelModelPropertyNameByIndex(model, 0);
-        auto result2 = Schema_GetModelModelPropertyNameByIndex(model, 1);
-        auto result_intruder1 = Schema_GetModelModelPropertyNameByIndex(model, 2);
-        auto result_intruder2 = Schema_GetModelModelPropertyNameByIndex(NULL, 0);
+        const char* result1 = Schema_GetModelModelPropertyNameByIndex(model, 0);
+        const char* result2 = Schema_GetModelModelPropertyNameByIndex(model, 1);
+        const char* result_intruder1 = Schema_GetModelModelPropertyNameByIndex(model, 2);
+        const char* result_intruder2 = Schema_GetModelModelPropertyNameByIndex(NULL, 0);
 
         ///assert
         ASSERT_ARE_EQUAL(char_ptr, "ManicMiner", result1);
@@ -3275,8 +3310,8 @@ BEGIN_TEST_SUITE(Schema_ut)
 
 
         ///act
-        auto result1 = Schema_AddModelModel(mediumModel, "theSmallModel", smallModel);
-        auto result2 = Schema_AddModelModel(bigModel, "theMediumModem", mediumModel);
+        SCHEMA_RESULT result1 = Schema_AddModelModel(mediumModel, "theSmallModel", smallModel);
+        SCHEMA_RESULT result2 = Schema_AddModelModel(bigModel, "theMediumModem", mediumModel);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_OK, result1);

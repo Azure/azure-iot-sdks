@@ -16,8 +16,6 @@ set(${theseTestsName}_c_files
 
 ${SHARED_UTIL_SRC_FOLDER}/gballoc.c
 ${LOCK_C_FILE}
-${SHARED_UTIL_SRC_FOLDER}/vector.c
-${SHARED_UTIL_SRC_FOLDER}/crt_abstractions.c
 )
 
 set(${theseTestsName}_h_files

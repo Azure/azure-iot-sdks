@@ -94,7 +94,7 @@ void simple_sample_with_strings_run(void)
 
             if (SERIALIZE_REPORTED_PROPERTIES(&buffer, &bufferSize, thermostat->RRREPORTED) != IOT_AGENT_OK)
             {
-                (void)printf("Failed serializing sensor values\r\n");
+                (void)printf("Failed serializing reported state\r\n");
             }
             else
             {
