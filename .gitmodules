@@ -16,3 +16,6 @@
 	path = csharp/device/external_modules/dotnetty
 	url = https://github.com/Azure/DotNetty.git
 	branch = dev
+[submodule "c/iothub_service_client/parson"]
+	path = c/iothub_service_client/parson
+	url = https://github.com/kgabis/parson
