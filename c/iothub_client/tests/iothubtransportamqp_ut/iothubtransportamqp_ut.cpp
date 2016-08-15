@@ -1208,7 +1208,7 @@ static void setExpectedCallsForGetSecondsSinceEpoch(CIoTHubTransportAMQPMocks& m
 {
 	(void)mocks;
 	STRICT_EXPECTED_CALL(mocks, get_time(NULL)).SetReturn(current_time);
-	EXPECTED_CALL(mocks, get_difftime(NULL, NULL));
+	EXPECTED_CALL(mocks, get_difftime((time_t)0, (time_t)0));
 }
 
 static void setExpectedCallsForSASTokenExpiryCheck(CIoTHubTransportAMQPMocks& mocks, time_t current_time)
