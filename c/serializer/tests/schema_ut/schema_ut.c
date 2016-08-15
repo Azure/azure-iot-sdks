@@ -21,6 +21,39 @@ void my_gballoc_free(void * t)
 #include <crtdbg.h>
 #endif
 
+#define VECTOR_create real_VECTOR_create
+#define VECTOR_destroy real_VECTOR_destroy
+#define VECTOR_push_back real_VECTOR_push_back
+#define VECTOR_erase real_VECTOR_erase
+#define VECTOR_clear real_VECTOR_clear 
+#define VECTOR_element real_VECTOR_element
+#define VECTOR_front real_VECTOR_front
+#define VECTOR_back real_VECTOR_back
+#define VECTOR_find_if real_VECTOR_find_if
+#define VECTOR_size real_VECTOR_size
+#include "vector.c"
+#undef VECTOR_create
+#undef VECTOR_destroy
+#undef VECTOR_push_back
+#undef VECTOR_erase
+#undef VECTOR_clear 
+#undef VECTOR_element
+#undef VECTOR_front
+#undef VECTOR_back
+#undef VECTOR_find_if
+#undef VECTOR_size
+#undef VECTOR_H
+
+#define mallocAndStrcpy_s real_mallocAndStrcpy_s
+#define unsignedIntToString real_unsignedIntToString
+#define size_tToString real_size_tToString 
+#include "crt_abstractions.c"
+#undef mallocAndStrcpy_s 
+#undef unsignedIntToString 
+#undef size_tToString 
+
+#undef CRT_ABSTRACTIONS_H
+
 #include "umock_c.h"
 #include "umocktypes_charptr.h"
 #include "umocktypes_bool.h"
@@ -63,6 +96,28 @@ BEGIN_TEST_SUITE(Schema_ut)
         ASSERT_IS_NOT_NULL(g_testByTest);
 
         (void)umock_c_init(on_umock_c_error);
+        (void)umocktypes_bool_register_types();
+        (void)umocktypes_charptr_register_types();
+        (void)umocktypes_stdint_register_types();
+
+        REGISTER_UMOCK_ALIAS_TYPE(const VECTOR_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(VECTOR_HANDLE, void*);
+
+        REGISTER_GLOBAL_MOCK_HOOK(VECTOR_create, real_VECTOR_create);
+        REGISTER_GLOBAL_MOCK_HOOK(VECTOR_destroy, real_VECTOR_destroy);
+        REGISTER_GLOBAL_MOCK_HOOK(VECTOR_push_back, real_VECTOR_push_back);
+        REGISTER_GLOBAL_MOCK_HOOK(VECTOR_erase, real_VECTOR_erase);
+        REGISTER_GLOBAL_MOCK_HOOK(VECTOR_clear, real_VECTOR_clear);
+        REGISTER_GLOBAL_MOCK_HOOK(VECTOR_element, real_VECTOR_element);
+        REGISTER_GLOBAL_MOCK_HOOK(VECTOR_front, real_VECTOR_front);
+        REGISTER_GLOBAL_MOCK_HOOK(VECTOR_back, real_VECTOR_back);
+        REGISTER_GLOBAL_MOCK_HOOK(VECTOR_find_if, real_VECTOR_find_if);
+        REGISTER_GLOBAL_MOCK_HOOK(VECTOR_size, real_VECTOR_size);
+
+        REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, real_mallocAndStrcpy_s);
+        REGISTER_GLOBAL_MOCK_HOOK(unsignedIntToString, real_unsignedIntToString);
+        REGISTER_GLOBAL_MOCK_HOOK(size_tToString, real_size_tToString);
+
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
