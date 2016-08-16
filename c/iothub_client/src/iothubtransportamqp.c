@@ -678,6 +678,11 @@ static void on_message_send_complete(void* context, MESSAGE_SEND_RESULT send_res
 
 static void on_put_token_complete(void* context, CBS_OPERATION_RESULT operation_result, unsigned int status_code, const char* status_description)
 {
+#ifdef NO_LOGGING
+    UNUSED(status_code);
+    UNUSED(status_description);
+#endif
+
     AMQP_TRANSPORT_INSTANCE* transportState = (AMQP_TRANSPORT_INSTANCE*)context;
 
     if (operation_result == CBS_OPERATION_RESULT_OK)
@@ -2185,6 +2190,10 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_SetOption(TRANSPORT_LL_HANDLE ha
 
 static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE handle, const IOTHUB_DEVICE_CONFIG* device, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, PDLIST_ENTRY waitingToSend)
 {
+#ifdef NO_LOGGING
+    UNUSED(iotHubClientHandle);
+#endif
+
     IOTHUB_DEVICE_HANDLE result;
     // Codes_SRS_IOTHUBTRANSPORTAMQP_17_001: [IoTHubTransportAMQP_Register shall return NULL if device, or waitingToSend are NULL.] 
     // Codes_SRS_IOTHUBTRANSPORTAMQP_17_005: [IoTHubTransportAMQP_Register shall return NULL if the TRANSPORT_LL_HANDLE is NULL.]

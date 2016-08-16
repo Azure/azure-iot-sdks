@@ -43,6 +43,7 @@ option(compileOption_CXX "passes a string to the command line of the C++ compile
 option(build_python "builds the Python native iothub_client module" OFF)
 option(build_javawrapper "builds the native iothub_client library for java C wrapper" OFF)
 option(dont_use_uploadtoblob "set dont_use_uploadtoblob to ON if the functionality of upload to blob is to be excluded, OFF otherwise. It requires HTTP" OFF)
+option(no_logging "disable logging" OFF)
 
 #check for conflicting options
 if(NOT ${dont_use_uploadtoblob} AND NOT ${use_http})
@@ -51,6 +52,10 @@ endif()
 
 if(${dont_use_uploadtoblob})
     add_definitions(-DDONT_USE_UPLOADTOBLOB)
+endif()
+
+if(${no_logging})
+    add_definitions(-DNO_LOGGING)
 endif()
 
 #Use solution folders. 
@@ -70,7 +75,6 @@ if (LINUX)
         endif()
     endif()
 endif()
-
 
 #if any compiler has a command line switch called "OFF" then it will need special care
 if(NOT "${compileOption_C}" STREQUAL "OFF")
