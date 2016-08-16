@@ -30,8 +30,8 @@ function Mqtt(config, provider) {
   }
   else
   {
-    this._mqtt = new Base();
-  }
+  this._mqtt = new Base();
+}
 }
 
 util.inherits(Mqtt, EventEmitter);

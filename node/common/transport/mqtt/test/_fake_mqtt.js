@@ -5,6 +5,9 @@
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 
+var responseTopic = '$iothub/twin/res/#';
+var postTopic = '$iothub/twin/POST/desired';
+
 var FakeMqtt = function() {
   EventEmitter.call(this);
 
@@ -14,6 +17,7 @@ var FakeMqtt = function() {
 
   this.publish = function(topic, message, options, callback) {
     this.publishoptions = options;
+    this.topicString = topic;
     if (this._publishSucceeds) {
       callback(null, {puback: 'success'});
     } else {
@@ -21,9 +25,26 @@ var FakeMqtt = function() {
     }
   };
 
+  this.publishWasCalled = function() {
+    return this.publishoptions;
+  };
+
   this.connect = function() {
+    // This object does double-duty.  It is both a replacement for mqtt.js and also a replacement for the mqtt.js Client object. Gross!
     return this;
   };
+
+  this.subscribe = function(topicName, param, done) {
+    done();
+  };
+
+  this.unsubscribe = function(topicName, done) {
+    done();
+  };
+
+  this.fakeMessageFromService = function(topic, message) {
+    this.emit('message', topic, message);
+  }
 };
 
 util.inherits(FakeMqtt, EventEmitter);
