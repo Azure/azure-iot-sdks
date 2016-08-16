@@ -16,12 +16,13 @@ source ./javawrapper/build_all/linux/exportLibPath.sh
 
 cd javawrapper/device/
 mvn install
-cp ~/cmake/javawrapper/libiothub_client_java.so ./samples/send-event-sample/target
-cp ~/cmake/javawrapper/libiothub_client_java.so ./samples/send-receive-sample/target
-cp ~/cmake/javawrapper/libiothub_client_java.so ./samples/send-serialized-event/target
-cp ~/cmake/javawrapper/libiothub_client_java.so ./samples/direct_call_of_wrapped_functions/target
-cp ~/cmake/javawrapper/libiothub_client_mock.so ./test
-cd $build_root 
+cp ./../../c/cmake/iotsdk_linux/javawrapper/libiothub_client_java.so ./samples/direct_call_of_wrapped_functions/target
+cp ./../../c/cmake/iotsdk_linux/javawrapper/libiothub_client_java.so ./samples/send-receive-sample/target
+cp ./../../c/cmake/iotsdk_linux/javawrapper/libiothub_client_java.so ./samples/send-receive-sample-x509/target
+cp ./../../c/cmake/iotsdk_linux/javawrapper/libiothub_client_java.so ./samples/send-event-sample/target
+cp ./../../c/cmake/iotsdk_linux/javawrapper/libiothub_client_java.so ./samples/send-serialized-event/target
+cp ./../../c/cmake/iotsdk_linux/javawrapper/libiothub_client_mock.so ./test
+cd $build_root
 
 
 

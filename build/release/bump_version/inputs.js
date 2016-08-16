@@ -700,7 +700,7 @@ module.exports = [
             {
                 "taskType": "jsonReplaceTask",
                 "search": "version",
-                "replaceString": "node-red-contrib-azureiothubnode"
+                "replaceString": "node.node-red-contrib-azureiothubnode"
             },
             {
                 "taskType": "jsonReplaceTask",

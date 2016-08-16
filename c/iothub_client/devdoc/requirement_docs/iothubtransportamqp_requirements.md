@@ -270,7 +270,7 @@ The below requirements only apply when authentication type is x509:
 
 **SRS_IOTHUBTRANSPORTAMQP_09_082: [**IoTHubTransportAMQP_DoWork shall refresh the SAS token if the current token has been used for more than 'sas_token_refresh_time' milliseconds**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_09_083: [**Each new SAS token created by the transport shall be valid for up to 'sas_token_lifetime' milliseconds from the time of creation**]**
+**SRS_IOTHUBTRANSPORTAMQP_09_083: [**SAS tokens expiration time shall be calculated using the number of seconds since Epoch UTC (Jan 1st 1970 00h00m00s000 GMT) to now (GMT), plus the 'sas_token_lifetime'.**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_09_145: [**Each new SAS token created shall be deleted from memory immediately after sending it to CBS**]**
 
