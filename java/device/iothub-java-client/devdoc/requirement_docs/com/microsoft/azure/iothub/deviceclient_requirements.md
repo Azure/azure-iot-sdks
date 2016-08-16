@@ -43,6 +43,8 @@ public DeviceClient(String connString, IotHubClientProtocol protocol) throws URI
 
 **SRS_DEVICECLIENT_11_045: [**The constructor shall save the device key as the value of 'SharedAccessKey' in the connection string.**]**
 
+**SRS_DEVICECLIENT_25_052: [**The constructor shall save the shared access token as the value of 'sharedAccessToken' in the connection string.**]**
+
 **SRS_DEVICECLIENT_11_046: [**The constructor shall initialize the IoT Hub transport that uses the protocol specified.**]**
 
 **SRS_DEVICECLIENT_11_047: [**If the connection string is null, the function shall throw an IllegalArgumentException.**]**
@@ -52,6 +54,10 @@ public DeviceClient(String connString, IotHubClientProtocol protocol) throws URI
 **SRS_DEVICECLIENT_11_049: [**If no value for 'DeviceId' is found in the connection string, the function shall throw an IllegalArgumentException.**]**
 
 **SRS_DEVICECLIENT_11_050: [**If no argument for 'SharedAccessKey' is found in the connection string, the function shall throw an IllegalArgumentException.**]**
+
+**SRS_DEVICECLIENT_25_053: [**If no argument for 'sharedAccessToken' and 'SharedAccessKey' is found in the connection string, the function shall throw an IllegalArgumentException.**]**
+
+**SRS_DEVICECLIENT_25_054: [**The constructor shall only accept either 'sharedAccessToken' or 'SharedAccessKey' from the connection string and throw an IllegalArgumentException if both are found**]**
 
 **SRS_DEVICECLIENT_11_051: [If protocol is null, the function shall throw an IllegalArgumentException.**]**
 
@@ -140,5 +146,8 @@ Options handled by the client:
 
 **SRS_DEVICECLIENT_25_008: [**"SetSASTokenExpiryTime" is available for HTTPS/AMQP/MQTT.**]**
 
-**SRS_DEVICECLIENT_25_010: [**"SetSASTokenExpiryTime" shall restart the transport if transport is already open after updating expiry time**.]**
+**SRS_DEVICECLIENT_25_010: [**"SetSASTokenExpiryTime" shall restart the transport
+                                    1. If the device currently uses device key and
+                                    2. If transport is already open
+                               after updating expiry time**.]**
 

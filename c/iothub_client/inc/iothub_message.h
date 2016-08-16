@@ -45,7 +45,7 @@ IOTHUBMESSAGE_UNKNOWN \
   */
 DEFINE_ENUM(IOTHUBMESSAGE_CONTENT_TYPE, IOTHUBMESSAGE_CONTENT_TYPE_VALUES);
 
-typedef void* IOTHUB_MESSAGE_HANDLE;
+typedef struct IOTHUB_MESSAGE_HANDLE_DATA_TAG* IOTHUB_MESSAGE_HANDLE;
 
 /**
  * @brief   Creates a new IoT hub message from a byte array. The type of the

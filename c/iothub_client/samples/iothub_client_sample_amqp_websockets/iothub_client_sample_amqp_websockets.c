@@ -162,10 +162,10 @@ void iothub_client_sample_amqp_websockets_run(void)
                 }
                 else
                 {
-                    messages[i].messageTrackingId = i;
+                    messages[i].messageTrackingId = (int)i;
                     
                     MAP_HANDLE propMap = IoTHubMessage_Properties(messages[i].messageHandle);
-                    sprintf_s(propText, sizeof(propText), "PropMsg_%d", i);
+                    (void)sprintf_s(propText, sizeof(propText), "PropMsg_%d", (int)i);
                     if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
                     {
                         (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");

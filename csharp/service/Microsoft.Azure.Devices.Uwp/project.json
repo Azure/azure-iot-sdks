@@ -2,8 +2,8 @@
   "dependencies": {
     "Microsoft.Azure.Amqp": "1.1.5",
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.0.0",
-    "Newtonsoft.Json": "8.0.3",
-    "PCLCrypto": "1.0.86",
+    "Newtonsoft.Json": "6.0.8",
+    "PCLCrypto": "1.0.86"
   },
   "frameworks": {
     "uap10.0": {}

@@ -24,11 +24,13 @@
         "device-amqp-ws": "1.0.11",
         "device-http": "1.0.12",
         "device-mqtt": "1.0.11",
-        "service": "1.0.13"
+        "service": "1.0.13",
+        "node-red-contrib-azureiothubnode": "0.0.1"
     },
     "c_shared_utility_nuget": "1.0.14",
     "uamqp_c_nuget": "1.0.15",
     "umqtt_c_nuget": "1.0.14",
+    "iothub-diagnostics": "1.0.0",
     "iothub-explorer": "1.0.10",
     "device-explorer": "1.0.9",
     "github-release": "v1.0.7"

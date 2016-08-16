@@ -5,6 +5,7 @@
 
 min_output=
 integration_tests=
+e2e_tests=
 npm_command=
 
 node_root=$(cd "$(dirname "$0")/.." && pwd)
@@ -17,6 +18,7 @@ usage ()
     echo "options"
     echo " --min                 minimize display output"
     echo " --integration-tests   run integration tests too (unit tests always run)"
+    echo " --e2e-tests           run end-to-end tests too (unit tests always run)"
     exit 1
 }
 
@@ -24,12 +26,14 @@ process_args ()
 {
     min_output=0
     integration_tests=0
+    e2e_tests=0
 
     for arg in $*
     do
         case "$arg" in
             "--min" ) min_output=1;;
             "--integration-tests" ) integration_tests=1;;
+            "--e2e-tests" ) e2e_tests=1;;
             * ) usage;;
         esac
     done
@@ -115,8 +119,11 @@ lint_and_test $node_root/device/transport/mqtt
 lint_and_test $node_root/service
 [ $? -eq 0 ] || cleanup_and_exit $?
 
-lint_and_test $node_root/e2etests
-[ $? -eq 0 ] || cleanup_and_exit $?
+if [ $e2e_tests -eq 1 ]
+then
+    lint_and_test $node_root/e2etests
+    [ $? -eq 0 ] || cleanup_and_exit $?
+fi
 
 cd $node_root/../tools/iothub-explorer
 npm -s test

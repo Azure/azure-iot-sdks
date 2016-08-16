@@ -44,7 +44,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     int* counter = (int*)userContextCallback;
     const char* buffer;
     size_t size;
-	MAP_HANDLE mapProperties;
+    MAP_HANDLE mapProperties;
 
     if (IoTHubMessage_GetByteArray(message, (const unsigned char**)&buffer, &size) != IOTHUB_MESSAGE_OK)
     {
@@ -66,7 +66,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
         {
             if (propertyCount > 0)
             {
-				size_t index;
+                size_t index;
 
                 printf("Message Properties:\r\n");
                 for (index = 0; index < propertyCount; index++)
@@ -98,59 +98,59 @@ static char propText[1024];
 
 void iothub_client_sample_http_setoptions(IOTHUB_CLIENT_HANDLE iothubClient, unsigned int timeout, unsigned int minimumPollingTime)
 {
-	if (IoTHubClient_SetOption(iothubClient, "timeout", &timeout) != IOTHUB_CLIENT_OK)
-	{
-		printf("failure to set option \"timeout\" on [%p]\r\n", iothubClient);
-	}
+    if (IoTHubClient_SetOption(iothubClient, "timeout", &timeout) != IOTHUB_CLIENT_OK)
+    {
+        printf("failure to set option \"timeout\" on [%p]\r\n", iothubClient);
+    }
 
-	if (IoTHubClient_SetOption(iothubClient, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
-	{
-		printf("failure to set option \"MinimumPollingTime\"on [%p]\r\n", iothubClient);
-	}
+    if (IoTHubClient_SetOption(iothubClient, "MinimumPollingTime", &minimumPollingTime) != IOTHUB_CLIENT_OK)
+    {
+        printf("failure to set option \"MinimumPollingTime\"on [%p]\r\n", iothubClient);
+    }
 }
 
 void iothub_client_sample_http_send_one_msg(IOTHUB_CLIENT_HANDLE iothubClient, EVENT_INSTANCE *message, int messageNumber)
 {
-	if ((message->messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
-	{
-		(void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
-	}
-	else
-	{
-		MAP_HANDLE propMap;
+    if ((message->messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText))) == NULL)
+    {
+        (void)printf("ERROR: iotHubMessageHandle is NULL!\r\n");
+    }
+    else
+    {
+        MAP_HANDLE propMap;
 
-		message->messageTrackingId = messageNumber;
+        message->messageTrackingId = messageNumber;
 
-		propMap = IoTHubMessage_Properties(message->messageHandle);
-		sprintf_s(propText, sizeof(propText), "PropMsg_%d", messageNumber);
-		if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
-		{
-			(void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
-		}
+        propMap = IoTHubMessage_Properties(message->messageHandle);
+        sprintf_s(propText, sizeof(propText), "PropMsg_%d", messageNumber);
+        if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
+        {
+            (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
+        }
 
-		if (IoTHubClient_SendEventAsync(iothubClient, message->messageHandle, SendConfirmationCallback, message) != IOTHUB_CLIENT_OK)
-		{
-			(void)printf("ERROR: IoTHubClient_LL_SendEventAsync to device [%p]..........FAILED!\r\n", iothubClient);
-		}
-		else
-		{
-			(void)printf("IoTHubClient_LL_SendEventAsync accepted message [%d] for transmission to IoT Hub, device [%p].\r\n", messageNumber, iothubClient);
-		}
-	}
+        if (IoTHubClient_SendEventAsync(iothubClient, message->messageHandle, SendConfirmationCallback, message) != IOTHUB_CLIENT_OK)
+        {
+            (void)printf("ERROR: IoTHubClient_LL_SendEventAsync to device [%p]..........FAILED!\r\n", iothubClient);
+        }
+        else
+        {
+            (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%d] for transmission to IoT Hub, device [%p].\r\n", messageNumber, iothubClient);
+        }
+    }
 }
 
 void iothub_client_sample_http_run(void)
 {
-	TRANSPORT_HANDLE httpTransport;
-	IOTHUB_CLIENT_HANDLE iothubClient1;
-	IOTHUB_CLIENT_HANDLE iothubClient2;
+    TRANSPORT_HANDLE httpTransport;
+    IOTHUB_CLIENT_HANDLE iothubClient1;
+    IOTHUB_CLIENT_HANDLE iothubClient2;
 
 
-	EVENT_INSTANCE messages1[MESSAGE_COUNT];
-	EVENT_INSTANCE messages2[MESSAGE_COUNT];
+    EVENT_INSTANCE messages1[MESSAGE_COUNT];
+    EVENT_INSTANCE messages2[MESSAGE_COUNT];
     double avgWindSpeed = 10.0;
-	int receiveContext1 = 0;
-	int receiveContext2 = 0;
+    int receiveContext1 = 0;
+    int receiveContext2 = 0;
 
     srand((unsigned int)time(NULL));
 
@@ -160,89 +160,89 @@ void iothub_client_sample_http_run(void)
     {
         printf("Failed to initialize the platform.\r\n");
     }
-	else
-	{
-		(void)printf("Starting the IoTHub client sample HTTP with Shared connection...\r\n");
+    else
+    {
+        (void)printf("Starting the IoTHub client sample HTTP with Shared connection...\r\n");
 
 
-		if ((httpTransport = IoTHubTransport_Create(HTTP_Protocol, hubName, hubSuffix)) == NULL)
-		{
-			(void)printf("ERROR: httpTransport is NULL\r\n");
-		}
-		else
-		{
-			IOTHUB_CLIENT_CONFIG config1;
-			config1.deviceId = deviceId1;
-			config1.deviceKey = deviceKey1;
-			config1.protocol = HTTP_Protocol;
-			config1.iotHubName = NULL;
-			config1.iotHubSuffix = NULL;
+        if ((httpTransport = IoTHubTransport_Create(HTTP_Protocol, hubName, hubSuffix)) == NULL)
+        {
+            (void)printf("ERROR: httpTransport is NULL\r\n");
+        }
+        else
+        {
+            IOTHUB_CLIENT_CONFIG config1;
+            config1.deviceId = deviceId1;
+            config1.deviceKey = deviceKey1;
+            config1.protocol = HTTP_Protocol;
+            config1.iotHubName = NULL;
+            config1.iotHubSuffix = NULL;
             config1.deviceSasToken = NULL;
-			if ((iothubClient1 = IoTHubClient_CreateWithTransport(httpTransport, &config1)) == NULL)
-			{
-				(void)printf("ERROR: 1st device handle is NULL\r\n");
-			}
-			else
-			{
-				IOTHUB_CLIENT_CONFIG config2;
-				config2.deviceId = deviceId2;
-				config2.deviceKey = deviceKey2;
-				config2.protocol = HTTP_Protocol;
-				config2.iotHubName = NULL;
-				config2.iotHubSuffix = NULL;
+            if ((iothubClient1 = IoTHubClient_CreateWithTransport(httpTransport, &config1)) == NULL)
+            {
+                (void)printf("ERROR: 1st device handle is NULL\r\n");
+            }
+            else
+            {
+                IOTHUB_CLIENT_CONFIG config2;
+                config2.deviceId = deviceId2;
+                config2.deviceKey = deviceKey2;
+                config2.protocol = HTTP_Protocol;
+                config2.iotHubName = NULL;
+                config2.iotHubSuffix = NULL;
                 config2.deviceSasToken = NULL;
-				if ((iothubClient2 = IoTHubClient_CreateWithTransport(httpTransport, &config2)) == NULL)
-				{
-					(void)printf("ERROR: 2nd device handle is NULL\r\n");
-				}
-				else
-				{
-					unsigned int timeout = 241000;
-					// Because it can poll "after 9 seconds" polls will happen effectively // at ~10 seconds.
-					// Note that for scalabilty, the default value of minimumPollingTime
-					// is 25 minutes. For more information, see:
-					// https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
-					unsigned int minimumPollingTime = 9;
-					iothub_client_sample_http_setoptions(iothubClient1, timeout, minimumPollingTime);
-					iothub_client_sample_http_setoptions(iothubClient2, timeout, minimumPollingTime);
+                if ((iothubClient2 = IoTHubClient_CreateWithTransport(httpTransport, &config2)) == NULL)
+                {
+                    (void)printf("ERROR: 2nd device handle is NULL\r\n");
+                }
+                else
+                {
+                    unsigned int timeout = 241000;
+                    // Because it can poll "after 9 seconds" polls will happen effectively // at ~10 seconds.
+                    // Note that for scalabilty, the default value of minimumPollingTime
+                    // is 25 minutes. For more information, see:
+                    // https://azure.microsoft.com/documentation/articles/iot-hub-devguide/#messaging
+                    unsigned int minimumPollingTime = 9;
+                    iothub_client_sample_http_setoptions(iothubClient1, timeout, minimumPollingTime);
+                    iothub_client_sample_http_setoptions(iothubClient2, timeout, minimumPollingTime);
 
-					// Setting message callbacks so we can receive commands
-					if (IoTHubClient_SetMessageCallback(iothubClient1, ReceiveMessageCallback, &receiveContext1) != IOTHUB_CLIENT_OK)
-					{
-						(void)printf("ERROR: IoTHubClient_LL_SetMessageCallback 1st device..........FAILED!\r\n");
-					}
-					else
-					{
-						if (IoTHubClient_SetMessageCallback(iothubClient2, ReceiveMessageCallback, &receiveContext2) != IOTHUB_CLIENT_OK)
-						{
-							(void)printf("ERROR: IoTHubClient_LL_SetMessageCallback 2nd device..........FAILED!\r\n");
-						}
-						else
-						{
-							// Now that we are ready to receive commands, let's send some messages
-							int i;
+                    // Setting message callbacks so we can receive commands
+                    if (IoTHubClient_SetMessageCallback(iothubClient1, ReceiveMessageCallback, &receiveContext1) != IOTHUB_CLIENT_OK)
+                    {
+                        (void)printf("ERROR: IoTHubClient_LL_SetMessageCallback 1st device..........FAILED!\r\n");
+                    }
+                    else
+                    {
+                        if (IoTHubClient_SetMessageCallback(iothubClient2, ReceiveMessageCallback, &receiveContext2) != IOTHUB_CLIENT_OK)
+                        {
+                            (void)printf("ERROR: IoTHubClient_LL_SetMessageCallback 2nd device..........FAILED!\r\n");
+                        }
+                        else
+                        {
+                            // Now that we are ready to receive commands, let's send some messages
+                            int i;
 
-							(void)printf("IoTHubClient_LL_SetMessageCallback...successful.\r\n");
+                            (void)printf("IoTHubClient_LL_SetMessageCallback...successful.\r\n");
 
-							for (i = 0; i < MESSAGE_COUNT; i++)
-							{
-								sprintf_s(msgText, sizeof(msgText), "{\"deviceId\": \"%s\",\"windSpeed\": %.2f}", deviceId1, avgWindSpeed + (rand() % 4 + 2));
-								iothub_client_sample_http_send_one_msg(iothubClient1, &messages1[i], i);
+                            for (i = 0; i < MESSAGE_COUNT; i++)
+                            {
+                                sprintf_s(msgText, sizeof(msgText), "{\"deviceId\": \"%s\",\"windSpeed\": %.2f}", deviceId1, avgWindSpeed + (rand() % 4 + 2));
+                                iothub_client_sample_http_send_one_msg(iothubClient1, &messages1[i], i);
 
-								sprintf_s(msgText, sizeof(msgText), "{\"deviceId\": \"%s\",\"windSpeed\": %.2f}", deviceId2, avgWindSpeed + (rand() % 4 + 2));
-								iothub_client_sample_http_send_one_msg(iothubClient2, &messages2[i], i);
-							}
-							// Wait for any incoming messages
-							(void)printf("Press any key to exit the application. \r\n");
-							(void)getchar();
-						}
-					}
-					IoTHubClient_Destroy(iothubClient2);
-				}
-				IoTHubClient_Destroy(iothubClient1);
-			}
-			IoTHubTransport_Destroy(httpTransport);
-		}
-		platform_deinit();
-	}
+                                sprintf_s(msgText, sizeof(msgText), "{\"deviceId\": \"%s\",\"windSpeed\": %.2f}", deviceId2, avgWindSpeed + (rand() % 4 + 2));
+                                iothub_client_sample_http_send_one_msg(iothubClient2, &messages2[i], i);
+                            }
+                            // Wait for any incoming messages
+                            (void)printf("Press any key to exit the application. \r\n");
+                            (void)getchar();
+                        }
+                    }
+                    IoTHubClient_Destroy(iothubClient2);
+                }
+                IoTHubClient_Destroy(iothubClient1);
+            }
+            IoTHubTransport_Destroy(httpTransport);
+        }
+        platform_deinit();
+    }
 }

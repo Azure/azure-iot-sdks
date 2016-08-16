@@ -19,7 +19,7 @@ var device_teardown = require('./test/device_teardown.js');
 
 var hubConnectionString = process.env.IOTHUB_CONNECTION_STRING;
 var storageConnectionString = process.env.STORAGE_CONNECTION_STRING;
-var generalProtocols = [deviceHttp.Http, deviceMqtt.Mqtt, deviceAmqp.Amqp, deviceAmqpWs.AmqpWs];
+var generalProtocols = [deviceHttp.Http, deviceAmqp.Amqp, deviceAmqpWs.AmqpWs, deviceMqtt.Mqtt];
 var acknowledgementProtocols = [deviceHttp.Http, deviceAmqp.Amqp, deviceAmqpWs.AmqpWs];
 
 device_provision(hubConnectionString, function (err, provisionedDevices) {
@@ -27,16 +27,16 @@ device_provision(hubConnectionString, function (err, provisionedDevices) {
     console.log('Unable to create the devices needed.');
   } else {
     provisionedDevices.forEach(function(deviceToTest) {
+      acknowledgementProtocols.forEach(function (protocolToTest) {
+        device_acknowledge_tests(hubConnectionString, protocolToTest, deviceToTest);
+        });
       generalProtocols.forEach(function(protocolToTest) {
         file_upload_tests(hubConnectionString, protocolToTest, deviceToTest);
         device_service_tests(hubConnectionString, protocolToTest, deviceToTest);
       });
-      acknowledgementProtocols.forEach(function (protocolToTest) {
-        device_acknowledge_tests(hubConnectionString, protocolToTest, deviceToTest);
-      });
     });
-   service_client(hubConnectionString);
-   registry_tests(hubConnectionString, storageConnectionString);
+    service_client(hubConnectionString);
+    registry_tests(hubConnectionString, storageConnectionString);
   }
   device_teardown(hubConnectionString, provisionedDevices);
   if (!provisionedDevices || provisionedDevices.length !== 3) {

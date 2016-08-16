@@ -71,7 +71,8 @@ public final class DeviceClient implements Closeable
     public static final String DEVICE_ID_ATTRIBUTE = "DeviceId=";
     /** The shared access key attribute name in a connection string. */
     public static final String SHARED_ACCESS_KEY_ATTRIBUTE = "SharedAccessKey=";
-
+    /** The shared access signature attribute name in a connection string. */
+    public static final String SHARED_ACCESS_TOKEN_ATTRIBUTE = "SharedAccessSignature=";
 
     /**
      * The charset used for URL-encoding the device ID in the connection
@@ -117,6 +118,7 @@ public final class DeviceClient implements Closeable
         String hostname = null;
         String deviceId = null;
         String sharedAccessKey = null;
+        String sharedAccessToken = null;
         for (String attr : connStringAttrs)
         {
             // Codes_SRS_DEVICECLIENT_11_043: [The constructor shall save the IoT Hub hostname as the value of 'HostName' in the connection string.]
@@ -143,9 +145,14 @@ public final class DeviceClient implements Closeable
             {
                 sharedAccessKey = attr.substring(SHARED_ACCESS_KEY_ATTRIBUTE.length());
             }
+            // Codes_SRS_DEVICECLIENT_25_052: [The constructor shall save the shared access token as the value of 'sharedAccessToken' in the connection string.]
+            else if (attr.startsWith(SHARED_ACCESS_TOKEN_ATTRIBUTE))
+            {
+                sharedAccessToken = attr.substring(SHARED_ACCESS_TOKEN_ATTRIBUTE.length());
+            }
         }
 
-        initIotHubClient(hostname, deviceId, sharedAccessKey, protocol);
+        initIotHubClient(hostname, deviceId, sharedAccessKey, sharedAccessToken, protocol);
     }
 
     /**
@@ -292,7 +299,7 @@ public final class DeviceClient implements Closeable
      * RFC 3986.
      */
     protected void initIotHubClient(String iotHubHostname, String deviceId,
-            String deviceKey, IotHubClientProtocol protocol)
+            String deviceKey, String sharedAccessToken, IotHubClientProtocol protocol)
             throws URISyntaxException
     {
         // Codes_SRS_DEVICECLIENT_11_048: [If no value for 'HostName' is found in the connection string, the function shall throw an IllegalArgumentException.]
@@ -308,12 +315,20 @@ public final class DeviceClient implements Closeable
         {
             throw new IllegalArgumentException("Device ID cannot be null.");
         }
-        // Codes_SRS_DEVICECLIENT_11_050: [If no argument for 'SharedAccessKey' is found in the connection string, the function shall throw an IllegalArgumentException.]
+        // Codes_SRS_DEVICECLIENT_25_053: [**If no argument for 'sharedAccessToken' and 'SharedAccessKey' is found in the connection string, the function shall throw an IllegalArgumentException.**]**
         // Codes_SRS_DEVICECLIENT_11_027: [If deviceKey is null, the constructor shall throw an IllegalArgumentException.]
-        if (deviceKey == null)
+        if (deviceKey == null && sharedAccessToken == null)
         {
-            throw new IllegalArgumentException("Device key cannot be null.");
+            throw new IllegalArgumentException("Device key and Shared Access Signature both cannot be null.");
         }
+
+        // Codes_SRS_DEVICECLIENT_25_054: [**The constructor shall only accept either 'sharedAccessToken' or 'SharedAccessKey' from the connection string and throw an IllegalArgumentException if both are found**]**
+        if (sharedAccessToken != null && deviceKey != null)
+        {
+            throw new IllegalArgumentException("Either of device key or Shared Access Signature should be provided.");
+
+        }
+
         // Codes_SRS_DEVICECLIENT_11_051: [If protocol is null, the function shall throw an IllegalArgumentException.]
         // Codes_SRS_DEVICECLIENT_11_034: [If protocol is null, the constructor shall throw an IllegalArgumentException.]
         if (protocol == null)
@@ -322,7 +337,7 @@ public final class DeviceClient implements Closeable
         }
 
         // Codes_SRS_DEVICECLIENT_11_052: [The constructor shall save the IoT Hub hostname, device ID, and device key as configuration parameters.]
-        this.config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey);
+        this.config = new DeviceClientConfig(iotHubHostname, deviceId, deviceKey, sharedAccessToken);
         // Codes_SRS_DEVICECLIENT_11_046: [The constructor shall initialize the IoT Hub transport that uses the protocol specified.]
         // Codes_SRS_DEVICECLIENT_11_004: [The constructor shall initialize the IoT Hub transport that uses the protocol specified.]
         switch (protocol)
@@ -408,10 +423,16 @@ public final class DeviceClient implements Closeable
             boolean restart = false;
             if (this.state != IotHubClientState.CLOSED) {
                 try {
-                    // Codes_SRS_DEVICECLIENT_25_010: [**"SetSASTokenExpiryTime" shall restart the transport if transport
-                    // is already open after updating expiry time
-                    restart = true;
-                    this.close();
+                    /* Codes_SRS_DEVICECLIENT_25_010: [**"SetSASTokenExpiryTime" shall restart the transport
+                     *                                  1. If the device currently uses device key and
+                     *                                  2. If transport is already open
+                     *                                 after updating expiry time
+                    */
+                    if (this.config.getDeviceKey() != null)
+                    {
+                        restart = true;
+                        this.close();
+                    }
                 } catch (IOException e) {
 
                     throw new IOError(e);

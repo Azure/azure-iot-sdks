@@ -7,7 +7,6 @@ import com.microsoft.azure.iothub.DeviceClientConfig;
 import com.microsoft.azure.iothub.IotHubStatusCode;
 import com.microsoft.azure.iothub.Message;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
-import com.microsoft.azure.iothub.net.IotHubUri;
 import com.microsoft.azure.iothub.transport.State;
 import com.microsoft.azure.iothub.transport.TransportUtils;
 import org.eclipse.paho.client.mqttv3.*;
@@ -78,7 +77,9 @@ public class MqttIotHubConnection implements MqttCallback
             }
             if (config.getDeviceKey() == null || config.getDeviceKey().length() == 0)
             {
-                throw new IllegalArgumentException("deviceKey cannot be null or empty.");
+                if(config.getSharedAccessToken() == null || config.getSharedAccessToken().length() == 0)
+
+                    throw new IllegalArgumentException("Both deviceKey and shared access signature cannot be null or empty.");
             }
 
             // Codes_SRS_MQTTIOTHUBCONNECTION_15_001: [The constructor shall save the configuration.]
@@ -113,9 +114,8 @@ public class MqttIotHubConnection implements MqttCallback
             // with an IoT Hub using the provided host name, user name, device ID, and sas token.]
             try
             {
-                IotHubSasToken sasToken = new IotHubSasToken(IotHubUri.getResourceUri(this.config.getIotHubHostname(), this.config.getDeviceId()),
-                        this.config.getDeviceKey(),
-                        System.currentTimeMillis() / 1000l + this.config.getTokenValidSecs() + 1l);
+                IotHubSasToken sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000l +
+                        this.config.getTokenValidSecs() + 1l);
 
 
                 this.asyncClient = new MqttAsyncClient(sslPrefix + this.config.getIotHubHostname() + sslPortSuffix,

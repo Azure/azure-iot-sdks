@@ -8,7 +8,6 @@ package com.microsoft.azure.iothub.transport.amqps;
 import com.microsoft.azure.iothub.DeviceClientConfig;
 import com.microsoft.azure.iothub.IotHubMessageResult;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
-import com.microsoft.azure.iothub.net.IotHubUri;
 import com.microsoft.azure.iothub.transport.State;
 import com.microsoft.azure.iothub.transport.TransportUtils;
 import org.apache.qpid.proton.Proton;
@@ -111,7 +110,9 @@ public final class AmqpsIotHubConnection extends BaseHandler
         }
         if(config.getDeviceKey() == null || config.getDeviceKey().length() == 0)
         {
-            throw new IllegalArgumentException("deviceKey cannot be null or empty.");
+            if(config.getSharedAccessToken() == null || config.getSharedAccessToken().length() == 0)
+
+                 throw new IllegalArgumentException("Both deviceKey and shared access signature cannot be null or empty.");
         }
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_002: [The constructor shall save the configuration into private member variables.]
@@ -165,10 +166,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
         {
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_008: [The function shall create a new sasToken valid for the duration
             // specified in config to be used for the communication with IoTHub.]
-            this.sasToken = new IotHubSasToken(
-                    IotHubUri.getResourceUri(this.config.getIotHubHostname(), this.config.getDeviceId()),
-                    this.config.getDeviceKey(),
-                    System.currentTimeMillis() / 1000L + this.config.getTokenValidSecs() + 1L).toString();
+            this.sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000L +
+                    this.config.getTokenValidSecs() + 1L).toString();
 
 			try
             {

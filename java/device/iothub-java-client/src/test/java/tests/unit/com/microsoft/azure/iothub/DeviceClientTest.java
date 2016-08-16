@@ -50,7 +50,7 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                new DeviceClientConfig(expectedHostname, anyString, anyString);
+                new DeviceClientConfig(expectedHostname, anyString, anyString, null);
             }
         };
     }
@@ -71,7 +71,7 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                new DeviceClientConfig(anyString, expectedDeviceId, anyString);
+                new DeviceClientConfig(anyString, expectedDeviceId, anyString, null);
             }
         };
     }
@@ -92,14 +92,37 @@ public class DeviceClientTest
         new Verifications()
         {
             {
-                new DeviceClientConfig(anyString, anyString, expectedSharedAccessKey);
+                new DeviceClientConfig(anyString, anyString, expectedSharedAccessKey, null);
+            }
+        };
+    }
+    //Tests_SRS_DEVICECLIENT_25_052: [**The constructor shall save the Shared Access Token as the value of 'sharedAccessToken' in the connection string.**]**
+    @Test
+    public void connStringConstructorSavesSharedAccessToken(
+            @Mocked final AmqpsTransport mockTransport)
+            throws URISyntaxException
+    {
+        final String connString =
+                "HostName=iothub.device.com;CredentialType=SharedAccessKey;CredentialScope=Device;DeviceId=testdevice;" +
+                        "SharedAccessSignature=SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=1469813873";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        new DeviceClient(connString, protocol);
+
+        final String expectedSharedAccessToken = "SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=1469813873";
+        new Verifications()
+        {
+            {
+                new DeviceClientConfig(anyString, anyString, null, expectedSharedAccessToken);
             }
         };
     }
 
+
+
     // Tests_SRS_DEVICECLIENT_11_046: [The constructor shall initialize the IoT Hub transport that uses the protocol specified.]
     @Test
-    public void connStringConstructorInitializesHttpsTransport(
+    public void connStringConstructorWithDeviceKeyInitializesHttpsTransport(
             @Mocked final HttpsTransport mockTransport)
             throws URISyntaxException
     {
@@ -119,7 +142,7 @@ public class DeviceClientTest
 
     // Tests_SRS_DEVICECLIENT_11_046: [The constructor shall initialize the IoT Hub transport that uses the protocol specified.]
     @Test
-    public void connStringConstructorInitializesAmqpsTransport(
+    public void connStringConstructorWithDeviceKeyInitializesAmqpsTransport(
             @Mocked final AmqpsTransport mockTransport)
             throws URISyntaxException
     {
@@ -139,7 +162,7 @@ public class DeviceClientTest
 
     // Tests_SRS_DEVICECLIENT_11_046: [The constructor shall initialize the IoT Hub transport that uses the protocol specified.]
     @Test
-    public void connStringConstructorInitializesMqttTransport(
+    public void connStringConstructorWithDeviceKeyInitializesMqttTransport(
             @Mocked final HttpsTransport mockTransport)
             throws URISyntaxException
     {
@@ -159,7 +182,7 @@ public class DeviceClientTest
 
     // Tests_SRS_DEVICECLIENT_11_046: [The constructor shall initialize the IoT Hub transport that uses the protocol specified.]
     @Test
-    public void connStringConstructorInitializesAmqps_Ws_Transport(
+    public void connStringConstructorWithDeviceKeyInitializesAmqps_Ws_Transport(
             @Mocked final AmqpsTransport mockTransport)
             throws URISyntaxException
     {
@@ -222,6 +245,34 @@ public class DeviceClientTest
 
         new DeviceClient(connString, protocol);
     }
+
+    //Tests_SRS_DEVICECLIENT_25_053: [**If no argument for 'sharedAccessToken' and 'SharedAccessKey' is found in the connection string, the function shall throw an IllegalArgumentException.**]**
+    @Test(expected = IllegalArgumentException.class)
+    public void connStringConstructorFailsIfConnStringMissingSharedAccessKeyAndSASToken(
+            @Mocked final AmqpsTransport mockTransport)
+            throws URISyntaxException
+    {
+        final String connString =
+                "HostName=iothub.device.com;CredentialType=SharedAccessKey;CredentialScope=Device;DeviceId=testdevice;";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        new DeviceClient(connString, protocol);
+    }
+    //Tests_SRS_DEVICECLIENT_25_054: [**The constructor shall only accept either 'sharedAccessToken' or 'SharedAccessKey' from the connection string and throw an IllegalArgumentException if both are found**]**
+    @Test(expected = IllegalArgumentException.class)
+    public void connStringConstructorFailsIfConnStringFoundBothSharedAccessKeyAndSASToken(
+            @Mocked final AmqpsTransport mockTransport)
+            throws URISyntaxException
+    {
+        final String connString =
+                "HostName=iothub.device.com;CredentialType=SharedAccessKey;CredentialScope=Device;DeviceId=testdevice;SharedAccessKey=adjkl234j52=;" +
+                        "SharedAccessSignature=SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=1469813873";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
+
+        new DeviceClient(connString, protocol);
+    }
+
+
 
     // Tests_SRS_DEVICECLIENT_11_051: [If protocol is null, the function shall throw an IllegalArgumentException.]
     @Test(expected = IllegalArgumentException.class)
@@ -819,6 +870,8 @@ public class DeviceClientTest
             {
                 mockTransport.isEmpty();
                 result = true;
+                mockConfig.getDeviceKey();
+                result = anyString;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -839,6 +892,45 @@ public class DeviceClientTest
                 times = 1;
                 mockTransport.open();
                 times = 2;
+
+            }
+        };
+    }
+
+    /*Tests_SRS_DEVICECLIENT_25_010: ["SetSASTokenExpiryTime" shall restart the transport
+                                    1. If the device currently uses device key and
+                                    2. If transport is already open
+                                    after updating expiry time.]
+    */
+    @Test
+    public void setOptionSASTokenExpiryTimeAfterClientOpenTransportWithSasTokenSucceeds(
+            @Mocked final HttpsTransport mockTransport)
+            throws IOException, URISyntaxException
+    {
+        new NonStrictExpectations() {
+            {
+                mockTransport.isEmpty();
+                result = true;
+            }
+        };
+        final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
+                + "SharedAccessSignature=SharedAccessSignature sr=sample-iothub-hostname.net%2fdevices%2fsample-device-ID&sig=S3%2flPidfBF48B7%2fOFAxMOYH8rpOneq68nu61D%2fBP6fo%3d&se=1469813873";
+        final IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
+
+        DeviceClient client = new DeviceClient(connString, protocol);
+        client.open();
+        long value = 60;
+        client.setOption("SetSASTokenExpiryTime", value);
+
+        new Verifications()
+        {
+            {
+                mockTransport.close();
+                times = 0;
+                mockConfig.setTokenValidSecs(60);
+                times = 1;
+                mockTransport.open();
+                times = 1;
 
             }
         };
@@ -884,6 +976,8 @@ public class DeviceClientTest
             {
                 mockTransport.isEmpty();
                 result = true;
+                mockConfig.getDeviceKey();
+                result = anyString;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"
@@ -949,6 +1043,8 @@ public class DeviceClientTest
             {
                 mockTransport.isEmpty();
                 result = true;
+                mockConfig.getDeviceKey();
+                result = anyString;
             }
         };
         final String connString = "HostName=iothub.device.com;CredentialType=SharedAccessKey;DeviceId=testdevice;"

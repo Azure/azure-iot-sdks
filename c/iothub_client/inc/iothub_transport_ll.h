@@ -6,6 +6,8 @@
 
 typedef void* TRANSPORT_LL_HANDLE;
 typedef void* IOTHUB_DEVICE_HANDLE;
+
+struct TRANSPORT_PROVIDER_TAG;
 typedef struct TRANSPORT_PROVIDER_TAG TRANSPORT_PROVIDER;
 
 #include "azure_c_shared_utility/doublylinkedlist.h"
@@ -55,10 +57,10 @@ pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;   \
 pfIoTHubTransport_DoWork IoTHubTransport_DoWork;             \
 pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus  /*there's an intentional missing ; on this line*/ \
 
-	typedef struct TRANSPORT_PROVIDER_TAG
+	struct TRANSPORT_PROVIDER_TAG
 	{
 		TRANSPORT_PROVIDER_FIELDS;
-	}TRANSPORT_PROVIDER;
+	};
 
 #ifdef __cplusplus
 }

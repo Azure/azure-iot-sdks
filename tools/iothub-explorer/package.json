@@ -7,7 +7,7 @@
   "main": "iothub-explorer.js",
   "bin": "iothub-explorer.js",
   "dependencies": {
-    "azure-event-hubs": "0.0.2",
+    "azure-event-hubs": "0.0.3",
     "azure-iot-common": "1.0.11",
     "azure-iot-device": "1.0.11",
     "azure-iothub": "1.0.13",
@@ -18,7 +18,7 @@
     "uuid": "^2.0.1"
   },
   "devDependencies": {
-    "jshint": "^2.8.0"
+    "jshint": "^2.9.2"
   },
   "scripts": {
     "jshint": "jshint iothub-explorer.js",

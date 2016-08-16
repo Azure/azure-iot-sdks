@@ -92,7 +92,6 @@ set CMAKE_skip_unittests=ON
 goto args-continue
 
 :arg-use-websockets
-shift
 set CMAKE_use_wsio=ON
 goto args-continue
 
@@ -260,13 +259,13 @@ if %MAKE_NUGET_PKG% == yes (
     popd
 	
     echo ***Running CMAKE for Win64***
-    if EXIST %cmake-root%\cmake\iotsdk_win64 (
-        rmdir /s/q %cmake-root%\cmake\iotsdk_win64
+    if EXIST %cmake-root%\cmake\iotsdk_x64 (
+        rmdir /s/q %cmake-root%\cmake\iotsdk_x64
     )
-	mkdir %cmake-root%\cmake\iotsdk_win64
+	mkdir %cmake-root%\cmake\iotsdk_x64
 	rem no error checking
 
-	pushd %cmake-root%\cmake\iotsdk_win64
+	pushd %cmake-root%\cmake\iotsdk_x64
 	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Dskip_unittests:BOOL=%CMAKE_skip_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% %build-root%  -G "Visual Studio 14 Win64"
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
     popd
@@ -282,7 +281,7 @@ if %MAKE_NUGET_PKG% == yes (
 	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Dskip_unittests:BOOL=%CMAKE_skip_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% %build-root%  -G "Visual Studio 14 ARM"
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-) else if %build-platform% == Win64 (
+) else if %build-platform% == x64 (
 	echo ***Running CMAKE for Win64***
 	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Dskip_unittests:BOOL=%CMAKE_skip_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% %build-root%  -G "Visual Studio 14 Win64"
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
@@ -304,9 +303,9 @@ if %MAKE_NUGET_PKG% == yes (
 		msbuild /m %cmake-root%\cmake\iotsdk_win32\azure_iot_sdks.sln /p:Configuration=Debug
 		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-		msbuild /m %cmake-root%\cmake\iotsdk_win64\azure_iot_sdks.sln /p:Configuration=Release
+		msbuild /m %cmake-root%\cmake\iotsdk_x64\azure_iot_sdks.sln /p:Configuration=Release
 		if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-		msbuild /m %cmake-root%\cmake\iotsdk_win64\azure_iot_sdks.sln /p:Configuration=Debug
+		msbuild /m %cmake-root%\cmake\iotsdk_x64\azure_iot_sdks.sln /p:Configuration=Debug
 		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 		msbuild /m %cmake-root%\cmake\iotsdk_arm\azure_iot_sdks.sln /p:Configuration=Release
