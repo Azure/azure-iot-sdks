@@ -23,6 +23,13 @@ describe('Mqtt', function () {
       assert.notEqual(mqtt, undefined);
       assert.equal(mqtt._config, fakeConfig);
     });
+
+    /* Tests_SRS_NODE_DEVICE_MQTT_18_025: [** If the `Mqtt` constructor receives a second parameter, it shall be used as a provider in place of mqtt. **]**   */
+    it ('accepts an mqttProvider for testing', function() {
+      var provider = {};
+      var mqtt = new Mqtt(null, provider);
+      assert.equal(mqtt._mqtt.mqttprovider, provider);
+    });
   });
 
   describe('#setOptions', function() {
