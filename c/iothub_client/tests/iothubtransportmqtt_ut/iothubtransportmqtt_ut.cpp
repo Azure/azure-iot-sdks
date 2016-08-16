@@ -2025,7 +2025,13 @@ TEST_FUNCTION(IoTHubTransportMqtt_DoWork_mqtt_client_connect_fail)
     //STRICT_EXPECTED_CALL(mocks, mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE));
     STRICT_EXPECTED_CALL(mocks, get_time(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(mocks, STRING_new());
+
+#ifndef NO_LOGGING
     EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)).ExpectedTimesExactly(5);
+#else
+    EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)).ExpectedTimesExactly(4);
+#endif
+
     STRICT_EXPECTED_CALL(mocks, platform_get_default_tlsio());
 
     EXPECTED_CALL(mocks, mqtt_client_connect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG)).SetReturn(__LINE__);
@@ -2850,7 +2856,12 @@ TEST_FUNCTION(IoTHubTransportMqtt_DoWork_connectFailCount_exceed_succeed)
         EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
     }
     STRICT_EXPECTED_CALL(mocks, tickcounter_get_current_ms(TEST_COUNTER_HANDLE, IGNORED_PTR_ARG)).IgnoreArgument(2);
+
+#ifndef NO_LOGGING
     EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)).ExpectedTimesExactly(25);
+#else
+    EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG)).ExpectedTimesExactly(19);
+#endif
 
     // act
     for (size_t index = 0; index < iterationCount; index++)

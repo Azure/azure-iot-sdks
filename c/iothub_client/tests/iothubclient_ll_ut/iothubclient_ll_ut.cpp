@@ -455,7 +455,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_gets_the_version_string
 {
     // arrange
     CNiceCallComparer<CIoTHubClientLLMocks> mocks;
+
+#ifndef NO_LOGGING
     EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     // act
     (void)IoTHubClient_LL_CreateFromConnectionString(NULL, NULL);
@@ -471,7 +474,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_DeviceKey_succeeds
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -578,7 +584,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_fails_when_uploadToBlob
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -675,7 +684,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_DeviceSasToken_suc
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -780,7 +792,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_DeviceKey_and_Devi
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -879,7 +894,9 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_withGatewayHostName_suc
     CIoTHubClientLLMocks mocks;
     checkProtocolGatewayHostName = true;
 
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -997,7 +1014,9 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_withoutGatewayHostName_
     CIoTHubClientLLMocks mocks;
     checkProtocolGatewayIsNull = true;
 
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -1101,7 +1120,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_input_parameter_conn
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     ///act
     auto result = IoTHubClient_LL_CreateFromConnectionString(NULL, provideFAKE);
@@ -1119,7 +1141,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_input_parameter_prot
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     ///act
     auto result = IoTHubClient_LL_CreateFromConnectionString(TEST_CHAR, NULL);
@@ -1138,7 +1163,9 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_config_structure_alloca
     ///arrange
     CIoTHubClientLLMocks mocks;
 
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     whenShallmalloc_fail = 1;
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
@@ -1160,7 +1187,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_IoTHubClient_LL_Crea
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -1270,7 +1300,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_hostName_missing_the
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -1339,7 +1372,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_deviceId_missing_the
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -1412,7 +1448,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_deviceKey_and_device
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -1483,7 +1522,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_x509_true_succeeds
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -1586,7 +1628,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_x509_BLA_BLA_BLA_f
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -1669,7 +1714,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_iotHubName_is_NULL_r
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -1755,7 +1803,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_if_iotHubSuffix_is_NULL
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -1840,7 +1891,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_construct_fails)
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -1868,7 +1922,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_tokenizer_create
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -1898,7 +1955,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_tokenizer_create
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -1948,7 +2008,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_new_fails_1)
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -1981,7 +2044,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_new_fails_2)
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -2016,7 +2082,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_new_fails_3)
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -2053,7 +2122,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_new_fails_4)
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -2092,7 +2164,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_get_next_token_f
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -2134,7 +2209,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_get_next_token_f
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -2177,7 +2255,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_get_next_token_f
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
@@ -2228,7 +2309,10 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_STRING_get_next_token_f
 {
     ///arrange
     CIoTHubClientLLMocks mocks;
+
+#ifndef NO_LOGGING
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_GetVersionString());
+#endif
 
     STRICT_EXPECTED_CALL(mocks, gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument(1);
