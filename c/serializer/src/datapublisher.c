@@ -240,7 +240,7 @@ DATA_PUBLISHER_RESULT DataPublisher_EndTransaction(TRANSACTION_HANDLE transactio
     /*Codes_SRS_DATA_PUBLISHER_02_006: [If the destination argument is NULL, DataPublisher_EndTransaction shall return DATA_PUBLISHER_INVALID_ARG.] */
     /*Codes_SRS_DATA_PUBLISHER_02_007: [If the destinationSize argument is NULL, DataPublisher_EndTransaction shall return DATA_PUBLISHER_INVALID_ARG.] */
     if (
-        (transactionHandle == NULL) || 
+        (transactionHandle == NULL) ||
         (destination == NULL) ||
         (destinationSize == NULL)
         )
@@ -307,7 +307,7 @@ DATA_PUBLISHER_RESULT DataPublisher_CancelTransaction(TRANSACTION_HANDLE transac
         free(transaction->Values);
         free(transaction);
 
-        /* Codes_SRS_DATA_PUBLISHER_99_013:[ A call to DataPublisher_CancelTransaction shall dispose of the transaction without dispatching 
+        /* Codes_SRS_DATA_PUBLISHER_99_013:[ A call to DataPublisher_CancelTransaction shall dispose of the transaction without dispatching
                                         the data to the DataMarshaller module and it shall return DATA_PUBLISHER_OK.] */
         result = DATA_PUBLISHER_OK;
     }
@@ -325,4 +325,28 @@ void DataPublisher_SetMaxBufferSize(size_t value)
 size_t DataPublisher_GetMaxBufferSize(void)
 {
     return maxBufferSize_;
+}
+
+REPORTED_PROPERTIES_TRANSACTION_HANDLE DataPublisher_CreateTransaction_ReportedProperties(DATA_PUBLISHER_HANDLE dataPublisherHandle)
+{
+    (void)(dataPublisherHandle);
+    return NULL;
+}
+
+DATA_PUBLISHER_RESULT DataPublisher_PublishTransacted_ReportedProperty(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle, const char* reportedPropertyPath, const AGENT_DATA_TYPE* data)
+{
+    (void)(transactionHandle, reportedPropertyPath, data);
+    return DATA_PUBLISHER_ERROR;
+}
+
+DATA_PUBLISHER_RESULT DataPublisher_CommitTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle, unsigned char** destination, size_t* destinationSize)
+{
+    (void)(transactionHandle, destination, destinationSize);
+    return DATA_PUBLISHER_ERROR;
+}
+
+void DataPublisher_DestroyTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle)
+{
+    (void)(transactionHandle);
+    return;
 }

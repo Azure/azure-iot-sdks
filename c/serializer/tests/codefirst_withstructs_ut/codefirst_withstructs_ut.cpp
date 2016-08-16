@@ -526,6 +526,19 @@ public:
     MOCK_METHOD_END(SCHEMA_HANDLE, (SCHEMA_HANDLE)NULL);
     MOCK_STATIC_METHOD_1(, SCHEMA_RESULT, Schema_DestroyIfUnused, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle);
     MOCK_METHOD_END(SCHEMA_RESULT, SCHEMA_OK);
+
+    MOCK_STATIC_METHOD_1(, REPORTED_PROPERTIES_TRANSACTION_HANDLE, Device_CreateTransaction_ReportedProperties, DEVICE_HANDLE, deviceHandle)
+    MOCK_METHOD_END(REPORTED_PROPERTIES_TRANSACTION_HANDLE, (REPORTED_PROPERTIES_TRANSACTION_HANDLE)NULL);
+
+    MOCK_STATIC_METHOD_3(, DEVICE_RESULT, Device_PublishTransacted_ReportedProperty, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, const char*, reportedPropertyPath, const AGENT_DATA_TYPE*, data);
+    MOCK_METHOD_END(DEVICE_RESULT, DEVICE_ERROR);
+
+    MOCK_STATIC_METHOD_3(, DEVICE_RESULT, Device_CommitTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize);
+    MOCK_METHOD_END(DEVICE_RESULT, DEVICE_ERROR);
+
+    MOCK_STATIC_METHOD_1(, void, Device_DestroyTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle)
+    MOCK_VOID_METHOD_END()
+
 };
 
 DECLARE_GLOBAL_MOCK_METHOD_2(CCodeFirstMocks, , AGENT_DATA_TYPES_RESULT, Create_EDM_BOOLEAN_from_int, AGENT_DATA_TYPE*, agentData, int, v);
@@ -570,6 +583,10 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CCodeFirstMocks, , SCHEMA_RESULT, Schema_ReleaseDev
 DECLARE_GLOBAL_MOCK_METHOD_1(CCodeFirstMocks, , SCHEMA_HANDLE, Schema_GetSchemaForModelType, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle);
 DECLARE_GLOBAL_MOCK_METHOD_1(CCodeFirstMocks, , SCHEMA_RESULT, Schema_DestroyIfUnused, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle);
 
+DECLARE_GLOBAL_MOCK_METHOD_1(CCodeFirstMocks, , REPORTED_PROPERTIES_TRANSACTION_HANDLE, Device_CreateTransaction_ReportedProperties, DEVICE_HANDLE, deviceHandle);
+DECLARE_GLOBAL_MOCK_METHOD_3(CCodeFirstMocks, , DEVICE_RESULT, Device_PublishTransacted_ReportedProperty, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, const char*, reportedPropertyPath, const AGENT_DATA_TYPE*, data);
+DECLARE_GLOBAL_MOCK_METHOD_3(CCodeFirstMocks, , DEVICE_RESULT, Device_CommitTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize);
+DECLARE_GLOBAL_MOCK_METHOD_1(CCodeFirstMocks, , void, Device_DestroyTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle);
 
 extern "C" DEVICE_HANDLE serializer_getdevicehandle(void) { return TEST_DEVICE_HANDLE; }
 

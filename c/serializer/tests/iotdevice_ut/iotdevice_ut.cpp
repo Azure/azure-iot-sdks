@@ -67,6 +67,18 @@ public:
     MOCK_METHOD_END(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK);
     MOCK_STATIC_METHOD_3(, DATA_PUBLISHER_RESULT, DataPublisher_PublishTransacted, TRANSACTION_HANDLE, transactionHandle, const char*, propertyPath, const AGENT_DATA_TYPE*, data)
     MOCK_METHOD_END(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK);
+
+    MOCK_STATIC_METHOD_1(,REPORTED_PROPERTIES_TRANSACTION_HANDLE, DataPublisher_CreateTransaction_ReportedProperties, DATA_PUBLISHER_HANDLE, dataPublisherHandle)
+    MOCK_METHOD_END(REPORTED_PROPERTIES_TRANSACTION_HANDLE, (REPORTED_PROPERTIES_TRANSACTION_HANDLE)1);
+
+    MOCK_STATIC_METHOD_3(, DATA_PUBLISHER_RESULT, DataPublisher_PublishTransacted_ReportedProperty, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, const char*, reportedPropertyPath, const AGENT_DATA_TYPE*, data);
+    MOCK_METHOD_END(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK);
+
+    MOCK_STATIC_METHOD_3(, DATA_PUBLISHER_RESULT, DataPublisher_CommitTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize);
+    MOCK_METHOD_END(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK);
+
+    MOCK_STATIC_METHOD_1(, void, DataPublisher_DestroyTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle);
+    MOCK_VOID_METHOD_END()
 };
 
 DECLARE_GLOBAL_MOCK_METHOD_2(CDeviceMocks, , DATA_PUBLISHER_HANDLE, DataPublisher_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, bool, includePropertyPath);
@@ -82,6 +94,11 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CDeviceMocks, , TRANSACTION_HANDLE, DataPublisher_S
 DECLARE_GLOBAL_MOCK_METHOD_3(CDeviceMocks, , DATA_PUBLISHER_RESULT, DataPublisher_EndTransaction, TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize)
 DECLARE_GLOBAL_MOCK_METHOD_1(CDeviceMocks, , DATA_PUBLISHER_RESULT, DataPublisher_CancelTransaction, TRANSACTION_HANDLE, transactionHandle)
 DECLARE_GLOBAL_MOCK_METHOD_3(CDeviceMocks, , DATA_PUBLISHER_RESULT, DataPublisher_PublishTransacted, TRANSACTION_HANDLE, transactionHandle, const char*, propertyPath, const AGENT_DATA_TYPE*, data)
+
+DECLARE_GLOBAL_MOCK_METHOD_1(CDeviceMocks, ,REPORTED_PROPERTIES_TRANSACTION_HANDLE, DataPublisher_CreateTransaction_ReportedProperties, DATA_PUBLISHER_HANDLE, dataPublisherHandle);
+DECLARE_GLOBAL_MOCK_METHOD_3(CDeviceMocks, ,DATA_PUBLISHER_RESULT, DataPublisher_PublishTransacted_ReportedProperty, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, const char*, reportedPropertyPath, const AGENT_DATA_TYPE*, data);
+DECLARE_GLOBAL_MOCK_METHOD_3(CDeviceMocks, ,DATA_PUBLISHER_RESULT, DataPublisher_CommitTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize);
+DECLARE_GLOBAL_MOCK_METHOD_1(CDeviceMocks, ,void, DataPublisher_DestroyTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle);
 
 namespace
 {

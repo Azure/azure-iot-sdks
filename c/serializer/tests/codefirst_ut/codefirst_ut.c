@@ -594,6 +594,17 @@ static DEVICE_RESULT my_Device_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, pfDe
     return DEVICE_OK;
 }
 
+static REPORTED_PROPERTIES_TRANSACTION_HANDLE my_Device_CreateTransaction_ReportedProperties(DEVICE_HANDLE deviceHandle)
+{
+    (void)deviceHandle;
+    return (REPORTED_PROPERTIES_TRANSACTION_HANDLE)my_gballoc_malloc(1);
+}
+
+void my_Device_DestroyTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle)
+{
+    my_gballoc_free(transactionHandle);
+}
+
 BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
@@ -683,6 +694,15 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         REGISTER_GLOBAL_MOCK_HOOK(STRING_empty, real_STRING_empty);
         REGISTER_GLOBAL_MOCK_HOOK(STRING_length, real_STRING_length);
         REGISTER_GLOBAL_MOCK_HOOK(STRING_compare, real_STRING_compare);
+
+        REGISTER_GLOBAL_MOCK_HOOK(Device_CreateTransaction_ReportedProperties, my_Device_CreateTransaction_ReportedProperties);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Device_CreateTransaction_ReportedProperties, NULL);
+
+        REGISTER_GLOBAL_MOCK_RETURNS(Device_PublishTransacted_ReportedProperty,DEVICE_OK, DEVICE_ERROR);
+
+        REGISTER_GLOBAL_MOCK_RETURNS(Device_CommitTransaction_ReportedProperties, DEVICE_OK, DEVICE_ERROR);
+
+        REGISTER_GLOBAL_MOCK_HOOK(Device_DestroyTransaction_ReportedProperties, my_Device_DestroyTransaction_ReportedProperties);
 
     }
 
@@ -3137,7 +3157,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         device2->reported_this_is_int = 2;
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(Device_StartTransaction(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_CreateTransaction_ReportedProperties(IGNORED_PTR_ARG))
             .IgnoreArgument_deviceHandle();
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(IGNORED_PTR_ARG))
@@ -3150,14 +3170,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_v();
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "reported_this_is_int", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted_ReportedProperty(IGNORED_PTR_ARG, "reported_this_is_int", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument_data();
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
         STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
             .IgnoreArgument_agentData();
-        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_DestroyTransaction_ReportedProperties(IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle();
 
         ///act
@@ -3183,14 +3203,16 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         device->reported_this_is_int = 3;
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(Device_StartTransaction(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_CreateTransaction_ReportedProperties(IGNORED_PTR_ARG))
             .IgnoreArgument_deviceHandle();
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(IGNORED_PTR_ARG))
             .IgnoreArgument_modelTypeHandle();
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_CommitTransaction_ReportedProperties(IGNORED_PTR_ARG, &destination, &destinationSize))
+            .IgnoreArgument_transactionHandle();
+        STRICT_EXPECTED_CALL(Device_DestroyTransaction_ReportedProperties(IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle();
 
         ///act
@@ -3229,35 +3251,39 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
     static void CodeFirst_SendReportedAsync_all_inert_path(void)
     {
-        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Device_CreateTransaction_ReportedProperties(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
 
         STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 5.5))
             .IgnoreArgument_agentData();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "reported_this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted_ReportedProperty(IGNORED_PTR_ARG, "reported_this_is_double", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument_data();
         EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
 
         STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, -5))
             .IgnoreArgument_agentData();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "reported_this_is_int", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted_ReportedProperty(IGNORED_PTR_ARG, "reported_this_is_int", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument_data();
         EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
 
-        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_CommitTransaction_ReportedProperties(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
+
+        STRICT_EXPECTED_CALL(Device_DestroyTransaction_ReportedProperties(IGNORED_PTR_ARG))
+            .IgnoreArgument_transactionHandle();
     }
 
     /*Tests_SRS_CODEFIRST_02_021: [ If the value passed through va_args is a complete model instance, then CodeFirst_SendAsyncReported shall send all the reported properties of that device. ]*/
-    /*Tests_SRS_CODEFIRST_02_022: [ CodeFirst_SendAsyncReported shall start a transaction by calling Device_StartTransaction. ]*/
+    /*Tests_SRS_CODEFIRST_02_022: [ CodeFirst_SendAsyncReported shall start a transaction by calling Device_CreateTransaction_ReportedProperties. ]*/
     /*Tests_SRS_CODEFIRST_02_023: [ CodeFirst_SendAsyncReported shall convert all REPORTED_PROPERTY model components to AGENT_DATA_TYPE. ]*/
-    /*Tests_SRS_CODEFIRST_02_024: [ CodeFirst_SendAsyncReported shall call Device_PublishTransacted for every AGENT_DATA_TYPE converted from REPORTED_PROPERTY. ]*/
-    /*Tests_SRS_CODEFIRST_02_026: [ CodeFirst_SendAsyncReported shall call Device_EndTransaction to end the transaction. ]*/
+    /*Tests_SRS_CODEFIRST_02_024: [ CodeFirst_SendAsyncReported shall call Device_PublishTransacted_ReportedProperty for every AGENT_DATA_TYPE converted from REPORTED_PROPERTY. ]*/
+    /*Tests_SRS_CODEFIRST_02_026: [ CodeFirst_SendAsyncReported shall call Device_CommitTransaction_ReportedProperties to commit the transaction. ]*/
     /*Tests_SRS_CODEFIRST_02_028: [ CodeFirst_SendAsyncReported shall return CODEFIRST_OK when it succeeds. ]*/
+    /*Tests_SRS_CODEFIRST_02_029: [ CodeFirst_SendAsyncReported shall call Device_DestroyTransaction_ReportedProperties to destroy the transaction. ]*/
     TEST_FUNCTION(CodeFirst_SendReportedAsync_all_happy_path)
     {
         /// arrange
@@ -3283,8 +3309,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         my_gballoc_free(destination);
     }
 
-    /*Tests_SRS_CODEFIRST_02_027: [ If any error occurs, CodeFirst_SendAsyncReported shall fail, cancelling the transaction by calling Device_CancelTransaction, returning CODEFIRST_DEVICE_FAILED if the error pertains to usage of Device APIs or returning CODEFIRST_ERROR in all other cases ]*/
-    TEST_FUNCTION(CodeFirst_SendReportedAsync_all_unahppy_path)
+    /*Tests_SRS_CODEFIRST_02_027: [ If any error occurs, CodeFirst_SendAsyncReported shall fail and return CODEFIRST_ERROR. ]*/
+    TEST_FUNCTION(CodeFirst_SendReportedAsync_all_unhappy_path)
     {
         ///arrange
         size_t destinationSize = 1000;
@@ -3305,6 +3331,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             1,/*Schema_GetModelName*/
             4,/*Destroy_AGENT_DATA_TYPE*/
             7,/*Destroy_AGENT_DATA_TYPE*/
+            9,/*Device_DestroyTransaction_ReportedProperties*/
         };
 
         for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
@@ -3339,7 +3366,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     static void CodeFirst_SendReportedAsync_one_inert_path(void)
     {
 
-        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Device_CreateTransaction_ReportedProperties(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
         STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "reported_this_is_double"))
@@ -3348,24 +3375,27 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_agentData();
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "reported_this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted_ReportedProperty(IGNORED_PTR_ARG, "reported_this_is_double", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument_data();
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
         STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
             .IgnoreArgument_agentData();
-        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_CommitTransaction_ReportedProperties(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
+        STRICT_EXPECTED_CALL(Device_DestroyTransaction_ReportedProperties(IGNORED_PTR_ARG))
+            .IgnoreArgument_transactionHandle();
     }
 
-    /*Tests_SRS_CODEFIRST_02_022: [ CodeFirst_SendAsyncReported shall start a transaction by calling Device_StartTransaction. ]*/
+    /*Tests_SRS_CODEFIRST_02_022: [ CodeFirst_SendAsyncReported shall start a transaction by calling Device_CreateTransaction_ReportedProperties. ]*/
     /*Tests_SRS_CODEFIRST_02_023: [ CodeFirst_SendAsyncReported shall convert all REPORTED_PROPERTY model components to AGENT_DATA_TYPE. ]*/
-    /*Tests_SRS_CODEFIRST_02_024: [ CodeFirst_SendAsyncReported shall call Device_PublishTransacted for every AGENT_DATA_TYPE converted from REPORTED_PROPERTY. ]*/
+    /*Tests_SRS_CODEFIRST_02_024: [ CodeFirst_SendAsyncReported shall call Device_PublishTransacted_ReportedProperty for every AGENT_DATA_TYPE converted from REPORTED_PROPERTY. ]*/
     /*Tests_SRS_CODEFIRST_02_025: [ CodeFirst_SendAsyncReported shall compute for every AGENT_DATA_TYPE the valuePath. ]*/
-    /*Tests_SRS_CODEFIRST_02_026: [ CodeFirst_SendAsyncReported shall call Device_EndTransaction to end the transaction. ]*/
+    /*Tests_SRS_CODEFIRST_02_026: [ CodeFirst_SendAsyncReported shall call Device_CommitTransaction_ReportedProperties to commit the transaction. ]*/
+    /*Tests_SRS_CODEFIRST_02_029: [ CodeFirst_SendAsyncReported shall call Device_DestroyTransaction_ReportedProperties to destroy the transaction. ]*/
     TEST_FUNCTION(CodeFirst_SendReportedAsync_one_reportedProperty_happy_path)
     {
         /// arrange
@@ -3391,7 +3421,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         my_gballoc_free(destination);
     }
 
-    /*Tests_SRS_CODEFIRST_02_027: [ If any error occurs, CodeFirst_SendAsyncReported shall fail, cancelling the transaction by calling Device_CancelTransaction, returning CODEFIRST_DEVICE_FAILED if the error pertains to usage of Device APIs or returning CODEFIRST_ERROR in all other cases ]*/
+    /*Tests_SRS_CODEFIRST_02_027: [ If any error occurs, CodeFirst_SendAsyncReported shall fail and return CODEFIRST_ERROR. ]*/
     TEST_FUNCTION(CodeFirst_SendReportedAsync_one_reportedProperty_unhappy_path)
     {
         /// arrange
@@ -3413,6 +3443,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             5,/*STRING_c_str*/
             7,/*STRING_delete*/
             8,/*Destroy_AGENT_DATA_TYPE*/
+            10, /*Device_DestroyTransaction_ReportedProperties*/
         };
 
         for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)

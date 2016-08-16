@@ -775,7 +775,7 @@ static CODEFIRST_RESULT SendAllDeviceProperties(DEVICE_HEADER_DATA* deviceHeader
     return result;
 }
 
-static CODEFIRST_RESULT SendAllDeviceReportedProperties(DEVICE_HEADER_DATA* deviceHeader, TRANSACTION_HANDLE transaction)
+static CODEFIRST_RESULT SendAllDeviceReportedProperties(DEVICE_HEADER_DATA* deviceHeader, REPORTED_PROPERTIES_TRANSACTION_HANDLE transaction)
 {
     const char* modelName = Schema_GetModelName(deviceHeader->ModelHandle);
     const REFLECTED_SOMETHING* something;
@@ -797,7 +797,7 @@ static CODEFIRST_RESULT SendAllDeviceReportedProperties(DEVICE_HEADER_DATA* devi
             }
             else
             {
-                if (Device_PublishTransacted(transaction, something->what.reportedProperty.name, &agentDataType) != DEVICE_OK)
+                if (Device_PublishTransacted_ReportedProperty(transaction, something->what.reportedProperty.name, &agentDataType) != DEVICE_OK)
                 {
                     Destroy_AGENT_DATA_TYPE(&agentDataType);
                     result = CODEFIRST_DEVICE_PUBLISH_FAILED;
@@ -998,7 +998,7 @@ CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t
     {
         DEVICE_HEADER_DATA* deviceHeader = NULL;
         size_t i;
-        TRANSACTION_HANDLE transaction = NULL;
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE transaction = NULL;
         va_list ap;
         result = CODEFIRST_ACTION_EXECUTION_ERROR; /*this initialization squelches a false warning about result not being initialized*/
 
@@ -1031,9 +1031,9 @@ CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t
                     LOG_CODEFIRST_ERROR;
                     break;
                 }
-                /*Codes_SRS_CODEFIRST_02_022: [ CodeFirst_SendAsyncReported shall start a transaction by calling Device_StartTransaction. ]*/
+                /*Codes_SRS_CODEFIRST_02_022: [ CodeFirst_SendAsyncReported shall start a transaction by calling Device_CreateTransaction_ReportedProperties. ]*/
                 else if ((deviceHeader == NULL) &&
-                    ((transaction = Device_StartTransaction(currentValueDeviceHeader->DeviceHandle)) == NULL))
+                    ((transaction = Device_CreateTransaction_ReportedProperties(currentValueDeviceHeader->DeviceHandle)) == NULL))
                 {
                     result = CODEFIRST_DEVICE_PUBLISH_FAILED;
                     LOG_CODEFIRST_ERROR;
@@ -1090,8 +1090,8 @@ CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t
                                 }
                                 else
                                 {
-                                    /*Codes_SRS_CODEFIRST_02_024: [ CodeFirst_SendAsyncReported shall call Device_PublishTransacted for every AGENT_DATA_TYPE converted from REPORTED_PROPERTY. ]*/
-                                    if (Device_PublishTransacted(transaction, STRING_c_str(valuePath), &agentDataType) != DEVICE_OK)
+                                    /*Codes_SRS_CODEFIRST_02_024: [ CodeFirst_SendAsyncReported shall call Device_PublishTransacted_ReportedProperty for every AGENT_DATA_TYPE converted from REPORTED_PROPERTY. ]*/
+                                    if (Device_PublishTransacted_ReportedProperty(transaction, STRING_c_str(valuePath), &agentDataType) != DEVICE_OK)
                                     {
                                         Destroy_AGENT_DATA_TYPE(&agentDataType);
                                         result = CODEFIRST_DEVICE_PUBLISH_FAILED;
@@ -1112,24 +1112,28 @@ CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t
             }
         }
 
-        /*Codes_SRS_CODEFIRST_02_027: [ If any error occurs, CodeFirst_SendAsyncReported shall fail, cancelling the transaction by calling Device_CancelTransaction, returning CODEFIRST_DEVICE_FAILED if the error pertains to usage of Device APIs or returning CODEFIRST_ERROR in all other cases ]*/
+        /*Codes_SRS_CODEFIRST_02_027: [ If any error occurs, CodeFirst_SendAsyncReported shall fail and return CODEFIRST_ERROR. ]*/
         if (i < numReportedProperties)
         {
             if (transaction != NULL)
             {
-                (void)Device_CancelTransaction(transaction);
+                Device_DestroyTransaction_ReportedProperties(transaction);
             }
         }
-        /*Codes_SRS_CODEFIRST_02_026: [ CodeFirst_SendAsyncReported shall call Device_EndTransaction to end the transaction. ]*/
-        else if (Device_EndTransaction(transaction, destination, destinationSize) != DEVICE_OK)
-        {
-            result = CODEFIRST_DEVICE_PUBLISH_FAILED;
-            LOG_CODEFIRST_ERROR;
-        }
+        /*Codes_SRS_CODEFIRST_02_026: [ CodeFirst_SendAsyncReported shall call Device_CommitTransaction_ReportedProperties to commit the transaction. ]*/
         else
         {
-            /*Codes_SRS_CODEFIRST_02_028: [ CodeFirst_SendAsyncReported shall return CODEFIRST_OK when it succeeds. ]*/
-            result = CODEFIRST_OK;
+            if (Device_CommitTransaction_ReportedProperties(transaction, destination, destinationSize) != DEVICE_OK)
+            {
+                result = CODEFIRST_DEVICE_PUBLISH_FAILED;
+                LOG_CODEFIRST_ERROR;
+            }
+            else
+            {
+                /*Codes_SRS_CODEFIRST_02_028: [ CodeFirst_SendAsyncReported shall return CODEFIRST_OK when it succeeds. ]*/
+                result = CODEFIRST_OK;
+            }
+            Device_DestroyTransaction_ReportedProperties(transaction);
         }
         
         va_end(ap);

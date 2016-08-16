@@ -235,18 +235,19 @@ CodeFirst_SendAsyncReported starts, publishes and finishes a device transaction.
 
 **SRS_CODEFIRST_02_021: [** If the value passed through va_args is a complete model instance, then `CodeFirst_SendAsyncReported` shall send all the reported properties of that device. **]**
 
-**SRS_CODEFIRST_02_022: [** `CodeFirst_SendAsyncReported` shall start a transaction by calling `Device_StartTransaction`. **]**
+**SRS_CODEFIRST_02_022: [** `CodeFirst_SendAsyncReported` shall start a transaction by calling `Device_CreateTransaction_ReportedProperties`. **]**
 
 **SRS_CODEFIRST_02_023: [** `CodeFirst_SendAsyncReported` shall convert all `REPORTED_PROPERTY` model components to `AGENT_DATA_TYPE`. **]** 
 
-**SRS_CODEFIRST_02_024: [** `CodeFirst_SendAsyncReported` shall call `Device_PublishTransacted` for every `AGENT_DATA_TYPE` converted from `REPORTED_PROPERTY`. **]**
+**SRS_CODEFIRST_02_024: [** `CodeFirst_SendAsyncReported` shall call `Device_PublishTransacted_ReportedProperty` for every `AGENT_DATA_TYPE` converted from `REPORTED_PROPERTY`. **]**
 
 **SRS_CODEFIRST_02_025: [** `CodeFirst_SendAsyncReported` shall compute for every `AGENT_DATA_TYPE` the valuePath. **]**
 
-**SRS_CODEFIRST_02_026: [** `CodeFirst_SendAsyncReported` shall call `Device_EndTransaction` to end the transaction. **]**
+**SRS_CODEFIRST_02_026: [** `CodeFirst_SendAsyncReported` shall call `Device_CommitTransaction_ReportedProperties` to commit the transaction. **]**
 
-**SRS_CODEFIRST_02_027: [** If any error occurs, `CodeFirst_SendAsyncReported` shall fail, cancelling the transaction by calling `Device_CancelTransaction`, 
-returning `CODEFIRST_DEVICE_FAILED` if the error pertains to usage of Device APIs or returning `CODEFIRST_ERROR` in all other cases **]**
+**SRS_CODEFIRST_02_029: [** `CodeFirst_SendAsyncReported` shall call `Device_DestroyTransaction_ReportedProperties` to destroy the transaction. **]**
+
+**SRS_CODEFIRST_02_027: [** If any error occurs, `CodeFirst_SendAsyncReported` shall fail and return `CODEFIRST_ERROR`. **]**
 
 **SRS_CODEFIRST_02_028: [** `CodeFirst_SendAsyncReported` shall return `CODEFIRST_OK` when it succeeds. **]**
 

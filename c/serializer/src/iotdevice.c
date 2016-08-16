@@ -17,6 +17,8 @@
 #define LOG_DEVICE_ERROR \
     LogError("(result = %s)", ENUM_TO_STRING(DEVICE_RESULT, result))
 
+
+
 typedef struct DEVICE_HANDLE_DATA_TAG
 {
     SCHEMA_MODEL_TYPE_HANDLE model;
@@ -155,9 +157,11 @@ DEVICE_RESULT Device_PublishTransacted(TRANSACTION_HANDLE transactionHandle, con
     DEVICE_RESULT result;
 
     /* Codes_SRS_DEVICE_01_037: [If any argument is NULL, Device_PublishTransacted shall return DEVICE_INVALID_ARG.] */
-    if ((transactionHandle == NULL) ||
+    if (
+        (transactionHandle == NULL) ||
         (propertyPath == NULL) ||
-        (data == NULL))
+        (data == NULL)
+	   )
     {
         result = DEVICE_INVALID_ARG;
         LOG_DEVICE_ERROR;
@@ -253,4 +257,119 @@ EXECUTE_COMMAND_RESULT Device_ExecuteCommand(DEVICE_HANDLE deviceHandle, const c
         result = CommandDecoder_ExecuteCommand(device->commandDecoderHandle, command);
     }
     return result;
+}
+
+REPORTED_PROPERTIES_TRANSACTION_HANDLE Device_CreateTransaction_ReportedProperties(DEVICE_HANDLE deviceHandle)
+{
+    REPORTED_PROPERTIES_TRANSACTION_HANDLE result;
+
+    /*Codes_SRS_DEVICE_02_014: [ If argument deviceHandle is NULL then Device_CreateTransaction_ReportedProperties shall fail and return NULL. ]*/
+    if (deviceHandle == NULL)
+    {
+        LogError("invalid argument DEVICE_HANDLE deviceHandle=%p", deviceHandle);
+        result = NULL;
+    }
+    else
+    {
+        DEVICE_HANDLE_DATA* deviceInstance = (DEVICE_HANDLE_DATA*)deviceHandle;
+        /*Codes_SRS_DEVICE_02_015: [ Otherwise, Device_CreateTransaction_ReportedProperties shall call DataPublisher_CreateTransaction_ReportedProperties. ]*/
+        /*Codes_SRS_DEVICE_02_016: [ If DataPublisher_CreateTransaction_ReportedProperties fails then Device_CreateTransaction_ReportedProperties shall fail and return NULL. ]*/
+        /*Codes_SRS_DEVICE_02_017: [ Otherwise Device_CreateTransaction_ReportedProperties shall succeed and return a non-NULL value. ]*/
+        result = DataPublisher_CreateTransaction_ReportedProperties(deviceInstance->dataPublisherHandle);
+        if (result == NULL)
+        {
+            LogError("unable to DataPublisher_CreateTransaction_ReportedProperties");
+            /*return as is*/
+        }
+        else
+        {
+            /*return as is*/
+        }
+    }
+
+    return result;
+}
+
+DEVICE_RESULT Device_PublishTransacted_ReportedProperty(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle, const char* reportedPropertyPath, const AGENT_DATA_TYPE* data)
+{
+    DEVICE_RESULT result;
+    /*Codes_SRS_DEVICE_02_018: [ If argument transactionHandle is NULL then Device_PublishTransacted_ReportedProperty shall fail and return DEVICE_INVALID_ARG. ]*/
+    /*Codes_SRS_DEVICE_02_019: [ If argument reportedPropertyPath is NULL then Device_PublishTransacted_ReportedProperty shall fail and return DEVICE_INVALID_ARG. ]*/
+    /*Codes_SRS_DEVICE_02_020: [ If argument data is NULL then Device_PublishTransacted_ReportedProperty shall fail and return DEVICE_INVALID_ARG. ]*/
+    if (
+        (transactionHandle == NULL) ||
+        (reportedPropertyPath == NULL) ||
+        (data == NULL)
+        )
+    {
+        LogError("invalid argument REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle=%p, const char* reportedPropertyPath=%s, const AGENT_DATA_TYPE* data=%p", transactionHandle, reportedPropertyPath, data);
+        result = DEVICE_INVALID_ARG;
+    }
+    else
+    {
+        /*Codes_SRS_DEVICE_02_021: [ Device_PublishTransacted_ReportedProperty shall call DataPublisher_PublishTransacted_ReportedProperty. ]*/
+        DATA_PUBLISHER_RESULT r = DataPublisher_PublishTransacted_ReportedProperty(transactionHandle, reportedPropertyPath, data);
+        if (r != DATA_PUBLISHER_OK)
+        {
+            LogError("unable to DataPublisher_PublishTransacted_ReportedProperty");
+            /*Codes_SRS_DEVICE_02_022: [ If DataPublisher_PublishTransacted_ReportedProperty fails then Device_PublishTransacted_ReportedProperty shall fail and return DEVICE_DATA_PUBLISHER_FAILED. ]*/
+            result = DEVICE_DATA_PUBLISHER_FAILED;
+        }
+        else
+        {
+            /*Codes_SRS_DEVICE_02_023: [ Otherwise, Device_PublishTransacted_ReportedProperty shall succeed and return DEVICE_OK. ]*/
+            result = DEVICE_OK;
+        }
+    }
+    return result;
+}
+
+DEVICE_RESULT Device_CommitTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle, unsigned char** destination, size_t* destinationSize)
+{
+    DEVICE_RESULT result;
+
+    /*Codes_SRS_DEVICE_02_024: [ If argument transactionHandle is NULL then Device_CommitTransaction_ReportedProperties shall fail and return DEVICE_INVALID_ARG. ]*/
+    /*Codes_SRS_DEVICE_02_025: [ If argument destination is NULL then Device_CommitTransaction_ReportedProperties shall fail and return DEVICE_INVALID_ARG. ]*/
+    /*Codes_SRS_DEVICE_02_026: [ If argument destinationSize is NULL then Device_CommitTransaction_ReportedProperties shall fail and return DEVICE_INVALID_ARG. ]*/
+    if (
+        (transactionHandle == NULL) ||
+        (destination == NULL) ||
+        (destination == NULL)
+        )
+    {
+        LogError("invalid argument REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle=%p, unsigned char** destination=%p, size_t* destinationSize=%p", transactionHandle, destination, destinationSize);
+        result = DEVICE_INVALID_ARG;
+    }
+    else
+    {
+        /*Codes_SRS_DEVICE_02_027: [ Device_CommitTransaction_ReportedProperties shall call DataPublisher_CommitTransaction_ReportedProperties. ]*/
+        DATA_PUBLISHER_RESULT r = DataPublisher_CommitTransaction_ReportedProperties(transactionHandle, destination, destinationSize);
+        
+        /*Codes_SRS_DEVICE_02_028: [ If DataPublisher_CommitTransaction_ReportedProperties fails then Device_CommitTransaction_ReportedProperties shall fail and return DEVICE_DATA_PUBLISHER_FAILED. ]*/
+        if (r != DATA_PUBLISHER_OK)
+        {
+            LogError("unable to DataPublisher_CommitTransaction_ReportedProperties");
+            result = DEVICE_DATA_PUBLISHER_FAILED;
+        }
+        else
+        {
+            /*Codes_SRS_DEVICE_02_029: [ Otherwise Device_CommitTransaction_ReportedProperties shall succeed and return DEVICE_OK. ]*/
+            result = DEVICE_OK;
+        }
+    }
+    return result;
+}
+
+void Device_DestroyTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle)
+{
+    /*Codes_SRS_DEVICE_02_030: [ If argument transactionHandle is NULL then Device_DestroyTransaction_ReportedProperties shall return. ]*/
+    if (transactionHandle == NULL)
+    {
+        LogError("invalid argument REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle=%p", transactionHandle);
+    }
+    else
+    {
+        /*Codes_SRS_DEVICE_02_031: [ Otherwise Device_DestroyTransaction_ReportedProperties shall free all used resources. ]*/
+        DataPublisher_DestroyTransaction_ReportedProperties(transactionHandle);
+    }
 }

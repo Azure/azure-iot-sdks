@@ -39,6 +39,11 @@ MOCKABLE_FUNCTION(,DEVICE_RESULT, Device_PublishTransacted, TRANSACTION_HANDLE, 
 MOCKABLE_FUNCTION(,DEVICE_RESULT, Device_EndTransaction, TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize);
 MOCKABLE_FUNCTION(,DEVICE_RESULT, Device_CancelTransaction, TRANSACTION_HANDLE, transactionHandle);
 
+MOCKABLE_FUNCTION(, REPORTED_PROPERTIES_TRANSACTION_HANDLE, Device_CreateTransaction_ReportedProperties, DEVICE_HANDLE, deviceHandle);
+MOCKABLE_FUNCTION(, DEVICE_RESULT, Device_PublishTransacted_ReportedProperty, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, const char*, reportedPropertyPath, const AGENT_DATA_TYPE*, data);
+MOCKABLE_FUNCTION(, DEVICE_RESULT, Device_CommitTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize);
+MOCKABLE_FUNCTION(, void, Device_DestroyTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle);
+
 MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, Device_ExecuteCommand, DEVICE_HANDLE, deviceHandle, const char*, command);
 #ifdef __cplusplus
 }
