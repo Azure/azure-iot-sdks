@@ -217,7 +217,7 @@ SCHEMA_RESULT Schema_AddModelReportedProperty(SCHEMA_MODEL_TYPE_HANDLE modelType
 
 **SRS_SCHEMA_02_003: [** If `reportedPropertyType` is `NULL` then `Schema_AddModelReportedProperty` shall fail and return `SCHEMA_INVALID_ARG`. **]**
 
-**SRS_SCHEMA_02_004: [** If `reportedPropertyName` has already been added then `Schema_AddModelReportedProperty` shall fail and return `SCHEMA_PROPERTY_ELEMENT_EXISTS`. **]**
+**SRS_SCHEMA_02_004: [** If `reportedPropertyName` has already been added then `Schema_AddModelReportedProperty` shall fail and return `SCHEMA_DUPLICATE_ELEMENT`. **]**
 
 **SRS_SCHEMA_02_005: [** `Schema_AddModelReportedProperty` shall record `reportedPropertyName` and `reportedPropertyType`. **]**
 

@@ -21,6 +21,12 @@ typedef struct SCHEMA_PROPERTY_HANDLE_DATA_TAG
     const char* PropertyType;
 } SCHEMA_PROPERTY_HANDLE_DATA;
 
+typedef struct SCHEMA_REPORTED_PROPERTY_HANDLE_DATA_TAG
+{
+    const char* reportedPropertyName;
+    const char* reportedPropertyType;
+} SCHEMA_REPORTED_PROPERTY_HANDLE_DATA;
+
 typedef struct SCHEMA_ACTION_ARGUMENT_HANDLE_DATA_TAG
 {
     const char* Name;
@@ -46,6 +52,7 @@ typedef struct SCHEMA_MODEL_TYPE_HANDLE_DATA_TAG
     SCHEMA_HANDLE SchemaHandle;
     SCHEMA_PROPERTY_HANDLE* Properties;
     size_t PropertyCount;
+    VECTOR_HANDLE reportedProperties; /*holds SCHEMA_REPORTED_PROPERTY_HANDLE*/
     SCHEMA_ACTION_HANDLE* Actions;
     size_t ActionCount;
     VECTOR_HANDLE models;
@@ -128,7 +135,7 @@ static void DestroyStruct(SCHEMA_STRUCT_TYPE_HANDLE structTypeHandle)
 static void DestroyModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle)
 {
     SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
-    size_t i;
+    size_t i, nReportedProperties;
 
     free((void*)modelType->Name);
     modelType->Name = NULL;
@@ -151,6 +158,17 @@ static void DestroyModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle)
         MODEL_IN_MODEL* temp = (MODEL_IN_MODEL*)VECTOR_element(modelType->models, i);
         free((void*)temp->propertyName);
     }
+
+    nReportedProperties = VECTOR_size(modelType->reportedProperties);
+    for (i = 0;i < nReportedProperties;i++)
+    {
+        SCHEMA_REPORTED_PROPERTY_HANDLE_DATA* reportedProperty = (SCHEMA_REPORTED_PROPERTY_HANDLE_DATA *)VECTOR_element(modelType->reportedProperties, i);
+        free((void*)reportedProperty->reportedPropertyName);
+        free((void*)reportedProperty->reportedPropertyType);
+        free(reportedProperty);
+    }
+    VECTOR_destroy(modelType->reportedProperties);
+
     VECTOR_clear(modelType->models);
     VECTOR_destroy(modelType->models);
 
@@ -566,11 +584,32 @@ SCHEMA_MODEL_TYPE_HANDLE Schema_CreateModelType(SCHEMA_HANDLE schemaHandle, cons
                     modelType->SchemaHandle = schemaHandle;
                     modelType->DeviceCount = 0;
                     modelType->models = VECTOR_create(sizeof(MODEL_IN_MODEL) );
-                    schema->ModelTypes[schema->ModelTypeCount] = modelType;
-                    schema->ModelTypeCount++;
+                    if (modelType->models == NULL)
+                    {
+                        LogError("unable to VECTOR_create");
+                        free((void*)modelType->Name);
+                        free((void*)modelType);
+                        result = NULL;
+                    }
+                    else
+                    {
+                        if ((modelType->reportedProperties = VECTOR_create(sizeof(SCHEMA_REPORTED_PROPERTY_HANDLE))) == NULL)
+                        {
+                            LogError("failed to VECTOR_create");
+                            VECTOR_destroy(modelType->models);
+                            free((void*)modelType->Name);
+                            free((void*)modelType);
+                            result = NULL;
 
-                    /* Codes_SRS_SCHEMA_99_008:[On success, a non-NULL handle shall be returned.] */
-                    result = (SCHEMA_MODEL_TYPE_HANDLE)modelType;
+                        }
+                        else
+                        {
+                            schema->ModelTypes[schema->ModelTypeCount] = modelType;
+                            schema->ModelTypeCount++;
+                            /* Codes_SRS_SCHEMA_99_008:[On success, a non-NULL handle shall be returned.] */
+                            result = (SCHEMA_MODEL_TYPE_HANDLE)modelType;
+                        }
+                    }
                 }
 
                 /* If possible, reduce the memory of over allocation */
@@ -616,6 +655,87 @@ SCHEMA_HANDLE Schema_GetSchemaForModelType(SCHEMA_MODEL_TYPE_HANDLE modelTypeHan
 SCHEMA_RESULT Schema_AddModelProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName, const char* propertyType)
 {
     return AddModelProperty((SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle, propertyName, propertyType);
+}
+
+static bool reportedPropertyExists(const void* element, const void* value)
+{
+    SCHEMA_REPORTED_PROPERTY_HANDLE_DATA* reportedProperty = (SCHEMA_REPORTED_PROPERTY_HANDLE_DATA*)element;
+    return (strcmp(reportedProperty->reportedPropertyName, value) == 0);
+}
+
+SCHEMA_RESULT Schema_AddModelReportedProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* reportedPropertyName, const char* reportedPropertyType)
+{
+    SCHEMA_RESULT result;
+    /*Codes_SRS_SCHEMA_02_001: [ If modelTypeHandle is NULL then Schema_AddModelReportedProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
+    /*Codes_SRS_SCHEMA_02_002: [ If reportedPropertyName is NULL then Schema_AddModelReportedProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
+    /*Codes_SRS_SCHEMA_02_003: [ If reportedPropertyType is NULL then Schema_AddModelReportedProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
+    if (
+        (modelTypeHandle == NULL)
+        )
+    {
+        LogError("invalid argument SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, const char* reportedPropertyName=%p, const char* reportedPropertyType=%p", modelTypeHandle, reportedPropertyName, reportedPropertyType);
+        result = SCHEMA_INVALID_ARG;
+    }
+    else
+    {
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
+        /*Codes_SRS_SCHEMA_02_004: [ If reportedPropertyName has already been added then Schema_AddModelReportedProperty shall fail and return SCHEMA_PROPERTY_ELEMENT_EXISTS. ]*/
+        if (VECTOR_find_if(modelType->reportedProperties, reportedPropertyExists, reportedPropertyName) != NULL)
+        {
+            LogError("unable to add reportedProperty %s because it already exists", reportedPropertyName);
+            result = SCHEMA_DUPLICATE_ELEMENT;
+        }
+        else
+        {
+            /*Codes_SRS_SCHEMA_02_005: [ Schema_AddModelReportedProperty shall record reportedPropertyName and reportedPropertyType. ]*/
+            SCHEMA_REPORTED_PROPERTY_HANDLE_DATA* reportedProperty = (SCHEMA_REPORTED_PROPERTY_HANDLE_DATA*)malloc(sizeof(SCHEMA_REPORTED_PROPERTY_HANDLE_DATA));
+            if (reportedProperty == NULL)
+            {
+                /*Codes_SRS_SCHEMA_02_006: [ If any error occurs then Schema_AddModelReportedProperty shall fail and return SCHEMA_ERROR. ]*/
+                LogError("unable to malloc");
+                result = SCHEMA_ERROR;
+            }
+            else
+            {
+                if (mallocAndStrcpy_s((char**)&reportedProperty->reportedPropertyName, reportedPropertyName) != 0)
+                {
+                    /*Codes_SRS_SCHEMA_02_006: [ If any error occurs then Schema_AddModelReportedProperty shall fail and return SCHEMA_ERROR. ]*/
+                    LogError("unable to mallocAndStrcpy_s");
+                    free(reportedProperty);
+                    result = SCHEMA_ERROR;
+                }
+                else
+                {
+                    if (mallocAndStrcpy_s((char**)&reportedProperty->reportedPropertyType, reportedPropertyType) != 0)
+                    {
+                        /*Codes_SRS_SCHEMA_02_006: [ If any error occurs then Schema_AddModelReportedProperty shall fail and return SCHEMA_ERROR. ]*/
+                        LogError("unable to mallocAndStrcpy_s");
+                        free((void*)reportedProperty->reportedPropertyName);
+                        free(reportedProperty);
+                        result = SCHEMA_ERROR;
+                    }
+                    else
+                    {
+                        if (VECTOR_push_back(modelType->reportedProperties, reportedProperty, 1) != 0)
+                        {
+                            /*Codes_SRS_SCHEMA_02_006: [ If any error occurs then Schema_AddModelReportedProperty shall fail and return SCHEMA_ERROR. ]*/
+                            LogError("unable to VECTOR_push_back");
+                            free((void*)reportedProperty->reportedPropertyType);
+                            free((void*)reportedProperty->reportedPropertyName);
+                            free(reportedProperty);
+                            result = SCHEMA_ERROR;
+                        }
+                        else
+                        {
+                            /*Codes_SRS_SCHEMA_02_007: [ Otherwise Schema_AddModelReportedProperty shall succeed and return SCHEMA_OK. ]*/
+                            result = SCHEMA_OK;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return result;
 }
 
 SCHEMA_ACTION_HANDLE Schema_CreateModelAction(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* actionName)
@@ -873,6 +993,86 @@ SCHEMA_RESULT Schema_GetModelPropertyCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHan
         result = SCHEMA_OK;
     }
 
+    return result;
+}
+
+SCHEMA_RESULT Schema_GetModelReportedPropertyCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t* reportedPropertyCount)
+{
+    SCHEMA_RESULT result;
+    /*Codes_SRS_SCHEMA_02_008: [ If parameter modelTypeHandle is NULL then Schema_GetModelReportedPropertyCount shall fail and return SCHEMA_INVALID_ARG. ]*/
+    /*Codes_SRS_SCHEMA_02_009: [ If parameter reportedPropertyCount is NULL then Schema_GetModelReportedPropertyCount shall fail and return SCHEMA_INVALID_ARG. ]*/
+    if (
+        (modelTypeHandle == NULL)||
+        (reportedPropertyCount==NULL)
+        )
+    {
+        LogError("SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, size_t* reportedPropertyCount=%p", modelTypeHandle, reportedPropertyCount);
+        result = SCHEMA_INVALID_ARG;
+    }
+    else
+    {
+        /*Codes_SRS_SCHEMA_02_010: [ Schema_GetModelReportedPropertyCount shall provide in reportedPropertyCount the number of reported properties and return SCHEMA_OK. ]*/
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
+        *reportedPropertyCount = VECTOR_size(modelType->reportedProperties);
+        result = SCHEMA_OK;
+    }
+    return result;
+}
+
+SCHEMA_REPORTED_PROPERTY_HANDLE Schema_GetModelReportedPropertyByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* reportedPropertyName)
+{
+    SCHEMA_REPORTED_PROPERTY_HANDLE result;
+    /*Codes_SRS_SCHEMA_02_011: [ If argument modelTypeHandle is NULL then Schema_GetModelReportedPropertyByName shall fail and return NULL. ]*/
+    /*Codes_SRS_SCHEMA_02_012: [ If argument reportedPropertyName is NULL then Schema_GetModelReportedPropertyByName shall fail and return NULL. ]*/
+    if(
+        (modelTypeHandle == NULL) ||
+        (reportedPropertyName == NULL)
+        )
+    {
+        LogError("invalid argument SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, const char* reportedPropertyName=%p", modelTypeHandle, reportedPropertyName);
+        result = NULL;
+    }
+    else
+    {
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
+        /*Codes_SRS_SCHEMA_02_013: [ If reported property by the name reportedPropertyName exists then Schema_GetModelReportedPropertyByName shall succeed and return a non-NULL value. ]*/
+        /*Codes_SRS_SCHEMA_02_014: [ Otherwise Schema_GetModelReportedPropertyByName shall fail and return NULL. ]*/
+        if((result = VECTOR_find_if(modelType->reportedProperties, reportedPropertyExists, reportedPropertyName))==NULL)
+        {
+            LogError("a reported property with name \"%s\" does not exist", reportedPropertyName);
+        }
+        else
+        {
+            /*return as is*/
+        }
+    }
+    return result;
+}
+
+SCHEMA_REPORTED_PROPERTY_HANDLE Schema_GetModelReportedPropertyByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index)
+{
+    SCHEMA_REPORTED_PROPERTY_HANDLE result;
+    /*Codes_SRS_SCHEMA_02_015: [ If argument modelTypeHandle is NULL then Schema_GetModelReportedPropertyByIndex shall fail and return NULL. ]*/
+    if (modelTypeHandle == NULL)
+    {
+        LogError("invalid argument SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, size_t index=%zu", modelTypeHandle, index);
+        result = NULL;
+    }
+    else
+    {
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
+
+        /*Codes_SRS_SCHEMA_02_016: [ If a reported property with index equal to index exists then Schema_GetModelReportedPropertyByIndex shall succeed and return the non-NULL handle of that REPORTED_PROPERTY. ]*/
+        /*Codes_SRS_SCHEMA_02_017: [ Otherwise Schema_GetModelReportedPropertyByIndex shall fail and return NULL. ]*/
+        if ((result = VECTOR_element(modelType->reportedProperties, index)) == NULL)
+        {
+            LogError("index %zu is invalid", index);
+        }
+        else
+        {
+            /*return as is*/
+        }
+    }
     return result;
 }
 
@@ -1894,6 +2094,98 @@ bool Schema_ModelPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, 
                     {
                         /* found property */
                         /* Codes_SRS_SCHEMA_99_177: [Schema_ModelPropertyByPathExists shall return true if a leaf property exists in the model modelTypeHandle.] */
+                        result = true;
+                        break;
+                    }
+                }
+
+                break;
+            }
+        } while (slashPos != NULL);
+    }
+
+    return result;
+}
+
+bool Schema_ModelReportedPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* reportedPropertyPath)
+{
+    bool result;
+
+    /*Codes_SRS_SCHEMA_02_018: [ If argument modelTypeHandle is NULL then Schema_ModelReportedPropertyByPathExists shall fail and return false. ]*/
+    /*Codes_SRS_SCHEMA_02_019: [ If argument reportedPropertyPath is NULL then Schema_ModelReportedPropertyByPathExists shall fail and return false. ]*/
+    if ((modelTypeHandle == NULL) ||
+        (reportedPropertyPath == NULL))
+    {
+        LogError("invalid argument SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, const char* reportedPropertyPath=%s", modelTypeHandle, reportedPropertyPath);
+        result = false;
+    }
+    else
+    {
+        const char* slashPos;
+
+        /*Codes_SRS_SCHEMA_02_021: [ If the reported property cannot be found Schema_ModelReportedPropertyByPathExists shall fail and return false. ]*/
+        result = false;
+
+        /*Codes_SRS_SCHEMA_02_020: [ reportedPropertyPath shall be assumed to be in the format model1/model2/.../reportedPropertyName. ]*/
+        if (*reportedPropertyPath == '/')
+        {
+            reportedPropertyPath++;
+        }
+
+        do
+        {
+            const char* endPos;
+            size_t i;
+            size_t modelCount;
+            SCHEMA_MODEL_TYPE_HANDLE_DATA* modelType = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
+
+            slashPos = strchr(reportedPropertyPath, '/');
+            endPos = slashPos;
+            if (endPos == NULL)
+            {
+                endPos = &reportedPropertyPath[strlen(reportedPropertyPath)];
+            }
+
+            modelCount = VECTOR_size(modelType->models);
+            for (i = 0; i < modelCount; i++)
+            {
+                MODEL_IN_MODEL* childModel = (MODEL_IN_MODEL*)VECTOR_element(modelType->models, i);
+                if ((strncmp(childModel->propertyName, reportedPropertyPath, endPos - reportedPropertyPath) == 0) &&
+                    (strlen(childModel->propertyName) == (size_t)(endPos - reportedPropertyPath)))
+                {
+                    /* found */
+                    modelTypeHandle = childModel->modelHandle;
+                    break;
+                }
+            }
+
+            if (i < modelCount)
+            {
+                /* model found, check if there is more in the path */
+                if (slashPos == NULL)
+                {
+                    /*Codes_SRS_SCHEMA_02_022: [ If the path reportedPropertyPath points to a sub-model, Schema_ModelReportedPropertyByPathExists shall succeed and true. ]*/
+                    /* this is the last one, so this is the thing we were looking for */
+                    result = true;
+                    break;
+                }
+                else
+                {
+                    /* continue looking, there's more  */
+                    reportedPropertyPath = slashPos + 1;
+                }
+            }
+            else
+            {
+                /* no model found, let's see if this is a property */
+                for (i = 0; i < modelType->PropertyCount; i++)
+                {
+                    SCHEMA_PROPERTY_HANDLE_DATA* property = (SCHEMA_PROPERTY_HANDLE_DATA*)modelType->Properties[i];
+                    if ((strncmp(property->PropertyName, reportedPropertyPath, endPos - reportedPropertyPath) == 0) &&
+                        (strlen(property->PropertyName) == (size_t)(endPos - reportedPropertyPath)))
+                    {
+                        /*Codes_SRS_SCHEMA_02_023: [ If reportedPropertyPath exists then Schema_ModelReportedPropertyByPathExists shall succeed and return `true' ]*/
+                        /* found property */
                         result = true;
                         break;
                     }
