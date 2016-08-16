@@ -562,7 +562,7 @@ bool Schema_ModelReportedPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelType
 
 **SRS_SCHEMA_02_022: [** If the path reportedPropertyPath points to a sub-model, `Schema_ModelReportedPropertyByPathExists` shall succeed and `true`. **]**
 
-**SRS_SCHEMA_02_023: [** If `reportedPropertyPath` exists then `Schema_ModelReportedPropertyByPathExists` shall succeed and return `true' **]**
+**SRS_SCHEMA_02_023: [** If `reportedPropertyPath` exists then `Schema_ModelReportedPropertyByPathExists` shall succeed and return `true` **]**
 
 ### Schema_ReleaseDeviceRef
 ```c

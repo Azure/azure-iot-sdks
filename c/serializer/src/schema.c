@@ -162,7 +162,7 @@ static void DestroyModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle)
     nReportedProperties = VECTOR_size(modelType->reportedProperties);
     for (i = 0;i < nReportedProperties;i++)
     {
-        SCHEMA_REPORTED_PROPERTY_HANDLE_DATA* reportedProperty = (SCHEMA_REPORTED_PROPERTY_HANDLE_DATA *)VECTOR_element(modelType->reportedProperties, i);
+        SCHEMA_REPORTED_PROPERTY_HANDLE_DATA* reportedProperty = *(SCHEMA_REPORTED_PROPERTY_HANDLE_DATA **)VECTOR_element(modelType->reportedProperties, i);
         free((void*)reportedProperty->reportedPropertyName);
         free((void*)reportedProperty->reportedPropertyType);
         free(reportedProperty);
@@ -659,7 +659,7 @@ SCHEMA_RESULT Schema_AddModelProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, 
 
 static bool reportedPropertyExists(const void* element, const void* value)
 {
-    SCHEMA_REPORTED_PROPERTY_HANDLE_DATA* reportedProperty = (SCHEMA_REPORTED_PROPERTY_HANDLE_DATA*)element;
+    SCHEMA_REPORTED_PROPERTY_HANDLE_DATA* reportedProperty = *(SCHEMA_REPORTED_PROPERTY_HANDLE_DATA**)element;
     return (strcmp(reportedProperty->reportedPropertyName, value) == 0);
 }
 
@@ -670,7 +670,9 @@ SCHEMA_RESULT Schema_AddModelReportedProperty(SCHEMA_MODEL_TYPE_HANDLE modelType
     /*Codes_SRS_SCHEMA_02_002: [ If reportedPropertyName is NULL then Schema_AddModelReportedProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
     /*Codes_SRS_SCHEMA_02_003: [ If reportedPropertyType is NULL then Schema_AddModelReportedProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
     if (
-        (modelTypeHandle == NULL)
+        (modelTypeHandle == NULL) ||
+        (reportedPropertyName == NULL) ||
+        (reportedPropertyType == NULL)
         )
     {
         LogError("invalid argument SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, const char* reportedPropertyName=%p, const char* reportedPropertyType=%p", modelTypeHandle, reportedPropertyName, reportedPropertyType);
@@ -716,7 +718,7 @@ SCHEMA_RESULT Schema_AddModelReportedProperty(SCHEMA_MODEL_TYPE_HANDLE modelType
                     }
                     else
                     {
-                        if (VECTOR_push_back(modelType->reportedProperties, reportedProperty, 1) != 0)
+                        if (VECTOR_push_back(modelType->reportedProperties, &reportedProperty, 1) != 0)
                         {
                             /*Codes_SRS_SCHEMA_02_006: [ If any error occurs then Schema_AddModelReportedProperty shall fail and return SCHEMA_ERROR. ]*/
                             LogError("unable to VECTOR_push_back");
@@ -2178,20 +2180,12 @@ bool Schema_ModelReportedPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelType
             else
             {
                 /* no model found, let's see if this is a property */
-                for (i = 0; i < modelType->PropertyCount; i++)
+                result = (VECTOR_find_if(modelType->reportedProperties, reportedPropertyExists, reportedPropertyPath) != NULL);
+                if (!result)
                 {
-                    SCHEMA_PROPERTY_HANDLE_DATA* property = (SCHEMA_PROPERTY_HANDLE_DATA*)modelType->Properties[i];
-                    if ((strncmp(property->PropertyName, reportedPropertyPath, endPos - reportedPropertyPath) == 0) &&
-                        (strlen(property->PropertyName) == (size_t)(endPos - reportedPropertyPath)))
-                    {
-                        /*Codes_SRS_SCHEMA_02_023: [ If reportedPropertyPath exists then Schema_ModelReportedPropertyByPathExists shall succeed and return `true' ]*/
-                        /* found property */
-                        result = true;
-                        break;
-                    }
+                    LogError("no such reported property \"%s\"", reportedPropertyPath);
                 }
-
-                break;
+				break;
             }
         } while (slashPos != NULL);
     }

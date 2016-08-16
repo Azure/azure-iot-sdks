@@ -12,6 +12,11 @@ void* my_gballoc_malloc(size_t t)
     return malloc(t);
 }
 
+void* my_gballoc_realloc(void* v, size_t t)
+{
+    return realloc(v, t);
+}
+
 void my_gballoc_free(void * t)
 {
     free(t);
@@ -21,6 +26,8 @@ void my_gballoc_free(void * t)
 #include <crtdbg.h>
 #endif
 
+/*want VECTOR to use real malloc*/
+#define GBALLOC_H 
 #define VECTOR_create real_VECTOR_create
 #define VECTOR_destroy real_VECTOR_destroy
 #define VECTOR_push_back real_VECTOR_push_back
@@ -44,6 +51,8 @@ void my_gballoc_free(void * t)
 #undef VECTOR_size
 #undef VECTOR_H
 
+/*want crt_abstractions to use real malloc*/
+#define GBALLOC_H 
 #define mallocAndStrcpy_s real_mallocAndStrcpy_s
 #define unsignedIntToString real_unsignedIntToString
 #define size_tToString real_size_tToString 
@@ -60,7 +69,9 @@ void my_gballoc_free(void * t)
 #include "umocktypes_stdint.h"
 #include "umock_c_negative_tests.h"
 
+#undef GBALLOC_H
 #define ENABLE_MOCKS
+#include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/vector.h"
 #undef ENABLE_MOCKS
@@ -102,10 +113,12 @@ BEGIN_TEST_SUITE(Schema_ut)
 
         REGISTER_UMOCK_ALIAS_TYPE(const VECTOR_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(VECTOR_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(PREDICATE_FUNCTION, void*);
 
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_create, real_VECTOR_create);
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_destroy, real_VECTOR_destroy);
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_push_back, real_VECTOR_push_back);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(VECTOR_push_back, __LINE__);
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_erase, real_VECTOR_erase);
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_clear, real_VECTOR_clear);
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_element, real_VECTOR_element);
@@ -115,8 +128,15 @@ BEGIN_TEST_SUITE(Schema_ut)
         REGISTER_GLOBAL_MOCK_HOOK(VECTOR_size, real_VECTOR_size);
 
         REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, real_mallocAndStrcpy_s);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __LINE__);
         REGISTER_GLOBAL_MOCK_HOOK(unsignedIntToString, real_unsignedIntToString);
         REGISTER_GLOBAL_MOCK_HOOK(size_tToString, real_size_tToString);
+
+        REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
+        REGISTER_GLOBAL_MOCK_HOOK(gballoc_realloc, my_gballoc_realloc);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_realloc, NULL);
 
     }
 
@@ -3909,6 +3929,552 @@ BEGIN_TEST_SUITE(Schema_ut)
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_OK, result);
+    }
+
+    /*Tests_SRS_SCHEMA_02_001: [ If modelTypeHandle is NULL then Schema_AddModelReportedProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
+    TEST_FUNCTION(Schema_AddModelReportedProperty_with_NULL_modelTypeHandle_fails)
+    {
+        ///arrange
+
+        ///act
+        SCHEMA_RESULT result = Schema_AddModelReportedProperty(NULL, "reportedPropertyName", "reportedPropertyType");
+
+        ///assert
+        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+    }
+
+    /*Tests_SRS_SCHEMA_02_002: [ If reportedPropertyName is NULL then Schema_AddModelReportedProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
+    TEST_FUNCTION(Schema_AddModelReportedProperty_with_NULL_reportedPropertyName_fails)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
+        umock_c_reset_all_calls();
+
+        ///act
+        SCHEMA_RESULT result = Schema_AddModelReportedProperty(modelType, NULL, "reportedPropertyType");
+
+        ///assert
+        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_003: [ If reportedPropertyType is NULL then Schema_AddModelReportedProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
+    TEST_FUNCTION(Schema_AddModelReportedProperty_with_NULL_reportedPropertyType_fails)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
+        umock_c_reset_all_calls();
+
+        ///act
+        SCHEMA_RESULT result = Schema_AddModelReportedProperty(modelType, "reportedPropertyName", NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_004: [ If reportedPropertyName has already been added then Schema_AddModelReportedProperty shall fail and return SCHEMA_DUPLICATE_ELEMENT. ]*/
+    TEST_FUNCTION(Schema_AddModelReportedProperty_adding_twice_the_same_reportedproperty_fails)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
+        const char* reportedPropertyName = "reportedPropertyName";
+        (void)Schema_AddModelReportedProperty(modelType, reportedPropertyName, "int"); /*added once here*/
+        
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, reportedPropertyName))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_pred();
+
+        ///act
+        SCHEMA_RESULT result = Schema_AddModelReportedProperty(modelType, reportedPropertyName, "int"); /*added the second time*/
+
+        ///assert
+        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_DUPLICATE_ELEMENT, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    void Schema_AddModelReportedProperty_inert_path(const char* reportedPropertyName, const char* reportedPropertyType)
+    {
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, reportedPropertyName))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_pred();
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, reportedPropertyName))
+            .IgnoreArgument_destination();
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, reportedPropertyType))
+            .IgnoreArgument_destination();
+        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_elements();
+    }
+
+    /*Tests_SRS_SCHEMA_02_005: [ Schema_AddModelReportedProperty shall record reportedPropertyName and reportedPropertyType. ]*/
+    /*Tests_SRS_SCHEMA_02_007: [ Otherwise Schema_AddModelReportedProperty shall succeed and return SCHEMA_OK. ]*/
+    TEST_FUNCTION(Schema_AddModelReportedProperty_happy_path)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
+        const char* reportedPropertyName = "reportedPropertyName";
+        const char* reportedPropertyType = "reportedPropertyType";
+        umock_c_reset_all_calls();
+
+        Schema_AddModelReportedProperty_inert_path(reportedPropertyName, reportedPropertyType);
+
+        ///act
+        SCHEMA_RESULT result = Schema_AddModelReportedProperty(modelType, reportedPropertyName, reportedPropertyType);
+
+        ///assert
+        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_006: [ If any error occurs then Schema_AddModelReportedProperty shall fail and return SCHEMA_ERROR. ]*/
+    TEST_FUNCTION(Schema_AddModelReportedProperty_unhappy_paths)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
+        const char* reportedPropertyName = "reportedPropertyName";
+        const char* reportedPropertyType = "reportedPropertyType";
+        (void)umock_c_negative_tests_init();
+        umock_c_reset_all_calls();
+        
+        Schema_AddModelReportedProperty_inert_path(reportedPropertyName, reportedPropertyType);
+        umock_c_negative_tests_snapshot();
+
+        size_t calls_that_cannot_fail[] =
+        {
+            0 /*VECTOR_find_if*/
+        };
+
+        for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+        {
+            size_t j;
+            umock_c_negative_tests_reset();
+
+            for (j = 0;j<sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++) /*not running the tests that cannot fail*/
+            {
+                if (calls_that_cannot_fail[j] == i)
+                    break;
+            }
+
+            if (j == sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]))
+            {
+
+                umock_c_negative_tests_fail_call(i);
+                char temp_str[128];
+                sprintf(temp_str, "On failed call %zu", i);
+
+                ///act
+                SCHEMA_RESULT result = Schema_AddModelReportedProperty(modelType, reportedPropertyName, reportedPropertyType);
+
+                ///assert
+                ASSERT_ARE_EQUAL_WITH_MSG(SCHEMA_RESULT, SCHEMA_ERROR, result, temp_str);
+            }
+        }
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_008: [ If parameter modelTypeHandle is NULL then Schema_GetModelReportedPropertyCount shall fail and return SCHEMA_INVALID_ARG. ]*/
+    TEST_FUNCTION(Schema_GetModelReportedPropertyCount_with_NULL_modelTypeHandle_fails)
+    {
+        ///arrange
+        size_t count;
+
+        ///act
+        SCHEMA_RESULT result = Schema_GetModelReportedPropertyCount(NULL, &count);
+
+        ///assert
+        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
+
+        ///clean
+    }
+
+    /*Tests_SRS_SCHEMA_02_009: [ If parameter reportedPropertyCount is NULL then Schema_GetModelReportedPropertyCount shall fail and return SCHEMA_INVALID_ARG. ]*/
+    TEST_FUNCTION(Schema_GetModelReportedPropertyCount_with_NULL_reportedPropertyCount_fails)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
+
+        ///act
+        SCHEMA_RESULT result = Schema_GetModelReportedPropertyCount(modelType, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_010: [ Schema_GetModelReportedPropertyCount shall provide in reportedPropertyCount the number of reported properties and return SCHEMA_OK. ]*/
+    TEST_FUNCTION(Schema_GetModelReportedPropertyCount_happy_path)
+    {
+        ///arrange
+        size_t count = 22;
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+            .IgnoreArgument_handle();
+
+        ///act
+        SCHEMA_RESULT result = Schema_GetModelReportedPropertyCount(modelType, &count);
+
+        ///assert
+        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_OK, result);
+        ASSERT_ARE_EQUAL(size_t, 0, count);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_010: [ Schema_GetModelReportedPropertyCount shall provide in reportedPropertyCount the number of reported properties and return SCHEMA_OK. ]*/
+    TEST_FUNCTION(Schema_GetModelReportedPropertyCount_happy_path_2)
+    {
+        ///arrange
+        size_t count = 22;
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
+        (void)Schema_AddModelReportedProperty(modelType, "a,", "b");
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+            .IgnoreArgument_handle();
+
+        ///act
+        SCHEMA_RESULT result = Schema_GetModelReportedPropertyCount(modelType, &count);
+
+        ///assert
+        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_OK, result);
+        ASSERT_ARE_EQUAL(size_t, 1, count);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_011: [ If argument modelTypeHandle is NULL then Schema_GetModelReportedPropertyByName shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_GetModelReportedPropertyByName_with_NULL_modelTypeHandle_fails)
+    {
+        ///arrange
+
+        ///act
+        SCHEMA_REPORTED_PROPERTY_HANDLE result = Schema_GetModelReportedPropertyByName(NULL, "a");
+        
+        ///assert
+        ASSERT_IS_NULL(result);
+
+        ///clean
+    }
+
+    /*Tests_SRS_SCHEMA_02_012: [ If argument reportedPropertyName is NULL then Schema_GetModelReportedPropertyByName shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_GetModelReportedPropertyByName_with_NULL_reportedPropertyName_fails)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
+        umock_c_reset_all_calls();
+
+        ///act
+        SCHEMA_REPORTED_PROPERTY_HANDLE result = Schema_GetModelReportedPropertyByName(modelType, NULL);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_013: [ If reported property by the name reportedPropertyName exists then Schema_GetModelReportedPropertyByName shall succeed and return a non-NULL value. ]*/
+    TEST_FUNCTION(Schema_GetModelReportedPropertyByName_happy_path)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
+        (void)Schema_AddModelReportedProperty(modelType, "a", "b");
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "a"))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_pred();
+
+        ///act
+        SCHEMA_REPORTED_PROPERTY_HANDLE result = Schema_GetModelReportedPropertyByName(modelType, "a");
+
+        ///assert
+        ASSERT_IS_NOT_NULL(result);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_014: [ Otherwise Schema_GetModelReportedPropertyByName shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_GetModelReportedPropertyByName_unhappy_path)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
+        (void)Schema_AddModelReportedProperty(modelType, "a", "b");
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "a"))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_pred();
+
+        ///act
+        SCHEMA_REPORTED_PROPERTY_HANDLE result = Schema_GetModelReportedPropertyByName(modelType, "it_wasn_t_me");
+
+        ///assert
+        ASSERT_IS_NULL(result);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_015: [ If argument modelTypeHandle is NULL then Schema_GetModelReportedPropertyByIndex shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_GetModelReportedPropertyByIndex_with_NULL_modelTypeHandle_fails)
+    {
+        ///arrange
+
+        ///act
+        SCHEMA_REPORTED_PROPERTY_HANDLE result = Schema_GetModelReportedPropertyByIndex(NULL, 0);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+
+        ///clean
+    }
+
+    /*Tests_SRS_SCHEMA_02_017: [ Otherwise Schema_GetModelReportedPropertyByIndex shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_GetModelReportedPropertyByIndex_unhappy_path)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0))
+            .IgnoreArgument_handle();
+
+        ///act
+        SCHEMA_REPORTED_PROPERTY_HANDLE result = Schema_GetModelReportedPropertyByIndex(modelType, 0);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_016: [ If a reported property with index equal to index exists then Schema_GetModelReportedPropertyByIndex shall succeed and return the non-NULL handle of that REPORTED_PROPERTY. ]*/
+    TEST_FUNCTION(Schema_GetModelReportedPropertyByIndex_happy_path)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
+        (void)Schema_AddModelReportedProperty(modelType, "a", "b");
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0))
+            .IgnoreArgument_handle();
+
+        ///act
+        SCHEMA_REPORTED_PROPERTY_HANDLE result = Schema_GetModelReportedPropertyByIndex(modelType, 0);
+
+        ///assert
+        ASSERT_IS_NOT_NULL(result);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_018: [ If argument modelTypeHandle is NULL then Schema_ModelReportedPropertyByPathExists shall fail and return false. ]*/
+    TEST_FUNCTION(Schema_ModelReportedPropertyByPathExists_with_NULL_modelTypeHandle_fails)
+    {
+        ///arrange
+
+        ///act
+        bool result = Schema_ModelReportedPropertyByPathExists(NULL, "a");
+
+        ///assert
+        ASSERT_IS_FALSE(result);
+
+        ///clean
+    }
+
+    /*Tests_SRS_SCHEMA_02_019: [ If argument reportedPropertyPath is NULL then Schema_ModelReportedPropertyByPathExists shall fail and return false. ]*/
+    TEST_FUNCTION(Schema_ModelReportedPropertyByPathExists_with_NULL_reportedPropertyPath_fails)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
+
+        ///act
+        bool result = Schema_ModelReportedPropertyByPathExists(modelType, NULL);
+
+        ///assert
+        ASSERT_IS_FALSE(result);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_021: [ If the reported property cannot be found Schema_ModelReportedPropertyByPathExists shall fail and return false. ]*/
+    TEST_FUNCTION(Schema_ModelReportedPropertyByPathExists_with_no_properties_fails)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
+
+        ///act
+        bool result = Schema_ModelReportedPropertyByPathExists(modelType, "a");
+
+        ///assert
+        ASSERT_IS_FALSE(result);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_021: [ If the reported property cannot be found Schema_ModelReportedPropertyByPathExists shall fail and return false. ]*/
+    TEST_FUNCTION(Schema_ModelReportedPropertyByPathExists_with_1_properties_fails)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
+        (void)Schema_AddModelReportedProperty(modelType, "a", "b");
+
+        ///act
+        bool result = Schema_ModelReportedPropertyByPathExists(modelType, "z"); /*only "a" exists*/
+
+        ///assert
+        ASSERT_IS_FALSE(result);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_021: [ If the reported property cannot be found Schema_ModelReportedPropertyByPathExists shall fail and return false. ]*/
+    TEST_FUNCTION(Schema_ModelReportedPropertyByPathExists_with_2_properties_fails)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
+        (void)Schema_AddModelReportedProperty(modelType, "a1", "b");
+        (void)Schema_AddModelReportedProperty(modelType, "a2", "b");
+
+        ///act
+        bool result = Schema_ModelReportedPropertyByPathExists(modelType, "z"); /*only "a1" and "a2" exists*/
+
+        ///assert
+        ASSERT_IS_FALSE(result);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_021: [ If the reported property cannot be found Schema_ModelReportedPropertyByPathExists shall fail and return false. ]*/
+    TEST_FUNCTION(Schema_ModelReportedPropertyByPathExists_with_1_model_in_model_fails)
+    {
+        ///arrange
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
+        SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
+        (void)Schema_AddModelModel(model, "ManicMiner", minerModel);
+        (void)Schema_AddModelReportedProperty(model, "a", "b");
+
+        /* overview of what the above instructions produce:
+        SCHEMA
+        |
+        +---- model ("someModel")
+        |     |
+        |     + "ManicMiner": minerModel
+        |     |
+        |     + "a":"b"
+        |
+        +---- minerModel ("someMinerModel")
+        */
+        
+        ///act
+        bool result1 = Schema_ModelReportedPropertyByPathExists(model, "z"); /*only "a" and "ManicMiner" exists*/
+        bool result2 = Schema_ModelReportedPropertyByPathExists(model, "ManicMinerX"); /*only "a" and "ManicMiner" exists*/
+
+        ///assert
+        ASSERT_IS_FALSE(result1);
+        ASSERT_IS_FALSE(result2);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_020: [ reportedPropertyPath shall be assumed to be in the format model1/model2/.../reportedPropertyName. ]*/
+    /*Tests_SRS_SCHEMA_02_022: [ If the path reportedPropertyPath points to a sub-model, Schema_ModelReportedPropertyByPathExists shall succeed and true. ]*/
+    /*Tests_SRS_SCHEMA_02_023: [ If reportedPropertyPath exists then Schema_ModelReportedPropertyByPathExists shall succeed and return true ]*/
+    TEST_FUNCTION(Schema_ModelReportedPropertyByPathExists_with_1_model_in_model_succeeds)
+    {
+        ///arrange
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
+        SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
+        (void)Schema_AddModelReportedProperty(minerModel, "reported", "five_miles_of_gallery");
+        (void)Schema_AddModelModel(model, "ManicMiner", minerModel);
+        (void)Schema_AddModelReportedProperty(model, "a", "b");
+
+        /* overview of what the above instructions produce:
+        SCHEMA
+        |
+        +---- model ("someModel")
+        |     |
+        |     + "ManicMiner": minerModel (+ it contains the ManicMiner's model constituents)
+        |     |
+        |     + "a":"b"
+        |
+        +---- minerModel ("someMinerModel")
+              |
+              + "reported": "five_miles_of_gallery"
+        */
+
+        ///act
+        bool result1 = Schema_ModelReportedPropertyByPathExists(model, "a"); /*only "a" and "ManicMiner" exists*/
+        bool result2 = Schema_ModelReportedPropertyByPathExists(model, "ManicMiner"); /*only "a" and "ManicMiner" exists*/
+        bool result3 = Schema_ModelReportedPropertyByPathExists(model, "ManicMiner/reported"); /*only "a" and "ManicMiner" exists*/
+
+        ///assert
+        ASSERT_IS_TRUE(result1);
+        ASSERT_IS_TRUE(result2);
+        ASSERT_IS_TRUE(result3);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
     }
 
 END_TEST_SUITE(Schema_ut)

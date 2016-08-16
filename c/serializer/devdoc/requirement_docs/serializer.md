@@ -114,7 +114,7 @@ An action defines a command which the IOT service can invoke on any device that 
 
 **SRS_SERIALIZER_H_99_042: [**  WITH_ACTIONS's field<n>Type argument, which describes the type of the nth parameter in the action's function prototype, shall be one of the data types permitted for model properties. **]**
 
-**SRS_SERIALIZER_H_99_039: [**  WITH_ACTION shall declare a function with the signature ‘void name(param1Type param1Name, ...)', which the developer can define to receive corresponding commands from the IOT service. **]**
+**SRS_SERIALIZER_H_99_039: [**  WITH_ACTION shall declare a function with the signature 'void name(param1Type param1Name, ...)', which the developer can define to receive corresponding commands from the IOT service. **]**
 
 **SRS_SERIALIZER_H_99_043: [**  It is valid for an action function not to have any parameters. **]**
 

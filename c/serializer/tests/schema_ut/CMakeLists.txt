@@ -12,9 +12,6 @@ ${theseTestsName}.c
 
 set(${theseTestsName}_c_files
 ../../src/schema.c
-
-
-${SHARED_UTIL_SRC_FOLDER}/gballoc.c
 ${LOCK_C_FILE}
 )
 
