@@ -176,8 +176,10 @@ MqttTwinReceiver.prototype._onResponseMessage = function(topic, message){
 };
 
 MqttTwinReceiver.prototype._onPostMessage = function(topic, message) {
+  /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_020: [** If there is a listener for the post event, a post event shal be emitteded for each post message received **]** */
   if (topic.indexOf('$iothub/twin/PATCH/properties/desired/') === 0)
   {
+  /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_022: [** When a post event it emitted, the parameter shall be the body of the message **]** */
     this.emit('post', message);
   }
 };
@@ -194,8 +196,6 @@ util.inherits(MqttTwinReceiver, EventEmitter);
 module.exports = MqttTwinReceiver;
 
 
-/* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_020: [** If there is a listener for the post event, a post event shal be emitteded for each post message received **]** */
-/* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_022: [** When a post event it emitted, the parameter shall be the body of the message **]** */
 
 
 

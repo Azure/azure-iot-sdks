@@ -35,7 +35,11 @@ var FakeMqtt = function() {
   };
 
   this.subscribe = function(topicName, param, done) {
-    done();
+    if (this.subscribeShouldFail) {
+      done (new Error('Not authorized'));
+    } else {
+      done();
+    }
   };
 
   this.unsubscribe = function(topicName, done) {

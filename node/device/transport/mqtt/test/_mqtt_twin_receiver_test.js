@@ -175,8 +175,28 @@ describe('MqttTwinReceiver', function () {
 
     /* Tests_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_023: [** If the `error` event is subscribed to, an `error` event shall be emitted if any asynchronous subscribing operations fails. **]** */
     /* Tests_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_024: [** When the `error` event is emitted, the first parameter shall be an error object obtained via the MQTT `translateErrror` module. **]** */
-    it ('emits an error if subscribing fails', function() {
+    it ('emits an error if subscribing to response event fails', function(done) {
+      provider.subscribeShouldFail = true;
+      receiver.on('error', function(err) {
+        if (err.constructor.name === 'UnauthorizedError') {
+          done();
+        }
+      });
+      receiver.on('response', function() {});
     });
+
+    /* Tests_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_023: [** If the `error` event is subscribed to, an `error` event shall be emitted if any asynchronous subscribing operations fails. **]** */
+    /* Tests_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_024: [** When the `error` event is emitted, the first parameter shall be an error object obtained via the MQTT `translateErrror` module. **]** */
+    it ('emits an error if subscribing to post event fails', function(done) {
+      provider.subscribeShouldFail = true;
+      receiver.on('error', function(err) {
+        if (err.constructor.name === 'UnauthorizedError') {
+          done();
+        }
+      });
+      receiver.on('post', function() {});
+    });
+
   });
 
   describe('subscribed event', function() {
