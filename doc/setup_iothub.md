@@ -6,9 +6,9 @@ Before you can communicate with IoT Hub from a device you must create an IoT hub
 
 ## Create an IoT hub
 
-You can use the [Azure Preview Portal][azure-portal] to create an IoT hub to use with your devices.
+You can use the [Azure Portal][azure-portal] to create an IoT hub to use with your devices.
 
-1. Log on to the [Azure Preview Portal][azure-portal].
+1. Log on to the [Azure Portal][azure-portal].
 
 2. In the jumpbar, click **New**, then click **Internet of Things**, and then click **Azure IoT Hub**.
 
@@ -19,7 +19,7 @@ You can use the [Azure Preview Portal][azure-portal] to create an IoT hub to use
    ![][2]
 
     * In the **Name** box, enter a name to identify your IoT hub. When the **Name** is validated, a green check mark appears in the **Name** box.
-    * Change the **Pricing and scale tier** as desired. This tutorial does not require a specific tier.
+    * Change the **Pricing and scale tier** as desired. The getting started samples do not require a specific tier.
     * In the **Resource group** box, create a new resource group, or select and existing one. For more information, see [Using resource groups to manage your Azure resources][resource-group-portal].
     * Use **Location** to specify the geographic location in which to host your IoT hub.  
 
@@ -29,7 +29,7 @@ You can use the [Azure Preview Portal][azure-portal] to create an IoT hub to use
     ![][3]
 
 
-5. After the IoT hub has been created successfully, open the blade of the new IoT hub, take note of the URI, and select the **Key** icon on the top.
+5. After the IoT hub has been created successfully, open the blade of the new IoT hub, take note of the hostname URI, and click **Shared access policies**.
 
     ![][4]
 
