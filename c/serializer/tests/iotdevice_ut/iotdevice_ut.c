@@ -68,120 +68,6 @@ DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 static SCHEMA_MODEL_TYPE_HANDLE irrelevantModel = (SCHEMA_MODEL_TYPE_HANDLE)0x1;
 static ACTION_CALLBACK_FUNC ActionCallbackCalledByCommandDecoder;
 
-#if 0
-DEFINE_MICROMOCK_ENUM_TO_STRING(DEVICE_RESULT, DEVICE_RESULT_VALUES);
-DEFINE_MICROMOCK_ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES)
-
-
-static const DATA_PUBLISHER_HANDLE TEST_DATA_PUBLISHER_HANDLE = (DATA_PUBLISHER_HANDLE)0x4444;
-static const SCHEMA_HANDLE TEST_SCHEMA_HANDLE = (SCHEMA_HANDLE)0x4245;
-static const TRANSACTION_HANDLE TEST_TRANSACTION_HANDLE = (TRANSACTION_HANDLE)0x4246;
-static const COMMAND_DECODER_HANDLE TEST_COMMAND_DECODER_HANDLE = (COMMAND_DECODER_HANDLE)0x4247;
-static const char* TEST_MODEL_NAME = "Photo_Model";
-
-#define TEST_ENTITY_SET_NAME            "SomeTrucks"
-#define TEST_ENTITY_SET_NAMESPACE       "WhiteTrucksDemo"
-
-
-
-
-
-TYPED_MOCK_CLASS(CDeviceMocks, CGlobalMock)
-{
-public:
-    /* DataPublisher mocks */
-    MOCK_STATIC_METHOD_2(, DATA_PUBLISHER_HANDLE, DataPublisher_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, bool, includePropertyPath)
-    MOCK_METHOD_END(DATA_PUBLISHER_HANDLE, TEST_DATA_PUBLISHER_HANDLE)
-    MOCK_STATIC_METHOD_1(, void, DataPublisher_Destroy, DATA_PUBLISHER_HANDLE, dataPublisherHandle)
-    MOCK_VOID_METHOD_END()
-
-    /* CommandDecoder mocks */
-    MOCK_STATIC_METHOD_3(, COMMAND_DECODER_HANDLE, CommandDecoder_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, ACTION_CALLBACK_FUNC, actionCallback, void*, actionCallbackContext)
-        ActionCallbackCalledByCommandDecoder = actionCallback;
-    MOCK_METHOD_END(COMMAND_DECODER_HANDLE, TEST_COMMAND_DECODER_HANDLE)
-    MOCK_STATIC_METHOD_2(, EXECUTE_COMMAND_RESULT, CommandDecoder_ExecuteCommand, COMMAND_DECODER_HANDLE, handle, const char*, command)
-    MOCK_METHOD_END(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS)
-
-    MOCK_STATIC_METHOD_1(, void, CommandDecoder_Destroy, COMMAND_DECODER_HANDLE, commandDecoderHandle)
-    MOCK_VOID_METHOD_END()
-
-    /* Device action callback mock */
-    MOCK_STATIC_METHOD_6(, EXECUTE_COMMAND_RESULT, DeviceActionCallback, DEVICE_HANDLE, deviceHandle, void*, callbackUserContext, const char*, relativeActionPath, const char*, actionName, size_t, argCount, const AGENT_DATA_TYPE*, arguments)
-    MOCK_METHOD_END(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS)
-
-    /* DataPublisher mocks */
-    MOCK_STATIC_METHOD_1(, TRANSACTION_HANDLE, DataPublisher_StartTransaction, DATA_PUBLISHER_HANDLE, modelHandle)
-    MOCK_METHOD_END(TRANSACTION_HANDLE, TEST_TRANSACTION_HANDLE);
-    MOCK_STATIC_METHOD_3(, DATA_PUBLISHER_RESULT, DataPublisher_EndTransaction, TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize)
-    MOCK_METHOD_END(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK);
-    MOCK_STATIC_METHOD_1(, DATA_PUBLISHER_RESULT, DataPublisher_CancelTransaction, TRANSACTION_HANDLE, transactionHandle)
-    MOCK_METHOD_END(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK);
-    MOCK_STATIC_METHOD_3(, DATA_PUBLISHER_RESULT, DataPublisher_PublishTransacted, TRANSACTION_HANDLE, transactionHandle, const char*, propertyPath, const AGENT_DATA_TYPE*, data)
-    MOCK_METHOD_END(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK);
-
-    MOCK_STATIC_METHOD_1(,REPORTED_PROPERTIES_TRANSACTION_HANDLE, DataPublisher_CreateTransaction_ReportedProperties, DATA_PUBLISHER_HANDLE, dataPublisherHandle)
-    MOCK_METHOD_END(REPORTED_PROPERTIES_TRANSACTION_HANDLE, (REPORTED_PROPERTIES_TRANSACTION_HANDLE)1);
-
-    MOCK_STATIC_METHOD_3(, DATA_PUBLISHER_RESULT, DataPublisher_PublishTransacted_ReportedProperty, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, const char*, reportedPropertyPath, const AGENT_DATA_TYPE*, data);
-    MOCK_METHOD_END(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK);
-
-    MOCK_STATIC_METHOD_3(, DATA_PUBLISHER_RESULT, DataPublisher_CommitTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize);
-    MOCK_METHOD_END(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK);
-
-    MOCK_STATIC_METHOD_1(, void, DataPublisher_DestroyTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle);
-    MOCK_VOID_METHOD_END()
-};
-
-DECLARE_GLOBAL_MOCK_METHOD_2(CDeviceMocks, , DATA_PUBLISHER_HANDLE, DataPublisher_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, bool, includePropertyPath);
-DECLARE_GLOBAL_MOCK_METHOD_1(CDeviceMocks, , void, DataPublisher_Destroy, DATA_PUBLISHER_HANDLE, dataPublisherHandle);
-
-DECLARE_GLOBAL_MOCK_METHOD_3(CDeviceMocks, , COMMAND_DECODER_HANDLE, CommandDecoder_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, ACTION_CALLBACK_FUNC, actionCallback, void*, actionCallbackContext);
-DECLARE_GLOBAL_MOCK_METHOD_2(CDeviceMocks, ,EXECUTE_COMMAND_RESULT, CommandDecoder_ExecuteCommand, COMMAND_DECODER_HANDLE, handle, const char*, command)
-DECLARE_GLOBAL_MOCK_METHOD_1(CDeviceMocks, , void, CommandDecoder_Destroy, COMMAND_DECODER_HANDLE, commandDecoderHandle)
-
-DECLARE_GLOBAL_MOCK_METHOD_6(CDeviceMocks, , EXECUTE_COMMAND_RESULT, DeviceActionCallback, DEVICE_HANDLE, deviceHandle, void*, callbackUserContext, const char*, relativeActionPath, const char*, actionName, size_t, argCount, const AGENT_DATA_TYPE*, arguments);
-
-DECLARE_GLOBAL_MOCK_METHOD_1(CDeviceMocks, , TRANSACTION_HANDLE, DataPublisher_StartTransaction, DATA_PUBLISHER_HANDLE, modelHandle)
-DECLARE_GLOBAL_MOCK_METHOD_3(CDeviceMocks, , DATA_PUBLISHER_RESULT, DataPublisher_EndTransaction, TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize)
-DECLARE_GLOBAL_MOCK_METHOD_1(CDeviceMocks, , DATA_PUBLISHER_RESULT, DataPublisher_CancelTransaction, TRANSACTION_HANDLE, transactionHandle)
-DECLARE_GLOBAL_MOCK_METHOD_3(CDeviceMocks, , DATA_PUBLISHER_RESULT, DataPublisher_PublishTransacted, TRANSACTION_HANDLE, transactionHandle, const char*, propertyPath, const AGENT_DATA_TYPE*, data)
-
-DECLARE_GLOBAL_MOCK_METHOD_1(CDeviceMocks, ,REPORTED_PROPERTIES_TRANSACTION_HANDLE, DataPublisher_CreateTransaction_ReportedProperties, DATA_PUBLISHER_HANDLE, dataPublisherHandle);
-DECLARE_GLOBAL_MOCK_METHOD_3(CDeviceMocks, ,DATA_PUBLISHER_RESULT, DataPublisher_PublishTransacted_ReportedProperty, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, const char*, reportedPropertyPath, const AGENT_DATA_TYPE*, data);
-DECLARE_GLOBAL_MOCK_METHOD_3(CDeviceMocks, ,DATA_PUBLISHER_RESULT, DataPublisher_CommitTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize);
-DECLARE_GLOBAL_MOCK_METHOD_1(CDeviceMocks, ,void, DataPublisher_DestroyTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle);
-
-namespace
-{
-   
-    const char* irrelevantName = "name";
-
-    DEVICE_HANDLE CreateDevice_(SCHEMA_MODEL_TYPE_HANDLE model)
-    {
-        DEVICE_HANDLE h;
-        (void)Device_Create(model, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
-        return h;
-    }
-
-    DEVICE_HANDLE CreateDeviceWithName_(void)
-    {
-        return CreateDevice_(irrelevantModel);
-    }
-
-    class AutoDevice
-    {
-        DEVICE_HANDLE h_;
-
-    public:
-        explicit AutoDevice(DEVICE_HANDLE deviceHandle) : h_(deviceHandle) {}
-        ~AutoDevice() { if (h_) Device_Destroy(h_); }
-        DEVICE_HANDLE Handle() { return h_; }
-    };
-}
-#endif
-
-
-
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;
 
@@ -277,20 +163,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(DataPublisher_EndTransaction, DATA_PUBLISHER_ERROR);
         REGISTER_GLOBAL_MOCK_HOOK(DataPublisher_CancelTransaction, my_DataPublisher_CancelTransaction);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(DataPublisher_CancelTransaction, DATA_PUBLISHER_ERROR);
-        
-#if 0
-        
 
-
-        DECLARE_GLOBAL_MOCK_METHOD_3(DATA_PUBLISHER_RESULT, DataPublisher_EndTransaction, TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize)
-        DECLARE_GLOBAL_MOCK_METHOD_1(DATA_PUBLISHER_RESULT, DataPublisher_CancelTransaction, TRANSACTION_HANDLE, transactionHandle)
-        DECLARE_GLOBAL_MOCK_METHOD_3(DATA_PUBLISHER_RESULT, DataPublisher_PublishTransacted, TRANSACTION_HANDLE, transactionHandle, const char*, propertyPath, const AGENT_DATA_TYPE*, data)
-
-        DECLARE_GLOBAL_MOCK_METHOD_1(REPORTED_PROPERTIES_TRANSACTION_HANDLE, DataPublisher_CreateTransaction_ReportedProperties, DATA_PUBLISHER_HANDLE, dataPublisherHandle);
-        DECLARE_GLOBAL_MOCK_METHOD_3(DATA_PUBLISHER_RESULT, DataPublisher_PublishTransacted_ReportedProperty, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, const char*, reportedPropertyPath, const AGENT_DATA_TYPE*, data);
-        DECLARE_GLOBAL_MOCK_METHOD_3(DATA_PUBLISHER_RESULT, DataPublisher_CommitTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize);
-        DECLARE_GLOBAL_MOCK_METHOD_1(void, DataPublisher_DestroyTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle);
-#endif
     }
 
     TEST_SUITE_CLEANUP(AfterEachSuite)
