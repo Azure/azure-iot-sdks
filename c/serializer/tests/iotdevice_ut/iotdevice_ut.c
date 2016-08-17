@@ -1,23 +1,74 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifdef __cplusplus
 #include <cstdlib>
+#else
+#include <stdlib.h>
+#endif
+
+void* my_gballoc_malloc(size_t t)
+{
+    return malloc(t);
+}
+
+void my_gballoc_free(void * t)
+{
+    free(t);
+}
+
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
 
+#ifdef __cplusplus
+#include <cstddef>
 #include <cstdbool>
-#include "testrunnerswitcher.h"
-#include "micromock.h"
-#include "micromockenumtostring.h"
-#include "micromockcharstararenullterminatedstrings.h"
+#else
+#include <stdlib.h>
+#include <stdbool.h>
+#endif
+
+#include "umock_c.h"
+#include "umocktypes_charptr.h"
+#include "umocktypes_bool.h"
+#include "umocktypes_stdint.h"
+#include "umock_c_negative_tests.h"
+
+#include "agenttypesystem.h"
+
+#define ENABLE_MOCKS
+#include "schema.h"
+#include "datapublisher.h"
+#include "commanddecoder.h"
+#undef ENABLE_MOCKS
 
 #include "iotdevice.h"
-#include "schema.h"
-#include "commanddecoder.h"
-#include "datapublisher.h"
 
+#include "testrunnerswitcher.h"
 
+TEST_DEFINE_ENUM_TYPE(DEVICE_RESULT, DEVICE_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(DEVICE_RESULT, DEVICE_RESULT_VALUES);
+
+TEST_DEFINE_ENUM_TYPE(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
+
+TEST_DEFINE_ENUM_TYPE(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES);
+
+#define ENABLE_MOCKS
+#include "azure_c_shared_utility/umock_c_prod.h"
+MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, DeviceActionCallback, DEVICE_HANDLE, deviceHandle, void*, callbackUserContext, const char*, relativeActionPath, const char*, actionName, size_t, argCount, const AGENT_DATA_TYPE*, arguments);
+#undef ENABLE_MOCKS
+
+DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+
+#define TEST_CALLBACK_CONTEXT           (void*)0x4246
+
+static SCHEMA_MODEL_TYPE_HANDLE irrelevantModel = (SCHEMA_MODEL_TYPE_HANDLE)0x1;
+static ACTION_CALLBACK_FUNC ActionCallbackCalledByCommandDecoder;
+
+#if 0
 DEFINE_MICROMOCK_ENUM_TO_STRING(DEVICE_RESULT, DEVICE_RESULT_VALUES);
 DEFINE_MICROMOCK_ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES)
 
@@ -31,9 +82,9 @@ static const char* TEST_MODEL_NAME = "Photo_Model";
 #define TEST_ENTITY_SET_NAME            "SomeTrucks"
 #define TEST_ENTITY_SET_NAMESPACE       "WhiteTrucksDemo"
 
-#define TEST_CALLBACK_CONTEXT           (void*)0x4246
 
-static ACTION_CALLBACK_FUNC ActionCallbackCalledByCommandDecoder;
+
+
 
 TYPED_MOCK_CLASS(CDeviceMocks, CGlobalMock)
 {
@@ -102,7 +153,7 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CDeviceMocks, ,void, DataPublisher_DestroyTransacti
 
 namespace
 {
-    SCHEMA_MODEL_TYPE_HANDLE irrelevantModel = (SCHEMA_MODEL_TYPE_HANDLE)0x1;
+   
     const char* irrelevantName = "name";
 
     DEVICE_HANDLE CreateDevice_(SCHEMA_MODEL_TYPE_HANDLE model)
@@ -127,30 +178,149 @@ namespace
         DEVICE_HANDLE Handle() { return h_; }
     };
 }
+#endif
 
-static MICROMOCK_MUTEX_HANDLE g_testByTest;
-static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
+
+
+static TEST_MUTEX_HANDLE g_testByTest;
+static TEST_MUTEX_HANDLE g_dllByDll;
+
+static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
+{
+    char temp_str[256];
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    ASSERT_FAIL(temp_str);
+}
+
+static DATA_PUBLISHER_HANDLE my_DataPublisher_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, bool includePropertyPath)
+{
+    (void)(modelHandle, includePropertyPath);
+    return (DATA_PUBLISHER_HANDLE )my_gballoc_malloc(1);
+}
+
+static void my_DataPublisher_Destroy(DATA_PUBLISHER_HANDLE dataPublisherHandle)
+{
+    my_gballoc_free(dataPublisherHandle);
+}
+
+static COMMAND_DECODER_HANDLE my_CommandDecoder_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, ACTION_CALLBACK_FUNC actionCallback, void* actionCallbackContext)
+{
+    (void)(modelHandle, actionCallbackContext);
+    ActionCallbackCalledByCommandDecoder = actionCallback;
+    return (COMMAND_DECODER_HANDLE)my_gballoc_malloc(1);
+}
+
+static void my_CommandDecoder_Destroy(COMMAND_DECODER_HANDLE commandDecoderHandle)
+{
+    my_gballoc_free(commandDecoderHandle);
+}
+
+static TRANSACTION_HANDLE my_DataPublisher_StartTransaction(DATA_PUBLISHER_HANDLE dataPublisherHandle)
+{
+    (void)(dataPublisherHandle);
+    return (TRANSACTION_HANDLE)my_gballoc_malloc(2);
+}
+
+static DATA_PUBLISHER_RESULT my_DataPublisher_EndTransaction(TRANSACTION_HANDLE transactionHandle, unsigned char** destination, size_t* destinationSize)
+{
+    (void)(destination, destinationSize);
+    my_gballoc_free(transactionHandle);
+    return DATA_PUBLISHER_OK;
+}
+
+static DATA_PUBLISHER_RESULT my_DataPublisher_CancelTransaction(TRANSACTION_HANDLE transactionHandle)
+{
+    my_gballoc_free(transactionHandle);
+    return DATA_PUBLISHER_OK;
+}
 
 BEGIN_TEST_SUITE(IoTDevice_ut)
 
     TEST_SUITE_INITIALIZE(BeforeSuite)
     {
         TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-        g_testByTest = MicroMockCreateMutex();
+
+        g_testByTest = TEST_MUTEX_CREATE();
         ASSERT_IS_NOT_NULL(g_testByTest);
+
+        (void)umock_c_init(on_umock_c_error);
+        (void)umocktypes_bool_register_types();
+        (void)umocktypes_charptr_register_types();
+        (void)umocktypes_stdint_register_types();
+
+        REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_MODEL_TYPE_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(DATA_PUBLISHER_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(ACTION_CALLBACK_FUNC, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(COMMAND_DECODER_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(TRANSACTION_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(DEVICE_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(EXECUTE_COMMAND_RESULT, int);
+        REGISTER_UMOCK_ALIAS_TYPE(DATA_PUBLISHER_RESULT, int);
+        
+        
+        REGISTER_GLOBAL_MOCK_RETURN(DeviceActionCallback, EXECUTE_COMMAND_SUCCESS);
+
+        REGISTER_GLOBAL_MOCK_HOOK(DataPublisher_Create, my_DataPublisher_Create);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(DataPublisher_Create, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(DataPublisher_Destroy, my_DataPublisher_Destroy);
+
+
+        
+        REGISTER_GLOBAL_MOCK_HOOK(CommandDecoder_Create, my_CommandDecoder_Create);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(CommandDecoder_Create, NULL);
+        REGISTER_GLOBAL_MOCK_RETURNS(CommandDecoder_ExecuteCommand, EXECUTE_COMMAND_SUCCESS, EXECUTE_COMMAND_ERROR);
+        REGISTER_GLOBAL_MOCK_HOOK(CommandDecoder_Destroy, my_CommandDecoder_Destroy);
+        
+        REGISTER_GLOBAL_MOCK_HOOK(DataPublisher_StartTransaction, my_DataPublisher_StartTransaction);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(DataPublisher_StartTransaction, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(DataPublisher_EndTransaction, my_DataPublisher_EndTransaction);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(DataPublisher_EndTransaction, DATA_PUBLISHER_ERROR);
+        REGISTER_GLOBAL_MOCK_HOOK(DataPublisher_CancelTransaction, my_DataPublisher_CancelTransaction);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(DataPublisher_CancelTransaction, DATA_PUBLISHER_ERROR);
+        
+#if 0
+        
+
+
+        DECLARE_GLOBAL_MOCK_METHOD_3(DATA_PUBLISHER_RESULT, DataPublisher_EndTransaction, TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize)
+        DECLARE_GLOBAL_MOCK_METHOD_1(DATA_PUBLISHER_RESULT, DataPublisher_CancelTransaction, TRANSACTION_HANDLE, transactionHandle)
+        DECLARE_GLOBAL_MOCK_METHOD_3(DATA_PUBLISHER_RESULT, DataPublisher_PublishTransacted, TRANSACTION_HANDLE, transactionHandle, const char*, propertyPath, const AGENT_DATA_TYPE*, data)
+
+        DECLARE_GLOBAL_MOCK_METHOD_1(REPORTED_PROPERTIES_TRANSACTION_HANDLE, DataPublisher_CreateTransaction_ReportedProperties, DATA_PUBLISHER_HANDLE, dataPublisherHandle);
+        DECLARE_GLOBAL_MOCK_METHOD_3(DATA_PUBLISHER_RESULT, DataPublisher_PublishTransacted_ReportedProperty, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, const char*, reportedPropertyPath, const AGENT_DATA_TYPE*, data);
+        DECLARE_GLOBAL_MOCK_METHOD_3(DATA_PUBLISHER_RESULT, DataPublisher_CommitTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize);
+        DECLARE_GLOBAL_MOCK_METHOD_1(void, DataPublisher_DestroyTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle);
+#endif
     }
 
     TEST_SUITE_CLEANUP(AfterEachSuite)
     {
-        MicroMockDestroyMutex(g_testByTest);
+        umock_c_deinit();
+
+        TEST_MUTEX_DESTROY(g_testByTest);
         TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
+    }
+
+    TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
+    {
+        if (TEST_MUTEX_ACQUIRE(g_testByTest))
+        {
+            ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
+        }
+
+        umock_c_reset_all_calls();
+    }
+
+    TEST_FUNCTION_CLEANUP(TestMethodCleanup)
+    {
+
+        TEST_MUTEX_RELEASE(g_testByTest);
     }
 
     /* Tests_SRS_DEVICE_05_014: [If any of the modelHandle, deviceHandle or deviceActionCallback arguments are NULL, Device_Create shall return DEVICE_INVALID_ARG.]*/
     TEST_FUNCTION(Device_Create_with_NULL_model_handle_fails)
     {
         // arrange
-        CDeviceMocks deviceMocks;
         DEVICE_HANDLE h;
 
         // act
@@ -164,7 +334,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     TEST_FUNCTION(Device_Create_with_NULL_Action_Callback_fails)
     {
         // arrange
-        CDeviceMocks deviceMocks;
         DEVICE_HANDLE h;
 
         // act
@@ -178,7 +347,6 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     TEST_FUNCTION(Device_Create_with_NULL_outparam_fails)
     {
         // arrange
-        CDeviceMocks deviceMocks;
 
         // act
         DEVICE_RESULT res = Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, NULL);
@@ -197,11 +365,10 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     TEST_FUNCTION(Device_Create_can_return_a_device_handle)
     {
         // arrange
-        CDeviceMocks deviceMocks;
         DEVICE_HANDLE h = NULL;
 
-        STRICT_EXPECTED_CALL(deviceMocks, DataPublisher_Create(irrelevantModel, true));
-        STRICT_EXPECTED_CALL(deviceMocks, CommandDecoder_Create(irrelevantModel, NULL, NULL))
+        STRICT_EXPECTED_CALL(DataPublisher_Create(irrelevantModel, true));
+        STRICT_EXPECTED_CALL(CommandDecoder_Create(irrelevantModel, NULL, NULL))
             .IgnoreArgument(2).IgnoreArgument(3);
 
         // act
@@ -210,21 +377,21 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_OK, res);
         ASSERT_IS_NOT_NULL(h);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         Device_Destroy(h);
     }
 
+
     /* Tests_SRS_DEVICE_01_004: [DeviceCreate shall pass to DataPublisher_create the includePropertyPath argument.] */
     TEST_FUNCTION(Device_Create_passes_includePropertyPath_false_to_DataPublisher_Create)
     {
         // arrange
-        CDeviceMocks deviceMocks;
         DEVICE_HANDLE h = NULL;
 
-        STRICT_EXPECTED_CALL(deviceMocks, DataPublisher_Create(irrelevantModel, false));
-        STRICT_EXPECTED_CALL(deviceMocks, CommandDecoder_Create(irrelevantModel, NULL, NULL))
+        STRICT_EXPECTED_CALL(DataPublisher_Create(irrelevantModel, false));
+        STRICT_EXPECTED_CALL(CommandDecoder_Create(irrelevantModel, NULL, NULL))
             .IgnoreArgument(2).IgnoreArgument(3);
 
         // act
@@ -233,7 +400,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_OK, res);
         ASSERT_IS_NOT_NULL(h);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         Device_Destroy(h);
@@ -243,31 +410,32 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     TEST_FUNCTION(When_DataPublisher_Create_Fails_Then_Device_Create_Fails)
     {
         // arrange
-        CNiceCallComparer<CDeviceMocks> deviceMocks;
         DEVICE_HANDLE h = NULL;
 
-        STRICT_EXPECTED_CALL(deviceMocks, DataPublisher_Create(irrelevantModel, true))
+        STRICT_EXPECTED_CALL(DataPublisher_Create(irrelevantModel, true))
             .SetReturn((DATA_PUBLISHER_HANDLE)NULL);
 
         // act
         DEVICE_RESULT res = Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, true, &h);
 
         // assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_DATA_PUBLISHER_FAILED, res);
         ASSERT_IS_NULL(h);
     }
-
 
     /* Tests_SRS_DEVICE_01_003: [If CommandDecoder_Create fails, Device_Create shall return DEVICE_COMMAND_DECODER_FAILED.] */
     TEST_FUNCTION(When_CommandDecoder_Create_Fails_Device_Create_Fails)
     {
         // arrange
-        CDeviceMocks deviceMocks;
         DEVICE_HANDLE h = NULL;
 
-        STRICT_EXPECTED_CALL(deviceMocks, DataPublisher_Create(irrelevantModel, true));
-        STRICT_EXPECTED_CALL(deviceMocks, CommandDecoder_Create(irrelevantModel, NULL, NULL))
+        STRICT_EXPECTED_CALL(DataPublisher_Create(irrelevantModel, true));
+        STRICT_EXPECTED_CALL(CommandDecoder_Create(irrelevantModel, NULL, NULL))
             .IgnoreArgument(2).IgnoreArgument(3).SetReturn((COMMAND_DECODER_HANDLE)NULL);
+
+        STRICT_EXPECTED_CALL(DataPublisher_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument_dataPublisherHandle();
 
         // act
         DEVICE_RESULT res = Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, true, &h);
@@ -275,7 +443,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_COMMAND_DECODER_FAILED, res);
         ASSERT_IS_NULL(h);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
     /* Device_Destroy */
@@ -284,32 +452,33 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     TEST_FUNCTION(Device_Destroy_with_a_NULL_handle_raises_no_exceptions)
     {
         // arrange
-        CNiceCallComparer<CDeviceMocks> deviceMocks;
 
         // act
         Device_Destroy(NULL);
 
         // assert
-        // no explicit assert; the test runner will treat a system null-dereference exception as a failure
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
+
 
     /* Tests_SRS_DEVICE_03_006: [Device_Destroy shall free all resources associated with a device.] */
     TEST_FUNCTION(Device_Destroy_with_a_Valid_handle_frees_all_underlying_modules)
     {
         // arrange
-        CDeviceMocks deviceMocks;
         DEVICE_HANDLE h = NULL;
         (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
-        deviceMocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(deviceMocks, DataPublisher_Destroy(TEST_DATA_PUBLISHER_HANDLE));
-        STRICT_EXPECTED_CALL(deviceMocks, CommandDecoder_Destroy(TEST_COMMAND_DECODER_HANDLE));
+        STRICT_EXPECTED_CALL(DataPublisher_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument_dataPublisherHandle();
+        STRICT_EXPECTED_CALL(CommandDecoder_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument_commandDecoderHandle();
 
         // act
         Device_Destroy(h);
 
         // assert
-        // uMock checks the calls
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
     /* Device_StartTransaction */
@@ -319,50 +488,60 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     TEST_FUNCTION(Device_StartTransaction_Calls_DataPublisher_And_Succeeds)
     {
         // arrange
-        CDeviceMocks deviceMocks;
-        AutoDevice device(CreateDeviceWithName_());
-        deviceMocks.ResetAllCalls();
+        DEVICE_HANDLE deviceHandle;
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(deviceMocks, DataPublisher_StartTransaction(TEST_DATA_PUBLISHER_HANDLE));
+        STRICT_EXPECTED_CALL(DataPublisher_StartTransaction(IGNORED_PTR_ARG))
+            .IgnoreArgument_dataPublisherHandle();
 
         // act
-        TRANSACTION_HANDLE result = Device_StartTransaction(device.Handle());
+        TRANSACTION_HANDLE result = Device_StartTransaction(deviceHandle);
 
         // assert
         ASSERT_IS_NOT_NULL(result);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_CancelTransaction(result);
+        Device_Destroy(deviceHandle);
     }
 
     /* Tests_SRS_DEVICE_01_035: [If any argument is NULL, Device_StartTransaction shall return NULL.] */
     TEST_FUNCTION(Device_StartTransaction_Called_With_NULL_Handle_Fails)
     {
         // arrange
-        CDeviceMocks deviceMocks;
 
         // act
         TRANSACTION_HANDLE result = Device_StartTransaction(NULL);
 
         // assert
         ASSERT_IS_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
+
 
     /* Tests_SRS_DEVICE_01_048: [When DataPublisher_StartTransaction fails, Device_StartTransaction shall return NULL.] */
     TEST_FUNCTION(When_DataPublisher_StartTransaction_Fails_Then_Device_StartTransaction_Fails)
     {
         // arrange
-        CDeviceMocks deviceMocks;
-        AutoDevice device(CreateDeviceWithName_());
-        deviceMocks.ResetAllCalls();
+        DEVICE_HANDLE deviceHandle;
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(deviceMocks, DataPublisher_StartTransaction(TEST_DATA_PUBLISHER_HANDLE))
+        STRICT_EXPECTED_CALL(DataPublisher_StartTransaction(IGNORED_PTR_ARG))
+            .IgnoreArgument_dataPublisherHandle()
             .SetReturn((TRANSACTION_HANDLE)NULL);
 
         // act
-        TRANSACTION_HANDLE result = Device_StartTransaction(device.Handle());
+        TRANSACTION_HANDLE result = Device_StartTransaction(deviceHandle);
 
         // assert
         ASSERT_IS_NULL(result);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_Destroy(deviceHandle);
     }
 
     /* Device_PublishTransacted */
@@ -372,29 +551,30 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     TEST_FUNCTION(Device_PublishTransacted_Calls_DataPublisher_And_Succeeds)
     {
         // arrange
-        CDeviceMocks deviceMocks;
         AGENT_DATA_TYPE ag;
-        AutoDevice device(CreateDeviceWithName_());
-        TRANSACTION_HANDLE transaction = Device_StartTransaction(device.Handle());
-        deviceMocks.ResetAllCalls();
+        DEVICE_HANDLE deviceHandle;
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(deviceMocks, DataPublisher_PublishTransacted(transaction, "p", &ag));
+        STRICT_EXPECTED_CALL(DataPublisher_PublishTransacted(transaction, "p", &ag));
 
         // act
         DEVICE_RESULT result = Device_PublishTransacted(transaction, "p", &ag);
 
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_OK, result);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
+        ///clean
         Device_CancelTransaction(transaction);
+        Device_Destroy(deviceHandle);
     }
 
     /* Tests_SRS_DEVICE_01_037: [If any argument is NULL, Device_PublishTransacted shall return DEVICE_INVALID_ARG.] */
     TEST_FUNCTION(Device_PublishTransacted_Called_With_NULL_Handle_Fails)
     {
         // arrange
-        CDeviceMocks deviceMocks;
         AGENT_DATA_TYPE ag;
 
         // act
@@ -404,56 +584,61 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, result);
     }
 
+
     /* Tests_SRS_DEVICE_01_037: [If any argument is NULL, Device_PublishTransacted shall return DEVICE_INVALID_ARG.] */
     TEST_FUNCTION(Device_PublishTransacted_Called_With_NULL_Property_Fails)
     {
         // arrange
-        CDeviceMocks deviceMocks;
         AGENT_DATA_TYPE ag;
-        AutoDevice device(CreateDeviceWithName_());
-        TRANSACTION_HANDLE transaction = Device_StartTransaction(device.Handle());
-        deviceMocks.ResetAllCalls();
+        DEVICE_HANDLE deviceHandle;
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
+        umock_c_reset_all_calls();
 
         // act
         DEVICE_RESULT result = Device_PublishTransacted(transaction, NULL, &ag);
 
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, result);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
+        ///clean
         Device_CancelTransaction(transaction);
+        Device_Destroy(deviceHandle);
     }
 
     /* Tests_SRS_DEVICE_01_037: [If any argument is NULL, Device_PublishTransacted shall return DEVICE_INVALID_ARG.] */
     TEST_FUNCTION(Device_PublishTransacted_Called_With_NULL_Value_Fails)
     {
         // arrange
-        CDeviceMocks deviceMocks;
-        AutoDevice device(CreateDeviceWithName_());
-        TRANSACTION_HANDLE transaction = Device_StartTransaction(device.Handle());
-        deviceMocks.ResetAllCalls();
+        DEVICE_HANDLE deviceHandle;
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
+        umock_c_reset_all_calls();
 
         // act
         DEVICE_RESULT result = Device_PublishTransacted(transaction, "p", NULL);
 
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, result);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
+        ///clean
         Device_CancelTransaction(transaction);
+        Device_Destroy(deviceHandle);
     }
 
     /* Tests_SRS_DEVICE_01_049: [When DataPublisher_PublishTransacted fails, Device_PublishTransacted shall return DEVICE_DATA_PUBLISHER_FAILED.] */
     TEST_FUNCTION(When_DataPublisher_PublishTransacted_Fails_Then_Device_PublishTransacted_Fails)
     {
         // arrange
-        CDeviceMocks deviceMocks;
         AGENT_DATA_TYPE ag;
-        AutoDevice device(CreateDeviceWithName_());
-        TRANSACTION_HANDLE transaction = Device_StartTransaction(device.Handle());
-        deviceMocks.ResetAllCalls();
+        DEVICE_HANDLE deviceHandle;
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(deviceMocks, DataPublisher_PublishTransacted(transaction, "p", &ag))
+        STRICT_EXPECTED_CALL(DataPublisher_PublishTransacted(transaction, "p", &ag))
             .SetReturn(DATA_PUBLISHER_ERROR);
 
         // act
@@ -461,9 +646,11 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
 
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_DATA_PUBLISHER_FAILED, result);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
+        ///clean
         Device_CancelTransaction(transaction);
+        Device_Destroy(deviceHandle);
     }
 
     /* Device_EndTransaction */
@@ -473,85 +660,111 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     TEST_FUNCTION(Device_EndTransaction_Calls_DataPublisher_And_Succeeds)
     {
         // arrange
-        CDeviceMocks deviceMocks;
         unsigned char* destination;
         size_t destinationSize;
+        DEVICE_HANDLE deviceHandle;
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(deviceMocks, DataPublisher_EndTransaction(TEST_TRANSACTION_HANDLE, &destination, &destinationSize));
+        STRICT_EXPECTED_CALL(DataPublisher_EndTransaction(transaction, &destination, &destinationSize));
 
         // act
-        DEVICE_RESULT result = Device_EndTransaction(TEST_TRANSACTION_HANDLE, &destination, &destinationSize);
+        DEVICE_RESULT result = Device_EndTransaction(transaction, &destination, &destinationSize);
 
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_Destroy(deviceHandle);
     }
 
     /* Tests_SRS_DEVICE_01_039: [If transactionHandle is NULL, Device_EndTransaction shall return DEVICE_INVALID_ARG.]    */
     TEST_FUNCTION(Device_EndTransaction_Called_With_NULL_Handle_Fails)
     {
         // arrange
-        CDeviceMocks deviceMocks;
 
         // act
         DEVICE_RESULT result = Device_EndTransaction(NULL, NULL, NULL);
 
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
     /* Tests_SRS_DEVICE_01_050: [When DataPublisher_EndTransaction fails, Device_EndTransaction shall return DEVICE_DATA_PUBLISHER_FAILED.] */
     TEST_FUNCTION(When_DataPublisher_EndTransaction_Fails_Then_Device_EndTransaction_Fails)
     {
         // arrange
-        CDeviceMocks deviceMocks;
-        AutoDevice device(CreateDeviceWithName_());
+        DEVICE_HANDLE deviceHandle;
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
         unsigned char* destination;
         size_t destinationSize;
-        deviceMocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(deviceMocks, DataPublisher_EndTransaction(TEST_TRANSACTION_HANDLE, &destination, &destinationSize))
+        STRICT_EXPECTED_CALL(DataPublisher_EndTransaction(transaction, &destination, &destinationSize))
             .SetReturn(DATA_PUBLISHER_ERROR);
 
         // act
-        DEVICE_RESULT result = Device_EndTransaction(TEST_TRANSACTION_HANDLE, &destination, &destinationSize);
+        DEVICE_RESULT result = Device_EndTransaction(transaction, &destination, &destinationSize);
 
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_DATA_PUBLISHER_FAILED, result);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_CancelTransaction(transaction);
+        Device_Destroy(deviceHandle);
     }
 
     /* Tests_SRS_DEVICE_01_038: [Device_EndTransaction shall invoke DataPublisher_EndTransaction.] */
     TEST_FUNCTION(Device_EndTransaction_Calls_DataPublisher_passingCallBackAndNullContext_Succeed)
     {
         // arrange
-        CDeviceMocks deviceMocks;
+        DEVICE_HANDLE deviceHandle;
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
         unsigned char* destination;
         size_t destinationSize;
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(deviceMocks, DataPublisher_EndTransaction(TEST_TRANSACTION_HANDLE, &destination, &destinationSize));
+        STRICT_EXPECTED_CALL(DataPublisher_EndTransaction(transaction, &destination, &destinationSize));
 
         // act
-        DEVICE_RESULT result = Device_EndTransaction(TEST_TRANSACTION_HANDLE, &destination, &destinationSize);
+        DEVICE_RESULT result = Device_EndTransaction(transaction, &destination, &destinationSize);
 
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_Destroy(deviceHandle);
     }
 
     /* Tests_SRS_DEVICE_01_038: [Device_EndTransaction shall invoke DataPublisher_EndTransaction.] */
     TEST_FUNCTION(Device_EndTransaction_Calls_DataPublisher_passingCallBackAndAndContext_Succeed)
     {
         // arrange
-        CDeviceMocks deviceMocks;
+        DEVICE_HANDLE deviceHandle;
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
         unsigned char* destination;
         size_t destinationSize;
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(deviceMocks, DataPublisher_EndTransaction(TEST_TRANSACTION_HANDLE, &destination, &destinationSize));
+        STRICT_EXPECTED_CALL(DataPublisher_EndTransaction(transaction, &destination, &destinationSize));
 
         // act
-        DEVICE_RESULT result = Device_EndTransaction(TEST_TRANSACTION_HANDLE, &destination, &destinationSize);
+        DEVICE_RESULT result = Device_EndTransaction(transaction, &destination, &destinationSize);
 
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_Destroy(deviceHandle);
     }
 
     /* Device_CancelTransaction */
@@ -561,47 +774,61 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     TEST_FUNCTION(Device_CancelTransaction_Calls_DataPublisher_And_Succeeds)
     {
         // arrange
-        CDeviceMocks deviceMocks;
+        DEVICE_HANDLE deviceHandle;
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(deviceMocks, DataPublisher_CancelTransaction(TEST_TRANSACTION_HANDLE));
+        STRICT_EXPECTED_CALL(DataPublisher_CancelTransaction(transaction));
 
         // act
-        DEVICE_RESULT result = Device_CancelTransaction(TEST_TRANSACTION_HANDLE);
+        DEVICE_RESULT result = Device_CancelTransaction(transaction);
 
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_Destroy(deviceHandle);
     }
+
 
     /* Tests_SRS_DEVICE_01_041: [If any argument is NULL, Device_CancelTransaction shall return DEVICE_INVALID_ARG.] */
     TEST_FUNCTION(Device_CancelTransaction_Called_With_NULL_Handle_Fails)
     {
         // arrange
-        CDeviceMocks deviceMocks;
 
         // act
         DEVICE_RESULT result = Device_CancelTransaction(NULL);
 
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
+
 
     /* Tests_SRS_DEVICE_01_051: [When DataPublisher_CancelTransaction fails, Device_CancelTransaction shall return DEVICE_DATA_PUBLISHER_FAILED.] */
     TEST_FUNCTION(When_DataPublisher_CancelTransaction_Fails_Then_Device_CancelTransaction_Fails)
     {
         // arrange
-        CDeviceMocks deviceMocks;
-        AutoDevice device(CreateDeviceWithName_());
-        deviceMocks.ResetAllCalls();
+        DEVICE_HANDLE deviceHandle;
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        TRANSACTION_HANDLE transaction = Device_StartTransaction(deviceHandle);
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(deviceMocks, DataPublisher_CancelTransaction(TEST_TRANSACTION_HANDLE))
+        STRICT_EXPECTED_CALL(DataPublisher_CancelTransaction(transaction))
             .SetReturn(DATA_PUBLISHER_ERROR);
 
         // act
-        DEVICE_RESULT result = Device_CancelTransaction(TEST_TRANSACTION_HANDLE);
+        DEVICE_RESULT result = Device_CancelTransaction(transaction);
 
         // assert
         ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_DATA_PUBLISHER_FAILED, result);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_CancelTransaction(transaction);
+        Device_Destroy(deviceHandle);
     }
 
     /* Action callback */
@@ -610,16 +837,19 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     TEST_FUNCTION(When_Action_Callback_Is_Invoked_with_NULL_handle_returns_ABANDONED)
     {
         /// arrange
-        CDeviceMocks deviceMocks;
-        AutoDevice device(CreateDeviceWithName_());
-        deviceMocks.ResetAllCalls();
+        DEVICE_HANDLE deviceHandle;
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        umock_c_reset_all_calls();
 
         /// act
         EXECUTE_COMMAND_RESULT result = ActionCallbackCalledByCommandDecoder(NULL, "", "testAction", 0, NULL);
 
         /// assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_Destroy(deviceHandle);
     }
 
     /* Tests_SRS_DEVICE_01_052: [When the action callback passed to CommandDecoder is called, Device shall call the appropriate user callback associated with the device handle.] */
@@ -628,18 +858,21 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     TEST_FUNCTION(When_Action_Callback_Is_Invoked_The_User_Callback_Is_Invoked)
     {
         // arrange
-        CDeviceMocks deviceMocks;
-        AutoDevice device(CreateDeviceWithName_());
-        deviceMocks.ResetAllCalls();
+        DEVICE_HANDLE deviceHandle;
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(deviceMocks, DeviceActionCallback(device.Handle(), TEST_CALLBACK_CONTEXT, "", "testAction", 0, NULL));
+        STRICT_EXPECTED_CALL(DeviceActionCallback(deviceHandle, TEST_CALLBACK_CONTEXT, "", "testAction", 0, NULL));
 
         // act
-        EXECUTE_COMMAND_RESULT result = ActionCallbackCalledByCommandDecoder(device.Handle(), "", "testAction", 0, NULL);
+        EXECUTE_COMMAND_RESULT result = ActionCallbackCalledByCommandDecoder(deviceHandle, "", "testAction", 0, NULL);
 
         // assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_Destroy(deviceHandle);
     }
 
     /* Tests_SRS_DEVICE_01_052: [When the action callback passed to CommandDecoder is called, Device shall call the appropriate user callback associated with the device handle.] */
@@ -648,53 +881,58 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     TEST_FUNCTION(When_Action_Callback_Is_Invoked_With_1_Arg_The_User_Callback_Is_Invoked_With_Same_Values)
     {
         // arrange
-        CDeviceMocks deviceMocks;
         AGENT_DATA_TYPE ag;
-        AutoDevice device(CreateDeviceWithName_());
-        deviceMocks.ResetAllCalls();
+        DEVICE_HANDLE deviceHandle;
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(deviceMocks, DeviceActionCallback(device.Handle(), TEST_CALLBACK_CONTEXT, "", "testAction", 1, &ag));
+        STRICT_EXPECTED_CALL(DeviceActionCallback(deviceHandle, TEST_CALLBACK_CONTEXT, "", "testAction", 1, &ag));
 
         // act
-        EXECUTE_COMMAND_RESULT result = ActionCallbackCalledByCommandDecoder(device.Handle(), "", "testAction", 1, &ag);
+        EXECUTE_COMMAND_RESULT result = ActionCallbackCalledByCommandDecoder(deviceHandle, "", "testAction", 1, &ag);
 
         // assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_Destroy(deviceHandle);
     }
 
     /* Tests_SRS_DEVICE_01_054: [If the user callback returns a non-zero value, a non-zero value shall be returned to CommandReader.] */
     TEST_FUNCTION(When_Action_Callback_Is_Invoked_And_User_Callback_Fails_Action_Callback_Fails_Too)
     {
         // arrange
-        CDeviceMocks deviceMocks;
         AGENT_DATA_TYPE ag;
-        AutoDevice device(CreateDeviceWithName_());
-        deviceMocks.ResetAllCalls();
+        DEVICE_HANDLE deviceHandle;
+        (void)Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &deviceHandle);
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(deviceMocks, DeviceActionCallback(device.Handle(), TEST_CALLBACK_CONTEXT, "", "testAction", 1, &ag))
+        STRICT_EXPECTED_CALL(DeviceActionCallback(deviceHandle, TEST_CALLBACK_CONTEXT, "", "testAction", 1, &ag))
             .SetReturn(EXECUTE_COMMAND_FAILED);
 
         // act
-        EXECUTE_COMMAND_RESULT result = ActionCallbackCalledByCommandDecoder(device.Handle(), "", "testAction", 1, &ag);
+        EXECUTE_COMMAND_RESULT result = ActionCallbackCalledByCommandDecoder(deviceHandle, "", "testAction", 1, &ag);
 
         // assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_FAILED, result);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_Destroy(deviceHandle);
     }
 
     /*Tests_SRS_DEVICE_02_012: [If any parameters are NULL, then Device_ExecuteCommand shall return EXECUTE_COMMAND_ERROR.]*/
     TEST_FUNCTION(Device_ExecuteCommand_with_NULL_handle_returns_EXECUTE_COMMAND_ERROR)
     {
         ///arrange
-        CDeviceMocks deviceMocks;
 
         ///act
         EXECUTE_COMMAND_RESULT result = Device_ExecuteCommand(NULL, "some command");
 
         ///assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         ///cleanup
     }
@@ -703,17 +941,16 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     TEST_FUNCTION(Device_ExecuteCommand_with_NULL_command_returns_EXECUTE_COMMAND_ERROR)
     {
         ///arrange
-        CDeviceMocks deviceMocks;
         DEVICE_HANDLE h;
         Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
-        deviceMocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         ///act
         EXECUTE_COMMAND_RESULT result = Device_ExecuteCommand(h,NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         ///cleanup
         Device_Destroy(h);
@@ -723,12 +960,11 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     TEST_FUNCTION(Device_ExecuteCommand_returns_what_CommandDecoder_ExecuteCommand_returns_EXECUTE_COMMAND_SUCCESS)
     {
         ///arrange
-        CDeviceMocks deviceMocks;
         DEVICE_HANDLE h;
         Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
-        deviceMocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(deviceMocks, CommandDecoder_ExecuteCommand(IGNORED_PTR_ARG, "some command"))
+        STRICT_EXPECTED_CALL(CommandDecoder_ExecuteCommand(IGNORED_PTR_ARG, "some command"))
             .IgnoreArgument(1);
 
         ///act
@@ -736,7 +972,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
 
         ///assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         ///cleanup
         Device_Destroy(h);
@@ -746,12 +982,11 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     TEST_FUNCTION(Device_ExecuteCommand_returns_what_CommandDecoder_ExecuteCommand_returns_EXECUTE_COMMAND_FAILED)
     {
         ///arrange
-        CDeviceMocks deviceMocks;
         DEVICE_HANDLE h;
         Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
-        deviceMocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(deviceMocks, CommandDecoder_ExecuteCommand(IGNORED_PTR_ARG, "some command"))
+        STRICT_EXPECTED_CALL(CommandDecoder_ExecuteCommand(IGNORED_PTR_ARG, "some command"))
             .IgnoreArgument(1)
             .SetReturn(EXECUTE_COMMAND_FAILED);
 
@@ -760,7 +995,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
 
         ///assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_FAILED, result);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         ///cleanup
         Device_Destroy(h);
@@ -770,12 +1005,11 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
     TEST_FUNCTION(Device_ExecuteCommand_returns_what_CommandDecoder_ExecuteCommand_returns_EXECUTE_COMMAND_ERROR)
     {
         ///arrange
-        CDeviceMocks deviceMocks;
         DEVICE_HANDLE h;
         Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
-        deviceMocks.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(deviceMocks, CommandDecoder_ExecuteCommand(IGNORED_PTR_ARG, "some command"))
+        STRICT_EXPECTED_CALL(CommandDecoder_ExecuteCommand(IGNORED_PTR_ARG, "some command"))
             .IgnoreArgument(1)
             .SetReturn(EXECUTE_COMMAND_ERROR);
 
@@ -784,7 +1018,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
 
         ///assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
-        deviceMocks.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         ///cleanup
         Device_Destroy(h);

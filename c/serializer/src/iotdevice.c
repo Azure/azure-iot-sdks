@@ -94,6 +94,7 @@ DEVICE_RESULT Device_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, pfDeviceAction
                 /* Codes_SRS_DEVICE_01_002: [Device_Create shall also pass to CommandDecoder_Create a callback to be invoked when a command is received and a context that shall be the device handle.] */
                 if ((device->commandDecoderHandle = CommandDecoder_Create(modelHandle, DeviceInvokeAction, device)) == NULL)
                 {
+                    DataPublisher_Destroy(device->dataPublisherHandle);
                     free(device);
 
                     /* Codes_SRS_DEVICE_01_003: [If CommandDecoder_Create fails, Device_Create shall return DEVICE_COMMAND_DECODER_FAILED.] */
