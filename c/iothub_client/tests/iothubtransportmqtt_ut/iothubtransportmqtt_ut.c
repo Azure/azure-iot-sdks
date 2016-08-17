@@ -35,7 +35,6 @@ void* my_gballoc_realloc(void* ptr, size_t size)
 #include "azure_c_shared_utility/sastoken.h"
 #include "azure_c_shared_utility/doublylinkedlist.h"
 #include "azure_c_shared_utility/gballoc.h"
-//#include "azure_c_shared_utility/macro_utils.h"
 
 #include "azure_umqtt_c/mqtt_client.h"
 
@@ -141,31 +140,10 @@ static const size_t appMsgSize = sizeof(appMessage) / sizeof(appMessage[0]);
 static IOTHUB_CLIENT_CONFIG g_iothubClientConfig = { 0 };
 static DLIST_ENTRY g_waitingToSend;
 
-static uint64_t g_current_ms;
+static uint64_t g_current_ms = 0;
 static size_t g_tokenizerIndex;
 
 #define TEST_TIME_T ((time_t)-1)
-
-#if 0
-//Messages to be used in test
-static const IOTHUB_MESSAGE_LIST message1 =  /* this is the oldest message, always the first to be processed, send etc*/
-{
-    TEST_IOTHUB_MSG_BYTEARRAY,          /* IOTHUB_MESSAGE_HANDLE messageHandle;                 */
-    NULL,                               /* IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK callback;  */
-    NULL,                               /* void* context;                                       */
-    { NULL, NULL },                     /* DLIST_ENTRY entry;                                   */
-    0
-};
-
-static IOTHUB_MESSAGE_LIST message2 =  /* this is the oldest message, always the first to be processed, send etc*/
-{
-    TEST_IOTHUB_MSG_STRING,             /* IOTHUB_MESSAGE_HANDLE messageHandle;                 */
-    NULL,                               /* IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK callback;  */
-    NULL,                               /* void* context;                                       */
-    { NULL, NULL },                     /* DLIST_ENTRY entry;                                   */
-    0
-};
-#endif
 
 static APP_PAYLOAD TEST_APP_PAYLOAD;
 
@@ -450,6 +428,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(TICK_COUNTER_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(ON_MQTT_OPERATION_CALLBACK, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(ON_IO_CLOSE_COMPLETE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_MESSAGE_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(QOS_VALUE, unsigned int);
     REGISTER_UMOCK_ALIAS_TYPE(MQTT_MESSAGE_HANDLE, void*);
