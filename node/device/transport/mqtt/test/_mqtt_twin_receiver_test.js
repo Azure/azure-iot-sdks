@@ -182,15 +182,41 @@ describe('MqttTwinReceiver', function () {
   describe('subscribed event', function() {
     
     /* Tests_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_025: [** If the `subscribed` event is subscribed to, a `subscribed` event shall be emitted after an MQTT topic is subscribed to. **]** */
-    it ('emits a subscribed event after successful subscription', function() {
+    it ('emits a subscribed event after successful subscription to response event', function(done) {
+      receiver.on('subscribed', function(shortname) {
+        void(shortname);
+        done();
+      });
+      receiver.on('response', function() {});
     });
 
+    /* Tests_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_025: [** If the `subscribed` event is subscribed to, a `subscribed` event shall be emitted after an MQTT topic is subscribed to. **]** */
+    it ('emits a subscribed event after successful subscription to post event', function(done) {
+      receiver.on('subscribed', function(shortname) {
+        void(shortname);
+        done();
+      });
+      receiver.on('post', function() {});
+    });
+    
     /* Tests_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_026: [** When the `subscribed` event is emitted because the response MQTT topic was subscribed, the parameter shall be the string 'response' **]**  */
-    it ('passes the the word "response" as an event parameter when the response topic is successfully subscribed to', function() {
+    it ('passes the the word "response" as an event parameter when the response topic is successfully subscribed to', function(done) {
+      receiver.on('subscribed', function(shortname) {
+        if (shortname === 'response') {
+          done();
+        }
+      });
+      receiver.on('response', function() {});
     });
 
     /* Tests_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_027: [** When the `subscribed` event is emitted because the post MQTT topic was subscribed, the parameter shall be the string 'post' **]** */
-    it ('passes the the word "post" as an event parameter when the post topic is successfully subscribed to', function() {
+    it ('passes the the word "post" as an event parameter when the post topic is successfully subscribed to', function(done) {
+      receiver.on('subscribed', function(shortname) {
+        if (shortname === 'post') {
+          done();
+        }
+      });
+      receiver.on('post', function() {});
     });
 
   });
