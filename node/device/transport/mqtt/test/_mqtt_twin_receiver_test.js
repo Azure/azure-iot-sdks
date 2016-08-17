@@ -96,7 +96,7 @@ describe('MqttTwinReceiver', function () {
 
     /* Tests_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_004: [** If there is a listener for the `response` event, a `response` event shall be emitted for each response received. **]** */
     it ('emits a response event for every message', function(done) {
-      validateEventFires('response', '$iothub/twin/res/#', done);
+      validateEventFires('response', '$iothub/twin/res/200/?$rid=42', done);
     });
 
     /* Tests_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_006: [** When a `response` event is emitted, the parameter shall be an object which contains `status`, `requestId` and `body` members **]**  */
