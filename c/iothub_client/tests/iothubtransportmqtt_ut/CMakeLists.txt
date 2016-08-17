@@ -8,18 +8,19 @@ if(NOT ${use_mqtt})
 	message(FATAL_ERROR "iothubtransportmqtt_ut being generated without mqtt support")
 endif()
 
-compileAsC99()
+compileAsC11()
 set(theseTestsName iothubtransportmqtt_ut)
 
-set(${theseTestsName}_cpp_files
-${theseTestsName}.cpp
+set(${theseTestsName}_test_files
+${theseTestsName}.c
 )
 
 set(${theseTestsName}_c_files
 ../../src/iothubtransportmqtt.c
+real_doublylinkedlist.c
 )
 
 set(${theseTestsName}_h_files
 )
 
-build_test_artifacts(${theseTestsName} ON)
+build_c_test_artifacts(${theseTestsName} ON "UnitTests")
