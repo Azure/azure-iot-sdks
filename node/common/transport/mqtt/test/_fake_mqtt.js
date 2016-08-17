@@ -22,12 +22,7 @@ var FakeMqtt = function() {
     }
   };
 
-  this.publishWasCalled = function() {
-    return this.publishoptions;
-  };
-
   this.connect = function() {
-    // This object does double-duty.  It is both a replacement for mqtt.js and also a replacement for the mqtt.js Client object. Gross!
     return this;
   };
 
