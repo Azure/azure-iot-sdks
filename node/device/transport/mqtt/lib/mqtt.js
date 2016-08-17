@@ -8,7 +8,6 @@ var results = require('azure-iot-common').results;
 var errors = require('azure-iot-common').errors;
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
-var debug = require('debug')('mqtt-device');
 var translateError = require('../lib/mqtt-translate-error.js');
 
 /**
@@ -236,7 +235,6 @@ Mqtt.prototype.sendTwinRequest = function(method, resource, properties, body, do
         done(translateError(err));
       } else {
         /* Codes_SRS_NODE_DEVICE_MQTT_18_004: [** If a `done` callback is passed as an argument, The `sendTwinRequest` method shall call `done` after the body has been published. **]** */
-        debug('PUBACK: ' + JSON.stringify(puback));
         /* Codes_SRS_NODE_DEVICE_MQTT_18_017: [** If the `sendTwinRequest` method is successful, the first parameter to the `done` callback shall be null and the second parameter shall be a MessageEnqueued object. **]** */
         done(null, new results.MessageEnqueued(puback));
       }
