@@ -5,9 +5,6 @@
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 
-var responseTopic = '$iothub/twin/res/#';
-var postTopic = '$iothub/twin/POST/desired';
-
 var FakeMqtt = function() {
   EventEmitter.call(this);
 
@@ -48,7 +45,7 @@ var FakeMqtt = function() {
 
   this.fakeMessageFromService = function(topic, message) {
     this.emit('message', topic, message);
-  }
+  };
 };
 
 util.inherits(FakeMqtt, EventEmitter);
