@@ -20,14 +20,14 @@ var provider;
 var transport;
 
 describe('Mqtt', function () {
-  describe('#sendTwinRequest', function () {
-    
     beforeEach(function(done) {
       provider = new MqttProvider();
       provider.publishShouldSucceed(true);
       transport = new Mqtt(config, provider);
       done();
     });
+    
+  describe('#sendTwinRequest', function () {
     
     /* Tests_SRS_NODE_DEVICE_MQTT_18_001: [** The `sendTwinRequest` method shall call the publish method on `MqttTransport`. **]** */
     it('calls publish method on transport', function() {
@@ -170,6 +170,53 @@ describe('Mqtt', function () {
 
     
   });
-  
-});
 
+  describe('#getTwinReceiver', function () {
+    /* Tests_SRS_NODE_DEVICE_MQTT_18_014: [** The `getTwinReceiver` method shall throw an `ReferenceError` if done is falsy **]**  */
+    it ('throws if done is falsy', function() {
+      assert.throws(function() {
+        transport.getTwinReceiver();
+      }, ReferenceError);
+    });
+    
+    /* Tests_SRS_NODE_DEVICE_MQTT_18_005: [** The `getTwinReceiver` method shall call the `done` method after it completes **]** */
+    it ('calls done when complete', function(done) {
+      transport.connect();
+      transport.getTwinReceiver(done);
+    });
+    
+    /* Tests_SRS_NODE_DEVICE_MQTT_18_003: [** If a twin receiver for this endpoint doesn't exist, the `getTwinReceiver` method should create a new `MqttTwinReceiver` object. **]** */
+    /* Tests_SRS_NODE_DEVICE_MQTT_18_006: [** If a twin receiver for this endpoint did not previously exist, the `getTwinReceiver` method should return the a new `MqttTwinReceiver` object as the second parameter of the `done` function with null as the first parameter. **]** */
+    it ('creates a new twin receiver object', function(done) {
+      transport.connect();
+      transport.getTwinReceiver(function(err,receiver) {
+        assert.isNull(err);
+        assert.equal(receiver,transport._twinReceiver);
+        done();
+      });
+    });
+    
+    /* Tests_SRS_NODE_DEVICE_MQTT_18_002: [** If a twin receiver for this endpoint has already been created, the `getTwinReceiver` method should not create a new `MqttTwinReceiver` object. **]** */
+    /* Tests_SRS_NODE_DEVICE_MQTT_18_007: [** If a twin receiver for this endpoint previously existed, the `getTwinReceiver` method should return the preexisting `MqttTwinReceiver` object as the second parameter of the `done` function with null as the first parameter. **]** */
+    it ('only creates one twin receiver object', function(done) {
+      transport.connect();
+      transport.getTwinReceiver(function(err,receiver1) {
+        assert.isNull(err);
+        process.nextTick(function() {
+          transport.getTwinReceiver(function(err,receiver2) {
+            assert.isNull(err);
+            assert.equal(receiver1,receiver2);
+            assert.equal(receiver1, transport._twinReceiver);
+            done();
+          });
+        });
+      });
+    });
+  });
+
+});
+          
+    
+          
+          
+          

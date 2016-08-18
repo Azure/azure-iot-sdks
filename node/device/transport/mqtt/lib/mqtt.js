@@ -9,6 +9,7 @@ var errors = require('azure-iot-common').errors;
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var translateError = require('../lib/mqtt-translate-error.js');
+var MqttTwinReceiver = require('../lib/mqtt-twin-receiver.js');
 
 /**
  * @class        module:azure-iot-device-mqtt.Mqtt
@@ -180,6 +181,9 @@ Mqtt.prototype.setOptions = function (options, done) {
  * @param {Object}        properties  object containing name value pairs for request properties (e.g. { 'rid' : 10, 'index' : 17 })
  * @param {String}        body  body of request
  * @param {Function}      the callback to be invoked when this function completes.
+ *
+ * @throws {ReferenceError}   One of the required parameters is falsy
+ * @throws {ArgumentError}  One of the parameters is an incorrect type
  */
 Mqtt.prototype.sendTwinRequest = function(method, resource, properties, body, done) {
 
@@ -244,8 +248,28 @@ Mqtt.prototype.sendTwinRequest = function(method, resource, properties, body, do
  * @description     Get a receiver object that handles C2D device-twin traffic
  *
  * @param {Function}      the callback to be invoked when this function completes.
+ *
+ * @throws {ReferenceError}   One of the required parameters is falsy
  */
-Mqtt.prototype.getTwinReceiver = function() { // done) {
+Mqtt.prototype.getTwinReceiver = function(done) {
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_014: [** The `getTwinReceiver` method shall throw an `ReferenceError` if done is falsy **]**  */
+  if (!done) {
+    throw new ReferenceError('required parameter is missing');
+  }
+
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_003: [** If a twin receiver for this endpoint doesn't exist, the `getTwinReceiver` method should create a new `MqttTwinReceiver` object. **]** */
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_002: [** If a twin receiver for this endpoint has already been created, the `getTwinReceiver` method should not create a new `MqttTwinReceiver` object. **]** */
+  if (!this._twinReceiver) {
+    this._twinReceiver = new MqttTwinReceiver(this._mqtt.client, this._topic_subscribe);
+  }
+
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_005: [** The `getTwinReceiver` method shall call the `done` method after it completes **]** */
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_006: [** If a twin receiver for this endpoint did not previously exist, the `getTwinReceiver` method should return the a new `MqttTwinReceiver` object as the second parameter of the `done` function with null as the first parameter. **]** */
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_007: [** If a twin receiver for this endpoint previously existed, the `getTwinReceiver` method should return the preexisting `MqttTwinReceiver` object as the second parameter of the `done` function with null as the first parameter. **]** */
+  done(null, this._twinReceiver);
+  
 };
+
+
 
 module.exports = Mqtt;
