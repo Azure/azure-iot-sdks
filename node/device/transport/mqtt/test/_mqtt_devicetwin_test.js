@@ -81,7 +81,7 @@ describe('Mqtt', function () {
     it('throws if properties is falsy', function() {
       transport.connect();
       assert.throws(function() {
-        transport.sendTwinRequest('PUT','/res',null,'body',function() {});
+        transport.sendTwinRequest('PUT', '/res', null, 'body', function() {});
       }, ReferenceError);
     });
 
@@ -105,16 +105,16 @@ describe('Mqtt', function () {
     it('throws if body is falsy', function() {
       transport.connect();
       assert.throws(function() {
-        transport.sendTwinRequest('PUT','/res',{'rid':10},null,function() {});
+        transport.sendTwinRequest('PUT', '/res', {'rid' : 10}, null, function() {});
       }, ReferenceError);
     });
 
     /* Tests_SRS_NODE_DEVICE_MQTT_18_022: [** The `propertyQuery` string shall be construced from the `properties` object. **]**   */
     /* Tests_SRS_NODE_DEVICE_MQTT_18_023: [** Each member of the `properties` object shall add another 'name=value&' pair to the `propertyQuery` string. **]**   */
     it('correctly builds properties string', function() {
-      var publish = sinon.spy(provider,'publish');
+      var publish = sinon.spy(provider, 'publish');
       transport.connect();
-      transport.sendTwinRequest('a/','b/',{'rid':10,'pid':20},'body',function() {});
+      transport.sendTwinRequest('a/', 'b/', {'rid' : 10, 'pid' : 20}, 'body', function() {});
       assert(publish.calledWith('$iothub/twin/a/b/?rid=10&pid=20'));
     });
 
@@ -127,7 +127,7 @@ describe('Mqtt', function () {
     /* Tests_SRS_NODE_DEVICE_MQTT_18_021: [** The topic name passed to the publish method shall be $iothub/twin/`method`/`resource`/?`propertyQuery` **]** */
     it('uses the correct topic name', function() {
       // 7.5.2: $iothub/twin/PATCH/properties/reported/?$rid={request id}&$version={base version}
-      var publish = sinon.spy(provider,'publish');
+      var publish = sinon.spy(provider, 'publish');
       transport.connect();
       transport.sendTwinRequest('PATCH', '/properties/reported/', {'$rid':10, '$version': 200}, 'body', function() {});
       assert(publish.calledWith('$iothub/twin/PATCH/properties/reported/?$rid=10&$version=200'));
@@ -135,7 +135,7 @@ describe('Mqtt', function () {
 
     /* Tests_SRS_NODE_DEVICE_MQTT_18_015: [** The `sendTwinRequest` shall publish the request with QOS=0, DUP=0, and Retain=0 **]** */
     it('uses the correct publish parameters', function() {
-      var publish = sinon.spy(provider,'publish');
+      var publish = sinon.spy(provider, 'publish');
       transport.connect();
       transport.sendTwinRequest('PATCH', '/properties/reported/', {'$rid':10, '$version': 200}, 'body', function() {});
       var publishoptions = publish.getCall(0).args[2];
@@ -158,7 +158,7 @@ describe('Mqtt', function () {
     /* Tests_SRS_NODE_DEVICE_MQTT_18_017: [** If the `sendTwinRequest` method is successful, the first parameter to the `done` callback shall be null and the second parameter shall be a MessageEnqueued object. **]** */
     it('returns MessageEnqueued object on success', function(done) {
       transport.connect();
-      transport.sendTwinRequest('PATCH', '/properties/reported/', {'$rid':10, '$version': 200}, 'body', function(err,res) {
+      transport.sendTwinRequest('PATCH', '/properties/reported/', {'$rid':10, '$version': 200}, 'body', function(err, res) {
         if (err) {
           done(err);
         } else {

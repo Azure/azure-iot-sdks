@@ -5,7 +5,6 @@
 
 var assert = require('chai').assert;
 
-var errors = require('azure-iot-common').errors;
 var MqttTwinReceiver = require('../lib/mqtt-twin-receiver.js');
 var MqttProvider = require('../../../../common/transport/mqtt/test/_fake_mqtt.js');
 var sinon = require('sinon');
@@ -15,7 +14,7 @@ var receiverConfig;
 var receiver;
 
 var validateSubscription = function(shortname, topic, done) {
-  var subscribe = sinon.spy(provider,'subscribe');
+  var subscribe = sinon.spy(provider, 'subscribe');
   receiver.on(shortname, function() {});
   process.nextTick(function() {
     assert(subscribe.withArgs(topic).calledOnce);
@@ -24,11 +23,11 @@ var validateSubscription = function(shortname, topic, done) {
 };
 
 var validateUnsubscription = function(shortname, topic, done) {
-  var unsubscribe = sinon.spy(provider,'unsubscribe');
+  var unsubscribe = sinon.spy(provider, 'unsubscribe');
   var func = function() { };
   receiver.on(shortname, func);
   process.nextTick(function() {
-    receiver.removeListener(shortname,func);
+    receiver.removeListener(shortname, func);
     process.nextTick(function() {
       assert(unsubscribe.withArgs(topic).calledOnce);
       done();
@@ -70,14 +69,14 @@ describe('MqttTwinReceiver', function () {
     it ('throws if config is falsy', function() {
       assert.throws(function() {
         receiver = new MqttTwinReceiver();
-      }, errors.ReferenceError);
+      }, ReferenceError);
     });
 
     /* Tests_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_028: [** The `MqttTwinReceiver` constructor shall throw a `ReferenceError` if the `config` object does not contain a property named `client` **]** */
-    it ('throws is config is missing a client member', function() {
+    it ('throws if config is missing a client member', function() {
       assert.throws(function() {
         receiver = new MqttTwinReceiver({});
-      }, errors.ReferenceError);
+      }, ReferenceError);
     });
   });
 
@@ -116,9 +115,9 @@ describe('MqttTwinReceiver', function () {
     /* Tests_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_013: [** The `body` parameter of the `response` event shall be the body of the received MQTT message **]**  */
     it ('parses the topic name correctly', function(done) {
       receiver.on('response', function(data) {
-        assert.equal(data.status,200);
-        assert.equal(data.requestId,42);
-        assert.equal(data.body,'fake_body');
+        assert.equal(data.status, 200);
+        assert.equal(data.requestId, 42);
+        assert.equal(data.body, 'fake_body');
         done();
       });
       provider.fakeMessageFromService('$iothub/twin/res/200/?$rid=42', 'fake_body');
@@ -126,7 +125,7 @@ describe('MqttTwinReceiver', function () {
     
     it ('ignores messages on invalid topics', function(done) {
       receiver.on('response', function() {
-        assert(false);
+        assert.fail();
       });
       /* Tests_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_014: [** Any messages received on topics which violate the topic name formatting shall be ignored. **]** */
       provider.fakeMessageFromService('garbage');
@@ -203,8 +202,7 @@ describe('MqttTwinReceiver', function () {
     
     /* Tests_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_025: [** If the `subscribed` event is subscribed to, a `subscribed` event shall be emitted after an MQTT topic is subscribed to. **]** */
     it ('emits a subscribed event after successful subscription to response event', function(done) {
-      receiver.on('subscribed', function(shortname) {
-        void(shortname);
+      receiver.on('subscribed', function() {
         done();
       });
       receiver.on('response', function() {});

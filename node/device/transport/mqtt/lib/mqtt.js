@@ -30,8 +30,8 @@ function Mqtt(config, provider) {
   }
   else
   {
-  this._mqtt = new Base();
-}
+    this._mqtt = new Base();
+  }
 }
 
 util.inherits(Mqtt, EventEmitter);
@@ -218,7 +218,7 @@ Mqtt.prototype.sendTwinRequest = function(method, resource, properties, body, do
     }
     
     /* Codes_SRS_NODE_DEVICE_MQTT_18_023: [** Each member of the `properties` object shall add another 'name=value&' pair to the `propertyQuery` string. **]**   */
-    propString +=(propString === '') ? '?' : '&';
+    propString += (propString === '') ? '?' : '&';
     propString += key + '=' + properties[key];
   });
 
