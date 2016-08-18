@@ -9,6 +9,7 @@
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/doublylinkedlist.h"
+#include "azure_c_shared_utility/umock_c_prod.h"
 
 #include "iothub_message.h"
 #include "iothub_client_ll.h"
@@ -17,8 +18,6 @@
 extern "C"
 {
 #endif
-
-
 
 #define EVENT_ENDPOINT "/messages/events"
 #define MESSAGE_ENDPOINT "/messages/devicebound"
@@ -31,8 +30,8 @@ extern "C"
 #define API_VERSION "?api-version=2016-02-03"
 #define REJECT_QUERY_PARAMETER "&reject"
 
-extern void IoTHubClient_LL_SendComplete(IOTHUB_CLIENT_LL_HANDLE handle, PDLIST_ENTRY completed, IOTHUB_CLIENT_CONFIRMATION_RESULT result);
-extern IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubClient_LL_MessageCallback(IOTHUB_CLIENT_LL_HANDLE handle, IOTHUB_MESSAGE_HANDLE message);
+MOCKABLE_FUNCTION(, void, IoTHubClient_LL_SendComplete, IOTHUB_CLIENT_LL_HANDLE, handle, PDLIST_ENTRY, completed, IOTHUB_CLIENT_CONFIRMATION_RESULT, result);
+MOCKABLE_FUNCTION(, IOTHUBMESSAGE_DISPOSITION_RESULT, IoTHubClient_LL_MessageCallback, IOTHUB_CLIENT_LL_HANDLE,  handle, IOTHUB_MESSAGE_HANDLE, message);
 
 typedef struct IOTHUB_MESSAGE_LIST_TAG
 {

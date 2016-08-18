@@ -56,6 +56,8 @@ The `Mqtt` constructor initializes a new instance of the MQTT transport.
 
 **SRS_NODE_DEVICE_MQTT_12_003: [** The `Mqtt` constructor shall create an MqttTransport object and store it in a member variable.**]**
 
+**SRS_NODE_DEVICE_MQTT_18_025: [** If the `Mqtt` constructor receives a second parameter, it shall be used as a provider in place of mqtt.js **]**  
+
 ### connect(done)
 The `connect` method initializes a connection to an IoT hub.
 
@@ -121,7 +123,7 @@ The `sendTwinRequest` method sends the given body to the given endpoint on an Io
 
 **SRS_NODE_DEVICE_MQTT_18_001: [** The `sendTwinRequest` method shall call the publish method on `MqttTransport`. **]**
 
-**SRS_NODE_DEVICE_MQTT_18_008: [** The `sendTwinRequest` method shall not throw `ReferenceError` if the `done` callback is falsy. **]**
+**SRS_NODE_DEVICE_MQTT_18_008: [** The `sendTwinRequest` method shall not throw if the `done` callback is falsy. **]**
 
 **SRS_NODE_DEVICE_MQTT_18_009: [** The `sendTwinRequest` method shall throw an `ReferenceError` if the `method` argument is falsy. **]**
 

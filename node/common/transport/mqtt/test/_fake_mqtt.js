@@ -17,7 +17,7 @@ var FakeMqtt = function() {
     if (this._publishSucceeds) {
       callback(null, {puback: 'success'});
     } else {
-      callback(new Error('publish failed'));
+      callback(new Error('Invalid topic'));
     }
   };
 

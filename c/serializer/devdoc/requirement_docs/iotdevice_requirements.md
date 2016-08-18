@@ -178,11 +178,11 @@ DEVICE_RESULT Device_CommitTransaction_ReportedProperties(REPORTED_PROPERTIES_TR
 
 Device_CommitTransaction_ReportedProperties commits a transaction thus filling the parameters `destination` and `destinationSize`.
 
-**SRS_DEVICE_02_024: [** If argument `transactionHandle` is `NULL` then `Device_CommitTransaction_ReportedProperties` shall fail and return DEVICE_INVALID_ARG. **]**
+**SRS_DEVICE_02_024: [** If argument `transactionHandle` is `NULL` then `Device_CommitTransaction_ReportedProperties` shall fail and return `DEVICE_INVALID_ARG`. **]**
 
-**SRS_DEVICE_02_025: [** If argument `destination` is `NULL` then `Device_CommitTransaction_ReportedProperties` shall fail and return DEVICE_INVALID_ARG. **]**
+**SRS_DEVICE_02_025: [** If argument `destination` is `NULL` then `Device_CommitTransaction_ReportedProperties` shall fail and return `DEVICE_INVALID_ARG`. **]**
 
-**SRS_DEVICE_02_026: [** If argument `destinationSize` is `NULL`then `Device_CommitTransaction_ReportedProperties` shall fail and return DEVICE_INVALID_ARG. **]**
+**SRS_DEVICE_02_026: [** If argument `destinationSize` is `NULL`then `Device_CommitTransaction_ReportedProperties` shall fail and return `DEVICE_INVALID_ARG`. **]**
 
 **SRS_DEVICE_02_027: [** `Device_CommitTransaction_ReportedProperties` shall call `DataPublisher_CommitTransaction_ReportedProperties`. **]**
 

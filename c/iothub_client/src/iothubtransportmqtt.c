@@ -759,13 +759,20 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transportState)
         {
             // We are connected and not being closed, so does SAS need to reconnect?
             uint64_t current_time;
-            (void)tickcounter_get_current_ms(g_msgTickCounter, &current_time);
-            if ((current_time - transportState->mqtt_connect_time) / 1000 > (SAS_TOKEN_DEFAULT_LIFETIME*SAS_REFRESH_MULTIPLIER))
+            if (tickcounter_get_current_ms(g_msgTickCounter, &current_time) != 0)
             {
-                (void)mqtt_client_disconnect(transportState->mqttClient);
-                transportState->subscribed = false;
-                transportState->connected = false;
-                transportState->currPacketState = UNKNOWN_TYPE;
+                transportState->connectFailCount++;
+                result = __LINE__;
+            }
+            else
+            {
+                if ((current_time - transportState->mqtt_connect_time) / 1000 > (SAS_TOKEN_DEFAULT_LIFETIME*SAS_REFRESH_MULTIPLIER))
+                {
+                    (void)mqtt_client_disconnect(transportState->mqttClient);
+                    transportState->subscribed = false;
+                    transportState->connected = false;
+                    transportState->currPacketState = UNKNOWN_TYPE;
+                }
             }
         }
     }
@@ -929,6 +936,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                     {
                         STRING_delete(state->transport_creds.CREDENTIAL_VALUE.deviceSasToken);
                     }
+                    mqtt_client_deinit(state->mqttClient);
                     STRING_delete(state->mqttEventTopic);
                     STRING_delete(state->mqttMessageTopic);
                     STRING_delete(state->device_id);
@@ -946,6 +954,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
                     {
                         STRING_delete(state->transport_creds.CREDENTIAL_VALUE.deviceSasToken);
                     }
+                    mqtt_client_deinit(state->mqttClient);
                     STRING_delete(state->hostAddress);
                     STRING_delete(state->mqttEventTopic);
                     STRING_delete(state->mqttMessageTopic);
