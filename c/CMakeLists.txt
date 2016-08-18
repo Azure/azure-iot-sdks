@@ -45,9 +45,13 @@ option(build_javawrapper "builds the native iothub_client library for java C wra
 option(dont_use_uploadtoblob "set dont_use_uploadtoblob to ON if the functionality of upload to blob is to be excluded, OFF otherwise. It requires HTTP" OFF)
 option(no_logging "disable logging" OFF)
 
+
 #check for conflicting options
-if(NOT ${dont_use_uploadtoblob} AND NOT ${use_http})
-    message(FATAL_ERROR "option dont_use_uploadtoblob set to OFF requires option use_http set to ON")
+if(NOT ${use_http})
+    MESSAGE( "Setting dont_use_uploadtoblob to ON because use_http is OFF")
+    set(dont_use_uploadtoblob "ON") 
+    MESSAGE( STATUS "use_http:         " ${use_http} )
+    MESSAGE( STATUS "dont_use_uploadtoblob:         " ${dont_use_uploadtoblob} )
 endif()
 
 if(${dont_use_uploadtoblob})
