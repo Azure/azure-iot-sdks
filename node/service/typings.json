@@ -1,0 +1,9 @@
+{
+  "name": "azure-iothub",
+  "main": "iothub.d.ts",
+  "dependencies": {
+  },
+  "globalDependencies": {
+    "node": "registry:dt/node#6.0.0+20160807145350"
+  }
+}
