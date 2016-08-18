@@ -12,7 +12,9 @@ extern const TRANSPORT_PROVIDER* MQTT_Protocol(void);
 ```
 
   The following static functions are provided in the fields of the TRANSPORT_PROVIDER structure:
-	- IoTHubTransportMqtt_GetHostname,
+    - IoTHubTransportMqtt_Subscribe_DeviceTwin,
+    - IoTHubTransportMqtt_Unsubscribe_DeviceTwin,
+	  - IoTHubTransportMqtt_GetHostname,
     - IoTHubTransportMqtt_SetOption,
     - IoTHubTransportMqtt_Create,
     - IoTHubTransportMqtt_Destroy,
@@ -51,7 +53,7 @@ IoTHubTransportMqtt_Create shall create a TRANSPORT_LL_HANDLE that can be furthe
 void IoTHubTransportMqtt_Destroy(TRANSPORT_LL_HANDLE handle)
 ```
 
-**SRS_IOTHUB_MQTT_TRANSPORT_07_012: [**IoTHubTransportMqtt_Destroy shall do nothing if parameter handle is NULL.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_012: [**IoTHubTransportMqtt_Destroy shall do nothing if parameter 'handle' is NULL.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_013: [**If the parameter subscribe is true then IoTHubTransportMqtt_Destroy shall call IoTHubTransportMqtt_Unsubscribe.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_014: [**IoTHubTransportMqtt_Destroy shall free all the resources currently in use.**]**  
 
@@ -80,13 +82,37 @@ This function is intended to remove a device as registered with the transport.  
 
 **SRS_IOTHUB_MQTT_TRANSPORT_17_005: [** `IoTHubTransportMqtt_Unregister` shall return. **]**  
 
+### IoTHubTransportMqtt_Subscribe_DeviceTwin
+
+```c
+int IoTHubTransportMqtt_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state)
+```
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_042: [**If the parameter 'handle' is NULL than IoTHubTransportMqtt_Subscribe shall return a non-zero value.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_043: [**If the subscribe_state has been previously subscribed IoTHubTransportMqtt_Subscribe_DeviceTwin shall do nothing.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_044: [**If 'subscribe_state' is set to IOTHUB_DEVICE_TWIN_DESIRED_STATE then IoTHubTransportMqtt_Subscribe_DeviceTwin shall construct the get state topic string.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_045: [**If 'subscribe_state' is set to IOTHUB_DEVICE_TWIN_NOTIFICATION_STATE then IoTHubTransportMqtt_Subscribe_DeviceTwin shall construct the notify state topic string**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_046: [**Upon failure IoTHubTransportMqtt_Subscribe_DeviceTwin shall return a non-zero value.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_047: [**On success IoTHubTransportMqtt_Subscribe_DeviceTwin shall return 0.**]**  
+
+### IoTHubTransportMqtt_Unsubscribe_DeviceTwin
+
+```c
+
+void IoTHubTransportMqtt_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state)
+```
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_048: [**If the parameter 'handle' is NULL than IoTHubTransportMqtt_Unsubscribe_DeviceTwin shall do nothing.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_049: [**If 'subscribe_state' is set to IOTHUB_DEVICE_TWIN_DESIRED_STATE then IoTHubTransportMqtt_Unsubscribe_DeviceTwin shall send the get state topic to the mqtt client.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_050: [**If 'subscribe_state' is set to IOTHUB_DEVICE_TWIN_NOTIFICATION_STATE then IoTHubTransportMqtt_Unsubscribe_DeviceTwin shall send the notify state topic to the mqtt client.**]**  
+
 ### IoTHubTransportMqtt_Subscribe
 
 ```c
 int IoTHubTransportMqtt_Subscribe(TRANSPORT_LL_HANDLE handle)
 ```
 
-**SRS_IOTHUB_MQTT_TRANSPORT_07_015: [**If parameter handle is NULL than IoTHubTransportMqtt_Subscribe shall return a non-zero value.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_015: [**If parameter 'handle' is NULL than IoTHubTransportMqtt_Subscribe shall return a non-zero value.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_016: [**IoTHubTransportMqtt_Subscribe shall set a flag to enable mqtt_client_subscribe to be called to subscribe to the Message Topic.**]**
 **SRS_IOTHUB_MQTT_TRANSPORT_07_035: [**If current packet state is not CONNACK, DISCONNECT_TYPE, or PACKET_TYPE_ERROR then IoTHubTransportMqtt_Subscribe shall set the packet state to SUBSCRIBE_TYPE.**]**   
 **SRS_IOTHUB_MQTT_TRANSPORT_07_017: [**Upon failure IoTHubTransportMqtt_Subscribe shall return a non-zero value.**]**    
@@ -98,7 +124,7 @@ int IoTHubTransportMqtt_Subscribe(TRANSPORT_LL_HANDLE handle)
 void IoTHubTransportMqtt_Unsubscribe(TRANSPORT_LL_HANDLE handle)
 ```
 
-**SRS_IOTHUB_MQTT_TRANSPORT_07_019: [**If parameter handle is NULL then IoTHubTransportMqtt_Unsubscribe shall do nothing.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_019: [**If parameter 'handle' is NULL then IoTHubTransportMqtt_Unsubscribe shall do nothing.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_020: [**IoTHubTransportMqtt_Unsubscribe shall call mqtt_client_unsubscribe to unsubscribe the mqtt message topic.**]**  
 
 ### IoTHubTransportMqtt_DoWork
@@ -107,13 +133,14 @@ void IoTHubTransportMqtt_Unsubscribe(TRANSPORT_LL_HANDLE handle)
 void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
 ```
 
-**SRS_IOTHUB_MQTT_TRANSPORT_07_026: [**IoTHubTransportMqtt_DoWork shall do nothing if parameter handle and/or iotHubClientHandle is NULL.**]**  
-**SRS_IOTHUB_MQTT_TRANSPORT_07_027: [**IoTHubTransportMqtt_DoWork shall inspect the “waitingToSend” DLIST passed in config structure.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_026: [**IoTHubTransportMqtt_DoWork shall do nothing if parameter 'handle' and/or 'iotHubClientHandle' is NULL.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_027: [**IoTHubTransportMqtt_DoWork shall inspect the 'waitingToSend' DLIST passed in config structure.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_028: [**IoTHubTransportMqtt_DoWork shall retrieve the payload message from the messageHandle parameter.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_029: [**IoTHubTransportMqtt_DoWork shall create a MQTT_MESSAGE_HANDLE and pass this to a call to  mqtt_client_publish.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_030: [**IoTHubTransportMqtt_DoWork shall call mqtt_client_dowork everytime it is called if it is connected.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_033: [**IoTHubTransportMqtt_DoWork shall iterate through the Waiting Acknowledge messages looking for any message that has been waiting longer than 2 min.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_034: [**If IoTHubTransportMqtt_DoWork has previously resent the message two times then it shall fail the message**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_053: [**IoTHubTransportMqtt_DoWork Shall send the mqtt subscribe message if any of the 'MessageTopic', get_state_topic, or notify_state_topic Topics are entered.**]**  
 
 ### IoTHubTransportMqtt_GetSendStatus
 
@@ -132,13 +159,13 @@ IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_LL_HANDLE handle, c
 ```
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_021: [**If any parameter is NULL then IoTHubTransportMqtt_SetOption shall return IOTHUB_CLIENT_INVALID_ARG.**]**
-**SRS_IOTHUB_MQTT_TRANSPORT_07_031: [**If the option parameter is set to "logtrace" then the value shall be a bool_ptr and the value will determine if the mqtt client log is on or off.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_031: [**If the 'optionName' parameter is set to "logtrace" then the value shall be a bool_ptr and the value will determine if the mqtt client log is on or off.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_032: [**IoTHubTransportMqtt_SetOption shall pass down the option to xio_setoption if the option parameter is not a known option string for the MQTT transport.**]**  
-**SRS_IOTHUB_MQTT_TRANSPORT_07_036: [**If the option parameter is set to "keepalive" then the value shall be a int_ptr and the value will determine the mqtt keepalive time that is set for pings.**]**  
-**SRS_IOTHUB_MQTT_TRANSPORT_07_037: [**If the option parameter is set to supplied int_ptr keepalive is the same value as the existing keepalive then IoTHubTransportMqtt_SetOption shall do nothing.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_036: [**If the 'optionName' parameter is set to "keepalive" then the value shall be a int_ptr and the value will determine the mqtt keepalive time that is set for pings.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_037: [**If the 'optionName' parameter is set to supplied int_ptr keepalive is the same value as the existing keepalive then IoTHubTransportMqtt_SetOption shall do nothing.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_038: [**If the client is connected when the keepalive is set then IoTHubTransportMqtt_SetOption shall disconnect and reconnect with the specified keepalive value.**]**  
-**SRS_IOTHUB_MQTT_TRANSPORT_07_039: [**If the option parameter is set to "x509certificate" then the value shall be a const char* of the certificate to be used for x509.**]**  
-**SRS_IOTHUB_MQTT_TRANSPORT_07_040: [**If the option parameter is set to "x509privatekey" then the value shall be a const char* of the RSA Private Key to be used for x509.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_039: [**If the 'optionName' parameter is set to "x509certificate" then the value shall be a const char* of the certificate to be used for x509.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_040: [**If the 'optionName' parameter is set to "x509privatekey" then the value shall be a const char* of the RSA Private Key to be used for x509.**]**  
 
 ```c
 STRING_HANDLE IoTHubTransportMqtt_GetHostname(TRANSPORT_LL_HANDLE handle)
@@ -157,6 +184,8 @@ const TRANSPORT_PROVIDER* MQTT_Protocol(void)
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_022: [**This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for it’s fields:
 
+IoTHubTransport_Subscribe_DeviceTwin = IoTHubTransportMqtt_Subscribe_DeviceTwin  
+IoTHubTransport_Unsubscribe_DeviceTwin = IoTHubTransportMqtt_Unsubscribe_DeviceTwin  
 IoTHubTransport_GetHostname = IoTHubTransportMqtt_GetHostname  
 IoTHubTransport_Create = IoTHubTransportMqtt_Create  
 IoTHubTransport_Destroy = IoTHubTransportMqtt_Destroy  

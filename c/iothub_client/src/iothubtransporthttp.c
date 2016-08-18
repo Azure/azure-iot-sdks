@@ -903,6 +903,22 @@ static void IoTHubTransportHttp_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
     }
 }
 
+static int IoTHubTransportHttp_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state)
+{
+    (void)handle;
+    (void)subscribe_state;
+    int result = __LINE__;
+    LogError("IoTHubTransportHttp_Subscribe_DeviceTwin Not supported");
+    return result;
+}
+
+static void IoTHubTransportHttp_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state)
+{
+    (void)handle;
+    (void)subscribe_state;
+    LogError("IoTHubTransportHttp_Unsubscribe_DeviceTwin Not supported");
+}
+
 /*produces a representation of the properties, if they exist*/
 /*if they do not exist, produces ""*/
 static int concat_Properties(STRING_HANDLE existing, MAP_HANDLE map, size_t* propertiesMessageSizeContribution)
@@ -2166,6 +2182,8 @@ static STRING_HANDLE IoTHubTransportHttp_GetHostname(TRANSPORT_LL_HANDLE handle)
 /*Codes_SRS_TRANSPORTMULTITHTTP_17_125: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:] */
 static TRANSPORT_PROVIDER thisTransportProvider =
 {
+    IoTHubTransportHttp_Subscribe_DeviceTwin, /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin; */
+    IoTHubTransportHttp_Unsubscribe_DeviceTwin, /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin; */
     IoTHubTransportHttp_GetHostname, /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname; */
     IoTHubTransportHttp_SetOption, /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;       */
     IoTHubTransportHttp_Create, /*pfIoTHubTransport_Create IoTHubTransport_Create;                                                  */

@@ -211,22 +211,22 @@ static STRING_HANDLE concat3Params(const char* prefix, const char* infix, const 
 
 static int getSecondsSinceEpoch(size_t* seconds)
 {
-	int result;
-	time_t current_time;
-	
-	if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
-	{
-		LogError("Failed getting the current local time (get_time() failed)");
-		result = __LINE__;
-	}
-	else
-	{
-		*seconds = (size_t)get_difftime(current_time, (time_t)0);
-		
-		result = RESULT_OK;
-	}
-	
-	return result;
+    int result;
+    time_t current_time;
+    
+    if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
+    {
+        LogError("Failed getting the current local time (get_time() failed)");
+        result = __LINE__;
+    }
+    else
+    {
+        *seconds = (size_t)get_difftime(current_time, (time_t)0);
+        
+        result = RESULT_OK;
+    }
+    
+    return result;
 }
 
 static void trackEventInProgress(IOTHUB_MESSAGE_LIST* message, AMQP_TRANSPORT_INSTANCE* transport_state)
@@ -957,11 +957,11 @@ static int establishConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
                             result = RESULT_FAILURE;
                             LogError("Failed to open the connection with CBS.");
                         }
-						else if (getSecondsSinceEpoch(&transport_state->connection_establish_time) != RESULT_OK)
-						{
-							LogError("Failed setting the connection establish time.");
-							result = RESULT_FAILURE;
-						}
+                        else if (getSecondsSinceEpoch(&transport_state->connection_establish_time) != RESULT_OK)
+                        {
+                            LogError("Failed setting the connection establish time.");
+                            result = RESULT_FAILURE;
+                        }
                         else
                         {
                             transport_state->cbs.cbs_state = CBS_STATE_IDLE;
@@ -1006,17 +1006,17 @@ static int establishConnection(AMQP_TRANSPORT_INSTANCE* transport_state)
                             LogError("Failed to set the AMQP outgoing window size.");
                         }
 
-						if (getSecondsSinceEpoch(&transport_state->connection_establish_time) != RESULT_OK)
-						{
-							LogError("Failed setting the connection establish time.");
-							result = RESULT_FAILURE;
-						}
-						else
-						{
+                        if (getSecondsSinceEpoch(&transport_state->connection_establish_time) != RESULT_OK)
+                        {
+                            LogError("Failed setting the connection establish time.");
+                            result = RESULT_FAILURE;
+                        }
+                        else
+                        {
                         connection_set_trace(transport_state->connection, transport_state->is_trace_on);
                         (void)xio_setoption(transport_state->tls_io, OPTION_LOG_TRACE, &transport_state->is_trace_on);
                         result = RESULT_OK;
-						}
+                        }
                     }
                 }
                 break;
@@ -1060,95 +1060,95 @@ static int startAuthentication(AMQP_TRANSPORT_INSTANCE* transport_state)
     int result;
     size_t currentTimeInSeconds;
 
-	if (getSecondsSinceEpoch(&currentTimeInSeconds) != RESULT_OK)
-	{
-		LogError("Failed getting current time to compute the SAS token creation time.");
-		result = __LINE__;
-	}
-	else
-	{
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_083: [SAS tokens expiration time shall be calculated using the number of seconds since Epoch UTC (Jan 1st 1970 00h00m00s000 GMT) to now (GMT), plus the 'sas_token_lifetime'.]
-		size_t new_expiry_time = currentTimeInSeconds + (transport_state->cbs.sas_token_lifetime / 1000);
+    if (getSecondsSinceEpoch(&currentTimeInSeconds) != RESULT_OK)
+    {
+        LogError("Failed getting current time to compute the SAS token creation time.");
+        result = __LINE__;
+    }
+    else
+    {
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_083: [SAS tokens expiration time shall be calculated using the number of seconds since Epoch UTC (Jan 1st 1970 00h00m00s000 GMT) to now (GMT), plus the 'sas_token_lifetime'.]
+        size_t new_expiry_time = currentTimeInSeconds + (transport_state->cbs.sas_token_lifetime / 1000);
 
-		STRING_HANDLE newSASToken;
+        STRING_HANDLE newSASToken;
 
-		switch (transport_state->credential.credentialType)
-		{
-			default:
-			{
-				result = __LINE__;
-				LogError("internal error, unexpected enum value transport_state->credential.credentialType=%d", transport_state->credential.credentialType);
-				break;
-			}
-			case DEVICE_KEY:
-			{
-				newSASToken = SASToken_Create(transport_state->credential.credential.deviceKey, transport_state->devicesPath, transport_state->cbs.sasTokenKeyName, new_expiry_time);
-				if (newSASToken == NULL)
-				{
-					LogError("Could not generate a new SAS token for the CBS.");
-					result = RESULT_FAILURE;
-				}
-				else
-				{
-					if (handSASTokenToCbs(transport_state, newSASToken, currentTimeInSeconds) != 0)
-					{
-						LogError("unable to handSASTokenToCbs");
-						result = RESULT_FAILURE;
-					}
-					else
-					{
-						result = RESULT_OK;
-					}
+        switch (transport_state->credential.credentialType)
+        {
+            default:
+            {
+                result = __LINE__;
+                LogError("internal error, unexpected enum value transport_state->credential.credentialType=%d", transport_state->credential.credentialType);
+                break;
+            }
+            case DEVICE_KEY:
+            {
+                newSASToken = SASToken_Create(transport_state->credential.credential.deviceKey, transport_state->devicesPath, transport_state->cbs.sasTokenKeyName, new_expiry_time);
+                if (newSASToken == NULL)
+                {
+                    LogError("Could not generate a new SAS token for the CBS.");
+                    result = RESULT_FAILURE;
+                }
+                else
+                {
+                    if (handSASTokenToCbs(transport_state, newSASToken, currentTimeInSeconds) != 0)
+                    {
+                        LogError("unable to handSASTokenToCbs");
+                        result = RESULT_FAILURE;
+                    }
+                    else
+                    {
+                        result = RESULT_OK;
+                    }
 
-					// Codes_SRS_IOTHUBTRANSPORTAMQP_09_145: [Each new SAS token created shall be deleted from memory immediately after sending it to CBS]
-					STRING_delete(newSASToken);
-				}
-				break;
-			}
-			case DEVICE_SAS_TOKEN:
-			{
-				newSASToken = STRING_clone(transport_state->credential.credential.deviceSasToken);
-				if (newSASToken == NULL)
-				{
-					LogError("Could not generate a new SAS token for the CBS.");
-					result = RESULT_FAILURE;
-				}
-				else
-				{
-					if (handSASTokenToCbs(transport_state, newSASToken, currentTimeInSeconds) != 0)
-					{
-						LogError("unable to handSASTokenToCbs");
-						result = RESULT_FAILURE;
-					}
-					else
-					{
-						result = RESULT_OK;
-					}
+                    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_145: [Each new SAS token created shall be deleted from memory immediately after sending it to CBS]
+                    STRING_delete(newSASToken);
+                }
+                break;
+            }
+            case DEVICE_SAS_TOKEN:
+            {
+                newSASToken = STRING_clone(transport_state->credential.credential.deviceSasToken);
+                if (newSASToken == NULL)
+                {
+                    LogError("Could not generate a new SAS token for the CBS.");
+                    result = RESULT_FAILURE;
+                }
+                else
+                {
+                    if (handSASTokenToCbs(transport_state, newSASToken, currentTimeInSeconds) != 0)
+                    {
+                        LogError("unable to handSASTokenToCbs");
+                        result = RESULT_FAILURE;
+                    }
+                    else
+                    {
+                        result = RESULT_OK;
+                    }
 
-					// Codes_SRS_IOTHUBTRANSPORTAMQP_09_145: [Each new SAS token created shall be deleted from memory immediately after sending it to CBS]
-					STRING_delete(newSASToken);
-				}
-				break;
-			}
-		}
-	}
+                    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_145: [Each new SAS token created shall be deleted from memory immediately after sending it to CBS]
+                    STRING_delete(newSASToken);
+                }
+                break;
+            }
+        }
+    }
     return result;
 }
 
 static int verifyAuthenticationTimeout(AMQP_TRANSPORT_INSTANCE* transport_state)
 {
-	int result;
-	size_t currentTimeInSeconds;
-	if (getSecondsSinceEpoch(&currentTimeInSeconds) != RESULT_OK)
-	{
-		LogError("Failed getting the current time to verify if the SAS token needs to be refreshed.");
-		result = RESULT_TIMEOUT; // Fail safe.
-	}
-	else
-	{
-		result = ((currentTimeInSeconds - transport_state->cbs.current_sas_token_create_time) * 1000 >= transport_state->cbs.cbs_request_timeout) ? RESULT_TIMEOUT : RESULT_OK;
-	}
-	return result;
+    int result;
+    size_t currentTimeInSeconds;
+    if (getSecondsSinceEpoch(&currentTimeInSeconds) != RESULT_OK)
+    {
+        LogError("Failed getting the current time to verify if the SAS token needs to be refreshed.");
+        result = RESULT_TIMEOUT; // Fail safe.
+    }
+    else
+    {
+        result = ((currentTimeInSeconds - transport_state->cbs.current_sas_token_create_time) * 1000 >= transport_state->cbs.cbs_request_timeout) ? RESULT_TIMEOUT : RESULT_OK;
+    }
+    return result;
 }
 
 static void attachDeviceClientTypeToLink(LINK_HANDLE link)
@@ -1483,11 +1483,11 @@ static int sendPendingEvents(AMQP_TRANSPORT_INSTANCE* transport_state)
                     /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
                     is_message_error = true;
                 }
-				else if (addApplicationPropertiesTouAMQPMessage(message->messageHandle, amqp_message) != 0)
-				{
-					/* Codes_SRS_IOTHUBTRANSPORTAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
-					is_message_error = true;
-				}
+                else if (addApplicationPropertiesTouAMQPMessage(message->messageHandle, amqp_message) != 0)
+                {
+                    /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
+                    is_message_error = true;
+                }
                 else
                 {
                     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_097: [IoTHubTransportAMQP_DoWork shall pass the encoded AMQP message to AMQP for sending (along with on_message_send_complete callback) using messagesender_send()] 
@@ -1533,23 +1533,23 @@ static int sendPendingEvents(AMQP_TRANSPORT_INSTANCE* transport_state)
 
 static bool isSasTokenRefreshRequired(AMQP_TRANSPORT_INSTANCE* transport_state)
 {
-	bool result;
-	size_t currentTimeInSeconds;
+    bool result;
+    size_t currentTimeInSeconds;
     if (transport_state->credential.credentialType == DEVICE_SAS_TOKEN)
     {
         result = false;
     }
-	else if (getSecondsSinceEpoch(&currentTimeInSeconds) != RESULT_OK)
-	{
-		LogError("Failed getting the current time to verify if the SAS token needs to be refreshed.");
-		result = true; // Fail safe.
-	}
+    else if (getSecondsSinceEpoch(&currentTimeInSeconds) != RESULT_OK)
+    {
+        LogError("Failed getting the current time to verify if the SAS token needs to be refreshed.");
+        result = true; // Fail safe.
+    }
     else
     {
         result = ((currentTimeInSeconds - transport_state->cbs.current_sas_token_create_time) >= (transport_state->cbs.sas_token_refresh_time / 1000)) ? true : false;
     }
-	
-	return result;
+    
+    return result;
 }
 
 static void prepareForConnectionRetry(AMQP_TRANSPORT_INSTANCE* transport_state)
@@ -2050,6 +2050,22 @@ static void IoTHubTransportAMQP_Unsubscribe(TRANSPORT_LL_HANDLE handle)
     }
 }
 
+static int IoTHubTransportAMQP_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state)
+{
+    (void)handle;
+    (void)subscribe_state;
+    int result = __LINE__;
+    LogError("IoTHubTransportAMQP_Subscribe_DeviceTwin Not supported");
+    return result;
+}
+
+static void IoTHubTransportAMQP_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state)
+{
+    (void)handle;
+    (void)subscribe_state;
+    LogError("IoTHubTransportAMQP_Unsubscribe_DeviceTwin Not supported");
+}
+
 static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_GetSendStatus(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
 {
     IOTHUB_CLIENT_RESULT result;
@@ -2290,6 +2306,8 @@ static STRING_HANDLE IoTHubTransportAMQP_GetHostname(TRANSPORT_LL_HANDLE handle)
 }
 
 static TRANSPORT_PROVIDER thisTransportProvider = {
+    IoTHubTransportAMQP_Subscribe_DeviceTwin,
+    IoTHubTransportAMQP_Unsubscribe_DeviceTwin,
     IoTHubTransportAMQP_GetHostname,
     IoTHubTransportAMQP_SetOption,
     IoTHubTransportAMQP_Create,
