@@ -17,11 +17,9 @@ receiver.on('response', function(status, requestId, body) {
 
 ### Constructor
 
-**SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_001: [** The `MqttTwinReceiver` constructor shall accept a `config` object **]**
+**SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_001: [** The `MqttTwinReceiver` constructor shall accept a `client` object **]**
 
-**SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_002: [** The `MqttTwinReceiver` constructor shall throw `ReferenceError` if the `config` object is falsy **]**
-
-**SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_028: [** The `MqttTwinReceiver` constructor shall throw a `ReferenceError` if the `config` object does not contain a property named `client` **]**
+**SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_002: [** The `MqttTwinReceiver` constructor shall throw `ReferenceError` if the `client` object is falsy **]**
 
 ### response event
 

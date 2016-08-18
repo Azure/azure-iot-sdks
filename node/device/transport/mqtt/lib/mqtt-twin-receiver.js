@@ -24,28 +24,30 @@ var postTopic = '$iothub/twin/PATCH/properties/desired/#';
  * @param {Object} config   configuration object
  *
  */
-function MqttTwinReceiver(config) {
-  /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_001: [** The `MqttTwinReceiver` constructor shall accept a `config` object **]** */
-  /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_002: [** The `MqttTwinReceiver` constructor shall throw `ReferenceError` if the `config` object is falsy **]** */
-  /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_028: [** The `MqttTwinReceiver` constructor shall throw a `ReferenceError` if the `config` object does not contain a property named `client` **]** */
-  if (!config || !config.client) {
+function MqttTwinReceiver(client) {
+  /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_001: [** The `MqttTwinReceiver` constructor shall accept a `client` object **]** */
+  /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_002: [** The `MqttTwinReceiver` constructor shall throw `ReferenceError` if the `client` object is falsy **]** */
+  if (!client) {
     throw new ReferenceError('required parameter is missing');
   }
-  this._config = config;
-  this._client = config.client;
+  this._client = client;
   EventEmitter.call(this);
 
   this.on("newListener", this._handleNewListener.bind(this));
   this.on("removeListener", this._handleRemoveListener.bind(this));
 }
 
+MqttTwinReceiver.responseEvent = 'response';
+MqttTwinReceiver.postEvent = 'post';
+
+
 util.inherits(MqttTwinReceiver, EventEmitter);
 
 MqttTwinReceiver.prototype._handleNewListener = function(eventName) {
   var self = this;
 
-  if (eventName === 'response') {
-    if (EventEmitter.listenerCount(this, 'response') === 0) { // array of listeners gets updated _after_ firing this event
+  if (eventName === MqttTwinReceiver.responseEvent) {
+    if (EventEmitter.listenerCount(this, MqttTwinReceiver.responseEvent) === 0) { // array of listeners gets updated _after_ firing this event
       this._startListeningIfFirstSubscription();
       /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_003: [** When a listener is added for the `response` event, the appropriate topic shall be asynchronously subscribed to. **]** */
       process.nextTick( function() {
@@ -54,14 +56,14 @@ MqttTwinReceiver.prototype._handleNewListener = function(eventName) {
             self._handleError(err);
           } else {
             /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_025: [** If the `subscribed` event is subscribed to, a `subscribed` event shall be emitted after an MQTT topic is subscribed to. **]** */
-            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_026: [** When the `subscribed` event is emitted because the response MQTT topic was subscribed, the parameter shall be the string 'response' **]**  */
-            self.emit('subscribed', 'response');
+            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_026: [** When the `subscribed` event is emitted because the response MQTT topic was subscribed, the parameter shall be the string MqttTwinReceiver.responseEvent **]**  */
+            self.emit('subscribed', MqttTwinReceiver.responseEvent);
           }
         });
       });
      }
-  } else if (eventName === 'post') {
-    if (EventEmitter.listenerCount(this, 'post') === 0) {// array of listeners gets updated _after_ firing this event
+  } else if (eventName === MqttTwinReceiver.postEvent) {
+    if (EventEmitter.listenerCount(this, MqttTwinReceiver.postEvent) === 0) {// array of listeners gets updated _after_ firing this event
       this._startListeningIfFirstSubscription();
       /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_018: [** When a listener is added to the post event, the appropriate topic shall be asynchronously subscribed to. **]** */
       process.nextTick( function() {
@@ -70,8 +72,8 @@ MqttTwinReceiver.prototype._handleNewListener = function(eventName) {
             self._handleError(err);
           } else {
             /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_025: [** If the `subscribed` event is subscribed to, a `subscribed` event shall be emitted after an MQTT topic is subscribed to. **]** */
-            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_026: [** When the `subscribed` event is emitted because the response MQTT topic was subscribed, the parameter shall be the string 'response' **]**  */
-            self.emit('subscribed', 'post');
+            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_026: [** When the `subscribed` event is emitted because the response MQTT topic was subscribed, the parameter shall be the string MqttTwinReceiver.responseEvent **]**  */
+            self.emit('subscribed', MqttTwinReceiver.postEvent);
           }
         });
       });
@@ -82,8 +84,8 @@ MqttTwinReceiver.prototype._handleNewListener = function(eventName) {
 MqttTwinReceiver.prototype._handleRemoveListener = function(eventName) {
   var self = this;
 
-  if (eventName === 'response') {
-    if (EventEmitter.listenerCount(this, 'response') === 0) { // array of listeners gets updated _before_ firing this event
+  if (eventName === MqttTwinReceiver.responseEvent) {
+    if (EventEmitter.listenerCount(this, MqttTwinReceiver.responseEvent) === 0) { // array of listeners gets updated _before_ firing this event
       this._stopListeningIfLastUnsubscription();
       /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_005: [** When there are no more listeners for the `response` event, the topic should be unsubscribed **]** */
       process.nextTick( function() {
@@ -94,8 +96,8 @@ MqttTwinReceiver.prototype._handleRemoveListener = function(eventName) {
         });
       });
     }
-  } else if (eventName === 'post') {
-    if (EventEmitter.listenerCount(this, 'post') === 0) { // array of listeners gets updated _before_ firing this event
+  } else if (eventName === MqttTwinReceiver.postEvent) {
+    if (EventEmitter.listenerCount(this, MqttTwinReceiver.postEvent) === 0) { // array of listeners gets updated _before_ firing this event
       this._stopListeningIfLastUnsubscription();
       /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_021: [** When there are no more listeners for the post event, the topic should be unsubscribed. **]** */
       process.nextTick( function() {
@@ -111,14 +113,14 @@ MqttTwinReceiver.prototype._handleRemoveListener = function(eventName) {
 
 MqttTwinReceiver.prototype._startListeningIfFirstSubscription = function() {
   // this method is called _before_ the new listener is added to the array of listeners
-  if ((EventEmitter.listenerCount(this, 'response') === 0) && (EventEmitter.listenerCount(this, 'post') === 0)) {
+  if ((EventEmitter.listenerCount(this, MqttTwinReceiver.responseEvent) === 0) && (EventEmitter.listenerCount(this, MqttTwinReceiver.postEvent) === 0)) {
     this._client.on('message', this._onMqttMessage.bind(this));
   }
 };
 
 MqttTwinReceiver.prototype._stopListeningIfLastUnsubscription = function() {
   // this method is called _after_ the listener is removed from the array of listeners
-  if ((EventEmitter.listenerCount(this, 'response')) && (EventEmitter.listenerCount(this, 'post') === 0)) {
+  if ((EventEmitter.listenerCount(this, MqttTwinReceiver.responseEvent)) && (EventEmitter.listenerCount(this, MqttTwinReceiver.postEvent) === 0)) {
     this._client.removeListener('message', this._onMqttMessage.bind(this));
   }
 };
@@ -171,7 +173,7 @@ MqttTwinReceiver.prototype._onResponseMessage = function(topic, message){
     };
 
     /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_004: [** If there is a listener for the `response` event, a `response` event shall be emitted for each response received. **]** */
-    this.emit('response', response);
+    this.emit(MqttTwinReceiver.responseEvent, response);
   }
 };
 
@@ -180,7 +182,7 @@ MqttTwinReceiver.prototype._onPostMessage = function(topic, message) {
   if (topic.indexOf('$iothub/twin/PATCH/properties/desired/') === 0)
   {
   /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_022: [** When a post event it emitted, the parameter shall be the body of the message **]** */
-    this.emit('post', message);
+    this.emit(MqttTwinReceiver.postEvent, message);
   }
 };
 
