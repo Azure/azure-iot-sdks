@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import { Packet } from 'mqtt';
-import { X509, results, TransportConfig } from 'azure-iot-common';
+import { results, TransportConfig } from 'azure-iot-common';
 import MqttReceiver = require('./mqtt_receiver');
 
 declare class Mqtt {

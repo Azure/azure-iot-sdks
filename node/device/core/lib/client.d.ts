@@ -38,18 +38,18 @@ declare namespace Client {
     interface Transport {
         updateSharedAccessSignature(sharedAccessSignature: string, done: (err: Error, result?: results.SharedAccessSignatureUpdated) => void): void;
         getReceiver(func: (err: Error, receiver?: Receiver) => void): void;
-        sendEvent(message: Message, done: (err: Error, result?: results.MessageEnqueued) => void): void;    
+        sendEvent(message: Message, done: (err: Error, result?: results.MessageEnqueued) => void): void;
         sendEventBatch(messages: Message[], done: (err: Error, result?: results.MessageEnqueued) => void): void;
-        complete(message: Message, done: (err: Error, result?: results.MessageCompleted) => void): void;   
+        complete(message: Message, done: (err: Error, result?: results.MessageCompleted) => void): void;
         reject(message: Message, done: (err: Error, results?: results.MessageRejected) => void): void;
         abandon(message: Message, done: (err: Error, results?: results.MessageAbandoned) => void): void;
     }
-    
+
     interface BlobUpload {
         uploadToBlob(blobName: string, stream: Stream, steamLength: number, done: (err?: Error) => void): void;
-        updateSharedAccessSignature(sharedAccessSignature: string);
+        updateSharedAccessSignature(sharedAccessSignature: string): void;
     }
-    
+
     type TransportCtor = new(config: Config) => Transport;
 }
 

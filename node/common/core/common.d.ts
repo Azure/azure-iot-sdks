@@ -16,7 +16,7 @@ export interface X509 {
     // https://nodejs.org/api/tls.html#tls_tls_connect_options_callback
     cert: string | string[] | Buffer | Buffer[];
     key: string | Buffer;
-    passphrase?: string;    
+    passphrase?: string;
 }
 
 export interface Receiver extends EventEmitter {
