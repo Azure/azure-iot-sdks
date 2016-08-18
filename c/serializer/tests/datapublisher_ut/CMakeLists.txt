@@ -14,7 +14,6 @@ ${theseTestsName}.c
 set(${theseTestsName}_c_files
 ../../src/datapublisher.c
 ${SHARED_UTIL_SRC_FOLDER}/gballoc.c
-${LOCK_C_FILE}
 )
 
 set(${theseTestsName}_h_files
