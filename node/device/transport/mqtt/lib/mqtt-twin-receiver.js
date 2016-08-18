@@ -22,6 +22,11 @@ var postTopic = '$iothub/twin/PATCH/properties/desired/#';
  * @classdesc    Acts as a receiver for device-twin traffic
  * 
  * @param {Object} config   configuration object
+ * @fires MqttTwinReceiver#subscribed   an MQTT topic has been successfully subscribed to
+ * @fires MqttTwinReceiver#error    an error has occured while subscribing to an MQTT topic
+ * @fires MqttTwinReceiver#response   a response message has been received from the service
+ * @fires MqttTwinReceiver#post a post message has been received from the service
+ * @throws {ReferenceError} If client parameter is falsy.
  *
  */
 function MqttTwinReceiver(client) {
@@ -35,6 +40,7 @@ function MqttTwinReceiver(client) {
 
   this.on("newListener", this._handleNewListener.bind(this));
   this.on("removeListener", this._handleRemoveListener.bind(this));
+  this._boundMessageHandler = this._onMqttMessage.bind(this); // need to save this so that calls to add & remove listeners can be matched by the EventEmitter.
 }
 
 MqttTwinReceiver.responseEvent = 'response';
@@ -51,15 +57,15 @@ MqttTwinReceiver.prototype._handleNewListener = function(eventName) {
       this._startListeningIfFirstSubscription();
       /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_003: [** When a listener is added for the `response` event, the appropriate topic shall be asynchronously subscribed to. **]** */
       process.nextTick( function() {
-        self._client.subscribe(responseTopic, { qos: 0 }, function(err, mqttObject) {
+        self._client.subscribe(responseTopic, { qos: 0 }, function(err, transportObject) {
           if (err) {
             self._handleError(err);
           } else {
             /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_025: [** If the `subscribed` event is subscribed to, a `subscribed` event shall be emitted after an MQTT topic is subscribed to. **]** */
-            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_028: [** When the `subscribed` event is emitted, the parameter shall be an object which contains an `eventName` field and an `mqttObject` field. **]** */
+            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_028: [** When the `subscribed` event is emitted, the parameter shall be an object which contains an `eventName` field and an `transportObject` field. **]** */
             /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_026: [** When the `subscribed` event is emitted because the response MQTT topic was subscribed, the parameter shall be the string 'response' **]**  */
-            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_029: [** When the subscribed event is emitted, the `mqttObject` field shall contain the object returned by the library in the subscription response. **]** */
-            self.emit('subscribed', { 'eventName' : MqttTwinReceiver.responseEvent, 'mqttObject' : mqttObject });
+            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_029: [** When the subscribed event is emitted, the `transportObject` field shall contain the object returned by the library in the subscription response. **]** */
+            self.emit('subscribed', { 'eventName' : MqttTwinReceiver.responseEvent, 'transportObject' : transportObject });
           }
         });
       });
@@ -69,15 +75,15 @@ MqttTwinReceiver.prototype._handleNewListener = function(eventName) {
       this._startListeningIfFirstSubscription();
       /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_018: [** When a listener is added to the post event, the appropriate topic shall be asynchronously subscribed to. **]** */
       process.nextTick( function() {
-        self._client.subscribe(postTopic, { qos: 0 }, function(err, mqttObject) {
+        self._client.subscribe(postTopic, { qos: 0 }, function(err, transportObject) {
           if (err) {
             self._handleError(err);
           } else {
             /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_025: [** If the `subscribed` event is subscribed to, a `subscribed` event shall be emitted after an MQTT topic is subscribed to. **]** */
-            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_028: [** When the `subscribed` event is emitted, the parameter shall be an object which contains an `eventName` field and an `mqttObject` field. **]** */
+            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_028: [** When the `subscribed` event is emitted, the parameter shall be an object which contains an `eventName` field and an `transportObject` field. **]** */
             /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_027: [** When the `subscribed` event is emitted because the post MQTT topic was subscribed, the `eventName` field shall be the string 'post' **]** */
-            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_029: [** When the subscribed event is emitted, the `mqttObject` field shall contain the object returned by the library in the subscription response. **]** */
-            self.emit('subscribed', { 'eventName' : MqttTwinReceiver.postEvent, 'mqttObject' : mqttObject });
+            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_029: [** When the subscribed event is emitted, the `transportObject` field shall contain the object returned by the library in the subscription response. **]** */
+            self.emit('subscribed', { 'eventName' : MqttTwinReceiver.postEvent, 'transportObject' : transportObject });
           }
         });
       });
@@ -118,14 +124,14 @@ MqttTwinReceiver.prototype._handleRemoveListener = function(eventName) {
 MqttTwinReceiver.prototype._startListeningIfFirstSubscription = function() {
   // this method is called _before_ the new listener is added to the array of listeners
   if ((EventEmitter.listenerCount(this, MqttTwinReceiver.responseEvent) === 0) && (EventEmitter.listenerCount(this, MqttTwinReceiver.postEvent) === 0)) {
-    this._client.on('message', this._onMqttMessage.bind(this));
+    this._client.on('message', this._boundMessageHandler);
   }
 };
 
 MqttTwinReceiver.prototype._stopListeningIfLastUnsubscription = function() {
   // this method is called _after_ the listener is removed from the array of listeners
   if ((EventEmitter.listenerCount(this, MqttTwinReceiver.responseEvent)) && (EventEmitter.listenerCount(this, MqttTwinReceiver.postEvent) === 0)) {
-    this._client.removeListener('message', this._onMqttMessage.bind(this));
+    this._client.removeListener('message', this._boundMessageHandler);
   }
 };
 
