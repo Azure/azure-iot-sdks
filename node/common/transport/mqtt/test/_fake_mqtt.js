@@ -30,7 +30,7 @@ var FakeMqtt = function() {
     if (this.subscribeShouldFail) {
       done (new Error('Not authorized'));
     } else {
-      done();
+      done(null, 'fake_object');
     }
   };
 

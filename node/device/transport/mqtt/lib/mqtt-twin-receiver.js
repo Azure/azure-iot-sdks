@@ -51,13 +51,15 @@ MqttTwinReceiver.prototype._handleNewListener = function(eventName) {
       this._startListeningIfFirstSubscription();
       /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_003: [** When a listener is added for the `response` event, the appropriate topic shall be asynchronously subscribed to. **]** */
       process.nextTick( function() {
-        self._client.subscribe(responseTopic, { qos: 0 }, function(err) {
+        self._client.subscribe(responseTopic, { qos: 0 }, function(err, mqttObject) {
           if (err) {
             self._handleError(err);
           } else {
             /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_025: [** If the `subscribed` event is subscribed to, a `subscribed` event shall be emitted after an MQTT topic is subscribed to. **]** */
-            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_026: [** When the `subscribed` event is emitted because the response MQTT topic was subscribed, the parameter shall be the string MqttTwinReceiver.responseEvent **]**  */
-            self.emit('subscribed', MqttTwinReceiver.responseEvent);
+            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_028: [** When the `subscribed` event is emitted, the parameter shall be an object which contains an `eventName` field and an `mqttObject` field. **]** */
+            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_026: [** When the `subscribed` event is emitted because the response MQTT topic was subscribed, the parameter shall be the string 'response' **]**  */
+            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_029: [** When the subscribed event is emitted, the `mqttObject` field shall contain the object returned by the library in the subscription response. **]** */
+            self.emit('subscribed', { 'eventName' : MqttTwinReceiver.responseEvent, 'mqttObject' : mqttObject });
           }
         });
       });
@@ -67,13 +69,15 @@ MqttTwinReceiver.prototype._handleNewListener = function(eventName) {
       this._startListeningIfFirstSubscription();
       /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_018: [** When a listener is added to the post event, the appropriate topic shall be asynchronously subscribed to. **]** */
       process.nextTick( function() {
-        self._client.subscribe(postTopic, { qos: 0 }, function(err) {
+        self._client.subscribe(postTopic, { qos: 0 }, function(err, mqttObject) {
           if (err) {
             self._handleError(err);
           } else {
             /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_025: [** If the `subscribed` event is subscribed to, a `subscribed` event shall be emitted after an MQTT topic is subscribed to. **]** */
-            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_026: [** When the `subscribed` event is emitted because the response MQTT topic was subscribed, the parameter shall be the string MqttTwinReceiver.responseEvent **]**  */
-            self.emit('subscribed', MqttTwinReceiver.postEvent);
+            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_028: [** When the `subscribed` event is emitted, the parameter shall be an object which contains an `eventName` field and an `mqttObject` field. **]** */
+            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_027: [** When the `subscribed` event is emitted because the post MQTT topic was subscribed, the `eventName` field shall be the string 'post' **]** */
+            /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_029: [** When the subscribed event is emitted, the `mqttObject` field shall contain the object returned by the library in the subscription response. **]** */
+            self.emit('subscribed', { 'eventName' : MqttTwinReceiver.postEvent, 'mqttObject' : mqttObject });
           }
         });
       });
