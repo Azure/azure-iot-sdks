@@ -3,7 +3,7 @@
 
 import { EventEmitter } from 'events';
 import { Stream } from 'stream';
-import { Message, results, Receiver } from 'azure-iot-common';
+import { Message, results, Receiver, TransportConfig } from 'azure-iot-common';
 
 declare class Client extends EventEmitter {
     constructor(transport: Client.Transport, connStr: string, blobUploadClient: Client.BlobUpload);
@@ -22,19 +22,17 @@ declare class Client extends EventEmitter {
 
     on(type: 'message', func: (msg: Message) => void): this;
     on(type: 'error', func: (err: Error) => void): this;
+    on(type: 'disconnect', func: (result: results.Disconnected) => void): this;
     // Required operator, shouldn't be used during normal operation
     on(type: string, func: Function): this;
 
-    static fromConnectionString(connStr: string, transport: Client.TransportCtr): Client;
-    static fromSharedAccessSignature(sharedAccessSignature: string, transport: Client.TransportCtr): Client;
+    static fromConnectionString(connStr: string, transport: Client.TransportCtor): Client;
+    static fromSharedAccessSignature(sharedAccessSignature: string, transport: Client.TransportCtor): Client;
 }
 
 declare namespace Client {
-    interface Config {
-        host: string;
-        deviceId: string;
+    interface Config extends TransportConfig {
         hubName: string;
-        sharedAccessSignature?: string;
     }
 
     interface Transport {
@@ -52,7 +50,7 @@ declare namespace Client {
         updateSharedAccessSignature(sharedAccessSignature: string);
     }
     
-    type TransportCtr = new(config: Config) => Transport;
+    type TransportCtor = new(config: Config) => Transport;
 }
 
 export = Client;

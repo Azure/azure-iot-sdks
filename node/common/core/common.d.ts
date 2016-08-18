@@ -25,3 +25,10 @@ export interface Receiver extends EventEmitter {
 
     on(type: string, func: Function): this;
 }
+
+export interface TransportConfig {
+    host: string;
+    deviceId: string;
+    sharedAccessSignature?: string;
+    x509?: X509;
+}

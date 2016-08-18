@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-// TODO: Check where result.js is used and specify the objects more
-
 // Typescript only interface
 export interface Result {
     tranportObj?: any;

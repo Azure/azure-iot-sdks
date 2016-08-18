@@ -9,7 +9,7 @@ declare class Client extends EventEmitter {
     constructor(transport: Client.Transport);
     open(done: (err: Error, result?: results.Connected) => void): void;
     close(done: (err: Error) => void): void;
-    send(deviceId: string, message: Message | Message.BufferConvertable, done: (err: Error, result?: results.MessageEnqueued) => void): void;
+    send(deviceId: string, message: Message | Message.BufferConvertible, done: (err: Error, result?: results.MessageEnqueued) => void): void;
     getFeedbackReceiver(done: (err: Error, receiver?: Client.ServiceReceiver) => void): void;
     getFileNotificationReceiver(done: (err: Error, receiver?: Client.ServiceReceiver) => void): void;
 
@@ -17,7 +17,7 @@ declare class Client extends EventEmitter {
     // Required overload, not used during normal operation
     on(type: string, func: Function): this;
 
-    static fromConnectionString(connStr: string, transportCtr?: Client.TransportContructor): Client;
+    static fromConnectionString(connStr: string, transportCtr?: Client.TransportCtor): Client;
     static fromSharedAccessSignature(sharedAccessSignature: string, tranposrtCtr?: Client.TransportContructor): Client;
 }
 
@@ -43,7 +43,7 @@ declare namespace Client {
         getFileNotificationReceiver(done: (err: Error, receiver?: ServiceReceiver) => void): void;
     }
 
-    type TransportContructor = new (config: Client.TransportConfigOptions) => Client.Transport;
+    type TransportCtor = new(config: Client.TransportConfigOptions) => Client.Transport;
 }
 
 export = Client;

@@ -12,14 +12,14 @@ declare class Message {
     correlationId: string;
     userId: string;
 
-    constructor(data: Message.BufferConvertable);
+    constructor(data: Message.BufferConvertible);
 
-    getData(): Message.BufferConvertable;
+    getData(): Message.BufferConvertible;
     getBytes(): Buffer;
 }
 
 declare namespace Message {
-    type BufferConvertable = Buffer | String | any[] | ArrayBuffer;
+    type BufferConvertible = Buffer | String | any[] | ArrayBuffer;
 }
 
 export = Message;

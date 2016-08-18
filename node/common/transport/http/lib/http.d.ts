@@ -14,7 +14,7 @@ declare class Http {
         x509Options: X509 | Http.DoneCallback,
         done?: Http.DoneCallback): ClientRequest;
 
-    toMessage(response: IncomingMessage, body: Message.BufferConvertable): Message;
+    toMessage(response: IncomingMessage, body: Message.BufferConvertible): Message;
     parseErrorBody(body: string): { code: string, message: string };
 }
 

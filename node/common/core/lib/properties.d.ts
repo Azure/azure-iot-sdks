@@ -3,16 +3,8 @@
 
 declare class Properties {
     add(itemKey: string, itemValue: string): boolean;
-    getItem(index: number): Properties.PropertyPair;
+    getItem(index: number): { key: string, value: string };
     count(): number;
-}
-
-declare namespace Properties {
-    interface KeyValuePair<K, V> {
-        key: K;
-        value: V;
-    }
-    type PropertyPair = KeyValuePair<string, string>
 }
 
 export = Properties;
