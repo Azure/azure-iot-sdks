@@ -335,7 +335,7 @@ DEVICE_RESULT Device_CommitTransaction_ReportedProperties(REPORTED_PROPERTIES_TR
     if (
         (transactionHandle == NULL) ||
         (destination == NULL) ||
-        (destination == NULL)
+        (destinationSize == NULL)
         )
     {
         LogError("invalid argument REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle=%p, unsigned char** destination=%p, size_t* destinationSize=%p", transactionHandle, destination, destinationSize);

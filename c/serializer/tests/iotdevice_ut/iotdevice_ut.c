@@ -120,6 +120,17 @@ static DATA_PUBLISHER_RESULT my_DataPublisher_CancelTransaction(TRANSACTION_HAND
     return DATA_PUBLISHER_OK;
 }
 
+static REPORTED_PROPERTIES_TRANSACTION_HANDLE my_DataPublisher_CreateTransaction_ReportedProperties(DATA_PUBLISHER_HANDLE dataPublisherHandle)
+{
+    (void)(dataPublisherHandle);
+    return (REPORTED_PROPERTIES_TRANSACTION_HANDLE)my_gballoc_malloc(3);
+}
+
+void my_DataPublisher_DestroyTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle)
+{
+    my_gballoc_free(transactionHandle);
+}
+
 BEGIN_TEST_SUITE(IoTDevice_ut)
 
     TEST_SUITE_INITIALIZE(BeforeSuite)
@@ -140,9 +151,10 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         REGISTER_UMOCK_ALIAS_TYPE(COMMAND_DECODER_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(TRANSACTION_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(DEVICE_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(REPORTED_PROPERTIES_TRANSACTION_HANDLE, void*);
+        
         REGISTER_UMOCK_ALIAS_TYPE(EXECUTE_COMMAND_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(DATA_PUBLISHER_RESULT, int);
-        
         
         REGISTER_GLOBAL_MOCK_RETURN(DeviceActionCallback, EXECUTE_COMMAND_SUCCESS);
 
@@ -163,6 +175,9 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(DataPublisher_EndTransaction, DATA_PUBLISHER_ERROR);
         REGISTER_GLOBAL_MOCK_HOOK(DataPublisher_CancelTransaction, my_DataPublisher_CancelTransaction);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(DataPublisher_CancelTransaction, DATA_PUBLISHER_ERROR);
+
+        REGISTER_GLOBAL_MOCK_HOOK(DataPublisher_CreateTransaction_ReportedProperties, my_DataPublisher_CreateTransaction_ReportedProperties);
+        REGISTER_GLOBAL_MOCK_HOOK(DataPublisher_DestroyTransaction_ReportedProperties, my_DataPublisher_DestroyTransaction_ReportedProperties);
 
     }
 
@@ -897,4 +912,377 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         Device_Destroy(h);
     }
 
+    /*Tests_SRS_DEVICE_02_014: [ If argument deviceHandle is NULL then Device_CreateTransaction_ReportedProperties shall fail and return NULL. ]*/
+    TEST_FUNCTION(Device_CreateTransaction_ReportedProperties_with_NULL_deviceHandle_fails)
+    {
+        ///arrange
+
+        ///act
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(NULL);
+
+        ///assert
+        ASSERT_IS_NULL(reportedPropertiesTransactionHandle);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+    }
+
+    /*Tests_SRS_DEVICE_02_015: [ Otherwise, Device_CreateTransaction_ReportedProperties shall call DataPublisher_CreateTransaction_ReportedProperties. ]*/
+    /*Tests_SRS_DEVICE_02_017: [ Otherwise Device_CreateTransaction_ReportedProperties shall succeed and return a non-NULL value. ]*/
+    TEST_FUNCTION(Device_CreateTransaction_ReportedProperties_succeeds)
+    {
+        ///arrange
+        DEVICE_HANDLE h;
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(DataPublisher_CreateTransaction_ReportedProperties(IGNORED_PTR_ARG))
+            .IgnoreArgument_dataPublisherHandle();
+
+        ///act
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
+
+        ///assert
+        ASSERT_IS_NOT_NULL(reportedPropertiesTransactionHandle);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_DestroyTransaction_ReportedProperties(reportedPropertiesTransactionHandle);
+        Device_Destroy(h);
+    }
+
+    /*Tests_SRS_DEVICE_02_016: [ If DataPublisher_CreateTransaction_ReportedProperties fails then Device_CreateTransaction_ReportedProperties shall fail and return NULL. ]*/
+    TEST_FUNCTION(Device_CreateTransaction_ReportedProperties_fails)
+    {
+        ///arrange
+        DEVICE_HANDLE h;
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(DataPublisher_CreateTransaction_ReportedProperties(IGNORED_PTR_ARG))
+            .IgnoreArgument_dataPublisherHandle()
+            .SetReturn(NULL);
+
+        ///act
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
+
+        ///assert
+        ASSERT_IS_NULL(reportedPropertiesTransactionHandle);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_Destroy(h);
+    }
+
+    /*Tests_SRS_DEVICE_02_018: [ If argument transactionHandle is NULL then Device_PublishTransacted_ReportedProperty shall fail and return DEVICE_INVALID_ARG. ]*/
+    TEST_FUNCTION(Device_PublishTransacted_ReportedProperty_with_NULL_transactionHandle_fails)
+    {
+        ///arrange
+        AGENT_DATA_TYPE ag;
+
+        ///act
+        DEVICE_RESULT result = Device_PublishTransacted_ReportedProperty(NULL, "a", &ag);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+    }
+
+    /*Tests_SRS_DEVICE_02_019: [ If argument reportedPropertyPath is NULL then Device_PublishTransacted_ReportedProperty shall fail and return DEVICE_INVALID_ARG. ]*/
+    TEST_FUNCTION(Device_PublishTransacted_ReportedProperty_with_NULL_reportedPropertyPath_fails)
+    {
+        ///arrange
+        AGENT_DATA_TYPE ag;
+        DEVICE_HANDLE h;
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
+        umock_c_reset_all_calls();
+
+        ///act
+        DEVICE_RESULT result = Device_PublishTransacted_ReportedProperty(reportedPropertiesTransactionHandle, NULL, &ag);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_DestroyTransaction_ReportedProperties(reportedPropertiesTransactionHandle);
+        Device_Destroy(h);
+    }
+
+    /*Tests_SRS_DEVICE_02_020: [ If argument data is NULL then Device_PublishTransacted_ReportedProperty shall fail and return DEVICE_INVALID_ARG. ]*/
+    TEST_FUNCTION(Device_PublishTransacted_ReportedProperty_with_NULL_data_fails)
+    {
+        ///arrange
+        DEVICE_HANDLE h;
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
+        umock_c_reset_all_calls();
+
+        ///act
+        DEVICE_RESULT result = Device_PublishTransacted_ReportedProperty(reportedPropertiesTransactionHandle, "a", NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_DestroyTransaction_ReportedProperties(reportedPropertiesTransactionHandle);
+        Device_Destroy(h);
+    }
+
+    /*Tests_SRS_DEVICE_02_021: [ Device_PublishTransacted_ReportedProperty shall call DataPublisher_PublishTransacted_ReportedProperty. ]*/
+    /*Tests_SRS_DEVICE_02_023: [ Otherwise, Device_PublishTransacted_ReportedProperty shall succeed and return DEVICE_OK. ]*/
+    TEST_FUNCTION(Device_PublishTransacted_ReportedProperty_succeeds)
+    {
+        ///arrange
+        AGENT_DATA_TYPE ag;
+        DEVICE_HANDLE h;
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(DataPublisher_PublishTransacted_ReportedProperty(IGNORED_PTR_ARG, "a", &ag))
+            .IgnoreArgument_transactionHandle();
+
+        ///act
+        DEVICE_RESULT result = Device_PublishTransacted_ReportedProperty(reportedPropertiesTransactionHandle, "a", &ag);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_DestroyTransaction_ReportedProperties(reportedPropertiesTransactionHandle);
+        Device_Destroy(h);
+    }
+
+    /*Tests_SRS_DEVICE_02_022: [ If DataPublisher_PublishTransacted_ReportedProperty fails then Device_PublishTransacted_ReportedProperty shall fail and return DEVICE_DATA_PUBLISHER_FAILED. ]*/
+    TEST_FUNCTION(Device_PublishTransacted_ReportedProperty_fails)
+    {
+        ///arrange
+        AGENT_DATA_TYPE ag;
+        DEVICE_HANDLE h;
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(DataPublisher_PublishTransacted_ReportedProperty(IGNORED_PTR_ARG, "a", &ag))
+            .IgnoreArgument_transactionHandle()
+            .SetReturn(DATA_PUBLISHER_ERROR);
+
+        ///act
+        DEVICE_RESULT result = Device_PublishTransacted_ReportedProperty(reportedPropertiesTransactionHandle, "a", &ag);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_DATA_PUBLISHER_FAILED, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_DestroyTransaction_ReportedProperties(reportedPropertiesTransactionHandle);
+        Device_Destroy(h);
+    }
+
+    /*Tests_SRS_DEVICE_02_024: [ If argument transactionHandle is NULL then Device_CommitTransaction_ReportedProperties shall fail and return DEVICE_INVALID_ARG. ]*/
+    TEST_FUNCTION(Device_CommitTransaction_ReportedProperties_with_NULL_transactionHandle_fails)
+    {
+        ///arrange
+        size_t destinationSize;
+        unsigned char* destination;
+
+        ///act
+        DEVICE_RESULT result = Device_CommitTransaction_ReportedProperties(NULL, &destination, &destinationSize);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    }
+
+    /*Tests_SRS_DEVICE_02_025: [ If argument destination is NULL then Device_CommitTransaction_ReportedProperties shall fail and return DEVICE_INVALID_ARG. ]*/
+    TEST_FUNCTION(Device_CommitTransaction_ReportedProperties_with_NULL_destination_fails)
+    {
+        ///arrange
+        DEVICE_HANDLE h;
+        size_t destinationSize;
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
+        umock_c_reset_all_calls();
+
+        ///act
+        DEVICE_RESULT result = Device_CommitTransaction_ReportedProperties(reportedPropertiesTransactionHandle, NULL, &destinationSize);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_DestroyTransaction_ReportedProperties(reportedPropertiesTransactionHandle);
+        Device_Destroy(h);
+        
+    }
+
+    /*Tests_SRS_DEVICE_02_026: [ If argument destinationSize is NULLthen Device_CommitTransaction_ReportedProperties shall fail and return DEVICE_INVALID_ARG. ]*/
+    TEST_FUNCTION(Device_CommitTransaction_ReportedProperties_with_NULL_destinationSize_fails)
+    {
+        ///arrange
+        DEVICE_HANDLE h;
+        unsigned char* destination;
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
+        umock_c_reset_all_calls();
+
+        ///act
+        DEVICE_RESULT result = Device_CommitTransaction_ReportedProperties(reportedPropertiesTransactionHandle, &destination, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_DestroyTransaction_ReportedProperties(reportedPropertiesTransactionHandle);
+        Device_Destroy(h);
+    }
+
+    /*Tests_SRS_DEVICE_02_027: [ Device_CommitTransaction_ReportedProperties shall call DataPublisher_CommitTransaction_ReportedProperties. ]*/
+    /*Tests_SRS_DEVICE_02_029: [ Otherwise Device_CommitTransaction_ReportedProperties shall succeed and return DEVICE_OK. ]*/
+    TEST_FUNCTION(Device_CommitTransaction_ReportedProperties_succeeds)
+    {
+        ///arrange
+        DEVICE_HANDLE h;
+        unsigned char* destination;
+        size_t destinationSize;
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(DataPublisher_CommitTransaction_ReportedProperties(IGNORED_PTR_ARG, &destination, &destinationSize))
+            .IgnoreArgument_transactionHandle();
+
+        ///act
+        DEVICE_RESULT result = Device_CommitTransaction_ReportedProperties(reportedPropertiesTransactionHandle, &destination, &destinationSize);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_DestroyTransaction_ReportedProperties(reportedPropertiesTransactionHandle);
+        Device_Destroy(h);
+    }
+
+    /*Tests_SRS_DEVICE_02_028: [ If DataPublisher_CommitTransaction_ReportedProperties fails then Device_CommitTransaction_ReportedProperties shall fail and return DEVICE_DATA_PUBLISHER_FAILED. ]*/
+    TEST_FUNCTION(Device_CommitTransaction_ReportedProperties_fails)
+    {
+        ///arrange
+        DEVICE_HANDLE h;
+        unsigned char* destination;
+        size_t destinationSize;
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(DataPublisher_CommitTransaction_ReportedProperties(IGNORED_PTR_ARG, &destination, &destinationSize))
+            .IgnoreArgument_transactionHandle()
+            .SetReturn(DATA_PUBLISHER_ERROR);
+
+        ///act
+        DEVICE_RESULT result = Device_CommitTransaction_ReportedProperties(reportedPropertiesTransactionHandle, &destination, &destinationSize);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_DATA_PUBLISHER_FAILED, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_DestroyTransaction_ReportedProperties(reportedPropertiesTransactionHandle);
+        Device_Destroy(h);
+    }
+
+    /*Tests_SRS_DEVICE_02_030: [ If argument transactionHandle is NULL then Device_DestroyTransaction_ReportedProperties shall return. ]*/
+    TEST_FUNCTION(Device_DestroyTransaction_ReportedProperties_with_NULL_returns)
+    {
+        ///arrange
+        
+        ///act
+        Device_DestroyTransaction_ReportedProperties(NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+    }
+
+    /*Tests_SRS_DEVICE_02_031: [ Otherwise Device_DestroyTransaction_ReportedProperties shall free all used resources. ]*/
+    TEST_FUNCTION(Device_DestroyTransaction_ReportedProperties_succeeds_1)
+    {
+        ///arrange
+        DEVICE_HANDLE h;
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(DataPublisher_DestroyTransaction_ReportedProperties(IGNORED_PTR_ARG))
+            .IgnoreArgument_transactionHandle();
+
+        ///act
+        Device_DestroyTransaction_ReportedProperties(reportedPropertiesTransactionHandle);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_Destroy(h);
+    }
+
+    /*Tests_SRS_DEVICE_02_031: [ Otherwise Device_DestroyTransaction_ReportedProperties shall free all used resources. ]*/
+    TEST_FUNCTION(Device_DestroyTransaction_ReportedProperties_succeeds_2)
+    {
+        ///arrange
+        AGENT_DATA_TYPE ag;
+        DEVICE_HANDLE h;
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
+        (void)Device_PublishTransacted_ReportedProperty(reportedPropertiesTransactionHandle, "a", &ag);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(DataPublisher_DestroyTransaction_ReportedProperties(IGNORED_PTR_ARG))
+            .IgnoreArgument_transactionHandle();
+
+        ///act
+        Device_DestroyTransaction_ReportedProperties(reportedPropertiesTransactionHandle);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_Destroy(h);
+    }
+
+    /*Tests_SRS_DEVICE_02_031: [ Otherwise Device_DestroyTransaction_ReportedProperties shall free all used resources. ]*/
+    TEST_FUNCTION(Device_DestroyTransaction_ReportedProperties_succeeds_3)
+    {
+        ///arrange
+        AGENT_DATA_TYPE ag;
+        DEVICE_HANDLE h;
+        unsigned char* destination;
+        size_t destinationSize;
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE reportedPropertiesTransactionHandle = Device_CreateTransaction_ReportedProperties(h);
+        (void)Device_PublishTransacted_ReportedProperty(reportedPropertiesTransactionHandle, "a", &ag);
+        (void)Device_CommitTransaction_ReportedProperties(reportedPropertiesTransactionHandle, &destination, &destinationSize);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(DataPublisher_DestroyTransaction_ReportedProperties(IGNORED_PTR_ARG))
+            .IgnoreArgument_transactionHandle();
+
+        ///act
+        Device_DestroyTransaction_ReportedProperties(reportedPropertiesTransactionHandle);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_Destroy(h);
+    }
 END_TEST_SUITE(IoTDevice_ut)
