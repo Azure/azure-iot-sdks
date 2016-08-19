@@ -24,6 +24,7 @@
 #define IOTHUB_CLIENT_LL_H
 
 #include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/umock_c_prod.h"
 
 #define IOTHUB_CLIENT_RESULT_VALUES       \
     IOTHUB_CLIENT_OK,                     \
@@ -98,14 +99,19 @@ extern "C"
     */
     DEFINE_ENUM(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_DISPOSITION_RESULT_VALUES);
 
+#define DEVICE_TWIN_UPDATE_STATE_VALUES \
+    DEVICE_TWIN_UPDATE_COMPLETE, \
+    DEVICE_TWIN_UPDATE_PARTIAL
+
+    DEFINE_ENUM(DEVICE_TWIN_UPDATE_STATE, DEVICE_TWIN_UPDATE_STATE_VALUES);
+
     
     typedef void(*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
     typedef IOTHUBMESSAGE_DISPOSITION_RESULT (*IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC)(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback);
     typedef const TRANSPORT_PROVIDER*(*IOTHUB_CLIENT_TRANSPORT_PROVIDER)(void);
 
-    typedef void(*IOTHUB_CLIENT_GET_DESIRED_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, const unsigned char* desiredState, size_t size, uint32_t desiredVersion, uint32_t lastSeenReportedVersion, void* userContextCallback);
-    typedef void(*IOTHUB_CLIENT_PATCH_DESIRED_CALLBACK)(const unsigned char* payLoad, size_t size, uint32_t desiredVersion, uint32_t lastSeenReportedVersion, void* userContextCallback);
-    typedef void(*IOTHUB_CLIENT_PATCH_REPORTED_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
+    typedef void(*IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback);
+    typedef void(*IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
 
     /** @brief	This struct captures IoTHub client configuration. */
     typedef struct IOTHUB_CLIENT_CONFIG_TAG
@@ -183,7 +189,7 @@ extern "C"
     * @return	A non-NULL @c IOTHUB_CLIENT_LL_HANDLE value that is used when
     * 			invoking other functions for IoT Hub client and @c NULL on failure.
     */
-    extern IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LL_HANDLE, IoTHubClient_LL_CreateFromConnectionString, const char*, connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER, protocol);
 
     /**
     * @brief	Creates a IoT Hub client for communication with an existing IoT
@@ -197,7 +203,7 @@ extern "C"
     * @return	A non-NULL @c IOTHUB_CLIENT_LL_HANDLE value that is used when
     * 			invoking other functions for IoT Hub client and @c NULL on failure.
     */
-    extern IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* config);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LL_HANDLE, IoTHubClient_LL_Create, const IOTHUB_CLIENT_CONFIG*, config);
 
     /**
     * @brief	Creates a IoT Hub client for communication with an existing IoT
@@ -211,7 +217,7 @@ extern "C"
     * @return	A non-NULL @c IOTHUB_CLIENT_LL_HANDLE value that is used when
     * 			invoking other functions for IoT Hub client and @c NULL on failure.
     */
-    extern IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(const IOTHUB_CLIENT_DEVICE_CONFIG * config);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_LL_HANDLE, IoTHubClient_LL_CreateWithTransport, const IOTHUB_CLIENT_DEVICE_CONFIG*, config);
 
     /**
     * @brief	Disposes of resources allocated by the IoT Hub client. This is a
@@ -219,7 +225,7 @@ extern "C"
     *
     * @param	iotHubClientHandle	The handle created by a call to the create function.
     */
-    extern void IoTHubClient_LL_Destroy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
+     MOCKABLE_FUNCTION(, void, IoTHubClient_LL_Destroy, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle);
 
     /**
     * @brief	Asynchronous call to send the message specified by @p eventMessageHandle.
@@ -241,7 +247,7 @@ extern "C"
     *
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventAsync(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SendEventAsync, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback);
 
     /**
     * @brief	This function returns the current sending status for IoTHubClient.
@@ -255,7 +261,7 @@ extern "C"
     *
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetSendStatus(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_STATUS *iotHubClientStatus);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_GetSendStatus, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_STATUS*, iotHubClientStatus);
 
     /**
     * @brief	Sets up the message callback to be invoked when IoT Hub issues a
@@ -272,7 +278,7 @@ extern "C"
     *
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetMessageCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC messageCallback, void* userContextCallback);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetMessageCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC, messageCallback, void*, userContextCallback);
 
     /**
     * @brief	This function returns in the out parameter @p lastMessageReceiveTime
@@ -285,7 +291,7 @@ extern "C"
     *
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetLastMessageReceiveTime(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, time_t* lastMessageReceiveTime);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_GetLastMessageReceiveTime, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, time_t*, lastMessageReceiveTime);
 
     /**
     * @brief	This function is meant to be called by the user when work
@@ -297,7 +303,7 @@ extern "C"
     *			and/or user level callbacks) are the effect of calling this
     *			function and they take place synchronously inside _DoWork.
     */
-    extern void IoTHubClient_LL_DoWork(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
+     MOCKABLE_FUNCTION(, void, IoTHubClient_LL_DoWork, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle);
 
     /**
     * @brief	This API sets a runtime option identified by parameter @p optionName
@@ -340,35 +346,14 @@ extern "C"
     *
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* optionName, const void* value);
-
-    /**
-    * @brief	This API sends a request for desired state. The device will receive a call back via the getDesiredCallback with
-    *			a byte array containing the payload.
-    *
-    * @param	iotHubClientHandle		The handle created by a call to the create function.
-    * @param	getDesiredCallback		The callback specified by the device client to return the IoTHub response
-    *									to a GetDesired request. The callback will be called with the status
-    *									of the request. If the GetDesired request is successful, the payload will be
-    *									passed to the callback, along with two version numbers:
-    *										- Desired:
-    *										- LastSeenReported:
-    * @param	userContextCallback		User specified context that will be provided to the
-    * 									callback. This can be @c NULL.
-    *
-    *			@b NOTE: The application behavior is undefined if the user calls
-    *			the ::IoTHubClient_LL_Destroy function from within any callback.
-    *
-    * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
-    */
-    extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetDesiredState(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_GET_DESIRED_CALLBACK getDesiredCallback, void* userContextCallback);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetOption, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, optionName, const void*, value);
 
     /**
     * @brief	This API specifies a call back to be used when the device receives a desired state update.
     *
     * @param	iotHubClientHandle		The handle created by a call to the create function.
-    * @param	patchDesiredCallback	The callback specified by the device client to be used for updating
-    *									the desired state. The callback will be called in response to a PatchDesried
+    * @param	deviceTwinCallback	    The callback specified by the device client to be used for updating
+    *									the desired state. The callback will be called in response to patch 
     *									request send by the IoTHub services. The payload will be passed to the
     *									callback, along with two version numbers:
     *										- Desired:
@@ -381,17 +366,15 @@ extern "C"
     *
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetPatchDesiredStateCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_PATCH_DESIRED_CALLBACK patchDesiredCallback, void* userContextCallback);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetDeviceTwinCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, deviceTwinCallback, void*, userContextCallback);
 
     /**
     * @brief	This API sneds a report of the device's properties and their current values.
     *
     * @param	iotHubClientHandle		The handle created by a call to the create function.
     * @param	reportedState			The current device property values to be 'reported' to the IoTHub.
-    * @param	patchDesiredCallback	The callback specified by the device client to be called with the
+    * @param	reportedStateCallback	The callback specified by the device client to be called with the
     *									result of the transaction.
-    * @param    reportedVersion			
-    * @param    lastSeenDesiredVersion
     * @param	userContextCallback		User specified context that will be provided to the
     * 									callback. This can be @c NULL.
     *
@@ -400,7 +383,7 @@ extern "C"
     *
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendReportedState(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, uint32_t reportedVersion, uint32_t lastSeenDesiredVersion, IOTHUB_CLIENT_PATCH_REPORTED_CALLBACK patchReportedCallback, void* userContextCallback);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SendReportedState, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const unsigned char*, reportedState, size_t, size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, reportedStateCallback, void*, userContextCallback);
 
 
 #ifndef DONT_USE_UPLOADTOBLOB
@@ -415,7 +398,7 @@ extern "C"
     *
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, const unsigned char*, source, size_t, size);
 
 #endif /*DONT_USE_UPLOADTOBLOB*/
 
