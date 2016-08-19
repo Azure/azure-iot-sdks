@@ -97,7 +97,7 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData(DATA_MARSHALLER_HANDLE dataMarsha
     else
     {
         size_t i;
-		bool includePropertyPath = dataMarshallerInstance->IncludePropertyPath;
+        bool includePropertyPath = dataMarshallerInstance->IncludePropertyPath;
         /* VS complains wrongly that result is not initialized */
         result = DATA_MARSHALLER_ERROR;
 
