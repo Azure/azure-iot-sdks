@@ -201,6 +201,7 @@ namespace Microsoft.Azure.Devices.Client
             catch(Exception ex) when(!ex.IsFatal())
             {
                 amqpConnection.SafeClose(ex);
+                throw;
             }
         }
 
