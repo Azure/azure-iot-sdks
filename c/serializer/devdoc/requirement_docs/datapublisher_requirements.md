@@ -183,7 +183,7 @@ extern REPORTED_PROPERTIES_TRANSACTION_HANDLE DataPublisher_CreateTransaction_Re
 extern DATA_PUBLISHER_RESULT DataPublisher_PublishTransacted_ReportedProperty(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle, const char* reportedPropertyPath, const AGENT_DATA_TYPE* data)
 ```
 
-**SRS_DATA_PUBLISHER_02_008: [** `DataPublisher_PublishTransacted_ReportedProperty` adds a new reported property to the transaction. **]**
+`DataPublisher_PublishTransacted_ReportedProperty` adds a new reported property to the transaction.
 
 **SRS_DATA_PUBLISHER_02_009: [** If argument `transactionHandle` is `NULL` then `DataPublisher_PublishTransacted_ReportedProperty` 
 shall fail and return `DATA_PUBLISHER_INVALID_ARG`. **]**
@@ -217,8 +217,8 @@ and return `DATA_PUBLISHER_ERROR`. **]**
 extern DATA_PUBLISHER_RESULT DataPublisher_CommitTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle, unsigned char** destination, size_t* destinationSize);
 ```
 
-**SRS_DATA_PUBLISHER_02_018: [** `DataPublisher_CommitTransaction_ReportedProperties` attempts to commit the transaction 
-by filling `destination` and `destinationSize`. **]**
+`DataPublisher_CommitTransaction_ReportedProperties` attempts to commit the transaction 
+by filling `destination` and `destinationSize`.
 
 **SRS_DATA_PUBLISHER_02_019: [** If argument `transactionHandle` is `NULL` then `DataPublisher_CommitTransaction_ReportedProperties` shall 
 fail and return `DATA_PUBLISHER_INVALID_ARG`. **]**
@@ -228,6 +228,9 @@ fail and return `DATA_PUBLISHER_INVALID_ARG`. **]**
 
 **SRS_DATA_PUBLISHER_02_021: [** If argument `destinationSize` `NULL` then `DataPublisher_CommitTransaction_ReportedProperties` shall 
 fail and return `DATA_PUBLISHER_INVALID_ARG`. **]**
+
+**SRS_DATA_PUBLISHER_02_031: [** If the transaction contains zero elements then `DataPublisher_CommitTransaction_ReportedProperties` shall 
+fail and return `DATA_PUBLISHER_INVALID_ARG`. **]**  
 
 **SRS_DATA_PUBLISHER_02_022: [** `DataPublisher_CommitTransaction_ReportedProperties` shall call `DataMarshaller_SendData_ReportedProperties` 
 providing the `VECTOR_HANDLE` holding the transacted reported properties, `destination` and `destinationSize`. **]**
