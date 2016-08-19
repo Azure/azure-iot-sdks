@@ -13,6 +13,11 @@ void* my_gballoc_malloc(size_t t)
     return malloc(t);
 }
 
+void* my_gballoc_realloc(void* ptr, size_t size)
+{
+    return realloc(ptr, size);
+}
+
 void my_gballoc_free(void * t)
 {
     free(t);
@@ -21,6 +26,18 @@ void my_gballoc_free(void * t)
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
+
+/*want crt_abstractions to use real malloc*/
+#define GBALLOC_H 
+#define mallocAndStrcpy_s real_mallocAndStrcpy_s
+#define unsignedIntToString real_unsignedIntToString
+#define size_tToString real_size_tToString 
+#include "crt_abstractions.c"
+#undef mallocAndStrcpy_s 
+#undef unsignedIntToString 
+#undef size_tToString 
+#undef GBALLOC_H
+#undef CRT_ABSTRACTIONS_H
 
 #include "umock_c.h"
 #include "umocktypes_charptr.h"
@@ -34,6 +51,7 @@ void my_gballoc_free(void * t)
 #include "datamarshaller.h"
 #include "schema.h"
 #include "iothub_client.h"
+#include "azure_c_shared_utility/gballoc.h"
 #undef ENABLE_MOCKS
 
 #include "datapublisher.h"
@@ -41,124 +59,19 @@ void my_gballoc_free(void * t)
 static AGENT_DATA_TYPE              data;
 static const DATA_MARSHALLER_VALUE* g_ExpectedDataSentValues;
 static TRANSACTION_HANDLE g_myTransaction = NULL;
-
-#if 0
-static MICROMOCK_MUTEX_HANDLE g_testByTest;
-
-DEFINE_MICROMOCK_ENUM_TO_STRING(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES);
-
-
-static const SCHEMA_PROPERTY_HANDLE g_ModelPropertyHandle = (SCHEMA_PROPERTY_HANDLE)0x4243;
-static const DATA_MARSHALLER_HANDLE TEST_DATA_MARSHALLER_HANDLE = (DATA_MARSHALLER_HANDLE)0x4343;
-static const SCHEMA_MODEL_TYPE_HANDLE       TEST_SCHEMA_MODEL_TYPE_HANDLE = (SCHEMA_MODEL_TYPE_HANDLE)0x4444;
-static bool                         g_DataSentMatches;
-
-
-
 static const SCHEMA_MODEL_TYPE_HANDLE TEST_MODEL_HANDLE = (SCHEMA_MODEL_TYPE_HANDLE)0x4242;
-
-static DATA_PUBLISHER_HANDLE g_handle = NULL;
-
-
-static size_t OriginalMaxBufferSize_()
-{
-    static size_t value = DataPublisher_GetMaxBufferSize();
-    return value;
-}
-
-time_t currentTime;
-int bufferStorageDataAmount = 0;
-
-
-static bool operator==(_In_ const DATA_MARSHALLER_VALUE& lhs, _In_ const DATA_MARSHALLER_VALUE& rhs)
-{
-    return ((strcmp(lhs.PropertyPath, rhs.PropertyPath) == 0) &&
-        (lhs.Value->type == rhs.Value->type) &&
-        (lhs.Value->value.edmSingle.value == rhs.Value->value.edmSingle.value));
-}
-
-TYPED_MOCK_CLASS(CDataPublisherMock, CGlobalMock)
-{
-public:
-    /* Tests_SRS_DATA_PUBLISHER_99_002:[ The DataPublisher module shall make use of the Schema module APIs to query schema information.] */
-    MOCK_STATIC_METHOD_2(, bool, Schema_ModelPropertyByPathExists, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyPath);
-    MOCK_METHOD_END(bool, true)
-
-    /* Tests_SRS_DATA_PUBLISHER_99_039:[ The DataPublisher module shall make use of the DataPublisher module APIs to dispatch data to be published.] */
-    MOCK_STATIC_METHOD_2(, DATA_MARSHALLER_HANDLE, DataMarshaller_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, bool, includePropertyPath);
-    MOCK_METHOD_END(DATA_MARSHALLER_HANDLE, TEST_DATA_MARSHALLER_HANDLE)
-    MOCK_STATIC_METHOD_1(, void, DataMarshaller_Destroy, DATA_MARSHALLER_HANDLE, dataMarshallerHandle);
-    MOCK_VOID_METHOD_END()
-    MOCK_STATIC_METHOD_5(, DATA_MARSHALLER_RESULT, DataMarshaller_SendData, DATA_MARSHALLER_HANDLE, dataMarshallerHandle, size_t, valueCount, const DATA_MARSHALLER_VALUE*, values, unsigned char**, destination, size_t*, destinationSize);
-        if (g_ExpectedDataSentValues != NULL)
-        {
-            size_t i;
-
-            g_DataSentMatches = true;
-            for (i = 0; i < valueCount; i++)
-            {
-                if (!(values[i] == ((const DATA_MARSHALLER_VALUE*)g_ExpectedDataSentValues)[i]))
-                {
-                    g_DataSentMatches = false;
-                }
-            }
-        }
-    MOCK_METHOD_END(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_OK)
-
-    /* AgentTypeSystem mocks */
-    MOCK_STATIC_METHOD_2(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE, AGENT_DATA_TYPE*, dest, const AGENT_DATA_TYPE*, src)
-        if (dest != NULL)
-        {
-            memcpy(dest, src, sizeof(AGENT_DATA_TYPE));
-        }
-    MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK)
-    MOCK_STATIC_METHOD_1(, void, Destroy_AGENT_DATA_TYPE, AGENT_DATA_TYPE*, agentData)
-    MOCK_VOID_METHOD_END()
-};
-
-DECLARE_GLOBAL_MOCK_METHOD_2(CDataPublisherMock, , bool, Schema_ModelPropertyByPathExists, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyPath);
-
-DECLARE_GLOBAL_MOCK_METHOD_2(CDataPublisherMock, , DATA_MARSHALLER_HANDLE, DataMarshaller_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, bool, includePropertyPath);
-DECLARE_GLOBAL_MOCK_METHOD_1(CDataPublisherMock, , void, DataMarshaller_Destroy, DATA_MARSHALLER_HANDLE, dataMarshallerHandle);
-DECLARE_GLOBAL_MOCK_METHOD_5(CDataPublisherMock, , DATA_MARSHALLER_RESULT, DataMarshaller_SendData, DATA_MARSHALLER_HANDLE, dataMarshallerHandle, size_t, valueCount, const DATA_MARSHALLER_VALUE*, values, unsigned char**, destination, size_t*, destinationSize);
-
-DECLARE_GLOBAL_MOCK_METHOD_2(CDataPublisherMock, , AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE, AGENT_DATA_TYPE*, dest, const AGENT_DATA_TYPE*, src);
-DECLARE_GLOBAL_MOCK_METHOD_1(CDataPublisherMock, , void, Destroy_AGENT_DATA_TYPE, AGENT_DATA_TYPE*, agentData);
-
-static bool operator==(_In_ const CMockValue<const DATA_MARSHALLER_VALUE*>& lhs, _In_ const CMockValue<const DATA_MARSHALLER_VALUE*>& rhs)
-{
-    const DATA_MARSHALLER_VALUE* lhsValue = lhs.GetValue();
-    const DATA_MARSHALLER_VALUE* rhsValue = rhs.GetValue();
-    if (lhsValue == NULL)
-    {
-        if (rhsValue == NULL)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-    else
-    {
-        if (rhsValue == NULL)
-        {
-            return false;
-        }
-        else
-        {
-            return (*lhsValue == *rhsValue);
-        }
-    }
-}
-
+static const SCHEMA_MODEL_TYPE_HANDLE       TEST_SCHEMA_MODEL_TYPE_HANDLE = (SCHEMA_MODEL_TYPE_HANDLE)0x4444;
 static const char* PropertyPath = "TestPropertyPath";
 static const char* PropertyPath_2 = "Test42PropertyPath";
 
-static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
+TEST_DEFINE_ENUM_TYPE(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES);
 
-#endif
+TEST_DEFINE_ENUM_TYPE(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT_VALUES);
+
+TEST_DEFINE_ENUM_TYPE(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_RESULT_VALUES);
 
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;
@@ -171,6 +84,32 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
     (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
+
+static DATA_MARSHALLER_HANDLE my_DataMarshaller_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, bool includePropertyPath)
+{
+    (void)(modelHandle, includePropertyPath);
+    return (DATA_MARSHALLER_HANDLE)my_gballoc_malloc(1);
+}
+
+static void my_DataMarshaller_Destroy(DATA_MARSHALLER_HANDLE h)
+{
+    my_gballoc_free(h);
+}
+
+static AGENT_DATA_TYPES_RESULT my_Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(AGENT_DATA_TYPE* dest, const AGENT_DATA_TYPE* src)
+{
+    if (dest != NULL)
+    {
+        memcpy(dest, src, sizeof(AGENT_DATA_TYPE));
+    }
+    return AGENT_DATA_TYPES_OK;
+}
+static DATA_MARSHALLER_RESULT my_DataMarshaller_SendData(DATA_MARSHALLER_HANDLE dataMarshallerHandle, size_t valueCount, const DATA_MARSHALLER_VALUE* values, unsigned char** destination, size_t* destinationSize)
+{
+    (void)(destination, destinationSize, values, valueCount, dataMarshallerHandle);
+    return DATA_MARSHALLER_OK;
+}
+
 BEGIN_TEST_SUITE(DataPublisher_ut)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
@@ -184,6 +123,35 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         (void)umocktypes_bool_register_types();
         (void)umocktypes_charptr_register_types();
         (void)umocktypes_stdint_register_types();
+
+        REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_MODEL_TYPE_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(DATA_MARSHALLER_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(DATA_PUBLISHER_RESULT, int);
+        REGISTER_UMOCK_ALIAS_TYPE(AGENT_DATA_TYPES_RESULT, int);
+        REGISTER_UMOCK_ALIAS_TYPE(DATA_MARSHALLER_RESULT, int);
+        
+
+        REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(gballoc_realloc, my_gballoc_realloc);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_realloc, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
+
+        REGISTER_GLOBAL_MOCK_HOOK(DataMarshaller_Create, my_DataMarshaller_Create);
+        REGISTER_GLOBAL_MOCK_HOOK(DataMarshaller_SendData, my_DataMarshaller_SendData);
+
+        REGISTER_GLOBAL_MOCK_HOOK(DataMarshaller_Destroy, my_DataMarshaller_Destroy);
+
+        REGISTER_GLOBAL_MOCK_RETURN(Schema_ModelPropertyByPathExists, true);
+
+        REGISTER_GLOBAL_MOCK_HOOK(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE, my_Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE);
+
+        REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, real_mallocAndStrcpy_s);
+        REGISTER_GLOBAL_MOCK_HOOK(unsignedIntToString, real_unsignedIntToString);
+        REGISTER_GLOBAL_MOCK_HOOK(size_tToString, real_size_tToString);
+        
+        
+
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -233,23 +201,23 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         ASSERT_IS_NULL(result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
-#if 0
+
     /* Tests_SRS_DATA_PUBLISHER_99_041:[ DataPublisher_Create shall create a new DataPublisher instance and return a non-NULL handle in case of success.] */
     /* Tests_SRS_DATA_PUBLISHER_99_043:[ DataPublisher_Create shall initialize and hold a handle to a DataMarshaller instance.] */
     /* Tests_SRS_DATA_PUBLISHER_01_001: [DataPublisher_Create shall pass the includePropertyPath argument to DataMarshaller_Create.] */
     TEST_FUNCTION(DataPublisher_Create_With_Valid_Arguments_Yields_A_non_NULL_Handle)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
-
-        STRICT_EXPECTED_CALL(dataPublisherMock, DataMarshaller_Create(TEST_MODEL_HANDLE, true));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(DataMarshaller_Create(TEST_MODEL_HANDLE, true));
 
         // act
         DATA_PUBLISHER_HANDLE result = DataPublisher_Create(TEST_MODEL_HANDLE, true);
 
         // assert
         ASSERT_IS_NOT_NULL(result);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         DataPublisher_Destroy(result);
@@ -259,16 +227,16 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_Create_Passes_includePropertyPath_To_DataMarshaller_Create)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
-
-        STRICT_EXPECTED_CALL(dataPublisherMock, DataMarshaller_Create(TEST_MODEL_HANDLE, false));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(DataMarshaller_Create(TEST_MODEL_HANDLE, false));
 
         // act
         DATA_PUBLISHER_HANDLE result = DataPublisher_Create(TEST_MODEL_HANDLE, false);
 
         // assert
         ASSERT_IS_NOT_NULL(result);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         DataPublisher_Destroy(result);
@@ -279,11 +247,13 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_Create_2_Instances_Yields_Different_Handles)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(DataMarshaller_Create(TEST_MODEL_HANDLE, true));
 
-        STRICT_EXPECTED_CALL(dataPublisherMock, DataMarshaller_Create(TEST_MODEL_HANDLE, true));
-
-        STRICT_EXPECTED_CALL(dataPublisherMock, DataMarshaller_Create(TEST_MODEL_HANDLE, true));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(DataMarshaller_Create(TEST_MODEL_HANDLE, true));
 
         DATA_PUBLISHER_HANDLE handle1 = DataPublisher_Create(TEST_MODEL_HANDLE, true);
 
@@ -295,7 +265,7 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         ASSERT_IS_NOT_NULL(handle2);
         ASSERT_ARE_NOT_EQUAL(void_ptr, (void_ptr)handle1, (void_ptr)handle2);
 
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         DataPublisher_Destroy(handle1);
@@ -306,16 +276,19 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_When_DataMarshaller_Create_Fails_DataPublisher_Create_Returns_NULL)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
-
-        STRICT_EXPECTED_CALL(dataPublisherMock, DataMarshaller_Create(TEST_MODEL_HANDLE, true))
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(DataMarshaller_Create(TEST_MODEL_HANDLE, true))
             .SetReturn((DATA_MARSHALLER_HANDLE)NULL);
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
 
         // act
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_MODEL_HANDLE, true);
 
         // assert
         ASSERT_IS_NULL(handle);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
     /* DataPublisher_Destroy */
@@ -324,19 +297,18 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_Destroy_Releases_The_Data_Marshaller_Instance)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
-
-
-        dataPublisherMock.ResetAllCalls();
-
-        STRICT_EXPECTED_CALL(dataPublisherMock, DataMarshaller_Destroy(TEST_DATA_MARSHALLER_HANDLE));
+        umock_c_reset_all_calls();
+        STRICT_EXPECTED_CALL(DataMarshaller_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument_dataMarshallerHandle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
 
         // act
         DataPublisher_Destroy(handle);
 
         // assert
-        // no explicit assert, uMock handles the call comparison
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
     /* Tests_SRS_DATA_PUBLISHER_99_046:[ If a NULL argument is passed to it, DataPublisher_Destroy shall do nothing.] */
@@ -344,13 +316,11 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_Destroy_With_A_NULL_Handle_Does_Not_Call_DataMarshaller_Destroy)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
-
         // act
         DataPublisher_Destroy(NULL);
 
         // assert
-        // no explicit assert, uMock handles the call comparison
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
     /* DataPublisher_StartTransaction */
@@ -360,18 +330,20 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_StartTransaction_Succeeds)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
         unsigned char* destination;
         size_t destinationSize;
-        dataPublisherMock.ResetAllCalls();
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument_size();
 
         // act
-        auto result = DataPublisher_StartTransaction(handle);
+        TRANSACTION_HANDLE result = DataPublisher_StartTransaction(handle);
 
         // assert
         ASSERT_IS_NOT_NULL(result);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         (void)DataPublisher_EndTransaction(result, &destination, &destinationSize);
@@ -382,10 +354,8 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_StartTransaction_With_NULL_Handle_Fails)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
-
         // act
-        auto result = DataPublisher_StartTransaction(NULL);
+        TRANSACTION_HANDLE result = DataPublisher_StartTransaction(NULL);
 
         // assert
         ASSERT_IS_NULL(result);
@@ -397,8 +367,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_PublishTransacted_With_NULL_Transaction_Handle_Fails)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
-
         // act
         DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted(NULL, PropertyPath, &data);
 
@@ -410,23 +378,21 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_PublishTransacted_With_NULL_PropertyPath_Fails)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
         unsigned char* destination;
         size_t destinationSize;
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
-        dataPublisherMock.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         // act
-        DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted(transaction,  NULL, &data);
-
-        (void)DataPublisher_EndTransaction(transaction, &destination, &destinationSize);
-
+        DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted(transaction, NULL, &data);
+        
         // assert
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG, result);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
+        (void)DataPublisher_EndTransaction(transaction, &destination, &destinationSize);
         DataPublisher_Destroy(handle);
     }
 
@@ -434,21 +400,19 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_PublishTransacted_With_NULL_Data_Payload_Fails)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
-        dataPublisherMock.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         // act
         DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted(transaction, PropertyPath, NULL);
 
-        (void)DataPublisher_CancelTransaction(transaction);
-
         // assert
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG, result);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
+        (void)DataPublisher_CancelTransaction(transaction);
         DataPublisher_Destroy(handle);
     }
 
@@ -456,26 +420,30 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_PublishTransacted_With_Valid_Data_Succeeds)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_MODEL_HANDLE, true);
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
-        dataPublisherMock.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(dataPublisherMock, Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
-        STRICT_EXPECTED_CALL(dataPublisherMock, Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, &data))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, PropertyPath))
+            .IgnoreArgument_destination();
+        STRICT_EXPECTED_CALL(Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, &data))
             .IgnoreArgument(1);
-        EXPECTED_CALL(dataPublisherMock, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_realloc(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+            .IgnoreArgument_ptr()
+            .IgnoreArgument_size();
 
         // act
         DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted(transaction, PropertyPath, &data);
 
-        (void)DataPublisher_CancelTransaction(transaction);
-
         // assert
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
+        (void)DataPublisher_CancelTransaction(transaction);
         DataPublisher_Destroy(handle);
     }
 
@@ -483,24 +451,26 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_When_GetModelProperty_Returns_NULL_Then_PublishTransacted_Fails)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_MODEL_HANDLE, true);
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
-        dataPublisherMock.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(dataPublisherMock, Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, PropertyPath))
+            .IgnoreArgument_destination();
+        STRICT_EXPECTED_CALL(Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath))
             .SetReturn(false);
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
 
         // act
         DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted(transaction, PropertyPath, &data);
 
-        (void)DataPublisher_CancelTransaction(transaction);
-
         // assert
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_SCHEMA_FAILED, result);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
+        (void)DataPublisher_CancelTransaction(transaction);
         DataPublisher_Destroy(handle);
     }
 
@@ -508,25 +478,32 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_When_Cloning_The_Agent_Data_Type_Fails_Then_PublishTransacted_Fails)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_MODEL_HANDLE, true);
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
-        dataPublisherMock.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(dataPublisherMock, Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
-        EXPECTED_CALL(dataPublisherMock, Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, &data))
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, PropertyPath))
+            .IgnoreArgument_destination();
+        STRICT_EXPECTED_CALL(Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, &data))
+            .IgnoreArgument(1)
             .SetReturn(AGENT_DATA_TYPES_ERROR);
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
 
         // act
         DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted(transaction, PropertyPath, &data);
 
-        (void)DataPublisher_CancelTransaction(transaction);
-
         // assert
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_AGENT_DATA_TYPES_ERROR, result);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
+        (void)DataPublisher_CancelTransaction(transaction);
         DataPublisher_Destroy(handle);
     }
 
@@ -534,37 +511,47 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_When_The_Value_Is_Destroyed_Before_End_Transaction_Cloned_Data_Is_Given_To_Data_Marshaller)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
         unsigned char* destination;
         size_t destinationSize;
-        TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
-        dataPublisherMock.ResetAllCalls();
+        TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);        
         AGENT_DATA_TYPE data2;
 
         data2.type = EDM_SINGLE_TYPE;
         data2.value.edmSingle.value = 3.5f;
 
-        const DATA_MARSHALLER_VALUE value = { PropertyPath, &data };
-
-        STRICT_EXPECTED_CALL(dataPublisherMock, Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
-
         (void)DataPublisher_PublishTransacted(transaction, PropertyPath, &data2);
 
         (void)memset(&data2, 0, sizeof(data2));
-            
-        dataPublisherMock.ResetAllCalls();
-        STRICT_EXPECTED_CALL(dataPublisherMock, DataMarshaller_SendData(TEST_DATA_MARSHALLER_HANDLE, 1, &value, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+
+        DATA_MARSHALLER_VALUE value;
+        value.PropertyPath = PropertyPath;
+        value.Value = &data;
+
+        umock_c_reset_all_calls();
+        
+        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_dataMarshallerHandle()
+            .IgnoreArgument_values()
             .IgnoreArgument(4)
             .IgnoreArgument(5);
-        EXPECTED_CALL(dataPublisherMock, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
+            .IgnoreArgument_agentData();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
 
         // act
         DATA_PUBLISHER_RESULT result = DataPublisher_EndTransaction(transaction, &destination, &destinationSize);
 
         // assert
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         DataPublisher_Destroy(handle);
@@ -576,7 +563,6 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_EndTransaction_With_NULL_Handle_Fails)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         unsigned char* destination;
         size_t destinationSize;
 
@@ -585,24 +571,24 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
         // assert
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
     /*Tests_SRS_DATA_PUBLISHER_02_006: [If the destination argument is NULL, DataPublisher_EndTransaction shall return DATA_PUBLISHER_INVALID_ARG.] */
     TEST_FUNCTION(DataPublisher_EndTransaction_With_NULL_destination_Fails)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
         size_t destinationSize;
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
-        dataPublisherMock.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         // act
         DATA_PUBLISHER_RESULT result = DataPublisher_EndTransaction(transaction, NULL, &destinationSize);
 
         // assert
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG, result);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         unsigned char* destination;
@@ -614,18 +600,17 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_EndTransaction_With_NULL_destinationSize_Fails)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
         unsigned char* destination;
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
-        dataPublisherMock.ResetAllCalls();
+        umock_c_reset_all_calls();
 
         // act
         DATA_PUBLISHER_RESULT result = DataPublisher_EndTransaction(transaction, &destination, NULL);
 
         // assert
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG, result);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         size_t destinationSize;
@@ -637,19 +622,23 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_EndTransaction_With_Valid_Handle_An_Empty_Transaction_Fails)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
         unsigned char* destination;
         size_t destinationSize;
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
-        dataPublisherMock.ResetAllCalls();
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
 
         // act
         DATA_PUBLISHER_RESULT result = DataPublisher_EndTransaction(transaction, &destination, &destinationSize);
 
         // assert
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_EMPTY_TRANSACTION, result);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         DataPublisher_Destroy(handle);
@@ -662,32 +651,38 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_EndTransaction_With_One_Value_Dispatches_The_Value)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
         unsigned char* destination;
         size_t destinationSize;
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
-        dataPublisherMock.ResetAllCalls();
-
-        const DATA_MARSHALLER_VALUE value = { PropertyPath, &data };
-
-        STRICT_EXPECTED_CALL(dataPublisherMock, Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
-
         (void)DataPublisher_PublishTransacted(transaction, PropertyPath, &data);
+        DATA_MARSHALLER_VALUE value;
+        value.PropertyPath = PropertyPath;
+        value.Value = &data;
 
-        dataPublisherMock.ResetAllCalls();
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(dataPublisherMock, DataMarshaller_SendData(TEST_DATA_MARSHALLER_HANDLE, 1, &value, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_PTR_ARG, 1, &value, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_dataMarshallerHandle()
+            .IgnoreArgument_values()
             .IgnoreArgument(4)
             .IgnoreArgument(5);
-        EXPECTED_CALL(dataPublisherMock, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
 
         // act
         DATA_PUBLISHER_RESULT result = DataPublisher_EndTransaction(transaction, &destination, &destinationSize);
 
         // assert
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         DataPublisher_Destroy(handle);
@@ -697,32 +692,38 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_When_DataMatshaller_SendData_Fails_Then_EndTransaction_Fails)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
         unsigned char* destination;
         size_t destinationSize;
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
-        dataPublisherMock.ResetAllCalls();
-
-        const DATA_MARSHALLER_VALUE value = { PropertyPath, &data };
-
-        STRICT_EXPECTED_CALL(dataPublisherMock, Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
-
         (void)DataPublisher_PublishTransacted(transaction, PropertyPath, &data);
+        DATA_MARSHALLER_VALUE value;
+        value.PropertyPath = PropertyPath;
+        value.Value = &data;
+        umock_c_reset_all_calls();
 
-        dataPublisherMock.ResetAllCalls();
-        STRICT_EXPECTED_CALL(dataPublisherMock, DataMarshaller_SendData(TEST_DATA_MARSHALLER_HANDLE, 1, &value, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_PTR_ARG, 1, &value, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_dataMarshallerHandle()
+            .IgnoreArgument_values()
             .IgnoreArgument(4)
             .IgnoreArgument(5)
             .SetReturn(DATA_MARSHALLER_ERROR);
-        EXPECTED_CALL(dataPublisherMock, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
 
         // act
         DATA_PUBLISHER_RESULT result = DataPublisher_EndTransaction(transaction, &destination, &destinationSize);
 
         // assert
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_MARSHALLER_ERROR, result);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         DataPublisher_Destroy(handle);
@@ -732,44 +733,44 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_Adding_The_Same_Property_To_A_Transaction_Twice_Keeps_The_Last_Value_Only)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_MODEL_HANDLE, true);
         unsigned char* destination;
         size_t destinationSize;
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
-        dataPublisherMock.ResetAllCalls();
-
         AGENT_DATA_TYPE data2;
 
         data2.type = EDM_SINGLE_TYPE;
         data2.value.edmSingle.value = 3.7f;
 
-        const DATA_MARSHALLER_VALUE value = { PropertyPath, &data2 };
+        DATA_MARSHALLER_VALUE value;
+        value.PropertyPath = PropertyPath;
+        value.Value = &data2;
+
         g_ExpectedDataSentValues = &value;
-
-        STRICT_EXPECTED_CALL(dataPublisherMock, Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
-        EXPECTED_CALL(dataPublisherMock, Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        EXPECTED_CALL(dataPublisherMock, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-
-        STRICT_EXPECTED_CALL(dataPublisherMock, Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
-        EXPECTED_CALL(dataPublisherMock, Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        EXPECTED_CALL(dataPublisherMock, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-
-        STRICT_EXPECTED_CALL(dataPublisherMock, DataMarshaller_SendData(TEST_DATA_MARSHALLER_HANDLE, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreArgument(3)
-            .IgnoreArgument(4)
-            .IgnoreArgument(5);
 
         (void)DataPublisher_PublishTransacted(transaction, PropertyPath, &data);
         (void)DataPublisher_PublishTransacted(transaction, PropertyPath, &data2);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG, &destination, &destinationSize))
+            .IgnoreArgument_dataMarshallerHandle()
+            .IgnoreArgument_values();
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
 
         // act
         DATA_PUBLISHER_RESULT result = DataPublisher_EndTransaction(transaction, &destination, &destinationSize);
 
         // assert
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result);
-        ASSERT_IS_TRUE(g_DataSentMatches);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         DataPublisher_Destroy(handle);
@@ -781,48 +782,43 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_Adding_Two_Different_Properties_To_A_Transaction_Dispatches_Both_Values)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_MODEL_HANDLE, true);
         unsigned char* destination;
         size_t destinationSize;
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
-        dataPublisherMock.ResetAllCalls();
-
         AGENT_DATA_TYPE data2;
 
         data2.type = EDM_SINGLE_TYPE;
         data2.value.edmSingle.value = 3.7f;
 
-        const DATA_MARSHALLER_VALUE values[] = {
-            { PropertyPath, &data },
-            { PropertyPath_2, &data2 },
-        };
-
-        g_ExpectedDataSentValues = values;
-
-        STRICT_EXPECTED_CALL(dataPublisherMock, Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
-        EXPECTED_CALL(dataPublisherMock, Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        EXPECTED_CALL(dataPublisherMock, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-
-        STRICT_EXPECTED_CALL(dataPublisherMock, Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath_2));
-        EXPECTED_CALL(dataPublisherMock, Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        EXPECTED_CALL(dataPublisherMock, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-
-        STRICT_EXPECTED_CALL(dataPublisherMock, DataMarshaller_SendData(TEST_DATA_MARSHALLER_HANDLE, 2, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreArgument(3)
-            .IgnoreArgument(4)
-            .IgnoreArgument(5);
-
         (void)DataPublisher_PublishTransacted(transaction, PropertyPath, &data);
         (void)DataPublisher_PublishTransacted(transaction, PropertyPath_2, &data2);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_PTR_ARG, 2, IGNORED_PTR_ARG, &destination, &destinationSize))
+            .IgnoreArgument_dataMarshallerHandle()
+            .IgnoreArgument_values();
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
 
         // act
         DATA_PUBLISHER_RESULT result = DataPublisher_EndTransaction(transaction, &destination, &destinationSize);
 
         // assert
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result);
-        ASSERT_IS_TRUE(g_DataSentMatches);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         DataPublisher_Destroy(handle);
@@ -832,39 +828,51 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_When_Getting_The_ModelProperty_For_The_Second_Property_Fails_Only_One_Property_Remains_Associated_With_The_Transaction)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_MODEL_HANDLE, true);
         unsigned char* destination;
         size_t destinationSize;
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
-        dataPublisherMock.ResetAllCalls();
-
         AGENT_DATA_TYPE data2;
 
         data2.type = EDM_SINGLE_TYPE;
         data2.value.edmSingle.value = 3.7f;
 
-        const DATA_MARSHALLER_VALUE value = { PropertyPath, &data };
-
-        STRICT_EXPECTED_CALL(dataPublisherMock, Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
-        STRICT_EXPECTED_CALL(dataPublisherMock, Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, &data))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(dataPublisherMock, Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath_2))
-            .SetReturn(false);
-        STRICT_EXPECTED_CALL(dataPublisherMock, DataMarshaller_SendData(TEST_DATA_MARSHALLER_HANDLE, 1, &value, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreArgument(4)
-            .IgnoreArgument(5);
-        EXPECTED_CALL(dataPublisherMock, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        DATA_MARSHALLER_VALUE value;
+        value.PropertyPath = PropertyPath;
+        value.Value = &data;
 
         (void)DataPublisher_PublishTransacted(transaction, PropertyPath, &data);
+        umock_c_reset_all_calls();
+        
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, PropertyPath_2))
+            .IgnoreArgument_destination();
+        STRICT_EXPECTED_CALL(Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath_2))
+            .SetReturn(false);
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+
+        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_PTR_ARG, 1, &value, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_dataMarshallerHandle()
+            .IgnoreArgument_values()
+            .IgnoreArgument(4)
+            .IgnoreArgument(5);
         (void)DataPublisher_PublishTransacted(transaction, PropertyPath_2, &data2);
 
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
         // act
         DATA_PUBLISHER_RESULT result = DataPublisher_EndTransaction(transaction, &destination, &destinationSize);
 
         // assert
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         DataPublisher_Destroy(handle);
@@ -874,28 +882,35 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_EndTransaction_Destroys_The_Cloned_Agent_Data_Type)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
         unsigned char* destination;
         size_t destinationSize;
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
-        dataPublisherMock.ResetAllCalls();
-
-        STRICT_EXPECTED_CALL(dataPublisherMock, Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
-
         DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted(transaction, PropertyPath, &data);
+        umock_c_reset_all_calls();
 
-        dataPublisherMock.ResetAllCalls();
-        EXPECTED_CALL(dataPublisherMock, DataMarshaller_SendData(TEST_DATA_MARSHALLER_HANDLE, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(DataMarshaller_SendData(IGNORED_PTR_ARG, 1, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_dataMarshallerHandle()
+            .IgnoreArgument_values()
+            .IgnoreArgument(4)
+            .IgnoreArgument(5);
 
-        EXPECTED_CALL(dataPublisherMock, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
 
         // act
         (void)DataPublisher_EndTransaction(transaction, &destination, &destinationSize);
 
         // assert
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         DataPublisher_Destroy(handle);
@@ -907,24 +922,27 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_CancelTransaction_Does_Not_Dispatch_Data)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
-        dataPublisherMock.ResetAllCalls();
-
-        STRICT_EXPECTED_CALL(dataPublisherMock, Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
-
         (void)DataPublisher_PublishTransacted(transaction, PropertyPath, &data);
+        umock_c_reset_all_calls();
 
-        dataPublisherMock.ResetAllCalls();
-        EXPECTED_CALL(dataPublisherMock, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
 
         // act
         DATA_PUBLISHER_RESULT result = DataPublisher_CancelTransaction(transaction);
 
         // assert
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         DataPublisher_Destroy(handle);
@@ -934,37 +952,39 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_CancelTransaction_With_A_NULL_Transaction_Fails)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
 
         // act
         DATA_PUBLISHER_RESULT result = DataPublisher_CancelTransaction(NULL);
 
         // assert
         ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
     /* Tests_SRS_DATA_PUBLISHER_99_015:[ DataPublisher_CancelTransaction shall dispose of any resources associated with the transaction.] */
     TEST_FUNCTION(DataPublisher_CancelTransaction_Destroys_The_Cloned_Agent_Data_Type)
     {
         // arrange
-        CDataPublisherMock dataPublisherMock;
         DATA_PUBLISHER_HANDLE handle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
         TRANSACTION_HANDLE transaction = DataPublisher_StartTransaction(handle);
-        dataPublisherMock.ResetAllCalls();
+        (void)DataPublisher_PublishTransacted(transaction, PropertyPath, &data);
+        umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(dataPublisherMock, Schema_ModelPropertyByPathExists(TEST_MODEL_HANDLE, PropertyPath));
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
 
         // act
-        DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted(transaction, PropertyPath, &data);
-
-        dataPublisherMock.ResetAllCalls();
-        EXPECTED_CALL(dataPublisherMock, Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
-
         (void)DataPublisher_CancelTransaction(transaction);
 
         // assert
-        ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result);
-        dataPublisherMock.AssertActualAndExpectedCalls();
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         // cleanup
         DataPublisher_Destroy(handle);
@@ -974,9 +994,12 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_default_max_buffer_size_should_be_10KB)
     {
         // arrange
+
         // act
+        size_t size = DataPublisher_GetMaxBufferSize();
+
         // assert
-        ASSERT_ARE_EQUAL(size_t, 10 * 1024, OriginalMaxBufferSize_());
+        ASSERT_ARE_EQUAL(size_t, 10 * 1024, size);
     }
 
     /* Tests_SRS_DATA_PUBLISHER_99_065:[ DataPublisher_SetMaxBufferSize shall directly update the value used to limit how much data (in bytes) can be buffered in the BufferStorage instance.] */
@@ -984,11 +1007,16 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
     TEST_FUNCTION(DataPublisher_SetMaxBufferSize_should_update_max_buffer_size_value)
     {
         // arrange
-        // act
         DataPublisher_SetMaxBufferSize(42);
 
+        // act
+        size_t result = DataPublisher_GetMaxBufferSize();
+
         // assert
-        ASSERT_ARE_EQUAL(size_t, 42, DataPublisher_GetMaxBufferSize());
+        ASSERT_ARE_EQUAL(size_t, 42, result);
+
+        ///cleanup
+        DataPublisher_SetMaxBufferSize(10*1024);
     }
-#endif
+
 END_TEST_SUITE(DataPublisher_ut)

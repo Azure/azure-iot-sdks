@@ -13,7 +13,6 @@ ${theseTestsName}.c
 
 set(${theseTestsName}_c_files
 ../../src/datapublisher.c
-${SHARED_UTIL_SRC_FOLDER}/gballoc.c
 )
 
 set(${theseTestsName}_h_files
