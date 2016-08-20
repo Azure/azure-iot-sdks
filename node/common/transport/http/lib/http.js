@@ -81,11 +81,11 @@ Http.prototype.buildRequest = function (method, path, httpHeaders, host, x509Opt
 };
 
 /**
- * @method              module:azure-iot-http-base.Http.toMessage
- * @description         Transforms the body of an HTTP response into a {@link module:azure-iot-common.Message} that can be treated by the client.
+ * @method                              module:azure-iot-http-base.Http.toMessage
+ * @description                         Transforms the body of an HTTP response into a {@link module:azure-iot-common.Message} that can be treated by the client.
  *
- * @param {Object}      response          The HTTP verb to use (GET, POST, PUT, DELETE...).
- * @param {Object}      body            The section of the URI that should be appended after the hostname.
+ * @param {module:http.IncomingMessage} response        A response as returned from the node.js http module
+ * @param {Object}                      body            The section of the URI that should be appended after the hostname.
  *
  * @returns {module:azure-iot-common.Message} A Message object.
  */

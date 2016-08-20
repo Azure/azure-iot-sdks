@@ -28,9 +28,18 @@ var defaultOptions = {
  * @class module:azure-iot-device-http.HttpReceiver
  * @classdesc Provides a receiver link that can pull messages from the IoT Hub service and settle them.
  *
+ * @param {Object}  config            This is a dictionary containing the
+ *                                    following keys and values:
+ *
+ * | Key     | Value                                                   |
+ * |---------|---------------------------------------------------------|
+ * | host    | The host URL of the Azure IoT Hub                       |
+ * | hubName | The name of the Azure IoT Hub                           |
+ * | keyName | The identifier of the device that is being connected to |
+ * | key     | The shared access key auth                              |
+ * 
  * @emits message When a message is received
  * @emits errorReceived When there was an error trying to receive messages
- *
  */
 /**
  * @event module:azure-iot-device-http.HttpReceiver#errorReceived
@@ -129,20 +138,7 @@ HttpReceiver.prototype._stopReceiver = function () {
 /**
  * @method          module:azure-iot-device-http.HttpReceiver#receive
  * @description     The receive method queries the IoT Hub immediately (as the device indicated in the
- *                  `config` parameter) for the next message in the queue.
- *
- * @param {Object}  config            This is a dictionary containing the
- *                                    following keys and values:
- *
- * | Key     | Value                                                   |
- * |---------|---------------------------------------------------------|
- * | host    | The host URL of the Azure IoT Hub                       |
- * | hubName | The name of the Azure IoT Hub                           |
- * | keyName | The identifier of the device that is being connected to |
- * | key     | The shared access key auth                              |
- *
- * @param {Function}      done      The callback to be invoked when
- *                                  `receive` completes execution.
+ *                  `config` constructor parameter) for the next message in the queue.
  */
 /*Codes_SRS_NODE_DEVICE_HTTP_05_004: [The receive method shall construct an HTTP request using information supplied by the caller, as follows:
 GET <config.host>/devices/<config.deviceId>/messages/devicebound?api-version=<version> HTTP/1.1

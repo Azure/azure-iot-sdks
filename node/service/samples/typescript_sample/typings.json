@@ -1,0 +1,11 @@
+{
+  "name": "registry_sample",
+  "dependencies": {
+    "amqp10": "registry:npm/amqp10#3.1.4+20160601175358",
+    "bluebird": "registry:npm/bluebird#3.4.1+20160811213708"
+  },
+  "globalDependencies": {
+    "es2015-promise": "registry:env/es2015-promise#1.0.0+20160526151700",
+    "node": "registry:dt/node#6.0.0+20160807145350"
+  }
+}
