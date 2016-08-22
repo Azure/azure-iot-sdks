@@ -34,7 +34,7 @@ typedef void(*IOTHUB_QUEUE_DESTROY_CALLBACK)(QUEUE_ITEM_TYPE msg_type, CLIENT_QU
 MOCKABLE_FUNCTION(, IOTHUB_QUEUE_HANDLE, IoTHubQueue_Create_Queue);
 MOCKABLE_FUNCTION(, void, IoTHubQueue_Destroy_Queue, IOTHUB_QUEUE_HANDLE, handle, IOTHUB_QUEUE_DESTROY_CALLBACK, destroy_callback);
 MOCKABLE_FUNCTION(, IOTHUB_QUEUE_RESULT, IoTHubQueue_Add_Item, IOTHUB_QUEUE_HANDLE, handle, QUEUE_ITEM_TYPE, msg_type, CLIENT_QUEUE_ITEM*, client_queue_item);
-MOCKABLE_FUNCTION(, const CLIENT_QUEUE_ITEM*, IoTHubQueue_Next_In_Queue, IOTHUB_QUEUE_HANDLE, handle);
+MOCKABLE_FUNCTION(, const CLIENT_QUEUE_ITEM*, IoTHubQueue_Get_Queue_Item, IOTHUB_QUEUE_HANDLE, handle);
 MOCKABLE_FUNCTION(, IOTHUB_QUEUE_RESULT, IoTHubQueue_Remove_Next_Item, IOTHUB_QUEUE_HANDLE, handle, IOTHUB_QUEUE_DESTROY_CALLBACK, destroy_callback);
 MOCKABLE_FUNCTION(, IOTHUB_QUEUE_ENUM_HANDLE, IoTHubQueue_Enum_Queue, IOTHUB_QUEUE_HANDLE, handle);
 MOCKABLE_FUNCTION(, const CLIENT_QUEUE_ITEM*, IoTHubQueue_Enum_Next_Item, IOTHUB_QUEUE_ENUM_HANDLE, enum_handle);
@@ -74,12 +74,12 @@ extern IOTHUB_QUEUE_RESULT IoTHubQueue_Add_Item(IOTHUB_QUEUE_HANDLE handle, IOTH
 ### IoTHubQueue_Next_In_Queue
 
 ```c
-extern const IOTHUB_QUEUE_ITEM* IoTHubQueue_Queue_Item(IOTHUB_QUEUE_HANDLE handle);
+extern const IOTHUB_QUEUE_ITEM* IoTHubQueue_Get_Queue_Item(IOTHUB_QUEUE_HANDLE handle);
 ```
 
-**SRS_IOTHUB_QUEUE_07_010: [**If `handle` is NULL IoTHubQueue_Queue_Item shall return NULL.**]**  
-**SRS_IOTHUB_QUEUE_07_011: [**If the queue is empty, IoTHubQueue_Queue_Item shall return NULL.**]**  
-**SRS_IOTHUB_QUEUE_07_012: [**If the IOTHUB_QUEUE_ITEM is retrieved from the queue IoTHubQueue_Queue_Item shall return a const IOTHUB_QUEUE_ITEM.**]**  
+**SRS_IOTHUB_QUEUE_07_010: [**If `handle` is NULL IoTHubQueue_Get_Queue_Item shall return NULL.**]**  
+**SRS_IOTHUB_QUEUE_07_011: [**If the queue is empty, IoTHubQueue_Get_Queue_Item shall return NULL.**]**  
+**SRS_IOTHUB_QUEUE_07_012: [**If the IOTHUB_QUEUE_ITEM is retrieved from the queue IoTHubQueue_Get_Queue_Item shall return a const IOTHUB_QUEUE_ITEM.**]**  
 
 
 ### IoTHubQueue_Remove_Next_Item

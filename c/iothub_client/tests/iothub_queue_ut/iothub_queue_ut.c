@@ -239,7 +239,7 @@ TEST_FUNCTION(IoTHubQueue_Destroy_Queue_Empty_List_Succeed)
     IoTHubQueue_Destroy_Queue(handle, my_destroy_callback);
 
     //assert
-    ASSERT_ARE_EQUAL(int, 0, g_destroy_callback_called);
+    ASSERT_ARE_EQUAL(size_t, 0, g_destroy_callback_called);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -271,7 +271,7 @@ TEST_FUNCTION(IoTHubQueue_Destroy_Queue_nonEmpty_List_Succeed)
     IoTHubQueue_Destroy_Queue(handle, my_destroy_callback);
 
     //assert
-    ASSERT_ARE_EQUAL(int, 1, g_destroy_callback_called);
+    ASSERT_ARE_EQUAL(size_t, 1, g_destroy_callback_called);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
@@ -495,7 +495,7 @@ TEST_FUNCTION(IoTHubQueue_Remove_Item_succeed)
     queue_result = IoTHubQueue_Remove_Next_Item(handle, my_destroy_callback);
 
     //assert
-    ASSERT_ARE_EQUAL(int, 1, g_destroy_callback_called);
+    ASSERT_ARE_EQUAL(size_t, 1, g_destroy_callback_called);
     ASSERT_ARE_EQUAL(IOTHUB_QUEUE_RESULT, IOTHUB_QUEUE_OK, queue_result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
@@ -514,7 +514,7 @@ TEST_FUNCTION(IoTHubQueue_Remove_Item_on_empty_queue_fail)
     IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Remove_Next_Item(handle, my_destroy_callback);
 
     //assert
-    ASSERT_ARE_EQUAL(int, 0, g_destroy_callback_called);
+    ASSERT_ARE_EQUAL(size_t, 0, g_destroy_callback_called);
     ASSERT_ARE_EQUAL(IOTHUB_QUEUE_RESULT, IOTHUB_QUEUE_QUEUE_EMPTY, queue_result);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
