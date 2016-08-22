@@ -245,12 +245,22 @@ namespace Microsoft.Azure.Devices
                 Properties = new Fields()
             };
 
-            var amqpSession = amqpConnection.CreateSession(sessionSettings);
-            await amqpSession.OpenAsync(timeoutHelper.RemainingTime());
+            AmqpSession amqpSession;
+            try
+            {
+                amqpSession = amqpConnection.CreateSession(sessionSettings);
+                await amqpSession.OpenAsync(timeoutHelper.RemainingTime());
 
-            // This adds itself to amqpConnection.Extensions
-            var cbsLink = new AmqpCbsLink(amqpConnection);
-            await this.SendCbsTokenAsync(cbsLink, timeoutHelper.RemainingTime());
+                // This adds itself to amqpConnection.Extensions
+                var cbsLink = new AmqpCbsLink(amqpConnection);
+                await this.SendCbsTokenAsync(cbsLink, timeoutHelper.RemainingTime());
+            }
+            catch (Exception e) when (!e.IsFatal())
+            {
+                // this can happen in a scenario where the server closes the Amqp connection before the session is established
+                throw amqpConnection.TerminalException ?? e;
+            }
+
             return amqpSession;
         }
 

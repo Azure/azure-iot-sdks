@@ -17,6 +17,7 @@ namespace Microsoft.Azure.Devices.Client
     using Microsoft.Azure.Amqp;
     using Microsoft.Azure.Amqp.Framing;
     using Microsoft.Azure.Amqp.Transport;
+    using Microsoft.Azure.Devices.Client.Extensions;
 
     abstract class IotHubConnection
     {
@@ -188,11 +189,21 @@ namespace Microsoft.Azure.Devices.Client
                 Properties = new Fields()
             };
 
-            var amqpSession = amqpConnection.CreateSession(sessionSettings);
-            await amqpSession.OpenAsync(timeoutHelper.RemainingTime());
+            AmqpSession amqpSession;
+            try
+            {
+                amqpSession = amqpConnection.CreateSession(sessionSettings);
+                await amqpSession.OpenAsync(timeoutHelper.RemainingTime());
 
-            // This adds itself to amqpConnection.Extensions
-            var cbsLink = new AmqpCbsLink(amqpConnection);
+                // This adds itself to amqpConnection.Extensions
+                var cbsLink = new AmqpCbsLink(amqpConnection);
+            }
+            catch (Exception e) when (!e.IsFatal())
+            {
+                // this can happen in a scenario where the server closes the Amqp connection before the session is established
+                throw amqpConnection.TerminalException ?? e;
+            }
+
             return amqpSession;
         }
 
