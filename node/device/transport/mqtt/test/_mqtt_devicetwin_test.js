@@ -9,6 +9,7 @@ var MqttProvider = require('../../../../common/transport/mqtt/test/_fake_mqtt.js
 var Mqtt = require('../lib/mqtt');
 var errors = require('azure-iot-common').errors;
 var sinon = require('sinon');
+var MqttTwinReceiver = require('../lib/mqtt-twin-receiver.js');
 
 var config = {
   'host' : 'mock_host',
@@ -20,13 +21,12 @@ var provider;
 var transport;
 
 describe('Mqtt', function () {
-    beforeEach(function(done) {
-      provider = new MqttProvider();
-      provider.publishShouldSucceed(true);
-      transport = new Mqtt(config, provider);
-      done();
-    });
-    
+  beforeEach(function() {
+    provider = new MqttProvider();
+    provider.publishShouldSucceed(true);
+    transport = new Mqtt(config, provider);
+  });
+  
   describe('#sendTwinRequest', function () {
     
     /* Tests_SRS_NODE_DEVICE_MQTT_18_001: [** The `sendTwinRequest` method shall call the publish method on `MqttTransport`. **]** */
@@ -191,7 +191,7 @@ describe('Mqtt', function () {
       transport.connect();
       transport.getTwinReceiver(function(err,receiver) {
         assert.isNull(err);
-        assert.equal(receiver,transport._twinReceiver);
+        assert.instanceOf(receiver, MqttTwinReceiver);
         done();
       });
     });
@@ -206,7 +206,7 @@ describe('Mqtt', function () {
           transport.getTwinReceiver(function(err,receiver2) {
             assert.isNull(err);
             assert.equal(receiver1,receiver2);
-            assert.equal(receiver1, transport._twinReceiver);
+            assert.instanceOf(receiver1, MqttTwinReceiver);
             done();
           });
         });
@@ -215,8 +215,4 @@ describe('Mqtt', function () {
   });
 
 });
-          
-    
-          
-          
           

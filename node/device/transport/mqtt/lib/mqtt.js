@@ -260,7 +260,7 @@ Mqtt.prototype.getTwinReceiver = function(done) {
   /* Codes_SRS_NODE_DEVICE_MQTT_18_003: [** If a twin receiver for this endpoint doesn't exist, the `getTwinReceiver` method should create a new `MqttTwinReceiver` object. **]** */
   /* Codes_SRS_NODE_DEVICE_MQTT_18_002: [** If a twin receiver for this endpoint has already been created, the `getTwinReceiver` method should not create a new `MqttTwinReceiver` object. **]** */
   if (!this._twinReceiver) {
-    this._twinReceiver = new MqttTwinReceiver(this._mqtt.client, this._topic_subscribe);
+    this._twinReceiver = new MqttTwinReceiver(this._mqtt.client);
   }
 
   /* Codes_SRS_NODE_DEVICE_MQTT_18_005: [** The `getTwinReceiver` method shall call the `done` method after it completes **]** */
