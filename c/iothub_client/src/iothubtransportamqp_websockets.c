@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "iothubtransportamqp_websockets.h"
-#include "azure_uamqp_c/wsio.h"
+#include "azure_c_shared_utility/wsio.h"
 #include "iothubtransportamqp.c"
 
 #define DEFAULT_WS_PROTOCOL_NAME "AMQPWSB10"
