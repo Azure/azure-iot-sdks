@@ -24,12 +24,9 @@ function Mqtt(config, provider) {
   EventEmitter.call(this);
   this._config = config;
   /* Codes_SRS_NODE_DEVICE_MQTT_18_025: [** If the `Mqtt` constructor receives a second parameter, it shall be used as a provider in place of mqtt.js **]**   */
-  if (provider)
-  {
+  if (provider) {
     this._mqtt = new Base(provider);
-  }
-  else
-  {
+  } else {
     this._mqtt = new Base();
   }
 }

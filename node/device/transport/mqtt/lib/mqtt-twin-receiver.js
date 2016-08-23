@@ -45,6 +45,7 @@ function MqttTwinReceiver(client) {
 
 MqttTwinReceiver.responseEvent = 'response';
 MqttTwinReceiver.postEvent = 'post';
+MqttTwinReceiver.subscribedEvent = 'subscribed';
 
 
 util.inherits(MqttTwinReceiver, EventEmitter);
@@ -65,7 +66,7 @@ MqttTwinReceiver.prototype._handleNewListener = function(eventName) {
             /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_028: [** When the `subscribed` event is emitted, the parameter shall be an object which contains an `eventName` field and an `transportObject` field. **]** */
             /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_026: [** When the `subscribed` event is emitted because the response MQTT topic was subscribed, the parameter shall be the string 'response' **]**  */
             /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_029: [** When the subscribed event is emitted, the `transportObject` field shall contain the object returned by the library in the subscription response. **]** */
-            self.emit('subscribed', { 'eventName' : MqttTwinReceiver.responseEvent, 'transportObject' : transportObject });
+            self.emit(MqttTwinReceiver.subscribedEvent, { 'eventName' : MqttTwinReceiver.responseEvent, 'transportObject' : transportObject });
           }
         });
       });
@@ -83,7 +84,7 @@ MqttTwinReceiver.prototype._handleNewListener = function(eventName) {
             /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_028: [** When the `subscribed` event is emitted, the parameter shall be an object which contains an `eventName` field and an `transportObject` field. **]** */
             /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_027: [** When the `subscribed` event is emitted because the post MQTT topic was subscribed, the `eventName` field shall be the string 'post' **]** */
             /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_029: [** When the subscribed event is emitted, the `transportObject` field shall contain the object returned by the library in the subscription response. **]** */
-            self.emit('subscribed', { 'eventName' : MqttTwinReceiver.postEvent, 'transportObject' : transportObject });
+            self.emit(MqttTwinReceiver.subscribedEvent, { 'eventName' : MqttTwinReceiver.postEvent, 'transportObject' : transportObject });
           }
         });
       });
