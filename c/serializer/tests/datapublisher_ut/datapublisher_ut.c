@@ -45,6 +45,33 @@ void my_gballoc_free(void * t)
 #include "umocktypes_stdint.h"
 #include "umock_c_negative_tests.h"
 
+/*not very nice source level preprocessor mocking... */
+#define GBALLOC_H
+#define VECTOR_create real_VECTOR_create
+#define VECTOR_destroy real_VECTOR_destroy
+#define VECTOR_push_back real_VECTOR_push_back 
+#define VECTOR_erase real_VECTOR_erase 
+#define VECTOR_clear real_VECTOR_clear 
+#define VECTOR_element real_VECTOR_element 
+#define VECTOR_front real_VECTOR_front 
+#define VECTOR_back real_VECTOR_back 
+#define VECTOR_find_if real_VECTOR_find_if 
+#define VECTOR_size real_VECTOR_size 
+#include "../src/vector.c"
+#undef VECTOR_create 
+#undef VECTOR_destroy 
+#undef VECTOR_push_back 
+#undef VECTOR_erase 
+#undef VECTOR_clear 
+#undef VECTOR_element 
+#undef VECTOR_front 
+#undef VECTOR_back 
+#undef VECTOR_find_if 
+#undef VECTOR_size 
+#undef VECTOR_H
+#undef GBALLOC_H
+#undef CRT_ABSTRACTIONS_H
+
 #include "testrunnerswitcher.h"
 #define ENABLE_MOCKS
 #include "schema.h"
@@ -52,6 +79,7 @@ void my_gballoc_free(void * t)
 #include "schema.h"
 #include "iothub_client.h"
 #include "azure_c_shared_utility/gballoc.h"
+#include "azure_c_shared_utility/vector.h"
 #undef ENABLE_MOCKS
 
 #include "datapublisher.h"
@@ -126,6 +154,10 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_MODEL_TYPE_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(DATA_MARSHALLER_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(VECTOR_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(PREDICATE_FUNCTION, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(const VECTOR_HANDLE, void*);
+        
         REGISTER_UMOCK_ALIAS_TYPE(DATA_PUBLISHER_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(AGENT_DATA_TYPES_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(DATA_MARSHALLER_RESULT, int);
@@ -139,18 +171,37 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(DataMarshaller_Create, my_DataMarshaller_Create);
         REGISTER_GLOBAL_MOCK_HOOK(DataMarshaller_SendData, my_DataMarshaller_SendData);
-
+        REGISTER_GLOBAL_MOCK_RETURN(DataMarshaller_SendData_ReportedProperties, DATA_MARSHALLER_OK);
         REGISTER_GLOBAL_MOCK_HOOK(DataMarshaller_Destroy, my_DataMarshaller_Destroy);
 
         REGISTER_GLOBAL_MOCK_RETURN(Schema_ModelPropertyByPathExists, true);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_ModelPropertyByPathExists, false);
+        
+        
+
+        REGISTER_GLOBAL_MOCK_RETURN(Schema_ModelReportedPropertyByPathExists, true);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_ModelReportedPropertyByPathExists, false);
 
         REGISTER_GLOBAL_MOCK_HOOK(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE, my_Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE, AGENT_DATA_TYPES_ERROR);
 
         REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, real_mallocAndStrcpy_s);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __LINE__);
         REGISTER_GLOBAL_MOCK_HOOK(unsignedIntToString, real_unsignedIntToString);
         REGISTER_GLOBAL_MOCK_HOOK(size_tToString, real_size_tToString);
         
-        
+        REGISTER_GLOBAL_MOCK_HOOK(VECTOR_create, real_VECTOR_create);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(VECTOR_create, NULL);
+
+        REGISTER_GLOBAL_MOCK_HOOK(VECTOR_size, real_VECTOR_size);
+        REGISTER_GLOBAL_MOCK_HOOK(VECTOR_push_back, real_VECTOR_push_back);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(VECTOR_push_back, __LINE__);
+
+        REGISTER_GLOBAL_MOCK_HOOK(VECTOR_find_if, real_VECTOR_find_if);
+
+        REGISTER_GLOBAL_MOCK_HOOK(VECTOR_element, real_VECTOR_element);
+
+        REGISTER_GLOBAL_MOCK_HOOK(VECTOR_destroy, real_VECTOR_destroy);
 
     }
 
@@ -1019,4 +1070,721 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
         DataPublisher_SetMaxBufferSize(10*1024);
     }
 
+    /*Tests_SRS_DATA_PUBLISHER_02_027: [ If argument dataPublisherHandle is NULL then DataPublisher_CreateTransaction_ReportedProperties shall fail and return NULL. ]*/
+    TEST_FUNCTION(DataPublisher_CreateTransaction_ReportedProperties_with_NULL_dataPublisherHandle_fails)
+    {
+        ///arrange
+
+        ///act
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(NULL);
+
+        ///assert
+        ASSERT_IS_NULL(handle);
+
+        ///cleanup
+    }
+
+    void DataPublisher_CreateTransaction_ReportedProperties_inert_path(void)
+    {
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+            .IgnoreArgument_size();
+        STRICT_EXPECTED_CALL(VECTOR_create(sizeof(void*)));
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_028: [ DataPublisher_CreateTransaction_ReportedProperties shall create a VECTOR_HANDLE holding the individual elements of the transaction (DATA_MARSHALLER_VALUE). ]*/
+    /*Tests_SRS_DATA_PUBLISHER_02_030: [ Otherwise DataPublisher_CreateTransaction_ReportedProperties shall succeed and return a non-NULL handle. ]*/
+    TEST_FUNCTION(DataPublisher_CreateTransaction_ReportedProperties_succeeds)
+    {
+        ///arrange
+        DATA_PUBLISHER_HANDLE dataPublisherHandle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
+        umock_c_reset_all_calls();
+
+        DataPublisher_CreateTransaction_ReportedProperties_inert_path();
+
+        ///act
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+        ASSERT_IS_NOT_NULL(handle);
+        
+        ///cleanup
+        DataPublisher_DestroyTransaction_ReportedProperties(handle);
+        DataPublisher_Destroy(dataPublisherHandle);
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_029: [ If any error occurs then DataPublisher_CreateTransaction_ReportedProperties shall fail and return NULL. ]*/
+    TEST_FUNCTION(DataPublisher_CreateTransaction_ReportedProperties_fails)
+    {
+        ///arrange
+        DATA_PUBLISHER_HANDLE dataPublisherHandle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
+        umock_c_reset_all_calls();
+
+        (void)umock_c_negative_tests_init();
+
+        DataPublisher_CreateTransaction_ReportedProperties_inert_path();
+
+        umock_c_negative_tests_snapshot();
+
+        for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+        {
+
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(i);
+
+            ///act
+            char temp_str[128];
+            (void)sprintf(temp_str, "On failed call %zu", i);
+
+            ///act
+            REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
+
+            ///assert
+            ASSERT_IS_NULL_WITH_MSG(handle, temp_str);
+        }
+
+        ///cleanup
+        DataPublisher_Destroy(dataPublisherHandle);
+        umock_c_negative_tests_deinit();
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_009: [ If argument transactionHandle is NULL then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
+    TEST_FUNCTION(DataPublisher_PublishTransacted_ReportedProperty_with_NULL_transactionHandle_fails)
+    {
+        ///arrange
+        AGENT_DATA_TYPE ag;
+
+        ///act
+        DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted_ReportedProperty(NULL, "a", &ag);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_010: [ If argument reportedPropertyPath is NULL then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
+    TEST_FUNCTION(DataPublisher_PublishTransacted_ReportedProperty_with_NULL_reportedPropertyPath_fails)
+    {
+        ///arrange
+        AGENT_DATA_TYPE ag;
+        ag.type = EDM_BYTE_TYPE;
+        ag.value.edmByte.value = 1;
+        DATA_PUBLISHER_HANDLE dataPublisherHandle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
+        umock_c_reset_all_calls();
+
+        ///act
+        DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted_ReportedProperty(handle, NULL, &ag);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        DataPublisher_DestroyTransaction_ReportedProperties(handle);
+        DataPublisher_Destroy(dataPublisherHandle);
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_011: [ If argument data is NULL then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
+    TEST_FUNCTION(DataPublisher_PublishTransacted_ReportedProperty_with_NULL_data_fails)
+    {
+        ///arrange
+        DATA_PUBLISHER_HANDLE dataPublisherHandle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
+        umock_c_reset_all_calls();
+
+        ///act
+        DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted_ReportedProperty(handle, "A", NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        DataPublisher_DestroyTransaction_ReportedProperties(handle);
+        DataPublisher_Destroy(dataPublisherHandle);
+    }
+
+    void DataPublisher_PublishTransacted_ReportedProperty_new_property_inert_path(const char* reportedPropertyPath, AGENT_DATA_TYPE* ag)
+    {
+        STRICT_EXPECTED_CALL(Schema_ModelReportedPropertyByPathExists(TEST_SCHEMA_MODEL_TYPE_HANDLE, reportedPropertyPath));
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, reportedPropertyPath))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_pred();
+        STRICT_EXPECTED_CALL(gballoc_malloc(sizeof(DATA_MARSHALLER_VALUE)));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, reportedPropertyPath))
+            .IgnoreArgument_destination();
+        STRICT_EXPECTED_CALL(gballoc_malloc(sizeof(AGENT_DATA_TYPE)));
+        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, ag))
+            .IgnoreArgument_dest();
+        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
+            .IgnoreArgument_elements()
+            .IgnoreArgument_handle();
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_015: [ DataPublisher_PublishTransacted_ReportedProperty shall add a new DATA_MARSHALLER_VALUE to the VECTOR_HANDLE. ]*/
+    /*Tests_SRS_DATA_PUBLISHER_02_017: [ Otherwise DataPublisher_PublishTransacted_ReportedProperty shall succeed and return DATA_PUBLISHER_OK. ]*/
+    TEST_FUNCTION(DataPublisher_PublishTransacted_ReportedProperty_new_property_happy_path)
+    {
+        ///arrange
+        AGENT_DATA_TYPE ag;
+        ag.type = EDM_BYTE_TYPE;
+        ag.value.edmByte.value = 1;
+        DATA_PUBLISHER_HANDLE dataPublisherHandle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
+        const char* reportedPropertyPath = "A";
+        umock_c_reset_all_calls();
+
+        DataPublisher_PublishTransacted_ReportedProperty_new_property_inert_path(reportedPropertyPath, &ag);
+
+        ///act
+        DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        DataPublisher_DestroyTransaction_ReportedProperties(handle);
+        DataPublisher_Destroy(dataPublisherHandle);
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_023: [ If any error occurs then DataPublisher_CommitTransaction_ReportedProperties shall fail and return DATA_PUBLISHER_ERROR. ]*/
+    /*Tests_SRS_DATA_PUBLISHER_02_013: [ If a reported property with path reportedPropertyPath does not exist in the model then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
+    TEST_FUNCTION(DataPublisher_PublishTransacted_ReportedProperty_new_property_unhappy_paths)
+    {
+        ///arrange
+        AGENT_DATA_TYPE ag;
+        ag.type = EDM_BYTE_TYPE;
+        ag.value.edmByte.value = 1;
+        DATA_PUBLISHER_HANDLE dataPublisherHandle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
+        const char* reportedPropertyPath = "A";
+        umock_c_reset_all_calls();
+        umock_c_negative_tests_init();
+
+        DataPublisher_PublishTransacted_ReportedProperty_new_property_inert_path(reportedPropertyPath, &ag);
+
+        umock_c_negative_tests_snapshot();
+
+        size_t calls_that_cannot_fail[] =
+        {
+            1, /*VECTOR_find_if*/
+        };
+
+        for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+        {
+            size_t j;
+            for (j = 0;j < sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++)
+            {
+                if (calls_that_cannot_fail[j] == i)
+                {
+                    goto next_fail;
+                }
+            }
+
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(i);
+
+            char temp_str[128];
+            (void)sprintf(temp_str, "On failed call %zu", i);
+
+            ///act
+            DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag);
+
+            ///assert
+            ASSERT_ARE_NOT_EQUAL_WITH_MSG(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result, temp_str);
+next_fail:;
+        }
+        ///clean
+        DataPublisher_DestroyTransaction_ReportedProperties(handle);
+        DataPublisher_Destroy(dataPublisherHandle);
+    }
+
+    void DataPublisher_PublishTransacted_ReportedProperty_new_property_after_property_inert_path(const char* reportedPropertyPath, AGENT_DATA_TYPE* ag)
+    {
+        STRICT_EXPECTED_CALL(Schema_ModelReportedPropertyByPathExists(TEST_SCHEMA_MODEL_TYPE_HANDLE, reportedPropertyPath));
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, reportedPropertyPath))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_pred();
+        STRICT_EXPECTED_CALL(gballoc_malloc(sizeof(DATA_MARSHALLER_VALUE)));
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, reportedPropertyPath))
+            .IgnoreArgument_destination();
+        STRICT_EXPECTED_CALL(gballoc_malloc(sizeof(AGENT_DATA_TYPE)));
+        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, ag))
+            .IgnoreArgument_dest();
+        STRICT_EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1))
+            .IgnoreArgument_elements()
+            .IgnoreArgument_handle();
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_015: [ DataPublisher_PublishTransacted_ReportedProperty shall add a new DATA_MARSHALLER_VALUE to the VECTOR_HANDLE. ]*/
+    /*Tests_SRS_DATA_PUBLISHER_02_017: [ Otherwise DataPublisher_PublishTransacted_ReportedProperty shall succeed and return DATA_PUBLISHER_OK. ]*/
+    TEST_FUNCTION(DataPublisher_PublishTransacted_ReportedProperty_new_property_after_property_happy_path)
+    {
+        ///arrange
+        AGENT_DATA_TYPE ag;
+        ag.type = EDM_BYTE_TYPE;
+        ag.value.edmByte.value = 1;
+        DATA_PUBLISHER_HANDLE dataPublisherHandle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
+        (void)DataPublisher_PublishTransacted_ReportedProperty(handle, "Z", &ag);
+        const char* reportedPropertyPath = "A";
+        umock_c_reset_all_calls();
+
+        DataPublisher_PublishTransacted_ReportedProperty_new_property_after_property_inert_path(reportedPropertyPath, &ag);
+
+        ///act
+        DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        DataPublisher_DestroyTransaction_ReportedProperties(handle);
+        DataPublisher_Destroy(dataPublisherHandle);
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_023: [ If any error occurs then DataPublisher_CommitTransaction_ReportedProperties shall fail and return DATA_PUBLISHER_ERROR. ]*/
+    /*Tests_SRS_DATA_PUBLISHER_02_013: [ If a reported property with path reportedPropertyPath does not exist in the model then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
+    TEST_FUNCTION(DataPublisher_PublishTransacted_ReportedProperty_new_property_after_property_unhappy_paths)
+    {
+        ///arrange
+        AGENT_DATA_TYPE ag;
+        ag.type = EDM_BYTE_TYPE;
+        ag.value.edmByte.value = 1;
+        DATA_PUBLISHER_HANDLE dataPublisherHandle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
+        const char* reportedPropertyPath = "A";
+        umock_c_reset_all_calls();
+        umock_c_negative_tests_init();
+
+        DataPublisher_PublishTransacted_ReportedProperty_new_property_after_property_inert_path(reportedPropertyPath, &ag);
+
+        umock_c_negative_tests_snapshot();
+
+        size_t calls_that_cannot_fail[] =
+        {
+            1, /*VECTOR_find_if*/
+        };
+
+        for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+        {
+            size_t j;
+            for (j = 0;j < sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++)
+            {
+                if (calls_that_cannot_fail[j] == i)
+                {
+                    goto next_fail;
+                }
+            }
+
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(i);
+
+            char temp_str[128];
+            (void)sprintf(temp_str, "On failed call %zu", i);
+
+            ///act
+            DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag);
+
+            ///assert
+            ASSERT_ARE_NOT_EQUAL_WITH_MSG(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result, temp_str);
+        next_fail:;
+        }
+        ///clean
+        DataPublisher_DestroyTransaction_ReportedProperties(handle);
+        DataPublisher_Destroy(dataPublisherHandle);
+    }
+
+    void DataPublisher_PublishTransacted_ReportedProperty_same_reportedPropertyPath_updates_property_inert_path(const char* reportedPropertyPath, AGENT_DATA_TYPE* ag)
+    {
+        STRICT_EXPECTED_CALL(Schema_ModelReportedPropertyByPathExists(TEST_SCHEMA_MODEL_TYPE_HANDLE, reportedPropertyPath));
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, reportedPropertyPath))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_pred();
+        STRICT_EXPECTED_CALL(gballoc_malloc(sizeof(AGENT_DATA_TYPE)));
+        STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(IGNORED_PTR_ARG, ag))
+            .IgnoreArgument_dest();
+        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
+            .IgnoreArgument_agentData();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_014: [ If the same (by reportedPropertypath) reported property has already been added to the transaction, then DataPublisher_PublishTransacted_ReportedProperty shall overwrite the previous reported property. ]*/
+    TEST_FUNCTION(DataPublisher_PublishTransacted_ReportedProperty_same_reportedPropertyPath_updates_property_happy_path)
+    {
+        ///arrange
+        AGENT_DATA_TYPE ag1;
+        ag1.type = EDM_BYTE_TYPE;
+        ag1.value.edmByte.value = 1;
+        AGENT_DATA_TYPE ag2;
+        ag2.type = EDM_SBYTE_TYPE;
+        ag2.value.edmSbyte.value = -31;
+        DATA_PUBLISHER_HANDLE dataPublisherHandle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
+        const char* reportedPropertyPath = "A";
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
+        (void)DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag1);
+        umock_c_reset_all_calls();
+
+        DataPublisher_PublishTransacted_ReportedProperty_same_reportedPropertyPath_updates_property_inert_path(reportedPropertyPath, &ag2);
+
+        ///act
+        DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag2);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        DataPublisher_DestroyTransaction_ReportedProperties(handle);
+        DataPublisher_Destroy(dataPublisherHandle);
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_016: [ If any error occurs then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_ERROR. ]*/
+    TEST_FUNCTION(DataPublisher_PublishTransacted_ReportedProperty_same_reportedPropertyPath_updates_property_unhappy_paths)
+    {
+        ///arrange
+        AGENT_DATA_TYPE ag1;
+        ag1.type = EDM_BYTE_TYPE;
+        ag1.value.edmByte.value = 1;
+        AGENT_DATA_TYPE ag2;
+        ag2.type = EDM_SBYTE_TYPE;
+        ag2.value.edmSbyte.value = -31;
+        DATA_PUBLISHER_HANDLE dataPublisherHandle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
+        const char* reportedPropertyPath = "A";
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
+        (void)DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag1);
+        umock_c_reset_all_calls();
+
+        umock_c_negative_tests_init();
+
+        DataPublisher_PublishTransacted_ReportedProperty_same_reportedPropertyPath_updates_property_inert_path(reportedPropertyPath, &ag2);
+
+        umock_c_negative_tests_snapshot();
+
+        size_t calls_that_cannot_fail[] =
+        {
+            1, /*VECTOR_find_if*/
+            4, /*Destroy_AGENT_DATA_TYPE*/
+            5, /*gballoc_free*/
+        };
+
+
+        for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+        {
+            size_t j;
+            for (j = 0;j < sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++)
+            {
+                if (calls_that_cannot_fail[j] == i)
+                {
+                    goto next_fail;
+                }
+            }
+
+            umock_c_negative_tests_reset();
+            umock_c_negative_tests_fail_call(i);
+
+            char temp_str[128];
+            (void)sprintf(temp_str, "On failed call %zu", i);
+
+            ///act
+            DATA_PUBLISHER_RESULT result = DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag2);
+
+            ///assert
+            ASSERT_ARE_NOT_EQUAL_WITH_MSG(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result, temp_str);
+        next_fail:;
+        }
+
+        ///clean
+        DataPublisher_DestroyTransaction_ReportedProperties(handle);
+        DataPublisher_Destroy(dataPublisherHandle);
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_019: [ If argument transactionHandle is NULL then DataPublisher_CommitTransaction_ReportedProperties shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
+    TEST_FUNCTION(DataPublisher_CommitTransaction_ReportedProperties_with_NULL_transactionHandle_fails)
+    {
+        ///arrange
+        unsigned char* destination;
+        size_t destinationSize;
+
+        ///act
+        DATA_PUBLISHER_RESULT result = DataPublisher_CommitTransaction_ReportedProperties(NULL, &destination, &destinationSize);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_020: [ If argument destination is NULL then DataPublisher_CommitTransaction_ReportedProperties shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
+    TEST_FUNCTION(DataPublisher_CommitTransaction_ReportedProperties_with_NULL_destination_fails)
+    {
+        ///arrange
+        DATA_PUBLISHER_HANDLE dataPublisherHandle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
+        size_t destinationSize;
+        umock_c_reset_all_calls();
+
+        ///act
+        DATA_PUBLISHER_RESULT result = DataPublisher_CommitTransaction_ReportedProperties(handle, NULL, &destinationSize);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        DataPublisher_DestroyTransaction_ReportedProperties(handle);
+        DataPublisher_Destroy(dataPublisherHandle);
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_021: [ If argument destinationSize NULL then DataPublisher_CommitTransaction_ReportedProperties shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
+    TEST_FUNCTION(DataPublisher_CommitTransaction_ReportedProperties_with_NULL_destinationSize_fails)
+    {
+        ///arrange
+        DATA_PUBLISHER_HANDLE dataPublisherHandle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
+        unsigned char* destination;
+        umock_c_reset_all_calls();
+
+        ///act
+        DATA_PUBLISHER_RESULT result = DataPublisher_CommitTransaction_ReportedProperties(handle, &destination, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        DataPublisher_DestroyTransaction_ReportedProperties(handle);
+        DataPublisher_Destroy(dataPublisherHandle);
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_031: [ If the transaction contains zero elements then DataPublisher_CommitTransaction_ReportedProperties shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
+    TEST_FUNCTION(DataPublisher_CommitTransaction_ReportedProperties_with_zero_elements_fails)
+    {
+        ///arrange
+        DATA_PUBLISHER_HANDLE dataPublisherHandle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
+        unsigned char* destination;
+        size_t destinationSize;
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+            .IgnoreArgument_handle();
+
+        ///act
+        DATA_PUBLISHER_RESULT result = DataPublisher_CommitTransaction_ReportedProperties(handle, &destination, &destinationSize);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        DataPublisher_DestroyTransaction_ReportedProperties(handle);
+        DataPublisher_Destroy(dataPublisherHandle);
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_022: [ DataPublisher_CommitTransaction_ReportedProperties shall call DataMarshaller_SendData_ReportedProperties providing the VECTOR_HANDLE holding the transacted reported properties, destination and destinationSize. ]*/
+    /*Tests_SRS_DATA_PUBLISHER_02_024: [ Otherwise DataPublisher_CommitTransaction_ReportedProperties shall succeed and return DATA_PUBLISHER_OK. ]*/
+    TEST_FUNCTION(DataPublisher_CommitTransaction_ReportedProperties_succeeds)
+    {
+        ///arrange
+        AGENT_DATA_TYPE ag1;
+        ag1.type = EDM_BYTE_TYPE;
+        ag1.value.edmByte.value = 1;
+        DATA_PUBLISHER_HANDLE dataPublisherHandle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
+        const char* reportedPropertyPath = "A";
+        (void)DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag1);
+        unsigned char* destination;
+        size_t destinationSize;
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+            .IgnoreArgument_handle();
+        STRICT_EXPECTED_CALL(DataMarshaller_SendData_ReportedProperties(IGNORED_PTR_ARG, IGNORED_PTR_ARG, &destination, &destinationSize))
+            .IgnoreArgument_dataMarshallerHandle()
+            .IgnoreArgument_values();
+
+        ///act
+        DATA_PUBLISHER_RESULT result = DataPublisher_CommitTransaction_ReportedProperties(handle, &destination, &destinationSize);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        DataPublisher_DestroyTransaction_ReportedProperties(handle);
+        DataPublisher_Destroy(dataPublisherHandle);
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_023: [ If any error occurs then DataPublisher_CommitTransaction_ReportedProperties shall fail and return DATA_PUBLISHER_ERROR. ]*/
+    TEST_FUNCTION(DataPublisher_CommitTransaction_ReportedProperties_fails)
+    {
+        ///arrange
+        AGENT_DATA_TYPE ag1;
+        ag1.type = EDM_BYTE_TYPE;
+        ag1.value.edmByte.value = 1;
+        DATA_PUBLISHER_HANDLE dataPublisherHandle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
+        const char* reportedPropertyPath = "A";
+        (void)DataPublisher_PublishTransacted_ReportedProperty(handle, reportedPropertyPath, &ag1);
+        unsigned char* destination;
+        size_t destinationSize;
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+            .IgnoreArgument_handle();
+        STRICT_EXPECTED_CALL(DataMarshaller_SendData_ReportedProperties(IGNORED_PTR_ARG, IGNORED_PTR_ARG, &destination, &destinationSize))
+            .IgnoreArgument_dataMarshallerHandle()
+            .IgnoreArgument_values()
+            .SetReturn(DATA_MARSHALLER_ERROR);
+
+        ///act
+        DATA_PUBLISHER_RESULT result = DataPublisher_CommitTransaction_ReportedProperties(handle, &destination, &destinationSize);
+
+        ///assert
+        ASSERT_ARE_EQUAL(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_ERROR, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        DataPublisher_DestroyTransaction_ReportedProperties(handle);
+        DataPublisher_Destroy(dataPublisherHandle);
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_025: [ If argument transactionHandle is NULL then DataPublisher_DestroyTransaction_ReportedProperties shall return. ]*/
+    TEST_FUNCTION(DataPublisher_DestroyTransaction_ReportedProperties_with_NULL_transactionHandle_fails)
+    {
+        ///arrange
+
+        ///act
+        DataPublisher_DestroyTransaction_ReportedProperties(NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_026: [ Otherwise DataPublisher_DestroyTransaction_ReportedProperties shall free all resources associated with the reported properties transactionHandle. ]*/
+    TEST_FUNCTION(DataPublisher_DestroyTransaction_ReportedProperties__empty_transaction_succeeds)
+    {
+        ///arrange
+        DATA_PUBLISHER_HANDLE dataPublisherHandle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+            .IgnoreArgument_handle();
+        STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument_handle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+
+        ///act
+        DataPublisher_DestroyTransaction_ReportedProperties(handle);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        DataPublisher_Destroy(dataPublisherHandle);
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_026: [ Otherwise DataPublisher_DestroyTransaction_ReportedProperties shall free all resources associated with the reported properties transactionHandle. ]*/
+    TEST_FUNCTION(DataPublisher_DestroyTransaction_ReportedProperties_1_element_in_transaction_succeeds)
+    {
+        ///arrange
+        AGENT_DATA_TYPE ag1;
+        ag1.type = EDM_BYTE_TYPE;
+        ag1.value.edmByte.value = 1;
+
+        DATA_PUBLISHER_HANDLE dataPublisherHandle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
+        (void)DataPublisher_PublishTransacted_ReportedProperty(handle, "AAA", &ag1);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+            .IgnoreArgument_handle();
+        for (size_t i = 0;i < 1;i++)
+        {
+            STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, i))
+                .IgnoreArgument_handle();
+            STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
+                .IgnoreArgument_agentData();
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+                .IgnoreArgument_ptr();
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+                .IgnoreArgument_ptr();
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+                .IgnoreArgument_ptr();
+        }
+
+        STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument_handle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+
+        ///act
+        DataPublisher_DestroyTransaction_ReportedProperties(handle);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        DataPublisher_Destroy(dataPublisherHandle);
+    }
+
+    /*Tests_SRS_DATA_PUBLISHER_02_026: [ Otherwise DataPublisher_DestroyTransaction_ReportedProperties shall free all resources associated with the reported properties transactionHandle. ]*/
+    TEST_FUNCTION(DataPublisher_DestroyTransaction_ReportedProperties_2_elements_in_transaction_succeeds)
+    {
+        ///arrange
+        AGENT_DATA_TYPE ag1;
+        ag1.type = EDM_BYTE_TYPE;
+        ag1.value.edmByte.value = 1;
+
+        AGENT_DATA_TYPE ag2;
+        ag2.type = EDM_SBYTE_TYPE;
+        ag2.value.edmSbyte.value = -31;
+
+        DATA_PUBLISHER_HANDLE dataPublisherHandle = DataPublisher_Create(TEST_SCHEMA_MODEL_TYPE_HANDLE, true);
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE handle = DataPublisher_CreateTransaction_ReportedProperties(dataPublisherHandle);
+        (void)DataPublisher_PublishTransacted_ReportedProperty(handle, "AAA", &ag1);
+        (void)DataPublisher_PublishTransacted_ReportedProperty(handle, "ZZZ", &ag2);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_size(IGNORED_PTR_ARG))
+            .IgnoreArgument_handle();
+        for (size_t i = 0;i < 2;i++)
+        {
+            STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, i))
+                .IgnoreArgument_handle();
+            STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
+                .IgnoreArgument_agentData();
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+                .IgnoreArgument_ptr();
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+                .IgnoreArgument_ptr();
+            STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+                .IgnoreArgument_ptr();
+        }
+        STRICT_EXPECTED_CALL(VECTOR_destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument_handle();
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+
+        ///act
+        DataPublisher_DestroyTransaction_ReportedProperties(handle);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        DataPublisher_Destroy(dataPublisherHandle);
+    }
 END_TEST_SUITE(DataPublisher_ut)

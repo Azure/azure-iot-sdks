@@ -218,3 +218,9 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData(DATA_MARSHALLER_HANDLE dataMarsha
 
     return result;
 }
+
+DATA_MARSHALLER_RESULT DataMarshaller_SendData_ReportedProperties(DATA_MARSHALLER_HANDLE dataMarshallerHandle, VECTOR_HANDLE values, unsigned char** destination, size_t* destinationSize)
+{
+    (void)(dataMarshallerHandle, values, destination, destinationSize);
+    return DATA_MARSHALLER_ERROR;
+}

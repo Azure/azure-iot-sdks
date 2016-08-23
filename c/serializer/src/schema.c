@@ -2185,7 +2185,7 @@ bool Schema_ModelReportedPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelType
                 {
                     LogError("no such reported property \"%s\"", reportedPropertyPath);
                 }
-				break;
+                break;
             }
         } while (slashPos != NULL);
     }
