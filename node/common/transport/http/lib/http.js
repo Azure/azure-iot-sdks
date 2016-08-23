@@ -112,6 +112,10 @@ Http.prototype.toMessage = function toMessage(response, body) {
         else if (item.toLowerCase() === "iothub-correlationid") {
           msg.correlationId = response.headers[item];
         }
+        else if (item.search("iothub-app-") === 0) { // starts with iothub-app-
+            var propertyName = item.substring("iothub-app-".length); // strip iothub-app- prefix as properties.add will add it
+            msg.properties.add(propertyName, response.headers[item]);
+        }
       }
       /*Codes_SRS_NODE_HTTP_05_011: [If the HTTP response has an 'etag' header, it shall be saved as the lockToken property on the created Message, minus any surrounding quotes.]*/
       else if (item.toLowerCase() === "etag") {
