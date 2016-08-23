@@ -261,7 +261,7 @@ extern "C"
     *
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_ExecuteIoTHubMethod, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char*, verb, const char*, resource, IOTHUB_CLIENT_IOTHUB_METHOD_PROPERTIES, properties, const unsigned char*, payload, IOTHUB_CLIENT_IOTHUB_METHOD_EXECUTE_CALLBACK, iotHubExecuteCallback, void*, userContextCallback);
+    MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_ExecuteIoTHubMethod, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, const char*, verb, const char*, resource, IOTHUB_CLIENT_METHOD_PROPERTIES, properties, const unsigned char*, payload, IOTHUB_CLIENT_IOTHUB_METHOD_EXECUTE_CALLBACK, iotHubExecuteCallback, void*, userContextCallback);
 
 #ifndef DONT_USE_UPLOADTOBLOB
     /**
