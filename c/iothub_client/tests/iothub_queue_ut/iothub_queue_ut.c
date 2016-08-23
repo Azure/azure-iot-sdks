@@ -131,9 +131,8 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 
-static void my_destroy_callback(QUEUE_ITEM_TYPE msg_type, CLIENT_QUEUE_ITEM* queue_item)
+static void my_destroy_callback(void* queue_item)
 {
-    (void)msg_type;
     (void)queue_item;
     g_destroy_callback_called++;
 }
@@ -250,7 +249,7 @@ TEST_FUNCTION(IoTHubQueue_Destroy_Queue_nonEmpty_List_Succeed)
 {
     //arrange
     IOTHUB_QUEUE_HANDLE handle = IoTHubQueue_Create_Queue();
-    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, QUEUE_ITEM_TYPE_MESSAGE_LIST, (CLIENT_QUEUE_ITEM*)TEST_IOTHUB_MESSAGE_ITEM);
+    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, (void*)TEST_IOTHUB_MESSAGE_ITEM);
     ASSERT_ARE_EQUAL(IOTHUB_QUEUE_RESULT, IOTHUB_QUEUE_OK, queue_result);
 
     umock_c_reset_all_calls();
@@ -283,7 +282,7 @@ TEST_FUNCTION(IoTHubQueue_Add_Item_Queue_NULL_handle_fails)
     //arrange
 
     //act
-    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(NULL, QUEUE_ITEM_TYPE_MESSAGE_LIST, (CLIENT_QUEUE_ITEM*)TEST_IOTHUB_MESSAGE_ITEM);
+    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(NULL, (void*)TEST_IOTHUB_MESSAGE_ITEM);
 
     //assert
     ASSERT_ARE_NOT_EQUAL(IOTHUB_QUEUE_RESULT, IOTHUB_QUEUE_OK, queue_result);
@@ -300,7 +299,7 @@ TEST_FUNCTION(IoTHubQueue_Add_Item_Queue_NULL_queue_item_fails)
     umock_c_reset_all_calls();
 
     //act
-    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, QUEUE_ITEM_TYPE_MESSAGE_LIST, NULL);
+    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, NULL);
 
     //assert
     ASSERT_ARE_NOT_EQUAL(IOTHUB_QUEUE_RESULT, IOTHUB_QUEUE_OK, queue_result);
@@ -324,7 +323,7 @@ TEST_FUNCTION(IoTHubQueue_Add_Item_succeed)
         .IgnoreArgument_listHead();
 
     //act
-    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, QUEUE_ITEM_TYPE_DEVICE_TWIN, (CLIENT_QUEUE_ITEM*)TEST_IOTHUB_DEVICE_TWIN_ITEM);
+    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, (void*)TEST_IOTHUB_DEVICE_TWIN_ITEM);
 
     //assert
     ASSERT_ARE_EQUAL(IOTHUB_QUEUE_RESULT, IOTHUB_QUEUE_OK, queue_result);
@@ -368,7 +367,7 @@ TEST_FUNCTION(IoTHubQueue_Add_Item_fail)
         char tmp_msg[64];
         sprintf(tmp_msg, "IoTHubQueue_Create_Queue failure in test %zu/%zu", index, count);
 
-        IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, QUEUE_ITEM_TYPE_DEVICE_TWIN, (CLIENT_QUEUE_ITEM*)TEST_IOTHUB_DEVICE_TWIN_ITEM);
+        IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, (void*)TEST_IOTHUB_DEVICE_TWIN_ITEM);
 
         //assert
         ASSERT_ARE_NOT_EQUAL(IOTHUB_QUEUE_RESULT, IOTHUB_QUEUE_OK, queue_result);
@@ -385,7 +384,7 @@ TEST_FUNCTION(IoTHubQueue_Get_Queue_Item_NULL_handle_fail)
     //arrange
 
     //act
-    const CLIENT_QUEUE_ITEM* client_queue_item = IoTHubQueue_Get_Queue_Item(NULL);
+    const void* client_queue_item = IoTHubQueue_Get_Queue_Item(NULL);
 
     //assert
     ASSERT_IS_NULL(client_queue_item);
@@ -399,12 +398,12 @@ TEST_FUNCTION(IoTHubQueue_Get_Queue_Item_succeed)
 {
     //arrange
     IOTHUB_QUEUE_HANDLE handle = IoTHubQueue_Create_Queue();
-    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, QUEUE_ITEM_TYPE_DEVICE_TWIN, (CLIENT_QUEUE_ITEM*)TEST_IOTHUB_DEVICE_TWIN_ITEM);
+    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, (void*)TEST_IOTHUB_DEVICE_TWIN_ITEM);
     ASSERT_ARE_EQUAL(IOTHUB_QUEUE_RESULT, IOTHUB_QUEUE_OK, queue_result);
     umock_c_reset_all_calls();
 
     //act
-    const CLIENT_QUEUE_ITEM* client_queue_item = IoTHubQueue_Get_Queue_Item(handle);
+    const void* client_queue_item = IoTHubQueue_Get_Queue_Item(handle);
 
     //assert
     ASSERT_ARE_EQUAL(void_ptr, TEST_IOTHUB_DEVICE_TWIN_ITEM, (IOTHUB_DEVICE_TWIN*)client_queue_item);
@@ -419,20 +418,20 @@ TEST_FUNCTION(IoTHubQueue_Get_Queue_Item_always_return_item_succeed)
 {
     //arrange
     IOTHUB_QUEUE_HANDLE handle = IoTHubQueue_Create_Queue();
-    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, QUEUE_ITEM_TYPE_DEVICE_TWIN, (CLIENT_QUEUE_ITEM*)TEST_IOTHUB_DEVICE_TWIN_ITEM);
+    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, (void*)TEST_IOTHUB_DEVICE_TWIN_ITEM);
     ASSERT_ARE_EQUAL(IOTHUB_QUEUE_RESULT, IOTHUB_QUEUE_OK, queue_result);
-    queue_result = IoTHubQueue_Add_Item(handle, QUEUE_ITEM_TYPE_DEVICE_TWIN, (CLIENT_QUEUE_ITEM*)TEST_IOTHUB_DEVICE_TWIN_ITEM_1);
+    queue_result = IoTHubQueue_Add_Item(handle, (void*)TEST_IOTHUB_DEVICE_TWIN_ITEM_1);
     ASSERT_ARE_EQUAL(IOTHUB_QUEUE_RESULT, IOTHUB_QUEUE_OK, queue_result);
-    queue_result = IoTHubQueue_Add_Item(handle, QUEUE_ITEM_TYPE_DEVICE_TWIN, (CLIENT_QUEUE_ITEM*)TEST_IOTHUB_DEVICE_TWIN_ITEM_2);
+    queue_result = IoTHubQueue_Add_Item(handle, (void*)TEST_IOTHUB_DEVICE_TWIN_ITEM_2);
     ASSERT_ARE_EQUAL(IOTHUB_QUEUE_RESULT, IOTHUB_QUEUE_OK, queue_result);
     umock_c_reset_all_calls();
 
     //act
-    const CLIENT_QUEUE_ITEM* client_queue_item = IoTHubQueue_Get_Queue_Item(handle);
-    ASSERT_ARE_EQUAL(void_ptr, TEST_IOTHUB_DEVICE_TWIN_ITEM, (IOTHUB_DEVICE_TWIN*)client_queue_item);
+    const void* client_queue_item = IoTHubQueue_Get_Queue_Item(handle);
+    ASSERT_ARE_EQUAL(void_ptr, TEST_IOTHUB_DEVICE_TWIN_ITEM, client_queue_item);
 
-    const CLIENT_QUEUE_ITEM* client_queue_item_2nd = IoTHubQueue_Get_Queue_Item(handle);
-    ASSERT_ARE_EQUAL(void_ptr, TEST_IOTHUB_DEVICE_TWIN_ITEM, (IOTHUB_DEVICE_TWIN*)client_queue_item_2nd);
+    const void* client_queue_item_2nd = IoTHubQueue_Get_Queue_Item(handle);
+    ASSERT_ARE_EQUAL(void_ptr, TEST_IOTHUB_DEVICE_TWIN_ITEM, client_queue_item_2nd);
 
     //assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -449,7 +448,7 @@ TEST_FUNCTION(IoTHubQueue_Get_Queue_Item_empty_queue_fail)
     umock_c_reset_all_calls();
 
     //act
-    const CLIENT_QUEUE_ITEM* client_queue_item = IoTHubQueue_Get_Queue_Item(handle);
+    const void* client_queue_item = IoTHubQueue_Get_Queue_Item(handle);
 
     //assert
     ASSERT_IS_NULL(client_queue_item);
@@ -480,9 +479,9 @@ TEST_FUNCTION(IoTHubQueue_Remove_Item_succeed)
 {
     //arrange
     IOTHUB_QUEUE_HANDLE handle = IoTHubQueue_Create_Queue();
-    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, QUEUE_ITEM_TYPE_DEVICE_TWIN, (CLIENT_QUEUE_ITEM*)TEST_IOTHUB_DEVICE_TWIN_ITEM);
+    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, (void*)TEST_IOTHUB_DEVICE_TWIN_ITEM);
     ASSERT_ARE_EQUAL(IOTHUB_QUEUE_RESULT, IOTHUB_QUEUE_OK, queue_result);
-    queue_result = IoTHubQueue_Add_Item(handle, QUEUE_ITEM_TYPE_DEVICE_TWIN, (CLIENT_QUEUE_ITEM*)TEST_IOTHUB_DEVICE_TWIN_ITEM_1);
+    queue_result = IoTHubQueue_Add_Item(handle, (void*)TEST_IOTHUB_DEVICE_TWIN_ITEM_1);
     ASSERT_ARE_EQUAL(IOTHUB_QUEUE_RESULT, IOTHUB_QUEUE_OK, queue_result);
     umock_c_reset_all_calls();
 
@@ -562,7 +561,7 @@ TEST_FUNCTION(IoTHubQueue_Enum_Queue_success)
 {
     //arrange
     IOTHUB_QUEUE_HANDLE handle = IoTHubQueue_Create_Queue();
-    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, QUEUE_ITEM_TYPE_DEVICE_TWIN, (CLIENT_QUEUE_ITEM*)TEST_IOTHUB_DEVICE_TWIN_ITEM);
+    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, (void*)TEST_IOTHUB_DEVICE_TWIN_ITEM);
     ASSERT_ARE_EQUAL(IOTHUB_QUEUE_RESULT, IOTHUB_QUEUE_OK, queue_result);
     umock_c_reset_all_calls();
 
@@ -588,7 +587,7 @@ TEST_FUNCTION(IoTHubQueue_Enum_Queue_fail)
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
 
     IOTHUB_QUEUE_HANDLE handle = IoTHubQueue_Create_Queue();
-    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, QUEUE_ITEM_TYPE_DEVICE_TWIN, (CLIENT_QUEUE_ITEM*)TEST_IOTHUB_DEVICE_TWIN_ITEM);
+    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, (void*)TEST_IOTHUB_DEVICE_TWIN_ITEM);
     ASSERT_ARE_EQUAL(IOTHUB_QUEUE_RESULT, IOTHUB_QUEUE_OK, queue_result);
     umock_c_reset_all_calls();
 
@@ -624,7 +623,7 @@ TEST_FUNCTION(IoTHubQueue_Enum_Next_Item_handle_null_fail)
     umock_c_reset_all_calls();
 
     //act
-    const CLIENT_QUEUE_ITEM* queue_item = IoTHubQueue_Enum_Next_Item(NULL);
+    const void* queue_item = IoTHubQueue_Enum_Next_Item(NULL);
 
     //assert
     ASSERT_IS_NULL(queue_item);
@@ -643,7 +642,7 @@ TEST_FUNCTION(IoTHubQueue_Enum_Next_Item_empty_list_success)
     umock_c_reset_all_calls();
 
     //act
-    const CLIENT_QUEUE_ITEM* queue_item = IoTHubQueue_Enum_Next_Item(enum_handle);
+    const void* queue_item = IoTHubQueue_Enum_Next_Item(enum_handle);
     ASSERT_IS_NULL(queue_item);
 
     queue_item = IoTHubQueue_Enum_Next_Item(enum_handle);
@@ -662,18 +661,18 @@ TEST_FUNCTION(IoTHubQueue_Enum_Next_Item_success)
 {
     //arrange
     IOTHUB_QUEUE_HANDLE handle = IoTHubQueue_Create_Queue();
-    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, QUEUE_ITEM_TYPE_DEVICE_TWIN, (CLIENT_QUEUE_ITEM*)TEST_IOTHUB_DEVICE_TWIN_ITEM);
+    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, (void*)TEST_IOTHUB_DEVICE_TWIN_ITEM);
     ASSERT_ARE_EQUAL(IOTHUB_QUEUE_RESULT, IOTHUB_QUEUE_OK, queue_result);
-    queue_result = IoTHubQueue_Add_Item(handle, QUEUE_ITEM_TYPE_DEVICE_TWIN, (CLIENT_QUEUE_ITEM*)TEST_IOTHUB_DEVICE_TWIN_ITEM_1);
+    queue_result = IoTHubQueue_Add_Item(handle, (void*)TEST_IOTHUB_DEVICE_TWIN_ITEM_1);
     ASSERT_ARE_EQUAL(IOTHUB_QUEUE_RESULT, IOTHUB_QUEUE_OK, queue_result);
-    queue_result = IoTHubQueue_Add_Item(handle, QUEUE_ITEM_TYPE_DEVICE_TWIN, (CLIENT_QUEUE_ITEM*)TEST_IOTHUB_DEVICE_TWIN_ITEM_2);
+    queue_result = IoTHubQueue_Add_Item(handle, (void*)TEST_IOTHUB_DEVICE_TWIN_ITEM_2);
     ASSERT_ARE_EQUAL(IOTHUB_QUEUE_RESULT, IOTHUB_QUEUE_OK, queue_result);
 
     IOTHUB_QUEUE_ENUM_HANDLE enum_handle = IoTHubQueue_Enum_Queue(handle);
     umock_c_reset_all_calls();
 
     //act
-    const CLIENT_QUEUE_ITEM* queue_item = IoTHubQueue_Enum_Next_Item(enum_handle);
+    const void* queue_item = IoTHubQueue_Enum_Next_Item(enum_handle);
     ASSERT_ARE_EQUAL(void_ptr, TEST_IOTHUB_DEVICE_TWIN_ITEM, (IOTHUB_DEVICE_TWIN*)queue_item);
 
     queue_item = IoTHubQueue_Enum_Next_Item(enum_handle);
@@ -712,7 +711,7 @@ TEST_FUNCTION(IoTHubQueue_Enum_Close_success)
 {
     //arrange
     IOTHUB_QUEUE_HANDLE handle = IoTHubQueue_Create_Queue();
-    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, QUEUE_ITEM_TYPE_DEVICE_TWIN, (CLIENT_QUEUE_ITEM*)TEST_IOTHUB_DEVICE_TWIN_ITEM);
+    IOTHUB_QUEUE_RESULT queue_result = IoTHubQueue_Add_Item(handle, (void*)TEST_IOTHUB_DEVICE_TWIN_ITEM);
     ASSERT_ARE_EQUAL(IOTHUB_QUEUE_RESULT, IOTHUB_QUEUE_OK, queue_result);
 
     IOTHUB_QUEUE_ENUM_HANDLE enum_handle = IoTHubQueue_Enum_Queue(handle);

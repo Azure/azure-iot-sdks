@@ -16,8 +16,7 @@
 
 typedef struct IOTHUB_QUEUE_ITEM_TAG
 {
-    QUEUE_ITEM_TYPE msg_type;
-    CLIENT_QUEUE_ITEM* client_queue_item;
+    void* client_queue_item;
     DLIST_ENTRY entry;
 } IOTHUB_QUEUE_ITEM;
 
@@ -63,7 +62,7 @@ void IoTHubQueue_Destroy_Queue(IOTHUB_QUEUE_HANDLE handle, IOTHUB_QUEUE_DESTROY_
             /* Codes_SRS_IOTHUB_QUEUE_07_005: [If destroy_callback is not NULL, IoTHubQueue_Destroy_Queue shall call destroy_callback with the item to be deleted.] */
             if (destroy_callback != NULL)
             {
-                destroy_callback(queue_item->msg_type, queue_item->client_queue_item);
+                destroy_callback(queue_item->client_queue_item);
             }
             /* Codes_SRS_IOTHUB_QUEUE_07_004: [IoTHubQueue_Destroy_Queue shall only free memory allocated within this compilation unit.] */
             free(queue_item);
@@ -72,7 +71,7 @@ void IoTHubQueue_Destroy_Queue(IOTHUB_QUEUE_HANDLE handle, IOTHUB_QUEUE_DESTROY_
     }
 }
 
-IOTHUB_QUEUE_RESULT IoTHubQueue_Add_Item(IOTHUB_QUEUE_HANDLE handle, QUEUE_ITEM_TYPE msg_type, CLIENT_QUEUE_ITEM* client_queue_item)
+IOTHUB_QUEUE_RESULT IoTHubQueue_Add_Item(IOTHUB_QUEUE_HANDLE handle, void* client_queue_item)
 {
     IOTHUB_QUEUE_RESULT result;
     /* Codes_SRS_IOTHUB_QUEUE_07_006: [If handle or queue_item are NULL IoTHubQueue_Add_Item shall return IOTHUB_QUEUE_INVALID_ARG.] */
@@ -83,7 +82,7 @@ IOTHUB_QUEUE_RESULT IoTHubQueue_Add_Item(IOTHUB_QUEUE_HANDLE handle, QUEUE_ITEM_
     }
     else
     {
-        IOTHUB_QUEUE_ITEM* queue_item = (IOTHUB_QUEUE_ITEM*)malloc(sizeof(IOTHUB_QUEUE_ITEM));
+        IOTHUB_QUEUE_ITEM* queue_item = malloc(sizeof(IOTHUB_QUEUE_ITEM) );
         if (queue_item == NULL)
         {
             /* Codes_SRS_IOTHUB_QUEUE_07_009: [If any error is encountered IoTHubQueue_Add_Item shall return IOTHUB_QUEUE_ERROR.] */
@@ -95,7 +94,6 @@ IOTHUB_QUEUE_RESULT IoTHubQueue_Add_Item(IOTHUB_QUEUE_HANDLE handle, QUEUE_ITEM_
             IOTHUB_QUEUE_DATA* queue_data = (IOTHUB_QUEUE_DATA*)handle;
 
             /* Codes_SRS_IOTHUB_QUEUE_07_007: [IoTHubQueue_Add_Item shall allocate an queue item and store the item into the queue.] */
-            queue_item->msg_type = msg_type;
             queue_item->client_queue_item = client_queue_item;
             DList_InsertTailList(&queue_data->list_entry, &queue_item->entry);
 
@@ -106,9 +104,9 @@ IOTHUB_QUEUE_RESULT IoTHubQueue_Add_Item(IOTHUB_QUEUE_HANDLE handle, QUEUE_ITEM_
     return result;
 }
 
-const CLIENT_QUEUE_ITEM* IoTHubQueue_Get_Queue_Item(IOTHUB_QUEUE_HANDLE handle)
+const void* IoTHubQueue_Get_Queue_Item(IOTHUB_QUEUE_HANDLE handle)
 {
-    CLIENT_QUEUE_ITEM* result;
+    void* result;
     /* Codes_SRS_IOTHUB_QUEUE_07_010: [If handle is NULL IoTHubQueue_Get_Queue_Item shall return NULL.] */
     if (handle == NULL)
     {
@@ -147,8 +145,8 @@ IOTHUB_QUEUE_RESULT IoTHubQueue_Remove_Next_Item(IOTHUB_QUEUE_HANDLE handle, IOT
     else
     {
         IOTHUB_QUEUE_DATA* queue_data = (IOTHUB_QUEUE_DATA*)handle;
-        PDLIST_ENTRY currentListEntry = queue_data->list_entry.Flink;
-        if (currentListEntry == &queue_data->list_entry)
+        PDLIST_ENTRY currentEntry = queue_data->list_entry.Flink;
+        if (currentEntry == &queue_data->list_entry)
         {
             /* Codes_SRS_IOTHUB_QUEUE_07_014: [If the queue is empty, IoTHubQueue_Remove_Next_Item shall return IOTHUB_QUEUE_QUEUE_EMPTY.] */
             // Nothing in the list
@@ -158,17 +156,17 @@ IOTHUB_QUEUE_RESULT IoTHubQueue_Remove_Next_Item(IOTHUB_QUEUE_HANDLE handle, IOT
         {
             IOTHUB_QUEUE_ITEM* queue_item;
             DLIST_ENTRY saveListEntry;
-            saveListEntry.Flink = currentListEntry->Flink;
+            saveListEntry.Flink = currentEntry->Flink;
 
             /* Codes_SRS_IOTHUB_QUEUE_07_015: [If the Item is successfully Removed from the queue and destroy_callback is not NULL, IoTHubQueue_Remove_Next_Item will call destroy_callback and deallocate the item.] */
-            queue_item = containingRecord(currentListEntry, IOTHUB_QUEUE_ITEM, entry);
+            queue_item = containingRecord(currentEntry, IOTHUB_QUEUE_ITEM, entry);
             if (destroy_callback != NULL)
             {
-                destroy_callback(queue_item->msg_type, queue_item->client_queue_item);
+                destroy_callback(queue_item->client_queue_item);
             }
-            (void)DList_RemoveEntryList(currentListEntry);
+            (void)DList_RemoveEntryList(currentEntry);
             free(queue_item);
-            currentListEntry->Flink = saveListEntry.Flink;
+            currentEntry = saveListEntry.Flink;
             /* Codes_SRS_IOTHUB_QUEUE_07_016: [On success IoTHubQueue_Remove_Next_Item shall return IOTHUB_QUEUE_OK.] */
             result = IOTHUB_QUEUE_OK;
         }
@@ -214,9 +212,9 @@ IOTHUB_QUEUE_ENUM_HANDLE IoTHubQueue_Enum_Queue(IOTHUB_QUEUE_HANDLE handle)
     return result;
 }
 
-const CLIENT_QUEUE_ITEM* IoTHubQueue_Enum_Next_Item(IOTHUB_QUEUE_ENUM_HANDLE enum_handle)
+const void* IoTHubQueue_Enum_Next_Item(IOTHUB_QUEUE_ENUM_HANDLE enum_handle)
 {
-    const CLIENT_QUEUE_ITEM* result;
+    const void* result;
     /* Codes_SRS_IOTHUB_QUEUE_07_020: [If enum_handle is NULL IoTHubQueue_Enum_Next_Item shall return NULL.] */
     if (enum_handle == NULL)
     {
