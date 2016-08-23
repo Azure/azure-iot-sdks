@@ -31,4 +31,8 @@ ENDIF(WIN32)
 
 add_library(iothub_test ${iothub_test_c_files} ${iothub_test_h_files})
 
-target_link_libraries(iothub_test uamqp iothub_service_client)
+if(NOT ${nuget_e2e_tests})
+    target_link_libraries(iothub_test uamqp iothub_service_client)
+else()
+    target_link_libraries(iothub_test iothub_service_client)
+endif()
