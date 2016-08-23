@@ -963,6 +963,28 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendReportedState(IOTHUB_CLIENT_LL_HANDLE i
     return IOTHUB_CLIENT_ERROR;
 }
 
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetIoTHubMethodCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_IOTHUB_METHOD_CALLBACK_ASYNC iotHubMethodCallback, void* userContextCallback)
+{
+    (void)iotHubClientHandle;
+    (void)iotHubMethodCallback;
+    (void)userContextCallback;
+
+    return IOTHUB_CLIENT_ERROR;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_ExecuteIoTHubMethod(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* verb, const char* resource, IOTHUB_CLIENT_METHOD_PROPERTIES properties, const unsigned char* payload, IOTHUB_CLIENT_IOTHUB_METHOD_EXECUTE_CALLBACK iotHubExecuteCallback, void* userContextCallback)
+{
+    (void)iotHubClientHandle;
+    (void)verb;
+    (void)resource;
+    (void)properties;
+    (void)payload;
+    (void)iotHubExecuteCallback;
+    (void)userContextCallback;
+
+    return IOTHUB_CLIENT_ERROR;
+}
+
 #ifndef DONT_USE_UPLOADTOBLOB
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size)
 {
