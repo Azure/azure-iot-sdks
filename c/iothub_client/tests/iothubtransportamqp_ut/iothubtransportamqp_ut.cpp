@@ -29,6 +29,7 @@ static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 #include "azure_c_shared_utility/xio.h"
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/map.h"
+#include "azure_c_shared_utility/wsio.h"
 
 #include "iothubtransportamqp.h"
 #include "iothub_client_options.h"

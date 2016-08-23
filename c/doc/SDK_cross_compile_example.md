@@ -14,9 +14,10 @@ This document presents an example of how to cross compile the Azure IoT Hub SDK 
 ### Version Information
 
 The host machine is running Debian GNU/Linux 8 (jessie) amd64
+
 The target machine is running Raspbian GNU/Linux 8 (jessie)
 
-Note this document assumes that you are using an amd64 build of Debian on the host and will use the 64-bit version of the Raspbian toolchain. You will need to select a different target toolchain if your host is not running a 64-bit Linux operating system.
+__Note:__ This example was built and tested on an __amd64__ build of Debian on the host and will use the __64-bit version__ of the Raspbian toolchain. You will need to select a different target toolchain if your host is not running a 64-bit Linux operating system.
 
 Though it may be possible to use a host machine running a variant of Windows this would likely be very complex to set up and thus is not addressed in this document.
 

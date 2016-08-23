@@ -39,6 +39,7 @@ typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG
     time_t lastMessageReceiveTime;
     TICK_COUNTER_HANDLE tickCounter; /*shared tickcounter used to track message timeouts in waitingToSend list*/
     uint64_t currentMessageTimeout;
+    IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback;
 #ifndef DONT_USE_UPLOADTOBLOB
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE uploadToBlobHandle;
 #endif
@@ -73,7 +74,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
     else
     {
         /* Codes_SRS_IOTHUBCLIENT_LL_12_004: [IoTHubClient_LL_CreateFromConnectionString shall allocate IOTHUB_CLIENT_CONFIG structure] */
-		IOTHUB_CLIENT_CONFIG* config = (IOTHUB_CLIENT_CONFIG*) malloc(sizeof(IOTHUB_CLIENT_CONFIG));
+        IOTHUB_CLIENT_CONFIG* config = (IOTHUB_CLIENT_CONFIG*) malloc(sizeof(IOTHUB_CLIENT_CONFIG));
         if (config == NULL)
         {
             /* Codes_SRS_IOTHUBCLIENT_LL_12_012: [If the allocation failed IoTHubClient_LL_CreateFromConnectionString  returns NULL]  */
@@ -460,7 +461,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(const IOTHUB_CLIENT_
             else
             {
                 /*Codes_SRS_IOTHUBCLIENT_LL_02_096: [ IoTHubClient_LL_CreateWithTransport shall create the data structures needed to instantiate a IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE. ]*/
-				char* IoTHubName = (char*) malloc(whereIsDot - hostname + 1);
+                char* IoTHubName = (char*) malloc(whereIsDot - hostname + 1);
                 if (IoTHubName == NULL)
                 {
                     /*Codes_SRS_IOTHUBCLIENT_LL_02_097: [ If creating the data structures fails or instantiating the IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE fails then IoTHubClient_LL_CreateWithTransport shall fail and return NULL. ]*/
@@ -845,7 +846,7 @@ IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubClient_LL_MessageCallback(IOTHUB_CLIENT_L
         }
     }
     /*Codes_SRS_IOTHUBCLIENT_LL_02_031: [Then IoTHubClient_LL_MessageCallback shall return what the user function returns.]*/
-	return (IOTHUBMESSAGE_DISPOSITION_RESULT) result;
+    return (IOTHUBMESSAGE_DISPOSITION_RESULT) result;
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetLastMessageReceiveTime(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, time_t* lastMessageReceiveTime)
@@ -945,35 +946,21 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetDesiredState(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_GET_DESIRED_CALLBACK getDesiredCallback, void* userContextCallback)
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceTwinCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback)
 {
-	(void)iotHubClientHandle;
-	(void)getDesiredCallback;
-	(void)userContextCallback;
-
-	return IOTHUB_CLIENT_ERROR;
+    (void)iotHubClientHandle; (void)deviceTwinCallback;(void)userContextCallback;
+    return IOTHUB_CLIENT_ERROR;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetPatchDesiredStateCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_PATCH_DESIRED_CALLBACK patchDesiredCallback, void* userContextCallback)
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendReportedState(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback)
 {
-	(void)iotHubClientHandle;
-	(void)patchDesiredCallback;
-	(void)userContextCallback;
+    (void)iotHubClientHandle;
+    (void)reportedState;
+    (void)size;
+    (void)reportedStateCallback;
+    (void)userContextCallback;
 
-	return IOTHUB_CLIENT_ERROR;
-}
-
-IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendReportedState(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, uint32_t reportedVersion, uint32_t lastSeenDesiredVersion, IOTHUB_CLIENT_PATCH_REPORTED_CALLBACK patchReportedCallback, void* userContextCallback)
-{
-	(void)iotHubClientHandle;
-	(void)reportedState;
-	(void)size;
-	(void)reportedVersion;
-	(void)lastSeenDesiredVersion;
-	(void)patchReportedCallback;
-	(void)userContextCallback;
-
-	return IOTHUB_CLIENT_ERROR;
+    return IOTHUB_CLIENT_ERROR;
 }
 
 #ifndef DONT_USE_UPLOADTOBLOB
