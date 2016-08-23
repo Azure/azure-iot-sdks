@@ -2793,6 +2793,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "double"));
         STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_double", "double"));
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "int"));
+        STRICT_EXPECTED_CALL(Schema_AddModelReportedProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_reported_int_Property_2", "int"));
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "int"));
         STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_int", "int"));
         STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_INNERTYPE_MODEL_HANDLE, "reset"));
         

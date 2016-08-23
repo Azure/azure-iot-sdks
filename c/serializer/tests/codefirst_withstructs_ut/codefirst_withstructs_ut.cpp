@@ -506,6 +506,8 @@ public:
     MOCK_METHOD_END(SCHEMA_RESULT, SCHEMA_OK);
     MOCK_STATIC_METHOD_3(, SCHEMA_RESULT, Schema_AddModelProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName, const char*, propertyType)
     MOCK_METHOD_END(SCHEMA_RESULT, SCHEMA_OK);
+    MOCK_STATIC_METHOD_3(, SCHEMA_RESULT, Schema_AddModelReportedProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName, const char*, propertyType)
+    MOCK_METHOD_END(SCHEMA_RESULT, SCHEMA_OK);
     MOCK_STATIC_METHOD_2(, SCHEMA_ACTION_HANDLE, Schema_CreateModelAction, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, actionName)
     MOCK_METHOD_END(SCHEMA_ACTION_HANDLE, TEST_ACTION_HANDLE);
     MOCK_STATIC_METHOD_3(, SCHEMA_RESULT, Schema_AddModelActionArgument, SCHEMA_ACTION_HANDLE, actionHandle, const char*, argumentName, const char*, argumentType)
@@ -572,6 +574,7 @@ DECLARE_GLOBAL_MOCK_METHOD_2(CCodeFirstMocks, , SCHEMA_MODEL_TYPE_HANDLE, Schema
 DECLARE_GLOBAL_MOCK_METHOD_2(CCodeFirstMocks, , SCHEMA_STRUCT_TYPE_HANDLE, Schema_CreateStructType, SCHEMA_HANDLE, schemaHandle, const char*, structTypeName);
 DECLARE_GLOBAL_MOCK_METHOD_3(CCodeFirstMocks, , SCHEMA_RESULT, Schema_AddStructTypeProperty, SCHEMA_STRUCT_TYPE_HANDLE, structTypeHandle, const char*, propertyName, const char*, propertyType);
 DECLARE_GLOBAL_MOCK_METHOD_3(CCodeFirstMocks, , SCHEMA_RESULT, Schema_AddModelProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName, const char*, propertyType);
+DECLARE_GLOBAL_MOCK_METHOD_3(CCodeFirstMocks, , SCHEMA_RESULT, Schema_AddModelReportedProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName, const char*, propertyType);
 DECLARE_GLOBAL_MOCK_METHOD_2(CCodeFirstMocks, , SCHEMA_ACTION_HANDLE, Schema_CreateModelAction, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, actionName);
 DECLARE_GLOBAL_MOCK_METHOD_3(CCodeFirstMocks, , SCHEMA_RESULT, Schema_AddModelActionArgument, SCHEMA_ACTION_HANDLE, actionHandle, const char*, argumentName, const char*, argumentType);
 DECLARE_GLOBAL_MOCK_METHOD_1(CCodeFirstMocks, , void, Schema_Destroy, SCHEMA_HANDLE, schemaHandle);
