@@ -43,6 +43,27 @@ typedef struct IOTHUBTRANSPORT_CONFIG_TAG IOTHUBTRANSPORT_CONFIG;
 
 typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG* IOTHUB_CLIENT_LL_HANDLE;
 
+typedef struct IOTHUB_IOTHUB_METHOD_PROPERTY_TAG
+{
+    char* key;
+    char* value;
+} IOTHUB_IOTHUB_METHOD_PROPERTY;
+
+typedef struct IOTHUB_CLIENT_IOTHUB_METHOD_PROPERTIES_TAG
+{
+    size_t size;
+    IOTHUB_IOTHUB_METHOD_PROPERTY* properties;
+} IOTHUB_CLIENT_IOTHUB_METHOD_PROPERTIES;
+
+#define IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_VALUES \
+    IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_SUCCESS,   \
+    IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_ERROR      \
+
+/** @brief Enumeration returned by remotely executed functions
+*/
+DEFINE_ENUM(IOTHUB_CLIENT_IOTHUB_METHOD_STATUS, IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_VALUES);
+
+
 #define IOTHUB_CLIENT_STATUS_VALUES       \
     IOTHUB_CLIENT_SEND_STATUS_IDLE,       \
     IOTHUB_CLIENT_SEND_STATUS_BUSY        \
@@ -112,6 +133,8 @@ extern "C"
 
     typedef void(*IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback);
     typedef void(*IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
+    typedef void(*IOTHUB_CLIENT_IOTHUB_METHOD_CALLBACK_ASYNC)(IOTHUB_CLIENT_IOTHUB_METHOD_PROPERTIES properties, const unsigned char* payload, void* userContextCallback);
+    typedef void(*IOTHUB_CLIENT_IOTHUB_METHOD_EXECUTE_CALLBACK)(IOTHUB_CLIENT_IOTHUB_METHOD_STATUS status, IOTHUB_CLIENT_IOTHUB_METHOD_PROPERTIES properties, const unsigned char* payload, void* userContextCallback);
 
     /** @brief	This struct captures IoTHub client configuration. */
     typedef struct IOTHUB_CLIENT_CONFIG_TAG
@@ -385,6 +408,33 @@ extern "C"
     */
      MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SendReportedState, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const unsigned char*, reportedState, size_t, size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, reportedStateCallback, void*, userContextCallback);
 
+     /**
+     * @brief	This API sets callback for cloud to device method call.
+     *
+     * @param	iotHubClientHandle		The handle created by a call to the create function.
+     * @param	iotHubMethodCallback	The callback which will be called by IoTHub.
+     * @param	userContextCallback		User specified context that will be provided to the
+     * 									callback. This can be @c NULL.
+     *
+     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
+     */
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetIoTHubMethodCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_IOTHUB_METHOD_CALLBACK_ASYNC, iotHubMethodCallback, void*, userContextCallback);
+
+     /**
+     * @brief	This API executes the given method on IoTHub and return the result to the client.
+     *
+     * @param	iotHubClientHandle		The handle created by a call to the create function.
+     * @param	verb                    Optional parameter in topic to serialize corresponding system properties.
+     * @param	resource        		Optional parameter in topic to serialize corresponding system properties.
+     * @param	properties        		Serialized message properites
+     * @param	payload         		Binary message payload
+     * @param	iotHubExecuteCallback	The callback which will be called with the result of function executed on IoTHub.
+     * @param	userContextCallback		User specified context that will be provided to the
+     * 									callback. This can be @c NULL.
+     *
+     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
+     */
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_ExecuteIoTHubMethod, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, verb, const char*, resource, IOTHUB_CLIENT_IOTHUB_METHOD_PROPERTIES, properties, const unsigned char*, payload, IOTHUB_CLIENT_IOTHUB_METHOD_EXECUTE_CALLBACK, iotHubExecuteCallback, void*, userContextCallback);
 
 #ifndef DONT_USE_UPLOADTOBLOB
     /**
