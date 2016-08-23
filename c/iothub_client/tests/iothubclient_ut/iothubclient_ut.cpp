@@ -2223,7 +2223,7 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         IoTHubClient_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBCLIENT_12_012: [** If `iotHubClientHandle` is `NULL`, `IoTHubClient_SetIoTHubMethodCallback` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_012: [ If iotHubClientHandle is NULL, IoTHubClient_SetIoTHubMethodCallback shall return IOTHUB_CLIENT_INVALID_ARG. ]*/
     TEST_FUNCTION(IoTHubClient_SetIoTHubMethodCallback_Fails_When_Handle_Is_NULL)
     {
         // arrange
@@ -2236,7 +2236,7 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
     }
 
-    /*Tests_*SRS_IOTHUBCLIENT_12_013: [** If acquiring the lock fails, `IoTHubClient_SetIoTHubMethodCallback` shall return `IOTHUB_CLIENT_ERROR`. **]*/
+    /*Tests_*SRS_IOTHUBCLIENT_12_013: [ If acquiring the lock fails, IoTHubClient_SetIoTHubMethodCallback shall return IOTHUB_CLIENT_ERROR. ]*/
     TEST_FUNCTION(IoTHubClient_SetIoTHubMethodCallback_Fails_When_Lock_Fails)
     {
         // arrange
@@ -2258,9 +2258,9 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         IoTHubClient_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBCLIENT_12_014: [** If the transport handle is null and the worker thread is not initialized, the thread shall be started by calling `IoTHubTransport_StartWorkerThread`. **]*/
-    /*Tests_SRS_IOTHUBCLIENT_12_015: [** If starting the thread fails, `IoTHubClient_SetIoTHubMethodCallback` shall return `IOTHUB_CLIENT_ERROR`. **]*/
-    /*Tests_SRS_IOTHUBCLIENT_12_018: [** `IoTHubClient_SetIoTHubMethodCallback` shall be made thread - safe by using the lock created in IoTHubClient_Create. **]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_014: [ If the transport handle is null and the worker thread is not initialized, the thread shall be started by calling IoTHubTransport_StartWorkerThread. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_015: [ If starting the thread fails, IoTHubClient_SetIoTHubMethodCallback shall return IOTHUB_CLIENT_ERROR. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_018: [ IoTHubClient_SetIoTHubMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
     TEST_FUNCTION(IoTHubClient_SetIoTHubMethodCallback_Fails_When_Thread_Start_Fails)
     {
         // arrange
@@ -2285,8 +2285,8 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         IoTHubClient_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBCLIENT_12_016: [** `IoTHubClient_SetIoTHubMethodCallback` shall call `IoTHubClient_LL_SetIoTHubMethodCallback`, while passing the `IoTHubClient_LL_handle` created by `IoTHubClient_LL_Create` along with the parameters `iotHubMethodCallback` and `userContextCallback`. **]*/
-    /*Tests_SRS_IOTHUBCLIENT_12_018: [** `IoTHubClient_SetIoTHubMethodCallback` shall be made thread - safe by using the lock created in IoTHubClient_Create. **]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_016: [ IoTHubClient_SetIoTHubMethodCallback shall call IoTHubClient_LL_SetIoTHubMethodCallback, while passing the IoTHubClient_LL_handle created by IoTHubClient_LL_Create along with the parameters iotHubMethodCallback and userContextCallback. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_018: [ IoTHubClient_SetIoTHubMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
     TEST_FUNCTION(IoTHubClient_SetIoTHubMethodCallback_Calls_IoTHubClient_LL_SetIoTHubMethodCallback)
     {
         // arrange
@@ -2310,8 +2310,33 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         IoTHubClient_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBCLIENT_12_017: [** When `IoTHubClient_LL_SetIoTHubMethodCallback` is called, `IoTHubClient_SetIoTHubMethodCallback` shall return the result of `IoTHubClient_LL_SetIoTHubMethodCallback`. **]*/
-    /*Tests_SRS_IOTHUBCLIENT_12_018: [** `IoTHubClient_SetIoTHubMethodCallback` shall be made thread - safe by using the lock created in IoTHubClient_Create. **]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_016: [ IoTHubClient_SetIoTHubMethodCallback shall call IoTHubClient_LL_SetIoTHubMethodCallback, while passing the IoTHubClient_LL_handle created by IoTHubClient_LL_Create along with the parameters iotHubMethodCallback and userContextCallback. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_018: [ IoTHubClient_SetIoTHubMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
+    TEST_FUNCTION(IoTHubClient_SetIoTHubMethodCallback_Calls_IoTHubClient_LL_SetIoTHubMethodCallback_with_all_param_NULL)
+    {
+        // arrange
+        CIoTHubClientMocks mocks;
+
+        IOTHUB_CLIENT_HANDLE handle = IoTHubClient_Create(&TEST_CONFIG);
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
+        EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
+        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_SetIoTHubMethodCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, NULL, NULL));
+
+        // act
+        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetIoTHubMethodCallback(handle, NULL, NULL);
+        ///assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        ///cleanup
+        IoTHubClient_Destroy(handle);
+    }
+
+    /*Tests_SRS_IOTHUBCLIENT_12_017: [ When IoTHubClient_LL_SetIoTHubMethodCallback is called, IoTHubClient_SetIoTHubMethodCallback shall return the result of IoTHubClient_LL_SetIoTHubMethodCallback. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_018: [ IoTHubClient_SetIoTHubMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
     TEST_FUNCTION(IoTHubClient_SetIoTHubMethodCallback_Calls_IoTHubClient_LL_SetIoTHubMethodCallback_and_return_with_the_result)
     {
         // arrange
@@ -2336,7 +2361,7 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         IoTHubClient_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBCLIENT_12_019: [** If `iotHubClientHandle` is `NULL`, `IoTHubClient_ExecuteIoTHubMethod` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_019: [ If iotHubClientHandle is NULL, IoTHubClient_ExecuteIoTHubMethod shall return IOTHUB_CLIENT_INVALID_ARG. ]*/
     TEST_FUNCTION(IoTHubClient_ExecuteIoTHubMethod_Fails_When_Handle_Is_NULL)
     {
         // arrange
@@ -2353,7 +2378,7 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
     }
 
-    /*Tests_SRS_IOTHUBCLIENT_12_020: [** If acquiring the lock fails, `IoTHubClient_ExecuteIoTHubMethod` shall return `IOTHUB_CLIENT_ERROR`. **]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_020: [ If acquiring the lock fails, IoTHubClient_ExecuteIoTHubMethod shall return IOTHUB_CLIENT_ERROR. ]*/
     TEST_FUNCTION(IoTHubClient_ExecuteIoTHubMethod_Fails_When_Lock_Fails)
     {
         // arrange
@@ -2379,9 +2404,9 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         IoTHubClient_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBCLIENT_12_021: [** If the transport handle is null and the worker thread is not initialized, the thread shall be started by calling `IoTHubTransport_StartWorkerThread`. **]*/
-    /*Tests_SRS_IOTHUBCLIENT_12_022 : [** If starting the thread fails, `IoTHubClient_ExecuteIoTHubMethod` shall return `IOTHUB_CLIENT_ERROR`. **]*/
-    /*Tests_SRS_IOTHUBCLIENT_12_025 : [** `IoTHubClient_SetIoTHubMethodCallback` shall be made thread - safe by using the lock created in IoTHubClient_Create. **]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_021: [ If the transport handle is null and the worker thread is not initialized, the thread shall be started by calling IoTHubTransport_StartWorkerThread. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_022 : [ If starting the thread fails, IoTHubClient_ExecuteIoTHubMethod shall return IOTHUB_CLIENT_ERROR. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_025 : [ IoTHubClient_SetIoTHubMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
     TEST_FUNCTION(IoTHubClient_ExecuteIoTHubMethod_Fails_When_Thread_Start_Fails)
     {
         // arrange
@@ -2410,8 +2435,8 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         IoTHubClient_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBCLIENT_12_023: [** `IoTHubClient_ExecuteIoTHubMethod` shall call `IoTHubClient_LL_ExecuteIoTHubMethod`, while passing the `IoTHubClient_LL_handle` created by `IoTHubClient_LL_Create` along with the parameters `verb`, `resource`, `properties`, `payload`, `iotHubExecuteCallback` and `userContextCallback`. **]*/
-    /*Tests_SRS_IOTHUBCLIENT_12_025 : [** `IoTHubClient_SetIoTHubMethodCallback` shall be made thread - safe by using the lock created in IoTHubClient_Create. **]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_023: [ IoTHubClient_ExecuteIoTHubMethod shall call IoTHubClient_LL_ExecuteIoTHubMethod, while passing the IoTHubClient_LL_handle created by IoTHubClient_LL_Create along with the parameters verb, resource, properties, payload, iotHubExecuteCallback and userContextCallback. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_025 : [ IoTHubClient_SetIoTHubMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
     TEST_FUNCTION(IoTHubClient_ExecuteIoTHubMethod_Calls_IoTHubClient_LL_SetIoTHubMethodCallback)
     {
         // arrange
@@ -2439,8 +2464,8 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         IoTHubClient_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBCLIENT_12_023: [** `IoTHubClient_ExecuteIoTHubMethod` shall call `IoTHubClient_LL_ExecuteIoTHubMethod`, while passing the `IoTHubClient_LL_handle` created by `IoTHubClient_LL_Create` along with the parameters `verb`, `resource`, `properties`, `payload`, `iotHubExecuteCallback` and `userContextCallback`. **]*/
-    /*Tests_SRS_IOTHUBCLIENT_12_025 : [** `IoTHubClient_SetIoTHubMethodCallback` shall be made thread - safe by using the lock created in IoTHubClient_Create. **]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_023: [ IoTHubClient_ExecuteIoTHubMethod shall call IoTHubClient_LL_ExecuteIoTHubMethod, while passing the IoTHubClient_LL_handle created by IoTHubClient_LL_Create along with the parameters verb, resource, properties, payload, iotHubExecuteCallback and userContextCallback. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_025 : [ IoTHubClient_SetIoTHubMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
     TEST_FUNCTION(IoTHubClient_ExecuteIoTHubMethod_Calls_IoTHubClient_LL_SetIoTHubMethodCallback_with_all_param_NULL)
     {
         // arrange
@@ -2465,8 +2490,8 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         IoTHubClient_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBCLIENT_12_024: [** When `IoTHubClient_LL_ExecuteIoTHubMethod` is called, `IoTHubClient_ExecuteIoTHubMethod` shall return the result of `IoTHubClient_LL_ExecuteIoTHubMethod`. **]*/
-    /*Tests_SRS_IOTHUBCLIENT_12_025 : [** `IoTHubClient_SetIoTHubMethodCallback` shall be made thread - safe by using the lock created in IoTHubClient_Create. **]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_024: [ When IoTHubClient_LL_ExecuteIoTHubMethod is called, IoTHubClient_ExecuteIoTHubMethod shall return the result of IoTHubClient_LL_ExecuteIoTHubMethod. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_025 : [ IoTHubClient_SetIoTHubMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
     TEST_FUNCTION(IoTHubClient_ExecuteIoTHubMethod_Calls_IoTHubClient_LL_SetIoTHubMethodCallback_and_return_with_the_result)
     {
         // arrange
