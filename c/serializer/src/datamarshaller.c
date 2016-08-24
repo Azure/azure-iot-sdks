@@ -14,6 +14,8 @@
 #include "jsonencoder.h"
 #include "agenttypesystem.h"
 #include "azure_c_shared_utility/xlogging.h"
+#include "parson.h"
+#include "azure_c_shared_utility/vector.h"
 
 DEFINE_ENUM_STRINGS(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_RESULT_VALUES);
 
@@ -221,6 +223,135 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData(DATA_MARSHALLER_HANDLE dataMarsha
 
 DATA_MARSHALLER_RESULT DataMarshaller_SendData_ReportedProperties(DATA_MARSHALLER_HANDLE dataMarshallerHandle, VECTOR_HANDLE values, unsigned char** destination, size_t* destinationSize)
 {
-    (void)(dataMarshallerHandle, values, destination, destinationSize);
-    return DATA_MARSHALLER_ERROR;
+    DATA_MARSHALLER_RESULT result;
+    /*this function builds a parson object*/
+    if (
+        (dataMarshallerHandle == NULL) ||
+        (values == NULL) ||
+        (destination == NULL) ||
+        (destinationSize == NULL)
+        )
+    {
+        LogError("invalid argument DATA_MARSHALLER_HANDLE dataMarshallerHandle=%p, VECTOR_HANDLE values=%p, unsigned char** destination=%p, size_t* destinationSize=%p",
+            dataMarshallerHandle,
+            values,
+            destination,
+            destinationSize);
+        result = DATA_MARSHALLER_INVALID_ARG;
+    }
+    else
+    {
+        JSON_Value* json = json_value_init_object();
+        if (json == NULL)
+        {
+            LogError("unable to json_value_init_object");
+            result = DATA_MARSHALLER_ERROR;
+        }
+        else
+        {
+            JSON_Object* jsonObject = json_object(json);
+            if (jsonObject == NULL)
+            {
+                LogError("unable to json_object");
+                json_value_free(json);
+                result = DATA_MARSHALLER_ERROR;
+            }
+            else
+            {
+                size_t i;
+                size_t nReportedProperties = VECTOR_size(values), nProcessedProperties = 0;
+
+                for (i = 0;i < nReportedProperties; i++)
+                {
+                    DATA_MARSHALLER_VALUE* v = *(DATA_MARSHALLER_VALUE**)VECTOR_element(values, i);
+                    STRING_HANDLE s = STRING_new();
+                    if (s == NULL)
+                    {
+                        LogError("unable to STRING_new");
+                        result = DATA_MARSHALLER_ERROR;
+                        i = nReportedProperties;/*forces loop to break*/
+                    }
+                    else
+                    {
+                        if (AgentDataTypes_ToString(s, v->Value) != AGENT_DATA_TYPES_OK)
+                        {
+                            LogError("unable to AgentDataTypes_ToString");
+                            result = DATA_MARSHALLER_ERROR;
+                            i = nReportedProperties;/*forces loop to break*/
+                            break;
+                        }
+                        else
+                        {
+                            JSON_Value * rightSide = json_parse_string(STRING_c_str(s));
+                            if (rightSide == NULL)
+                            {
+                                LogError("unable to json_parse_string");
+                                result = DATA_MARSHALLER_ERROR;
+                                i = nReportedProperties; /*forces loop to break*/
+                            }
+                            else
+                            {
+                                char* leftSide;
+                                if (mallocAndStrcpy_s(&leftSide, v->PropertyPath) != 0)
+                                {
+                                    LogError("unable to mallocAndStrcpy_s");
+                                    result = DATA_MARSHALLER_ERROR;
+                                    i = nReportedProperties;/*forces loop to break*/
+                                }
+                                else
+                                {
+                                    char *whereIsSlash;
+                                    while ((whereIsSlash = strchr(leftSide, '/')) != NULL)
+                                    {
+                                        *whereIsSlash = '.';
+                                    }
+
+                                    if (json_object_dotset_value(jsonObject, leftSide, rightSide) != JSONSuccess)
+                                    {
+                                        LogError("unable to json_object_dotset_value");
+                                        result = DATA_MARSHALLER_ERROR;
+                                        i = nReportedProperties;/*forces loop to break*/
+                                    }
+                                    else
+                                    {
+                                        /*all is fine with this property... */
+                                        nProcessedProperties++;
+                                    }
+                                    free(leftSide);
+                                }
+                                //json_value_free(rightSide);
+                            }
+                        }
+                        STRING_delete(s);
+                    }
+                }
+
+                if (nProcessedProperties != nReportedProperties)
+                {
+                    /*all properties have NOT been processed*/
+                    /*return result as is*/
+                }
+                else
+                {
+                    char* temp = json_serialize_to_string_pretty(json);
+                    if (temp == NULL)
+                    {
+                        LogError("unable to json_serialize_to_string_pretty ");
+                        free(temp);
+                        result = DATA_MARSHALLER_ERROR;
+                    }
+                    else
+                    {
+                        *destination = (unsigned char*)temp;
+                        *destinationSize = strlen(temp);
+                        result = DATA_MARSHALLER_OK;
+                        /*all is fine... */
+                    }
+                }
+            }
+            result = DATA_MARSHALLER_OK;
+        }
+    }
+    return result;
 }
+ 

@@ -1,23 +1,77 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifdef __cplusplus
 #include <cstdlib>
+#else
+#include <stdlib.h>
+#endif 
+
+static void* my_gballoc_malloc(size_t size)
+{
+    return malloc(size);
+}
+
+static void my_gballoc_free(void* s)
+{
+    free(s);
+}
+
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
 
-#include <ostream>
-#include "testrunnerswitcher.h"
-#include "datamarshaller.h"
+#define ENABLE_MOCKS
 #include "jsonencoder.h"
 #include "multitree.h"
 #include "schema.h"
-#include "micromock.h"
-#include "micromockcharstararenullterminatedstrings.h"
 #include "azure_c_shared_utility/strings.h"
+#include "azure_c_shared_utility/vector.h"
+#include "agenttypesystem.h"
 
-static MICROMOCK_MUTEX_HANDLE g_testByTest;
+#include "parson.h"
+MOCKABLE_FUNCTION(, JSON_Value*, json_parse_string, const char *, string);
+MOCKABLE_FUNCTION(, const char*, json_object_get_string, const JSON_Object *, object, const char *, name);
+MOCKABLE_FUNCTION(, JSON_Object*, json_value_get_object, const JSON_Value *, value);
+MOCKABLE_FUNCTION(, double, json_object_get_number, const JSON_Object*, object, const char*, name);
+MOCKABLE_FUNCTION(, char*, json_serialize_to_string, const JSON_Value*, value);
+MOCKABLE_FUNCTION(, void, json_free_serialized_string, char*, string);
+MOCKABLE_FUNCTION(, const char*, json_object_dotget_string, const JSON_Object*, object, const char*, name);
+MOCKABLE_FUNCTION(, JSON_Status, json_object_set_string, JSON_Object*, object, const char*, name, const char*, string);
+MOCKABLE_FUNCTION(, JSON_Status, json_object_dotset_string, JSON_Object*, object, const char*, name, const char*, string);
+MOCKABLE_FUNCTION(, JSON_Value*, json_value_init_object);
+MOCKABLE_FUNCTION(, JSON_Array*, json_array_get_array, const JSON_Array*, array, size_t, index);
+MOCKABLE_FUNCTION(, JSON_Object*, json_array_get_object, const JSON_Array*, array, size_t, index);
+MOCKABLE_FUNCTION(, JSON_Array*, json_value_get_array, const JSON_Value*, value);
+MOCKABLE_FUNCTION(, size_t, json_array_get_count, const JSON_Array*, array);
+MOCKABLE_FUNCTION(, JSON_Status, json_array_clear, JSON_Array*, array);
+MOCKABLE_FUNCTION(, JSON_Status, json_object_clear, JSON_Object*, object);
+MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value *, value);
+MOCKABLE_FUNCTION(, char *, json_serialize_to_string_pretty, const JSON_Value *, value);
+MOCKABLE_FUNCTION(, JSON_Status, json_object_dotset_value, JSON_Object *, object, const char *, name, JSON_Value *, value);
+MOCKABLE_FUNCTION(, JSON_Object *, json_object, const JSON_Value *,value);
 
+#undef ENABLE_MOCKS
+
+
+#include "datamarshaller.h"
+#include "testrunnerswitcher.h"
+#include "umock_c.h"
+#include "umocktypes_charptr.h"
+#include "umock_c_negative_tests.h"
+
+static TEST_MUTEX_HANDLE g_testByTest;
+static TEST_MUTEX_HANDLE g_dllByDll;
+
+static AGENT_DATA_TYPE floatValid;
+static AGENT_DATA_TYPE intValid;
+static AGENT_DATA_TYPE structTypeValue;
+static AGENT_DATA_TYPE structTypeValue2Members;
+
+static COMPLEX_TYPE_FIELD_TYPE members = { "x", &floatValid };
+static COMPLEX_TYPE_FIELD_TYPE two_members[] = { { "x", &floatValid },{ "y", &intValid } };
+
+#if 0
 DEFINE_MICROMOCK_ENUM_TO_STRING(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_RESULT_VALUES);
 
 #define DEFAULT_ENTITY_SET_NAME_SPACE "defaultEntitySetNameSpace"
@@ -39,10 +93,10 @@ static const size_t DEFAULT_ENCODED_PAYLOAD_LENGTH = sizeof(DEFAULT_ENCODED_PAYL
 
 static const char* DEFAULT_JSON_ENCODED_VALUES = "{ Some JSON values }";
 
-static AGENT_DATA_TYPE floatValid;
-static AGENT_DATA_TYPE intValid;
-static AGENT_DATA_TYPE structTypeValue;
-static AGENT_DATA_TYPE structTypeValue2Members;
+
+
+
+
 static const char* floatValidAsCharArray = "10.500000"; /*depends on FLT_DIG of the platform*/
 static time_t currentTime;
 
@@ -192,16 +246,25 @@ DECLARE_GLOBAL_MOCK_METHOD_2(CDataMarshallerMocks, , AGENT_DATA_TYPES_RESULT, Ag
 
 static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 
-COMPLEX_TYPE_FIELD_TYPE members = { "x", &floatValid };
-COMPLEX_TYPE_FIELD_TYPE two_members[] = { { "x", &floatValid }, { "y", &intValid } };
+;
+
+#endif
+
+static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
+{
+    char temp_str[256];
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    ASSERT_FAIL(temp_str);
+}
 
 BEGIN_TEST_SUITE(DataMarshaller_ut)
 
         TEST_SUITE_INITIALIZE(TestClassInitialize)
         {
             TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-            g_testByTest = MicroMockCreateMutex();
+            g_testByTest = TEST_MUTEX_CREATE();
             ASSERT_IS_NOT_NULL(g_testByTest);
+
             floatValid.type = EDM_SINGLE_TYPE;
             floatValid.value.edmSingle.value = 10.5;
             intValid.type = EDM_INT32_TYPE;
@@ -216,22 +279,30 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
 
         TEST_SUITE_CLEANUP(TestClassCleanup)
         {
-            MicroMockDestroyMutex(g_testByTest);
-            TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
+            umock_c_deinit();
+
+            TEST_MUTEX_DESTROY(g_testByTest);
+            TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);;
         }
 
         TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
         {
-            if (!MicroMockAcquireMutex(g_testByTest))
+            if (TEST_MUTEX_ACQUIRE(g_testByTest))
             {
                 ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
             }
+
+            umock_c_reset_all_calls();
+#if 0
             currentSTRING_new_call = 0;
             whenShallSTRING_new_fail = 0;
+#endif
+
         }
 
         TEST_FUNCTION_CLEANUP(TestMethodCleanup)
         {
+#if 0
             if (DEFAULT_ENCODED_VALUES != NULL)
             {
                 BASEIMPLEMENTATION::STRING_delete(DEFAULT_ENCODED_VALUES);
@@ -239,13 +310,11 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
             }
 
             ASSERT_ARE_EQUAL(size_t, nSTRING_new_calls, nSTRING_delete_calls);
+#endif
 
-            if (!MicroMockReleaseMutex(g_testByTest))
-            {
-                ASSERT_FAIL("failure in test framework at ReleaseMutex");
-            }
+            TEST_MUTEX_RELEASE(g_testByTest);
         }
-
+#if 0
         /* DataMarshaller_Create */
 
         /*Tests_SRS_DATA_MARSHALLER_99_019:[ DataMarshaller_Create shall return NULL if any argument is NULL.]*/
@@ -947,5 +1016,5 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
             ///cleanup
             DataMarshaller_Destroy(handle);
         }
-
+#endif
 END_TEST_SUITE(DataMarshaller_ut)
