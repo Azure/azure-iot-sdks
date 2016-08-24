@@ -291,7 +291,7 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceTwinCallback(IOTHUB_CLIENT_HAN
 
 `IoTHubClient_SetDeviceTwinCallback` sets up the callback for Device Twin events which are sent from the IoTHub.
 
-**SRS_IOTHUBCLIENT_10_001: [ If `iotHubClientHandle` is ``NULL``, `IoTHubClient_SetDeviceTwinCallback` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]**
+**SRS_IOTHUBCLIENT_10_001: [ If `iotHubClientHandle` is `NULL`, `IoTHubClient_SetDeviceTwinCallback` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]**
 
 **SRS_IOTHUBCLIENT_10_002: [ If acquiring the lock fails, `IoTHubClient_SetDeviceTwinCallback` shall return `IOTHUB_CLIENT_ERROR`. ]**
 
@@ -315,7 +315,7 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE 
 
 `IoTHubClient_SendReportedState` sends an asynchronous reported state to the IoTHub. The response is returned via call to the specified reportedStateCallback.
 
-**SRS_IOTHUBCLIENT_10_013: [ If `iotHubClientHandle` is ``NULL``, `IoTHubClient_SendReportedState` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]**
+**SRS_IOTHUBCLIENT_10_013: [ If `iotHubClientHandle` is `NULL`, `IoTHubClient_SendReportedState` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]**
 
 **SRS_IOTHUBCLIENT_10_014: [ If acquiring the lock fails, `IoTHubClient_SendReportedState` shall return `IOTHUB_CLIENT_ERROR`. ]**
 
@@ -338,7 +338,7 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SetIoTHubMethodCallback(IOTHUB_CLIENT_H
 
 `IoTHubClient_SetIoTHubMethodCallback` sets up the callback for a method which will be called by IoTHub.
 
-**SRS_IOTHUBCLIENT_12_012: [ If `iotHubClientHandle` is ``NULL``, `IoTHubClient_SetIoTHubMethodCallback` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]**
+**SRS_IOTHUBCLIENT_12_012: [ If `iotHubClientHandle` is `NULL`, `IoTHubClient_SetIoTHubMethodCallback` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]**
 
 **SRS_IOTHUBCLIENT_12_013: [ If acquiring the lock fails, `IoTHubClient_SetIoTHubMethodCallback` shall return `IOTHUB_CLIENT_ERROR`. ]**
 
@@ -361,7 +361,7 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_ExecuteIoTHubMethod(IOTHUB_CLIENT_HANDL
 
 `IoTHubClient_ExecuteIoTHubMethod` executes the given method on IoTHub and return the result to the client.
 
-**SRS_IOTHUBCLIENT_12_019: [ If `iotHubClientHandle` is ``NULL``, `IoTHubClient_ExecuteIoTHubMethod` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]**
+**SRS_IOTHUBCLIENT_12_019: [ If `iotHubClientHandle` is `NULL`, `IoTHubClient_ExecuteIoTHubMethod` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]**
 
 **SRS_IOTHUBCLIENT_12_020: [ If acquiring the lock fails, `IoTHubClient_ExecuteIoTHubMethod` shall return `IOTHUB_CLIENT_ERROR`. ]**
 
@@ -386,9 +386,9 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubC
 `IoTHubClient_UploadToBlobAsync` asynchronously uploads the data pointed to by `source` having the size `size` to a file 
 called `destinationFileName` in Azure Blob Storage and calls `iotHubClientFileUploadCallback` once the operation has completed
 
-**SRS_IOTHUBCLIENT_02_047: [ If `iotHubClientHandle` is ``NULL`` then `IoTHubClient_UploadToBlobAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]**
+**SRS_IOTHUBCLIENT_02_047: [ If `iotHubClientHandle` is `NULL` then `IoTHubClient_UploadToBlobAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]**
 
-**SRS_IOTHUBCLIENT_02_048: [ If `destinationFileName` is ``NULL`` then `IoTHubClient_UploadToBlobAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]**
+**SRS_IOTHUBCLIENT_02_048: [ If `destinationFileName` is `NULL` then `IoTHubClient_UploadToBlobAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]**
 
 **SRS_IOTHUBCLIENT_02_049: [ If `source` is `NULL` and size is greated than 0 then `IoTHubClient_UploadToBlobAsync` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`. ]**
 
