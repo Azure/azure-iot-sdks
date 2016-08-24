@@ -112,7 +112,7 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData_ReportedProperties(DATA_MARSHALLE
 
 `DataMarshaller_SendData_ReportedProperties` produces in `destination` and `destinationSize` the representatio of the data in JSON format.
 
-If argument `dataMarshallerHandle` is `NULL` then `DataMarshaller_SendData_ReportedProperties` shall fail and return `DATA_MARSHALLER_INVALID_ARG`.
+**SRS_DATA_MARSHALLER_02_021: [** If argument `dataMarshallerHandle` is `NULL` then `DataMarshaller_SendData_ReportedProperties` shall fail and return `DATA_MARSHALLER_INVALID_ARG`. **]**
 
 **SRS_DATA_MARSHALLER_02_008: [** If argument `values` is `NULL` then `DataMarshaller_SendData_ReportedProperties` shall fail and return `DATA_MARSHALLER_INVALID_ARG`. **]**
 

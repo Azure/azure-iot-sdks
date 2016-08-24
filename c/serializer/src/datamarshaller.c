@@ -221,10 +221,14 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData(DATA_MARSHALLER_HANDLE dataMarsha
     return result;
 }
 
+
 DATA_MARSHALLER_RESULT DataMarshaller_SendData_ReportedProperties(DATA_MARSHALLER_HANDLE dataMarshallerHandle, VECTOR_HANDLE values, unsigned char** destination, size_t* destinationSize)
 {
     DATA_MARSHALLER_RESULT result;
-    /*this function builds a parson object*/
+    /*Codes_SRS_DATA_MARSHALLER_02_021: [ If argument dataMarshallerHandle is NULL then DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_INVALID_ARG. ]*/
+    /*Codes_SRS_DATA_MARSHALLER_02_008: [ If argument values is NULL then DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_INVALID_ARG. ]*/
+    /*Codes_SRS_DATA_MARSHALLER_02_009: [ If argument destination NULL then DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_INVALID_ARG. ]*/
+    /*Codes_SRS_DATA_MARSHALLER_02_010: [ If argument destinationSize NULL then DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_INVALID_ARG. ]*/
     if (
         (dataMarshallerHandle == NULL) ||
         (values == NULL) ||
@@ -241,19 +245,22 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData_ReportedProperties(DATA_MARSHALLE
     }
     else
     {
+        /*Codes_SRS_DATA_MARSHALLER_02_012: [ DataMarshaller_SendData_ReportedProperties shall create an empty JSON_Value. ]*/
         JSON_Value* json = json_value_init_object();
         if (json == NULL)
         {
+            /*Codes_SRS_DATA_MARSHALLER_02_019: [ If any failure occurs, DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_ERROR. ]*/
             LogError("unable to json_value_init_object");
             result = DATA_MARSHALLER_ERROR;
         }
         else
         {
+            /*Codes_SRS_DATA_MARSHALLER_02_013: [ DataMarshaller_SendData_ReportedProperties shall get the object behind the JSON_Value by calling json_object. ]*/
             JSON_Object* jsonObject = json_object(json);
             if (jsonObject == NULL)
             {
+                /*Codes_SRS_DATA_MARSHALLER_02_019: [ If any failure occurs, DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_ERROR. ]*/
                 LogError("unable to json_object");
-                json_value_free(json);
                 result = DATA_MARSHALLER_ERROR;
             }
             else
@@ -267,50 +274,56 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData_ReportedProperties(DATA_MARSHALLE
                     STRING_HANDLE s = STRING_new();
                     if (s == NULL)
                     {
+                        /*Codes_SRS_DATA_MARSHALLER_02_019: [ If any failure occurs, DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_ERROR. ]*/
                         LogError("unable to STRING_new");
-                        result = DATA_MARSHALLER_ERROR;
-                        i = nReportedProperties;/*forces loop to break*/
+                        i = nReportedProperties;/*forces loop to break, result is set in the "if" following this for*/
                     }
                     else
                     {
+                        /*Codes_SRS_DATA_MARSHALLER_02_014: [ For every reported property, DataMarshaller_SendData_ReportedProperties shall get the reported property's JSON value (as string) by calling AgentDataTypes_ToString. ]*/
                         if (AgentDataTypes_ToString(s, v->Value) != AGENT_DATA_TYPES_OK)
                         {
+                            /*Codes_SRS_DATA_MARSHALLER_02_019: [ If any failure occurs, DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_ERROR. ]*/
                             LogError("unable to AgentDataTypes_ToString");
-                            result = DATA_MARSHALLER_ERROR;
-                            i = nReportedProperties;/*forces loop to break*/
-                            break;
+                            i = nReportedProperties;/*forces loop to break, result is set in the "if" following this for*/
                         }
                         else
                         {
+                            /*Codes_SRS_DATA_MARSHALLER_02_015: [ DataMarshaller_SendData_ReportedProperties shall import the JSON value (as string) by calling json_parse_string. ]*/
                             JSON_Value * rightSide = json_parse_string(STRING_c_str(s));
                             if (rightSide == NULL)
                             {
+                                /*Codes_SRS_DATA_MARSHALLER_02_019: [ If any failure occurs, DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_ERROR. ]*/
                                 LogError("unable to json_parse_string");
-                                result = DATA_MARSHALLER_ERROR;
-                                i = nReportedProperties; /*forces loop to break*/
+                                i = nReportedProperties;/*forces loop to break, result is set in the "if" following this for*/
                             }
                             else
                             {
                                 char* leftSide;
                                 if (mallocAndStrcpy_s(&leftSide, v->PropertyPath) != 0)
                                 {
+                                    /*Codes_SRS_DATA_MARSHALLER_02_019: [ If any failure occurs, DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_ERROR. ]*/
                                     LogError("unable to mallocAndStrcpy_s");
-                                    result = DATA_MARSHALLER_ERROR;
-                                    i = nReportedProperties;/*forces loop to break*/
+                                    json_value_free(rightSide);i = nReportedProperties;/*forces loop to break, result is set in the "if" following this for*/
+                                    i = nReportedProperties;/*forces loop to break, result is set in the "if" following this for*/
                                 }
                                 else
                                 {
+                                    /*Codes_SRS_DATA_MARSHALLER_02_016: [ DataMarshaller_SendData_ReportedProperties shall replace all the occurences of / with . in the reported property paths. ]*/
                                     char *whereIsSlash;
                                     while ((whereIsSlash = strchr(leftSide, '/')) != NULL)
                                     {
                                         *whereIsSlash = '.';
                                     }
 
+                                    /*Codes_SRS_DATA_MARSHALLER_02_017: [ DataMarshaller_SendData_ReportedProperties shall use json_object_dotset_value passing the reported property path and the imported json value. ]*/
+                                    /*Codes_SRS_DATA_MARSHALLER_02_011: [ DataMarshaller_SendData_ReportedProperties shall ignore the value of includePropertyPath and shall consider it to be true. ]*/
                                     if (json_object_dotset_value(jsonObject, leftSide, rightSide) != JSONSuccess)
                                     {
+                                        /*Codes_SRS_DATA_MARSHALLER_02_019: [ If any failure occurs, DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_ERROR. ]*/
                                         LogError("unable to json_object_dotset_value");
-                                        result = DATA_MARSHALLER_ERROR;
-                                        i = nReportedProperties;/*forces loop to break*/
+                                        json_value_free(rightSide);
+                                        i = nReportedProperties;/*forces loop to break, result is set in the "if" following this for*/
                                     }
                                     else
                                     {
@@ -319,7 +332,6 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData_ReportedProperties(DATA_MARSHALLE
                                     }
                                     free(leftSide);
                                 }
-                                //json_value_free(rightSide);
                             }
                         }
                         STRING_delete(s);
@@ -328,20 +340,23 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData_ReportedProperties(DATA_MARSHALLE
 
                 if (nProcessedProperties != nReportedProperties)
                 {
+                    result = DATA_MARSHALLER_ERROR;
                     /*all properties have NOT been processed*/
                     /*return result as is*/
                 }
                 else
                 {
+                    /*Codes_SRS_DATA_MARSHALLER_02_018: [ DataMarshaller_SendData_ReportedProperties shall use json_serialize_to_string_pretty to produce the output JSON string that fills out parameters destination and destionationSize. ]*/
                     char* temp = json_serialize_to_string_pretty(json);
                     if (temp == NULL)
                     {
+                        /*Codes_SRS_DATA_MARSHALLER_02_019: [ If any failure occurs, DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_ERROR. ]*/
                         LogError("unable to json_serialize_to_string_pretty ");
-                        free(temp);
                         result = DATA_MARSHALLER_ERROR;
                     }
                     else
                     {
+                        /*Codes_SRS_DATA_MARSHALLER_02_020: [ Otherwise DataMarshaller_SendData_ReportedProperties shall succeed and return DATA_MARSHALLER_OK. ]*/
                         *destination = (unsigned char*)temp;
                         *destinationSize = strlen(temp);
                         result = DATA_MARSHALLER_OK;
@@ -349,7 +364,7 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData_ReportedProperties(DATA_MARSHALLE
                     }
                 }
             }
-            result = DATA_MARSHALLER_OK;
+            json_value_free(json);
         }
     }
     return result;
