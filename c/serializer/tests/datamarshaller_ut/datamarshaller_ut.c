@@ -21,6 +21,12 @@ static void my_gballoc_free(void* s)
 #include <crtdbg.h>
 #endif
 
+#include "umock_c.h"
+#include "umocktypes_charptr.h"
+#include "umocktypes_bool.h"
+#include "umocktypes_stdint.h"
+#include "umock_c_negative_tests.h"
+
 #define ENABLE_MOCKS
 #include "jsonencoder.h"
 #include "multitree.h"
@@ -60,6 +66,8 @@ MOCKABLE_FUNCTION(, JSON_Object *, json_object, const JSON_Value *,value);
 #include "umocktypes_charptr.h"
 #include "umock_c_negative_tests.h"
 
+DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;
 
@@ -71,184 +79,43 @@ static AGENT_DATA_TYPE structTypeValue2Members;
 static COMPLEX_TYPE_FIELD_TYPE members = { "x", &floatValid };
 static COMPLEX_TYPE_FIELD_TYPE two_members[] = { { "x", &floatValid },{ "y", &intValid } };
 
-#if 0
-DEFINE_MICROMOCK_ENUM_TO_STRING(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_RESULT_VALUES);
-
-#define DEFAULT_ENTITY_SET_NAME_SPACE "defaultEntitySetNameSpace"
-#define DEFAULT_ENTITY_SET_NAME "defaultEntitySetName"
-
 static const SCHEMA_MODEL_TYPE_HANDLE TEST_MODEL_HANDLE = (SCHEMA_MODEL_TYPE_HANDLE)0x4242;
-static const SCHEMA_HANDLE TEST_SCHEMA_HANDLE = (SCHEMA_HANDLE)0x4243;
-
 #define DEFAULT_PROPERTY_NAME "defaultPropertyName"
+
+
+TEST_DEFINE_ENUM_TYPE(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_RESULT_VALUES);
+
+TEST_DEFINE_ENUM_TYPE(MULTITREE_RESULT, MULTITREE_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(MULTITREE_RESULT, MULTITREE_RESULT_VALUES);
+
+TEST_DEFINE_ENUM_TYPE(JSON_ENCODER_RESULT, JSON_ENCODER_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(JSON_ENCODER_RESULT, JSON_ENCODER_RESULT_VALUES);
+
+
+
 #define DEFAULT_PROPERTY_NAME_2 "blahBlah"
 
-#define DEFAULT_TIMESTAMP_STR "SomeTimeSTamp T 10:52:32Z"
-
-static STRING_HANDLE DEFAULT_ENCODED_VALUES = NULL;
-static const size_t DEFAULT_ENCODED_VALUES_LENGTH = sizeof(DEFAULT_ENCODED_VALUES) - 1;
-
-static STRING_HANDLE DEFAULT_ENCODED_PAYLOAD;
-static const size_t DEFAULT_ENCODED_PAYLOAD_LENGTH = sizeof(DEFAULT_ENCODED_PAYLOAD) - 1;
-
-static const char* DEFAULT_JSON_ENCODED_VALUES = "{ Some JSON values }";
-
-
-
-
-
-static const char* floatValidAsCharArray = "10.500000"; /*depends on FLT_DIG of the platform*/
-static time_t currentTime;
-
-std::ostream& operator<<(std::ostream& left, EDM_DATE_TIME_OFFSET dateTimeOffset)
+static MULTITREE_HANDLE my_MultiTree_Create(MULTITREE_CLONE_FUNCTION cloneFunction, MULTITREE_FREE_FUNCTION freeFunction)
 {
-    return left << "struct tm = (" <<
-        dateTimeOffset.dateTime.tm_year << "-" <<
-        dateTimeOffset.dateTime.tm_mon << "-" <<
-        dateTimeOffset.dateTime.tm_mday << " " <<
-        dateTimeOffset.dateTime.tm_hour << ":" <<
-        dateTimeOffset.dateTime.tm_min << ":" <<
-        dateTimeOffset.dateTime.tm_sec << " ) " <<
-        dateTimeOffset.hasFractionalSecond << " " <<
-        dateTimeOffset.fractionalSecond << " " <<
-        dateTimeOffset.hasTimeZone << " " <<
-        dateTimeOffset.timeZoneHour << " " <<
-        dateTimeOffset.timeZoneMinute;
+    (void)(cloneFunction, freeFunction);
+    return (MULTITREE_HANDLE)my_gballoc_malloc(1);
 }
 
-std::wostream& operator<<(std::wostream& left, EDM_DATE_TIME_OFFSET dateTimeOffset)
+static void my_MultiTree_Destroy(MULTITREE_HANDLE treeHandle)
 {
-    return left << L"struct tm = (" <<
-        dateTimeOffset.dateTime.tm_year << L"-" <<
-        dateTimeOffset.dateTime.tm_mon << L"-" <<
-        dateTimeOffset.dateTime.tm_mday << L" " <<
-        dateTimeOffset.dateTime.tm_hour << L":" <<
-        dateTimeOffset.dateTime.tm_min << L":" <<
-        dateTimeOffset.dateTime.tm_sec << L" ) " <<
-        dateTimeOffset.hasFractionalSecond << L" " <<
-        dateTimeOffset.fractionalSecond << L" " <<
-        dateTimeOffset.hasTimeZone << L" " <<
-        dateTimeOffset.timeZoneHour << L" " <<
-        dateTimeOffset.timeZoneMinute;
+    my_gballoc_free(treeHandle);
 }
 
-
-static bool operator==(EDM_DATE_TIME_OFFSET left, EDM_DATE_TIME_OFFSET right)
+static STRING_HANDLE my_STRING_new(void)
 {
-    return memcmp(&left, &right, sizeof(left)) == 0;
+    return (STRING_HANDLE)my_gballoc_malloc(2);
 }
 
-static struct tm someStructTm;
-
-#define DEFAULT_JSON_ENCODER_PAYLOAD_LENGTH 10
-#define TEST_JSON_ENCODER_HANDLE_0x42 (void*)0x42
-static MULTITREE_HANDLE TEST_MULTITREE_HANDLE = (MULTITREE_HANDLE)0x4442;
-static MULTITREE_HANDLE TEST_ENVELOPE_MULTITREE_HANDLE = (MULTITREE_HANDLE)0x4443;
-
-#define GBALLOC_H
-namespace BASEIMPLEMENTATION
+static void my_STRING_delete(STRING_HANDLE handle)
 {
-#include "strings.c"
-};
-
-static size_t currentSTRING_new_call;
-static size_t whenShallSTRING_new_fail;
-
-static size_t nSTRING_new_calls = 0;
-static size_t nSTRING_delete_calls = 0;
-
-TYPED_MOCK_CLASS(CDataMarshallerMocks, CGlobalMock)
-{
-public:
-
-    /* JSONEncoder mocks */
-    MOCK_STATIC_METHOD_4(, JSON_ENCODER_RESULT, JSONEncoder_EncodeTree, MULTITREE_HANDLE, treeHandle, char*, buffer, size_t*, byteCount, JSON_ENCODER_TOSTRING_FUNC, toStringFunc)
-    MOCK_METHOD_END(JSON_ENCODER_RESULT, JSON_ENCODER_OK)
-    MOCK_STATIC_METHOD_3(, JSON_ENCODER_TOSTRING_RESULT, JSONEncoder_CharPtr_ToString, char*, destination, size_t, destinationSize, const void*, value)
-    MOCK_METHOD_END(JSON_ENCODER_TOSTRING_RESULT, JSON_ENCODER_TOSTRING_OK)
-
-    /* MultiTree mocks */
-    MOCK_STATIC_METHOD_2(, MULTITREE_HANDLE, MultiTree_Create, MULTITREE_CLONE_FUNCTION, cloneFunction, MULTITREE_FREE_FUNCTION, freeFunction)
-    MOCK_METHOD_END(MULTITREE_HANDLE, TEST_MULTITREE_HANDLE)
-    MOCK_STATIC_METHOD_3(, MULTITREE_RESULT, MultiTree_AddLeaf, MULTITREE_HANDLE, treeHandle, const char*, destinationPath, const void*, value)
-    MOCK_METHOD_END(MULTITREE_RESULT, MULTITREE_OK)
-    MOCK_STATIC_METHOD_1(, void, MultiTree_Destroy, MULTITREE_HANDLE, treeHandle)
-    MOCK_VOID_METHOD_END()
-
-    /* AgentTypeSystem mocks */
-    MOCK_STATIC_METHOD_2(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_charz, AGENT_DATA_TYPE*, agentData, const char*, v)
-    MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK)
-    MOCK_STATIC_METHOD_1(, void, Destroy_AGENT_DATA_TYPE, AGENT_DATA_TYPE*, agentData)
-    MOCK_VOID_METHOD_END()
-    MOCK_STATIC_METHOD_2(, AGENT_DATA_TYPES_RESULT, AgentDataTypes_ToString, STRING_HANDLE, destination, const AGENT_DATA_TYPE*, value)
-    MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK)
-
-    /*Strings*/
-
-    MOCK_STATIC_METHOD_0(, STRING_HANDLE, STRING_new)
-
-    STRING_HANDLE result2;
-    currentSTRING_new_call++;
-    if (whenShallSTRING_new_fail>0)
-    {
-        if (currentSTRING_new_call == whenShallSTRING_new_fail)
-        {
-            result2 = (STRING_HANDLE)NULL;
-        }
-        else
-        {
-            nSTRING_new_calls++;
-            result2 = BASEIMPLEMENTATION::STRING_new();
-        }
-    }
-    else
-    {
-        nSTRING_new_calls++;
-        result2 = BASEIMPLEMENTATION::STRING_new();
-    }
-    MOCK_METHOD_END(STRING_HANDLE, result2)
-    MOCK_STATIC_METHOD_1(, void, STRING_delete, STRING_HANDLE, s)
-        nSTRING_delete_calls++;
-        BASEIMPLEMENTATION::STRING_delete(s);
-    MOCK_VOID_METHOD_END()
-
-    MOCK_STATIC_METHOD_1(, const char*, STRING_c_str, STRING_HANDLE, s)
-    MOCK_METHOD_END(const char*, BASEIMPLEMENTATION::STRING_c_str(s))
-
-    MOCK_STATIC_METHOD_1(, size_t, STRING_length, STRING_HANDLE, s)
-    MOCK_METHOD_END(size_t, BASEIMPLEMENTATION::STRING_length(s))
-
-    /* JSONEncoder mocks */
-    MOCK_STATIC_METHOD_3(, JSON_ENCODER_RESULT, JSONEncoder_EncodeTree, MULTITREE_HANDLE, treeHandle, STRING_HANDLE, buffer, JSON_ENCODER_TOSTRING_FUNC, toStringFunc)
-    MOCK_METHOD_END(JSON_ENCODER_RESULT, JSON_ENCODER_OK)
-    MOCK_STATIC_METHOD_2(, JSON_ENCODER_TOSTRING_RESULT, JSONEncoder_CharPtr_ToString, STRING_HANDLE, destination, const void*, value)
-    MOCK_METHOD_END(JSON_ENCODER_TOSTRING_RESULT, JSON_ENCODER_TOSTRING_OK)
-
-};
-
-
-DECLARE_GLOBAL_MOCK_METHOD_3(CDataMarshallerMocks, , JSON_ENCODER_RESULT, JSONEncoder_EncodeTree, MULTITREE_HANDLE, treeHandle, STRING_HANDLE, buffer, JSON_ENCODER_TOSTRING_FUNC, toStringFunc);
-DECLARE_GLOBAL_MOCK_METHOD_2(CDataMarshallerMocks, , JSON_ENCODER_TOSTRING_RESULT, JSONEncoder_CharPtr_ToString, STRING_HANDLE, destination, const void*, value);
-
-DECLARE_GLOBAL_MOCK_METHOD_0(CDataMarshallerMocks, , STRING_HANDLE, STRING_new);
-DECLARE_GLOBAL_MOCK_METHOD_1(CDataMarshallerMocks, , void, STRING_delete, STRING_HANDLE, s);
-DECLARE_GLOBAL_MOCK_METHOD_1(CDataMarshallerMocks, , const char*, STRING_c_str, STRING_HANDLE, s);
-DECLARE_GLOBAL_MOCK_METHOD_1(CDataMarshallerMocks, , size_t, STRING_length, STRING_HANDLE, s);
-
-DECLARE_GLOBAL_MOCK_METHOD_2(CDataMarshallerMocks, , MULTITREE_HANDLE, MultiTree_Create, MULTITREE_CLONE_FUNCTION, cloneFunction, MULTITREE_FREE_FUNCTION, freeFunction);
-DECLARE_GLOBAL_MOCK_METHOD_3(CDataMarshallerMocks, , MULTITREE_RESULT, MultiTree_AddLeaf, MULTITREE_HANDLE, treeHandle, const char*, destinationPath, const void*, value);
-DECLARE_GLOBAL_MOCK_METHOD_1(CDataMarshallerMocks, , void, MultiTree_Destroy, MULTITREE_HANDLE, treeHandle);
-
-DECLARE_GLOBAL_MOCK_METHOD_2(CDataMarshallerMocks, , AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_charz, AGENT_DATA_TYPE*, agentData, const char*, v);
-DECLARE_GLOBAL_MOCK_METHOD_1(CDataMarshallerMocks, , void, Destroy_AGENT_DATA_TYPE, AGENT_DATA_TYPE*, agentData);
-DECLARE_GLOBAL_MOCK_METHOD_2(CDataMarshallerMocks, , AGENT_DATA_TYPES_RESULT, AgentDataTypes_ToString, STRING_HANDLE, destination, const AGENT_DATA_TYPE*, value);
-
-
-static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
-
-;
-
-#endif
+    my_gballoc_free(handle);
+}
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
@@ -265,6 +132,12 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
             g_testByTest = TEST_MUTEX_CREATE();
             ASSERT_IS_NOT_NULL(g_testByTest);
 
+            (void)umock_c_init(on_umock_c_error);
+
+            (void)umocktypes_bool_register_types();
+            (void)umocktypes_charptr_register_types();
+            (void)umocktypes_stdint_register_types();
+
             floatValid.type = EDM_SINGLE_TYPE;
             floatValid.value.edmSingle.value = 10.5;
             intValid.type = EDM_INT32_TYPE;
@@ -275,6 +148,27 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
             structTypeValue2Members.type = EDM_COMPLEX_TYPE_TYPE;
             structTypeValue2Members.value.edmComplexType.nMembers = COUNT_OF(two_members);
             structTypeValue2Members.value.edmComplexType.fields = two_members;
+
+            REGISTER_UMOCK_ALIAS_TYPE(MULTITREE_CLONE_FUNCTION, void*);
+            REGISTER_UMOCK_ALIAS_TYPE(MULTITREE_FREE_FUNCTION, void*);
+            REGISTER_UMOCK_ALIAS_TYPE(MULTITREE_HANDLE, void*);
+            REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
+            REGISTER_UMOCK_ALIAS_TYPE(JSON_ENCODER_TOSTRING_FUNC, void*);
+            
+            
+
+            REGISTER_UMOCK_ALIAS_TYPE(MULTITREE_RESULT, int);
+            REGISTER_UMOCK_ALIAS_TYPE(DATA_MARSHALLER_RESULT, int);
+            REGISTER_UMOCK_ALIAS_TYPE(JSON_ENCODER_RESULT, int);
+            
+
+            REGISTER_GLOBAL_MOCK_HOOK(MultiTree_Create, my_MultiTree_Create);
+            REGISTER_GLOBAL_MOCK_HOOK(MultiTree_Destroy, my_MultiTree_Destroy);
+
+            REGISTER_GLOBAL_MOCK_HOOK(STRING_new, my_STRING_new);
+            REGISTER_GLOBAL_MOCK_HOOK(STRING_delete, my_STRING_delete);
+            
+            
         }
 
         TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -293,38 +187,23 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
             }
 
             umock_c_reset_all_calls();
-#if 0
-            currentSTRING_new_call = 0;
-            whenShallSTRING_new_fail = 0;
-#endif
 
         }
 
         TEST_FUNCTION_CLEANUP(TestMethodCleanup)
         {
-#if 0
-            if (DEFAULT_ENCODED_VALUES != NULL)
-            {
-                BASEIMPLEMENTATION::STRING_delete(DEFAULT_ENCODED_VALUES);
-                DEFAULT_ENCODED_VALUES = NULL;
-            }
-
-            ASSERT_ARE_EQUAL(size_t, nSTRING_new_calls, nSTRING_delete_calls);
-#endif
-
             TEST_MUTEX_RELEASE(g_testByTest);
         }
-#if 0
+
         /* DataMarshaller_Create */
 
         /*Tests_SRS_DATA_MARSHALLER_99_019:[ DataMarshaller_Create shall return NULL if any argument is NULL.]*/
         TEST_FUNCTION(DataMarshaller_Create_with_NULL_Model_Handle_fails)
         {
             ///arrange
-            CDataMarshallerMocks mocks;
 
             ///act
-            auto res = DataMarshaller_Create(NULL, true);
+            DATA_MARSHALLER_HANDLE res = DataMarshaller_Create(NULL, true);
 
             ///assert
             ASSERT_IS_NULL(res);
@@ -335,14 +214,13 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(DataMarshaller_Create_succeeds)
         {
             ///arrange
-            CDataMarshallerMocks mocks;
 
             ///act
-            auto res = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
+            DATA_MARSHALLER_HANDLE res = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
 
             ///assert
             ASSERT_IS_NOT_NULL(res);
-            mocks.AssertActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
             ///cleanup
             DataMarshaller_Destroy(res);
@@ -354,17 +232,16 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(DataMarshaller_Create_Twice_Yields_2_Different_Handles)
         {
             ///arrange
-            CDataMarshallerMocks mocks;
 
             ///act
-            auto handle1 = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
-            auto handle2 = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
+            DATA_MARSHALLER_HANDLE handle1 = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
+            DATA_MARSHALLER_HANDLE handle2 = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
 
             ///assert
             ASSERT_IS_NOT_NULL(handle1);
             ASSERT_IS_NOT_NULL(handle2);
             ASSERT_ARE_NOT_EQUAL(void_ptr, (void_ptr)handle1, (void_ptr)handle2);
-            mocks.AssertActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
             ///cleanup
             DataMarshaller_Destroy(handle1);
@@ -377,15 +254,14 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(DataMarshaller_Destroy_succeeds_1)
         {
             ///arrange
-            CDataMarshallerMocks mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
 
             ///act
             DataMarshaller_Destroy(handle);
 
             ///assert
-            ///no explicit assert, uMock checks the calls
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         }
 
         /*Tests_SRS_DATA_MARSHALLER_99_024:[ When called with a NULL handle, DataMarshaller_Destroy shall do nothing.]*/
@@ -394,7 +270,6 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
             /*Comments: "shall do nothing" is impossible to test, but we can try something*/
 
             ///arrange
-            CDataMarshallerMocks mocks;
 
             ///act
             DataMarshaller_Destroy(NULL);
@@ -410,16 +285,15 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(DataMarshaller_SendData_with_Zero_Value_Count_Fails)
         {
             ///arrange
-            CNiceCallComparer<CDataMarshallerMocks> mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
             unsigned char* destination;
             size_t destinationSize;
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
 
             const DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, &floatValid };
 
             ///act
-            auto result = DataMarshaller_SendData(handle, 0, &value, &destination, &destinationSize);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, 0, &value, &destination, &destinationSize);
             
             ///assert
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_INVALID_ARG, result);
@@ -433,20 +307,19 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(DataMarshaller_SendData_with_PropertyName_NULL_fails)
         {
             ///arrange
-            CNiceCallComparer<CDataMarshallerMocks> mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
             unsigned char* destination;
             size_t destinationSize;
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
 
             DATA_MARSHALLER_VALUE value = { NULL, &floatValid };
 
             ///act
-            auto result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
             
             ///assert
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_INVALID_MODEL_PROPERTY, result);
-            mocks.AssertActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
             ///cleanup
             DataMarshaller_Destroy(handle);
@@ -457,20 +330,19 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(DataMarshaller_SendData_with_Value_NULL_In_The_DATA_MARSHALLER_VALUE_fails)
         {
             ///arrange
-            CNiceCallComparer<CDataMarshallerMocks> mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
             unsigned char* destination;
             size_t destinationSize;
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
 
             DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, NULL };
 
             ///act
-            auto result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
 
             ///assert
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_INVALID_MODEL_PROPERTY, result);
-            mocks.AssertActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
             ///cleanup
             DataMarshaller_Destroy(handle);
@@ -481,22 +353,21 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(DataMarshaller_SendData_with_Second_PropertyName_NULL_fails)
         {
             ///arrange
-            CNiceCallComparer<CDataMarshallerMocks> mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
             unsigned char* destination;
             size_t destinationSize;
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
 
             DATA_MARSHALLER_VALUE values[] = {
                 { DEFAULT_PROPERTY_NAME, &floatValid },
                 { NULL, &floatValid } };
 
             ///act
-            auto result = DataMarshaller_SendData(handle, sizeof(values) / sizeof(values[0]), values, &destination, &destinationSize);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, sizeof(values) / sizeof(values[0]), values, &destination, &destinationSize);
 
             ///assert
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_INVALID_MODEL_PROPERTY, result);
-            mocks.AssertActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
             ///cleanup
             DataMarshaller_Destroy(handle);
@@ -507,22 +378,21 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(DataMarshaller_SendData_with_Second_Value_NULL_In_The_DATA_MARSHALLER_VALUE_fails)
         {
             ///arrange
-            CNiceCallComparer<CDataMarshallerMocks> mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
             unsigned char* destination;
             size_t destinationSize;
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
 
             DATA_MARSHALLER_VALUE values[] = {
                 { DEFAULT_PROPERTY_NAME, &floatValid },
                 { DEFAULT_PROPERTY_NAME_2, NULL } };
 
             ///act
-            auto result = DataMarshaller_SendData(handle, sizeof(values) / sizeof(values[0]), values, &destination, &destinationSize);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, sizeof(values) / sizeof(values[0]), values, &destination, &destinationSize);
 
             ///assert
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_INVALID_MODEL_PROPERTY, result);
-            mocks.AssertActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
             ///cleanup
             DataMarshaller_Destroy(handle);
@@ -533,19 +403,18 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(DataMarshaller_SendData_with_NULL_values_fails)
         {
             ///arrange
-            CDataMarshallerMocks mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
             unsigned char* destination;
             size_t destinationSize;
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
 
             ///act
-            auto result = DataMarshaller_SendData(handle, 1, NULL, &destination, &destinationSize);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, 1, NULL, &destination, &destinationSize);
 
             ///assert
-            mocks.ResetAllCalls(); /*because for this test we don't care about the calls in other layers*/
+            umock_c_reset_all_calls(); /*because for this test we don't care about the calls in other layers*/
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_INVALID_ARG, result);
-            mocks.AssertActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
             ///cleanup
             DataMarshaller_Destroy(handle);
@@ -555,19 +424,18 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(DataMarshaller_SendData_with_NULL_destination_fails)
         {
             ///arrange
-            CDataMarshallerMocks mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
             size_t destinationSize;
             DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, &floatValid };
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
 
             ///act
-            auto result = DataMarshaller_SendData(handle, 1, &value, NULL, &destinationSize);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, 1, &value, NULL, &destinationSize);
 
             ///assert
-            mocks.ResetAllCalls(); /*because for this test we don't care about the calls in other layers*/
+            umock_c_reset_all_calls(); /*because for this test we don't care about the calls in other layers*/
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_INVALID_ARG, result);
-            mocks.AssertActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
             ///cleanup
             DataMarshaller_Destroy(handle);
@@ -577,19 +445,18 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(DataMarshaller_SendData_with_NULL_destinationSize_fails)
         {
             ///arrange
-            CDataMarshallerMocks mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
             unsigned char* destination;
             DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, &floatValid };
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
 
             ///act
-            auto result = DataMarshaller_SendData(handle, 1, &value, &destination, NULL);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, 1, &value, &destination, NULL);
 
             ///assert
-            mocks.ResetAllCalls(); /*because for this test we don't care about the calls in other layers*/
+            umock_c_reset_all_calls(); /*because for this test we don't care about the calls in other layers*/
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_INVALID_ARG, result);
-            mocks.AssertActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
             ///cleanup
             DataMarshaller_Destroy(handle);
@@ -599,23 +466,22 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(DataMarshaller_SendData_When_MultiTree_Create_Fails_Then_Fails)
         {
             ///arrange
-            CDataMarshallerMocks mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
             unsigned char* destination;
             size_t destinationSize;
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
 
             DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, &floatValid };
 
-            EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
                 .SetReturn((MULTITREE_HANDLE)NULL);
 
             ///act
-            auto result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
 
             ///assert
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_MULTITREE_ERROR, result);
-            mocks.AssertActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
             ///cleanup
             DataMarshaller_Destroy(handle);
@@ -625,27 +491,30 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(DataMarshaller_SendData_When_MultiTree_AddLeaf_With_Property_Value_Fails_Then_Fails)
         {
             ///arrange
-            CDataMarshallerMocks mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
             unsigned char* destination;
             size_t destinationSize;
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
 
             DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, &floatValid };
 
-            EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                .IgnoreArgument_cloneFunction()
+                .IgnoreArgument_freeFunction();
 
-            STRICT_EXPECTED_CALL(mocks, MultiTree_AddLeaf(TEST_MULTITREE_HANDLE, DEFAULT_PROPERTY_NAME, &floatValid))
+            STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
+                .IgnoreArgument_treeHandle()
                 .SetReturn(MULTITREE_ERROR);
 
-            STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TEST_MULTITREE_HANDLE));
+            STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+                .IgnoreArgument_treeHandle();
 
             ///act
-            auto result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
 
             ///assert
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_MULTITREE_ERROR, result);
-            mocks.AssertActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
             ///cleanup
             DataMarshaller_Destroy(handle);
@@ -655,32 +524,36 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(DataMarshaller_SendData_When_MultiTree_AddLeaf_With_The_Second_Property_Value_Fails_Then_Fails)
         {
             ///arrange
-            CDataMarshallerMocks mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
             unsigned char* destination;
             size_t destinationSize;
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
             AGENT_DATA_TYPE floatValid2;
 
-            DATA_MARSHALLER_VALUE values[] = {
-                { DEFAULT_PROPERTY_NAME, &floatValid },
-                { DEFAULT_PROPERTY_NAME_2, &floatValid2 }
-            };
+            DATA_MARSHALLER_VALUE values[2];
+            values[0].PropertyPath = DEFAULT_PROPERTY_NAME;
+            values[0].Value = &floatValid;
 
-            EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            values[1].PropertyPath = DEFAULT_PROPERTY_NAME_2;
+            values[1].Value = &floatValid2;
 
-            STRICT_EXPECTED_CALL(mocks, MultiTree_AddLeaf(TEST_MULTITREE_HANDLE, DEFAULT_PROPERTY_NAME, &floatValid));
-            STRICT_EXPECTED_CALL(mocks, MultiTree_AddLeaf(TEST_MULTITREE_HANDLE, DEFAULT_PROPERTY_NAME_2, &floatValid2))
+            EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+            STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
+                .IgnoreArgument_treeHandle();
+            STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME_2, &floatValid2))
+                .IgnoreArgument_treeHandle()
                 .SetReturn(MULTITREE_ERROR);
 
-            STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TEST_MULTITREE_HANDLE));
+            STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+                .IgnoreArgument_treeHandle();
 
             ///act
-            auto result = DataMarshaller_SendData(handle, sizeof(values) / sizeof(values[0]), values, &destination, &destinationSize);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, sizeof(values) / sizeof(values[0]), values, &destination, &destinationSize);
 
             ///assert
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_MULTITREE_ERROR, result);
-            mocks.AssertActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
             ///cleanup
             DataMarshaller_Destroy(handle);
@@ -690,33 +563,36 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(DataMarshaller_SendData_When_Encoding_The_Values_Tree_To_JSON_Fails_Then_Fails)
         {
             ///arrange
-            CDataMarshallerMocks mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
             unsigned char* destination;
             size_t destinationSize;
             DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, &floatValid };
 
-            EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
-            STRICT_EXPECTED_CALL(mocks, MultiTree_AddLeaf(TEST_MULTITREE_HANDLE, DEFAULT_PROPERTY_NAME, &floatValid));
-            EXPECTED_CALL(mocks, JSONEncoder_EncodeTree(TEST_MULTITREE_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .ValidateArgument(1)
+            STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
+                .IgnoreArgument_treeHandle();
+            STRICT_EXPECTED_CALL(STRING_new());
+            EXPECTED_CALL(JSONEncoder_EncodeTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                .IgnoreArgument_treeHandle()
+                .IgnoreArgument_destination()
+                .IgnoreArgument_toStringFunc()
                 .SetReturn(JSON_ENCODER_ERROR);
 
-            EXPECTED_CALL(mocks, STRING_new())
-                .ExpectedTimesExactly(1);
-            EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
-                .ExpectedTimesExactly(1);
+            STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+                .IgnoreArgument_handle();
 
-            STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TEST_MULTITREE_HANDLE));
+            STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+                .IgnoreArgument_treeHandle();
 
             ///act
-            auto result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
 
             ///assert
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_JSON_ENCODER_ERROR, result);
-            mocks.AssertActualAndExpectedCalls();
+            
 
             ///cleanup
             DataMarshaller_Destroy(handle);
@@ -727,39 +603,44 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(when_includepropertypath_is_false_and_value_count_is_greater_than_1_and_one_of_them_is_a_struct_the_property_path_is_included)
         {
             ///arrange
-            CDataMarshallerMocks mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, false);
             unsigned char* destination;
             size_t destinationSize;
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
             DATA_MARSHALLER_VALUE value[] = { { DEFAULT_PROPERTY_NAME, &floatValid }, { DEFAULT_PROPERTY_NAME_2, &structTypeValue } };
             char json_payload[] = "Test";
 
-            EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
-            STRICT_EXPECTED_CALL(mocks, MultiTree_AddLeaf(TEST_MULTITREE_HANDLE, DEFAULT_PROPERTY_NAME, &floatValid));
-            STRICT_EXPECTED_CALL(mocks, MultiTree_AddLeaf(TEST_MULTITREE_HANDLE, DEFAULT_PROPERTY_NAME_2, &structTypeValue));
-            EXPECTED_CALL(mocks, STRING_new());
-            EXPECTED_CALL(mocks, JSONEncoder_EncodeTree(TEST_MULTITREE_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .ValidateArgument(1);
+            STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
+                .IgnoreArgument_treeHandle();
+            STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME_2, &structTypeValue))
+                .IgnoreArgument_treeHandle();
+            EXPECTED_CALL(STRING_new());
+            EXPECTED_CALL(JSONEncoder_EncodeTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                .IgnoreArgument_treeHandle()
+                .IgnoreArgument_destination()
+                .IgnoreArgument_toStringFunc();
 
-            EXPECTED_CALL(mocks, STRING_length(IGNORED_PTR_ARG))
+            EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
                 .SetReturn(strlen(json_payload));
 
-            EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+            EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
                 .SetReturn(json_payload);
 
-            EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TEST_MULTITREE_HANDLE));
+            EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+                .IgnoreArgument_treeHandle();
 
             ///act
-            auto result = DataMarshaller_SendData(handle, 2, value, &destination, &destinationSize);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, 2, value, &destination, &destinationSize);
 
             ///assert
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_OK, result);
             ASSERT_ARE_EQUAL(size_t, strlen(json_payload), destinationSize);
             ASSERT_ARE_EQUAL(int, 0, memcmp(destination, json_payload, destinationSize));
-            mocks.AssertActualAndExpectedCalls();
+            
 
             ///cleanup
             free(destination);
@@ -770,37 +651,41 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(DataMarshaller_SendData_sends_to_LL_layer_succeeds)
         {
             ///arrange
-            CDataMarshallerMocks mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, false);
             unsigned char* destination;
             size_t destinationSize;
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
             DATA_MARSHALLER_VALUE value[] = { { DEFAULT_PROPERTY_NAME, &floatValid }, { DEFAULT_PROPERTY_NAME_2, &structTypeValue } };
             char json_payload[] = "Test";
 
-            EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
-            STRICT_EXPECTED_CALL(mocks, MultiTree_AddLeaf(TEST_MULTITREE_HANDLE, DEFAULT_PROPERTY_NAME, &floatValid));
-            STRICT_EXPECTED_CALL(mocks, MultiTree_AddLeaf(TEST_MULTITREE_HANDLE, DEFAULT_PROPERTY_NAME_2, &structTypeValue));
-            EXPECTED_CALL(mocks, STRING_new());
-            EXPECTED_CALL(mocks, JSONEncoder_EncodeTree(TEST_MULTITREE_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .ValidateArgument(1);
+            STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
+                .IgnoreArgument_treeHandle();
+            STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME_2, &structTypeValue))
+                .IgnoreArgument_treeHandle();
+            EXPECTED_CALL(STRING_new());
+            EXPECTED_CALL(JSONEncoder_EncodeTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                .IgnoreArgument_treeHandle()
+                .IgnoreArgument_destination()
+                .IgnoreArgument_toStringFunc();
 
-            EXPECTED_CALL(mocks, STRING_length(IGNORED_PTR_ARG))
+            EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
                 .SetReturn(strlen(json_payload));
 
-            EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+            EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
                 .SetReturn(json_payload);
 
-            EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TEST_MULTITREE_HANDLE));
+            EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+                .IgnoreArgument_treeHandle();
 
             ///act
-            auto result = DataMarshaller_SendData(handle, 2, value, &destination, &destinationSize);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, 2, value, &destination, &destinationSize);
 
             ///assert
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_OK, result);
-            mocks.AssertActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
             ///cleanup
             free(destination);
@@ -811,37 +696,41 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(when_includepropertypath_is_false_and_value_count_is_greater_than_1_and_one_but_no_structs_SendData_succeeds)
         {
             ///arrange
-            CDataMarshallerMocks mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, false);
             unsigned char* destination;
             size_t destinationSize;
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
             DATA_MARSHALLER_VALUE value[] = { { DEFAULT_PROPERTY_NAME, &floatValid }, { DEFAULT_PROPERTY_NAME_2, &floatValid } };
             char json_payload[] = "Test";
 
-            EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
-            STRICT_EXPECTED_CALL(mocks, MultiTree_AddLeaf(TEST_MULTITREE_HANDLE, DEFAULT_PROPERTY_NAME, &floatValid));
-            STRICT_EXPECTED_CALL(mocks, MultiTree_AddLeaf(TEST_MULTITREE_HANDLE, DEFAULT_PROPERTY_NAME_2, &floatValid));
-            EXPECTED_CALL(mocks, STRING_new());
-            EXPECTED_CALL(mocks, JSONEncoder_EncodeTree(TEST_MULTITREE_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .ValidateArgument(1);
+            STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
+                .IgnoreArgument_treeHandle();
+            STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME_2, &floatValid))
+                .IgnoreArgument_treeHandle();
+            EXPECTED_CALL(STRING_new());
+            EXPECTED_CALL(JSONEncoder_EncodeTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                .IgnoreArgument_treeHandle()
+                .IgnoreArgument_destination()
+                .IgnoreArgument_toStringFunc();
 
-            EXPECTED_CALL(mocks, STRING_length(IGNORED_PTR_ARG))
+            EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
                 .SetReturn(strlen(json_payload));
 
-            EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+            EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
                 .SetReturn(json_payload);
 
-            EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TEST_MULTITREE_HANDLE));
+            EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+                .IgnoreArgument_treeHandle();
 
             ///act
-            auto result = DataMarshaller_SendData(handle, 2, value, &destination, &destinationSize);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, 2, value, &destination, &destinationSize);
 
             ///assert
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_OK, result);
-            mocks.AssertActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
             ///cleanup
             free(destination);
@@ -852,36 +741,39 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(when_includePropertyPath_is_true_the_property_name_is_placed_in_the_JSON_and_SendAsync_is_called)
         {
             ///arrange
-            CDataMarshallerMocks mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, true);
             unsigned char* destination;
             size_t destinationSize;
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
             DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, &floatValid };
             char json_payload[] = "Test";
 
-            EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
-            STRICT_EXPECTED_CALL(mocks, MultiTree_AddLeaf(TEST_MULTITREE_HANDLE, DEFAULT_PROPERTY_NAME, &floatValid));
-            EXPECTED_CALL(mocks, STRING_new());
-            EXPECTED_CALL(mocks, JSONEncoder_EncodeTree(TEST_MULTITREE_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .ValidateArgument(1);
+            STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
+                .IgnoreArgument_treeHandle();
+            EXPECTED_CALL(STRING_new());
+            EXPECTED_CALL(JSONEncoder_EncodeTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                .IgnoreArgument_treeHandle()
+                .IgnoreArgument_destination()
+                .IgnoreArgument_toStringFunc();
 
-            EXPECTED_CALL(mocks, STRING_length(IGNORED_PTR_ARG))
+            EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
                 .SetReturn(strlen(json_payload));
 
-            EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+            EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
                 .SetReturn(json_payload);
 
-            EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TEST_MULTITREE_HANDLE));
+            EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+                .IgnoreArgument_treeHandle();
 
             ///act
-            auto result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
 
             ///assert
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_OK, result);
-            mocks.AssertActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
             ///cleanup
             free(destination);
@@ -893,36 +785,40 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(when_includePropertyPath_is_false_and_one_struct_is_being_sent_the_property_name_is_not_placed_in_the_JSON_and_SendAsync_is_called)
         {
             ///arrange
-            CDataMarshallerMocks mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, false);
             unsigned char* destination;
             size_t destinationSize;
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
             DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, &structTypeValue2Members };
             char json_payload[] = "Test";
 
-            EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
-            STRICT_EXPECTED_CALL(mocks, MultiTree_AddLeaf(TEST_MULTITREE_HANDLE, "x", structTypeValue2Members.value.edmComplexType.fields[0].value));
-            STRICT_EXPECTED_CALL(mocks, MultiTree_AddLeaf(TEST_MULTITREE_HANDLE, "y", structTypeValue2Members.value.edmComplexType.fields[1].value));
-            EXPECTED_CALL(mocks, STRING_new());
-            EXPECTED_CALL(mocks, JSONEncoder_EncodeTree(TEST_MULTITREE_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-                .ValidateArgument(1);
+            STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, "x", structTypeValue2Members.value.edmComplexType.fields[0].value))
+                .IgnoreArgument_treeHandle();
+            STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, "y", structTypeValue2Members.value.edmComplexType.fields[1].value))
+                .IgnoreArgument_treeHandle();
+            EXPECTED_CALL(STRING_new());
+            EXPECTED_CALL(JSONEncoder_EncodeTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                .IgnoreArgument_treeHandle()
+                .IgnoreArgument_destination()
+                .IgnoreArgument_toStringFunc();
 
-            EXPECTED_CALL(mocks, STRING_length(IGNORED_PTR_ARG))
+            EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
                 .SetReturn(strlen(json_payload));
 
-            EXPECTED_CALL(mocks, STRING_c_str(IGNORED_PTR_ARG))
+            EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
                 .SetReturn(json_payload);
-            EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG));
-            STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TEST_MULTITREE_HANDLE));
+            EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+            STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+                .IgnoreArgument_treeHandle();
 
             ///act
-            auto result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
 
             ///assert
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_OK, result);
-            mocks.AssertActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
             ///cleanup
             free(destination);
@@ -933,26 +829,27 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(when_adding_the_first_member_of_the_struct_fails_then_senddata_fails)
         {
             ///arrange
-            CDataMarshallerMocks mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, false);
             unsigned char* destination;
             size_t destinationSize;
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
             DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, &structTypeValue2Members };
 
-            EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
-            STRICT_EXPECTED_CALL(mocks, MultiTree_AddLeaf(TEST_MULTITREE_HANDLE, "x", structTypeValue2Members.value.edmComplexType.fields[0].value))
+            STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, "x", structTypeValue2Members.value.edmComplexType.fields[0].value))
+                .IgnoreArgument_treeHandle()
                 .SetReturn(MULTITREE_ERROR);
 
-            STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TEST_MULTITREE_HANDLE));
+            STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+                .IgnoreArgument_treeHandle();
 
             ///act
-            auto result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
 
             ///assert
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_MULTITREE_ERROR, result);
-            mocks.AssertActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
             ///cleanup
             DataMarshaller_Destroy(handle);
@@ -962,27 +859,29 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(when_adding_the_second_member_of_the_struct_fails_then_senddata_fails)
         {
             ///arrange
-            CDataMarshallerMocks mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, false);
             unsigned char* destination;
             size_t destinationSize;
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
             DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, &structTypeValue2Members };
 
-            EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
-            STRICT_EXPECTED_CALL(mocks, MultiTree_AddLeaf(TEST_MULTITREE_HANDLE, "x", structTypeValue2Members.value.edmComplexType.fields[0].value));
-            STRICT_EXPECTED_CALL(mocks, MultiTree_AddLeaf(TEST_MULTITREE_HANDLE, "y", structTypeValue2Members.value.edmComplexType.fields[1].value))
+            STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, "x", structTypeValue2Members.value.edmComplexType.fields[0].value))
+                .IgnoreArgument_treeHandle();
+            STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, "y", structTypeValue2Members.value.edmComplexType.fields[1].value))
+                .IgnoreArgument_treeHandle()
                 .SetReturn(MULTITREE_ERROR);
 
-            STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TEST_MULTITREE_HANDLE));
+            STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+                .IgnoreArgument_treeHandle();
 
             ///act
-            auto result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
 
             ///assert
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_MULTITREE_ERROR, result);
-            mocks.AssertActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
             ///cleanup
             DataMarshaller_Destroy(handle);
@@ -992,29 +891,29 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         TEST_FUNCTION(when_STRING_new_fails_SendData_Fails)
         {
             ///arrange
-            CDataMarshallerMocks mocks;
             DATA_MARSHALLER_HANDLE handle = DataMarshaller_Create(TEST_MODEL_HANDLE, false);
             unsigned char* destination;
             size_t destinationSize;
-            mocks.ResetAllCalls();
+            umock_c_reset_all_calls();
             DATA_MARSHALLER_VALUE value = { DEFAULT_PROPERTY_NAME, &floatValid };
-            whenShallSTRING_new_fail = 1;
 
-            EXPECTED_CALL(mocks, MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+            EXPECTED_CALL(MultiTree_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
 
-            STRICT_EXPECTED_CALL(mocks, MultiTree_AddLeaf(TEST_MULTITREE_HANDLE, DEFAULT_PROPERTY_NAME, &floatValid));
-            EXPECTED_CALL(mocks, STRING_new());
-            STRICT_EXPECTED_CALL(mocks, MultiTree_Destroy(TEST_MULTITREE_HANDLE));
+            STRICT_EXPECTED_CALL(MultiTree_AddLeaf(IGNORED_PTR_ARG, DEFAULT_PROPERTY_NAME, &floatValid))
+                .IgnoreArgument_treeHandle();
+            EXPECTED_CALL(STRING_new())
+                .SetReturn(NULL);
+            STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+                .IgnoreArgument_treeHandle();
 
             ///act
-            auto result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
+            DATA_MARSHALLER_RESULT result = DataMarshaller_SendData(handle, 1, &value, &destination, &destinationSize);
 
             ///assert
             ASSERT_ARE_EQUAL(DATA_MARSHALLER_RESULT, DATA_MARSHALLER_ERROR, result);
-            mocks.AssertActualAndExpectedCalls();
+            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
             ///cleanup
             DataMarshaller_Destroy(handle);
         }
-#endif
 END_TEST_SUITE(DataMarshaller_ut)
