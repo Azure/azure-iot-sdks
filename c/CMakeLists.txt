@@ -43,6 +43,8 @@ option(compileOption_CXX "passes a string to the command line of the C++ compile
 option(build_python "builds the Python native iothub_client module" OFF)
 option(build_javawrapper "builds the native iothub_client library for java C wrapper" OFF)
 option(dont_use_uploadtoblob "set dont_use_uploadtoblob to ON if the functionality of upload to blob is to be excluded, OFF otherwise. It requires HTTP" OFF)
+option(build_samples "set to OFF to not build samples" ON)
+option(build_service_client "set to OFF to not build the iothub_service_client" ON)
 
 #check for conflicting options
 if(NOT ${dont_use_uploadtoblob} AND NOT ${use_http})
@@ -82,8 +84,12 @@ if(NOT "${compileOption_CXX}" STREQUAL "OFF")
 endif()
 
 add_subdirectory(azure-c-shared-utility)
-add_subdirectory(azure-uamqp-c)
-add_subdirectory(azure-umqtt-c)
+if(${use_amqp})
+    add_subdirectory(azure-uamqp-c)
+endif()
+if(${use_mqtt})
+    add_subdirectory(azure-umqtt-c)
+endif()
 
 enable_testing()
 
