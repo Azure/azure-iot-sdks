@@ -15,6 +15,10 @@ set(${theseTestsName}_cpp_files
 	${theseTestsName}.cpp
 )
 
+set(${theseTestsName}_nuget_cpp_files
+       ${theseTestsName}.cpp
+)
+
 set(${theseTestsName}_c_files
 )
 
@@ -52,6 +56,14 @@ if(WIN32)
 		linkSharedUtil(${theseTestsName}_exe)
 		linkUAMQP(${theseTestsName}_exe)	
 	endif()
+    
+    if(TARGET ${theseTestsName}_nuget_exe)
+           target_link_libraries(${theseTestsName}_nuget_exe
+                   iothub_test
+                   iothub_service_client
+                   rpcrt4
+           )
+    endif()
 else()
 	if(TARGET ${theseTestsName}_exe)
 		target_link_libraries(${theseTestsName}_exe
