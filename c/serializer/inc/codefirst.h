@@ -131,21 +131,22 @@ CODEFIRST_NOT_A_PROPERTY
 
 DEFINE_ENUM(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES)
 
-extern CODEFIRST_RESULT CodeFirst_Init(const char* overrideSchemaNamespace);
-extern void CodeFirst_Deinit(void);
-extern SCHEMA_HANDLE CodeFirst_RegisterSchema(const char* schemaNamespace, const REFLECTED_DATA_FROM_DATAPROVIDER* metadata);
+#include "azure_c_shared_utility/umock_c_prod.h"
+MOCKABLE_FUNCTION(, CODEFIRST_RESULT, CodeFirst_Init, const char*, overrideSchemaNamespace);
+MOCKABLE_FUNCTION(, void, CodeFirst_Deinit);
+MOCKABLE_FUNCTION(, SCHEMA_HANDLE, CodeFirst_RegisterSchema, const char*, schemaNamespace, const REFLECTED_DATA_FROM_DATAPROVIDER*, metadata);
 
-extern EXECUTE_COMMAND_RESULT CodeFirst_InvokeAction(DEVICE_HANDLE deviceHandle, void* callbackUserContext, const char* relativeActionPath, const char* actionName, size_t parameterCount, const AGENT_DATA_TYPE* parameterValues);
+MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, CodeFirst_InvokeAction, DEVICE_HANDLE, deviceHandle, void*, callbackUserContext, const char*, relativeActionPath, const char*, actionName, size_t, parameterCount, const AGENT_DATA_TYPE*, parameterValues);
 
-extern EXECUTE_COMMAND_RESULT CodeFirst_ExecuteCommand(void* device, const char* command);
+MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, CodeFirst_ExecuteCommand, void*, device, const char*, command);
 
-extern void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DATA_FROM_DATAPROVIDER* metadata, size_t dataSize, bool includePropertyPath);
-extern void CodeFirst_DestroyDevice(void* device);
+MOCKABLE_FUNCTION(, void*, CodeFirst_CreateDevice, SCHEMA_MODEL_TYPE_HANDLE, model, const REFLECTED_DATA_FROM_DATAPROVIDER*, metadata, size_t, dataSize, bool, includePropertyPath);
+MOCKABLE_FUNCTION(, void, CodeFirst_DestroyDevice, void*, device);
 
 extern CODEFIRST_RESULT CodeFirst_SendAsync(unsigned char** destination, size_t* destinationSize, size_t numProperties, ...);
 extern CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t* destinationSize, size_t numReportedProperties, ...);
 
-extern AGENT_DATA_TYPE_TYPE CodeFirst_GetPrimitiveType(const char* typeName);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPE_TYPE, CodeFirst_GetPrimitiveType, const char*, typeName);
 
 #ifdef __cplusplus
 }

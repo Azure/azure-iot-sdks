@@ -1,22 +1,54 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifdef __cplusplus
 #include <cstdlib>
+#else
+#include <stdlib.h>
+#endif
+
+void* my_gballoc_malloc(size_t t)
+{
+    return malloc(t);
+}
+
+void my_gballoc_free(void * t)
+{
+    free(t);
+}
+
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
 
-#include "azure_c_shared_utility/lock.h"
-#include "testrunnerswitcher.h"
-#include "micromock.h"
-#include "micromockcharstararenullterminatedstrings.h"
-#include "commanddecoder.h"
+#include "umock_c.h"
+#include "umocktypes_charptr.h"
+#include "umocktypes_bool.h"
+#include "umocktypes_stdint.h"
+#include "umock_c_negative_tests.h"
+
+
+
+#define ENABLE_MOCKS
+#include "azure_c_shared_utility/gballoc.h"
 #include "multitree.h"
 #include "schema.h"
 #include "agenttypesystem.h"
-#include "codefirst.h"
-#include "jsondecoder.h"
+#undef ENABLE_MOCKS
 
+#include "commanddecoder.h"
+
+#define ENABLE_MOCKS
+#include "codefirst.h" 
+#include "jsondecoder.h"
+#undef ENABLE_MOCKS
+
+#include "azure_c_shared_utility/lock.h"
+#include "testrunnerswitcher.h"
+
+
+
+#if 0
 #define GBALLOC_H
 
 extern "C" int gballoc_init(void);
@@ -104,7 +136,7 @@ static const MULTITREE_HANDLE TEST_MEMBER1_NODE = (MULTITREE_HANDLE)0x4401;
 static const MULTITREE_HANDLE TEST_MEMBER2_NODE = (MULTITREE_HANDLE)0x4402;
 
 static char lastMemberNames[100][100][100];
-static size_t nCall = 0;
+
 
 #define TEST_COMMAND \
     "{ "  \
@@ -122,7 +154,7 @@ static const char* TEST_IOTHUB_MESSAGE_HANDLE2 = TEST_COMMAND;
 static const MULTITREE_HANDLE TEST_COMMANDS_ROOT_NODE = (MULTITREE_HANDLE)0x4201;
 static const COMMAND_DECODER_HANDLE TEST_COMMAND_DECODER_HANDLE = (COMMAND_DECODER_HANDLE)0x4246;
 
-static bool isIoTHubMessage_GetData_writing_to_outputs = true;
+
 
 static size_t currentmalloc_call;
 static size_t whenShallmalloc_fail;
@@ -327,30 +359,58 @@ void SetupArgumentCalls(CCommandDecoderMocks* mocks, SCHEMA_ACTION_HANDLE action
 }
 
 static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
+#endif 
+
+static bool isIoTHubMessage_GetData_writing_to_outputs = true;
+static const char OtherArgValue[] = "SomeString";
+static size_t nCall = 0;
+static AGENT_DATA_TYPE StateAgentDataType;
+
+DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES);
+
+static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
+{
+    char temp_str[256];
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    ASSERT_FAIL(temp_str);
+}
+
+static TEST_MUTEX_HANDLE g_testByTest;
+static TEST_MUTEX_HANDLE g_dllByDll;
 
 BEGIN_TEST_SUITE(CommandDecoder_ut)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
-        TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
+    TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
 
-        g_testByTest = MicroMockCreateMutex();
-        ASSERT_IS_NOT_NULL(g_testByTest);
+    g_testByTest = TEST_MUTEX_CREATE();
+    ASSERT_IS_NOT_NULL(g_testByTest);
+
+    (void)umock_c_init(on_umock_c_error);
+
+    (void)umocktypes_bool_register_types();
+    (void)umocktypes_charptr_register_types();
+    (void)umocktypes_stdint_register_types();
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
     {
-        MicroMockDestroyMutex(g_testByTest);
+        umock_c_deinit();
+
+        TEST_MUTEX_DESTROY(g_testByTest);
         TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 
     }
 
     TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
     {
-        if (!MicroMockAcquireMutex(g_testByTest))
+        if (TEST_MUTEX_ACQUIRE(g_testByTest))
         {
             ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
         }
+
+        umock_c_reset_all_calls();
 
         nCall = 0;
 
@@ -362,24 +422,15 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         StateAgentDataType.value.edmString.chars = (char*)OtherArgValue;
 
         isIoTHubMessage_GetData_writing_to_outputs = true;
-
-        currentmalloc_call = 0;
-        whenShallmalloc_fail = 0;
-
-        currentrealloc_call = 0;
-        whenShallrealloc_fail = 0;
     }
 
     TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     {
-        if (!MicroMockReleaseMutex(g_testByTest))
-        {
-            ASSERT_FAIL("failure in test framework at ReleaseMutex");
-        }
+        TEST_MUTEX_RELEASE(g_testByTest);
     }
 
     /* CommandDecoder_Create */
-
+#if 0
     /* Tests_SRS_COMMAND_DECODER_99_019:[ For all exposed APIs argument validity checks shall precede other checks.] */
     /* Tests_SRS_COMMAND_DECODER_01_003: [If any of the arguments modelHandle is NULL, CommandDecoder_Create shall return NULL.]*/
     TEST_FUNCTION(CommandDecoder_Create_With_NULL_Model_Handle_Fails)
@@ -2865,5 +2916,5 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // cleanup
         CommandDecoder_Destroy(commandDecoderHandle);
     }
-
+#endif
     END_TEST_SUITE(CommandDecoder_ut)
