@@ -45,9 +45,15 @@ option(build_javawrapper "builds the native iothub_client library for java C wra
 option(dont_use_uploadtoblob "set dont_use_uploadtoblob to ON if the functionality of upload to blob is to be excluded, OFF otherwise. It requires HTTP" OFF)
 option(no_logging "disable logging" OFF)
 
+#setting nuget_e2e_tests will only generate e2e tests to run with nuget packages.  Install-packages from Package Manager Console in VS before building the projects
+option(nuget_e2e_tests "set nuget_e2e_tests to ON to generate e2e tests to run with nuget packages (default is OFF)" OFF)
+
 #check for conflicting options
-if(NOT ${dont_use_uploadtoblob} AND NOT ${use_http})
-    message(FATAL_ERROR "option dont_use_uploadtoblob set to OFF requires option use_http set to ON")
+if(NOT ${use_http})
+    MESSAGE( "Setting dont_use_uploadtoblob to ON because use_http is OFF")
+    set(dont_use_uploadtoblob "ON") 
+    MESSAGE( STATUS "use_http:         " ${use_http} )
+    MESSAGE( STATUS "dont_use_uploadtoblob:         " ${dont_use_uploadtoblob} )
 endif()
 
 if(${dont_use_uploadtoblob})
@@ -219,7 +225,7 @@ endif()
 
 add_subdirectory(iothub_service_client)
 
-if(${run_e2e_tests} OR ${run_longhaul_tests})
+if(${run_e2e_tests} OR ${run_longhaul_tests} OR ${nuget_e2e_tests})
     add_subdirectory(testtools)
 endif()
 

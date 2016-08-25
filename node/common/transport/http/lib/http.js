@@ -81,11 +81,11 @@ Http.prototype.buildRequest = function (method, path, httpHeaders, host, x509Opt
 };
 
 /**
- * @method              module:azure-iot-http-base.Http.toMessage
- * @description         Transforms the body of an HTTP response into a {@link module:azure-iot-common.Message} that can be treated by the client.
+ * @method                              module:azure-iot-http-base.Http.toMessage
+ * @description                         Transforms the body of an HTTP response into a {@link module:azure-iot-common.Message} that can be treated by the client.
  *
- * @param {Object}      response          The HTTP verb to use (GET, POST, PUT, DELETE...).
- * @param {Object}      body            The section of the URI that should be appended after the hostname.
+ * @param {module:http.IncomingMessage} response        A response as returned from the node.js http module
+ * @param {Object}                      body            The section of the URI that should be appended after the hostname.
  *
  * @returns {module:azure-iot-common.Message} A Message object.
  */
@@ -111,6 +111,10 @@ Http.prototype.toMessage = function toMessage(response, body) {
         /*Codes_SRS_NODE_HTTP_05_010: [If the HTTP response has an 'iothub-correlationid' header, it shall be saved as the correlationId property on the created Message.]*/
         else if (item.toLowerCase() === "iothub-correlationid") {
           msg.correlationId = response.headers[item];
+        }
+        /*Codes_SRS_NODE_HTTP_13_001: [ If the HTTP response has a header with the prefix iothub-app- then a new property with the header name and value as the key and value shall be added to the message. ]*/
+        else if(item.search("iothub-app-") !== -1) {
+            msg.properties.add(item, response.headers[item]);
         }
       }
       /*Codes_SRS_NODE_HTTP_05_011: [If the HTTP response has an 'etag' header, it shall be saved as the lockToken property on the created Message, minus any surrounding quotes.]*/

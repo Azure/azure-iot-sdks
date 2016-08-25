@@ -29,6 +29,7 @@ static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 #include "azure_c_shared_utility/xio.h"
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/map.h"
+#include "azure_c_shared_utility/wsio.h"
 
 #include "iothubtransportamqp.h"
 #include "iothub_client_options.h"
@@ -58,7 +59,6 @@ static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 #include "azure_uamqp_c/sasl_plain.h"
 #include "azure_uamqp_c/session.h"
 #include "azure_uamqp_c/socket_listener.h"
-#include "azure_uamqp_c/wsio.h"
 
 
 DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);

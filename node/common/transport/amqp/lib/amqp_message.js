@@ -51,6 +51,23 @@ AmqpMessage.fromMessage = function fromMessage(message) {
     amqpMessage.applicationProperties['iothub-ack'] = message.ack;
   }
 
+  /*Codes_SRS_NODE_IOTHUB_AMQPMSG_13_001: [ If message.properties is truthy, then all the properties in it shall be copied to the applicationProperties property of the AmqpMessage object. ]*/
+  if(message.properties) {
+    var props = message.properties;
+    var propsCount = props.count();
+    if(propsCount > 0) {
+      if(!amqpMessage.applicationProperties) {
+        ensureApplicationPropertiesCreated();
+      }
+      for (var index = 0; index < propsCount; index++) {
+        var item = props.getItem(index);
+        if(!!item) {
+          amqpMessage.applicationProperties[item.key] = item.value;
+        }
+      }
+    }
+  }
+
   /*Codes_SRS_NODE_IOTHUB_AMQPMSG_05_005: [If message.getData() is truthy, the AmqpMessage object shall have a property named body with the value returned from message.getData().]*/
   var body = message.getData();
   if (body) {

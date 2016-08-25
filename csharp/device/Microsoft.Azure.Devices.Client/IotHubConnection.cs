@@ -18,6 +18,7 @@ namespace Microsoft.Azure.Devices.Client
     using Microsoft.Azure.Amqp.Framing;
     using Microsoft.Azure.Amqp.Transport;
     using Microsoft.Azure.Devices.Client.Extensions;
+    using Microsoft.Azure.Devices.Client.Transport;
 
     abstract class IotHubConnection
     {
@@ -182,29 +183,32 @@ namespace Microsoft.Azure.Devices.Client
             };
 
             var amqpConnection = new AmqpConnection(transport, amqpSettings, amqpConnectionSettings);
-            await amqpConnection.OpenAsync(timeoutHelper.RemainingTime());
-
-            var sessionSettings = new AmqpSessionSettings()
-            {
-                Properties = new Fields()
-            };
-
-            AmqpSession amqpSession;
             try
             {
-                amqpSession = amqpConnection.CreateSession(sessionSettings);
+                await amqpConnection.OpenAsync(timeoutHelper.RemainingTime());
+
+                var sessionSettings = new AmqpSessionSettings()
+                {
+                    Properties = new Fields()
+                };
+
+                AmqpSession amqpSession = amqpConnection.CreateSession(sessionSettings);
                 await amqpSession.OpenAsync(timeoutHelper.RemainingTime());
 
                 // This adds itself to amqpConnection.Extensions
                 var cbsLink = new AmqpCbsLink(amqpConnection);
+                return amqpSession;
             }
-            catch (Exception e) when (!e.IsFatal())
+            catch (Exception ex) when (!ex.IsFatal())
             {
-                // this can happen in a scenario where the server closes the Amqp connection before the session is established
-                throw amqpConnection.TerminalException ?? e;
-            }
+                if (amqpConnection.TerminalException != null)
+                {
+                    throw AmqpClientHelper.ToIotHubClientContract(amqpConnection.TerminalException);
+                }
 
-            return amqpSession;
+                amqpConnection.SafeClose(ex);
+                throw;
+            }
         }
 
         protected virtual void OnCreateSession()

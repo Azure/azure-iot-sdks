@@ -89,6 +89,38 @@ describe('AmqpMessage', function () {
       assert.equal(amqpMessage.applicationProperties['iothub-ack'], ack);
     });
 
+    /*Tests_SRS_NODE_IOTHUB_AMQPMSG_13_001: [ If message.properties is truthy, then all the properties in it shall be copied to the applicationProperties property of the AmqpMessage object. ]*/
+    it('copies message.properties to amqpMessage.applicationProperties', function () {
+      var message = new Message();
+      var keyItem = '';
+      var valueItem = '';
+      var numProps = 10;
+      var i;
+
+      for (i = 0; i < numProps; i++) {
+        keyItem = "itemKey" + (i + 1);
+        valueItem = "itemValue" + (i + 1);
+        message.properties.add(keyItem, valueItem);
+      }
+
+      var amqpMessage = AmqpMessage.fromMessage(message);
+      assert.isOk(amqpMessage.applicationProperties);
+
+      for (i = 0; i < numProps; i++) {
+        keyItem = "itemKey" + (i + 1);
+        valueItem = "itemValue" + (i + 1);
+        assert.property(amqpMessage.applicationProperties, keyItem);
+        assert.strictEqual(amqpMessage.applicationProperties[keyItem], valueItem);
+      }
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_AMQPMSG_13_001: [ If message.properties is truthy, then all the properties in it shall be copied to the applicationProperties property of the AmqpMessage object. ]*/
+    it('does not create amqpMessage.applicationProperties when there are no properties', function () {
+      var message = new Message();
+      var amqpMessage = AmqpMessage.fromMessage(message);
+      assert.isNotOk(amqpMessage.applicationProperties);
+    });
+
     /*Tests_SRS_NODE_IOTHUB_AMQPMSG_05_009: [If the message argument has an ack property, the applicationProperties property of the AmqpMessage object shall have a property named iothub-ack with the same value.]*/
     it('does not set amqpMessage.applicationProperties[\'iothub-ack\'] if message.ack isn\'t set', function () {
       var amqpMessage = AmqpMessage.fromMessage(new Message());
