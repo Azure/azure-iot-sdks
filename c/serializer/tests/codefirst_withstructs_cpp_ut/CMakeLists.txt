@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 2.8.11)
 
 compileAsC99()
 set(theseTestsName codefirst_withstructs_cpp_ut)
-set(${theseTestsName}_cpp_files
+set(${theseTestsName}_test_files
 ${theseTestsName}.cpp
 )
 
@@ -14,7 +14,6 @@ set(${theseTestsName}_c_files
 ../../src/codefirst.c
 ${SHARED_UTIL_SRC_FOLDER}/gballoc.c
 ${LOCK_C_FILE}
-${SHARED_UTIL_SRC_FOLDER}/strings.c
 )
 
 set(${theseTestsName}_h_files
@@ -26,4 +25,4 @@ if(WIN32)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4505")
 endif()
 
-build_test_artifacts(${theseTestsName} ON)
+build_c_test_artifacts(${theseTestsName} ON "UnitTests")

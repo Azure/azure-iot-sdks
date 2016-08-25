@@ -1,22 +1,47 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#ifdef __cplusplus
 #include <cstdlib>
+#else
+#include <stdlib.h>
+#endif
+
+void* my_gballoc_malloc(size_t t)
+{
+    return malloc(t);
+}
+
+void my_gballoc_free(void * t)
+{
+    free(t);
+}
+
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
 
+#include "umock_c.h"
+#include "umocktypes_charptr.h"
+#include "umocktypes_bool.h"
+#include "umocktypes_stdint.h"
+#include "umock_c_negative_tests.h"
+
+#define ENABLE_MOCKS
+#include "agenttypesystem.h"
+#include "schema.h"
+#include "iotdevice.h"
+#undef ENABLE_MOCKS
+
 #include "testrunnerswitcher.h"
 #include "codefirst.h"
 #include "azure_c_shared_utility/macro_utils.h"
-#include "micromock.h"
-#include "micromockcharstararenullterminatedstrings.h"
-#include "schema.h"
-#include "iotdevice.h"
+
+
+
 #include "serializer.h"
-#include "iotdevice.h"
 
-
+#if 0
 DEFINE_MICROMOCK_ENUM_TO_STRING(IOT_AGENT_RESULT, IOT_AGENT_RESULT_ENUM_VALUES)
 DEFINE_MICROMOCK_ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
 
@@ -71,7 +96,7 @@ static void EDM_DATE_TIME_OFFSET_ToString(char* string, size_t bufferSize, EDM_D
     o << val;
     strcpy(string, o.str().c_str());
 }
-
+#endif 
 BEGIN_NAMESPACE(DummyDataProvider_WithStructs)
 
 /*Tests_SRS_SERIALIZER_99_016:[ The second macro, DECLARE_STRUCT shall introduce a new struct  type having the fields field1name of type field1Type, field2name having the type field2type etc.]*/
@@ -164,11 +189,14 @@ EXECUTE_COMMAND_RESULT alwaysAbandon(TruckType* device)
     return EXECUTE_COMMAND_ERROR;
 }
 
+static const DEVICE_HANDLE TEST_DEVICE_HANDLE = (DEVICE_HANDLE)0x4848;
+
+#if 0
 static const SCHEMA_HANDLE TEST_SCHEMA_HANDLE = (SCHEMA_HANDLE)0x4242;
 static const SCHEMA_MODEL_TYPE_HANDLE TEST_MODEL_HANDLE = (SCHEMA_MODEL_TYPE_HANDLE)0x4243;
 static const SCHEMA_STRUCT_TYPE_HANDLE TEST_STRUCT_TYPE = (SCHEMA_STRUCT_TYPE_HANDLE)0x4244;
 static const SCHEMA_ACTION_HANDLE TEST_ACTION_HANDLE = (SCHEMA_ACTION_HANDLE)0x4245;
-static const DEVICE_HANDLE TEST_DEVICE_HANDLE = (DEVICE_HANDLE)0x4848;
+
 static void* g_InvokeActionCallbackArgument;
 
 std::ostream& operator<<(std::ostream& left, const EDM_GUID edmGuid)
@@ -325,10 +353,15 @@ template <> static std::wstring Microsoft::VisualStudio::CppUnitTestFramework::T
 
 static MICROMOCK_MUTEX_HANDLE g_testByTest;
 
+
+
+
+
+#endif
+
+#define MAX_RECORDINGS 100
 #define MAX_NAME_LENGTH 100
 typedef char someName[MAX_NAME_LENGTH];
-#define MAX_RECORDINGS 100
-
 static  AGENT_DATA_TYPE* Create_EDM_BOOLEAN_from_int_agentData = NULL;
 static  AGENT_DATA_TYPE* Create_AGENT_DATA_TYPE_from_UINT8_agentData = NULL;
 static  AGENT_DATA_TYPE* Create_AGENT_DATA_TYPE_from_DOUBLE_agentData[MAX_RECORDINGS];
@@ -352,6 +385,7 @@ static  AGENT_DATA_TYPE* Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET_agentD
 static  AGENT_DATA_TYPE* Create_AGENT_DATA_TYPE_from_EDM_GUID_agentData = NULL;
 static  AGENT_DATA_TYPE* Create_AGENT_DATA_TYPE_from_EDM_BINARY_agentData = NULL;
 
+#if 0
 TYPED_MOCK_CLASS(CCodeFirstMocks, CGlobalMock)
 {
 public:
@@ -591,32 +625,60 @@ DECLARE_GLOBAL_MOCK_METHOD_3(CCodeFirstMocks, , DEVICE_RESULT, Device_PublishTra
 DECLARE_GLOBAL_MOCK_METHOD_3(CCodeFirstMocks, , DEVICE_RESULT, Device_CommitTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize);
 DECLARE_GLOBAL_MOCK_METHOD_1(CCodeFirstMocks, , void, Device_DestroyTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle);
 
-extern "C" DEVICE_HANDLE serializer_getdevicehandle(void) { return TEST_DEVICE_HANDLE; }
-
 DEFINE_MICROMOCK_ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_ENUM_VALUES)
 
+
+
+#endif
+
+static DEVICE_HANDLE serializer_getdevicehandle(void) { return TEST_DEVICE_HANDLE; }
+
+static TEST_MUTEX_HANDLE g_testByTest;
+static TEST_MUTEX_HANDLE g_dllByDll;
+
 static STRING_HANDLE global_bufferTemp;
-static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
+
+DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
+{
+    char temp_str[256];
+    (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
+    ASSERT_FAIL(temp_str);
+}
 
 BEGIN_TEST_SUITE(CodeFirst_ut_Two_Providers_With_Structs)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
     TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-    g_testByTest = MicroMockCreateMutex();
+
+    g_testByTest = TEST_MUTEX_CREATE();
     ASSERT_IS_NOT_NULL(g_testByTest);
+
+    (void)umock_c_init(on_umock_c_error);
+
+    (void)umocktypes_bool_register_types();
+    (void)umocktypes_charptr_register_types();
+    (void)umocktypes_stdint_register_types();
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
 {
-    MicroMockDestroyMutex(g_testByTest);
+    umock_c_deinit();
+
+    TEST_MUTEX_DESTROY(g_testByTest);
     TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
 {
-    CCodeFirstMocks mocks;
-    mocks.SetPerformAutomaticCallComparison(AUTOMATIC_CALL_COMPARISON_OFF);
+    if (TEST_MUTEX_ACQUIRE(g_testByTest))
+    {
+        ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
+    }
+
+    umock_c_reset_all_calls();
+
     nCreate_AGENT_DATA_TYPE_from_DOUBLE_agentData = 0;
     nDestroy_AGENT_DATA_TYPE_agentData = 0;
 
@@ -633,24 +695,17 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
 
     (void)CodeFirst_Init(NULL);
     global_bufferTemp = STRING_new();
-    if (!MicroMockAcquireMutex(g_testByTest))
-    {
-        ASSERT_FAIL("our mutex is ABANDONED. Failure in test framework");
-    }
+
 }
 
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 {
-    CCodeFirstMocks mocks;
-    mocks.SetPerformAutomaticCallComparison(AUTOMATIC_CALL_COMPARISON_OFF);
     STRING_delete(global_bufferTemp);
     CodeFirst_Deinit();
-    if (!MicroMockReleaseMutex(g_testByTest))
-    {
-        ASSERT_FAIL("failure in test framework at ReleaseMutex");
-    }
-}
 
+    TEST_MUTEX_RELEASE(g_testByTest);
+}
+#if 0
 /*Tests_SRS_CODEFIRST_99_002:[ CodeFirst_Init shall initialize the CodeFirst module. If initialization is successful, it shall return CODEFIRST_OK.]*/
 TEST_FUNCTION(CodeFirst_Init_succeds)
 {
@@ -672,7 +727,6 @@ TEST_FUNCTION(CodeFirst_Init_succeds)
 TEST_FUNCTION(InvokeAction_goToLocation_succeeds)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE someLocation;
@@ -711,7 +765,6 @@ TEST_FUNCTION(InvokeAction_goToLocation_succeeds)
 TEST_FUNCTION(InvokeAction_alwaysRejected_return_EXECUTE_COMMAND_FAILED)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
    
@@ -732,7 +785,6 @@ TEST_FUNCTION(InvokeAction_alwaysRejected_return_EXECUTE_COMMAND_FAILED)
 TEST_FUNCTION(InvokeAction_alwaysAbandon_return_EXECUTE_COMMAND_ERROR)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
 
@@ -755,7 +807,6 @@ TEST_FUNCTION(InvokeAction_alwaysAbandon_return_EXECUTE_COMMAND_ERROR)
 TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_with_3_fields_fails)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE someLocation;
@@ -796,7 +847,6 @@ TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_with_3_fields_fails)
 TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_with_1_field_fails)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE someLocation;
@@ -829,7 +879,6 @@ TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_with_1_field_fails)
 TEST_FUNCTION(InvokeAction_goToLocation_with_a_non_struct_fails)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
 
@@ -855,7 +904,6 @@ TEST_FUNCTION(InvokeAction_goToLocation_with_a_non_struct_fails)
 TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_and_a_double_fails)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE someLocationAndDouble[2];
@@ -895,7 +943,6 @@ TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_and_a_double_fails)
 TEST_FUNCTION(InvokeAction_goToLocation_with_a_double_and_a_struct_fails)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE someLocationAndDouble[2];
@@ -935,7 +982,6 @@ TEST_FUNCTION(InvokeAction_goToLocation_with_a_double_and_a_struct_fails)
 TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_with_first_field_of_wrong_type_fails)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE someLocation;
@@ -972,7 +1018,6 @@ TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_with_first_field_of_wrong_
 TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_with_second_field_of_wrong_type_fails)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE someLocation;
@@ -1010,7 +1055,6 @@ TEST_FUNCTION(InvokeAction_goToLocation_with_a_struct_with_second_field_of_wrong
 TEST_FUNCTION(InvokeAction_moveCarTo_succeeds)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE parameters[3];
@@ -1079,7 +1123,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_succeeds)
 TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_number_of_parameters_fails_1)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE parameters[3];
@@ -1141,7 +1184,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_number_of_parameters_fails_1)
 TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_number_of_parameters_fails_2)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE parameters[3];
@@ -1203,7 +1245,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_number_of_parameters_fails_2)
 TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_of_parameter_1_fails)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE parameters[3];
@@ -1265,7 +1306,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_of_parameter_1_fails)
 TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_of_parameter_2_fails)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE parameters[3];
@@ -1327,7 +1367,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_of_parameter_2_fails)
 TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_destination_Alt_fails)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE parameters[3];
@@ -1389,7 +1428,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_destination_Alt_fails)
 TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_destination_whereIsMyCar_fails)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE parameters[3];
@@ -1451,7 +1489,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_destination_whereIsMyCa
 TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_destination_whereIsMyCar_Lat_fails)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE parameters[3];
@@ -1513,7 +1550,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_destination_whereIsMyCa
 TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_destination_whereIsMyCar_Long_fails)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE parameters[3];
@@ -1575,7 +1611,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_destination_whereIsMyCa
 TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_reverse_fails)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE parameters[3];
@@ -1637,7 +1672,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_wrong_type_for_reverse_fails)
 TEST_FUNCTION(InvokeAction_moveCarTo_with_too_many_fields_in_CarLocation_fails)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE parameters[3];
@@ -1699,7 +1733,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_too_many_fields_in_CarLocation_fails)
 TEST_FUNCTION(InvokeAction_moveCarTo_with_too_few_fields_in_CarLocation_fails)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE parameters[3];
@@ -1761,7 +1794,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_too_few_fields_in_CarLocation_fails)
 TEST_FUNCTION(InvokeAction_moveCarTo_with_too_many_fields_in_CarLocation_whereIsMyCar_fails)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE parameters[3];
@@ -1823,7 +1855,6 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_too_many_fields_in_CarLocation_whereIs
 TEST_FUNCTION(InvokeAction_moveCarTo_with_too_few_fields_in_CarLocation_whereIsMyCar_fails)
 {
     ///arrange
-    CCodeFirstMocks mocks;
     void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_WithStructs_allReflected, sizeof(TruckType), false);
     mocks.ResetAllCalls();
     AGENT_DATA_TYPE parameters[3];
@@ -1880,5 +1911,5 @@ TEST_FUNCTION(InvokeAction_moveCarTo_with_too_few_fields_in_CarLocation_whereIsM
     // cleanup
     CodeFirst_DestroyDevice(device);
 }
-
+#endif
 END_TEST_SUITE(CodeFirst_ut_Two_Providers_With_Structs);
