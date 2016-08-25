@@ -250,7 +250,7 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData_ReportedProperties(DATA_MARSHALLE
         if (json == NULL)
         {
             /*Codes_SRS_DATA_MARSHALLER_02_019: [ If any failure occurs, DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_ERROR. ]*/
-            LogError("unable to json_value_init_object");
+            LogError("failure calling json_value_init_object");
             result = DATA_MARSHALLER_ERROR;
         }
         else
@@ -260,22 +260,21 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData_ReportedProperties(DATA_MARSHALLE
             if (jsonObject == NULL)
             {
                 /*Codes_SRS_DATA_MARSHALLER_02_019: [ If any failure occurs, DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_ERROR. ]*/
-                LogError("unable to json_object");
+                LogError("failure calling json_object");
                 result = DATA_MARSHALLER_ERROR;
             }
             else
             {
-                size_t i;
                 size_t nReportedProperties = VECTOR_size(values), nProcessedProperties = 0;
 
-                for (i = 0;i < nReportedProperties; i++)
+                for (size_t i = 0;i < nReportedProperties; i++)
                 {
                     DATA_MARSHALLER_VALUE* v = *(DATA_MARSHALLER_VALUE**)VECTOR_element(values, i);
                     STRING_HANDLE s = STRING_new();
                     if (s == NULL)
                     {
                         /*Codes_SRS_DATA_MARSHALLER_02_019: [ If any failure occurs, DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_ERROR. ]*/
-                        LogError("unable to STRING_new");
+                        LogError("failure calling STRING_new");
                         i = nReportedProperties;/*forces loop to break, result is set in the "if" following this for*/
                     }
                     else
@@ -284,7 +283,7 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData_ReportedProperties(DATA_MARSHALLE
                         if (AgentDataTypes_ToString(s, v->Value) != AGENT_DATA_TYPES_OK)
                         {
                             /*Codes_SRS_DATA_MARSHALLER_02_019: [ If any failure occurs, DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_ERROR. ]*/
-                            LogError("unable to AgentDataTypes_ToString");
+                            LogError("failure calling AgentDataTypes_ToString");
                             i = nReportedProperties;/*forces loop to break, result is set in the "if" following this for*/
                         }
                         else
@@ -294,7 +293,7 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData_ReportedProperties(DATA_MARSHALLE
                             if (rightSide == NULL)
                             {
                                 /*Codes_SRS_DATA_MARSHALLER_02_019: [ If any failure occurs, DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_ERROR. ]*/
-                                LogError("unable to json_parse_string");
+                                LogError("failure calling json_parse_string");
                                 i = nReportedProperties;/*forces loop to break, result is set in the "if" following this for*/
                             }
                             else
@@ -303,8 +302,8 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData_ReportedProperties(DATA_MARSHALLE
                                 if (mallocAndStrcpy_s(&leftSide, v->PropertyPath) != 0)
                                 {
                                     /*Codes_SRS_DATA_MARSHALLER_02_019: [ If any failure occurs, DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_ERROR. ]*/
-                                    LogError("unable to mallocAndStrcpy_s");
-                                    json_value_free(rightSide);i = nReportedProperties;/*forces loop to break, result is set in the "if" following this for*/
+                                    LogError("failure calling mallocAndStrcpy_s");
+                                    json_value_free(rightSide);
                                     i = nReportedProperties;/*forces loop to break, result is set in the "if" following this for*/
                                 }
                                 else
@@ -321,7 +320,7 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData_ReportedProperties(DATA_MARSHALLE
                                     if (json_object_dotset_value(jsonObject, leftSide, rightSide) != JSONSuccess)
                                     {
                                         /*Codes_SRS_DATA_MARSHALLER_02_019: [ If any failure occurs, DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_ERROR. ]*/
-                                        LogError("unable to json_object_dotset_value");
+                                        LogError("failure calling json_object_dotset_value");
                                         json_value_free(rightSide);
                                         i = nReportedProperties;/*forces loop to break, result is set in the "if" following this for*/
                                     }
@@ -351,7 +350,7 @@ DATA_MARSHALLER_RESULT DataMarshaller_SendData_ReportedProperties(DATA_MARSHALLE
                     if (temp == NULL)
                     {
                         /*Codes_SRS_DATA_MARSHALLER_02_019: [ If any failure occurs, DataMarshaller_SendData_ReportedProperties shall fail and return DATA_MARSHALLER_ERROR. ]*/
-                        LogError("unable to json_serialize_to_string_pretty ");
+                        LogError("failure calling json_serialize_to_string_pretty ");
                         result = DATA_MARSHALLER_ERROR;
                     }
                     else
