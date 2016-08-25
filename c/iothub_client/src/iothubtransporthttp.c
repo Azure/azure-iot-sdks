@@ -461,7 +461,7 @@ static bool findDeviceHandle(const void* element, const void* value)
     bool result;
     /* data stored at element is device handle */
     const IOTHUB_DEVICE_HANDLE * guess = (const IOTHUB_DEVICE_HANDLE *)element;
-    const IOTHUB_DEVICE_HANDLE match = (const IOTHUB_DEVICE_HANDLE)value;
+    IOTHUB_DEVICE_HANDLE match = (IOTHUB_DEVICE_HANDLE)value;
     result = (*guess == match) ? true : false;
     return result;
 }
@@ -1326,8 +1326,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                         else
                         {
                             unsigned int statusCode;
-                            HTTPAPIEX_RESULT r;
-                            if ((r = HTTPAPIEX_SAS_ExecuteRequest(
+                            if (HTTPAPIEX_SAS_ExecuteRequest(
                                 deviceData->sasObject,
                                 handleData->httpApiExHandle,
                                 HTTPAPI_REQUEST_POST,
@@ -1337,7 +1336,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                 &statusCode,
                                 NULL,
                                 NULL
-                                )) != HTTPAPIEX_OK)
+                                ) != HTTPAPIEX_OK)
                             {
                                 LogError("unable to HTTPAPIEX_ExecuteRequest");
                                 //items go back to waitingToSend

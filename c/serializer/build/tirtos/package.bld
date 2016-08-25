@@ -6,7 +6,7 @@ var Build = xdc.useModule('xdc.bld.BuildEnvironment');
 var Pkg = xdc.useModule('xdc.bld.PackageContents');
 
 /* make command to search for the srcs */
-Pkg.makePrologue = "vpath %.c ../../src";
+Pkg.makePrologue = "vpath %.c ../../src ../../../parson";
 
 /* lib/ is a generated directory that 'xdc clean' should remove */
 Pkg.generatedFiles.$add("lib/");
@@ -24,7 +24,8 @@ var SRCS = [
     "multitree.c",
     "schema.c",
     "schemalib.c",
-    "schemaserializer.c"
+    "schemaserializer.c",
+	"parson.c"
 ];
 
 /* Paths to external source libraries */
@@ -34,7 +35,7 @@ var slIncs = "";
 var ndkIncs = "";
 var wolfsslIncs = "";
 var serializerIncs = "-I../../inc -I../../../azure-c-shared-utility/inc -I../../../azure-c-shared-utility/inc/azure_c_shared_utility "
-    + "-I../../../iothub_client/inc ";
+    + "-I../../../iothub_client/inc -I../../../parson ";
 var pthreadIncs = "";
 
 /* Parse out the XDCARGS options for the library source paths */
