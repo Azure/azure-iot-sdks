@@ -255,10 +255,15 @@ namespace Microsoft.Azure.Devices
                 var cbsLink = new AmqpCbsLink(amqpConnection);
                 await this.SendCbsTokenAsync(cbsLink, timeoutHelper.RemainingTime());
             }
-            catch (Exception e) when (!e.IsFatal())
+            catch (Exception ex) when (!ex.IsFatal())
             {
-                // this can happen in a scenario where the server closes the Amqp connection before the session is established
-                throw amqpConnection.TerminalException ?? e;
+                if (amqpConnection.TerminalException != null)
+                {
+                    throw AmqpClientHelper.ToIotHubClientContract(amqpConnection.TerminalException);
+                }
+
+                amqpConnection.SafeClose(ex);
+                throw;
             }
 
             return amqpSession;
