@@ -245,15 +245,15 @@ namespace Microsoft.Azure.Devices
                 Properties = new Fields()
             };
 
-            AmqpSession amqpSession;
             try
             {
-                amqpSession = amqpConnection.CreateSession(sessionSettings);
+                var amqpSession = amqpConnection.CreateSession(sessionSettings);
                 await amqpSession.OpenAsync(timeoutHelper.RemainingTime());
 
                 // This adds itself to amqpConnection.Extensions
                 var cbsLink = new AmqpCbsLink(amqpConnection);
                 await this.SendCbsTokenAsync(cbsLink, timeoutHelper.RemainingTime());
+                return amqpSession;
             }
             catch (Exception ex) when (!ex.IsFatal())
             {
@@ -265,8 +265,6 @@ namespace Microsoft.Azure.Devices
                 amqpConnection.SafeClose(ex);
                 throw;
             }
-
-            return amqpSession;
         }
 
         void CloseConnection(AmqpSession amqpSession)
