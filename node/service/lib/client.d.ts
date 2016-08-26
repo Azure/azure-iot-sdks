@@ -18,7 +18,7 @@ declare class Client extends EventEmitter {
     on(type: string, func: Function): this;
 
     static fromConnectionString(connStr: string, transportCtr?: Client.TransportCtor): Client;
-    static fromSharedAccessSignature(sharedAccessSignature: string, tranposrtCtr?: Client.TransportContructor): Client;
+    static fromSharedAccessSignature(sharedAccessSignature: string, tranposrtCtr?: Client.TransportCtor): Client;
 }
 
 declare namespace Client {
