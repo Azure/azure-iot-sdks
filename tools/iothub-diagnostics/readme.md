@@ -1,7 +1,6 @@
-# Diagnosing issues with your IOT Hub
+# Diagnosing issues with your IoT Hub
 
-This tooling is provided to help diagnose issues with Azure IOT Hubs.
-
+This tool is provided to help diagnose issues with a device connecting to Azure IoT Hubs.
 
 ## Setup
 
