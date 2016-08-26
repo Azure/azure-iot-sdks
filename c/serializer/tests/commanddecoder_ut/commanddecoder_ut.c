@@ -48,279 +48,6 @@ MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, ActionCallbackMock, void*, actionCal
 #include "azure_c_shared_utility/lock.h"
 #include "testrunnerswitcher.h"
 
-
-
-#if 0
-#define GBALLOC_H
-
-extern "C" int gballoc_init(void);
-extern "C" void gballoc_deinit(void);
-extern "C" void* gballoc_malloc(size_t size);
-extern "C" void* gballoc_calloc(size_t nmemb, size_t size);
-extern "C" void* gballoc_realloc(void* ptr, size_t size);
-extern "C" void gballoc_free(void* ptr);
-
-
-namespace BASEIMPLEMENTATION
-{
-    /*if malloc is defined as gballoc_malloc at this moment, there'd be serious trouble*/
-#define Lock(x) (LOCK_OK + gballocState - gballocState) /*compiler warning about constant in if condition*/
-#define Unlock(x) (LOCK_OK + gballocState - gballocState)
-#define Lock_Init() (LOCK_HANDLE)0x42
-#define Lock_Deinit(x) (LOCK_OK + gballocState - gballocState)
-#include "gballoc.c"
-#undef Lock
-#undef Unlock
-#undef Lock_Init
-#undef Lock_Deinit
-};
-
-DEFINE_MICROMOCK_ENUM_TO_STRING(COMMANDDECODER_RESULT, COMMANDDECODER_RESULT_VALUES);
-DEFINE_MICROMOCK_ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
-
-
-static MICROMOCK_MUTEX_HANDLE g_testByTest;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// = { "State", "bool" }
-
-
-
-// = { "OtherArg", "ascii_char_ptr" }
-
-
-static AGENT_DATA_TYPE StateAgentDataType;
-
-
-
-
-
-
-
-#define DEFAULT_SCHEMA_NAME_SPACE "TruckDemo"
-
-
-
-
-
-// { "Location", "GeoLocation" }
-
-
-//  = { "Lat", "double" }
-
-//  = { "Long", "double" }
-
-
-//  = { "NestedLocation", "NestedGeoLocation" }
-
-
-
-
-
-
-
-
-
-
-
-static const ACTION_CALLBACK_FUNC TEST_CALLBACK_PTR = (ACTION_CALLBACK_FUNC)0x4343;
-static const char* TEST_IOTHUB_MESSAGE_HANDLE2 = TEST_COMMAND;
-
-static const COMMAND_DECODER_HANDLE TEST_COMMAND_DECODER_HANDLE = (COMMAND_DECODER_HANDLE)0x4246;
-
-
-
-static size_t currentmalloc_call;
-static size_t whenShallmalloc_fail;
-
-static size_t currentrealloc_call;
-static size_t whenShallrealloc_fail;
-
-
-TYPED_MOCK_CLASS(CCommandDecoderMocks, CGlobalMock)
-{
-public:
-    /* MultiTree mocks */
-    MOCK_STATIC_METHOD_3(, MULTITREE_RESULT, MultiTree_GetChildByName, MULTITREE_HANDLE, treeHandle, const char*, childName, MULTITREE_HANDLE*, childHandle)
-    MOCK_METHOD_END(MULTITREE_RESULT, MULTITREE_OK)
-    MOCK_STATIC_METHOD_2(, MULTITREE_RESULT, MultiTree_GetValue, MULTITREE_HANDLE, treeHandle, const void**, destination)
-    MOCK_METHOD_END(MULTITREE_RESULT, MULTITREE_OK)
-    MOCK_STATIC_METHOD_2(, MULTITREE_RESULT, MultiTree_GetChildCount, MULTITREE_HANDLE, treeHandle, size_t*, count)
-    MOCK_METHOD_END(MULTITREE_RESULT, MULTITREE_OK)
-    MOCK_STATIC_METHOD_3(, MULTITREE_RESULT, MultiTree_GetChild, MULTITREE_HANDLE, treeHandle, size_t, index, MULTITREE_HANDLE*, childHandle)
-    MOCK_METHOD_END(MULTITREE_RESULT, MULTITREE_OK)
-    MOCK_STATIC_METHOD_1(, void, MultiTree_Destroy, MULTITREE_HANDLE, treeHandle)
-    MOCK_VOID_METHOD_END()
-
-    /* Action callback mock */
-    MOCK_STATIC_METHOD_5(, EXECUTE_COMMAND_RESULT, ActionCallbackMock, void*, actionCallbackContext, const char*, relativeActionPath, const char*, actionName, size_t, parameterCount, const AGENT_DATA_TYPE*, parameterValues)
-    MOCK_METHOD_END(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS)
-
-    /* Schema mocks */
-    MOCK_STATIC_METHOD_2(, SCHEMA_ACTION_HANDLE, Schema_GetModelActionByName, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, actionName)
-    MOCK_METHOD_END(SCHEMA_ACTION_HANDLE, (SCHEMA_ACTION_HANDLE)NULL)
-    MOCK_STATIC_METHOD_2(, SCHEMA_RESULT, Schema_GetModelActionArgumentCount, SCHEMA_ACTION_HANDLE, actionHandle, size_t*, argumentCount)
-    MOCK_METHOD_END(SCHEMA_RESULT, SCHEMA_OK)
-    MOCK_STATIC_METHOD_2(, SCHEMA_ACTION_ARGUMENT_HANDLE, Schema_GetModelActionArgumentByIndex, SCHEMA_ACTION_HANDLE, modelActionHandle, size_t, argumentIndex)
-    MOCK_METHOD_END(SCHEMA_ACTION_ARGUMENT_HANDLE, NULL)
-    MOCK_STATIC_METHOD_1(, const char*, Schema_GetActionArgumentName, SCHEMA_ACTION_ARGUMENT_HANDLE, actionArgumentHandle)
-    MOCK_METHOD_END(const char*, NULL)
-    MOCK_STATIC_METHOD_1(, const char*, Schema_GetActionArgumentType, SCHEMA_ACTION_ARGUMENT_HANDLE, actionArgumentHandle)
-    MOCK_METHOD_END(const char*, NULL)
-    MOCK_STATIC_METHOD_2(, SCHEMA_STRUCT_TYPE_HANDLE, Schema_GetStructTypeByName, SCHEMA_HANDLE, schemaHandle, const char*, name)
-    MOCK_METHOD_END(SCHEMA_STRUCT_TYPE_HANDLE, (SCHEMA_STRUCT_TYPE_HANDLE)NULL)
-    MOCK_STATIC_METHOD_2(, SCHEMA_RESULT, Schema_GetStructTypePropertyCount, SCHEMA_STRUCT_TYPE_HANDLE, structTypeHandle, size_t*, propertyCount)
-    MOCK_METHOD_END(SCHEMA_RESULT, SCHEMA_OK)
-    MOCK_STATIC_METHOD_2(, SCHEMA_PROPERTY_HANDLE, Schema_GetStructTypePropertyByIndex, SCHEMA_STRUCT_TYPE_HANDLE, structTypeHandle, size_t, index)
-    MOCK_METHOD_END(SCHEMA_PROPERTY_HANDLE, (SCHEMA_PROPERTY_HANDLE)NULL)
-    MOCK_STATIC_METHOD_1(, SCHEMA_HANDLE, Schema_GetSchemaForModelType, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle)
-    MOCK_METHOD_END(SCHEMA_HANDLE, TEST_SCHEMA_HANDLE)
-    MOCK_STATIC_METHOD_1(, const char*, Schema_GetPropertyName, SCHEMA_PROPERTY_HANDLE, propertyHandle)
-    MOCK_METHOD_END(const char*, NULL)
-    MOCK_STATIC_METHOD_1(, const char*, Schema_GetPropertyType, SCHEMA_PROPERTY_HANDLE, propertyHandle)
-    MOCK_METHOD_END(const char*, NULL)
-    MOCK_STATIC_METHOD_1(, const char*, Schema_GetSchemaNamespace, SCHEMA_HANDLE, schemaHandle)
-    MOCK_METHOD_END(const char*, DEFAULT_SCHEMA_NAME_SPACE)
-    MOCK_STATIC_METHOD_2(, SCHEMA_MODEL_TYPE_HANDLE, Schema_GetModelModelByName, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName)
-    MOCK_METHOD_END(SCHEMA_MODEL_TYPE_HANDLE, TEST_CHILD_MODEL_HANDLE)
-
-    /* AgentDataType mocks */
-    MOCK_STATIC_METHOD_3(, AGENT_DATA_TYPES_RESULT, CreateAgentDataType_From_String, const char*, source, AGENT_DATA_TYPE_TYPE, type, AGENT_DATA_TYPE*, agentData)
-    MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK)
-    MOCK_STATIC_METHOD_5(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_Members, AGENT_DATA_TYPE*, agentData, const char*, typeName, size_t, nMembers, const char* const *, memberNames, const AGENT_DATA_TYPE*, memberValues)
-    {
-        for (size_t i = 0; i < nMembers; i++)
-        {
-            strcpy(lastMemberNames[nCall][i], memberNames[i]);
-        }
-        nCall++;
-    }
-    MOCK_METHOD_END(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_OK)
-        MOCK_STATIC_METHOD_1(, void, Destroy_AGENT_DATA_TYPE, AGENT_DATA_TYPE*, agentData)
-        MOCK_VOID_METHOD_END()
-        MOCK_STATIC_METHOD_1(, AGENT_DATA_TYPE_TYPE, CodeFirst_GetPrimitiveType, const char*, typeName)
-        MOCK_METHOD_END(AGENT_DATA_TYPE_TYPE, EDM_NO_TYPE)
-
-        ///* IoT Hub mocks */
-    /*MOCK_STATIC_METHOD_3(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_GetData, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const unsigned char**, buffer, size_t*, size)
-        
-    if (isIoTHubMessage_GetData_writing_to_outputs)
-    {
-        *buffer = (const unsigned char*)TEST_COMMAND;
-        *size = strlen(TEST_COMMAND);
-    }
-        
-    MOCK_METHOD_END(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_OK)*/
-
-    /* JSON Decoder mocks */
-    MOCK_STATIC_METHOD_2(, JSON_DECODER_RESULT, JSONDecoder_JSON_To_MultiTree, char*, json, MULTITREE_HANDLE*, multiTreeHandle);
-        *multiTreeHandle = TEST_COMMANDS_ROOT_NODE;
-    MOCK_METHOD_END(JSON_DECODER_RESULT, JSON_DECODER_OK)
-
-
-        MOCK_STATIC_METHOD_1(, void*, gballoc_malloc, size_t, size)
-        void* result2;
-    currentmalloc_call++;
-    if (whenShallmalloc_fail>0)
-    {
-        if (currentmalloc_call == whenShallmalloc_fail)
-        {
-            result2 = (STRING_HANDLE)NULL;
-        }
-        else
-        {
-            result2 = BASEIMPLEMENTATION::gballoc_malloc(size);
-        }
-    }
-    else
-    {
-        result2 = BASEIMPLEMENTATION::gballoc_malloc(size);
-    }
-    MOCK_METHOD_END(void*, result2);
-
-    MOCK_STATIC_METHOD_2(, void*, gballoc_realloc, void*, ptr, size_t, size)
-        void* result2;
-    currentrealloc_call++;
-    if (whenShallrealloc_fail>0)
-    {
-        if (currentrealloc_call == whenShallrealloc_fail)
-        {
-            result2 = (STRING_HANDLE)NULL;
-        }
-        else
-        {
-            result2 = BASEIMPLEMENTATION::gballoc_realloc(ptr, size);
-        }
-    }
-    else
-    {
-        result2 = BASEIMPLEMENTATION::gballoc_realloc(ptr, size);
-    }
-    MOCK_METHOD_END(void*, result2);
-
-    MOCK_STATIC_METHOD_1(, void, gballoc_free, void*, ptr)
-        BASEIMPLEMENTATION::gballoc_free(ptr);
-    MOCK_VOID_METHOD_END()
-
-};
-
-DECLARE_GLOBAL_MOCK_METHOD_3(CCommandDecoderMocks, , MULTITREE_RESULT, MultiTree_GetChildByName, MULTITREE_HANDLE, treeHandle, const char*, childName, MULTITREE_HANDLE*, childHandle);
-DECLARE_GLOBAL_MOCK_METHOD_2(CCommandDecoderMocks, , MULTITREE_RESULT, MultiTree_GetValue, MULTITREE_HANDLE, treeHandle, const void**, destination);
-DECLARE_GLOBAL_MOCK_METHOD_2(CCommandDecoderMocks, , MULTITREE_RESULT, MultiTree_GetChildCount, MULTITREE_HANDLE, treeHandle, size_t*, count);
-DECLARE_GLOBAL_MOCK_METHOD_3(CCommandDecoderMocks, , MULTITREE_RESULT, MultiTree_GetChild, MULTITREE_HANDLE, treeHandle, size_t, index, MULTITREE_HANDLE*, childHandle);
-DECLARE_GLOBAL_MOCK_METHOD_1(CCommandDecoderMocks, , void, MultiTree_Destroy, MULTITREE_HANDLE, treeHandle);
-
-
-
-DECLARE_GLOBAL_MOCK_METHOD_2(CCommandDecoderMocks, , SCHEMA_ACTION_HANDLE, Schema_GetModelActionByName, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, actionName);
-DECLARE_GLOBAL_MOCK_METHOD_2(CCommandDecoderMocks, , SCHEMA_RESULT, Schema_GetModelActionArgumentCount, SCHEMA_ACTION_HANDLE, actionHandle, size_t*, argumentCount);
-DECLARE_GLOBAL_MOCK_METHOD_2(CCommandDecoderMocks, , SCHEMA_ACTION_ARGUMENT_HANDLE, Schema_GetModelActionArgumentByIndex, SCHEMA_ACTION_HANDLE, modelActionHandle, size_t, argumentIndex);
-DECLARE_GLOBAL_MOCK_METHOD_1(CCommandDecoderMocks, , const char*, Schema_GetActionArgumentName, SCHEMA_ACTION_ARGUMENT_HANDLE, actionArgumentHandle);
-DECLARE_GLOBAL_MOCK_METHOD_1(CCommandDecoderMocks, , const char*, Schema_GetActionArgumentType, SCHEMA_ACTION_ARGUMENT_HANDLE, actionArgumentHandle);
-DECLARE_GLOBAL_MOCK_METHOD_2(CCommandDecoderMocks, , SCHEMA_STRUCT_TYPE_HANDLE, Schema_GetStructTypeByName, SCHEMA_HANDLE, schemaHandle, const char*, name);
-DECLARE_GLOBAL_MOCK_METHOD_2(CCommandDecoderMocks, , SCHEMA_RESULT, Schema_GetStructTypePropertyCount, SCHEMA_STRUCT_TYPE_HANDLE, structTypeHandle, size_t*, propertyCount);
-DECLARE_GLOBAL_MOCK_METHOD_2(CCommandDecoderMocks, , SCHEMA_PROPERTY_HANDLE, Schema_GetStructTypePropertyByIndex, SCHEMA_STRUCT_TYPE_HANDLE, structTypeHandle, size_t, index);
-DECLARE_GLOBAL_MOCK_METHOD_1(CCommandDecoderMocks, , SCHEMA_HANDLE, Schema_GetSchemaForModelType, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle);
-DECLARE_GLOBAL_MOCK_METHOD_1(CCommandDecoderMocks, , const char*, Schema_GetPropertyName, SCHEMA_PROPERTY_HANDLE, propertyHandle);
-DECLARE_GLOBAL_MOCK_METHOD_1(CCommandDecoderMocks, , const char*, Schema_GetPropertyType, SCHEMA_PROPERTY_HANDLE, propertyHandle);
-DECLARE_GLOBAL_MOCK_METHOD_1(CCommandDecoderMocks, , const char*, Schema_GetSchemaNamespace, SCHEMA_HANDLE, schemaHandle);
-DECLARE_GLOBAL_MOCK_METHOD_2(CCommandDecoderMocks, , SCHEMA_MODEL_TYPE_HANDLE, Schema_GetModelModelByName, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName);
-
-DECLARE_GLOBAL_MOCK_METHOD_3(CCommandDecoderMocks, , AGENT_DATA_TYPES_RESULT, CreateAgentDataType_From_String, const char*, source, AGENT_DATA_TYPE_TYPE, type, AGENT_DATA_TYPE*, agentData);
-DECLARE_GLOBAL_MOCK_METHOD_5(CCommandDecoderMocks, , AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_Members, AGENT_DATA_TYPE*, agentData, const char*, typeName, size_t, nMembers, const char* const *, memberNames, const AGENT_DATA_TYPE*, memberValues);
-DECLARE_GLOBAL_MOCK_METHOD_1(CCommandDecoderMocks, , void, Destroy_AGENT_DATA_TYPE, AGENT_DATA_TYPE*, agentData);
-DECLARE_GLOBAL_MOCK_METHOD_1(CCommandDecoderMocks, , AGENT_DATA_TYPE_TYPE, CodeFirst_GetPrimitiveType, const char*, typeName);
-
-//
-DECLARE_GLOBAL_MOCK_METHOD_2(CCommandDecoderMocks, , JSON_DECODER_RESULT, JSONDecoder_JSON_To_MultiTree, char*, json, MULTITREE_HANDLE*, multiTreeHandle);
-
-
-DECLARE_GLOBAL_MOCK_METHOD_1(CCommandDecoderMocks, , void*, gballoc_malloc, size_t, size);
-DECLARE_GLOBAL_MOCK_METHOD_2(CCommandDecoderMocks, , void*, gballoc_realloc, void*, ptr, size_t, size);
-DECLARE_GLOBAL_MOCK_METHOD_1(CCommandDecoderMocks, , void, gballoc_free, void*, ptr);
-
-/* Requirements tested by the virtue of invoking the public API */
-/* Tests_SRS_COMMAND_DECODER_99_001:[ The CommandDecoder module shall expose the following API ... ] */
-
-
-
-
-
-static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
-#endif 
-
 static const SCHEMA_MODEL_TYPE_HANDLE TEST_CHILD_MODEL_HANDLE = (SCHEMA_MODEL_TYPE_HANDLE)0x4302;
 static const MULTITREE_HANDLE TEST_NESTED_STRUCT_NODE = (MULTITREE_HANDLE)0x4283;
 static const SCHEMA_PROPERTY_HANDLE memberNestedComplexTypeProperty = (SCHEMA_PROPERTY_HANDLE)0x4403;
@@ -338,40 +65,24 @@ static const char LocationActionArgument_Name[] = "Location";
 static const char LocationActionArgument_Type[] = "GeoLocation";
 static const SCHEMA_ACTION_ARGUMENT_HANDLE LocationActionArgument = (SCHEMA_ACTION_ARGUMENT_HANDLE)0x5254;
 static const SCHEMA_ACTION_HANDLE SetLocationActionHandle = (SCHEMA_ACTION_HANDLE)0x4242;
-
 static const char* quotedSetLocationName = "\"SetLocation\"";
 static const char* setLocationName = "SetLocation";
-
 static AGENT_DATA_TYPE OtherArgAgentDataType;
-
 static const MULTITREE_HANDLE TEST_ARG2_NODE = (MULTITREE_HANDLE)0x4282;
-
 static const char OtherArgActionArgument_Name[] = "OtherArg";
 static const char OtherArgActionArgument_Type[] = "ascii_char_ptr";
 static const SCHEMA_ACTION_ARGUMENT_HANDLE OtherArgActionArgument = (SCHEMA_ACTION_ARGUMENT_HANDLE)0x5253;
-
 static const MULTITREE_HANDLE TEST_ARG1_NODE = (MULTITREE_HANDLE)0x4281;
-
 static const SCHEMA_ACTION_ARGUMENT_HANDLE StateActionArgument = (SCHEMA_ACTION_ARGUMENT_HANDLE)0x5252;
-
 static const char StateActionArgument_Type[] = "bool";
-
 static const char StateActionArgument_Name[] = "State";
-
 static const SCHEMA_ACTION_HANDLE SetACStateActionHandle = (SCHEMA_ACTION_HANDLE)0x4242;
-
 static const char* setACStateName = "SetACState";
-
 static const MULTITREE_HANDLE TEST_COMMAND_ARGS_NODE = (MULTITREE_HANDLE)0x4202;
-
 static const MULTITREE_HANDLE TEST_COMMANDS_ROOT_NODE = (MULTITREE_HANDLE)0x4201;
-
 static const char* quotedSetACStateName = "\"SetACState\"";
-
 static const MULTITREE_HANDLE TEST_COMMAND_NAME_NODE = (MULTITREE_HANDLE)0x4202;
-
 static const MULTITREE_HANDLE TEST_COMMAND_ROOT_NODE = (MULTITREE_HANDLE)0x4201;
-
 static const SCHEMA_HANDLE TEST_SCHEMA_HANDLE = (SCHEMA_HANDLE)0x4401;
 
 #define TEST_COMMAND \
@@ -493,7 +204,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
-
         
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_MODEL_TYPE_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_HANDLE, void*);
@@ -503,18 +213,12 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_STRUCT_TYPE_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_PROPERTY_HANDLE, void*);
         
-        
-        
         REGISTER_UMOCK_ALIAS_TYPE(JSON_DECODER_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(MULTITREE_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(AGENT_DATA_TYPE_TYPE, int);
         REGISTER_UMOCK_ALIAS_TYPE(AGENT_DATA_TYPES_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(EXECUTE_COMMAND_RESULT, int);
-        
-        
-        
-        
 
         REGISTER_GLOBAL_MOCK_HOOK(JSONDecoder_JSON_To_MultiTree, my_JSONDecoder_JSON_To_MultiTree);
         REGISTER_GLOBAL_MOCK_HOOK(MultiTree_Destroy, my_MultiTree_Destroy);
@@ -526,12 +230,6 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         REGISTER_GLOBAL_MOCK_RETURN(MultiTree_GetValue, MULTITREE_OK);
         REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelModelByName, TEST_CHILD_MODEL_HANDLE);
         
-
-        
-        
-        
-        
-
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
