@@ -165,6 +165,127 @@ The `sendEventBatch` method sends a list of event messages to the IoT Hub as the
 
 **SRS_NODE_DEVICE_CLIENT_18_003: [** The `getDeviceTwin` method shall use the second parameter (if it is not falsy) to call `fromDeviceClient` on. **]**    
 
+#### onMethod(methodName, callback)
+
+The `onMethod` method's `callback` parameter is a function that is expected to conform to the signature of the interface `DeviceMethodEventHandler` as defined below (specified here using TypeScript syntax for expository purposes):
+
+```
+interface StringMap {
+  [key: string]: string;
+}
+
+interface DeviceMethodRequest {
+  resource?: string;
+  properties: StringMap;
+  body: Buffer;
+}
+
+interface DeviceMethodResponse {
+  properties: StringMap;
+  write(data: Buffer | string): void;
+  end(status: number, done?: (err: any): void); 
+}
+
+interface DeviceMethodEventHandler {
+  (request: DeviceMethodRequest, response: DeviceMethodResponse): void;
+}
+```
+
+**SRS_NODE_DEVICE_CLIENT_13_020: [** `onMethod` shall throw a `ReferenceError` if `methodName` is undefined or not a string. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_022: [** `onMethod` shall throw a `ReferenceError` if `callback` is undefined or not a `Function`. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_001: [** The `onMethod` method shall cause the `callback` function to be invoked when a cloud-to-device *method* invocation signal is received from the IoT Hub service. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_003: [** The client shall start listening for method calls from the service whenever there is at least 1 listener subscribed for a method callback. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_015: [** `DeviceMethodResponse.write` shall throw a `ReferenceError` if `data` is undefined. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_016: [** `DeviceMethodResponse.write` shall convert `data` to a string by calling `toString` if it is not a `string` or a `Buffer`. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_011: [** The `DeviceMethodResponse.write` method shall accumulate the `data` passed to it in an internal buffer when `data` is a Node `Buffer` object. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_012: [** If the parameter `data` to `DeviceMethodResponse.write` is a `string` then it shall convert the string to a Node `Buffer` and accumulate it in an internal buffer. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_013: [** `DeviceMethodResponse.write` shall throw an `Error` object if it is invoked after `DeviceMethodResponse.end` has been called. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_014: [** `DeviceMethodResponse.end` shall throw an `Error` if `status` is undefined or not a number. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_017: [** `DeviceMethodResponse.end` shall notify the service and supply the response for the request along with the `status`. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_018: [** `DeviceMethodResponse.end` shall throw an `Error` object if it is called more than once for the same request. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_019: [** `DeviceMethodResponse.end` shall invoke the callback specified by `done` if it is not falsy when the response has been sent to the service passing the status of the communication. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_021: [** `onMethod` shall throw an `Error` if the underlying transport does not support device methods. **]**
+
+
+
+### Events
+#### message
+
+**SRS_NODE_DEVICE_CLIENT_16_002: [** The `message` event shall be emitted when a cloud-to-device message is received from the IoT Hub service. **]**
+
+**SRS_NODE_DEVICE_CLIENT_16_003: [** The `message` event parameter shall be a `message` object. **]**
+
+**SRS_NODE_DEVICE_CLIENT_16_004: [** The client shall start listening for messages from the service whenever there is a listener subscribed to the `message` event. **]**
+
+**SRS_NODE_DEVICE_CLIENT_16_005: [** The client shall stop listening for messages from the service whenever the last listener unsubscribes from the `message` event. **]**
+
+#### method
+
+The `method` event handler is expected to conform to the signature of the interface `DeviceMethodEventHandler` as defined below (specified here using TypeScript syntax for expository purposes):
+
+```
+interface StringMap {
+  [key: string]: string;
+}
+
+interface DeviceMethodRequest {
+  resource?: string;
+  properties: StringMap;
+  body: Buffer;
+}
+
+interface DeviceMethodResponse {
+  properties: StringMap;
+  write(data: Buffer | string): void;
+  end(status: number, done?: (err: any): void); 
+}
+
+interface DeviceMethodEventHandler {
+  (request: DeviceMethodRequest, response: DeviceMethodResponse): void;
+}
+```
+
+**SRS_NODE_DEVICE_CLIENT_13_020: [** `onMethod` shall throw a `ReferenceError` if `methodName` is undefined or not a string. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_022: [** `onMethod` shall throw a `ReferenceError` if `callback` is undefined or not a `Function`. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_001: [** The `onMethod` method shall cause the `callback` function to be invoked when a cloud-to-device *method* invocation signal is received from the IoT Hub service. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_003: [** The client shall start listening for method calls from the service whenever there is at least 1 listener subscribed for a method callback. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_015: [** `DeviceMethodResponse.write` shall throw a `ReferenceError` if `data` is undefined. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_016: [** `DeviceMethodResponse.write` shall convert `data` to a string by calling `toString` if it is not a `string` or a `Buffer`. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_011: [** The `DeviceMethodResponse.write` method shall accumulate the `data` passed to it in an internal buffer when `data` is a Node `Buffer` object. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_012: [** If the parameter `data` to `DeviceMethodResponse.write` is a `string` then it shall convert the string to a Node `Buffer` and accumulate it in an internal buffer. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_013: [** `DeviceMethodResponse.write` shall throw an `Error` object if it is invoked after `DeviceMethodResponse.end` has been called. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_014: [** `DeviceMethodResponse.end` shall throw an `Error` if `status` is undefined or not a number. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_017: [** `DeviceMethodResponse.end` shall notify the service and supply the response for the request along with the `status`. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_018: [** `DeviceMethodResponse.end` shall throw an `Error` object if it is called more than once for the same request. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_019: [** `DeviceMethodResponse.end` shall invoke the callback specified by `done` if it is not falsy when the response has been sent to the service passing the status of the communication. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_021: [** `onMethod` shall throw an `Error` if the underlying transport does not support device methods. **]**
+
 ### Events
 #### message
 
