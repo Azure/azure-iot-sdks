@@ -499,7 +499,7 @@ COMMAND_DECODER_HANDLE CommandDecoder_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandl
         if (result == NULL)
         {
             /* Codes_SRS_COMMAND_DECODER_01_004: [If any error is encountered during CommandDecoder_Create CommandDecoder_Create shall return NULL.] */
-            result = NULL;
+            /*return as is*/
         }
         else
         {
