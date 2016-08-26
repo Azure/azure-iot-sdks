@@ -1,13 +1,13 @@
 {
     "c": {
-        "device": "1.0.13"
+        "device": "1.0.14"
     },
     "c_nuget": {
-        "device": "1.0.15"
+        "device": "1.0.16"
     },
     "csharp": {
-        "device": "1.0.17",
-        "devicepcl": "1.0.17",
+        "device": "1.0.18",
+        "devicepcl": "1.0.18",
         "service": "1.0.14"
     },
     "java": {
@@ -15,23 +15,23 @@
         "service": "1.0.8"
     },
     "node": {
-        "common": "1.0.12",
-        "amqp-base": "1.0.12",
-        "http-base": "1.0.13",
-        "mqtt-base": "1.0.12",
-        "device": "1.0.12",
-        "device-amqp": "1.0.12",
-        "device-amqp-ws": "1.0.12",
-        "device-http": "1.0.13",
-        "device-mqtt": "1.0.12",
-        "service": "1.0.14",
-        "node-red-contrib-azureiothubnode": "0.0.1"
+        "common": "1.0.13",
+        "amqp-base": "1.0.14",
+        "http-base": "1.0.14",
+        "mqtt-base": "1.0.13",
+        "device": "1.0.13",
+        "device-amqp": "1.0.13",
+        "device-amqp-ws": "1.0.13",
+        "device-http": "1.0.14",
+        "device-mqtt": "1.0.13",
+        "service": "1.0.15",
+        "node-red-contrib-azureiothubnode": "0.0.2"
     },
-    "c_shared_utility_nuget": "1.0.16",
-    "uamqp_c_nuget": "1.0.17",
-    "umqtt_c_nuget": "1.0.16",
-    "iothub-diagnostics": "1.0.0",
-    "iothub-explorer": "1.0.11",
-    "device-explorer": "1.0.10",
-    "github-release": "v1.0.8"
+    "c_shared_utility_nuget": "1.0.17",
+    "uamqp_c_nuget": "1.0.18",
+    "umqtt_c_nuget": "1.0.17",
+    "iothub-diagnostics": "1.0.1",
+    "iothub-explorer": "1.0.12",
+    "device-explorer": "1.0.11",
+    "github-release": "v1.0.9"
 }
