@@ -3083,7 +3083,7 @@ static int sscanf3d2d(const char* src, int* hourOffset, int* minOffset)
 
     if (
         (scanAndReadNDigitsInt(src, &position, hourOffset, (3-position)) == 0) &&
-        (src[position] == ':', position++) &&
+        (src[position++] == ':') &&
         (scanAndReadNDigitsInt(src, &position, minOffset, 2) == 0)
         )
     {
