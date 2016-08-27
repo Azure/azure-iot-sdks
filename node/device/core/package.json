@@ -12,7 +12,8 @@
     "azure-storage": "^1.2.0",
     "debug": "^2.2.0",
     "lodash": "^4.15.0",
-    "traverse": "^0.6.6"
+    "traverse": "^0.6.6",
+    "es5-shim": "^4.5.9"
   },
   "devDependencies": {
     "chai": "^3.5.0",

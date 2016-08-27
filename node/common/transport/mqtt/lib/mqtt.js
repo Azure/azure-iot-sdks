@@ -39,10 +39,10 @@ Mqtt.prototype.connect = function (config, done) {
 
   this._receiver = null;
   this._hostName = 'mqtts://' + config.host;
-  this._topic_publish = "devices/" + config.deviceId + "/messages/events/";
-  this._topic_subscribe = "devices/" + config.deviceId + "/messages/devicebound/#";
-  debug('topic publish: ' + this._topic_publish);
-  debug('topic subscribe: ' + this._topic_subscribe);
+  this._topicTelemetryPublish = "devices/" + config.deviceId + "/messages/events/";
+  this._topicMessageSubscribe = "devices/" + config.deviceId + "/messages/devicebound/#";
+  debug('topic publish: ' + this._topicTelemetryPublish);
+  debug('topic subscribe: ' + this._topicMessageSubscribe);
   var versionString = encodeURIComponent('azure-iot-device/' + PackageJson.version);
 
   /*Codes_SRS_NODE_COMMON_MQTT_16_002: [The `connect` method shall use the authentication parameters contained in the `config` argument to connect to the server.]*/
@@ -128,7 +128,7 @@ Mqtt.prototype.publish = function (message, done) {
     throw new ReferenceError('Invalid message');
   }
 
-  this.client.publish(this._topic_publish, message.data.toString(), { qos: 1, retain: false }, function (err, puback) {
+  this.client.publish(this._topicTelemetryPublish, message.data.toString(), { qos: 1, retain: false }, function (err, puback) {
     if (done) {
       if (err) {
         done(err);
@@ -150,7 +150,10 @@ Mqtt.prototype.publish = function (message, done) {
 /*Codes_SRS_NODE_DEVICE_MQTT_16_003: [If a receiver for this endpoint doesn’t exist, the getReceiver method should create a new MqttReceiver object and then call the done() method with the object that was just created as an argument.] */
 Mqtt.prototype.getReceiver = function (done) {
   if (!this._receiver) {
-    this._receiver = new MqttReceiver(this.client, this._topic_subscribe);
+    this._receiver = new MqttReceiver(
+      this.client,
+      this._topicMessageSubscribe
+    );
   }
 
   done(null, this._receiver);

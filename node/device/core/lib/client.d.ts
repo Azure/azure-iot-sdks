@@ -19,6 +19,7 @@ declare class Client extends EventEmitter {
     reject(message: Message, done: (err: Error, results?: results.MessageRejected) => void): void;
     abandon(message: Message, done: (err: Error, results?: results.MessageAbandoned) => void): void;
     uploadToBlob(blobName: string, stream: Stream, steamLength: number, done: (err?: Error) => void): void;
+    onDeviceMethod(methodName: string, callback: (request: Client.DeviceMethodRequest, response: Client.DeviceMethodResponse) => void): void;
 
     on(type: 'message', func: (msg: Message) => void): this;
     on(type: 'error', func: (err: Error) => void): this;
@@ -48,6 +49,24 @@ declare namespace Client {
     interface BlobUpload {
         uploadToBlob(blobName: string, stream: Stream, steamLength: number, done: (err?: Error) => void): void;
         updateSharedAccessSignature(sharedAccessSignature: string): void;
+    }
+
+    interface DeviceMethodRequest {
+        requestId: string;
+        methodName: string;
+        properties: { [key: string]: string; };
+        body: Buffer;
+    }
+
+    interface DeviceMethodResponse {
+        requestId: string;
+        properties: { [key: string]: string; };
+        bodyParts: Buffer[];
+        isResponseComplete: boolean;
+        status: number;
+
+        write(data: string | Buffer): void;
+        end(status: number, done: (err?: Error) => void): void;
     }
 
     type TransportCtor = new(config: Config) => Transport;

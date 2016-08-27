@@ -19,6 +19,7 @@ declare class Mqtt extends EventEmitter implements Client.Transport {
     complete(message: Message, done: (err: Error, result?: results.MessageCompleted) => void): void;
     reject(message: Message, done: (err: Error, results?: results.MessageRejected) => void): void;
     abandon(message: Message, done: (err: Error, results?: results.MessageAbandoned) => void): void;
+    sendMethodResponse(response: Client.DeviceMethodResponse, done?: (err: Error) => void): void;
 
     on(type: 'disconnect', func: (err: Error) => void): this;
 

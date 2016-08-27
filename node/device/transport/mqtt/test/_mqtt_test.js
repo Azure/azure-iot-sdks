@@ -3,8 +3,9 @@
 
 'use strict';
 
+require('es5-shim');
 var assert = require('chai').assert;
-
+var sinon = require('sinon');
 var Mqtt = require('../lib/mqtt.js');
 var errors = require('azure-iot-common').errors;
 
@@ -29,6 +30,179 @@ describe('Mqtt', function () {
       var provider = {};
       var mqtt = new Mqtt(null, provider);
       assert.equal(mqtt._mqtt.mqttprovider, provider);
+    });
+  });
+
+  describe('#sendMethodResponse', function() {
+    var MockMqttBase = {
+      client: {
+        publish: function(){}
+      }
+    };
+
+    // Tests_SRS_NODE_DEVICE_MQTT_13_001: [ sendMethodResponse shall throw an Error if response is falsy or does not conform to the shape defined by DeviceMethodResponse. ]
+    [
+      // response is falsy
+      null,
+      // response is falsy
+      undefined,
+      // response.requestId is falsy
+      {},
+      // response.requestId is not a string
+      { requestId: 42 },
+      // response.requestId is an empty string
+      { requestId: '' },
+      // response.properties is falsy
+      { requestId: 'req1' },
+      // response.properties is not an object
+      {
+        requestId: 'req1',
+        properties: 42
+      },
+      // response.properties has empty string keys
+      {
+        requestId: 'req1',
+        properties: {
+          '': 'val1'
+        }
+      },
+      // response.properties has non-string values
+      {
+        requestId: 'req1',
+        properties: {
+          'k1': 42
+        }
+      },
+      // response.properties has empty string values
+      {
+        requestId: 'req1',
+        properties: {
+          'k1': ''
+        }
+      },
+      // response.status is falsy
+      {
+        requestId: 'req1',
+        properties: {
+          'k1': 'v1'
+        }
+      },
+      // response.status is not a number
+      {
+        requestId: 'req1',
+        properties: {
+          'k1': 'v1'
+        },
+        status: '200'
+      },
+      // response.bodyParts is falsy
+      {
+        requestId: 'req1',
+        properties: {
+          'k1': 'v1'
+        },
+        status: 200
+      },
+      // response.bodyParts.length is falsy
+      {
+        requestId: 'req1',
+        properties: {
+          'k1': 'v1'
+        },
+        status: 200,
+        bodyParts: {}
+      }
+    ].forEach(function(response) {
+      it('throws an Error if response is falsy or is improperly constructed', function()
+      {
+        var mqtt = new Mqtt(fakeConfig);
+        assert.throws(function() {
+          mqtt.sendMethodResponse(response, null);
+        });
+      });
+    });
+
+    // Tests_SRS_NODE_DEVICE_MQTT_13_002: [ sendMethodResponse shall build an MQTT topic name in the format: $iothub/methods/res/<STATUS>/?$rid=<REQUEST ID>&<PROPERTIES> where <STATUS> is response.status. ]
+    // Tests_SRS_NODE_DEVICE_MQTT_13_003: [ sendMethodResponse shall build an MQTT topic name in the format: $iothub/methods/res/<STATUS>/?$rid=<REQUEST ID>&<PROPERTIES> where <REQUEST ID> is response.requestId. ]
+    // Tests_SRS_NODE_DEVICE_MQTT_13_004: [ sendMethodResponse shall build an MQTT topic name in the format: $iothub/methods/res/<STATUS>/?$rid=<REQUEST ID>&<PROPERTIES> where <PROPERTIES> is URL encoded. ]
+    it('formats MQTT topic with status code', function() {
+      // setup
+      var mqtt = new Mqtt(fakeConfig);
+      var spy = sinon.spy(MockMqttBase.client, 'publish');
+      mqtt._mqtt = MockMqttBase;
+
+      // test
+      mqtt.sendMethodResponse({
+        requestId: 'req1',
+        properties: {
+          'k1': 'value has spaces'
+        },
+        status: 200,
+        bodyParts: []
+      });
+
+      // assert
+      assert.isTrue(spy.calledOnce);
+      assert.strictEqual(spy.args[0][0], '$iothub/methods/res/200/?$rid=req1&k1=value%20has%20spaces');
+
+      // cleanup
+      MockMqttBase.client.publish.restore();
+    });
+
+    // Tests_SRS_NODE_DEVICE_MQTT_13_006: [ If the MQTT publish fails then an error shall be returned via the done callback's first parameter. ]
+    it('calls callback with error when mqtt publish fails', function() {
+      // setup
+      var mqtt = new Mqtt(fakeConfig);
+      var stub = sinon.stub(MockMqttBase.client, 'publish')
+                      .callsArgWith(3, new Error('No connection to broker'));
+      var callback = sinon.spy();
+      mqtt._mqtt = MockMqttBase;
+
+      // test
+      mqtt.sendMethodResponse({
+        requestId: 'req1',
+        properties: {
+          'k1': 'value has spaces'
+        },
+        status: 200,
+        bodyParts: []
+      }, callback);
+
+      // assert
+      assert.isTrue(stub.calledOnce);
+      assert.isTrue(callback.calledOnce);
+      assert.isOk(callback.args[0][0]);
+
+      // cleanup
+      MockMqttBase.client.publish.restore();
+    });
+
+    // Tests_SRS_NODE_DEVICE_MQTT_13_007: [ If the MQTT publish is successful then the done callback shall be invoked passing null for the first parameter. ]
+    it('calls callback with null when mqtt publish succeeds', function() {
+      // setup
+      var mqtt = new Mqtt(fakeConfig);
+      var stub = sinon.stub(MockMqttBase.client, 'publish')
+                      .callsArgWith(3, null);
+      var callback = sinon.spy();
+      mqtt._mqtt = MockMqttBase;
+
+      // test
+      mqtt.sendMethodResponse({
+        requestId: 'req1',
+        properties: {
+          'k1': 'value has spaces'
+        },
+        status: 200,
+        bodyParts: []
+      }, callback);
+
+      // assert
+      assert.isTrue(stub.calledOnce);
+      assert.isTrue(callback.calledOnce);
+      assert.isNotOk(callback.args[0][0]);
+
+      // cleanup
+      MockMqttBase.client.publish.restore();
     });
   });
 

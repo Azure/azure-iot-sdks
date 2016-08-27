@@ -405,6 +405,162 @@ describe('Client', function () {
     });
   });
 
+  describe('#onDeviceMethod', function() {
+    var MockReceiver = function() {
+      EventEmitter.call(this);
+
+      this.onDeviceMethod = function(methodName, callback) {
+        this.on('method_' + methodName, callback);
+      };
+
+      // causes a mock method event to be raised
+      this.emitMethodCall = function(methodName) {
+        this.emit('method_' + methodName, {
+          methods: { methodName: methodName },
+          properties: {},
+          body: '',
+          requestId: '42'
+        });
+      };
+    };
+    util.inherits(MockReceiver, EventEmitter);
+
+    var MockTransport = function(config) {
+      EventEmitter.call(this);
+      this.config = config;
+      this.receiver = new MockReceiver();
+
+      this.getReceiver = function(callback) {
+        callback(null, this.receiver);
+      };
+
+      this.sendMethodResponse = function(response, done) {
+        response = response;
+        if(!!done && typeof(done) === 'function') {
+          done(null);
+        }
+      };
+    };
+    util.inherits(MockTransport, EventEmitter);
+
+    var MockTransportWithNoDeviceMethods = function(config) {
+      EventEmitter.call(this);
+      this.config = config;
+      this.receiver = new MockReceiver();
+
+      this.getReceiver = function(callback) {
+        callback(null, this.receiver);
+      };
+    };
+    util.inherits(MockTransport, EventEmitter);
+
+    // Tests_SRS_NODE_DEVICE_CLIENT_13_020: [ onDeviceMethod shall throw a ReferenceError if methodName is falsy. ]
+    [undefined, null].forEach(function (methodName) {
+      it('throws ReferenceError when methodName is "' + methodName + '"', function() {
+        var transport = new MockTransport();
+        var client = new Client(transport);
+        assert.throws(function() {
+          client.onDeviceMethod(methodName, function() {});
+        }, ReferenceError);
+      });
+    });
+
+    // Tests_SRS_NODE_DEVICE_CLIENT_13_024: [ onDeviceMethod shall throw a TypeError if methodName is not a string. ]
+    [new Date(), 42].forEach(function (methodName) {
+      it('throws TypeError when methodName is "' + methodName + '"', function() {
+        var transport = new MockTransport();
+        var client = new Client(transport);
+        assert.throws(function() {
+          client.onDeviceMethod(methodName, function() {});
+        }, TypeError);
+      });
+    });
+
+    // Tests_SRS_NODE_DEVICE_CLIENT_13_022: [ onDeviceMethod shall throw a ReferenceError if callback is falsy. ]
+    [undefined, null].forEach(function (callback) {
+      it('throws ReferenceError when callback is "' + callback + '"', function() {
+        var transport = new MockTransport();
+        var client = new Client(transport);
+        assert.throws(function() {
+          client.onDeviceMethod('doSomeTests', callback);
+        }, ReferenceError);
+      });
+    });
+
+    // Tests_SRS_NODE_DEVICE_CLIENT_13_025: [ onDeviceMethod shall throw a TypeError if callback is not a Function. ]
+    ['not_a_function', 42].forEach(function (callback) {
+      it('throws ReferenceError when callback is "' + callback + '"', function() {
+        var transport = new MockTransport();
+        var client = new Client(transport);
+        assert.throws(function() {
+          client.onDeviceMethod('doSomeTests', callback);
+        }, TypeError);
+      });
+    });
+
+    // Tests_SRS_NODE_DEVICE_CLIENT_13_001: [ The onDeviceMethod method shall cause the callback function to be invoked when a cloud-to-device method invocation signal is received from the IoT Hub service. ]
+    it('calls callback when C2D method call arrives', function(done) {
+      // setup
+      var transport = new MockTransport();
+      var client = new Client(transport);
+      var callback = sinon.spy();
+      client.onDeviceMethod('reboot', callback);
+
+      // test
+      transport.receiver.emitMethodCall('reboot');
+
+      // assert
+      assert.isTrue(callback.calledOnce);
+
+      // cleanup
+      done();
+    });
+
+    // Tests_SRS_NODE_DEVICE_CLIENT_13_003: [ The client shall start listening for method calls from the service whenever there is a listener subscribed for a method callback. ]
+    it('registers callback on transport when a method event is subscribed to', function() {
+      // setup
+      var transport = new MockTransport();
+      var client = new Client(transport);
+      var callback = sinon.spy();
+      transport.receiver.on('newListener', callback);
+
+      // test
+      client.onDeviceMethod('reboot', function(){});
+
+      // assert
+      assert.isTrue(callback.withArgs('method_reboot').calledOnce);
+
+      // cleanup
+      transport.receiver.removeListener('newListener', callback);
+    });
+
+    // Tests_SRS_NODE_DEVICE_CLIENT_13_023: [ onDeviceMethod shall throw an Error if a listener is already subscribed for a given method call. ]
+    it('throws if a listener is already subscribed for a method call', function() {
+      // setup
+      var transport = new MockTransport();
+      var client = new Client(transport);
+      client.onDeviceMethod('reboot', function(){});
+
+      // test
+      // assert
+      assert.throws(function() {
+        client.onDeviceMethod('reboot', function(){});
+      });
+    });
+
+    // Tests_SRS_NODE_DEVICE_CLIENT_13_021: [ onDeviceMethod shall throw an Error if the underlying transport does not support device methods. ]
+    it('throws if underlying transport does not support device methods', function() {
+      // setup
+      var transport = new MockTransportWithNoDeviceMethods();
+      var client = new Client(transport);
+
+      // test & assert
+      assert.throws(function() {
+        client.onDeviceMethod('reboot', function() {});
+      });
+    });
+  });
+
   describe('#events', function () {
     /*Tests_SRS_NODE_DEVICE_CLIENT_16_002: [The ‘message’ event shall be emitted when a cloud-to-device message is received from the IoT Hub service.]*/
     it('emits a message event when a message is received', function (done) {

@@ -117,6 +117,36 @@ The `reject` method is there for compatibility purposes with other transports bu
 
 **SRS_NODE_DEVICE_MQTT_16_014: [** The `setOptions` method shall not throw if the `done` argument is not passed. **]**
 
+### sendMethodResponse(response, done)
+The `sendMethodResponse` method sends the given response to the method's topic on an IoT Hub on behalf of the device indicated in the constructor argument. The `response` argument is an object that has the following shape:
+
+```
+interface StringMap {
+  [key: string]: string;
+}
+
+interface DeviceMethodResponse {
+  requestId: string;
+  properties: StringMap;
+  status: number;
+  bodyParts: Buffer[];
+}
+```
+
+**SRS_NODE_DEVICE_MQTT_13_001: [** `sendMethodResponse` shall throw an `Error` if `response` is falsy or does not conform to the shape defined by `DeviceMethodResponse`. **]**
+
+**SRS_NODE_DEVICE_MQTT_13_002: [** `sendMethodResponse` shall build an MQTT topic name in the format: `$iothub/methods/res/<STATUS>/?$rid=<REQUEST ID>&<PROPERTIES>` where `<STATUS>` is `response.status`. **]**
+
+**SRS_NODE_DEVICE_MQTT_13_003: [** `sendMethodResponse` shall build an MQTT topic name in the format: `$iothub/methods/res/<STATUS>/?$rid=<REQUEST ID>&<PROPERTIES>` where `<REQUEST ID>` is `response.requestId`. **]**
+
+**SRS_NODE_DEVICE_MQTT_13_004: [** `sendMethodResponse` shall build an MQTT topic name in the format: `$iothub/methods/res/<STATUS>/?$rid=<REQUEST ID>&<PROPERTIES>` where `<PROPERTIES>` is URL encoded. **]**
+
+**SRS_NODE_DEVICE_MQTT_13_005: [** `sendMethodResponse` shall concatenate `response.bodyParts` into a single `Buffer` and publish the message to the MQTT topic name. **]**
+
+**SRS_NODE_DEVICE_MQTT_13_006: [** If the MQTT publish fails then an error shall be returned via the `done` callback's first parameter. **]**
+
+**SRS_NODE_DEVICE_MQTT_13_007: [** If the MQTT publish is successful then the `done` callback shall be invoked passing `null` for the first parameter. **]**
+
 ### sendTwinRequest(method, resource, properties, body, done)
 The `sendTwinRequest` method sends the given body to the given endpoint on an IoT hub on behalf of the device indicated in the constructor argument.
 
