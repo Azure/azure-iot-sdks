@@ -13,7 +13,7 @@ var DeviceTwin = require('azure-iot-device').DeviceTwin; // OPEN ISSUE: what mod
 var client = Client.fromConnectionString('[IoT Hub device connection string]', Protocol);
 
 // Create device Twin
-var thermostat = DeviceTwin.fromDeviceClient(client, function(err) {
+client.getDeviceTwin(client, function(err, thermostat) {
   if (err) {
   console.log('could not establish connection to twin');
   console.log(detail);
