@@ -67,17 +67,6 @@ extern "C"
 {
 #endif
 
-#define IOT_AGENT_RESULT_ENUM_VALUES \
-    IOT_AGENT_OK, \
-    IOT_AGENT_AGENT_DATA_TYPES_ERROR, \
-    IOT_AGENT_COMMAND_EXECUTION_ERROR, \
-    IOT_AGENT_ERROR, \
-    IOT_AGENT_SERIALIZE_FAILED, \
-    IOT_AGENT_INVALID_ARG
-
-DEFINE_ENUM(IOT_AGENT_RESULT, IOT_AGENT_RESULT_ENUM_VALUES);
-
-
 /* IOT Agent Macros */
 
 /**
@@ -261,9 +250,9 @@ DEFINE_ENUM(IOT_AGENT_RESULT, IOT_AGENT_RESULT_ENUM_VALUES);
 /*Codes_SRS_SERIALIZER_99_113:[ SERIALIZE shall call CodeFirst_SendAsync, passing a destination, destinationSize, the number of properties to publish, and pointers to the values for each property.] */
 /*Codes_SRS_SERIALIZER_99_117:[ If CodeFirst_SendAsync succeeds, SEND will return IOT_AGENT_OK.] */
 /*Codes_SRS_SERIALIZER_99_114:[ If CodeFirst_SendAsync fails, SEND shall return IOT_AGENT_SERIALIZE_FAILED.] */
-#define SERIALIZE(destination, destinationSize,...) ((CodeFirst_SendAsync(destination, destinationSize, COUNT_ARG(__VA_ARGS__) FOR_EACH_1(ADDRESS_MACRO, __VA_ARGS__)) == CODEFIRST_OK) ? IOT_AGENT_OK : IOT_AGENT_SERIALIZE_FAILED)
+#define SERIALIZE(destination, destinationSize,...) CodeFirst_SendAsync(destination, destinationSize, COUNT_ARG(__VA_ARGS__) FOR_EACH_1(ADDRESS_MACRO, __VA_ARGS__))
 
-#define SERIALIZE_REPORTED_PROPERTIES(destination, destinationSize,...) ((CodeFirst_SendAsyncReported(destination, destinationSize, COUNT_ARG(__VA_ARGS__) FOR_EACH_1(ADDRESS_MACRO, __VA_ARGS__)) == CODEFIRST_OK) ? IOT_AGENT_OK : IOT_AGENT_SERIALIZE_FAILED)
+#define SERIALIZE_REPORTED_PROPERTIES(destination, destinationSize,...) CodeFirst_SendAsyncReported(destination, destinationSize, COUNT_ARG(__VA_ARGS__) FOR_EACH_1(ADDRESS_MACRO, __VA_ARGS__))
 
 /**
  * @def   EXECUTE_COMMAND(device, command)
