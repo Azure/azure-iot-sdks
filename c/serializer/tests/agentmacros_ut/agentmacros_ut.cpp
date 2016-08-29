@@ -16,7 +16,7 @@
 
 
 DEFINE_MICROMOCK_ENUM_TO_STRING(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT_VALUES);
-DEFINE_MICROMOCK_ENUM_TO_STRING(IOT_AGENT_RESULT, IOT_AGENT_RESULT_ENUM_VALUES);
+DEFINE_MICROMOCK_ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES);
 DEFINE_MICROMOCK_ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
 
 
@@ -942,7 +942,7 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
     /* SEND */
 
     /* Tests_SRS_SERIALIZER_99_113:[ SERIALIZE shall call CodeFirst_SendAsync, passing a destination, destinationSize, the number of properties to publish, and pointers to the values for each property.] */
-    /* Tests_SRS_SERIALIZER_99_117:[ If CodeFirst_SendAsync succeeds, SEND will return IOT_AGENT_OK.] */
+    /* Tests_SRS_SERIALIZER_99_117:[ If CodeFirst_SendAsync succeeds, SEND will return CODEFIRST_OK.] */
     TEST_FUNCTION(SEND_With_One_Property_Succeeds)
     {
         // arrange
@@ -951,11 +951,11 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
         macroMocks.ResetAllCalls();
 
         // act
-        IOT_AGENT_RESULT result = SERIALIZE(NULL, NULL, myDevice->Speed);
+        CODEFIRST_RESULT result = SERIALIZE(NULL, NULL, myDevice->Speed);
 
         // assert
         // uMock checks the calls
-        ASSERT_ARE_EQUAL(IOT_AGENT_RESULT, IOT_AGENT_OK, result);
+        ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
         ASSERT_ARE_EQUAL(size_t, 1, g_NumProperties);
         
     }
@@ -972,17 +972,17 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
         g_SendResult = CODEFIRST_ERROR;
 
         // act
-        IOT_AGENT_RESULT result = SERIALIZE(NULL, NULL, myDevice->Speed);
+        CODEFIRST_RESULT result = SERIALIZE(NULL, NULL, myDevice->Speed);
 
         // assert
         // uMock checks the calls
-        ASSERT_ARE_EQUAL(IOT_AGENT_RESULT, IOT_AGENT_SERIALIZE_FAILED, result);
+        ASSERT_ARE_NOT_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
         ASSERT_ARE_EQUAL(size_t, 1, g_NumProperties);
 
     }
 
     /* Tests_SRS_SERIALIZER_99_113:[ SERIALIZE shall call CodeFirst_SendAsync, passing a destination, destinationSize, the number of properties to publish, and pointers to the values for each property.] */
-    /* Tests_SRS_SERIALIZER_99_117:[ If CodeFirst_SendAsync succeeds, SEND will return IOT_AGENT_OK.] */
+    /* Tests_SRS_SERIALIZER_99_117:[ If CodeFirst_SendAsync succeeds, SEND will return CODEFIRST_OK.] */
     TEST_FUNCTION(SEND_With_2_Properties_Succeeds)
     {
         // arrange
@@ -991,11 +991,11 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
         macroMocks.ResetAllCalls();
 
         // act
-        IOT_AGENT_RESULT result = SERIALIZE(NULL, NULL, myDevice->Speed, myDevice->moreSpeed);
+        CODEFIRST_RESULT result = SERIALIZE(NULL, NULL, myDevice->Speed, myDevice->moreSpeed);
 
         // assert
         // uMock checks the calls
-        ASSERT_ARE_EQUAL(IOT_AGENT_RESULT, IOT_AGENT_OK, result);
+        ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
         ASSERT_ARE_EQUAL(size_t, 2, g_NumProperties);
     }
 
@@ -1007,11 +1007,11 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
         macroMocks.ResetAllCalls();
 
         // act
-        IOT_AGENT_RESULT result = SERIALIZE(NULL, NULL, jukebox->bestSong);
+        CODEFIRST_RESULT result = SERIALIZE(NULL, NULL, jukebox->bestSong);
 
         // assert
         // uMock checks the calls
-        ASSERT_ARE_EQUAL(IOT_AGENT_RESULT, IOT_AGENT_OK, result);
+        ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
         ASSERT_ARE_EQUAL(size_t, 1, g_NumProperties);
         macroMocks.AssertActualAndExpectedCalls();
 

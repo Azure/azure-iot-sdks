@@ -82,7 +82,7 @@ void simple_sample_with_strings_run(void)
 
             (void)printf("Sending sensor value Temperature = %d, Humidity = %d\r\n", thermostat->Temperature, thermostat->Humidity);
 
-            if (SERIALIZE(&buffer, &bufferSize, thermostat->DeviceId, thermostat->Temperature, thermostat->Humidity, thermostat->ExternalTemperature) != IOT_AGENT_OK)
+            if (SERIALIZE(&buffer, &bufferSize, thermostat->DeviceId, thermostat->Temperature, thermostat->Humidity, thermostat->ExternalTemperature) != CODEFIRST_OK)
             {
                 (void)printf("Failed serializing sensor values\r\n");
             }
@@ -92,7 +92,7 @@ void simple_sample_with_strings_run(void)
                 free(buffer);
             }
 
-            if (SERIALIZE_REPORTED_PROPERTIES(&buffer, &bufferSize, thermostat->RRREPORTED) != IOT_AGENT_OK)
+            if (SERIALIZE_REPORTED_PROPERTIES(&buffer, &bufferSize, thermostat->RRREPORTED) != CODEFIRST_OK)
             {
                 (void)printf("Failed serializing reported state\r\n");
             }
