@@ -17,8 +17,8 @@ namespace Microsoft.Azure.Devices.Client
     using Microsoft.Azure.Amqp;
     using Microsoft.Azure.Amqp.Framing;
     using Microsoft.Azure.Amqp.Transport;
-    using Microsoft.Azure.Devices.Client.Exceptions;
     using Microsoft.Azure.Devices.Client.Extensions;
+    using Microsoft.Azure.Devices.Client.Transport;
 
     abstract class IotHubConnection
     {
@@ -199,13 +199,14 @@ namespace Microsoft.Azure.Devices.Client
                 var cbsLink = new AmqpCbsLink(amqpConnection);
                 return amqpSession;
             }
-            catch(Exception ex) when(!ex.IsFatal())
+            catch (Exception ex) when (!ex.IsFatal())
             {
-                amqpConnection.SafeClose(ex);
                 if (amqpConnection.TerminalException != null)
                 {
-                    throw new IotHubCommunicationException(amqpConnection.TerminalException.Message, amqpConnection.TerminalException);
+                    throw AmqpClientHelper.ToIotHubClientContract(amqpConnection.TerminalException);
                 }
+
+                amqpConnection.SafeClose(ex);
                 throw;
             }
         }
@@ -299,7 +300,7 @@ namespace Microsoft.Azure.Devices.Client
 #if WINDOWS_UWP
             // System.Reflection.Assembly.GetExecutingAssembly() does not exist for UWP, therefore use a hard-coded version name
             // (This string is picked up by the bump_version script, so don't change the line below)
-            var UWPAssemblyVersion = "1.0.17";
+            var UWPAssemblyVersion = "1.0.18";
             linkSettings.AddProperty(IotHubAmqpProperty.ClientVersion, UWPAssemblyVersion);
 #else
             linkSettings.AddProperty(IotHubAmqpProperty.ClientVersion, Utils.GetClientVersion());
