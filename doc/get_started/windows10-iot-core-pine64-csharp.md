@@ -45,7 +45,7 @@ You should have the following items ready before beginning the process:
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
 
--   Click [here](https://1drv.ms/u/s!ApsOAlHgx3LcrvsCrRKBpz2bj-F9Xg) to download the FFU.
+-   Click [here](http://files.pine64.org/os/win10-iot/Pine64_Win10IoTCore10586_beta0.1.ffu) to download the FFU.
 -   Download and install the [IoT Dashboard](https://iottools.blob.core.windows.net/iotdashboardpreview/setup.exe)
 -   Prepare a microSD(TF) card 8GB at least and a card reader.
 -   Connect your microSD card to your PC, and start the IoT Dashboard application.
