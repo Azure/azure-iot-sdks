@@ -80,7 +80,7 @@ static uint32_t get_next_item_id(IOTHUB_CLIENT_LL_HANDLE_DATA* handleData)
 
 static IOTHUB_DEVICE_TWIN* dev_twin_data_create(IOTHUB_CLIENT_LL_HANDLE_DATA* handleData, uint32_t id, const unsigned char* reportedState, size_t size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback)
 {
-    IOTHUB_DEVICE_TWIN* result = malloc(sizeof(IOTHUB_DEVICE_TWIN) );
+    IOTHUB_DEVICE_TWIN* result = (IOTHUB_DEVICE_TWIN*)malloc(sizeof(IOTHUB_DEVICE_TWIN) );
     if (result != NULL)
     {
         result->report_data_handle = CONSTBUFFER_Create(reportedState, size);
