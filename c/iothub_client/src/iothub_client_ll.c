@@ -11,6 +11,7 @@
 #include "azure_c_shared_utility/doublylinkedlist.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/tickcounter.h"
+#include "azure_c_shared_utility/constbuffer.h"
 
 #include "iothub_client_ll.h"
 #include "iothub_client_private.h"
