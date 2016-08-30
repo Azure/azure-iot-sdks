@@ -2034,7 +2034,7 @@ static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportHttp_ProcessItem(TRANSPORT_LL_H
     (void)item_type;
     (void)iothub_item;
     LogError("Currently Not Supported.");
-    return IOTHUB_CLIENT_ERROR;
+    return IOTHUB_PROCESS_ERROR;
 }
 
 static void IoTHubTransportHttp_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
