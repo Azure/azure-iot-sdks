@@ -23,7 +23,7 @@ Http.prototype.createDevice = function (path, deviceInfo, done) {
     'Authorization': config.sharedAccessSignature,
     'iothub-name': config.hubName,
     'Content-Type': 'application/json; charset=utf-8',
-    'User-Agent': 'azure-iothub/' + PackageJson.version
+    'User-Agent': PackageJson.name + '/' + PackageJson.version
   };
   /*Codes_SRS_NODE_IOTHUB_HTTP_05_002: [The createDevice method shall construct an HTTP request using information supplied by the caller, as follows:
   PUT <path>?api-version=<version> HTTP/1.1
@@ -63,7 +63,7 @@ Http.prototype.updateDevice = function (path, deviceInfo, done) {
     'iothub-name': config.hubName,
     'Content-Type': 'application/json; charset=utf-8',
     'If-Match': '*',
-    'User-Agent': 'azure-iothub/' + PackageJson.version
+    'User-Agent': PackageJson.name + '/' + PackageJson.version
   };
   /*Codes_SRS_NODE_IOTHUB_HTTP_05_003: [The updateDevice method shall construct an HTTP request using information supplied by the caller, as follows:
   PUT <path>?api-version=<version> HTTP/1.1
@@ -100,7 +100,7 @@ Http.prototype.getDevice = function (path, done) {
   var httpHeaders = {
     'Authorization': config.sharedAccessSignature,
     'iothub-name': config.hubName,
-    'User-Agent': 'azure-iothub/' + PackageJson.version
+    'User-Agent': PackageJson.name + '/' + PackageJson.version
   };
   /*Codes_SRS_NODE_IOTHUB_HTTP_05_004: [The getDevice method shall construct an HTTP request using information supplied by the caller, as follows:
   GET <path>?api-version=<version> HTTP/1.1
@@ -133,7 +133,7 @@ Http.prototype.listDevices = function (path, done) {
   var httpHeaders = {
     'Authorization': config.sharedAccessSignature,
     'iothub-name': config.hubName,
-    'User-Agent': 'azure-iothub/' + PackageJson.version
+    'User-Agent': PackageJson.name + '/' + PackageJson.version
   };
   /*Codes_SRS_NODE_IOTHUB_HTTP_05_005: [The listDevices method shall construct an HTTP request using information supplied by the caller, as follows:
   GET <path>?api-version=<version> HTTP/1.1
@@ -167,7 +167,7 @@ Http.prototype.deleteDevice = function (path, done) {
     'Authorization': config.sharedAccessSignature,
     'iothub-name': config.hubName,
     'If-Match': '*',
-    'User-Agent': 'azure-iothub/' + PackageJson.version
+    'User-Agent': PackageJson.name + '/' + PackageJson.version
   };
   /*Codes_SRS_NODE_IOTHUB_HTTP_05_006: [The deleteDevice method shall construct an HTTP request using information supplied by the caller, as follows:
   DELETE <path>?api-version=<version> HTTP/1.1
@@ -203,7 +203,7 @@ Http.prototype.importDevicesFromBlob = function (path, importRequest, done) {
     'Authorization': config.sharedAccessSignature,
     'Content-Type': 'application/json; charset=utf-8',
     'Request-Id': requestId,
-    'User-Agent': 'azure-iothub/' + PackageJson.version
+    'User-Agent': PackageJson.name + '/' + PackageJson.version
   };
 
   /*Codes_SRS_NODE_IOTHUB_HTTP_16_005: [The importDeviceFromBlob method shall construct an HTTP request using information supplied by the caller, as follows:
@@ -242,7 +242,7 @@ Http.prototype.exportDevicesToBlob = function (path, exportRequest, done) {
     'Authorization': config.sharedAccessSignature,
     'Content-Type': 'application/json; charset=utf-8',
     'Request-Id': requestId,
-    'User-Agent': 'azure-iothub/' + PackageJson.version
+    'User-Agent': PackageJson.name + '/' + PackageJson.version
   };
 
   /*Codes_SRS_NODE_IOTHUB_HTTP_16_004: [The exportDevicesToBlob method shall construct an HTTP request using information supplied by the caller, as follows:
@@ -280,7 +280,7 @@ Http.prototype.listJobs = function (path, done) {
   var httpHeaders = {
     'Authorization': config.sharedAccessSignature,
     'Request-Id': requestId,
-    'User-Agent': 'azure-iothub/' + PackageJson.version
+    'User-Agent': PackageJson.name + '/' + PackageJson.version
   };
 
   /*Codes_SRS_NODE_IOTHUB_HTTP_16_002: [The listJobs method shall construct an HTTP request using information supplied by the caller, as follows:
@@ -314,7 +314,7 @@ Http.prototype.getJob = function (path, done) {
   var httpHeaders = {
     'Authorization': config.sharedAccessSignature,
     'Request-Id': requestId,
-    'User-Agent': 'azure-iothub/' + PackageJson.version
+    'User-Agent': PackageJson.name + '/' + PackageJson.version
   };
 
   /*Codes_SRS_NODE_IOTHUB_HTTP_16_003: [The getJob method shall construct an HTTP request using information supplied by the caller, as follows:
@@ -348,7 +348,7 @@ Http.prototype.cancelJob = function (path, done) {
   var httpHeaders = {
     'Authorization': config.sharedAccessSignature,
     'Request-Id': requestId,
-    'User-Agent': 'azure-iothub/' + PackageJson.version
+    'User-Agent': PackageJson.name + '/' + PackageJson.version
   };
 
   /*Codes_SRS_NODE_IOTHUB_HTTP_16_001: [The cancelJob method shall construct an HTTP request using information supplied by the caller as follows:
@@ -364,6 +364,48 @@ Http.prototype.cancelJob = function (path, done) {
   body – the body of the HTTP response
   response - the Node.js http.ServerResponse object returned by the transport]*/
   var request = this._http.buildRequest('DELETE', path, httpHeaders, config.host, function (err, body, response) {
+    if (!err) {
+      done(null, body, response);
+    } else if (response) {
+      done(translateError(body, response));
+    } else {
+      done(err);
+    }
+  });
+
+  request.end();
+};
+
+Http.prototype.getDeviceTwin = function (path, done) {
+  var config = this._config;
+  var requestId = uuid.v4();
+  
+  /*Codes_SRS_NODE_IOTHUB_HTTP_16_006: [The `getDeviceTwin` method shall construct an HTTP request using the information supplied by the caller as follows:
+  ```
+  GET <path>?api-version=<version> HTTP/1.1
+  Authorization: <config.sharedAccessSignature>
+  Request-Id: <guid>
+  ```]*/
+  var httpHeaders = {
+    'Authorization': config.sharedAccessSignature,
+    'Request-Id': requestId,
+    'User-Agent': PackageJson.name + '/' + PackageJson.version
+  };
+
+  var request = this._http.buildRequest('GET', path, httpHeaders, config.host, function (err, body, response) {
+    /*Codes_SRS_NODE_IOTHUB_HTTP_05_007: [If any registry operation method encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).**]**     
+    **SRS_NODE_IOTHUB_HTTP_05_008: [When any registry operation method receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:
+    ```
+    err - the standard JavaScript Error object, with the Node.js
+    http.ServerResponse object attached as the property response.
+    ```]*/
+
+    /*Codes_SRS_NODE_IOTHUB_HTTP_05_009: [When any registry operation receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
+    ```
+    err - null
+    body – the body of the HTTP response
+    response - the Node.js http.ServerResponse object returned by the transport
+    ```]*/
     if (!err) {
       done(null, body, response);
     } else if (response) {
