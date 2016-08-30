@@ -48,6 +48,15 @@
     </Compile>
     <Compile Include="DeviceEntity.cs" />
     <Compile Include="DevicesProcessor.cs" />
+    <Compile Include="DeviceTwinProperties.cs" />
+    <Compile Include="DeviceTwinPropertiesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DeviceTwinPropertiesForm.Designer.cs">
+      <DependentUpon>DeviceTwinPropertiesForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DeviceTwinProperty.cs" />
+    <Compile Include="DeviceTwinPropertyDescriptor.cs" />
     <Compile Include="DeviceUpdateForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -76,6 +85,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DeviceCreatedForm.resx">
       <DependentUpon>DeviceCreatedForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DeviceTwinPropertiesForm.resx">
+      <DependentUpon>DeviceTwinPropertiesForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DeviceUpdateForm.resx">
       <DependentUpon>DeviceUpdateForm.cs</DependentUpon>
@@ -119,10 +131,11 @@
       <HintPath>..\packages\Microsoft.Azure.Amqp.1.1.5\lib\net451\Microsoft.Azure.Amqp.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Azure.Devices, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Azure.Devices.1.0.11\lib\net451\Microsoft.Azure.Devices.dll</HintPath>
+    <Reference Include="Microsoft.Azure.Devices, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Azure.Devices.1.0.0-dmpreview-032\lib\net451\Microsoft.Azure.Devices.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Owin, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Owin.3.0.1\lib\net45\Microsoft.Owin.dll</HintPath>
       <Private>True</Private>

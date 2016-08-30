@@ -64,6 +64,8 @@
             this.copySelectedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.getDeviceConnectionStringToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.showDevicePropertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabData = new System.Windows.Forms.TabPage();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.consumerGroupCheckBox = new System.Windows.Forms.CheckBox();
@@ -81,6 +83,7 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.eventHubTextBox = new System.Windows.Forms.RichTextBox();
             this.tabMessagesToDevice = new System.Windows.Forms.TabPage();
+            this.messagePropertiesLabel = new System.Windows.Forms.Label();
             this.messagePropertiesGrid = new System.Windows.Forms.DataGridView();
             this.KeyColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ValueColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -98,7 +101,7 @@
             this.sendMessageToDeviceButton = new System.Windows.Forms.Button();
             this.textBoxMessage = new System.Windows.Forms.TextBox();
             this.ehStringToolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.messagePropertiesLabel = new System.Windows.Forms.Label();
+            this.deviceTwinPropertiesBtn = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.groupBox5.SuspendLayout();
@@ -130,7 +133,7 @@
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(640, 630);
+            this.tabControl1.Size = new System.Drawing.Size(759, 630);
             this.tabControl1.TabIndex = 0;
             this.tabControl1.Selected += new System.Windows.Forms.TabControlEventHandler(this.tabControl1_Selected);
             // 
@@ -360,7 +363,7 @@
             this.tabManagement.Location = new System.Drawing.Point(4, 25);
             this.tabManagement.Name = "tabManagement";
             this.tabManagement.Padding = new System.Windows.Forms.Padding(3);
-            this.tabManagement.Size = new System.Drawing.Size(632, 601);
+            this.tabManagement.Size = new System.Drawing.Size(751, 601);
             this.tabManagement.TabIndex = 0;
             this.tabManagement.Text = "Management";
             this.tabManagement.UseVisualStyleBackColor = true;
@@ -369,6 +372,7 @@
             // 
             this.groupBox7.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox7.Controls.Add(this.deviceTwinPropertiesBtn);
             this.groupBox7.Controls.Add(this.sasTokenButton);
             this.groupBox7.Controls.Add(this.createDeviceButton);
             this.groupBox7.Controls.Add(this.listDevicesButton);
@@ -376,14 +380,14 @@
             this.groupBox7.Controls.Add(this.deleteDeviceButton);
             this.groupBox7.Location = new System.Drawing.Point(6, 18);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(615, 59);
+            this.groupBox7.Size = new System.Drawing.Size(734, 59);
             this.groupBox7.TabIndex = 8;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Actions";
             // 
             // sasTokenButton
             // 
-            this.sasTokenButton.Location = new System.Drawing.Point(504, 21);
+            this.sasTokenButton.Location = new System.Drawing.Point(502, 21);
             this.sasTokenButton.Name = "sasTokenButton";
             this.sasTokenButton.Size = new System.Drawing.Size(100, 30);
             this.sasTokenButton.TabIndex = 6;
@@ -413,7 +417,7 @@
             // 
             // updateDeviceButton
             // 
-            this.updateDeviceButton.Location = new System.Drawing.Point(255, 21);
+            this.updateDeviceButton.Location = new System.Drawing.Point(254, 21);
             this.updateDeviceButton.Name = "updateDeviceButton";
             this.updateDeviceButton.Size = new System.Drawing.Size(100, 30);
             this.updateDeviceButton.TabIndex = 4;
@@ -423,7 +427,7 @@
             // 
             // deleteDeviceButton
             // 
-            this.deleteDeviceButton.Location = new System.Drawing.Point(384, 21);
+            this.deleteDeviceButton.Location = new System.Drawing.Point(378, 21);
             this.deleteDeviceButton.Name = "deleteDeviceButton";
             this.deleteDeviceButton.Size = new System.Drawing.Size(100, 30);
             this.deleteDeviceButton.TabIndex = 5;
@@ -441,7 +445,7 @@
             this.groupBox2.Controls.Add(this.devicesGridView);
             this.groupBox2.Location = new System.Drawing.Point(6, 83);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(620, 512);
+            this.groupBox2.Size = new System.Drawing.Size(739, 512);
             this.groupBox2.TabIndex = 6;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Devices";
@@ -478,7 +482,7 @@
             this.devicesGridView.MultiSelect = false;
             this.devicesGridView.Name = "devicesGridView";
             this.devicesGridView.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.devicesGridView.Size = new System.Drawing.Size(610, 458);
+            this.devicesGridView.Size = new System.Drawing.Size(729, 458);
             this.devicesGridView.TabIndex = 9;
             this.devicesGridView.DataBindingComplete += new System.Windows.Forms.DataGridViewBindingCompleteEventHandler(this.devicesGridView_DataBindingComplete);
             // 
@@ -489,9 +493,11 @@
             this.copyAllToolStripMenuItem,
             this.copySelectedToolStripMenuItem,
             this.toolStripSeparator1,
-            this.getDeviceConnectionStringToolStripMenuItem});
+            this.getDeviceConnectionStringToolStripMenuItem,
+            this.toolStripSeparator2,
+            this.showDevicePropertiesToolStripMenuItem});
             this.devicesGridViewContextMenu.Name = "devicesGridViewContextMenu";
-            this.devicesGridViewContextMenu.Size = new System.Drawing.Size(300, 76);
+            this.devicesGridViewContextMenu.Size = new System.Drawing.Size(300, 104);
             // 
             // copyAllToolStripMenuItem
             // 
@@ -518,6 +524,18 @@
             this.getDeviceConnectionStringToolStripMenuItem.Size = new System.Drawing.Size(299, 22);
             this.getDeviceConnectionStringToolStripMenuItem.Text = "Copy connection string for selected device";
             this.getDeviceConnectionStringToolStripMenuItem.Click += new System.EventHandler(this.getDeviceConnectionStringToolStripMenuItem_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(296, 6);
+            // 
+            // showDevicePropertiesToolStripMenuItem
+            // 
+            this.showDevicePropertiesToolStripMenuItem.Name = "showDevicePropertiesToolStripMenuItem";
+            this.showDevicePropertiesToolStripMenuItem.Size = new System.Drawing.Size(299, 22);
+            this.showDevicePropertiesToolStripMenuItem.Text = "Show device properties";
+            this.showDevicePropertiesToolStripMenuItem.Click += new System.EventHandler(this.showDevicePropertiesToolStripMenuItem_Click);
             // 
             // tabData
             // 
@@ -723,6 +741,15 @@
             this.tabMessagesToDevice.Text = "Messages To Device";
             this.tabMessagesToDevice.UseVisualStyleBackColor = true;
             // 
+            // messagePropertiesLabel
+            // 
+            this.messagePropertiesLabel.AutoSize = true;
+            this.messagePropertiesLabel.Location = new System.Drawing.Point(21, 187);
+            this.messagePropertiesLabel.Name = "messagePropertiesLabel";
+            this.messagePropertiesLabel.Size = new System.Drawing.Size(73, 16);
+            this.messagePropertiesLabel.TabIndex = 14;
+            this.messagePropertiesLabel.Text = "Properties:";
+            // 
             // messagePropertiesGrid
             // 
             this.messagePropertiesGrid.AllowUserToResizeColumns = false;
@@ -897,20 +924,21 @@
             this.textBoxMessage.Size = new System.Drawing.Size(516, 22);
             this.textBoxMessage.TabIndex = 4;
             // 
-            // messagePropertiesLabel
+            // deviceTwinPropertiesBtn
             // 
-            this.messagePropertiesLabel.AutoSize = true;
-            this.messagePropertiesLabel.Location = new System.Drawing.Point(21, 187);
-            this.messagePropertiesLabel.Name = "messagePropertiesLabel";
-            this.messagePropertiesLabel.Size = new System.Drawing.Size(73, 16);
-            this.messagePropertiesLabel.TabIndex = 14;
-            this.messagePropertiesLabel.Text = "Properties:";
+            this.deviceTwinPropertiesBtn.Location = new System.Drawing.Point(626, 21);
+            this.deviceTwinPropertiesBtn.Name = "deviceTwinPropertiesBtn";
+            this.deviceTwinPropertiesBtn.Size = new System.Drawing.Size(100, 30);
+            this.deviceTwinPropertiesBtn.TabIndex = 7;
+            this.deviceTwinPropertiesBtn.Text = "Twin Props.";
+            this.deviceTwinPropertiesBtn.UseVisualStyleBackColor = true;
+            this.deviceTwinPropertiesBtn.Click += new System.EventHandler(this.deviceTwinPropertiesBtn_Click);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(664, 646);
+            this.ClientSize = new System.Drawing.Size(783, 646);
             this.Controls.Add(this.tabControl1);
             this.MinimumSize = new System.Drawing.Size(680, 605);
             this.Name = "MainForm";
@@ -1014,6 +1042,9 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn KeyColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn ValueColumn;
         private System.Windows.Forms.Label messagePropertiesLabel;
+        private System.Windows.Forms.ToolStripMenuItem showDevicePropertiesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.Button deviceTwinPropertiesBtn;
     }
 }
 
