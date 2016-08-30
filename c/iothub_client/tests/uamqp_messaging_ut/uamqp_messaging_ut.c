@@ -171,7 +171,7 @@ static void set_exp_calls_for_addApplicationPropertiesTouAMQPMessage(int number_
 		.IgnoreArgument(2).IgnoreArgument(3).IgnoreArgument(4)
 		.CopyOutArgumentBuffer_keys(&TEST_MAP_KEYS, sizeof(char**))
 		.CopyOutArgumentBuffer_values(&TEST_MAP_VALUES, sizeof(char**))
-		.CopyOutArgumentBuffer_count(&(size_t)number_of_app_properties, sizeof(size_t));
+		.CopyOutArgumentBuffer_count((size_t *)&number_of_app_properties, sizeof(size_t));
 
 	if (number_of_app_properties > 0)
 	{
@@ -279,7 +279,7 @@ static void set_exp_calls_for_IoTHubMessage_CreateFromUamqpMessage(int number_of
 		STRICT_EXPECTED_CALL(amqpvalue_get_inplace_described_value(TEST_AMQP_VALUE));
 		STRICT_EXPECTED_CALL(amqpvalue_get_map_pair_count(TEST_AMQP_VALUE, IGNORED_PTR_ARG))
 			.IgnoreArgument(2)
-			.CopyOutArgumentBuffer_pair_count(&(uint32_t)number_of_properties, sizeof(uint32_t));
+			.CopyOutArgumentBuffer_pair_count((uint32_t *)&number_of_properties, sizeof(uint32_t));
 
 		int i;
 		for (i = 0; i < number_of_properties; i++)
@@ -481,7 +481,7 @@ TEST_FUNCTION(message_create_from_iothub_message_bytearray_success)
     // assert
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 	ASSERT_ARE_EQUAL(int, result, 0);
-	ASSERT_ARE_EQUAL(int, (int)uamqp_message, (int)TEST_MESSAGE_HANDLE);
+	ASSERT_ARE_EQUAL(void_ptr, (void*)uamqp_message, (void*)TEST_MESSAGE_HANDLE);
 
     // cleanup
 }
@@ -500,7 +500,7 @@ TEST_FUNCTION(message_create_from_iothub_message_zero_app_properties_success)
 	// assert
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 	ASSERT_ARE_EQUAL(int, result, 0);
-	ASSERT_ARE_EQUAL(int, (int)uamqp_message, (int)TEST_MESSAGE_HANDLE);
+	ASSERT_ARE_EQUAL(void_ptr, (void*)uamqp_message, (void*)TEST_MESSAGE_HANDLE);
 
 	// cleanup
 }
@@ -520,7 +520,7 @@ TEST_FUNCTION(message_create_from_iothub_message_string_success)
 	// assert
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 	ASSERT_ARE_EQUAL(int, result, 0);
-	ASSERT_ARE_EQUAL(int, (int)uamqp_message, (int)TEST_MESSAGE_HANDLE);
+	ASSERT_ARE_EQUAL(void_ptr, (void*)uamqp_message, (void*)TEST_MESSAGE_HANDLE);
 
 	// cleanup
 }
@@ -539,7 +539,7 @@ TEST_FUNCTION(message_create_from_iothub_message_no_message_id_success)
 	// assert
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 	ASSERT_ARE_EQUAL(int, result, 0);
-	ASSERT_ARE_EQUAL(int, (int)uamqp_message, (int)TEST_MESSAGE_HANDLE);
+	ASSERT_ARE_EQUAL(void_ptr, (void*)uamqp_message, (void*)TEST_MESSAGE_HANDLE);
 
 	// cleanup
 }
@@ -558,7 +558,7 @@ TEST_FUNCTION(message_create_from_iothub_message_no_correlation_id_success)
 	// assert
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 	ASSERT_ARE_EQUAL(int, result, 0);
-	ASSERT_ARE_EQUAL(int, (int)uamqp_message, (int)TEST_MESSAGE_HANDLE);
+	ASSERT_ARE_EQUAL(void_ptr, (void*)uamqp_message, (void*)TEST_MESSAGE_HANDLE);
 
 	// cleanup
 }
@@ -577,7 +577,7 @@ TEST_FUNCTION(message_create_from_iothub_message_no_msg_hdl_props_success)
 	// assert
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 	ASSERT_ARE_EQUAL(int, result, 0);
-	ASSERT_ARE_EQUAL(int, (int)uamqp_message, (int)TEST_MESSAGE_HANDLE);
+	ASSERT_ARE_EQUAL(void_ptr, (void*)uamqp_message, (void*)TEST_MESSAGE_HANDLE);
 
 	// cleanup
 }
@@ -634,7 +634,7 @@ TEST_FUNCTION(message_create_from_iothub_message_BYTEARRAY_return_errors_fails)
 		if (i == 6 /*GetMessageId is optional*/ || i == 10 /*GetCorrelationId is optional*/)
 		{
 			ASSERT_ARE_EQUAL(int, result, 0);
-			ASSERT_ARE_EQUAL(int, (int)uamqp_message, (int)TEST_MESSAGE_HANDLE);
+			ASSERT_ARE_EQUAL(void_ptr, (void*)uamqp_message, (void*)TEST_MESSAGE_HANDLE);
 		}
 		else
 		{
@@ -683,7 +683,7 @@ TEST_FUNCTION(message_create_from_iothub_message_STRING_return_errors_fails)
 		if (i == 5 /*GetMessageId is optional*/ || i == 9 /*GetCorrelationId is optional*/)
 		{
 			ASSERT_ARE_EQUAL(int, result, 0);
-			ASSERT_ARE_EQUAL(int, (int)uamqp_message, (int)TEST_MESSAGE_HANDLE);
+			ASSERT_ARE_EQUAL(void_ptr, (void*)uamqp_message, (void*)TEST_MESSAGE_HANDLE);
 		}
 		else
 		{
@@ -736,7 +736,7 @@ TEST_FUNCTION(IoTHubMessage_CreateFromUamqpMessage_success)
 	// assert
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 	ASSERT_ARE_EQUAL(int, result, 0);
-	ASSERT_ARE_EQUAL(int, (int)iothub_client_message, (int)TEST_IOTHUB_MESSAGE_HANDLE);
+	ASSERT_ARE_EQUAL(void_ptr, (void*)iothub_client_message, (void*)TEST_IOTHUB_MESSAGE_HANDLE);
 
 	// cleanup
 }
@@ -755,7 +755,7 @@ TEST_FUNCTION(IoTHubMessage_CreateFromUamqpMessage_no_message_id_success)
 	// assert
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 	ASSERT_ARE_EQUAL(int, result, 0);
-	ASSERT_ARE_EQUAL(int, (int)iothub_client_message, (int)TEST_IOTHUB_MESSAGE_HANDLE);
+	ASSERT_ARE_EQUAL(void_ptr, (void*)iothub_client_message, (void*)TEST_IOTHUB_MESSAGE_HANDLE);
 
 	// cleanup
 }
@@ -774,7 +774,7 @@ TEST_FUNCTION(IoTHubMessage_CreateFromUamqpMessage_no_correlation_id_success)
 	// assert
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 	ASSERT_ARE_EQUAL(int, result, 0);
-	ASSERT_ARE_EQUAL(int, (int)iothub_client_message, (int)TEST_IOTHUB_MESSAGE_HANDLE);
+	ASSERT_ARE_EQUAL(void_ptr, (void*)iothub_client_message, (void*)TEST_IOTHUB_MESSAGE_HANDLE);
 
 	// cleanup
 }
@@ -810,7 +810,7 @@ TEST_FUNCTION(IoTHubMessage_CreateFromUamqpMessage_error_returns_fails)
 	// assert
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 	ASSERT_ARE_EQUAL(int, result, 0);
-	ASSERT_ARE_EQUAL(int, (int)iothub_client_message, (int)TEST_IOTHUB_MESSAGE_HANDLE);
+	ASSERT_ARE_EQUAL(void_ptr, (void*)iothub_client_message, (void*)TEST_IOTHUB_MESSAGE_HANDLE);
 
 	// cleanup
 }
@@ -829,7 +829,7 @@ TEST_FUNCTION(IoTHubMessage_CreateFromUamqpMessage_no_app_properties_success)
 	// assert
 	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 	ASSERT_ARE_EQUAL(int, result, 0);
-	ASSERT_ARE_EQUAL(int, (int)iothub_client_message, (int)TEST_IOTHUB_MESSAGE_HANDLE);
+	ASSERT_ARE_EQUAL(void_ptr, (void*)iothub_client_message, (void*)TEST_IOTHUB_MESSAGE_HANDLE);
 
 	// cleanup
 }

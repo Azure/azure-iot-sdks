@@ -466,7 +466,7 @@ int message_create_from_iothub_message(IOTHUB_MESSAGE_HANDLE iothub_message, MES
 
 	// Codes_SRS_UAMQP_MESSAGING_09_048: [If the content type of the IOTHUB_MESSAGE_HANDLE instance is IOTHUBMESSAGE_BYTEARRAY, the content shall be obtained using IoTHubMessage_GetByteArray().]
 	if (contentType == IOTHUBMESSAGE_BYTEARRAY &&
-		IoTHubMessage_GetByteArray(iothub_message, &(const unsigned char *)messageContent, &messageContentSize) != IOTHUB_MESSAGE_OK)
+		IoTHubMessage_GetByteArray(iothub_message, (const unsigned char **)&messageContent, &messageContentSize) != IOTHUB_MESSAGE_OK)
 	{
 		// Codes_SRS_UAMQP_MESSAGING_09_049: [If IoTHubMessage_GetByteArray() fails, message_create_from_iothub_message() shall fail and return.]
 		LogError("Failed getting the BYTE array representation of the IOTHUB_MESSAGE_HANDLE instance.");

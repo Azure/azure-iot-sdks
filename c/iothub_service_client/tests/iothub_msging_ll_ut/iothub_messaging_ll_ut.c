@@ -67,7 +67,6 @@ MOCKABLE_FUNCTION(, int, link_set_rcv_settle_mode, LINK_HANDLE, link, sender_set
 MOCKABLE_FUNCTION(, void, link_destroy, LINK_HANDLE, link);
 MOCKABLE_FUNCTION(, void, connection_destroy, CONNECTION_HANDLE, connection);
 MOCKABLE_FUNCTION(, LINK_HANDLE, link_create, SESSION_HANDLE, session, const char*, name, role, role, AMQP_VALUE, source, AMQP_VALUE, target);
-MOCKABLE_FUNCTION(, IOTHUB_MESSAGE_RESULT, IoTHubMessage_GetByteArray, IOTHUB_MESSAGE_HANDLE, iotHubMessageHandle, const unsigned char**, buffer, size_t*, size);
 MOCKABLE_FUNCTION(, AMQP_VALUE, amqpvalue_create_string, const char*, value);
 MOCKABLE_FUNCTION(, void, amqpvalue_destroy, AMQP_VALUE, value);
 MOCKABLE_FUNCTION(, CONNECTION_HANDLE, connection_create, XIO_HANDLE, xio, const char*, hostname, const char*, container_id, ON_NEW_ENDPOINT, on_new_endpoint, void*, callback_context);
