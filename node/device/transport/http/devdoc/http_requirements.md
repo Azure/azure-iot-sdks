@@ -53,7 +53,7 @@ or:
 
 The `sendEvent` method sends an event to an IoT hub on behalf of the device indicated in the constructor argument.
 
-**SRS_NODE_DEVICE_HTTP_05_002: [**The `sendEvent` method shall construct an HTTP request using information supplied by the caller, as follows:
+**SRS_NODE_DEVICE_HTTP_05_002: [** The `sendEvent` method shall construct an HTTP request using information supplied by the caller, as follows:
 ```
 POST <config.host>/devices/<config.deviceId>/messages/events?api-version=<version> HTTP/1.1
 iothub-to: /devices/<config.deviceId>/messages/events
@@ -63,6 +63,8 @@ Host: <config.host>
 <message>
 ```
 **]**
+
+**SRS_NODE_DEVICE_HTTP_13_001: [** `sendEvent` shall add message properties as HTTP headers and prefix the key name with the string **iothub-app**. **]**
 
 ### sendEventBatch(messages, done)
 
@@ -76,10 +78,12 @@ User-Agent: <version string>
 Content-Type: application/vnd.microsoft.iothub.json
 Host: <config.host>
 
-{"body":"<Base64 Message1>","properties":{"<key>":"<value>"}},
+{"body":"<Base64 Message1>","properties":{"iothub-app-<key>":"<value>"}},
 {"body":"<Base64 Message1>"}...
 ```
 **]**
+
+**SRS_NODE_DEVICE_HTTP_13_002: [** `sendEventBatch` shall prefix the key name for all message properties with the string **iothub-app**. **]**
 
 ### getReceiver(done)
 

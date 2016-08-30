@@ -53,6 +53,7 @@ set(iothub_client_h_files
 ./inc/iothub_client_options.h
 ./inc/iothub_client_version.h
 ./inc/iothubtransport.h
+./inc/iothub_client_private.h
 )
 
 set(iothub_client_h_install_files
@@ -74,7 +75,6 @@ if(${use_http})
         ${iothub_client_ll_transport_h_files}
         ./inc/iothubtransporthttp.h
         ./inc/iothub_transport_ll.h
-        ./inc/iothub_client_private.h
     )
     
     set(iothub_client_h_install_files

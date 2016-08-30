@@ -18,7 +18,7 @@ You can also use both of these tools to monitor the messages that your device se
 <a name="iothub-explorer"/>
 ## Use the iothub-explorer tool to provision a device
 
-The iothub-explorer tool is a cross-platform, command-line tool (written in Node.js) for managing your devices in IoT hub. 
+The iothub-explorer tool is a cross-platform, command-line tool (written in Node.js) for managing your devices in IoT hub. You will need to pre-install Node.js for your platform including npm package manager from [nodejs.org](https://nodejs.org)
 
 To install this tool in your environment, run the following command in a terminal/shell window on your machine:
 

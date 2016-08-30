@@ -49,7 +49,11 @@ ENDIF(WIN32)
 
 add_library(iothub_service_client ${iothub_service_client_c_files} ${iothub_service_client_h_files})
 
-target_link_libraries(iothub_service_client uamqp)
+if(NOT ${nuget_e2e_tests})
+    target_link_libraries(iothub_service_client uamqp)
+else()
+    target_link_libraries(iothub_service_client)
+endif()
 
 if (NOT ${ARCHITECTURE} STREQUAL "ARM")
 	add_subdirectory(samples)
