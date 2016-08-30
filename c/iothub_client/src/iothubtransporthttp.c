@@ -905,6 +905,7 @@ static void IoTHubTransportHttp_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
 
 static int IoTHubTransportHttp_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state)
 {
+    /*Codes_SRS_TRANSPORTMULTITHTTP_02_003: [ IoTHubTransportHttp_Subscribe_DeviceTwin shall return a non-zero value. ]*/
     (void)handle;
     (void)subscribe_state;
     int result = __LINE__;
@@ -916,6 +917,7 @@ static void IoTHubTransportHttp_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE hand
 {
     (void)handle;
     (void)subscribe_state;
+    /*Codes_SRS_TRANSPORTMULTITHTTP_02_004: [ IoTHubTransportHttp_Unsubscribe_DeviceTwin shall return ]*/
     LogError("IoTHubTransportHttp_Unsubscribe_DeviceTwin Not supported");
 }
 

@@ -1056,6 +1056,7 @@ static int IoTHubTransportMqtt_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle,
     (void)handle;
     (void)subscribe_state;
     int result = __LINE__;
+    LogError("not implemented (yet)");
     return result;
 }
 
@@ -1063,6 +1064,7 @@ static void IoTHubTransportMqtt_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE hand
 {
     (void)handle;
     (void)subscribe_state;
+    LogError("not implemented (yet)");
 }
 
 static int IoTHubTransportMqtt_Subscribe(IOTHUB_DEVICE_HANDLE handle)

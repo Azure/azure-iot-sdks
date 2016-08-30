@@ -17,6 +17,8 @@ extern const TRANSPORT_PROVIDER* AMQP_Protocol(void);
   
   The following static functions are provided in the fields of the TRANSPORT_PROVIDER structure:
 
+    - IoTHubTransportAMQP_Subscribe_DeviceTwin,
+    - IoTHubTransportAMQP_Unsubscribe_DeviceTwin,
     - IoTHubTransportAMQP_GetHostname, 
     - IoTHubTransportAMQP_SetOption,
     - IoTHubTransportAMQP_Create,
@@ -556,3 +558,12 @@ The following requirements only apply if the authentication is NOT x509:
 **SRS_IOTHUBTRANSPORTAMQP_09_047: [**If the option name does not match one of the options handled by this module, then IoTHubTransportAMQP_SetOption shall get  the handle to the XIO and invoke the xio_setoption passing down the option name and value parameters.**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_03_001: [**If xio_setoption fails,  IoTHubTransportAMQP_SetOption shall return IOTHUB_CLIENT_ERROR.**]**
+
+### IoTHubTransportAMQP_Subscribe_DeviceTwin
+```c
+int IoTHubTransportAMQP_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state)
+```
+
+`IoTHubTransportAMQP_Subscribe_DeviceTwin` subscribes to DeviceTwin's messages. Not implemented at the moment.
+
+**SRS_IOTHUBTRANSPORTAMQP_02_009: [** `IoTHubTransportAMQP_Subscribe_DeviceTwin` shall return a non-zero value. **]**

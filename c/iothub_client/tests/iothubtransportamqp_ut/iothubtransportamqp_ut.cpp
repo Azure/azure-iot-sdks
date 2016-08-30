@@ -6257,4 +6257,62 @@ TEST_FUNCTION(AMQP_DoWork_authentication_SASToken_get_time_current_local_time_fa
 	transport_interface->IoTHubTransport_Destroy(transport);
 }
 
+/*Tests_SRS_IOTHUBTRANSPORTAMQP_02_010: [ IoTHubTransportAMQP_Unsubscribe_DeviceTwin shall return. ]*/
+TEST_FUNCTION(IoTHubTransportAMQP_Unsubscribe_DeviceTwin_returns)
+{
+    ///arrange
+    CIoTHubTransportAMQPMocks mocks;
+    IOTHUB_DEVICE_CONFIG device;
+    device.deviceId = TEST_DEVICE_ID;
+    device.deviceKey = TEST_DEVICE_KEY;
+    device.deviceSasToken = NULL;
+
+    DLIST_ENTRY wts;
+    BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+    TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+    IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+        TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+    IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, &device, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
+    mocks.ResetAllCalls();
+
+    /// act
+    transport_interface->IoTHubTransport_Unsubscribe_DeviceTwin(devHandle, IOTHUB_DEVICE_TWIN_DESIRED_STATE);
+
+    ///assert
+    mocks.AssertActualAndExpectedCalls();
+    
+}
+
+/*Tests_SRS_IOTHUBTRANSPORTAMQP_02_009: [ IoTHubTransportAMQP_Subscribe_DeviceTwin shall return a non-zero value. ]*/
+TEST_FUNCTION(IoTHubTransportAMQP_Subscribe_DeviceTwin_returns)
+{
+    ///arrange
+    CIoTHubTransportAMQPMocks mocks;
+    IOTHUB_DEVICE_CONFIG device;
+    device.deviceId = TEST_DEVICE_ID;
+    device.deviceKey = TEST_DEVICE_KEY;
+    device.deviceSasToken = NULL;
+
+    DLIST_ENTRY wts;
+    BASEIMPLEMENTATION::DList_InitializeListHead(&wts);
+    TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+    IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
+        TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
+    IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
+
+    TRANSPORT_LL_HANDLE transport = transport_interface->IoTHubTransport_Create(&config);
+    IOTHUB_DEVICE_HANDLE devHandle = transport_interface->IoTHubTransport_Register(transport, &device, TEST_IOTHUB_CLIENT_LL_HANDLE, &wts);
+    mocks.ResetAllCalls();
+
+    /// act
+    int res = transport_interface->IoTHubTransport_Subscribe_DeviceTwin(devHandle, IOTHUB_DEVICE_TWIN_DESIRED_STATE);
+
+    ///assert
+    mocks.AssertActualAndExpectedCalls();
+    ASSERT_ARE_NOT_EQUAL(int, 0, res);
+}
+
 END_TEST_SUITE(iothubtransportamqp_ut)

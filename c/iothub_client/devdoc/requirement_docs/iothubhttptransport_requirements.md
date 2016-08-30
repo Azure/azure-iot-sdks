@@ -36,16 +36,18 @@ extern "C"
 ```
 
   The following static functions are provided in the fields of the TRANSPORT_PROVIDER structure:
-	- IoTHubTransportHttp_GetHostname,
-    - IoTHubTransportHttp_SetOption,
-    - IoTHubTransportHttp_Create,
-    - IoTHubTransportHttp_Destroy,
-    - IoTHubTransportHttp_Register,
-    - IoTHubTransportHttp_Unregister,
-    - IoTHubTransportHttp_Subscribe,
-    - IoTHubTransportHttp_Unsubscribe,
-    - IoTHubTransportHttp_DoWork,
-    - IoTHubTransportHttp_GetSendStatus
+   - IoTHubTransportHttp_Subscribe_DeviceTwin,   
+   - IoTHubTransportHttp_Unsubscribe_DeviceTwin, 
+   - IoTHubTransportHttp_GetHostname,            
+   - IoTHubTransportHttp_SetOption,              
+   - IoTHubTransportHttp_Create,                                           
+   - IoTHubTransportHttp_Destroy,                                          
+   - IoTHubTransportHttp_Register,               
+   - IoTHubTransportHttp_Unregister, 
+   - IoTHubTransportHttp_Subscribe, 
+   - IoTHubTransportHttp_Unsubscribe, 
+   - IoTHubTransportHttp_DoWork, 
+   - IoTHubTransportHttp_GetSendStatus 
     
 ## IoTHubTransportHttp_Create
 ```c
@@ -362,7 +364,7 @@ Options currently handled by IoTHubTransportHttp:
 |**SRS_TRANSPORTMULTITHTTP_17_121: [** "MinimumPollingTime" **]**   | unsigned int	| 1500	         | Set the option to the minimum number of seconds between 2 consecutive GET service requests. **SRS_TRANSPORTMULTITHTTP_17_122: [** A GET request that happens earlier than GetMinimumPollingTime shall be ignored. **]**   **SRS_TRANSPORTMULTITHTTP_17_123: [** After client creation, the first GET shall be allowed no matter what the value of GetMinimumPollingTime.  **]**  **SRS_TRANSPORTMULTITHTTP_17_124: [** If time is not available then all calls shall be treated as if they are the first one. **]** |
 | **SRS_TRANSPORTMULTITHTTP_17_126: [** "TrustedCerts"**]**        | Char\*        | `NULL`	         | Sets a string that should be used as trusted certificates by the transport, freeing any previous TrustedCerts option value.   **SRS_TRANSPORTMULTITHTTP_17_127: [** `NULL` shall be allowed. **]**  **SRS_TRANSPORTMULTITHTTP_17_129: [** This option shall passed down to the lower layer by calling `HTTPAPIEX_SetOption`. **]**|
 
-##IoTHubTransportHttp_GetHostname
+## IoTHubTransportHttp_GetHostname
 ```c
 STRING_HANDLE IoTHubTransportHttp_GetHostname(TRANSPORT_LL_HANDLE handle)
 ```
@@ -372,15 +374,36 @@ STRING_HANDLE IoTHubTransportHttp_GetHostname(TRANSPORT_LL_HANDLE handle)
 **SRS_TRANSPORTMULTITHTTP_02_001: [** If `handle` is NULL then `IoTHubTransportHttp_GetHostname` shall fail and return NULL. **]**
 **SRS_TRANSPORTMULTITHTTP_02_002: [** Otherwise `IoTHubTransportHttp_GetHostname` shall return a non-NULL STRING_HANDLE containing the hostname. **]**
 
+## IoTHubTransportHttp_Subscribe_DeviceTwin
+```c
+int IoTHubTransportHttp_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state)
+```
+
+`IoTHubTransportHttp_Subscribe_DeviceTwin` subscribes to DeviceTwin's Desired Properties. Not implemented at the moment.
+
+**SRS_TRANSPORTMULTITHTTP_02_003: [** `IoTHubTransportHttp_Subscribe_DeviceTwin` shall return a non-zero value. **]**
+
+## IoTHubTransportHttp_Unsubscribe_DeviceTwin
+```c 
+void IoTHubTransportHttp_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state)
+```
+
+`IoTHubTransportHttp_Unsubscribe_DeviceTwin` unsubscribes from DeviceTwin's Desired Properties.
+
+**SRS_TRANSPORTMULTITHTTP_02_004: [** `IoTHubTransportHttp_Unsubscribe_DeviceTwin` shall return **]**
+
+
 ## HTTP_Protocol
 ```c
-    extern const TRANSPORT_PROVIDER* HTTP_Protocol(void);
+extern const TRANSPORT_PROVIDER* HTTP_Protocol(void);
 ```
 
 This function provides a structure containing the function pointers of this implementation.
 
 **SRS_TRANSPORTMULTITHTTP_17_125: [** This function shall return a pointer to a structure of type `IOTHUB_TRANSPORT_PROVIDER` having the following values for its fields: **]** 
 
+IoTHubTransport_Subscribe_DeviceTwin=IoTHubTransportHttp_Subscribe_DeviceTwin
+IoTHubTransport_Unsubscribe_DeviceTwin= IoTHubTransportHttp_Unsubscribe_DeviceTwin
 IoTHubTransport_GetHostname=IoTHubTransportHttp_GetHostName   
 IoTHubTransport_SetOption=IoTHubTransportHttp_SetOption   
 IoTHubTransport_Create=IoTHubTransportHttp_Create   

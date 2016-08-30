@@ -2054,6 +2054,7 @@ static int IoTHubTransportAMQP_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle,
 {
     (void)handle;
     (void)subscribe_state;
+    /*Codes_SRS_IOTHUBTRANSPORTAMQP_02_009: [ IoTHubTransportAMQP_Subscribe_DeviceTwin shall return a non-zero value. ]*/
     int result = __LINE__;
     LogError("IoTHubTransportAMQP_Subscribe_DeviceTwin Not supported");
     return result;
@@ -2063,6 +2064,7 @@ static void IoTHubTransportAMQP_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE hand
 {
     (void)handle;
     (void)subscribe_state;
+    /*Codes_SRS_IOTHUBTRANSPORTAMQP_02_010: [ IoTHubTransportAMQP_Unsubscribe_DeviceTwin shall return. ]*/
     LogError("IoTHubTransportAMQP_Unsubscribe_DeviceTwin Not supported");
 }
 
