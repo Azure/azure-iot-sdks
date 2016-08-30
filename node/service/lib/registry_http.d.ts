@@ -15,6 +15,7 @@ declare class Http implements Registry.Transport {
     listJobs(path: string, done: (err: Error, jobsList?: string[]) => void): void;
     getJob(path: string, done: Registry.JobCallback): void;
     cancelJob(path: string, done: Registry.JobCallback): void;
+    getDeviceTwin(path: string, done: Registry.Nodeback): void;
 }
 
 export = Http;

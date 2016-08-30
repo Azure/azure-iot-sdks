@@ -32,8 +32,8 @@ registry.create({deviceId: 'dev1'}, function (err, dev) {
   }
 });
 ```
+## Constructors/Factory methods
 
-## Public Interface
 ### Registry constructor
 **SRS_NODE_IOTHUB_REGISTRY_05_001: [** The Registry constructor shall accept a transport object, e.g. `azure-iothub.Http` **]**   
 
@@ -50,6 +50,8 @@ The `fromConnectionString` static method returns a new instance of the `Registry
 **SRS_NODE_IOTHUB_REGISTRY_05_011: [** The `fromSharedAccessSignature` method shall throw `ReferenceError` if the value argument is falsy. **]**   
 **SRS_NODE_IOTHUB_REGISTRY_05_012: [** Otherwise, it shall derive and transform the needed parts from the shared access signature in order to create a new instance of the default transport (`azure-iothub.Http`). **]**   
 **SRS_NODE_IOTHUB_REGISTRY_05_013: [** The `fromSharedAccessSignature` method shall return a new instance of the `Registry` object, as by a call to `new Registry(transport)`. **]**    
+
+## CRUD operation for the device registry
 
 ### create(deviceInfo, done)
 The `create` method creates a device with the given device properties.
@@ -79,6 +81,8 @@ The `delete` method removes a device with the given ID.
 **SRS_NODE_IOTHUB_REGISTRY_07_007: [** The `delete` method shall throw `ReferenceError` if the supplied deviceId is falsy. **]**   
 **SRS_NODE_IOTHUB_REGISTRY_05_007: [** The `delete` method shall delete the given device from an IoT hub’s identity service via the transport associated with the Registry instance. **]**   
 **SRS_NODE_IOTHUB_REGISTRY_05_005: [** When the `delete` method completes, the callback function (indicated by the done argument) shall be invoked with an `Error` object (may be `null`). **]**   
+
+## Bulk Import/Export of devices
 
 ### importDevicesFromBlob(inputBlobContainerUri, outputBlobContainerUri, done)
 The `importDevicesFromBlob` imports a list of devices from a blob named devices.txt found at the input URI given as a parameter, and output logs from the import job in a blob at found at the output URI given as a parameter.
@@ -129,3 +133,14 @@ The `cancelJob` method will cancel the bulk import/export job identified by the 
 **SRS_NODE_IOTHUB_REGISTRY_16_012: [** A `ReferenceError` shall be thrown if the jobId is falsy **]**    
 **SRS_NODE_IOTHUB_REGISTRY_16_013: [** The `done` callback shall be called with only an error object if the request fails. **]**    
 **SRS_NODE_IOTHUB_REGISTRY_16_014: [** The `done` callback shall be called with no parameters if the request is successful. **]**    
+
+## Device Twin operations
+
+### getDeviceTwin(deviceId, done)
+The `getDeviceTwin` method retrieves the latest Device Twin state in the device registry.
+
+**SRS_NODE_IOTHUB_REGISTRY_16_019: [** The `getDeviceTwin` method shall throw a `ReferenceError` if the `deviceId` parameter is falsy. **]**  
+**SRS_NODE_IOTHUB_REGISTRY_16_020: [** The `getDeviceTwin` method shall throw a `ReferenceError` if the `done` parameter is falsy. **]**  
+**SRS_NODE_IOTHUB_REGISTRY_16_021: [** The `getDeviceTwin` method shall call the `done` callback with a standard Javascript `Error` object if the Device Twin could not be retrieved. **]**  
+**SRS_NODE_IOTHUB_REGISTRY_16_022: [** The `getDeviceTwin` method shall call the `done` callback with `null` in the first parameter and the twin object as a second parameter if the device twin was successfully retrieved. **]**  
+

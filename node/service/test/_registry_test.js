@@ -223,6 +223,51 @@ function bulkTests(Transport, goodConnectionString) {
         });
       });
     });
+
+    describe('#getDeviceTwin', function() {
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_019: [The `getDeviceTwin` method shall throw a `ReferenceError` if the `deviceId` parameter is falsy.]*/
+      [undefined, null, ''].forEach(function(badDeviceId){
+        it('throws if the \'deviceId\' parameter is \'' + badDeviceId + '\'', function() {
+          var registry = Registry.fromConnectionString(goodConnectionString, Transport);
+          assert.throws(function(){
+            registry.getDeviceTwin(badDeviceId, function() {});
+          }, ReferenceError);
+        });
+      });
+
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_020: [The `getDeviceTwin` method shall throw a `ReferenceError` if the `done` parameter is falsy.]*/
+      [undefined, null].forEach(function(badCallback){
+        it('throws if the \'done\' parameter is \'' + badCallback + '\'', function() {
+          var registry = Registry.fromConnectionString(goodConnectionString, Transport);
+          assert.throws(function(){
+            registry.getDeviceTwin('deviceId', badCallback);
+          }, ReferenceError);
+        });
+      });
+
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_021: [The `getDeviceTwin` method shall call the `done` callback with a standard Javascript `Error` object if the Device Twin could not be retrieved.]*/
+      it('calls the \'done\' callback with an error if the device twin cannot be retrieved', function (done) {
+        var registry = Registry.fromConnectionString(goodConnectionString, Transport);
+        registry._transport.fakeFailure = true;
+        registry.getDeviceTwin('deviceId', function(err) {
+          assert.instanceOf(err, Error);
+          done();
+        });
+      });
+
+      /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_022: [The `getDeviceTwin` method shall call the `done` callback with `null` in the first parameter and the twin object as a second parameter if the device twin was successfully retrieved.]*/
+      it('calls the \'done\' callback with a null error and a twin if successful', function (done) {
+        var registry = Registry.fromConnectionString(goodConnectionString, Transport);
+        registry.getDeviceTwin('deviceId', function(err, twin) {
+          if (err) {
+            done(err);
+          } else {
+            assert.isOk(twin);
+            done();
+          }
+        });
+      });
+    });
   });
 }
 
