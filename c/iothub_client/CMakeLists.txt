@@ -10,7 +10,6 @@ set(iothub_client_ll_transport_c_files
 ./src/version.c
 ./src/iothub_message.c
 ./src/iothub_client_ll.c
-./src/iothub_queue.c
 ./src/blob.c
 )
 
@@ -32,7 +31,6 @@ set(iothub_client_ll_transport_h_files
 ./inc/iothub_client_ll.h
 ./inc/iothub_client_version.h
 ./inc/iothub_transport_ll.h
-./inc/iothub_queue.h
 ./inc/blob.h
 )
 

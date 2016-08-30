@@ -58,6 +58,18 @@ DEFINE_ENUM(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
 
 DEFINE_ENUM(IOTHUB_DEVICE_TWIN_STATE, IOTHUB_DEVICE_TWIN_STATE_VALUE);
 
+#define IOTHUB_IDENTITY_TYPE_VALUE  \
+    IOTHUB_TYPE_TELEMETRY,          \
+    IOTHUB_TYPE_DEVICE_TWIN
+DEFINE_ENUM(IOTHUB_IDENTITY_TYPE, IOTHUB_IDENTITY_TYPE_VALUE);
+
+#define IOTHUB_PROCESS_ITEM_RESULT_VALUE    \
+    IOTHUB_PROCESS_OK,                      \
+    IOTHUB_PROCESS_ERROR,                   \
+    IOTHUB_PROCESS_NOT_CONNECTED,           \
+    IOTHUB_PROCESS_CONTINUE
+DEFINE_ENUM(IOTHUB_PROCESS_ITEM_RESULT, IOTHUB_PROCESS_ITEM_RESULT_VALUE);
+
 #include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/xio.h"
 #include "azure_c_shared_utility/doublylinkedlist.h"
@@ -131,7 +143,7 @@ extern "C"
     typedef const TRANSPORT_PROVIDER*(*IOTHUB_CLIENT_TRANSPORT_PROVIDER)(void);
 
     typedef void(*IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback);
-    typedef void(*IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
+    typedef void(*IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)(int status_code, void* userContextCallback);
     typedef void(*IOTHUB_CLIENT_IOTHUB_METHOD_CALLBACK_ASYNC)(IOTHUB_CLIENT_METHOD_PROPERTIES properties, const unsigned char* payload, void* userContextCallback);
     typedef void(*IOTHUB_CLIENT_IOTHUB_METHOD_EXECUTE_CALLBACK)(IOTHUB_CLIENT_IOTHUB_METHOD_STATUS status, IOTHUB_CLIENT_METHOD_PROPERTIES properties, const unsigned char* payload, void* userContextCallback);
 

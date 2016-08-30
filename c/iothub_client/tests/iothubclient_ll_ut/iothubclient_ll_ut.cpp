@@ -240,6 +240,9 @@ public:
         MOCK_STATIC_METHOD_2(, void, FAKE_IoTHubTransport_Unsubscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_DEVICE_TWIN_STATE, subscribe_state)
         MOCK_VOID_METHOD_END()
 
+        MOCK_STATIC_METHOD_3(, IOTHUB_PROCESS_ITEM_RESULT, FAKE_IoTHubTransport_ProcessItem, TRANSPORT_LL_HANDLE, handle, IOTHUB_IDENTITY_TYPE, item_type, void*, iothub_item)
+        MOCK_METHOD_END(IOTHUB_PROCESS_ITEM_RESULT, IOTHUB_PROCESS_OK)
+
         MOCK_STATIC_METHOD_1(, STRING_HANDLE, FAKE_IoTHubTransport_GetHostname, TRANSPORT_LL_HANDLE, handle)
         MOCK_METHOD_END(STRING_HANDLE, (STRING_HANDLE)0x42)
 
@@ -359,6 +362,7 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, gballoc_free, void*, 
 
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientLLMocks, , int, FAKE_IoTHubTransport_Subscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_DEVICE_TWIN_STATE, subscribe_state);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientLLMocks, , void, FAKE_IoTHubTransport_Unsubscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_DEVICE_TWIN_STATE, subscribe_state);
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientLLMocks, , IOTHUB_PROCESS_ITEM_RESULT, FAKE_IoTHubTransport_ProcessItem, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_IDENTITY_TYPE, item_type, void*, iothub_item);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , STRING_HANDLE, FAKE_IoTHubTransport_GetHostname, TRANSPORT_LL_HANDLE, handle);
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientLLMocks, , IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_SetOption, TRANSPORT_LL_HANDLE, handle, const char*, optionName, const void*, value);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , TRANSPORT_LL_HANDLE, FAKE_IoTHubTransport_Create, const IOTHUBTRANSPORT_CONFIG*, config);
@@ -407,6 +411,7 @@ static TRANSPORT_PROVIDER FAKE_transport_provider =
 {
     FAKE_IoTHubTransport_Subscribe_DeviceTwin, /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin; */
     FAKE_IoTHubTransport_Unsubscribe_DeviceTwin, /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin; */
+    FAKE_IoTHubTransport_ProcessItem,   /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem     */
     FAKE_IoTHubTransport_GetHostname,   /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname     */
     FAKE_IoTHubTransport_SetOption,     /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;        */
     FAKE_IoTHubTransport_Create,        /*pfIoTHubTransport_Create IoTHubTransport_Create;              */
@@ -554,7 +559,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_DeviceKey_succeeds
     EXPECTED_CALL(mocks, STRING_TOKENIZER_destroy(IGNORED_PTR_ARG));
 
 #ifndef DONT_USE_UPLOADTOBLOB
-	/* underlying IoTHubClient_LL_Create call */
+    /* underlying IoTHubClient_LL_Create call */
     STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_UploadToBlob_Create(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 #endif 

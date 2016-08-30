@@ -43,7 +43,7 @@ typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG
 #ifndef DONT_USE_UPLOADTOBLOB
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE uploadToBlobHandle;
 #endif
-
+	uint32_t data_msg_id;
 }IOTHUB_CLIENT_LL_HANDLE_DATA;
 
 static const char HOSTNAME_TOKEN[] = "HostName";
@@ -56,7 +56,7 @@ static const char PROTOCOL_GATEWAY_HOST[] = "GatewayHostName";
 
 IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* connectionString, IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    IOTHUB_CLIENT_LL_HANDLE result = NULL;
+    IOTHUB_CLIENT_LL_HANDLE result;
 
     /*Codes_SRS_IOTHUBCLIENT_LL_05_001: [IoTHubClient_LL_CreateFromConnectionString shall obtain the version string by a call to IoTHubClient_GetVersionString.]*/
     /*Codes_SRS_IOTHUBCLIENT_LL_05_002: [IoTHubClient_LL_CreateFromConnectionString shall print the version string to standard output.]*/
@@ -66,10 +66,12 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
     if (connectionString == NULL)
     {
         LogError("Input parameter is NULL: connectionString");
+        result = NULL;
     }
     else if (protocol == NULL)
     {
         LogError("Input parameter is NULL: protocol");
+        result = NULL;
     }
     else
     {
@@ -79,7 +81,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
         {
             /* Codes_SRS_IOTHUBCLIENT_LL_12_012: [If the allocation failed IoTHubClient_LL_CreateFromConnectionString  returns NULL]  */
             LogError("Malloc failed");
-            return NULL;
+            result = NULL;
         }
         else
         {
@@ -108,26 +110,32 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
             if ((connString = STRING_construct(connectionString)) == NULL)
             {
                 LogError("Error constructing connectiong String");
+                result = NULL;
             }
             else if ((tokenizer1 = STRING_TOKENIZER_create(connString)) == NULL)
             {
                 LogError("Error creating Tokenizer");
+                result = NULL;
             }
             else if ((tokenString = STRING_new()) == NULL)
             {
                 LogError("Error creating Token String");
+                result = NULL;
             }
             else if ((valueString = STRING_new()) == NULL)
             {
                 LogError("Error creating Value String");
+                result = NULL;
             }
             else if ((hostNameString = STRING_new()) == NULL)
             {
                 LogError("Error creating HostName String");
+                result = NULL;
             }
             else if ((hostSuffixString = STRING_new()) == NULL)
             {
                 LogError("Error creating HostSuffix String");
+                result = NULL;
             }
             /* Codes_SRS_IOTHUBCLIENT_LL_12_005: [IoTHubClient_LL_CreateFromConnectionString shall try to parse the connectionString input parameter for the following structure: "Key1=value1;key2=value2;key3=value3..."] */
             /* Codes_SRS_IOTHUBCLIENT_LL_12_006: [IoTHubClient_LL_CreateFromConnectionString shall verify the existence of the following Key/Value pairs in the connection string: HostName, DeviceId, SharedAccessKey, SharedAccessSignature or x509]  */
@@ -233,14 +241,17 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                 if (config->iotHubName == NULL)
                 {
                     LogError("iotHubName is not found");
+                    result = NULL;
                 }
                 else if (config->iotHubSuffix == NULL)
                 {
                     LogError("iotHubSuffix is not found");
+                    result = NULL;
                 }
                 else if (config->deviceId == NULL)
                 {
                     LogError("deviceId is not found");
+                    result = NULL;
                 }
                 else if (!(
                     ((!isx509found) && (config->deviceSasToken == NULL) ^ (config->deviceKey == NULL)) ||
@@ -248,6 +259,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                     ))
                 {
                     LogError("invalid combination of x509, deviceSasToken and deviceKey");
+                    result = NULL;
                 }
                 else
                 {
@@ -304,7 +316,9 @@ static void setTransportProtocol(IOTHUB_CLIENT_LL_HANDLE_DATA* handleData, TRANS
     handleData->IoTHubTransport_Unsubscribe = protocol->IoTHubTransport_Unsubscribe;
     handleData->IoTHubTransport_DoWork = protocol->IoTHubTransport_DoWork;
     handleData->IoTHubTransport_GetSendStatus = protocol->IoTHubTransport_GetSendStatus;
-
+    handleData->IoTHubTransport_ProcessItem = protocol->IoTHubTransport_ProcessItem;
+    handleData->IoTHubTransport_Subscribe_DeviceTwin = protocol->IoTHubTransport_Subscribe_DeviceTwin;
+    handleData->IoTHubTransport_Unsubscribe_DeviceTwin = protocol->IoTHubTransport_Unsubscribe_DeviceTwin;
 }
 
 IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* config)
@@ -364,6 +378,8 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* confi
                     handleData->messageCallback = NULL;
                     handleData->messageUserContextCallback = NULL;
                     handleData->lastMessageReceiveTime = INDEFINITE_TIME;
+                    handleData->data_msg_id = 1;
+
                     /*Codes_SRS_IOTHUBCLIENT_LL_02_006: [IoTHubClient_LL_Create shall populate a structure of type IOTHUBTRANSPORT_CONFIG with the information from config parameter and the previous DLIST and shall pass that to the underlying layer _Create function.]*/
                     lowerLayerConfig.upperConfig = config;
                     lowerLayerConfig.waitingToSend = &(handleData->waitingToSend);
@@ -515,7 +531,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(const IOTHUB_CLIENT_
                             handleData->messageCallback = NULL;
                             handleData->messageUserContextCallback = NULL;
                             handleData->lastMessageReceiveTime = INDEFINITE_TIME;
-                            
+                            handleData->data_msg_id = 1;
 
                             IOTHUB_DEVICE_CONFIG deviceConfig;
 
@@ -815,6 +831,13 @@ void IoTHubClient_LL_SendComplete(IOTHUB_CLIENT_LL_HANDLE handle, PDLIST_ENTRY c
             free(messageList);
         }
     }
+}
+
+void IoTHubClient_LL_ReportedStateComplete(IOTHUB_CLIENT_LL_HANDLE handle, uint32_t item_id, int status_code)
+{
+	(void)handle;
+	(void)item_id;
+	(void)status_code;
 }
 
 IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubClient_LL_MessageCallback(IOTHUB_CLIENT_LL_HANDLE handle, IOTHUB_MESSAGE_HANDLE message)
