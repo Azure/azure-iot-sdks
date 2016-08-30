@@ -12,7 +12,7 @@ function(add_sample_directory whatIsBuilding)
 			   FOLDER "Serializer_Samples")
 endfunction()
 
-add_sample_directory(simple_sample_with_strings)
+
 
 if(${use_amqp} AND (NOT DEFINED use_amqp_kit OR NOT ${use_amqp_kit}))
 	add_sample_directory(remote_monitoring)
@@ -26,5 +26,6 @@ endif()
 
 if(${use_mqtt} AND (NOT DEFINED use_mqtt_kit OR NOT ${use_mqtt_kit}))
 	add_sample_directory(simplesample_mqtt)
+    add_sample_directory(devicetwin_simplesample)
 endif()
 
