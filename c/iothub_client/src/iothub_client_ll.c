@@ -17,7 +17,7 @@
 #include "iothub_client_private.h"
 #include "iothub_client_version.h"
 #include "iothub_transport_ll.h"
-#include <inttypes.h>
+#include <stdint.h>
 
 #ifndef DONT_USE_UPLOADTOBLOB
 #include "iothub_client_ll_uploadtoblob.h"
