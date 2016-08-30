@@ -41,7 +41,7 @@ static int wascallbackcalled = 0;
 void deviceTwinCallback(int status_code, void* userContextCallback)
 {
     (void)(userContextCallback);
-    printf("status_code = %u\n", status_code);
+    printf("Status_code = %u\n", status_code);
     wascallbackcalled = 1;
 }
 
@@ -100,11 +100,11 @@ void simple_sample_with_strings_run(void)
 
                         if (IoTHubClient_SendReportedState(iotHubClientHandle, buffer, bufferSize, deviceTwinCallback, NULL) != IOTHUB_CLIENT_OK)
                         {
-                            printf("failure sending data!!!\n");
+                            printf("Failure sending data!!!\n");
                         }
                         else
                         {
-                            printf("waiting for callback to be called\n");
+                            printf("Waiting for callback to be called\n");
                             /*do nothing until callback is called*/
                             while (wascallbackcalled == 0)
                             {
