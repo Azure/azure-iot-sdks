@@ -10,6 +10,7 @@ import com.microsoft.azure.iothub.IotHubMessageResult;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
 import com.microsoft.azure.iothub.transport.State;
 import com.microsoft.azure.iothub.transport.TransportUtils;
+
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
@@ -17,27 +18,45 @@ import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.SenderSettleMode;
-import org.apache.qpid.proton.engine.*;
+import org.apache.qpid.proton.engine.BaseHandler;
+import org.apache.qpid.proton.engine.Connection;
+import org.apache.qpid.proton.engine.Delivery;
+import org.apache.qpid.proton.engine.Event;
+import org.apache.qpid.proton.engine.Link;
+import org.apache.qpid.proton.engine.Receiver;
+import org.apache.qpid.proton.engine.Sasl;
+import org.apache.qpid.proton.engine.Sender;
+import org.apache.qpid.proton.engine.Session;
+import org.apache.qpid.proton.engine.SslDomain;
+import org.apache.qpid.proton.engine.Transport;
 import org.apache.qpid.proton.engine.impl.WebSocketImpl;
 import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
 import org.apache.qpid.proton.reactor.Reactor;
+
 import org.bouncycastle.openssl.PEMReader;
 import org.bouncycastle.openssl.PEMWriter;
 
-
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOError;
+import java.io.IOException;
+import java.io.Reader;
 import java.nio.BufferOverflowException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -81,6 +100,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
     private List<ServerListener> listeners = new ArrayList<>();
     private ExecutorService executorService;
+
+    private int ReactorRunnerCount = 0;
 
     /**
      * Constructor to set up connection parameters using the {@link DeviceClientConfig}.
@@ -172,7 +193,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
 			try
             {
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_009: [The function shall trigger the Reactor (Proton) to begin running.]
-                this.reactorFuture = this.startReactorAsync();
+                this.startReactorAsync();
 
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_010: [The function shall wait for the reactor to be ready and for
                 // enough link credit to become available.]
@@ -215,8 +236,22 @@ public final class AmqpsIotHubConnection extends BaseHandler
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_014: [The function shall stop the Proton reactor.]
         if (this.reactorFuture != null)
             this.reactorFuture.cancel(true);
-        if (this.executorService != null)
+        if (this.executorService != null) {
+            System.out.println("Shutting down executorService");
             this.executorService.shutdown();
+            try {
+                // Wait a while for existing tasks to terminate
+                if (!this.executorService.awaitTermination(30, TimeUnit.SECONDS)) {
+                    this.executorService.shutdownNow(); // Cancel currently executing tasks
+                    // Wait a while for tasks to respond to being cancelled
+                    if (!this.executorService.awaitTermination(30, TimeUnit.SECONDS))
+                        System.err.println("Pool did not terminate");
+                }
+            } catch (InterruptedException ie) {
+                // (Re-)Cancel if current thread also interrupted
+                this.executorService.shutdownNow();
+            }
+        }
     }
 
     /**
@@ -528,7 +563,11 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
         executorService = Executors.newFixedThreadPool(1);
         ReactorRunner reactorRunner = new ReactorRunner(iotHubReactor);
-        return executorService.submit(reactorRunner);
+        ReactorRunnerCount++;
+        System.out.println("new ReactorRunner(iotHubReactor) - count: " + ReactorRunnerCount);
+        this.reactorFuture = executorService.submit(reactorRunner);
+        iotHubReactor.IotHubReactorSetFutureReactor(this.reactorFuture);
+        return this.reactorFuture;
     }
 
     /**
@@ -565,6 +604,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
      */
     private void reconnect()
     {
+        System.out.println("AmqpIotHubConnection reconnect");
         this.close();
 
         for(ServerListener listener : listeners)
@@ -583,6 +623,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             {
                 try
                 {
+                    this.close();
                     System.out.println("Lost connection to the server. Reconnection attempt " + currentReconnectionAttempt++ + "...");
                     Thread.sleep(TransportUtils.generateSleepInterval(currentReconnectionAttempt));
                 }
