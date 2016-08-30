@@ -6279,7 +6279,7 @@ TEST_FUNCTION(IoTHubTransportAMQP_Unsubscribe_DeviceTwin_returns)
     mocks.ResetAllCalls();
 
     /// act
-    transport_interface->IoTHubTransport_Unsubscribe_DeviceTwin(devHandle, IOTHUB_DEVICE_TWIN_DESIRED_STATE);
+    transport_interface->IoTHubTransport_Unsubscribe_DeviceTwin(devHandle, IOTHUB_DEVICE_TWIN_REPORTED_STATE);
 
     ///assert
     mocks.AssertActualAndExpectedCalls();
@@ -6308,7 +6308,7 @@ TEST_FUNCTION(IoTHubTransportAMQP_Subscribe_DeviceTwin_returns)
     mocks.ResetAllCalls();
 
     /// act
-    int res = transport_interface->IoTHubTransport_Subscribe_DeviceTwin(devHandle, IOTHUB_DEVICE_TWIN_DESIRED_STATE);
+    int res = transport_interface->IoTHubTransport_Subscribe_DeviceTwin(devHandle, IOTHUB_DEVICE_TWIN_REPORTED_STATE);
 
     ///assert
     mocks.AssertActualAndExpectedCalls();
