@@ -567,3 +567,12 @@ int IoTHubTransportAMQP_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB
 `IoTHubTransportAMQP_Subscribe_DeviceTwin` subscribes to DeviceTwin's messages. Not implemented at the moment.
 
 **SRS_IOTHUBTRANSPORTAMQP_02_009: [** `IoTHubTransportAMQP_Subscribe_DeviceTwin` shall return a non-zero value. **]**
+
+### IoTHubTransportAMQP_Unsubscribe_DeviceTwin
+```c
+void IoTHubTransportAMQP_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state)
+```
+
+`IoTHubTransportAMQP_Unsubscribe_DeviceTwin` unsubscribes from DeviceTwin's messages. Not implemented.
+
+**SRS_IOTHUBTRANSPORTAMQP_02_010: [** `IoTHubTransportAMQP_Unsubscribe_DeviceTwin` shall return. **]**
