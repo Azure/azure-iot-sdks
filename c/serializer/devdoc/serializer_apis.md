@@ -111,7 +111,7 @@ WITH_REPORTED_PROPERTY(propertyType, propertyName)
 ```
 
 `WITH_REPORTED_PROPERTY` macro allows declaring a reported property (in the context of DeviceTwin).
-Reported properties have the same type as proeprties declared by `WITH_DATA` macro. 
+Reported properties have the same type as properties declared by `WITH_DATA` macro. 
 
 
 ## WITH_ACTION(actionName, arg1Type, arg1Name, ...)
@@ -142,7 +142,7 @@ This macro produces the JSON serialized representation of the properties.
 __Arguments:__
 
 -	destination – pointer to an unsigned char* that will receive the serialized data. 
--	destinationSize – Pointer to a size_t that gets written with the size in bytes of the serialized data 
+-	destinationSize – pointer to a size_t that gets written with the size in bytes of the serialized data 
 -	property1, property2, ... -  a list of property values to send. The order in which the properties appear in the list does not matter, all values will be sent together.
 
 __Returns:__
@@ -182,7 +182,7 @@ individual properties or a complete model.
 __Arguments:__
 
 -	destination – pointer to an unsigned char* that will receive the serialized reported properties. 
--	destinationSize – Pointer to a size_t that gets written with the size in bytes of the serialized reported properties. 
+-	destinationSize – pointer to a size_t that gets written with the size in bytes of the serialized reported properties. 
 -	property1, property2, ... -  a list of reported properties to send. The order in which the reported properties appear in 
 the list does not matter, all values will be sent together. If the reported property argument is a complete model, then only
 the reported properties in that model will be serialized.
