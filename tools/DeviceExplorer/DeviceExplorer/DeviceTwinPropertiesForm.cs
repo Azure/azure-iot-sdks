@@ -21,71 +21,63 @@ namespace DeviceExplorer
         private DeviceTwinProperties desiredProperties;
         private String reportedPropertiesJson;
         private String desiredPropertiesJson;
+        private bool initialIndexSet;
 
         public DeviceTwinPropertiesForm()
         {
             InitializeComponent();
         }
 
-        public async Task GetDeviceTwinData()
+        public async Task<bool> GetDeviceTwinData()
         {
             bool isOK = false;
             string exStr = "";
 
-            RegistryManager registryManager = RegistryManager.CreateFromConnectionString(iotHubConnectionString);
+            dynamic registryManager = RegistryManager.CreateFromConnectionString(iotHubConnectionString);
+            dynamic repProps = null;
+            dynamic desProps = null;
+            dynamic tags = null;
 
-            var type = registryManager.GetType();
             try
             {
-                if (type.GetMember("GetDeviceTwinAsync") != null)
+                var deviceTwin = await registryManager.GetDeviceTwinAsync(deviceName);
+                if (deviceTwin != null)
                 {
-                    dynamic repProps = null;
-                    dynamic desProps = null;
-                    dynamic tags = null;
+                    tags = deviceTwin.Tags;
+                    repProps = deviceTwin.ReportedProperties;
+                    desProps = deviceTwin.DesiredProperties;
 
-                    var deviceTwin = await registryManager.GetDeviceTwinAsync(deviceName);
-                    if (deviceTwin != null)
+                    Console.WriteLine(repProps.ToJson());
+
+                    if (repProps != null)
                     {
-                        tags = deviceTwin.Tags;
-                        repProps = deviceTwin.ReportedProperties;
-                        desProps = deviceTwin.DesiredProperties;
+                        reportedProperties = new DeviceTwinProperties();
 
-                        Console.WriteLine(repProps.ToJson());
-
-                        if (repProps != null)
+                        foreach (var property in repProps)
                         {
-                            reportedProperties = new DeviceTwinProperties();
-
-                            foreach (var property in repProps)
-                            {
-                                reportedProperties.Add(new DeviceTwinProperty(property.Key, property.Value, typeof(string), true));
-                            }
+                            reportedProperties.Add(new DeviceTwinProperty(property.Key, property.Value, typeof(string), true));
                         }
-
-                        if (desProps != null)
-                        {
-                            desiredProperties = new DeviceTwinProperties();
-                            foreach (var property in desProps)
-                            {
-                                desiredProperties.Add(new DeviceTwinProperty(property.Key, property.Value, typeof(string), true));
-                            }
-                        }
-
-                        reportedPropertiesJson = repProps.ToJson();
-                        desiredPropertiesJson = desProps.ToJson();
-
-                        isOK = true;
                     }
-                }
-                else
-                {
-                    exStr = "Device Twin functionality is not found." + Environment.NewLine + 
-                        "Make sure you are using the latest Microsoft.Azure.Devices package.";
+
+                    if (desProps != null)
+                    {
+                        desiredProperties = new DeviceTwinProperties();
+                        foreach (var property in desProps)
+                        {
+                            desiredProperties.Add(new DeviceTwinProperty(property.Key, property.Value, typeof(string), true));
+                        }
+                    }
+
+                    reportedPropertiesJson = repProps.ToJson();
+                    desiredPropertiesJson = desProps.ToJson();
+
+                    isOK = true;
                 }
             }
             catch (Exception e)
             {
-                exStr = e.ToString();
+                exStr = "Device Twin functionality is not found." + Environment.NewLine +
+                    "Make sure you are using the latest Microsoft.Azure.Devices package.";
             }
 
             if (!isOK)
@@ -97,11 +89,13 @@ namespace DeviceExplorer
 
                 MessageBox.Show(exStr, "Device Twin Properties", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
+            return isOK;
         }
 
-        public async Task UpdateDialogData()
+        public async Task<bool> UpdateDialogData()
         {
-            await GetDeviceTwinData();
+            bool isOK = await GetDeviceTwinData();
 
             reportedPropertiesGrid.SelectedObject = reportedProperties;
             reportedPropertiesGrid.Refresh();
@@ -110,13 +104,17 @@ namespace DeviceExplorer
             desiredPropertiesGrid.SelectedObject = desiredProperties;
             desiredPropertiesGrid.Refresh();
             jsonRichTextBox2.Text = desiredPropertiesJson;
+
+            return isOK;
         }
 
-        public void Execute(String activeIotHubConnectionString, String selectedDeviceName, List<string> currentDeviceList)
+        public async void Execute(String activeIotHubConnectionString, String selectedDeviceName, List<string> currentDeviceList)
         {
             iotHubConnectionString = activeIotHubConnectionString;
             deviceName = selectedDeviceName;
             deviceList = currentDeviceList;
+
+            initialIndexSet = true;
 
             deviceListCombo.Items.Clear();
             if (deviceList != null)
@@ -127,13 +125,21 @@ namespace DeviceExplorer
                 }
             }
             deviceListCombo.SelectedItem = deviceName;
-            ShowDialog();
+
+            if (await UpdateDialogData())
+            {
+                ShowDialog();
+            }
         }
 
         private void deviceListCombo_SelectedIndexChanged(object sender, EventArgs e)
         {
-            deviceName = deviceListCombo.SelectedItem.ToString();
-            refreshBtn_Click(this, null);
+            if (!initialIndexSet)
+            {
+                deviceName = deviceListCombo.SelectedItem.ToString();
+                refreshBtn_Click(this, null);
+            }
+            initialIndexSet = false;
         }
 
         private async void refreshBtn_Click(object sender, EventArgs e)
