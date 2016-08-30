@@ -1,4 +1,4 @@
-azure-iot-sdk-c (0.1.0-22) vivid; urgency=low
+azure-iot-sdk-c (0.1.0-25) vivid; urgency=low
 
   * Initial release
 
@@ -46,4 +46,6 @@ azure-iot-sdk-c (0.1.0-22) vivid; urgency=low
 
   * Added x509 authentication support to MQTT and AMQP transports
 
- -- AzureIoT User <aziotsdklinux@outlook.com>  Tue, 2 Aug 2016 11:00:00 +0000
+  * Add messageId and correlationId to uAMQP messages on D2C messages
+
+ -- AzureIoT User <aziotsdklinux@outlook.com>  Sat, 27 Aug 2016 11:00:00 +0000
