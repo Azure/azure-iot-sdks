@@ -48,9 +48,19 @@ static  void IoTHubTransportAMQP_Unsubscribe_DeviceTwin_WebSocketsOverTls(IOTHUB
     LogError("not implemented yet");
 }
 
+static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportAMQP_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, void* iothub_item)
+{
+    (void)handle;
+    (void)item_type;
+    (void)iothub_item;
+    LogError("Currently Not Supported.");
+    return IOTHUB_CLIENT_ERROR;
+}
+
 static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
     IoTHubTransportAMQP_Subscribe_DeviceTwin_WebSocketsOverTls,
     IoTHubTransportAMQP_Unsubscribe_DeviceTwin_WebSocketsOverTls,
+    IoTHubTransportAMQP_ProcessItem,	
     IoTHubTransportAMQP_GetHostname,
     IoTHubTransportAMQP_SetOption,
     IoTHubTransportAMQP_Create_WebSocketsOverTls,

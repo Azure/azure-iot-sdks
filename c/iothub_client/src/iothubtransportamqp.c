@@ -1877,6 +1877,15 @@ static void IoTHubTransportAMQP_Destroy(TRANSPORT_LL_HANDLE handle)
     }
 }
 
+static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportAMQP_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, void* iothub_item)
+{
+    (void)handle;
+    (void)item_type;
+    (void)iothub_item;
+    LogError("Currently Not Supported.");
+    return IOTHUB_CLIENT_ERROR;
+}
+
 static void IoTHubTransportAMQP_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
 {
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_051: [IoTHubTransportAMQP_DoWork shall fail and return immediately if the transport handle parameter is NULL] 
@@ -2310,6 +2319,7 @@ static STRING_HANDLE IoTHubTransportAMQP_GetHostname(TRANSPORT_LL_HANDLE handle)
 static TRANSPORT_PROVIDER thisTransportProvider = {
     IoTHubTransportAMQP_Subscribe_DeviceTwin,
     IoTHubTransportAMQP_Unsubscribe_DeviceTwin,
+    IoTHubTransportAMQP_ProcessItem,
     IoTHubTransportAMQP_GetHostname,
     IoTHubTransportAMQP_SetOption,
     IoTHubTransportAMQP_Create,

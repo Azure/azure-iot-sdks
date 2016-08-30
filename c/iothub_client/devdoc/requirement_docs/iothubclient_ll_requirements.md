@@ -561,12 +561,33 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendReportedState(IOTHUB_CLIENT_LL_H
 
 **SRS_IOTHUBCLIENT_LL_10_012: [ `IoTHubClient_LL_SendReportedState` shall fail and return `IOTHUB_CLIENT_INVALID_ARG` if parameter `iotHubClientHandle` is `NULL`. ]**
 
-**SRS_IOTHUBCLIENT_LL_10_013: [ `IoTHubClient_LL_SendReportedState` shall fail and return `IOTHUB_CLIENT_INVALID_ARG` if parameter `reportedState` is `NULL` or if parameter `size` is equal to 0. ]**
+**SRS_IOTHUBCLIENT_LL_10_013: [ `IoTHubClient_LL_SendReportedState` shall fail and return `IOTHUB_CLIENT_INVALID_ARG` if parameter `reportedState` is `NULL`]**
 
-**SRS_IOTHUBCLIENT_LL_10_014: [ if parameter `patchReportedCallback` is not `NULL`, `IoTHubClient_LL_SendReportedState` shall call the underlaying `_Subscribe`. ]**
+**SRS_IOTHUBCLIENT_LL_07_005: [ `IoTHubClient_LL_SendReportedState` shall fail and return `IOTHUB_CLIENT_INVALID_ARG` if parameter `size` is equal to 0. ]**
 
-**SRS_IOTHUBCLIENT_LL_10_015: [ If the underlying layer's `_Subscribe` function fails, then `IoTHubClient_LL_SendReportedState` shall fail and return `IOTHUB_CLIENT_ERROR`. ]**
+**SRS_IOTHUBCLIENT_LL_10_014: [ `IoTHubClient_LL_SendReportedState` shall construct a Device_Twin structure containing reportedState data. ]**
 
-**SRS_IOTHUBCLIENT_LL_10_016: [ Otherwise `IoTHubClient_LL_SetPatchDesiredStateCallback` shall succeed and return `IOTHUB_CLIENT_OK`. ]**
+**SRS_IOTHUBCLIENT_LL_07_001: [** `IoTHubClient_LL_SendReportedState` shall queue the constructed reportedState data to be consumed by the targeted transport. **]**
 
-**SRS_IOTHUBCLIENT_LL_10_017: [ if parameter `patchReportedCallback` is `NULL`, `IoTHubClient_LL_SendReportedState` shall call the underlying layer's `_Unsubscribe` function and return `IOTHUB_CLIENT_OK`. ]**
+**SRS_IOTHUBCLIENT_LL_10_015: [ If any error is encountered `IoTHubClient_LL_SendReportedState` shall return `IOTHUB_CLIENT_ERROR`.]**
+
+**SRS_IOTHUBCLIENT_LL_10_016: [ Otherwise `IoTHubClient_LL_SendReportedState` shall succeed and return `IOTHUB_CLIENT_OK`.]**
+
+**SRS_IOTHUBCLIENT_LL_10_017: [ if parameter `reportedStateCallback` is `NULL`, `IoTHubClient_LL_SendReportedState` shall send the reported state without any notification upon the message reaching the iothub. ]**
+
+
+## IoTHubClient_LL_ReportedStateComplete
+
+```c
+void IoTHubClient_LL_ReportedStateComplete(IOTHUB_CLIENT_LL_HANDLE handle, IOTHUB_QUEUE_HANDLE queue_handle, IOTHUB_CLIENT_CONFIRMATION_RESULT result)
+```
+
+IoTHubClient_LL_ReportedStateComplete is a function only called by the transport that signals the completed transmission of a device_twin message to iothub, or an error.  
+
+**SRS_IOTHUBCLIENT_LL_07_002: [ if handle is NULL then IoTHubClient_LL_ReportedStateComplete shall do nothing. ]**
+
+**SRS_IOTHUBCLIENT_LL_07_006: [ if queue_handle is NULL then IoTHubClient_LL_ReportedStateComplete shall do nothing ]**
+
+**SRS_IOTHUBCLIENT_LL_07_003: [ IoTHubClient_LL_ReportedStateComplete shall enumerate through the IOTHUB_DEVICE_TWIN structures in queue_handle. ]**
+
+**SRS_IOTHUBCLIENT_LL_07_004: [ If the IOTHUB_DEVICE_TWIN's `reported_state_callback` variable is non-NULL then IoTHubClient_LL_ReportedStateComplete shall call the function. ]**  

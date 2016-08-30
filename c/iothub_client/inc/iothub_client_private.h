@@ -10,6 +10,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/doublylinkedlist.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
+#include "azure_c_shared_utility/constbuffer.h"
 
 #include "iothub_message.h"
 #include "iothub_client_ll.h"
@@ -31,6 +32,7 @@ extern "C"
 #define REJECT_QUERY_PARAMETER "&reject"
 
 MOCKABLE_FUNCTION(, void, IoTHubClient_LL_SendComplete, IOTHUB_CLIENT_LL_HANDLE, handle, PDLIST_ENTRY, completed, IOTHUB_CLIENT_CONFIRMATION_RESULT, result);
+MOCKABLE_FUNCTION(, void, IoTHubClient_LL_ReportedStateComplete, IOTHUB_CLIENT_LL_HANDLE, handle, uint32_t, item_id, int, status_code);
 MOCKABLE_FUNCTION(, IOTHUBMESSAGE_DISPOSITION_RESULT, IoTHubClient_LL_MessageCallback, IOTHUB_CLIENT_LL_HANDLE,  handle, IOTHUB_MESSAGE_HANDLE, message);
 
 typedef struct IOTHUB_MESSAGE_LIST_TAG
@@ -44,8 +46,8 @@ typedef struct IOTHUB_MESSAGE_LIST_TAG
 
 typedef struct IOTHUB_DEVICE_TWIN_TAG
 {
-    IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK device_twin_callback;
     IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reported_state_callback;
+    CONSTBUFFER_HANDLE report_data_handle;
     void* context;
 } IOTHUB_DEVICE_TWIN;
 

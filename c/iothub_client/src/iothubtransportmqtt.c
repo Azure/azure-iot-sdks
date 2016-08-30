@@ -1123,6 +1123,15 @@ static void IoTHubTransportMqtt_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
     }
 }
 
+static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportMqtt_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, void* iothub_item)
+{
+    (void)handle;
+    (void)item_type;
+    (void)iothub_item;
+    LogError("Currently Not Supported.");
+    return IOTHUB_CLIENT_ERROR;
+}
+
 static void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
 {
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_026: [IoTHubTransportMqtt_DoWork shall do nothing if parameter handle and/or iotHubClientHandle is NULL.] */
@@ -1435,6 +1444,7 @@ static STRING_HANDLE IoTHubTransportMqtt_GetHostname(TRANSPORT_LL_HANDLE handle)
 static TRANSPORT_PROVIDER myfunc = {
     IoTHubTransportMqtt_Subscribe_DeviceTwin,
     IoTHubTransportMqtt_Unsubscribe_DeviceTwin,
+	IoTHubTransportMqtt_ProcessItem,
     IoTHubTransportMqtt_GetHostname,
     IoTHubTransportMqtt_SetOption,
     IoTHubTransportMqtt_Create,

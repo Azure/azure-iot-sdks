@@ -179,7 +179,7 @@ public:
     MOCK_STATIC_METHOD_7(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_ExecuteIoTHubMethod, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, verb, const char*, resource, IOTHUB_CLIENT_METHOD_PROPERTIES, properties, const unsigned char*, payload, IOTHUB_CLIENT_IOTHUB_METHOD_EXECUTE_CALLBACK, iotHubExecuteCallback, void*, userContextCallback);
     MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK);
 
-    MOCK_STATIC_METHOD_2(, void, sendReportedCallback, IOTHUB_CLIENT_CONFIRMATION_RESULT, result2, void*, userContextCallback)
+    MOCK_STATIC_METHOD_2(, void, sendReportedCallback, int, status_code, void*, userContextCallback)
     MOCK_VOID_METHOD_END();
     MOCK_STATIC_METHOD_5(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SendReportedState, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const unsigned char*, reportedState, size_t, size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, reportedStateCallback, void*, userContextCallback)
     MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK);
@@ -412,7 +412,7 @@ DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubClientMocks, , void, deviceTwinCallback, DEV
 
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetDeviceTwinCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, deviceTwinCallback, void*, userContextCallback)
 
-DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , void, sendReportedCallback, IOTHUB_CLIENT_CONFIRMATION_RESULT, result2, void*, userContextCallback);
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , void, sendReportedCallback, int, status_code, void*, userContextCallback);
 DECLARE_GLOBAL_MOCK_METHOD_5(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SendReportedState, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const unsigned char*, reportedState, size_t, size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, reportedStateCallback, void*, userContextCallback);
 
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientMocks, , void, iotHubMethodCallback, IOTHUB_CLIENT_METHOD_PROPERTIES, properties, const unsigned char*, payLoad, void*, userContextCallback)
