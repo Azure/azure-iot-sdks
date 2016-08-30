@@ -383,4 +383,24 @@ Registry.prototype.cancelJob = function (jobId, done) {
   });
 };
 
+/**
+ * @method              module:azure-iothub.Registry#getDeviceTwin
+ * @description         Gets the Device Twin of the device with the specified device identifier.
+ * @param {String}      deviceId   The device identifier.
+ * @param {Function}    done       The callback that will be called with either an Error object or 
+ *                                 the device twin instance.
+ */
+Registry.prototype.getDeviceTwin = function (deviceId, done) {
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_019: [The `getDeviceTwin` method shall throw a `ReferenceError` if the `deviceId` parameter is falsy.]*/
+  if (!deviceId) throw new ReferenceError('the \'deviceId\' cannot be falsy');
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_020: [The `getDeviceTwin` method shall throw a `ReferenceError` if the `done` parameter is falsy.]*/
+  if (!done) throw new ReferenceError('the \'done\' argument cannot be falsy');
+
+  var path = "/twins/" + deviceId + endpoint.versionQueryString();
+
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_021: [The `getDeviceTwin` method shall call the `done` callback with a standard Javascript `Error` object if the Device Twin could not be retrieved.]*/
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_022: [The `getDeviceTwin` method shall call the `done` callback with `null` in the first parameter and the twin object as a second parameter if the device twin was successfully retrieved.]*/
+  this._transport.getDeviceTwin(path, done);
+};
+
 module.exports = Registry;
