@@ -24,7 +24,14 @@ include /usr/share/dpkg/default.mk
 override_dh_auto_configure:
 	dh_auto_configure -- -Dskip_unittests=ON
 
-
-
-
-
+override_dh_auto_install:
+	rm -f -r $$(pwd)/debian/tmp
+	mkdir $$(pwd)/debian/tmp
+	mkdir $$(pwd)/debian/tmp/usr
+	mkdir $$(pwd)/debian/tmp/usr/lib
+	mkdir $$(pwd)/debian/tmp/usr/include
+	mkdir $$(pwd)/debian/tmp/usr/include/azureiot
+	cp $$(pwd)/obj-*/iothub_client/*.a $$(pwd)/debian/tmp/usr/lib/
+	cp $$(pwd)/obj-*/serializer/*.a $$(pwd)/debian/tmp/usr/lib/
+	cp $$(pwd)/iothub_client/inc/* $$(pwd)/debian/tmp/usr/include/azureiot
+	cp $$(pwd)/serializer/inc/* $$(pwd)/debian/tmp/usr/include/azureiot
