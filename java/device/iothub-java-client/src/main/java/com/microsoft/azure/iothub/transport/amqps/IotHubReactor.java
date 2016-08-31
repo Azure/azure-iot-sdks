@@ -13,7 +13,6 @@ import java.util.concurrent.Future;
 public class IotHubReactor
 {
     Reactor reactor;
-
     Future futureReactor;
 
     public IotHubReactor(Reactor reactor)
@@ -29,7 +28,6 @@ public class IotHubReactor
     {
         this.reactor.setTimeout(10);
         this.reactor.start();
-        System.out.println("Running: " + Thread.currentThread().getName() + " id: " + Thread.currentThread().getId());
         while(this.reactor.process())
         {
             if( Thread.currentThread().isInterrupted() || futureReactor.isCancelled() )
@@ -38,6 +36,5 @@ public class IotHubReactor
             }
         }
         this.reactor.stop();
-        System.out.println("Closing: " + Thread.currentThread().getName() + " id: " + Thread.currentThread().getId());
     }
 }
