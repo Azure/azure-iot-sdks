@@ -326,18 +326,31 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice)
                                     LogError("mallocAndStrcpy_s failed for primaryKey\r\n");
                                 }
                             }
-                            free((char*)deviceInfo.deviceId);
-                            free((char*)deviceInfo.primaryKey);
-                            free((char*)deviceInfo.secondaryKey);
-                            free((char*)deviceInfo.generationId);
-                            free((char*)deviceInfo.eTag);
-                            free((char*)deviceInfo.connectionStateUpdatedTime);
-                            free((char*)deviceInfo.statusReason);
-                            free((char*)deviceInfo.statusUpdatedTime);
-                            free((char*)deviceInfo.lastActivityTime);
-                            free((char*)deviceInfo.configuration);
-                            free((char*)deviceInfo.deviceProperties);
-                            free((char*)deviceInfo.serviceProperties);
+
+                            if (deviceInfo.deviceId != NULL)
+                                free((char*)deviceInfo.deviceId);
+                            if (deviceInfo.primaryKey != NULL)
+                                free((char*)deviceInfo.primaryKey);
+                            if(deviceInfo.secondaryKey != NULL)
+                                free((char*)deviceInfo.secondaryKey);
+                            if(deviceInfo.generationId != NULL)
+                                free((char*)deviceInfo.generationId);
+                            if(deviceInfo.eTag != NULL)
+                                free((char*)deviceInfo.eTag);
+                            if(deviceInfo.connectionStateUpdatedTime != NULL)
+                                free((char*)deviceInfo.connectionStateUpdatedTime);
+                            if(deviceInfo.statusReason != NULL)
+                                free((char*)deviceInfo.statusReason);
+                            if(deviceInfo.statusUpdatedTime != NULL)
+                                free((char*)deviceInfo.statusUpdatedTime);
+                            if(deviceInfo.lastActivityTime != NULL)
+                                free((char*)deviceInfo.lastActivityTime);
+                            if(deviceInfo.configuration != NULL)
+                                free((char*)deviceInfo.configuration);
+                            if(deviceInfo.deviceProperties != NULL)
+                                free((char*)deviceInfo.deviceProperties);
+                            if(deviceInfo.serviceProperties != NULL)
+                                free((char*)deviceInfo.serviceProperties);
                         }
                     }
                 }
