@@ -43,6 +43,7 @@ function MqttTwinReceiver(client) {
   this._boundMessageHandler = this._onMqttMessage.bind(this); // need to save this so that calls to add & remove listeners can be matched by the EventEmitter.
 }
 
+MqttTwinReceiver.errorEvent = 'error';
 MqttTwinReceiver.responseEvent = 'response';
 MqttTwinReceiver.postEvent = 'post';
 MqttTwinReceiver.subscribedEvent = 'subscribed';
@@ -179,7 +180,7 @@ MqttTwinReceiver.prototype._onResponseMessage = function(topic, message){
     /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_013: [** The `body` parameter of the `response` event shall be the body of the received MQTT message **]**  */
     var response = {
       'status' : path[3],
-      'requestId' : query.$rid,
+      '$rid' : query.$rid,
       'body' : message
     };
 
@@ -200,7 +201,7 @@ MqttTwinReceiver.prototype._onPostMessage = function(topic, message) {
 MqttTwinReceiver.prototype._handleError = function(err) {
   /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_023: [** If the `error` event is subscribed to, an `error` event shall be emitted if any asynchronous subscribing operations fails. **]** */
   /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_024: [** When the `error` event is emitted, the first parameter shall be an error object obtained via the MQTT `translateErrror` module. **]** */
-  this.emit('error', translateError(err));
+  this.emit(MqttTwinReceiver.errorEvent, translateError(err));
 };
 
 

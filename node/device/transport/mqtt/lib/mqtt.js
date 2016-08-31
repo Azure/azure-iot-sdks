@@ -180,7 +180,7 @@ Mqtt.prototype.setOptions = function (options, done) {
  * @param {String}        resource  name of the resource to act on (e.g. '/properties/reported/') with beginning and ending slashes
  * @param {Object}        properties  object containing name value pairs for request properties (e.g. { 'rid' : 10, 'index' : 17 })
  * @param {String}        body  body of request
- * @param {Function}      the callback to be invoked when this function completes.
+ * @param {Function}      done  the callback to be invoked when this function completes.
  *
  * @throws {ReferenceError}   One of the required parameters is falsy
  * @throws {ArgumentError}  One of the parameters is an incorrect type
@@ -247,7 +247,7 @@ Mqtt.prototype.sendTwinRequest = function(method, resource, properties, body, do
  * @method          module:azure-iot-device-mqtt.Mqtt#getTwinReceiver
  * @description     Get a receiver object that handles C2D device-twin traffic
  *
- * @param {Function}      the callback to be invoked when this function completes.
+ * @param {Function}  done      the callback to be invoked when this function completes.
  *
  * @throws {ReferenceError}   One of the required parameters is falsy
  */

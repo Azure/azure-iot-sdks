@@ -12,6 +12,7 @@ var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var debug = require('debug')('azure-iot-device.Client');
 var BlobUploadClient = require('./blob_upload').BlobUploadClient;
+var Twin = require('./twin.js');
 
 /**
  * @class           module:azure-iot-device.Client
@@ -462,6 +463,19 @@ Client.prototype.uploadToBlob = function (blobName, stream, streamLength, done) 
   /*Codes_SRS_NODE_DEVICE_CLIENT_16_040: [The `uploadToBlob` method shall call the `done` callback with an `Error` object if the upload fails.]*/
   /*Codes_SRS_NODE_DEVICE_CLIENT_16_041: [The `uploadToBlob` method shall call the `done` callback no parameters if the upload succeeds.]*/
   this.blobUploadClient.uploadToBlob(blobName, stream, streamLength, done);
+};
+
+/**
+ * @method           module:azure-iot-device.Client#getDeviceTwin
+ * @description      The `getDeviceTwin` method creates a DeviceTwin object and establishes a connection with the Twin service.
+ *
+ * @param {Function} done             The callback to call when the connection is established.
+ *
+ */
+Client.prototype.getDeviceTwin = function(done) {
+  /* Codes_SRS_NODE_DEVICE_CLIENT_18_001: [** The `getDeviceTwin` method shall call the `azure-iot-device-core!Twin.fromDeviceClient` method to create the device client object. **]** */
+  /* Codes_SRS_NODE_DEVICE_CLIENT_18_002: [** The `getDeviceTwin` method shall pass itself as the first parameter to `fromDeviceClient` and it shall pass the `done` method as the second parameter. **]**  */
+  Twin.fromDeviceClient(this, done);
 };
 
 module.exports = Client;
