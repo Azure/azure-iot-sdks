@@ -5,6 +5,7 @@
   "author": "Microsoft Corporation",
   "license": "MIT",
   "main": "iothub.js",
+  "typings": "iothub.d.ts",
   "dependencies": {
     "azure-iot-amqp-base": "1.0.14",
     "azure-iot-common": "1.0.13",

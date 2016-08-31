@@ -7,3 +7,5 @@ import { Amqp }  from 'azure-iot-device-amqp';
 declare class AmqpWs extends Amqp implements Client.Transport {
     constructor(config: Client.Config);
 }
+
+export = AmqpWs;
