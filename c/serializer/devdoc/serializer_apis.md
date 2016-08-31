@@ -1,4 +1,4 @@
-# SERIALIZER APIs v3
+# SERIALIZER APIs v4
  
 ## Overview
 The SERIALIZER APIs allows developers to quickly and easily define models for their devices directly as code, while supporting the required features for 
@@ -25,7 +25,7 @@ DECLARE_MODEL(FunkyTV,
     WITH_ACTION(LostSignal, int, source, int, resolution)
 );
 
-DECLARE_IOT_MODEL(AnotherDevice, 
+DECLARE_MODEL(AnotherDevice, 
     ...
 );
 
@@ -43,7 +43,7 @@ This macro marks the end of a section that declares the model elements.
 
 ### DECLARE_STRUCT(structTypeName, field1Type, field1Name, ...)
 
-This macro allows declaring a struct (complex) type for an IOT model.
+This macro allows declaring a struct (complex) type for a model.
 
 Arguments:
 - structTypeName – specifies the struct type name
@@ -69,7 +69,7 @@ Arguments:
 
 __Example:__
 ```c
-DECLARE_IOT_MODEL(FunkyTV,
+DECLARE_MODEL(FunkyTV,
     ...
 );
 ```
@@ -78,7 +78,7 @@ DECLARE_IOT_MODEL(FunkyTV,
 
 The `WITH_DATA` macro allows declaring a model property in a model. A property can be serialized by using the SERIALIZE macro.
 
-Arguments:
+__Arguments:__
 -   propertyType – specifies the property type. Can be any of the following types:
     -	int
     -	double
@@ -98,12 +98,21 @@ Arguments:
 -	propertyName – specifies the property name
 
 ```c
-DECLARE_IOT_MODEL(FunkyTV,
+DECLARE_MODEL(FunkyTV,
     WITH_DATA(int, screenSize),
     WITH_DATA(bool, hasEthernet),
     ...
     );
 ```
+
+## WITH_REPORTED_PROPERTY
+```c
+WITH_REPORTED_PROPERTY(propertyType, propertyName)
+```
+
+`WITH_REPORTED_PROPERTY` macro allows declaring a reported property (in the context of DeviceTwin).
+Reported properties have the same type as properties declared by `WITH_DATA` macro. 
+
 
 ## WITH_ACTION(actionName, arg1Type, arg1Name, ...)
 The `WITH_ACTION` macro allows declaring a model action.
@@ -113,7 +122,7 @@ Arguments:
 -	`argXtype`, `argXName` – defines the type and name for the Xth argument of the action. The type can be any of the primitive types or a struct type.
 
 ```c
-DECLARE_IOT_MODEL(FunkyTV,
+DECLARE_MODEL(FunkyTV,
     ...
     WITH_ACTION(channelChange, ascii_char_ptr, Property1),
     ...
@@ -133,7 +142,7 @@ This macro produces the JSON serialized representation of the properties.
 __Arguments:__
 
 -	destination – pointer to an unsigned char* that will receive the serialized data. 
--	destinationSize – Pointer to a size_t that gets written with the size in bytes of the serialized data 
+-	destinationSize – pointer to a size_t that gets written with the size in bytes of the serialized data 
 -	property1, property2, ... -  a list of property values to send. The order in which the properties appear in the list does not matter, all values will be sent together.
 
 __Returns:__
@@ -142,7 +151,7 @@ __Returns:__
 
 ```c
 ...
-DECLARE_IOT_MODEL(FunkyTV,
+DECLARE_MODEL(FunkyTV,
     WITH_DATA(int, screenSize),
     WITH_DATA(bool, hasEthernet),
     ...
@@ -162,6 +171,49 @@ int main(int argc, char** argv)
 }
 ```
 
+### SERIALIZE_REPORTED_PROPERTIES
+```c
+SERIALIZE_REPORTED_PROPERTIES(destination, destinationSize, reportedProperty1, ...)
+```
+
+This macro produces the JSON serialized representation of the reported properties. The arguments can be
+individual properties or a complete model. 
+
+__Arguments:__
+
+-	destination – pointer to an unsigned char* that will receive the serialized reported properties. 
+-	destinationSize – pointer to a size_t that gets written with the size in bytes of the serialized reported properties. 
+-	property1, property2, ... -  a list of reported properties to send. The order in which the reported properties appear in 
+the list does not matter, all values will be sent together. If the reported property argument is a complete model, then only
+the reported properties in that model will be serialized.
+
+__Returns:__
+-	CODEFIRST_OK on success
+-	Any other value on failure
+
+__Example__
+```c
+...
+DECLARE_MODEL(FunkyTV,
+    WITH_REPORTED_PROPERTY(int, screenSize),
+    WITH_REPORTED_PROPERTY(bool, hasEthernet),
+    ...
+);
+...
+
+int main(int argc, char** argv)
+{
+...
+    FunkyTV* funkyTV = CREATE_MODEL_INSTANCE(MyFunkyTV, FunkyTV);
+    unsigned char* destination; size_t destinationSize;
+    funkyTV->hasEthernet = false;
+    funkyTV->screenSize = 42;
+    SERIALIZE_REPORTED_PROPERTIES(&destination, &destinationSize, funkyTV->hasEthernet, funkyTV->screenSize);
+    printf("serialized reported properties \n%*.*s\r\n",(int)destinationSize, (int)destinationSize,  (char*)destination);
+...
+}
+```
+
 ### EXECUTE_COMMAND
 
 Any action that is declared in a model must also have an implementation as a C function.
@@ -173,7 +225,7 @@ The C function arguments must be:
 The macro `EXECUTE_COMMAND(device, commandBuffer)` shall execute the command indicated in the commandBuffer for the device. 
 
 ```c
-DECLARE_IOT_MODEL(MyFunkyTV,
+DECLARE_MODEL(MyFunkyTV,
     ...
     WITH_ACTION(changeChannel, ascii_char_ptr, Property1)
     );

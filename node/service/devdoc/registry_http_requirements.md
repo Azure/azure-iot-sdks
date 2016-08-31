@@ -155,6 +155,15 @@ Request-Id: <guid>
 ```
 **]**    
 
+### getDeviceTwin(deviceId, done)
+**SRS_NODE_IOTHUB_HTTP_16_006: [** The `getDeviceTwin` method shall construct an HTTP request using the information supplied by the caller as follows:
+```
+GET <path>?api-version=<version> HTTP/1.1
+Authorization: <config.sharedAccessSignature>
+Request-Id: <guid>
+```
+ **]**
+
 ### All HTTP requests
 **SRS_NODE_IOTHUB_HTTP_05_007: [** If any registry operation method encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).**]**     
 **SRS_NODE_IOTHUB_HTTP_05_008: [** When any registry operation method receives an HTTP response with a status code >= 300, it shall invoke the done callback function with the following arguments:

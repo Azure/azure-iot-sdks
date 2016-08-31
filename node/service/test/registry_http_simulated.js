@@ -139,4 +139,14 @@ SimulatedHttp.prototype.cancelJob = function (path, done) {
   }
 };
 
+SimulatedHttp.prototype.getDeviceTwin = function (deviceId, done) {
+  if (this.fakeFailure) {
+    done(new Error('Fake Error'));
+  } else {
+    done(null, {
+      id: deviceId
+    });
+  }
+};
+
 module.exports = SimulatedHttp;

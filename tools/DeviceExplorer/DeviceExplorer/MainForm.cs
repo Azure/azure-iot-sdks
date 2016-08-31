@@ -804,5 +804,26 @@ namespace DeviceExplorer
                 }
             }
         }
+
+        private void showDevicePropertiesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DeviceTwinPropertiesForm deviceTwinPropertiesForm = new DeviceTwinPropertiesForm();
+
+            if (devicesGridView.SelectedRows.Count > 0)
+            {
+                String deviceName = devicesGridView.Rows[devicesGridView.SelectedRows[0].Index].Cells[0].Value.ToString();
+                List<string> deviceList = new List<string>();
+                for (int i = 0; i < devicesGridView.RowCount - 1; i++)
+                {
+                    deviceList.Add(devicesGridView.Rows[i].Cells[0].Value.ToString());
+                }
+                deviceTwinPropertiesForm.Execute(activeIoTHubConnectionString, deviceName, deviceList);
+            }
+        }
+
+        private void deviceTwinPropertiesBtn_Click(object sender, EventArgs e)
+        {
+            showDevicePropertiesToolStripMenuItem_Click(this, null);
+        }
     }
 }

@@ -208,8 +208,9 @@ void IoTHubClient_LL_Destroy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
 
 **SRS_IOTHUBCLIENT_LL_02_010: [ If `iotHubClientHandle` was not created by `IoTHubClient_LL_CreateWithTransport`, `IoTHubClient_LL_Destroy`  shall call the underlaying layer's _Destroy function. and shall free the resources allocated by `IoTHubClient` (if any). ]**
 
-**SRS_IOTHUBCLIENT_LL_17_011: [ `IoTHubClient_LL_Destroy`  shall free the resources allocated by `IoTHubClient` (if any). ]** 
+**SRS_IOTHUBCLIENT_LL_17_011: [ `IoTHubClient_LL_Destroy` shall free the resources allocated by `IoTHubClient` (if any). ]** 
 
+**SRS_IOTHUBCLIENT_LL_07_007: [** `IoTHubClient_LL_Destroy` shall iterate the device twin queues and destroy any remaining items. **]**
 
 
 ## IoTHubClient_LL_SendEventAsync
@@ -256,7 +257,13 @@ void IoTHubClient_LL_DoWork(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
 
 **SRS_IOTHUBCLIENT_LL_02_021: [ Otherwise, `IoTHubClient_LL_DoWork` shall invoke the underlaying layer's _DoWork function. ]** 
 
+**SRS_IOTHUBCLIENT_LL_07_008: [ `IoTHubClient_LL_DoWork` shall iterate the message queue and execute the underlying transports `IoTHubTransport_ProcessItem` function for each item. ]** 
 
+**SRS_IOTHUBCLIENT_LL_07_010: [ If 'IoTHubTransport_ProcessItem' returns IOTHUB_PROCESS_CONTINUE or IOTHUB_PROCESS_NOT_CONNECTED `IoTHubClient_LL_DoWork` shall continue on to call the underlaying layer's _DoWork function. ]**  
+
+**SRS_IOTHUBCLIENT_LL_07_011: [ If 'IoTHubTransport_ProcessItem' returns IOTHUB_PROCESS_OK `IoTHubClient_LL_DoWork` shall add the `IOTHUB_QUEUE_DATA_ITEM` to the ack queue. ]**
+
+**SRS_IOTHUBCLIENT_LL_07_012: [** If 'IoTHubTransport_ProcessItem' returns any other value `IoTHubClient_LL_DoWork` shall destroy the `IOTHUB_QUEUE_DATA_ITEM` item. **]**
 
 ## IoTHubClient_LL_SendComplete
 
@@ -579,15 +586,15 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendReportedState(IOTHUB_CLIENT_LL_H
 ## IoTHubClient_LL_ReportedStateComplete
 
 ```c
-void IoTHubClient_LL_ReportedStateComplete(IOTHUB_CLIENT_LL_HANDLE handle, IOTHUB_QUEUE_HANDLE queue_handle, IOTHUB_CLIENT_CONFIRMATION_RESULT result)
+void IoTHubClient_LL_ReportedStateComplete(IOTHUB_CLIENT_LL_HANDLE handle, uint32_t item_id, int status_code)
 ```
 
 IoTHubClient_LL_ReportedStateComplete is a function only called by the transport that signals the completed transmission of a device_twin message to iothub, or an error.  
 
 **SRS_IOTHUBCLIENT_LL_07_002: [ if handle is NULL then IoTHubClient_LL_ReportedStateComplete shall do nothing. ]**
 
-**SRS_IOTHUBCLIENT_LL_07_006: [ if queue_handle is NULL then IoTHubClient_LL_ReportedStateComplete shall do nothing ]**
+**SRS_IOTHUBCLIENT_LL_07_003: [ IoTHubClient_LL_ReportedStateComplete shall enumerate through the IOTHUB_QUEUE_DATA_ITEM structures in queue_handle. ]**
 
-**SRS_IOTHUBCLIENT_LL_07_003: [ IoTHubClient_LL_ReportedStateComplete shall enumerate through the IOTHUB_DEVICE_TWIN structures in queue_handle. ]**
+**SRS_IOTHUBCLIENT_LL_07_004: [ If the IOTHUB_QUEUE_DATA_ITEM's `reported_state_callback` variable is non-NULL then IoTHubClient_LL_ReportedStateComplete shall call the function. ]**  
 
-**SRS_IOTHUBCLIENT_LL_07_004: [ If the IOTHUB_DEVICE_TWIN's `reported_state_callback` variable is non-NULL then IoTHubClient_LL_ReportedStateComplete shall call the function. ]**  
+**SRS_IOTHUBCLIENT_LL_07_009: [ IoTHubClient_LL_ReportedStateComplete shall remove the IOTHUB_QUEUE_DATA_ITEM item from the ack queue.]** 

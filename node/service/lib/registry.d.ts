@@ -15,6 +15,7 @@ declare class Registry {
     listJobs(done: (err: Error, jobsList?: string[]) => void): void;
     getJob(jobId: string, done: Registry.JobCallback): void;
     cancelJob(jobId: string, done: Registry.JobCallback): void;
+    getDeviceTwin(deviceId: string, done: Registry.Nodeback): void;
 
     static fromConnectionString(value: string, transportCtr?: Registry.TransportContructor): Registry;
     static fromSharedAccessSignature(value: string): Registry;
@@ -39,8 +40,10 @@ declare namespace Registry {
         listJobs(path: string, done: (err: Error, jobsList?: string[]) => void): void;
         getJob(path: string, done: JobCallback): void;
         cancelJob(path: string, done: JobCallback): void;
+        getDeviceTwin(deviceId: string, done: Registry.Nodeback): void;
     }
 
+    type Nodeback = (err: Error, result: any) => void;
     type ResponseCallback = (err: Error, device: Device, response: any) => void;
     type JobCallback = (err: Error, jobStatus?: JobStatus) => void;
     type TransportContructor = new (config: TransportConfig) => Transport;
