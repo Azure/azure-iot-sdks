@@ -94,10 +94,10 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         this.connection = new AmqpsIotHubConnection(this.config, this.useWebSockets);
         try
         {
-            this.connection.open();
-
             // Codes_SRS_AMQPSTRANSPORT_15_005: [The function shall add the transport to the list of listeners subscribed to the connection events.]
             this.connection.addListener(this);
+
+            this.connection.open();
         }
         catch (Exception e)
         {
