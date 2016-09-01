@@ -14,6 +14,8 @@ build_http=ON
 build_mqtt=ON
 use_wsio=OFF
 skip_unittests=OFF
+build_samples=ON
+build_service_client=ON
 build_python=OFF
 build_javawrapper=OFF
 run_valgrind=0
@@ -36,6 +38,8 @@ usage ()
     echo " --no-http                     do no build HTTP transport and samples"
     echo " --no-mqtt                     do no build MQTT transport and samples"
     echo " --no-make                     do not run make after cmake"
+    echo " --skip-samples                do not build samples"
+    echo " --skip-service-client         do not build iothub service client"
     echo " --use-websockets              Enables the support for AMQP over WebSockets."
     echo " --toolchain-file <file>       pass cmake a toolchain file for cross compiling"
     echo " --install-path-prefix         alternative prefix for make install"
@@ -86,6 +90,8 @@ process_args ()
               "--no-amqp" ) build_amqp=OFF;;
               "--no-http" ) build_http=OFF;;
               "--no-mqtt" ) build_mqtt=OFF;;
+              "--skip-samples" ) build_samples=OFF;;
+              "--skip-service-client" ) build_service_client=OFF;;
               "--no-make" ) make=false;;
               "--use-websockets" ) use_wsio=ON;;
               "--build-python" ) save_next_arg=3;;
@@ -115,7 +121,7 @@ process_args $*
 rm -r -f $build_folder
 mkdir -p $build_folder
 pushd $build_folder
-cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Duse_wsio:BOOL=$use_wsio -Dskip_unittests:BOOL=$skip_unittests -Dbuild_python:STRING=$build_python -Dbuild_javawrapper:BOOL=$build_javawrapper $build_root
+cmake $toolchainfile $cmake_install_prefix -Drun_valgrind:BOOL=$run_valgrind -DcompileOption_C:STRING="$extracloptions" -Drun_e2e_tests:BOOL=$run_e2e_tests -Drun_longhaul_tests=$run_longhaul_tests -Duse_amqp:BOOL=$build_amqp -Duse_http:BOOL=$build_http -Duse_mqtt:BOOL=$build_mqtt -Duse_wsio:BOOL=$use_wsio -Dskip_unittests:BOOL=$skip_unittests -Dbuild_python:STRING=$build_python -Dbuild_javawrapper:BOOL=$build_javawrapper -Dbuild_samples:BOOL=$build_samples -Dbuild_service_client:BOOL=$build_service_client $build_root
 
 if [ "$make" = true ]
 then
