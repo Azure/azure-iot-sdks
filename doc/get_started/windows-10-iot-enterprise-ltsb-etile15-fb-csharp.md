@@ -1,10 +1,10 @@
 ---
 platform: windows 10 iot enterprise ltsb
-device: wt15m-fb
+device: etile15-fb
 language: csharp
 ---
 
-Run a simple Csharp sample on WT15M-FB device running Windows 10 IoT Enterprise LTSB
+Run a simple Csharp sample on ETILE15-FB device running Windows 10 IoT Enterprise LTSB
 ===
 ---
 
@@ -20,7 +20,7 @@ Run a simple Csharp sample on WT15M-FB device running Windows 10 IoT Enterprise 
 
 **About this document**
 
-This document describes how to connect WT15M-FB device running Window 10 IoT Enterprise LTSB with Azure IoT SDK. This multi-step process includes:
+This document describes how to connect ETILE15-FB device running Window 10 IoT Enterprise LTSB with Azure IoT SDK. This multi-step process includes:
 -   Configuring Azure IoT Hub
 -   Registering your IoT device
 -   Build and deploy Azure IoT SDK on device
@@ -34,7 +34,7 @@ You should have the following items ready before beginning the process:
     [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub public repository.
 -   [Setup your IoT hub][lnk-setup-iot-hub]
 -   [Provision your device and get its credentials][lnk-manage-iot-hub]
--   AOPEN WT15M-FB device.
+-   AOPEN ETILE15-FB device.
 
 #### Install Visual Studio 2015 and Tools
 
@@ -45,7 +45,7 @@ You should have the following items ready before beginning the process:
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
 
--   Connect the power adapter with AOPEN WT15M-FB.
+-   Connect the power adapter with AOPEN ETILE15-FB.
 -   Press the power button by “Power on\off Steel tool” .
 -   Wait until the operating system is ready.
 -   You may download [user manual](http://global.aopen.com/download.aspx)
