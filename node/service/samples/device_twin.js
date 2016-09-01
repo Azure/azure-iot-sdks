@@ -10,6 +10,6 @@ registry.getDeviceTwin(deviceId, function(err, twin) {
   if (err) {
     console.error(err.message);
   } else {
-    console.log(JSON.stringify(JSON.parse(twin), null, 2));
+    console.log(JSON.stringify(twin, null, 2));
   }
 });
