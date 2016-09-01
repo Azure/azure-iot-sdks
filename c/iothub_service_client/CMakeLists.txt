@@ -51,7 +51,7 @@ add_library(iothub_service_client ${iothub_service_client_c_files} ${iothub_serv
 
 target_link_libraries(iothub_service_client uamqp)
 
-if (NOT ${ARCHITECTURE} STREQUAL "ARM")
+if (NOT ${ARCHITECTURE} STREQUAL "ARM" AND ${build_samples})
 	add_subdirectory(samples)
 endif()
 

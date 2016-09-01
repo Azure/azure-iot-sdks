@@ -84,6 +84,11 @@ if(NOT "${compileOption_CXX}" STREQUAL "OFF")
 endif()
 
 add_subdirectory(azure-c-shared-utility)
+
+# Check we have at least one valid transport
+if(NOT ${use_amqp} AND NOT ${use_mqtt} AND NOT ${use_http})
+    message(FATAL_ERROR "must provide at least one valid transport. At least one of use_amqtp, use_mqtt or use_http options must be set to ON")
+endif()
 if(${use_amqp})
     add_subdirectory(azure-uamqp-c)
 endif()
