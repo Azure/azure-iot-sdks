@@ -196,6 +196,7 @@ java/**/out/
 java/**/target/
 java/**/*.iml
 java/**/*dependency-reduced-pom.xml
+java/**/*.crt
 
 # Node.js
 **/.settings/
