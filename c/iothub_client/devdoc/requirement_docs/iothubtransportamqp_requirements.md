@@ -1,22 +1,23 @@
 
 # IoTHubTransportAMQP Requirements
+================
 
- 
 ## Overview
 
 This module provides an implementation of the transport layer of the IoT Hub client based on the AMQP API, which implements the AMQP protocol.  
 Access to the static functions described in this document is possible through the set of function pointers provided by the function AMQP_Protocol.  
 
-   
-   
+
 ## Exposed API
 
 ```c
 extern const TRANSPORT_PROVIDER* AMQP_Protocol(void);
 ```
-  
+
   The following static functions are provided in the fields of the TRANSPORT_PROVIDER structure:
 
+    - IoTHubTransportAMQP_Subscribe_DeviceMethod,
+    - IoTHubTransportAMQP_Unsubscribe_DeviceMethod,
     - IoTHubTransportAMQP_Subscribe_DeviceTwin,
     - IoTHubTransportAMQP_Unsubscribe_DeviceTwin,
     - IoTHubTransportAMQP_GetHostname, 
@@ -32,11 +33,10 @@ extern const TRANSPORT_PROVIDER* AMQP_Protocol(void);
   
 
 ### IoTHubTransportAMQP_GetHostname
-
- ```c
+```c
  STRING_HANDLE IoTHubTransportAMQP_GetHostname(TRANSPORT_LL_HANDLE handle)
- ```
- 
+```
+`
 IoTHubTransportAMQP_GetHostname provides a STRING_HANDLE containing the hostname with which the transport has been created.
 
 
@@ -576,3 +576,17 @@ void IoTHubTransportAMQP_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOT
 `IoTHubTransportAMQP_Unsubscribe_DeviceTwin` unsubscribes from DeviceTwin's messages. Not implemented.
 
 **SRS_IOTHUBTRANSPORTAMQP_02_010: [** `IoTHubTransportAMQP_Unsubscribe_DeviceTwin` shall return. **]**
+
+
+### IoTHubTransportAMQP_Subscribe_DeviceMethod
+```c
+int IoTHubTransportAMQP_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+```
+Not implemented (yet)
+
+
+### IoTHubTransportAMQP_Unsubscribe_DeviceMethod
+```c
+void IoTHubTransportAMQP_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+```
+Not implemented (yet)

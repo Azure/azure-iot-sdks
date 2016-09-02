@@ -50,20 +50,24 @@ extern "C"
     typedef int (*pfIoTHubTransport_Subscribe_DeviceTwin)(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state);
     typedef void (*pfIoTHubTransport_Unsubscribe_DeviceTwin)(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state);
     typedef IOTHUB_PROCESS_ITEM_RESULT(*pfIoTHubTransport_ProcessItem)(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item);
+    typedef int(*pfIoTHubTransport_Subscribe_DeviceMethod)(IOTHUB_DEVICE_HANDLE handle);
+    typedef void(*pfIoTHubTransport_Unsubscribe_DeviceMethod)(IOTHUB_DEVICE_HANDLE handle);
 
-#define TRANSPORT_PROVIDER_FIELDS                            \
-pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin; \
-pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin; \
-pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;   \
-pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;   \
-pfIoTHubTransport_SetOption IoTHubTransport_SetOption;       \
-pfIoTHubTransport_Create IoTHubTransport_Create;             \
-pfIoTHubTransport_Destroy IoTHubTransport_Destroy;           \
-pfIotHubTransport_Register IoTHubTransport_Register;         \
-pfIotHubTransport_Unregister IoTHubTransport_Unregister;     \
-pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;       \
-pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;   \
-pfIoTHubTransport_DoWork IoTHubTransport_DoWork;             \
+#define TRANSPORT_PROVIDER_FIELDS                                                   \
+pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;    \
+pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMethod;\
+pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;        \
+pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;    \
+pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;                          \
+pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;                          \
+pfIoTHubTransport_SetOption IoTHubTransport_SetOption;                              \
+pfIoTHubTransport_Create IoTHubTransport_Create;                                    \
+pfIoTHubTransport_Destroy IoTHubTransport_Destroy;                                  \
+pfIotHubTransport_Register IoTHubTransport_Register;                                \
+pfIotHubTransport_Unregister IoTHubTransport_Unregister;                            \
+pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;                              \
+pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;                          \
+pfIoTHubTransport_DoWork IoTHubTransport_DoWork;                                    \
 pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus  /*there's an intentional missing ; on this line*/
 
     struct TRANSPORT_PROVIDER_TAG

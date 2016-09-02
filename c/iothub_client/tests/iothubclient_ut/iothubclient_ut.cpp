@@ -45,31 +45,33 @@ namespace BASEIMPLEMENTATION
 DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 
 // Overloading operators for Micromock
-static bool operator==(IOTHUB_CLIENT_METHOD_PROPERTIES left, const IOTHUB_CLIENT_METHOD_PROPERTIES right)
+static bool operator==(IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES left, const IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES right)
 {
     bool areEqual = true;
 
     if (left.size == right.size)
     {
-        for (size_t i = 0; i < left.size; i++)
+        if ((left.properties == NULL) && (right.properties != NULL))
         {
-            if ((left.properties == NULL) && (right.properties != NULL))
-            {
-                areEqual = false;
-            }
-            if ((left.properties != NULL) && (right.properties == NULL))
-            {
-                areEqual = false;
-            }
-            if ((left.properties != NULL) && (right.properties != NULL))
+            areEqual = false;
+        }
+        if ((left.properties != NULL) && (right.properties == NULL))
+        {
+            areEqual = false;
+        }
+        if ((left.properties != NULL) && (right.properties != NULL))
+        {
+            for (size_t i = 0; i < left.size; i++)
             {
                 if (strcmp(left.properties[i].key, right.properties[i].key) != 0)
                 {
                     areEqual = false;
+                    break;
                 }
                 if (strcmp(left.properties[i].value, right.properties[i].value) != 0)
                 {
                     areEqual = false;
+                    break;
                 }
             }
         }
@@ -81,9 +83,9 @@ static bool operator==(IOTHUB_CLIENT_METHOD_PROPERTIES left, const IOTHUB_CLIENT
     return areEqual;
 }
 
-static std::ostream& operator<<(std::ostream& left, const IOTHUB_CLIENT_METHOD_PROPERTIES properties)
+static std::ostream& operator<<(std::ostream& left, const IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES properties)
 {
-    return left << "struct IOTHUB_CLIENT_METHOD_PROPERTIES size = ([length=" << properties.size << " bytes] )";
+    return left << "struct IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES size = ([length=" << properties.size << " bytes] )";
 }
 
 static MICROMOCK_MUTEX_HANDLE g_testByTest;
@@ -167,16 +169,10 @@ public:
     MOCK_STATIC_METHOD_3(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetDeviceTwinCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, deviceTwinCallback, void*, userContextCallback)
     MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK);
 
-    MOCK_STATIC_METHOD_3(, void, iotHubMethodCallback, IOTHUB_CLIENT_METHOD_PROPERTIES, properties, const unsigned char*, payLoad, void*, userContextCallback)
+    MOCK_STATIC_METHOD_4(, void, deviceMethodCallback, IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES, properties, const unsigned char*, payLoad, size_t, size, void*, userContextCallback)
     MOCK_VOID_METHOD_END();
 
-    MOCK_STATIC_METHOD_3(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetIoTHubMethodCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_IOTHUB_METHOD_CALLBACK_ASYNC, iotHubMethodCallback, void*, userContextCallback);
-    MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK);
-
-    MOCK_STATIC_METHOD_4(, void, iotHubExecuteCallback, IOTHUB_CLIENT_IOTHUB_METHOD_STATUS, status, IOTHUB_CLIENT_METHOD_PROPERTIES, properties, const unsigned char*, payLoad, void*, userContextCallback)
-    MOCK_VOID_METHOD_END();
-
-    MOCK_STATIC_METHOD_7(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_ExecuteIoTHubMethod, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, verb, const char*, resource, IOTHUB_CLIENT_METHOD_PROPERTIES, properties, const unsigned char*, payload, IOTHUB_CLIENT_IOTHUB_METHOD_EXECUTE_CALLBACK, iotHubExecuteCallback, void*, userContextCallback);
+    MOCK_STATIC_METHOD_3(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetDeviceMethodCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, deviceMethodCallback, void*, userContextCallback);
     MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK);
 
     MOCK_STATIC_METHOD_2(, void, sendReportedCallback, int, status_code, void*, userContextCallback)
@@ -415,11 +411,8 @@ DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubC
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , void, sendReportedCallback, int, status_code, void*, userContextCallback);
 DECLARE_GLOBAL_MOCK_METHOD_5(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SendReportedState, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const unsigned char*, reportedState, size_t, size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, reportedStateCallback, void*, userContextCallback);
 
-DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientMocks, , void, iotHubMethodCallback, IOTHUB_CLIENT_METHOD_PROPERTIES, properties, const unsigned char*, payLoad, void*, userContextCallback)
-DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetIoTHubMethodCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_IOTHUB_METHOD_CALLBACK_ASYNC, iotHubMethodCallback, void*, userContextCallback);
-
-DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubClientMocks, , void, iotHubExecuteCallback, IOTHUB_CLIENT_IOTHUB_METHOD_STATUS, status, IOTHUB_CLIENT_METHOD_PROPERTIES, properties, const unsigned char*, payLoad, void*, userContextCallback)
-DECLARE_GLOBAL_MOCK_METHOD_7(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_ExecuteIoTHubMethod, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, verb, const char*, resource, IOTHUB_CLIENT_METHOD_PROPERTIES, properties, const unsigned char*, payload, IOTHUB_CLIENT_IOTHUB_METHOD_EXECUTE_CALLBACK, iotHubExecuteCallback, void*, userContextCallback);
+DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubClientMocks, , void, deviceMethodCallback, IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES, properties, const unsigned char*, payLoad, size_t, size, void*, userContextCallback)
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetDeviceMethodCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, deviceMethodCallback, void*, userContextCallback);
 
 #ifndef DONT_USE_UPLOADTOBLOB
 DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_UploadToBlob, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, destinationFileName, const unsigned char*, source, size_t, size);
@@ -2223,21 +2216,21 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         IoTHubClient_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBCLIENT_12_012: [ If iotHubClientHandle is NULL, IoTHubClient_SetIoTHubMethodCallback shall return IOTHUB_CLIENT_INVALID_ARG. ]*/
-    TEST_FUNCTION(IoTHubClient_SetIoTHubMethodCallback_Fails_When_Handle_Is_NULL)
+    /*Tests_SRS_IOTHUBCLIENT_12_012: [ If iotHubClientHandle is NULL, IoTHubClient_SetDeviceMethodCallback shall return IOTHUB_CLIENT_INVALID_ARG. ]*/
+    TEST_FUNCTION(IoTHubClient_SetDeviceMethodCallback_Fails_When_Handle_Is_NULL)
     {
         // arrange
         CIoTHubClientMocks mocks;
 
         // act
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetIoTHubMethodCallback(NULL, iotHubMethodCallback, (void*)0x42);
+        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetDeviceMethodCallback(NULL, deviceMethodCallback, (void*)0x42);
 
         // assert
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
     }
 
-    /*Tests_*SRS_IOTHUBCLIENT_12_013: [ If acquiring the lock fails, IoTHubClient_SetIoTHubMethodCallback shall return IOTHUB_CLIENT_ERROR. ]*/
-    TEST_FUNCTION(IoTHubClient_SetIoTHubMethodCallback_Fails_When_Lock_Fails)
+    /*Tests_*SRS_IOTHUBCLIENT_12_013: [ If acquiring the lock fails, IoTHubClient_SetDeviceMethodCallback shall return IOTHUB_CLIENT_ERROR. ]*/
+    TEST_FUNCTION(IoTHubClient_SetDeviceMethodCallback_Fails_When_Lock_Fails)
     {
         // arrange
         CIoTHubClientMocks mocks;
@@ -2248,7 +2241,7 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
             .SetReturn(LOCK_ERROR);
         // act
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetIoTHubMethodCallback(handle, iotHubMethodCallback, (void*)0x42);
+        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetDeviceMethodCallback(handle, deviceMethodCallback, (void*)0x42);
 
         // assert
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
@@ -2259,9 +2252,9 @@ BEGIN_TEST_SUITE(iothubclient_ut)
     }
 
     /*Tests_SRS_IOTHUBCLIENT_12_014: [ If the transport handle is null and the worker thread is not initialized, the thread shall be started by calling IoTHubTransport_StartWorkerThread. ]*/
-    /*Tests_SRS_IOTHUBCLIENT_12_015: [ If starting the thread fails, IoTHubClient_SetIoTHubMethodCallback shall return IOTHUB_CLIENT_ERROR. ]*/
-    /*Tests_SRS_IOTHUBCLIENT_12_018: [ IoTHubClient_SetIoTHubMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
-    TEST_FUNCTION(IoTHubClient_SetIoTHubMethodCallback_Fails_When_Thread_Start_Fails)
+    /*Tests_SRS_IOTHUBCLIENT_12_015: [ If starting the thread fails, IoTHubClient_SetDeviceMethodCallback shall return IOTHUB_CLIENT_ERROR. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_018: [ IoTHubClient_SetDeviceMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
+    TEST_FUNCTION(IoTHubClient_SetDeviceMethodCallback_Fails_When_Thread_Start_Fails)
     {
         // arrange
         CIoTHubClientMocks mocks;
@@ -2275,7 +2268,7 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
 
         // act
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetIoTHubMethodCallback(handle, iotHubMethodCallback, (void*)0x42);
+        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetDeviceMethodCallback(handle, deviceMethodCallback, (void*)0x42);
 
         // assert
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
@@ -2285,9 +2278,9 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         IoTHubClient_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBCLIENT_12_016: [ IoTHubClient_SetIoTHubMethodCallback shall call IoTHubClient_LL_SetIoTHubMethodCallback, while passing the IoTHubClient_LL_handle created by IoTHubClient_LL_Create along with the parameters iotHubMethodCallback and userContextCallback. ]*/
-    /*Tests_SRS_IOTHUBCLIENT_12_018: [ IoTHubClient_SetIoTHubMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
-    TEST_FUNCTION(IoTHubClient_SetIoTHubMethodCallback_Calls_IoTHubClient_LL_SetIoTHubMethodCallback)
+    /*Tests_SRS_IOTHUBCLIENT_12_016: [ IoTHubClient_SetDeviceMethodCallback shall call IoTHubClient_LL_SetDeviceMethodCallback, while passing the IoTHubClient_LL_handle created by IoTHubClient_LL_Create along with the parameters deviceMethodCallback and userContextCallback. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_018: [ IoTHubClient_SetDeviceMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
+    TEST_FUNCTION(IoTHubClient_SetDeviceMethodCallback_Calls_IoTHubClient_LL_SetDeviceMethodCallback)
     {
         // arrange
         CIoTHubClientMocks mocks;
@@ -2298,10 +2291,10 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
         EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_SetIoTHubMethodCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, iotHubMethodCallback, (void*)0x42));
+        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, deviceMethodCallback, (void*)0x42));
 
         // act
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetIoTHubMethodCallback(handle, iotHubMethodCallback, (void*)0x42);
+        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetDeviceMethodCallback(handle, deviceMethodCallback, (void*)0x42);
         ///assert
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
         mocks.AssertActualAndExpectedCalls();
@@ -2310,9 +2303,9 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         IoTHubClient_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBCLIENT_12_016: [ IoTHubClient_SetIoTHubMethodCallback shall call IoTHubClient_LL_SetIoTHubMethodCallback, while passing the IoTHubClient_LL_handle created by IoTHubClient_LL_Create along with the parameters iotHubMethodCallback and userContextCallback. ]*/
-    /*Tests_SRS_IOTHUBCLIENT_12_018: [ IoTHubClient_SetIoTHubMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
-    TEST_FUNCTION(IoTHubClient_SetIoTHubMethodCallback_Calls_IoTHubClient_LL_SetIoTHubMethodCallback_with_all_param_NULL)
+    /*Tests_SRS_IOTHUBCLIENT_12_016: [ IoTHubClient_SetDeviceMethodCallback shall call IoTHubClient_LL_SetDeviceMethodCallback, while passing the IoTHubClient_LL_handle created by IoTHubClient_LL_Create along with the parameters deviceMethodCallback and userContextCallback. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_018: [ IoTHubClient_SetDeviceMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
+    TEST_FUNCTION(IoTHubClient_SetDeviceMethodCallback_Calls_IoTHubClient_LL_SetDeviceMethodCallback_with_all_param_NULL)
     {
         // arrange
         CIoTHubClientMocks mocks;
@@ -2323,10 +2316,10 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
         EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_SetIoTHubMethodCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, NULL, NULL));
+        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, NULL, NULL));
 
         // act
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetIoTHubMethodCallback(handle, NULL, NULL);
+        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetDeviceMethodCallback(handle, NULL, NULL);
         ///assert
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
         mocks.AssertActualAndExpectedCalls();
@@ -2335,9 +2328,9 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         IoTHubClient_Destroy(handle);
     }
 
-    /*Tests_SRS_IOTHUBCLIENT_12_017: [ When IoTHubClient_LL_SetIoTHubMethodCallback is called, IoTHubClient_SetIoTHubMethodCallback shall return the result of IoTHubClient_LL_SetIoTHubMethodCallback. ]*/
-    /*Tests_SRS_IOTHUBCLIENT_12_018: [ IoTHubClient_SetIoTHubMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
-    TEST_FUNCTION(IoTHubClient_SetIoTHubMethodCallback_Calls_IoTHubClient_LL_SetIoTHubMethodCallback_and_return_with_the_result)
+    /*Tests_SRS_IOTHUBCLIENT_12_017: [ When IoTHubClient_LL_SetDeviceMethodCallback is called, IoTHubClient_SetDeviceMethodCallback shall return the result of IoTHubClient_LL_SetDeviceMethodCallback. ]*/
+    /*Tests_SRS_IOTHUBCLIENT_12_018: [ IoTHubClient_SetDeviceMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
+    TEST_FUNCTION(IoTHubClient_SetDeviceMethodCallback_Calls_IoTHubClient_LL_SetDeviceMethodCallback_and_return_with_the_result)
     {
         // arrange
         CIoTHubClientMocks mocks;
@@ -2348,170 +2341,11 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
         EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_SetIoTHubMethodCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, iotHubMethodCallback, (void*)0x42))
+        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_SetDeviceMethodCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, deviceMethodCallback, (void*)0x42))
             .SetReturn(IOTHUB_CLIENT_ERROR);
 
         // act
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetIoTHubMethodCallback(handle, iotHubMethodCallback, (void*)0x42);
-        ///assert
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
-
-        ///cleanup
-        IoTHubClient_Destroy(handle);
-    }
-
-    /*Tests_SRS_IOTHUBCLIENT_12_019: [ If iotHubClientHandle is NULL, IoTHubClient_ExecuteIoTHubMethod shall return IOTHUB_CLIENT_INVALID_ARG. ]*/
-    TEST_FUNCTION(IoTHubClient_ExecuteIoTHubMethod_Fails_When_Handle_Is_NULL)
-    {
-        // arrange
-        CIoTHubClientMocks mocks;
-        const char* verb = "verb";
-        const char* resource = "resource";
-        const unsigned char* payload = (const unsigned char*)0x34;
-        IOTHUB_CLIENT_METHOD_PROPERTIES properties = {42, NULL};
-
-        // act
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_ExecuteIoTHubMethod(NULL, verb, resource, properties, payload, iotHubExecuteCallback, (void*)0x42);
-
-        // assert
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
-    }
-
-    /*Tests_SRS_IOTHUBCLIENT_12_020: [ If acquiring the lock fails, IoTHubClient_ExecuteIoTHubMethod shall return IOTHUB_CLIENT_ERROR. ]*/
-    TEST_FUNCTION(IoTHubClient_ExecuteIoTHubMethod_Fails_When_Lock_Fails)
-    {
-        // arrange
-        CIoTHubClientMocks mocks;
-        const char* verb = "verb";
-        const char* resource = "resource";
-        const unsigned char* payload = (const unsigned char*)0x34;
-        IOTHUB_CLIENT_METHOD_PROPERTIES properties = { 42, NULL };
-
-        IOTHUB_CLIENT_HANDLE handle = IoTHubClient_Create(&TEST_CONFIG);
-        mocks.ResetAllCalls();
-
-        EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE))
-            .SetReturn(LOCK_ERROR);
-        // act
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_ExecuteIoTHubMethod(handle, verb, resource, properties, payload, iotHubExecuteCallback, (void*)0x42);
-
-        // assert
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
-
-        ///cleanup
-        IoTHubClient_Destroy(handle);
-    }
-
-    /*Tests_SRS_IOTHUBCLIENT_12_021: [ If the transport handle is null and the worker thread is not initialized, the thread shall be started by calling IoTHubTransport_StartWorkerThread. ]*/
-    /*Tests_SRS_IOTHUBCLIENT_12_022 : [ If starting the thread fails, IoTHubClient_ExecuteIoTHubMethod shall return IOTHUB_CLIENT_ERROR. ]*/
-    /*Tests_SRS_IOTHUBCLIENT_12_025 : [ IoTHubClient_SetIoTHubMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
-    TEST_FUNCTION(IoTHubClient_ExecuteIoTHubMethod_Fails_When_Thread_Start_Fails)
-    {
-        // arrange
-        CIoTHubClientMocks mocks;
-        const char* verb = "verb";
-        const char* resource = "resource";
-        const unsigned char* payload = (const unsigned char*)0x34;
-        IOTHUB_CLIENT_METHOD_PROPERTIES properties = { 42, NULL };
-
-        IOTHUB_CLIENT_HANDLE handle = IoTHubClient_Create(&TEST_CONFIG);
-        mocks.ResetAllCalls();
-
-        STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
-        EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .SetReturn(THREADAPI_ERROR);
-        STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
-
-        // act
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_ExecuteIoTHubMethod(handle, verb, resource, properties, payload, iotHubExecuteCallback, (void*)0x42);
-  
-        // assert
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
-        mocks.AssertActualAndExpectedCalls();
-
-        ///cleanup
-        IoTHubClient_Destroy(handle);
-    }
-
-    /*Tests_SRS_IOTHUBCLIENT_12_023: [ IoTHubClient_ExecuteIoTHubMethod shall call IoTHubClient_LL_ExecuteIoTHubMethod, while passing the IoTHubClient_LL_handle created by IoTHubClient_LL_Create along with the parameters verb, resource, properties, payload, iotHubExecuteCallback and userContextCallback. ]*/
-    /*Tests_SRS_IOTHUBCLIENT_12_025 : [ IoTHubClient_SetIoTHubMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
-    TEST_FUNCTION(IoTHubClient_ExecuteIoTHubMethod_Calls_IoTHubClient_LL_SetIoTHubMethodCallback)
-    {
-        // arrange
-        CIoTHubClientMocks mocks;
-        const char* verb = "verb";
-        const char* resource = "resource";
-        const unsigned char* payload = (const unsigned char*)0x34;
-        IOTHUB_CLIENT_METHOD_PROPERTIES properties = { 42, NULL };
-
-        IOTHUB_CLIENT_HANDLE handle = IoTHubClient_Create(&TEST_CONFIG);
-        mocks.ResetAllCalls();
-
-        STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
-        EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_ExecuteIoTHubMethod(TEST_IOTHUB_CLIENT_LL_HANDLE, verb, resource, properties, payload, iotHubExecuteCallback, (void*)0x42));
-
-        // act
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_ExecuteIoTHubMethod(handle, verb, resource, properties, payload, iotHubExecuteCallback, (void*)0x42);
-        ///assert
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
-        mocks.AssertActualAndExpectedCalls();
-
-        ///cleanup
-        IoTHubClient_Destroy(handle);
-    }
-
-    /*Tests_SRS_IOTHUBCLIENT_12_023: [ IoTHubClient_ExecuteIoTHubMethod shall call IoTHubClient_LL_ExecuteIoTHubMethod, while passing the IoTHubClient_LL_handle created by IoTHubClient_LL_Create along with the parameters verb, resource, properties, payload, iotHubExecuteCallback and userContextCallback. ]*/
-    /*Tests_SRS_IOTHUBCLIENT_12_025 : [ IoTHubClient_SetIoTHubMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
-    TEST_FUNCTION(IoTHubClient_ExecuteIoTHubMethod_Calls_IoTHubClient_LL_SetIoTHubMethodCallback_with_all_param_NULL)
-    {
-        // arrange
-        CIoTHubClientMocks mocks;
-        IOTHUB_CLIENT_METHOD_PROPERTIES properties = { 0, NULL };
-
-        IOTHUB_CLIENT_HANDLE handle = IoTHubClient_Create(&TEST_CONFIG);
-        mocks.ResetAllCalls();
-
-        STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
-        EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_ExecuteIoTHubMethod(TEST_IOTHUB_CLIENT_LL_HANDLE, NULL, NULL, properties, NULL, NULL, NULL));
-
-        // act
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_ExecuteIoTHubMethod(handle, NULL, NULL, properties, NULL, NULL, NULL);
-        ///assert
-        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
-        mocks.AssertActualAndExpectedCalls();
-
-        ///cleanup
-        IoTHubClient_Destroy(handle);
-    }
-
-    /*Tests_SRS_IOTHUBCLIENT_12_024: [ When IoTHubClient_LL_ExecuteIoTHubMethod is called, IoTHubClient_ExecuteIoTHubMethod shall return the result of IoTHubClient_LL_ExecuteIoTHubMethod. ]*/
-    /*Tests_SRS_IOTHUBCLIENT_12_025 : [ IoTHubClient_SetIoTHubMethodCallback shall be made thread - safe by using the lock created in IoTHubClient_Create. ]*/
-    TEST_FUNCTION(IoTHubClient_ExecuteIoTHubMethod_Calls_IoTHubClient_LL_SetIoTHubMethodCallback_and_return_with_the_result)
-    {
-        // arrange
-        CIoTHubClientMocks mocks;
-        const char* verb = "verb";
-        const char* resource = "resource";
-        const unsigned char* payload = (const unsigned char*)0x34;
-        IOTHUB_CLIENT_METHOD_PROPERTIES properties = { 42, NULL };
-
-        IOTHUB_CLIENT_HANDLE handle = IoTHubClient_Create(&TEST_CONFIG);
-        mocks.ResetAllCalls();
-
-        STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
-        EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
-        STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
-        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_ExecuteIoTHubMethod(TEST_IOTHUB_CLIENT_LL_HANDLE, verb, resource, properties, payload, iotHubExecuteCallback, (void*)0x42))
-            .SetReturn(IOTHUB_CLIENT_ERROR);
-
-        // act
-        IOTHUB_CLIENT_RESULT result = IoTHubClient_ExecuteIoTHubMethod(handle, verb, resource, properties, payload, iotHubExecuteCallback, (void*)0x42);
+        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetDeviceMethodCallback(handle, deviceMethodCallback, (void*)0x42);
         ///assert
         ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
         mocks.AssertActualAndExpectedCalls();

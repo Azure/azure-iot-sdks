@@ -1,53 +1,35 @@
+
 # IoTHubHTTPTransport Requirements
+================
 
-
- 
 ## Overview
 
 The Http Transport is a transport mechanismism to connect the IoT Hub to multiple devices though a single TLS connection. It exposes a transport handle and a device handle.  The transport handle is responsible for the connection, sending, and receiving messages, and the device handle is used to identify the correct Iot Hub device related to these devices.
-
-
 ![HTTP TRANSPORT Diagram](./iothubhttptransport_image.jpg)
 
- 
+
 ## Exposed API
 
 ```c
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-#ifndef IOTHUBTRANSPORTHTTP_H
-#define IOTHUBTRANSPORTHTTP_H
-
-#include "iothub_transport_ll.h"
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-    
-    extern const TRANSPORT_PROVIDER* HTTP_Protocol(void);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /*IOTHUBTRANSPORTHTTP_H*/
+extern const TRANSPORT_PROVIDER* HTTP_Protocol(void);
 ```
 
   The following static functions are provided in the fields of the TRANSPORT_PROVIDER structure:
-   - IoTHubTransportHttp_Subscribe_DeviceTwin,   
-   - IoTHubTransportHttp_Unsubscribe_DeviceTwin, 
-   - IoTHubTransportHttp_GetHostname,            
-   - IoTHubTransportHttp_SetOption,              
-   - IoTHubTransportHttp_Create,                                           
-   - IoTHubTransportHttp_Destroy,                                          
-   - IoTHubTransportHttp_Register,               
-   - IoTHubTransportHttp_Unregister, 
-   - IoTHubTransportHttp_Subscribe, 
-   - IoTHubTransportHttp_Unsubscribe, 
-   - IoTHubTransportHttp_DoWork, 
-   - IoTHubTransportHttp_GetSendStatus 
+
+    - IoTHubTransportHttp_Subscribe_DeviceMethod,
+    - IoTHubTransportHttp_Unsubscribe_DeviceMethod,
+    - IoTHubTransportHttp_Subscribe_DeviceTwin,
+    - IoTHubTransportHttp_Unsubscribe_DeviceTwin,
+    - IoTHubTransportHttp_GetHostname,
+    - IoTHubTransportHttp_SetOption,
+    - IoTHubTransportHttp_Create,
+    - IoTHubTransportHttp_Destroy,
+    - IoTHubTransportHttp_Register,
+    - IoTHubTransportHttp_Unregister, 
+    - IoTHubTransportHttp_Subscribe, 
+    - IoTHubTransportHttp_Unsubscribe, 
+    - IoTHubTransportHttp_DoWork, 
+    - IoTHubTransportHttp_GetSendStatus 
     
 ## IoTHubTransportHttp_Create
 ```c
@@ -393,6 +375,20 @@ void IoTHubTransportHttp_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOT
 **SRS_TRANSPORTMULTITHTTP_02_004: [** `IoTHubTransportHttp_Unsubscribe_DeviceTwin` shall return **]**
 
 
+### IoTHubTransportHttp_Subscribe_DeviceMethod
+```c
+int IoTHubTransportHttp_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+```
+Not implemented (yet)
+
+
+### IoTHubTransportHttp_Unsubscribe_DeviceMethod
+```c
+void IoTHubTransportHttp_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+```
+Not implemented (yet)
+
+
 ## HTTP_Protocol
 ```c
 extern const TRANSPORT_PROVIDER* HTTP_Protocol(void);
@@ -402,6 +398,8 @@ This function provides a structure containing the function pointers of this impl
 
 **SRS_TRANSPORTMULTITHTTP_17_125: [** This function shall return a pointer to a structure of type `IOTHUB_TRANSPORT_PROVIDER` having the following values for its fields: **]** 
 
+IoTHubTransport_Subscribe_DeviceMethod = IoTHubTransportHttp_Subscribe_DeviceMethod
+IoTHubTransport_Unsubscribe_DeviceMethod = IoTHubTransportHttp_Unsubscribe_DeviceMethod
 IoTHubTransport_Subscribe_DeviceTwin=IoTHubTransportHttp_Subscribe_DeviceTwin
 IoTHubTransport_Unsubscribe_DeviceTwin= IoTHubTransportHttp_Unsubscribe_DeviceTwin
 IoTHubTransport_GetHostname=IoTHubTransportHttp_GetHostName   

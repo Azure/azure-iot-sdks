@@ -2077,6 +2077,20 @@ static void IoTHubTransportAMQP_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE hand
     LogError("IoTHubTransportAMQP_Unsubscribe_DeviceTwin Not supported");
 }
 
+static int IoTHubTransportAMQP_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+{
+    (void)handle;
+    int result = __LINE__;
+    LogError("not implemented (yet)");
+    return result;
+}
+
+static void IoTHubTransportAMQP_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+{
+    (void)handle;
+    LogError("not implemented (yet)");
+}
+
 static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_GetSendStatus(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
 {
     IOTHUB_CLIENT_RESULT result;
@@ -2316,20 +2330,23 @@ static STRING_HANDLE IoTHubTransportAMQP_GetHostname(TRANSPORT_LL_HANDLE handle)
     return result;
 }
 
-static TRANSPORT_PROVIDER thisTransportProvider = {
-    IoTHubTransportAMQP_Subscribe_DeviceTwin,
-    IoTHubTransportAMQP_Unsubscribe_DeviceTwin,
-    IoTHubTransportAMQP_ProcessItem,
-    IoTHubTransportAMQP_GetHostname,
-    IoTHubTransportAMQP_SetOption,
-    IoTHubTransportAMQP_Create,
-    IoTHubTransportAMQP_Destroy,
-    IoTHubTransportAMQP_Register,
-    IoTHubTransportAMQP_Unregister,
-    IoTHubTransportAMQP_Subscribe,
-    IoTHubTransportAMQP_Unsubscribe,
-    IoTHubTransportAMQP_DoWork,
-    IoTHubTransportAMQP_GetSendStatus
+static TRANSPORT_PROVIDER thisTransportProvider = 
+{
+    IoTHubTransportAMQP_Subscribe_DeviceMethod,     /*pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;*/
+    IoTHubTransportAMQP_Unsubscribe_DeviceMethod,   /*pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMethod;*/
+    IoTHubTransportAMQP_Subscribe_DeviceTwin,       /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;*/
+    IoTHubTransportAMQP_Unsubscribe_DeviceTwin,     /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;*/
+    IoTHubTransportAMQP_ProcessItem,                /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;*/
+    IoTHubTransportAMQP_GetHostname,                /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;*/
+    IoTHubTransportAMQP_SetOption,                  /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;*/
+    IoTHubTransportAMQP_Create,                     /*pfIoTHubTransport_Create IoTHubTransport_Create;*/
+    IoTHubTransportAMQP_Destroy,                    /*pfIoTHubTransport_Destroy IoTHubTransport_Destroy;*/
+    IoTHubTransportAMQP_Register,                   /*pfIotHubTransport_Register IoTHubTransport_Register;*/
+    IoTHubTransportAMQP_Unregister,                 /*pfIotHubTransport_Unregister IoTHubTransport_Unegister;*/
+    IoTHubTransportAMQP_Subscribe,                  /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;*/
+    IoTHubTransportAMQP_Unsubscribe,                /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;*/
+    IoTHubTransportAMQP_DoWork,                     /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;*/
+    IoTHubTransportAMQP_GetSendStatus               /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
 };
 
 extern const TRANSPORT_PROVIDER* AMQP_Protocol(void)

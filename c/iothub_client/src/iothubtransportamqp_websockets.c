@@ -48,6 +48,20 @@ static  void IoTHubTransportAMQP_Unsubscribe_DeviceTwin_WebSocketsOverTls(IOTHUB
     LogError("not implemented yet");
 }
 
+static int IoTHubTransportAMQP_Subscribe_DeviceMethod_WebSocketsOverTls(IOTHUB_DEVICE_HANDLE handle)
+{
+    (void)handle;
+    int result = __LINE__;
+    LogError("not implemented (yet)");
+    return result;
+}
+
+static void IoTHubTransportAMQP_Unsubscribe_DeviceMethod_WebSocketsOverTls(IOTHUB_DEVICE_HANDLE handle)
+{
+    (void)handle;
+    LogError("not implemented (yet)");
+}
+
 static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportAMQP_ProcessItem_WebSocketsOverTls(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item)
 {
     (void)handle;
@@ -57,20 +71,23 @@ static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportAMQP_ProcessItem_WebSocketsOver
     return IOTHUB_CLIENT_ERROR;
 }
 
-static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
-    IoTHubTransportAMQP_Subscribe_DeviceTwin_WebSocketsOverTls,
-    IoTHubTransportAMQP_Unsubscribe_DeviceTwin_WebSocketsOverTls,
-    IoTHubTransportAMQP_ProcessItem_WebSocketsOverTls,
-    IoTHubTransportAMQP_GetHostname,
-    IoTHubTransportAMQP_SetOption,
-    IoTHubTransportAMQP_Create_WebSocketsOverTls,
-    IoTHubTransportAMQP_Destroy,
-    IoTHubTransportAMQP_Register,
-    IoTHubTransportAMQP_Unregister,
-    IoTHubTransportAMQP_Subscribe,
-    IoTHubTransportAMQP_Unsubscribe,
-    IoTHubTransportAMQP_DoWork,
-    IoTHubTransportAMQP_GetSendStatus
+static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = 
+{
+    IoTHubTransportAMQP_Subscribe_DeviceMethod_WebSocketsOverTls,   /*pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;*/
+    IoTHubTransportAMQP_Unsubscribe_DeviceMethod_WebSocketsOverTls, /*pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMethod;*/
+    IoTHubTransportAMQP_Subscribe_DeviceTwin_WebSocketsOverTls,     /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;*/
+    IoTHubTransportAMQP_Unsubscribe_DeviceTwin_WebSocketsOverTls,   /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;*/
+    IoTHubTransportAMQP_ProcessItem_WebSocketsOverTls,              /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;*/
+    IoTHubTransportAMQP_GetHostname,                                /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;*/
+    IoTHubTransportAMQP_SetOption,                                  /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;*/
+    IoTHubTransportAMQP_Create_WebSocketsOverTls,                   /*pfIoTHubTransport_Create IoTHubTransport_Create;*/
+    IoTHubTransportAMQP_Destroy,                                    /*pfIoTHubTransport_Destroy IoTHubTransport_Destroy;*/
+    IoTHubTransportAMQP_Register,                                   /*pfIotHubTransport_Register IoTHubTransport_Register;*/
+    IoTHubTransportAMQP_Unregister,                                 /*pfIotHubTransport_Unregister IoTHubTransport_Unegister;*/
+    IoTHubTransportAMQP_Subscribe,                                  /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;*/
+    IoTHubTransportAMQP_Unsubscribe,                                /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;*/
+    IoTHubTransportAMQP_DoWork,                                     /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;*/
+    IoTHubTransportAMQP_GetSendStatus                               /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
 };
 
 extern const TRANSPORT_PROVIDER* AMQP_Protocol_over_WebSocketsTls(void)
