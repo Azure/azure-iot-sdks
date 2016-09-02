@@ -246,7 +246,7 @@ public:
         MOCK_STATIC_METHOD_2(, void, FAKE_IoTHubTransport_Unsubscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_DEVICE_TWIN_STATE, subscribe_state)
         MOCK_VOID_METHOD_END()
 
-        MOCK_STATIC_METHOD_3(, IOTHUB_PROCESS_ITEM_RESULT, FAKE_IoTHubTransport_ProcessItem, TRANSPORT_LL_HANDLE, handle, IOTHUB_IDENTITY_TYPE, item_type, void*, iothub_item)
+        MOCK_STATIC_METHOD_3(, IOTHUB_PROCESS_ITEM_RESULT, FAKE_IoTHubTransport_ProcessItem, TRANSPORT_LL_HANDLE, handle, IOTHUB_IDENTITY_TYPE, item_type, IOTHUB_IDENTITY_INFO*, iothub_item)
         MOCK_METHOD_END(IOTHUB_PROCESS_ITEM_RESULT, IOTHUB_PROCESS_OK)
 
         MOCK_STATIC_METHOD_1(, STRING_HANDLE, FAKE_IoTHubTransport_GetHostname, TRANSPORT_LL_HANDLE, handle)
@@ -380,7 +380,7 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, gballoc_free, void*, 
 
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientLLMocks, , int, FAKE_IoTHubTransport_Subscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_DEVICE_TWIN_STATE, subscribe_state);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientLLMocks, , void, FAKE_IoTHubTransport_Unsubscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_DEVICE_TWIN_STATE, subscribe_state);
-DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientLLMocks, , IOTHUB_PROCESS_ITEM_RESULT, FAKE_IoTHubTransport_ProcessItem, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_IDENTITY_TYPE, item_type, void*, iothub_item);
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientLLMocks, , IOTHUB_PROCESS_ITEM_RESULT, FAKE_IoTHubTransport_ProcessItem, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_IDENTITY_TYPE, item_type, IOTHUB_IDENTITY_INFO*, iothub_item);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , STRING_HANDLE, FAKE_IoTHubTransport_GetHostname, TRANSPORT_LL_HANDLE, handle);
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientLLMocks, , IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_SetOption, TRANSPORT_LL_HANDLE, handle, const char*, optionName, const void*, value);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , TRANSPORT_LL_HANDLE, FAKE_IoTHubTransport_Create, const IOTHUBTRANSPORT_CONFIG*, config);

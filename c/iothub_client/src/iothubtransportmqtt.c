@@ -1500,7 +1500,7 @@ static void IoTHubTransportMqtt_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
     }
 }
 
-static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportMqtt_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, void* iothub_item)
+static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportMqtt_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item)
 {
     IOTHUB_PROCESS_ITEM_RESULT result;
     /* Codes_SRS_IOTHUBCLIENT_LL_07_001: [ If handle or iothub_item are NULL then IoTHubTransportMqtt_ProcessItem shall return IOTHUB_PROCESS_ERROR. ]*/
@@ -1525,15 +1525,14 @@ static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportMqtt_ProcessItem(TRANSPORT_LL_H
                 }
                 else
                 {
-                    IOTHUB_DEVICE_TWIN* iothub_device_twin = (IOTHUB_DEVICE_TWIN*)iothub_item;
                     /*Codes_SRS_IOTHUBCLIENT_LL_07_003: [ IoTHubTransportMqtt_ProcessItem shall publish a message to the mqtt protocol with the message topic for the message type.]*/
                     mqtt_info->iothub_type = item_type;
-                    mqtt_info->iothub_msg_id = iothub_device_twin->item_id;
+                    mqtt_info->iothub_msg_id = iothub_item->device_twin->item_id;
                     
                     /* Codes_SRS_IOTHUBCLIENT_LL_07_005: [ If successful IoTHubTransportMqtt_ProcessItem shall add mqtt info structure acknowledgement queue. ] */
                     DList_InsertTailList(&transportState->ack_waiting_queue, &mqtt_info->entry);
 
-                    if (publish_device_twin_message(transportState, iothub_item, mqtt_info) != 0)
+                    if (publish_device_twin_message(transportState, iothub_item->device_twin, mqtt_info) != 0)
                     {
                         DList_RemoveEntryList(&mqtt_info->entry);
 
@@ -1725,7 +1724,7 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_SetOption(TRANSPORT_LL_HANDLE ha
         if (strcmp(OPTION_LOG_TRACE, option) == 0)
         {
             bool* traceVal = (bool*)value;
-            mqtt_client_set_trace(transportState->mqttClient, *traceVal, *traceVal);
+            mqtt_client_set_trace(transportState->mqttClient, *traceVal, false);
             result = IOTHUB_CLIENT_OK;
         }
         else if (strcmp(OPTION_KEEP_ALIVE, option) == 0)
