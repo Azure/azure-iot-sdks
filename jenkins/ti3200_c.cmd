@@ -20,7 +20,7 @@ if defined CC3200_SDK_VERSION set sdkversion=%CC3200_SDK_VERSION%
 set cc3200sdk=CC3200SDK_%sdkversion%
 
 echo ********** INSTALLING CC3200 SDK **********
-if not exist "%install-root%\%cc3200sdk%" start /wait %installers-path%\%cc3200sdk%-windows-installer.exe --mode unattended --prefix %install-root%\%cc3200sdk%
+if not exist "%install-root%\%cc3200sdk%" start /wait %installers-path%\CC3200SDK-%sdkversion%-windows-installer.exe --mode unattended --prefix %install-root%\%cc3200sdk%
 
 echo ********** INSTALLING Tirtos Simplelink **********
 if not exist "%install-root%\tirtos_simplelink_2_14_01_20" start /wait %installers-path%\tirtos_simplelink_setupwin32_2_14_01_20.exe --mode unattended --prefix %install-root%
