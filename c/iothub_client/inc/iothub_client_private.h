@@ -54,6 +54,13 @@ typedef struct IOTHUB_DEVICE_TWIN_TAG
     DLIST_ENTRY entry;
 } IOTHUB_DEVICE_TWIN;
 
+typedef union IOTHUB_IDENTITY_INFO_TAG
+{
+    IOTHUB_DEVICE_TWIN* device_twin;
+    IOTHUB_MESSAGE_LIST* iothub_message;
+} IOTHUB_IDENTITY_INFO;
+
+
 #ifdef __cplusplus
 }
 #endif

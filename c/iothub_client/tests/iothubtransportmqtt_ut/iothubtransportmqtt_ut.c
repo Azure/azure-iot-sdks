@@ -2807,7 +2807,9 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_succeed)
     IOTHUB_DEVICE_TWIN device_twin;
     device_twin.report_data_handle = cbh;
     device_twin.item_id = 1;
-    (void)IoTHubTransportMqtt_ProcessItem(handle, IOTHUB_TYPE_DEVICE_TWIN, &device_twin);
+    IOTHUB_IDENTITY_INFO identity_info;
+    identity_info.device_twin = &device_twin;
+    (void)IoTHubTransportMqtt_ProcessItem(handle, IOTHUB_TYPE_DEVICE_TWIN, &identity_info);
     CONSTBUFFER_Destroy(cbh);
     umock_c_reset_all_calls();
 
@@ -2850,7 +2852,9 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_twin_fail)
     IOTHUB_DEVICE_TWIN device_twin;
     device_twin.report_data_handle = cbh;
     device_twin.item_id = 1;
-    (void)IoTHubTransportMqtt_ProcessItem(handle, IOTHUB_TYPE_DEVICE_TWIN, &device_twin);
+    IOTHUB_IDENTITY_INFO identity_info;
+    identity_info.device_twin = &device_twin;
+    (void)IoTHubTransportMqtt_ProcessItem(handle, IOTHUB_TYPE_DEVICE_TWIN, &identity_info);
     CONSTBUFFER_Destroy(cbh);
     umock_c_reset_all_calls();
 
@@ -3569,12 +3573,14 @@ TEST_FUNCTION(IoTHubTransportMqtt_ProcessItem_Succeed)
     IOTHUB_DEVICE_TWIN device_twin;
     device_twin.report_data_handle = cbh;
     device_twin.item_id = 1;
+    IOTHUB_IDENTITY_INFO identity_info;
+    identity_info.device_twin = &device_twin;
     umock_c_reset_all_calls();
 
     setup_processItem_mocks(false);
 
     // act
-    IOTHUB_PROCESS_ITEM_RESULT result_item = IoTHubTransportMqtt_ProcessItem(handle, IOTHUB_TYPE_DEVICE_TWIN, &device_twin);
+    IOTHUB_PROCESS_ITEM_RESULT result_item = IoTHubTransportMqtt_ProcessItem(handle, IOTHUB_TYPE_DEVICE_TWIN, &identity_info);
 
     // assert
     ASSERT_ARE_EQUAL(int, IOTHUB_PROCESS_OK, result_item);
@@ -3623,10 +3629,12 @@ TEST_FUNCTION(IoTHubTransportMqtt_ProcessItem_NULL_handle_fail)
     IOTHUB_DEVICE_TWIN device_twin;
     device_twin.report_data_handle = (CONSTBUFFER_HANDLE)0x48;
     device_twin.item_id = 1;
+    IOTHUB_IDENTITY_INFO identity_info;
+    identity_info.device_twin = &device_twin;
     umock_c_reset_all_calls();
 
     // act
-    IOTHUB_PROCESS_ITEM_RESULT result_item = IoTHubTransportMqtt_ProcessItem(NULL, IOTHUB_TYPE_DEVICE_TWIN, &device_twin);
+    IOTHUB_PROCESS_ITEM_RESULT result_item = IoTHubTransportMqtt_ProcessItem(NULL, IOTHUB_TYPE_DEVICE_TWIN, &identity_info);
 
     // assert
     ASSERT_ARE_EQUAL(int, IOTHUB_PROCESS_ERROR, result_item);
@@ -3646,13 +3654,15 @@ TEST_FUNCTION(IoTHubTransportMqtt_ProcessItem_not_connected_Succeed)
     IOTHUB_DEVICE_TWIN device_twin;
     device_twin.report_data_handle = cbh;
     device_twin.item_id = 1;
+    IOTHUB_IDENTITY_INFO identity_info;
+    identity_info.device_twin = &device_twin;
     umock_c_reset_all_calls();
 
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
     umock_c_reset_all_calls();
 
     // act
-    IOTHUB_PROCESS_ITEM_RESULT result_item = IoTHubTransportMqtt_ProcessItem(handle, IOTHUB_TYPE_DEVICE_TWIN, &device_twin);
+    IOTHUB_PROCESS_ITEM_RESULT result_item = IoTHubTransportMqtt_ProcessItem(handle, IOTHUB_TYPE_DEVICE_TWIN, &identity_info);
 
     // assert
     ASSERT_ARE_EQUAL(int, IOTHUB_PROCESS_NOT_CONNECTED, result_item);
@@ -3689,10 +3699,12 @@ TEST_FUNCTION(IoTHubTransportMqtt_ProcessItem_continue_Succeed)
     IOTHUB_DEVICE_TWIN device_twin;
     device_twin.report_data_handle = cbh;
     device_twin.item_id = 1;
+    IOTHUB_IDENTITY_INFO identity_info;
+    identity_info.device_twin = &device_twin;
     umock_c_reset_all_calls();
 
     // act
-    IOTHUB_PROCESS_ITEM_RESULT result_item = IoTHubTransportMqtt_ProcessItem(handle, IOTHUB_TYPE_TELEMETRY, &device_twin);
+    IOTHUB_PROCESS_ITEM_RESULT result_item = IoTHubTransportMqtt_ProcessItem(handle, IOTHUB_TYPE_TELEMETRY, &identity_info);
 
     // assert
     ASSERT_ARE_EQUAL(int, IOTHUB_PROCESS_CONTINUE, result_item);
@@ -3728,6 +3740,8 @@ TEST_FUNCTION(IoTHubTransportMqtt_ProcessItem_fail)
     IOTHUB_DEVICE_TWIN device_twin;
     device_twin.report_data_handle = cbh;
     device_twin.item_id = 1;
+    IOTHUB_IDENTITY_INFO identity_info;
+    identity_info.device_twin = &device_twin;
     umock_c_reset_all_calls();
 
     setup_processItem_mocks(true);
@@ -3754,7 +3768,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_ProcessItem_fail)
         char tmp_msg[64];
         sprintf(tmp_msg, "IoTHubTransportMqtt_ProcessItem failure in test %zu/%zu", index, count);
 
-        IOTHUB_PROCESS_ITEM_RESULT result_item = IoTHubTransportMqtt_ProcessItem(handle, IOTHUB_TYPE_DEVICE_TWIN, &device_twin);
+        IOTHUB_PROCESS_ITEM_RESULT result_item = IoTHubTransportMqtt_ProcessItem(handle, IOTHUB_TYPE_DEVICE_TWIN, &identity_info);
         // assert
         ASSERT_ARE_NOT_EQUAL_WITH_MSG(int, IOTHUB_PROCESS_OK, result_item, tmp_msg);
     }

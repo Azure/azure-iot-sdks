@@ -130,7 +130,7 @@ void IoTHubTransportMqtt_Unsubscribe(TRANSPORT_LL_HANDLE handle)
 ### IoTHubTransportMqtt_ProcessItem
 
 ```c
-IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportMqtt_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, void* iothub_item)
+IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportMqtt_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item)
 ```
 
 **SRS_IOTHUBCLIENT_LL_07_001: [** If `handle` or `iothub_item` are NULL then `IoTHubTransportMqtt_ProcessItem` shall return IOTHUB_PROCESS_ERROR. **]**  
