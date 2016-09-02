@@ -12,7 +12,8 @@ var fakeDevice = { deviceId: 'deviceId' };
 var fakeConfig = { host: 'host', sharedAccessSignature: 'sas' };
 
 function testFalsyArg(methodUnderTest, argName, argValue, ExpectedErrorType) {
-  it('throws a ' + ExpectedErrorType.name + ' if \'' + argName + '\' is \'' + JSON.stringify(argValue) + '\'', function() {
+  var errorName = ExpectedErrorType ? ExpectedErrorType.name : 'Error';
+  it('throws a ' + errorName + ' if \'' + argName + '\' is \'' + JSON.stringify(argValue) + '\'', function() {
     var registry = new Registry({ host: 'host', sharedAccessSignature: 'sas' });
     assert.throws(function() {
       registry[methodUnderTest](argValue, function() {});
@@ -125,8 +126,8 @@ describe('Registry', function() {
       });
     });
 
-    /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_009: [Otherwise, it shall derive and transform the needed parts from the connection string in order to create a `config` object for the constructor (see `SRS_NODE_IOTHUB_REGISTRY_05_001`).]*/
-    /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_010: [The `fromConnectionString` method shall return a new instance of the Registry object, as by a call to `new Registry(config)`.]*/
+    /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_009: [The `fromConnectionString` method shall derive and transform the needed parts from the connection string in order to create a `config` object for the constructor (see `SRS_NODE_IOTHUB_REGISTRY_05_001`).]*/
+    /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_010: [The `fromConnectionString` method shall return a new instance of the `Registry` object.]*/
     it('returns a new instance of the Registry object', function() {
       var registry = Registry.fromConnectionString('HostName=a.b.c;SharedAccessKeyName=name;SharedAccessKey=key');
       assert.instanceOf(registry, Registry);
@@ -143,8 +144,8 @@ describe('Registry', function() {
       });
     });
 
-    /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_012: [Otherwise, it shall derive and transform the needed parts from the shared access signature in order to create a `config` object for the constructor (see `SRS_NODE_IOTHUB_REGISTRY_05_001`).]*/
-    /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_013: [The `fromSharedAccessSignature` method shall return a new instance of the `Registry` object, as by a call to `new Registry(config)`.]*/
+    /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_012: [The `fromSharedAccessSignature` method shall derive and transform the needed parts from the shared access signature in order to create a `config` object for the constructor (see `SRS_NODE_IOTHUB_REGISTRY_05_001`).]*/
+    /*Tests_SRS_NODE_IOTHUB_REGISTRY_05_013: [The `fromSharedAccessSignature` method shall return a new instance of the `Registry` object.]*/
     it('returns a new instance of the Registry object', function() {
       var registry = Registry.fromSharedAccessSignature('SharedAccessSignature sr=audience&sig=signature&se=expiry&skn=keyname');
       assert.instanceOf(registry, Registry);
@@ -181,7 +182,7 @@ describe('Registry', function() {
           assert.equal(method, 'PUT');
           assert.equal(path, '/devices/' + fakeDevice.deviceId + endpoint.versionQueryString());
           assert.equal(httpHeaders['Content-Type'], 'application/json; charset=utf-8');
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows to trace requests/responses in the logs.]*/
+          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows tracing of requests/responses in the logs.]*/
           assert.isString(httpHeaders['Request-Id']);
           /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_042: [All requests shall contain a `Authorization` header that contains a valid shared access key.]*/
           assert.equal(httpHeaders.Authorization, fakeConfig.sharedAccessSignature);

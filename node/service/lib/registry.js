@@ -7,7 +7,7 @@ var uuid = require('uuid');
 var anHourFromNow = require('azure-iot-common').anHourFromNow;
 var ArgumentError = require('azure-iot-common').errors.ArgumentError;
 var endpoint = require('azure-iot-common').endpoint;
-var HttpHelper = require('azure-iot-http-base').Http;
+var HttpRequestBuilder = require('azure-iot-http-base').Http;
 var ConnectionString = require('./connection_string.js');
 var translateError = require('./registry_http_errors.js');
 var SharedAccessSignature = require('./shared_access_signature.js');
@@ -24,12 +24,9 @@ var PackageJson = require('../package.json');
  * @param {Object}  config      An object containing the necessary information to connect to the IoT Hub instance:
  *                              - host: the hostname for the IoT Hub instance
  *                              - sharedAccessSignature: A shared access signature with valid access rights and expiry. 
- * @param {Object}  httpHelper  (optional) if nothing is passed azure-iot-http-base.Http will be used.
- *                              If passed, this parameter should have the same methods as azure-iot-http-base.Http.
- *                              This parameter is used for mocking and unit-testing and probably should not be used outside of this scenario.
  */
 /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_001: [The Registry constructor shall accept a transport object]*/
-function Registry(config, httpHelper) {
+function Registry(config, httpRequestBuilder) {
   if (!config) {
     /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_023: [The `Registry` constructor shall throw a `ReferenceError` if the config object is falsy.]*/
     throw new ReferenceError('The \'config\' parameter cannot be \'' + config + '\'');
@@ -41,9 +38,10 @@ function Registry(config, httpHelper) {
   }
   this._config = config;
 
-  /*SRS_NODE_IOTHUB_REGISTRY_16_024: [The `Registry` constructor shall use the `httpHelper` provided as a second argument if it is provided.]*/
-  /*SRS_NODE_IOTHUB_REGISTRY_16_025: [The `Registry` constructor shall use `azure-iot-http-base.Http` if no `httpHelper` argument is provided.]*/
-  this._http = httpHelper || new HttpHelper();
+  /*SRS_NODE_IOTHUB_REGISTRY_16_024: [The `Registry` constructor shall use the `httpRequestBuilder` provided as a second argument if it is provided.]*/
+  /*SRS_NODE_IOTHUB_REGISTRY_16_025: [The `Registry` constructor shall use `azure-iot-http-base.Http` if no `httpRequestBuilder` argument is provided.]*/
+  // This httpRequestBuilder parameter is used only for unit-testing purposes and should not be used in other situations.
+  this._http = httpRequestBuilder || new HttpRequestBuilder();
 }
 
 /**
@@ -60,7 +58,7 @@ Registry.fromConnectionString = function fromConnectionString(value) {
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_008: [The `fromConnectionString` method shall throw `ReferenceError` if the value argument is falsy.]*/
   if (!value) throw new ReferenceError('value is \'' + value + '\'');
 
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_009: [Otherwise, it shall derive and transform the needed parts from the connection string in order to create a `config` object for the constructor (see `SRS_NODE_IOTHUB_REGISTRY_05_001`).]*/
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_009: [The `fromConnectionString` method shall derive and transform the needed parts from the connection string in order to create a `config` object for the constructor (see `SRS_NODE_IOTHUB_REGISTRY_05_001`).]*/
   var cn = ConnectionString.parse(value);
   var sas = SharedAccessSignature.create(cn.HostName, cn.SharedAccessKeyName, cn.SharedAccessKey, anHourFromNow());
 
@@ -69,7 +67,7 @@ Registry.fromConnectionString = function fromConnectionString(value) {
     sharedAccessSignature: sas.toString()
   };
 
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_010: [The `fromConnectionString` method shall return a new instance of the Registry object, as by a call to new Registry(config).]*/
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_010: [The `fromConnectionString` method shall return a new instance of the `Registry` object.]*/
   return new Registry(config);
 };
 
@@ -84,10 +82,10 @@ Registry.fromConnectionString = function fromConnectionString(value) {
  * @returns {module:azure-iothub.Registry}
  */
 Registry.fromSharedAccessSignature = function fromSharedAccessSignature(value) {
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_011: [The fromSharedAccessSignature method shall throw ReferenceError if the value argument is falsy.]*/
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_011: [The `fromSharedAccessSignature` method shall throw ReferenceError if the value argument is falsy.]*/
   if (!value) throw new ReferenceError('value is \'' + value + '\'');
 
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_012: [Otherwise, it shall derive and transform the needed parts from the shared access signature in order to create a `config` object for the constructor (see `SRS_NODE_IOTHUB_REGISTRY_05_001`).]*/
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_012: [The `fromSharedAccessSignature` method shall derive and transform the needed parts from the shared access signature in order to create a `config` object for the constructor (see `SRS_NODE_IOTHUB_REGISTRY_05_001`).]*/
   var sas = SharedAccessSignature.parse(value);
 
   var config = {
@@ -95,25 +93,25 @@ Registry.fromSharedAccessSignature = function fromSharedAccessSignature(value) {
     sharedAccessSignature: sas.toString()
   };
 
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_013: [The fromSharedAccessSignature method shall return a new instance of the Registry object, as by a call to new Registry(transport).]*/
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_013: [The fromSharedAccessSignature method shall return a new instance of the `Registry` object.]*/
   return new Registry(config);
 };
 
-Registry.prototype._executeApiCall = function (method, path, headers, body, done) {
+Registry.prototype._executeApiCall = function (method, path, headers, requestBody, done) {
   var httpHeaders = headers || {};
 
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_040: [All requests shall contain a `User-Agent` header that uniquely identifies the SDK and SDK version used.]*/
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows to trace requests/responses in the logs.]*/  
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows tracing of requests/responses in the logs.]*/  
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_042: [All requests shall contain a `Authorization` header that contains a valid shared access key.]*/
   httpHeaders.Authorization = this._config.sharedAccessSignature;
   httpHeaders['Request-Id'] = uuid.v4();
   httpHeaders['User-Agent'] = PackageJson.name + '/' + PackageJson.version;
 
-  var request = this._http.buildRequest(method, path, httpHeaders, this._config.host, function (err, body, response) {
+  var request = this._http.buildRequest(method, path, httpHeaders, this._config.host, function (err, responseBody, response) {
       if (err) {
         if (response) {
           /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_035: [When any registry operation method receives an HTTP response with a status code >= 300, it shall invoke the done callback function with an error translated using the requirements detailed in `registry_http_errors_requirements.md`]*/
-          done(translateError(body, response));
+          done(translateError(responseBody, response));
         } else {
           /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_033: [If any registry operation method encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
           done(err);
@@ -123,13 +121,13 @@ Registry.prototype._executeApiCall = function (method, path, headers, body, done
           - `err`: `null`
           - `result`: A javascript object parsed from the body of the HTTP response
           - `response`: the Node.js `http.ServerResponse` object returned by the transport]*/
-        var responseBody = body ? JSON.parse(body) : '';
-        done(null, responseBody, response);
+        var result = responseBody ? JSON.parse(responseBody) : '';
+        done(null, result, response);
       }
     });
 
-    if (body) {
-      request.write(JSON.stringify(body));
+    if (requestBody) {
+      request.write(JSON.stringify(requestBody));
     }
 
     request.end();
@@ -398,7 +396,7 @@ Registry.prototype.listJobs = function (done) {
   ```]*/
   var path = "/jobs" + endpoint.versionQueryString();
   
-  this._executeApiCall('GET', path, {}, null, done);
+  this._executeApiCall('GET', path, null, null, done);
 };
 
 /**

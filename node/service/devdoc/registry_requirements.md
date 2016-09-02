@@ -34,30 +34,30 @@ registry.create({deviceId: 'dev1'}, function (err, dev) {
 
 ## Constructors/Factory methods
 
-### Registry(config, httpHelper) [constructor]
-The `Registry` constructor initializes a new instance of a Registry object that is used to conduct operations on the device registry.
+### Registry(config, httpRequestBuilder) [constructor]
+The `Registry` constructor initializes a new instance of a `Registry` object that is used to conduct operations on the device registry.
 
-**SRS_NODE_IOTHUB_REGISTRY_16_023: [** The `Registry` constructor shall throw a `ReferenceError` if the config object is falsy. **]**  
-**SRS_NODE_IOTHUB_REGISTRY_05_001: [** The `Registry` constructor shall throw an `ArgumentException` if the config object is missing one or more of the following properties:
+**SRS_NODE_IOTHUB_REGISTRY_16_023: [** The `Registry` constructor shall throw a `ReferenceError` if the `config` object is falsy. **]**  
+**SRS_NODE_IOTHUB_REGISTRY_05_001: [** The `Registry` constructor shall throw an `ArgumentError` if the `config` object is missing one or more of the following properties:
 - `host`: the IoT Hub hostname
 - `sharedAccessSignature`: shared access signature with the permissions for the desired operations.
  **]**
-**SRS_NODE_IOTHUB_REGISTRY_16_024: [** The `Registry` constructor shall use the `httpHelper` provided as a second argument if it is provided. **]**  
-**SRS_NODE_IOTHUB_REGISTRY_16_025: [** The `Registry` constructor shall use `azure-iot-http-base.Http` if no `httpHelper` argument is provided. **]**  
+**SRS_NODE_IOTHUB_REGISTRY_16_024: [** The `Registry` constructor shall use the `httpRequestBuilder` provided as a second argument if it is provided. **]**  
+**SRS_NODE_IOTHUB_REGISTRY_16_025: [** The `Registry` constructor shall use `azure-iot-http-base.Http` if no `httpRequestBuilder` argument is provided. **]**  
 
 ### fromConnectionString(value) [static]
 The `fromConnectionString` static method returns a new instance of the `Registry` object.
 
 **SRS_NODE_IOTHUB_REGISTRY_05_008: [** The `fromConnectionString` method shall throw `ReferenceError` if the value argument is falsy. **]**   
-**SRS_NODE_IOTHUB_REGISTRY_05_009: [** Otherwise, it shall derive and transform the needed parts from the connection string in order to create a `config` object for the constructor (see `SRS_NODE_IOTHUB_REGISTRY_05_001`). **]**   
-**SRS_NODE_IOTHUB_REGISTRY_05_010: [** The `fromConnectionString` method shall return a new instance of the Registry object, as by a call to `new Registry(config)`. **]**   
+**SRS_NODE_IOTHUB_REGISTRY_05_009: [** The `fromConnectionString` method shall derive and transform the needed parts from the connection string in order to create a `config` object for the constructor (see `SRS_NODE_IOTHUB_REGISTRY_05_001`). **]**   
+**SRS_NODE_IOTHUB_REGISTRY_05_010: [** The `fromConnectionString` method shall return a new instance of the `Registry` object. **]**   
 
 ### fromSharedAccessSignature(value) [static]
 The `fromSharedAccessSignature` static method returns a new instance of the `Registry` object.
 
 **SRS_NODE_IOTHUB_REGISTRY_05_011: [** The `fromSharedAccessSignature` method shall throw `ReferenceError` if the value argument is falsy. **]**   
-**SRS_NODE_IOTHUB_REGISTRY_05_012: [** Otherwise, it shall derive and transform the needed parts from the shared access signature in order to create a `config` object for the constructor (see `SRS_NODE_IOTHUB_REGISTRY_05_001`). **]**   
-**SRS_NODE_IOTHUB_REGISTRY_05_013: [** The `fromSharedAccessSignature` method shall return a new instance of the `Registry` object, as by a call to `new Registry(config)`. **]**    
+**SRS_NODE_IOTHUB_REGISTRY_05_012: [** The `fromSharedAccessSignature` method shall derive and transform the needed parts from the shared access signature in order to create a `config` object for the constructor (see `SRS_NODE_IOTHUB_REGISTRY_05_001`). **]**   
+**SRS_NODE_IOTHUB_REGISTRY_05_013: [** The `fromSharedAccessSignature` method shall return a new instance of the `Registry` object. **]**    
 
 ## CRUD operation for the device registry
 
@@ -81,7 +81,7 @@ Request-Id: <guid>
 The `update` method updates an existing device identity with the given device properties.
 
 **SRS_NODE_IOTHUB_REGISTRY_16_043: [** The `update` method shall throw `ReferenceError` if the `deviceInfo` argument is falsy. **]**   
-**SRS_NODE_IOTHUB_REGISTRY_07_003: [** The `update` method shall throw ArgumentError if the first argument does not contain a deviceId property. **]**   
+**SRS_NODE_IOTHUB_REGISTRY_07_003: [** The `update` method shall throw `ArgumentError` if the first argument does not contain a `deviceId` property. **]**   
 **SRS_NODE_IOTHUB_REGISTRY_16_027: [** The `update` method shall construct an HTTP request using information supplied by the caller, as follows:
 ```
 PUT /devices/<deviceInfo.deviceId>?api-version=<version> HTTP/1.1
@@ -226,7 +226,7 @@ Request-Id: <guid>
 All HTTP requests to the registry API should implement the following requirements:
 
 **SRS_NODE_IOTHUB_REGISTRY_16_040: [** All requests shall contain a `User-Agent` header that uniquely identifies the SDK and SDK version used. **]**
-**SRS_NODE_IOTHUB_REGISTRY_16_041: [** All requests shall contain a `Request-Id` header that uniquely identifies the request and allows to trace requests/responses in the logs. **]**  
+**SRS_NODE_IOTHUB_REGISTRY_16_041: [** All requests shall contain a `Request-Id` header that uniquely identifies the request and allows tracing of requests/responses in the logs. **]**  
 **SRS_NODE_IOTHUB_REGISTRY_16_042: [** All requests shall contain a `Authorization` header that contains a valid shared access key. **]**
 **SRS_NODE_IOTHUB_REGISTRY_16_033: [** If any registry operation method encounters an error before it can send the request, it shall invoke the `done` callback function and pass the standard JavaScript `Error` object with a text description of the error (err.message). **]**   
 **SRS_NODE_IOTHUB_REGISTRY_16_035: [** When any registry operation method receives an HTTP response with a status code >= 300, it shall invoke the `done` callback function with an error translated using the requirements detailed in `registry_http_errors_requirements.md` **]**   
