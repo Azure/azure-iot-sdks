@@ -22,4 +22,4 @@ if(WIN32)
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4505")
 endif()
 
-build_c_test_artifacts(${theseTestsName} ON "UnitTests")
+build_c_test_artifacts(${theseTestsName} ON "tests/UnitTests")

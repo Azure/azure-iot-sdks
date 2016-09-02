@@ -26,4 +26,4 @@ set(${theseTestsName}_h_files
 real_constbuffer.h
 )
 
-build_c_test_artifacts(${theseTestsName} ON "UnitTests")
+build_c_test_artifacts(${theseTestsName} ON "tests/UnitTests")

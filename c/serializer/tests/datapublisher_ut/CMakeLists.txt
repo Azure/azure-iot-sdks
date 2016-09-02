@@ -22,4 +22,4 @@ set(${theseTestsName}_h_files
 #but shouldn't...
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
 
-build_c_test_artifacts(${theseTestsName} ON "UnitTests")
+build_c_test_artifacts(${theseTestsName} ON "tests/UnitTests")
