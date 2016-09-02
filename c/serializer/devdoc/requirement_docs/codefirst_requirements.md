@@ -38,6 +38,8 @@ extern void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLEC
  
 extern CODEFIRST_RESULT CodeFirst_SendAsync(unsigned char** destination, size_t* destinationSize, size_t numProperties, ...);
  
+extern CODEFIRST_RESULT CodeFirst_IngestDesiredProperties(void* device, const char* desiredProperties);
+
 extern AGENT_DATA_TYPE_TYPE CodeFirst_GetPrimitiveType(const char* typeName);
 ```
 
@@ -251,3 +253,21 @@ CodeFirst_SendAsyncReported starts, publishes and finishes a device transaction.
 
 **SRS_CODEFIRST_02_028: [** `CodeFirst_SendAsyncReported` shall return `CODEFIRST_OK` when it succeeds. **]**
 
+### CODEFIRST_RESULT CodeFirst_IngestDesiredProperties
+```c
+extern CODEFIRST_RESULT CodeFirst_IngestDesiredProperties(void* device, const char* desiredProperties);
+```
+
+`CodeFirst_IngestDesiredProperties` applies desired properties to a device.
+
+**SRS_CODEFIRST_02_030: [** If argument `device` is `NULL` then `CodeFirst_IngestDesiredProperties` shall fail and return `CODEFIRST_INVALID_ARG`. **]**
+
+**SRS_CODEFIRST_02_031: [** If argument `desiredProperties` is `NULL` then `CodeFirst_IngestDesiredProperties` shall fail and return `CODEFIRST_INVALID_ARG`. **]**
+
+**SRS_CODEFIRST_02_032: [** `CodeFirst_IngestDesiredProperties` shall locate the device associated with `device`. **]**
+
+**SRS_CODEFIRST_02_033: [** `CodeFirst_IngestDesiredProperties` shall call `Device_IngestDesiredProperties`. **]**
+
+**SRS_CODEFIRST_02_034: [** If there is any failure, then `CodeFirst_IngestDesiredProperties` shall fail and return `CODEFIRST_ERROR`. **]**
+
+**SRS_CODEFIRST_02_035: [** Otherwise, `CodeFirst_IngestDesiredProperties` shall return `CODEFIRST_OK`. **]**
