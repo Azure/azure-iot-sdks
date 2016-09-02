@@ -21,4 +21,4 @@ set(${theseTestsName}_c_files
 set(${theseTestsName}_h_files
 )
 
-build_c_test_artifacts(${theseTestsName} OFF "UnitTests")
+build_c_test_artifacts(${theseTestsName} OFF "tests/UnitTests")
