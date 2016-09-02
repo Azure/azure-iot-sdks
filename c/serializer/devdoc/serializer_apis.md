@@ -113,6 +113,20 @@ WITH_REPORTED_PROPERTY(propertyType, propertyName)
 `WITH_REPORTED_PROPERTY` macro allows declaring a reported property (in the context of DeviceTwin).
 Reported properties have the same type as properties declared by `WITH_DATA` macro. 
 
+## WITH_DESIRED_PROPERTY
+```c
+WITH_DESIRED_PROPERTY(propertyType, propertyname)
+```
+
+`WITH_DESIRED_PROPERTY` macro declares a desired property. This is a DeviceTwin notion.
+Desired properties have the same types as regulat properties declared using `WITH_DATA` macro. 
+
+__Example__
+DECLARE_MODEL(Car,
+    WITH_DESIRED_PROPERTY(int, softwareVersion),
+    WITH_DESIRED_PROPERTY(ascii_char_ptr, firmwareVersionAsString)
+    ...
+    );
 
 ## WITH_ACTION(actionName, arg1Type, arg1Name, ...)
 The `WITH_ACTION` macro allows declaring a model action.
@@ -245,6 +259,32 @@ int main(void)
     ...
 } 
 ```
+
+### INGEST_DESIRED_PROPERTIES
+```c
+INGEST_DESIRED_PROPERTIES(modelInstance, DESIRED_PROPERTIES_AS_JSON)
+```
+
+Arguments: 
+- `modelInstance` is a previous model instance created by `CREATE_MODEL_INSTANCE` macro;
+- `DESIRED_PROPERTIES_AS_JSON` is a `const char*` pointer pointing to a null terminated string. 
+
+__Example__:
+```c
+DECLARE_MODEL(Car,
+    WITH_DESIRED_PROPERTY(int, softwareVersion),
+    WITH_DESIRED_PROPERTY(ascii_char_ptr, firmwareVersionAsString)
+    ...
+    );
+int main(void)
+{
+    (int)serializer_init(NULL);
+
+	Car* car = CREATE_MODEL_INSTANCE(MyFunkyCarNamespace, Car);
+    ...
+    INGEST_DESIRED_PROPERTIES(car, "{\"softwareVersion\":3, \"firmwareVersionAsString\":\"the firmware 0.1\"}");
+    ...
+}
 
 ## SERIALIZER APIs
 

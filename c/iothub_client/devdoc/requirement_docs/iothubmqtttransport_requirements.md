@@ -14,6 +14,7 @@ extern const TRANSPORT_PROVIDER* MQTT_Protocol(void);
   The following static functions are provided in the fields of the TRANSPORT_PROVIDER structure:
     - IoTHubTransportMqtt_Subscribe_DeviceTwin,
     - IoTHubTransportMqtt_Unsubscribe_DeviceTwin,
+    - IoTHubTransportMqtt_ProcessItem,
 	  - IoTHubTransportMqtt_GetHostname,
     - IoTHubTransportMqtt_SetOption,
     - IoTHubTransportMqtt_Create,
@@ -24,7 +25,6 @@ extern const TRANSPORT_PROVIDER* MQTT_Protocol(void);
     - IoTHubTransportMqtt_Unsubscribe,
     - IoTHubTransportMqtt_DoWork,
     - IoTHubTransportMqtt_GetSendStatus
-
 ## IoTHubTransportMqtt_Create
 
 ```c
@@ -127,6 +127,19 @@ void IoTHubTransportMqtt_Unsubscribe(TRANSPORT_LL_HANDLE handle)
 **SRS_IOTHUB_MQTT_TRANSPORT_07_019: [**If parameter 'handle' is NULL then IoTHubTransportMqtt_Unsubscribe shall do nothing.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_020: [**IoTHubTransportMqtt_Unsubscribe shall call mqtt_client_unsubscribe to unsubscribe the mqtt message topic.**]**  
 
+### IoTHubTransportMqtt_ProcessItem
+
+```c
+IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportMqtt_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, void* iothub_item)
+```
+
+**SRS_IOTHUBCLIENT_LL_07_001: [** If `handle` or `iothub_item` are NULL then `IoTHubTransportMqtt_ProcessItem` shall return IOTHUB_PROCESS_ERROR. **]**  
+**SRS_IOTHUBCLIENT_LL_07_002: [** If the mqtt is not ready to publish messages `IoTHubTransportMqtt_ProcessItem` shall return IOTHUB_PROCESS_NOT_CONNECTED. **]**  
+**SRS_IOTHUBCLIENT_LL_07_003: [** `IoTHubTransportMqtt_ProcessItem` shall publish a message to the mqtt protocol with the message topic for the message type.**]**  
+**SRS_IOTHUBCLIENT_LL_07_004: [** If any errors are encountered `IoTHubTransportMqtt_ProcessItem` shall return IOTHUB_PROCESS_ERROR. **]**  
+**SRS_IOTHUBCLIENT_LL_07_005: [** If successful `IoTHubTransportMqtt_ProcessItem` shall add mqtt info structure acknowledgement queue. **]**  
+**SRS_IOTHUBCLIENT_LL_07_006: [** If the `item_type` is not a supported type `IoTHubTransportMqtt_ProcessItem` shall return IOTHUB_PROCESS_CONTINUE. **]**  
+
 ### IoTHubTransportMqtt_DoWork
 
 ```c
@@ -137,7 +150,7 @@ void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HAN
 **SRS_IOTHUB_MQTT_TRANSPORT_07_027: [**IoTHubTransportMqtt_DoWork shall inspect the 'waitingToSend' DLIST passed in config structure.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_028: [**IoTHubTransportMqtt_DoWork shall retrieve the payload message from the messageHandle parameter.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_029: [**IoTHubTransportMqtt_DoWork shall create a MQTT_MESSAGE_HANDLE and pass this to a call to  mqtt_client_publish.**]**  
-**SRS_IOTHUB_MQTT_TRANSPORT_07_030: [**IoTHubTransportMqtt_DoWork shall call mqtt_client_dowork everytime it is called if it is connected.**]**  
+**SRS_IOTHUB_MQTT_TRANSPORT_07_030: [**IoTHubTransportMqtt_DoWork shall call mqtt_client_dowork if it is connected.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_033: [**IoTHubTransportMqtt_DoWork shall iterate through the Waiting Acknowledge messages looking for any message that has been waiting longer than 2 min.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_034: [**If IoTHubTransportMqtt_DoWork has previously resent the message two times then it shall fail the message**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_053: [**IoTHubTransportMqtt_DoWork Shall send the mqtt subscribe message if any of the 'MessageTopic', get_state_topic, or notify_state_topic Topics are entered.**]**  
@@ -186,6 +199,7 @@ const TRANSPORT_PROVIDER* MQTT_Protocol(void)
 
 IoTHubTransport_Subscribe_DeviceTwin = IoTHubTransportMqtt_Subscribe_DeviceTwin  
 IoTHubTransport_Unsubscribe_DeviceTwin = IoTHubTransportMqtt_Unsubscribe_DeviceTwin  
+IoTHubTransport_ProcessItem - IoTHubTransportMqtt_ProcessItem  
 IoTHubTransport_GetHostname = IoTHubTransportMqtt_GetHostname  
 IoTHubTransport_Create = IoTHubTransportMqtt_Create  
 IoTHubTransport_Destroy = IoTHubTransportMqtt_Destroy  

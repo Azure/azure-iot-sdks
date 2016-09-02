@@ -293,7 +293,7 @@ else if (command === 'sas-token') {
     if (err)
       serviceError(err);
     else {
-      var key = device.authentication.SymmetricKey.primaryKey;
+      var key = device.authentication.symmetricKey.primaryKey;
       var expiry = endTime();
       if (!parsed.raw)
         console.log(colorsTmpl('{green}SAS Token for device ' + arg1 + ' with expiry ' + (parsed.duration ? parsed.duration : '3600') + ' seconds from now:{/green}'));
@@ -365,8 +365,8 @@ function connectionString(device) {
 function constructAuthenticationString(authenticationMechanism) {
   var authString = '';
 
-  if (authenticationMechanism.SymmetricKey.primaryKey) {
-    authString = 'SharedAccessKey=' + authenticationMechanism.SymmetricKey.primaryKey;
+  if (authenticationMechanism.symmetricKey.primaryKey) {
+    authString = 'SharedAccessKey=' + authenticationMechanism.symmetricKey.primaryKey;
   } else if (authenticationMechanism.x509Thumbprint.primaryThumbprint || authenticationMechanism.x509Thumbprint.secondaryThumbprint) {
     authString = 'x509=true';
   }

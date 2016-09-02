@@ -3,34 +3,45 @@
 
 'use strict';
 
+var uuid = require('uuid');
 var anHourFromNow = require('azure-iot-common').anHourFromNow;
 var ArgumentError = require('azure-iot-common').errors.ArgumentError;
-var ConnectionString = require('./connection_string.js');
-var DefaultTransport = require('./registry_http.js');
-var Device = require('./device.js');
 var endpoint = require('azure-iot-common').endpoint;
-
+var HttpRequestBuilder = require('azure-iot-http-base').Http;
+var ConnectionString = require('./connection_string.js');
+var translateError = require('./registry_http_errors.js');
 var SharedAccessSignature = require('./shared_access_signature.js');
+var PackageJson = require('../package.json');
 
 /**
  * @class           module:azure-iothub.Registry
- * @classdesc       Constructs a Registry object with the given transport
+ * @classdesc       Constructs a Registry object with the given configuration
  *                  object. The Registry class provides access to the IoT Hub
  *                  identity service. Normally, consumers will call one of the
  *                  factory methods, e.g.,
- *                  {@link module:azure-iothub.Registry.fromConnectionString|fromConnectionString},
+ *                  {@link module:azure-iothub.Registry.fromConnectionString|fromSharedAccessSignature},
  *                  to create a Registry object.
- * @param {Object}  transport   An object that implements the interface
- *                              expected of a transport object. See the file
- *                              **node/service/devdoc/http_requirements.docm**
- *                              for information on what the transport object
- *                              should look like. The
- *                              {@link module:azure-iothub.Http|Http} class is
- *                              one such implementation of the transport.
+ * @param {Object}  config      An object containing the necessary information to connect to the IoT Hub instance:
+ *                              - host: the hostname for the IoT Hub instance
+ *                              - sharedAccessSignature: A shared access signature with valid access rights and expiry. 
  */
 /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_001: [The Registry constructor shall accept a transport object]*/
-function Registry(transport) {
-  this._transport = transport;
+function Registry(config, httpRequestBuilder) {
+  if (!config) {
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_023: [The `Registry` constructor shall throw a `ReferenceError` if the config object is falsy.]*/
+    throw new ReferenceError('The \'config\' parameter cannot be \'' + config + '\'');
+  } else if (!config.host || !config.sharedAccessSignature) {
+    /*SRS_NODE_IOTHUB_REGISTRY_05_001: [** The `Registry` constructor shall throw an `ArgumentException` if the config object is missing one or more of the following properties:
+    - `host`: the IoT Hub hostname
+    - `sharedAccessSignature`: shared access signature with the permissions for the desired operations.]*/
+    throw new ArgumentError('The \'config\' argument is missing either the host or the sharedAccessSignature property');
+  }
+  this._config = config;
+
+  /*SRS_NODE_IOTHUB_REGISTRY_16_024: [The `Registry` constructor shall use the `httpRequestBuilder` provided as a second argument if it is provided.]*/
+  /*SRS_NODE_IOTHUB_REGISTRY_16_025: [The `Registry` constructor shall use `azure-iot-http-base.Http` if no `httpRequestBuilder` argument is provided.]*/
+  // This httpRequestBuilder parameter is used only for unit-testing purposes and should not be used in other situations.
+  this._http = httpRequestBuilder || new HttpRequestBuilder();
 }
 
 /**
@@ -43,24 +54,21 @@ function Registry(transport) {
  *                              permissions.
  * @returns {module:azure-iothub.Registry}
  */
-Registry.fromConnectionString = function fromConnectionString(value, Transport) {
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_008: [The fromConnectionString method shall throw ReferenceError if the value argument is falsy.]*/
+Registry.fromConnectionString = function fromConnectionString(value) {
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_008: [The `fromConnectionString` method shall throw `ReferenceError` if the value argument is falsy.]*/
   if (!value) throw new ReferenceError('value is \'' + value + '\'');
 
-  Transport = Transport || DefaultTransport;
-
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_009: [Otherwise, it shall derive and transform the needed parts from the connection string in order to create a new instance of the default transport (azure-iothub.Http).]*/
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_009: [The `fromConnectionString` method shall derive and transform the needed parts from the connection string in order to create a `config` object for the constructor (see `SRS_NODE_IOTHUB_REGISTRY_05_001`).]*/
   var cn = ConnectionString.parse(value);
   var sas = SharedAccessSignature.create(cn.HostName, cn.SharedAccessKeyName, cn.SharedAccessKey, anHourFromNow());
 
   var config = {
     host: cn.HostName,
-    hubName: cn.HostName.split('.', 1)[0],
     sharedAccessSignature: sas.toString()
   };
 
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_010: [The fromConnectionString method shall return a new instance of the Registry object, as by a call to new Registry(transport).]*/
-  return new Registry(new Transport(config));
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_010: [The `fromConnectionString` method shall return a new instance of the `Registry` object.]*/
+  return new Registry(config);
 };
 
 /**
@@ -74,20 +82,55 @@ Registry.fromConnectionString = function fromConnectionString(value, Transport) 
  * @returns {module:azure-iothub.Registry}
  */
 Registry.fromSharedAccessSignature = function fromSharedAccessSignature(value) {
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_011: [The fromSharedAccessSignature method shall throw ReferenceError if the value argument is falsy.]*/
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_011: [The `fromSharedAccessSignature` method shall throw ReferenceError if the value argument is falsy.]*/
   if (!value) throw new ReferenceError('value is \'' + value + '\'');
 
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_012: [Otherwise, it shall derive and transform the needed parts from the shared access signature in order to create a new instance of the default transport (azure-iothub.Http).]*/
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_012: [The `fromSharedAccessSignature` method shall derive and transform the needed parts from the shared access signature in order to create a `config` object for the constructor (see `SRS_NODE_IOTHUB_REGISTRY_05_001`).]*/
   var sas = SharedAccessSignature.parse(value);
 
   var config = {
     host: sas.sr,
-    hubName: sas.sr.split('.', 1)[0],
     sharedAccessSignature: sas.toString()
   };
 
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_013: [The fromSharedAccessSignature method shall return a new instance of the Registry object, as by a call to new Registry(transport).]*/
-  return new Registry(new DefaultTransport(config));
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_013: [The fromSharedAccessSignature method shall return a new instance of the `Registry` object.]*/
+  return new Registry(config);
+};
+
+Registry.prototype._executeApiCall = function (method, path, headers, requestBody, done) {
+  var httpHeaders = headers || {};
+
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_040: [All requests shall contain a `User-Agent` header that uniquely identifies the SDK and SDK version used.]*/
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows tracing of requests/responses in the logs.]*/  
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_042: [All requests shall contain a `Authorization` header that contains a valid shared access key.]*/
+  httpHeaders.Authorization = this._config.sharedAccessSignature;
+  httpHeaders['Request-Id'] = uuid.v4();
+  httpHeaders['User-Agent'] = PackageJson.name + '/' + PackageJson.version;
+
+  var request = this._http.buildRequest(method, path, httpHeaders, this._config.host, function (err, responseBody, response) {
+      if (err) {
+        if (response) {
+          /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_035: [When any registry operation method receives an HTTP response with a status code >= 300, it shall invoke the done callback function with an error translated using the requirements detailed in `registry_http_errors_requirements.md`]*/
+          done(translateError(responseBody, response));
+        } else {
+          /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_033: [If any registry operation method encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
+          done(err);
+        }
+      } else {
+        /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_034: [When any registry operation receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
+          - `err`: `null`
+          - `result`: A javascript object parsed from the body of the HTTP response
+          - `response`: the Node.js `http.ServerResponse` object returned by the transport]*/
+        var result = responseBody ? JSON.parse(responseBody) : '';
+        done(null, result, response);
+      }
+    });
+
+    if (requestBody) {
+      request.write(JSON.stringify(requestBody));
+    }
+
+    request.end();
 };
 
 /**
@@ -104,21 +147,30 @@ Registry.fromSharedAccessSignature = function fromSharedAccessSignature(value) {
  *                                object useful for logging or debugging.
  */
 Registry.prototype.create = function (deviceInfo, done) {
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_07_001: [The create method shall throw ArgumentError if the first argument does not contain a deviceId property.]*/
-  if (!deviceInfo.deviceId) {
+  if (!deviceInfo) {
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_07_001: [The `create` method shall throw `ReferenceError` if the `deviceInfo` argument is falsy. **]*/
+    throw new ReferenceError('deviceInfo cannot be \'' + deviceInfo + '\'');
+  } else if (!deviceInfo.deviceId) {
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_07_001: [The create method shall throw ArgumentError if the first argument does not contain a deviceId property.]*/
     throw new ArgumentError('The object \'deviceInfo\' is missing the property: deviceId');
   }
-  else {
-    var path = endpoint.devicePath(deviceInfo.deviceId) + endpoint.versionQueryString();
-    this._transport.createDevice(path, deviceInfo, function (err, body, response) {
-      /*Codes_SRS_NODE_IOTHUB_REGISTRY_07_002: [When the create method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and a Device object representing the new device identity returned from the IoT hub.]*/
-      if (err) {
-        done(err, null, response);
-      } else {
-        done(err, new Device(body), response);
-      }
-    });
-  }
+
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_026: [The `create` method shall construct an HTTP request using information supplied by the caller, as follows:
+  ```
+  PUT /devices/<deviceInfo.deviceId>?api-version=<version> HTTP/1.1
+  Authorization: <sharedAccessSignature>
+  Content-Type: application/json; charset=utf-8
+  If-Match: *
+  Request-Id: <guid>
+
+  <deviceInfo>
+  ```]*/
+  var path = endpoint.devicePath(deviceInfo.deviceId) + endpoint.versionQueryString();
+  var httpHeaders = {
+    'Content-Type': 'application/json; charset=utf-8'
+  };
+
+  this._executeApiCall('PUT', path, httpHeaders, deviceInfo, done);
 };
 
 /**
@@ -137,22 +189,30 @@ Registry.prototype.create = function (deviceInfo, done) {
  *                                object useful for logging or debugging.
  */
 Registry.prototype.update = function (deviceInfo, done) {
-  /* Codes_SRS_NODE_IOTHUB_REGISTRY_07_003: [The update method shall throw ArgumentError if the first argument does not contain a deviceId property.]*/
-  if (!deviceInfo.deviceId) {
+  if (!deviceInfo) {
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_043: [The `update` method shall throw `ReferenceError` if the `deviceInfo` argument is falsy.]*/
+    throw new ReferenceError('deviceInfo cannot be \'' + deviceInfo + '\'');
+  } else if (!deviceInfo.deviceId) {
+    /* Codes_SRS_NODE_IOTHUB_REGISTRY_07_003: [The update method shall throw ArgumentError if the first argument does not contain a deviceId property.]*/
     throw new ArgumentError('The object \'deviceInfo\' is missing the property: deviceId');
   }
 
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_027: [The `update` method shall construct an HTTP request using information supplied by the caller, as follows:
+  ```
+  PUT /devices/<deviceInfo.deviceId>?api-version=<version> HTTP/1.1
+  Authorization: <config.sharedAccessSignature>
+  Content-Type: application/json; charset=utf-8
+  Request-Id: <guid>
+
+  <deviceInfo>
+  ```]*/
   var path = endpoint.devicePath(deviceInfo.deviceId) + endpoint.versionQueryString();
-  this._transport.updateDevice(path, deviceInfo, function (err, body, response) {
-    /*Codes_SRS_NODE_IOTHUB_REGISTRY_07_004: [When the update method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and a Device object representing the new device identity returned from the IoT hub.]*/
-    if (err) {
-      deviceInfo = undefined;
-    }
-    else if (body) {
-      deviceInfo = new Device(body);
-    }
-    done(err, deviceInfo, response);
-  });
+  var httpHeaders = {
+    'Content-Type': 'application/json; charset=utf-8',
+    'If-Match': '*'
+  };
+
+  this._executeApiCall('PUT', path, httpHeaders, deviceInfo, done);
 };
 
 /**
@@ -174,16 +234,15 @@ Registry.prototype.get = function (deviceId, done) {
     throw new ReferenceError('deviceId is \'' + deviceId + '\'');
   }
 
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_002: [The get method shall request metadata for the device (indicated by the deviceId argument) from an IoT hub’s identity service via the transport associated with the Registry instance.]*/
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_028: [The `get` method shall construct an HTTP request using information supplied by the caller, as follows:
+  ```
+  GET /devices/<deviceInfo.deviceId>?api-version=<version> HTTP/1.1
+  Authorization: <config.sharedAccessSignature>
+  Request-Id: <guid>
+  ```]*/
   var path = endpoint.devicePath(deviceId) + endpoint.versionQueryString();
-  this._transport.getDevice(path, function (err, body, response) {
-    /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_003: [When the get method completes, the callback function (indicated by the done argument) shall be invoked with the same arguments as the underlying transport method’s callback, plus a Device object representing the device information returned from IoT Hub.]*/
-    var dev;
-    if (body) {
-      dev = new Device(body);
-    }
-    done(err, dev, response);
-  });
+
+  this._executeApiCall('GET', path, null, null, done);
 };
 
 /**
@@ -200,21 +259,15 @@ Registry.prototype.get = function (deviceId, done) {
  *                                object useful for logging or debugging.
  */
 Registry.prototype.list = function (done) {
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_029: [The `list` method shall construct an HTTP request using information supplied by the caller, as follows:
+  ```
+  GET /devices?api-version=<version> HTTP/1.1
+  Authorization: <config.sharedAccessSignature>
+  Request-Id: <guid>
+  ```]*/
   var path = endpoint.devicePath('') + endpoint.versionQueryString();
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_004: [The list method shall request information about devices from an IoT hub’s identity service via the transport associated with the Registry instance.]*/
-  this._transport.listDevices(path, function (err, body, response) {
-    var devList = [];
-    if (body) {
-      var jsonArray = JSON.parse(body);
-      jsonArray.forEach(function (jsonElement) {
-        /*Codes_SRS_NODE_IOTHUB_REGISTRY_07_006: [The JSON array returned from the service shall be converted to a list of Device objects.]*/
-        var devItem = new Device(JSON.stringify(jsonElement));
-        devList.push(devItem);
-      });
-    }
-    /*Codes_SRS_NODE_IOTHUB_REGISTRY_07_005: [When the list method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null), and an array of Device objects representing up to 1000 devices from the IoT hub.]*/
-    done(err, devList, response);
-  });
+
+  this._executeApiCall('GET', path, null, null, done);
 };
 
 /**
@@ -235,12 +288,19 @@ Registry.prototype.delete = function (deviceId, done) {
     throw new ReferenceError('deviceId is \'' + deviceId + '\'');
   }
 
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_030: [The `delete` method shall construct an HTTP request using information supplied by the caller, as follows:
+  ```
+  DELETE /devices/<deviceInfo.deviceId>?api-version=<version> HTTP/1.1
+  Authorization: <config.sharedAccessSignature>
+  If-Match: *
+  Request-Id: <guid>
+  ```]*/
   var path = endpoint.devicePath(deviceId) + endpoint.versionQueryString();
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_007: [The delete method shall delete the given device from an IoT hub’s identity service via the transport associated with the Registry instance.]*/
-  this._transport.deleteDevice(path, function (err, body, response) {
-    /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_005: [When the delete method completes, the callback function (indicated by the done argument) shall be invoked with an Error object (may be null).]*/
-    done(err, null, response);
-  });
+  var httpHeaders = {
+    'If-Match': '*'
+  };
+
+  this._executeApiCall('DELETE', path, httpHeaders, null, done);
 };
 
 /**
@@ -257,27 +317,30 @@ Registry.prototype.importDevicesFromBlob = function (inputBlobContainerUri, outp
   /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_002: [A ReferenceError shall be thrown if exportBlobContainerUri is falsy] */
   if (!outputBlobContainerUri) throw new ReferenceError('outputBlobContainerUri cannot be falsy');
 
-  /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_008: [The importDevicesFromBlob method should create a bulk import job using the transport associated with the Registry instance by giving it the correct URI path and an import request object such as:
+  /*SRS_NODE_IOTHUB_REGISTRY_16_031: [The `importDeviceFromBlob` method shall construct an HTTP request using information supplied by the caller, as follows:
+  ```
+  POST /jobs/create?api-version=<version> HTTP/1.1
+  Authorization: <config.sharedAccessSignature>
+  Content-Type: application/json; charset=utf-8 
+  Request-Id: <guid>
+
   {
-      'type': 'import',
-      'inputBlobContainerUri': <input container Uri given as parameter>,
-      'outputBlobContainerUri': <output container Uri given as parameter>
-  }] */
+    "type": "import",
+    "inputBlobContainerUri": "<input container Uri given as parameter>",
+    "outputBlobContainerUri": "<output container Uri given as parameter>"
+  }
+  ```]*/
   var path = "/jobs/create" + endpoint.versionQueryString();
+  var httpHeaders = {
+    'Content-Type': 'application/json; charset=utf-8'
+  };
   var importRequest = {
     'type': 'import',
     'inputBlobContainerUri': inputBlobContainerUri,
     'outputBlobContainerUri': outputBlobContainerUri
   };
 
-  this._transport.importDevicesFromBlob(path, importRequest, function (err, jobStatus) {
-    /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_003: [The ‘done’ callback shall be called with the job status as a parameter when the import job has been created] */
-    if (err) {
-      done(err);
-    } else {
-      done(null, jobStatus);
-    }
-  });
+  this._executeApiCall('POST', path, httpHeaders, importRequest, done);
 };
 
 /**
@@ -292,27 +355,30 @@ Registry.prototype.exportDevicesToBlob = function (outputBlobContainerUri, exclu
   /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_004: [A ReferenceError shall be thrown if outputBlobContainerUri is falsy] */
   if (!outputBlobContainerUri) throw new ReferenceError('outputBlobContainerUri cannot be falsy');
 
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_032: [** The `exportDeviceToBlob` method shall construct an HTTP request using information supplied by the caller, as follows:
+  ```
+  POST /jobs/create?api-version=<version> HTTP/1.1
+  Authorization: <config.sharedAccessSignature>
+  Content-Type: application/json; charset=utf-8 
+  Request-Id: <guid>
+
+  {
+    "type": "export",
+    "outputBlobContainerUri": "<output container Uri given as parameter>",
+    "excludeKeysInExport": "<excludeKeys Boolean given as parameter>"
+  }
+  ```]*/
   var path = "/jobs/create" + endpoint.versionQueryString();
+  var httpHeaders = {
+    'Content-Type': 'application/json; charset=utf-8'
+  };
   var exportRequest = {
     'type': 'export',
     'outputBlobContainerUri': outputBlobContainerUri,
     'excludeKeysInExport': excludeKeys
   };
 
-  /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_009: [The exportDevicesToBlob method should create a bulk export job using the transport associated with the Registry instance by giving it the correct path URI and export request object such as:
-  {
-      'type': 'export',
-      'outputBlobContainerUri': <output container Uri given as parameter>,
-      'excludeKeysInExport': <excludeKeys Boolean given as parameter>
-  }] */
-  this._transport.exportDevicesToBlob(path, exportRequest, function (err, jobStatus) {
-    /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_005: [The ‘done’ callback shall be called with a null error parameter and the job status as a second parameter when the export job has been created] */
-    if (err) {
-      done(err);
-    } else {
-      done(null, jobStatus);
-    }
-  });
+  this._executeApiCall('POST', path, httpHeaders, exportRequest, done);
 };
 
 /**
@@ -322,17 +388,15 @@ Registry.prototype.exportDevicesToBlob = function (outputBlobContainerUri, exclu
  *                              (null otherwise) and the list of past jobs as an argument.
  */
 Registry.prototype.listJobs = function (done) {
-  /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_016: [The listJobs method should request a list of active and recent bulk import/export jobs using the transport associated with the Registry instance and give it the correct path URI.] */
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_037: [The `listJobs` method shall construct an HTTP request using information supplied by the caller, as follows:
+  ```
+  GET /jobs?api-version=<version> HTTP/1.1
+  Authorization: <config.sharedAccessSignature> 
+  Request-Id: <guid>
+  ```]*/
   var path = "/jobs" + endpoint.versionQueryString();
-  this._transport.listJobs(path, function (err, jobsList) {
-    if (err) {
-      /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_011: [The ‘done’ callback shall be called with only an error object if the request fails.] */
-      done(err);
-    } else {
-      /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_010: [The ‘done’ callback shall be called with a null error parameter and list of recent jobs as a second parameter if the request is successful.] */
-      done(null, jobsList);
-    }
-  });
+  
+  this._executeApiCall('GET', path, null, null, done);
 };
 
 /**
@@ -343,20 +407,17 @@ Registry.prototype.listJobs = function (done) {
  *                              (null otherwise) and the status of the job whose identifier was passed as an argument.
  */
 Registry.prototype.getJob = function (jobId, done) {
-  /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_006: [A ReferenceError shall be thrown if jobId is falsy] */
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_006: [A ReferenceError shall be thrown if jobId is falsy] */
   if (!jobId) throw new ReferenceError('jobId cannot be falsy');
 
-  /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_017: [The getJob method should request status information of the bulk import/export job identified by the jobId parameter using the transport associated with the Registry instance and give it the correct path URI.] */
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_038: [The `getJob` method shall construct an HTTP request using information supplied by the caller, as follows:
+  ```
+  GET /jobs/<jobId>?api-version=<version> HTTP/1.1
+  Authorization: <config.sharedAccessSignature> 
+  Request-Id: <guid>
+  ```]*/
   var path = "/jobs/" + jobId + endpoint.versionQueryString();
-  this._transport.getJob(path, function (err, jobStatus) {
-    if (err) {
-      /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_015: [The ‘done’ callback shall be called with only an error object if the request fails.]  */
-      done(err);
-    } else {
-      /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_007: [The ‘done’ callback shall be called with a null error parameter and the job status as second parameter if the request is successful.]  */
-      done(null, jobStatus);
-    }
-  });
+  this._executeApiCall('GET', path, null, null, done);
 };
 
 /**
@@ -367,20 +428,17 @@ Registry.prototype.getJob = function (jobId, done) {
  *                              (null otherwise) and the (cancelled) status of the job whose identifier was passed as an argument.
  */
 Registry.prototype.cancelJob = function (jobId, done) {
-  /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_012: [A ReferenceError shall be thrown if the jobId is falsy] */
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_012: [A ReferenceError shall be thrown if the jobId is falsy] */
   if (!jobId) throw new ReferenceError('jobId cannot be falsy');
 
-  /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_018: [The cancelJob method should request cancel the job identified by the jobId parameter using the transport associated with the Registry instance by giving it the correct path URI.] */
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_039: [The `cancelJob` method shall construct an HTTP request using information supplied by the caller as follows:
+  ```
+  DELETE /jobs/<jobId>?api-version=<version> HTTP/1.1
+  Authorization: <config.sharedAccessSignature>
+  Request-Id: <guid>
+  ```]*/
   var path = "/jobs/" + jobId + endpoint.versionQueryString();
-  this._transport.cancelJob(path, function (err) {
-    if (err) {
-      /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_013: [The ‘done’ callback shall be called with only an error object if the request fails.] */
-      done(err);
-    } else {
-      /* Codes_SRS_NODE_IOTHUB_REGISTRY_16_014: [The ‘done’ callback shall be called with no parameters if the request is successful.] */
-      done();
-    }
-  });
+  this._executeApiCall('DELETE', path, null, null, done);
 };
 
 /**
@@ -396,11 +454,14 @@ Registry.prototype.getDeviceTwin = function (deviceId, done) {
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_020: [The `getDeviceTwin` method shall throw a `ReferenceError` if the `done` parameter is falsy.]*/
   if (!done) throw new ReferenceError('the \'done\' argument cannot be falsy');
 
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_036: [** The `getDeviceTwin` method shall construct an HTTP request using the information supplied by the caller as follows:
+  ```
+  GET /twins/<deviceId>?api-version=<version> HTTP/1.1
+  Authorization: <config.sharedAccessSignature>
+  Request-Id: <guid>
+  ```]*/
   var path = "/twins/" + deviceId + endpoint.versionQueryString();
-
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_021: [The `getDeviceTwin` method shall call the `done` callback with a standard Javascript `Error` object if the Device Twin could not be retrieved.]*/
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_022: [The `getDeviceTwin` method shall call the `done` callback with `null` in the first parameter and the twin object as a second parameter if the device twin was successfully retrieved.]*/
-  this._transport.getDeviceTwin(path, done);
+  this._executeApiCall('GET', path, null, null, done);
 };
 
 module.exports = Registry;
