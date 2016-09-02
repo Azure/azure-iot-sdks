@@ -49,7 +49,7 @@ Twin.fromDeviceClient = function(client, done) {
   } else {
     /* Codes_SRS_NODE_DEVICE_TWIN_18_029: [** if `fromDeviceClient` is called with 2 different `client`s, it shall return 2 unique `Twin` objects **]** */
     /* Codes_SRS_NODE_DEVICE_TWIN_18_003: [** `fromDeviceClient` shall allocate a new `Twin` object **]**  */
-    var twin = client._twin = new Twin(client);
+    var twin = new Twin(client);
 
     /* Codes_SRS_NODE_DEVICE_TWIN_18_005: [** If the protocol does not contain a `getTwinReceiver` method, `fromDeviceClient` shall call the `done` callback with a `NotImplementedError` object **]**  */
     if (!client._transport.getTwinReceiver) {
@@ -63,6 +63,7 @@ Twin.fromDeviceClient = function(client, done) {
           twin._receiver = receiver;
 
           twin._subscribe( function(err) {
+            client._twin = twin;
             done(err, twin);
           });
         }
@@ -93,12 +94,10 @@ Twin.prototype._subscribe = function(done) {
   };
       
 
-  var timeout;
+  var timeout = null;
   var cleanupAndReturn = function(err) {
-    if (timeout) {
-      clearTimeout(timeout);
-      timeout = null;
-    }
+    clearTimeout(timeout);
+    timeout = null;
     /* Codes_SRS_NODE_DEVICE_TWIN_18_012: [** `fromDeviceClient` shall remove the handlers for both the `subscribed` and `error` events before calling the `done` callback. **]**   */
     receiver.removeListener(Twin.subscribedEvent, handleSubscribed);
     receiver.removeListener(Twin.errorEvent, handleError);
@@ -143,12 +142,10 @@ Twin.prototype._sendTwinRequest = function(method, resource, properties, body, d
   };
   
   /* Codes_SRS_NODE_DEVICE_TWIN_18_021: [** Before calling `done`, `_sendTwinRequest` shall remove the handler for the `response` event **]**  */
-  var timeout;
+  var timeout = null;
   var cleanupAndReturn = function(err) {
-    if (timeout) {
-      clearTimeout(timeout);
-      timeout = null;
-    }
+    clearTimeout(timeout);
+    timeout = null;
     self._receiver.removeListener('response', handleResponse);
     done(err);
   };

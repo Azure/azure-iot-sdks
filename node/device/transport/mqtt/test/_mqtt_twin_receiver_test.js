@@ -93,7 +93,7 @@ describe('MqttTwinReceiver', function () {
     it ('has a parameter with an object with the correct properties', function(done) {
       receiver.on(MqttTwinReceiver.responseEvent, function(data) {
         assert.isDefined(data.status);
-        assert.isDefined(data.requestId);
+        assert.isDefined(data.$rid);
         assert.isDefined(data.body);
         done();
       });
@@ -107,7 +107,7 @@ describe('MqttTwinReceiver', function () {
     it ('parses the topic name correctly', function(done) {
       receiver.on(MqttTwinReceiver.responseEvent, function(data) {
         assert.equal(data.status, 200);
-        assert.equal(data.requestId, 42);
+        assert.equal(data.$rid, 42);
         assert.equal(data.body, 'fake_body');
         done();
       });

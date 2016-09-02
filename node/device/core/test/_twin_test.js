@@ -29,7 +29,7 @@ var FakeReceiver = function() {
           if (self.forceError) {
             self.emit('error', new Error('failed to subscribe to ' + eventname))                               ;
           } else if (self.successfulSubscription) {
-            self.emit('subscribed', {eventName: eventname});
+            self.emit('subscribed', {eventName: self.fakeSubscriptionName || eventname});
           }
           // else time out
         }
@@ -61,7 +61,7 @@ var FakeTransport = function(receiver) {
     process.nextTick(function() {
       var response = {
         'status' : self.status,
-        '$rid' : properties.$rid,
+        '$rid' : self.responseId || properties.$rid,
         'body' : ' '
       };
       self._receiver.emit('response', response);
@@ -204,7 +204,33 @@ describe('Twin', function () {
         done();
       });
     });
+
+    it('gracefully handles getTwinReceiver failures', function(done) {
+      var client = new FakeClient();
+      client._transport.getTwinReceiver = function(done) {
+        done(new errors.TimeoutError());
+      };
+      Twin.fromDeviceClient(client, function(err) {
+        assert.instanceOf(err, errors.TimeoutError);
+        done();
+      });
+    });
+
+    it ('ignores unkonwn subscription events', function(done) {
+      var client = new FakeClient();
+      client._transport._receiver.fakeSubscriptionName = 'bogus';
+      Twin.fromDeviceClient(client, function(err) {
+        assert.instanceOf(err, errors.TimeoutError);
+        done();
+      });
+    });
+
+    it ('relies on clearTimeout(null) not excepting or crashing', function(done) {
+      clearTimeout(null);
+      done();
+    });
   });
+    
   describe('_sendTwinRequest', function () {
     var receiver;
     var transport;
@@ -227,7 +253,6 @@ describe('Twin', function () {
     });
 
     /* Tests_SRS_NODE_DEVICE_TWIN_18_016: [** `_sendTwinRequest` shall use the `sendTwinRequest` method on the transport to send the request **]**  */
-    /* Tests_SRS_NODE_DEVICE_TWIN_18_018: [** The response handler shall ignore any messages that dont have an `rid` that matches the `rid` of the request **]**   */
     /* Tests_SRS_NODE_DEVICE_TWIN_18_019: [** `_sendTwinRequest` shall call `done` with `err`=`null` if the response event returns `status`===200 or 204 **]**   */
     it ('uses the right parameters', function(done) {
       twin._sendTwinRequest('fake_method', 'fake_resource', {}, 'fake_body', function(err) {
@@ -236,6 +261,15 @@ describe('Twin', function () {
         assert.equal(sendTwinRequest.firstCall.args[0], 'fake_method');
         assert.equal(sendTwinRequest.firstCall.args[1], 'fake_resource');
         assert.equal(sendTwinRequest.firstCall.args[3], 'fake_body');
+        done();
+      });
+    });
+
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_018: [** The response handler shall ignore any messages that dont have an `rid` that matches the `rid` of the request **]**   */
+    it ('ignores non-matching responses', function(done) {
+      transport.responseId = 10;
+      twin._sendTwinRequest('fake_method', 'fake_resource', {}, 'fake_body', function(err) {
+        assert.instanceOf(err, errors.TimeoutError);
         done();
       });
     });
