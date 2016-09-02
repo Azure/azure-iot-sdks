@@ -14,6 +14,7 @@ describe('translateError', function() {
   /*Tests_SRS_NODE_DEVICE_AMQP_COMMON_ERRORS_16_006: [`translateError` shall return an `DeviceNotFoundError` if the AMQP error condition is `amqp:not-found`.]*/
   /*Tests_SRS_NODE_DEVICE_AMQP_COMMON_ERRORS_16_007: [`translateError` shall return an `MessageTooLargeError` if the AMQP error condition is `amqp:link-message-size-exceeded`.]*/
   /*Tests_SRS_NODE_DEVICE_AMQP_COMMON_ERRORS_16_008: [`translateError` shall return an `InternalServerError` if the AMQP error condition is `amqp:internal-error`.]*/
+  /*Tests_SRS_NODE_DEVICE_AMQP_COMMON_ERRORS_16_011: [`translateError` shall return an `IotHubQuotaExceededError` if the AMQP error condition is `amqp:resource-limit-exceeded`.]*/
   /*Tests_SRS_NODE_DEVICE_AMQP_COMMON_ERRORS_16_009: [`translateError` shall return an `ServiceUnavailableError` if the AMQP error condition is `com.microsoft:timeout`.]*/
   [
     { errorDescription: 'com.microsoft:argument-out-of-range', errorMessage: 'Fake bad request', expectedErrorType: errors.ArgumentError },
@@ -21,6 +22,7 @@ describe('translateError', function() {
     { errorDescription: 'amqp:not-found', errorMessage: 'Fake not found', expectedErrorType: errors.DeviceNotFoundError },
     { errorDescription: 'amqp:link-message-size-exceeded', errorMessage: 'Fake request too large', expectedErrorType: errors.MessageTooLargeError },
     { errorDescription: 'amqp:internal-error', errorMessage: 'Fake internal server error', expectedErrorType: errors.InternalServerError },
+    { errorDescription: 'amqp:resource-limit-exceeded', errorMessage: 'Fake quota exceeded error', expectedErrorType: errors.IotHubQuotaExceededError },
     { errorDescription: 'com.microsoft:timeout', errorMessage: 'Fake server unavailable', expectedErrorType: errors.ServiceUnavailableError },
     { errorDescription: 'unknown', errorMessage: 'Unknown error', expectedErrorType: Error }
   ].forEach(function(testParams) {

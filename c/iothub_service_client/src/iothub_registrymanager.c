@@ -30,18 +30,18 @@
 
 DEFINE_ENUM(IOTHUB_REQUEST_MODE, IOTHUB_REQUEST_MODE_VALUES);
 
-static const char* HTTP_HEADER_KEY_AUTHORIZATION = "Authorization";
-static const char* HTTP_HEADER_VAL_AUTHORIZATION = " ";
-static const char* HTTP_HEADER_KEY_REQUEST_ID = "Request-Id";
-static const char* HTTP_HEADER_VAL_REQUEST_ID = "1001";
-static const char* HTTP_HEADER_KEY_USER_AGENT = "User-Agent";
-static const char* HTTP_HEADER_VAL_USER_AGENT = "Microsoft.Azure.Devices/1.0.0";
-static const char* HTTP_HEADER_KEY_ACCEPT = "Accept";
-static const char* HTTP_HEADER_VAL_ACCEPT = "application/json";
-static const char* HTTP_HEADER_KEY_CONTENT_TYPE = "Content-Type";
-static const char* HTTP_HEADER_VAL_CONTENT_TYPE = "application/json; charset=utf-8";
-static const char* HTTP_HEADER_KEY_IFMATCH = "If-Match";
-static const char* HTTP_HEADER_VAL_IFMATCH = "*";
+#define  HTTP_HEADER_KEY_AUTHORIZATION  "Authorization"
+#define  HTTP_HEADER_VAL_AUTHORIZATION  " "
+#define  HTTP_HEADER_KEY_REQUEST_ID  "Request-Id"
+#define  HTTP_HEADER_VAL_REQUEST_ID  "1001"
+#define  HTTP_HEADER_KEY_USER_AGENT  "User-Agent"
+#define  HTTP_HEADER_VAL_USER_AGENT  "Microsoft.Azure.Devices/1.0.0"
+#define  HTTP_HEADER_KEY_ACCEPT  "Accept"
+#define  HTTP_HEADER_VAL_ACCEPT  "application/json"
+#define  HTTP_HEADER_KEY_CONTENT_TYPE  "Content-Type"
+#define  HTTP_HEADER_VAL_CONTENT_TYPE  "application/json; charset=utf-8"
+#define  HTTP_HEADER_KEY_IFMATCH  "If-Match"
+#define  HTTP_HEADER_VAL_IFMATCH  "*"
 
 static size_t IOTHUB_DEVICES_MAX_REQUEST = 1000;
 
@@ -110,13 +110,13 @@ static BUFFER_HANDLE constructDeviceJson(const IOTHUB_DEVICE* deviceInfo)
     if (deviceInfo == NULL)
     {
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
-        LogError("json_value_init_object failed");
+        LogError("deviceInfo cannot be null");
         result = NULL;
     }
     else if (deviceInfo->deviceId == NULL)
     {
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
-        LogError("json_value_init_object failed");
+        LogError("Device id cannot be NULL");
         result = NULL;
     }
     if ((root_value = json_value_init_object()) == NULL)
@@ -163,7 +163,7 @@ static BUFFER_HANDLE constructDeviceJson(const IOTHUB_DEVICE* deviceInfo)
             if ((result = BUFFER_create((const unsigned char*)serialized_string, strlen(serialized_string))) == NULL)
             {
                 /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_013: [ IoTHubRegistryManager_CreateDevice shall return IOTHUB_REGISTRYMANAGER_ERROR_CREATING_JSON if the JSON creation failed  ] */
-                LogError("json_serialize_to_string failed");
+                LogError("Buffer_Create failed");
                 result = NULL;
             }
             json_free_serialized_string(serialized_string);
@@ -177,7 +177,8 @@ static BUFFER_HANDLE constructDeviceJson(const IOTHUB_DEVICE* deviceInfo)
         BUFFER_delete(result);
         result = NULL;
     }
-    json_value_free(root_value);
+    if(root_value != NULL)
+        json_value_free(root_value);
 
     return result;
 }
@@ -185,23 +186,6 @@ static BUFFER_HANDLE constructDeviceJson(const IOTHUB_DEVICE* deviceInfo)
 static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceJson(BUFFER_HANDLE jsonBuffer, IOTHUB_DEVICE* deviceInfo)
 {
     IOTHUB_REGISTRYMANAGER_RESULT result;
-
-    deviceInfo->deviceId = NULL;
-    deviceInfo->primaryKey = NULL;
-    deviceInfo->secondaryKey = NULL;
-    deviceInfo->generationId = NULL;
-    deviceInfo->eTag = NULL;
-    deviceInfo->connectionState = IOTHUB_DEVICE_CONNECTION_STATE_DISCONNECTED;
-    deviceInfo->connectionStateUpdatedTime = NULL;
-    deviceInfo->status = IOTHUB_DEVICE_STATUS_DISABLED;
-    deviceInfo->statusReason = NULL;
-    deviceInfo->statusUpdatedTime = NULL;
-    deviceInfo->lastActivityTime = NULL;
-    deviceInfo->cloudToDeviceMessageCount = 0;
-    deviceInfo->isManaged = false;
-    deviceInfo->configuration = NULL;
-    deviceInfo->deviceProperties = NULL;
-    deviceInfo->serviceProperties = NULL;
 
     /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_024: [ If the deviceInfo out parameter is not NULL IoTHubRegistryManager_CreateDevice shall save the received deviceInfo to the out parameter and return IOTHUB_REGISTRYMANAGER_OK ] */
     /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_033: [ IoTHubRegistryManager_GetDevice shall verify the received HTTP status code and if it is less or equal than 300 then try to parse the response JSON to deviceInfo for the following properties: deviceId, primaryKey, secondaryKey, generationId, eTag, connectionState, connectionstateUpdatedTime, status, statusReason, statusUpdatedTime, lastActivityTime, cloudToDeviceMessageCount ] */
@@ -226,6 +210,23 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceJson(BUFFER_HANDLE jsonBuffer, I
         JSON_Value* root_value = NULL;
         JSON_Object* root_object = NULL;
         JSON_Status jsonStatus;
+
+        deviceInfo->deviceId = NULL;
+        deviceInfo->primaryKey = NULL;
+        deviceInfo->secondaryKey = NULL;
+        deviceInfo->generationId = NULL;
+        deviceInfo->eTag = NULL;
+        deviceInfo->connectionState = IOTHUB_DEVICE_CONNECTION_STATE_DISCONNECTED;
+        deviceInfo->connectionStateUpdatedTime = NULL;
+        deviceInfo->status = IOTHUB_DEVICE_STATUS_DISABLED;
+        deviceInfo->statusReason = NULL;
+        deviceInfo->statusUpdatedTime = NULL;
+        deviceInfo->lastActivityTime = NULL;
+        deviceInfo->cloudToDeviceMessageCount = 0;
+        deviceInfo->isManaged = false;
+        deviceInfo->configuration = NULL;
+        deviceInfo->deviceProperties = NULL;
+        deviceInfo->serviceProperties = NULL;
 
         if ((bufferStr = (const char*)BUFFER_u_char(jsonBuffer)) == NULL)
         {
@@ -380,6 +381,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceJson(BUFFER_HANDLE jsonBuffer, I
             LogError("json_object_clear failed");
             result = IOTHUB_REGISTRYMANAGER_JSON_ERROR;
         }
+
         json_value_free(root_value);
 
         if (result != IOTHUB_REGISTRYMANAGER_OK)
@@ -387,50 +389,62 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceJson(BUFFER_HANDLE jsonBuffer, I
             if (deviceInfo->deviceId != NULL)
             {
                 free((void*)deviceInfo->deviceId);
+                deviceInfo->deviceId = NULL;
             }
             if (deviceInfo->primaryKey != NULL)
             {
                 free((void*)deviceInfo->primaryKey);
+                deviceInfo->primaryKey = NULL;
             }
             if (deviceInfo->secondaryKey != NULL)
             {
                 free((void*)deviceInfo->secondaryKey);
+                deviceInfo->secondaryKey = NULL;
             }
             if (deviceInfo->generationId != NULL)
             {
                 free((void*)deviceInfo->generationId);
+                deviceInfo->generationId = NULL;
             }
             if (deviceInfo->eTag != NULL)
             {
                 free((void*)deviceInfo->eTag);
+                deviceInfo->eTag = NULL;
             }
             if (deviceInfo->connectionStateUpdatedTime != NULL)
             {
                 free((void*)deviceInfo->connectionStateUpdatedTime);
+                deviceInfo->connectionStateUpdatedTime = NULL;
             }
             if (deviceInfo->statusReason != NULL)
             {
                 free((void*)deviceInfo->statusReason);
+                deviceInfo->statusReason = NULL;
             }
             if (deviceInfo->statusUpdatedTime != NULL)
             {
                 free((void*)deviceInfo->statusUpdatedTime);
+                deviceInfo->statusUpdatedTime = NULL;
             }
             if (deviceInfo->lastActivityTime != NULL)
             {
                 free((void*)deviceInfo->lastActivityTime);
+                deviceInfo->lastActivityTime = NULL;
             }
             if (deviceInfo->configuration != NULL)
             {
                 free((void*)deviceInfo->configuration);
+                deviceInfo->configuration = NULL;
             }
             if (deviceInfo->deviceProperties != NULL)
             {
                 free((void*)deviceInfo->deviceProperties);
+                deviceInfo->deviceProperties = NULL;
             }
             if (deviceInfo->serviceProperties != NULL)
             {
                 free((void*)deviceInfo->serviceProperties);
+                deviceInfo->serviceProperties = NULL;
             }
         }
     }
@@ -1383,16 +1397,18 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDevice(IOTHUB_REGISTRYMAN
             /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_035: [ If the JSON parsing failed, IoTHubRegistryManager_GetDevice shall return IOTHUB_REGISTRYMANAGER_JSON_ERROR ] */
             /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_036: [ If the received JSON is empty, IoTHubRegistryManager_GetDevice shall return IOTHUB_REGISTRYMANAGER_DEVICE_NOT_EXIST ] */
             /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_037: [ If the deviceInfo out parameter if not NULL IoTHubRegistryManager_GetDevice shall save the received deviceInfo to the out parameter and return IOTHUB_REGISTRYMANAGER_OK ] */
-            result = parseDeviceJson(responseBuffer, deviceInfo);
+            if ((result = parseDeviceJson(responseBuffer, deviceInfo)) == IOTHUB_REGISTRYMANAGER_OK)
+            {
 
-            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_036: [ If the received JSON is empty, IoTHubRegistryManager_GetDevice shall return IOTHUB_REGISTRYMANAGER_DEVICE_NOT_EXIST ] */
-            if ((deviceInfo == NULL) || (deviceInfo->deviceId == NULL))
-            {
-                result = IOTHUB_REGISTRYMANAGER_DEVICE_NOT_EXIST;
-            }
-            else
-            {
-                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_037: [ If the deviceInfo out parameter if not NULL IoTHubRegistryManager_GetDevice shall save the received deviceInfo to the out parameter and return IOTHUB_REGISTRYMANAGER_OK ] */
+                /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_036: [ If the received JSON is empty, IoTHubRegistryManager_GetDevice shall return IOTHUB_REGISTRYMANAGER_DEVICE_NOT_EXIST ] */
+                if ((deviceInfo == NULL) || (deviceInfo->deviceId == NULL))
+                {
+                    result = IOTHUB_REGISTRYMANAGER_DEVICE_NOT_EXIST;
+                }
+                else
+                {
+                    /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_037: [ If the deviceInfo out parameter if not NULL IoTHubRegistryManager_GetDevice shall save the received deviceInfo to the out parameter and return IOTHUB_REGISTRYMANAGER_OK ] */
+                }
             }
         }
 
