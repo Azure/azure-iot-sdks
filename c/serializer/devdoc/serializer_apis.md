@@ -265,9 +265,14 @@ int main(void)
 INGEST_DESIRED_PROPERTIES(modelInstance, DESIRED_PROPERTIES_AS_JSON)
 ```
 
-Arguments: 
+`INGEST_DESIRED_PROPERTIES` shall populate desired properties with values from the JSON.
+
+__Arguments:__ 
 - `modelInstance` is a previous model instance created by `CREATE_MODEL_INSTANCE` macro;
 - `DESIRED_PROPERTIES_AS_JSON` is a `const char*` pointer pointing to a null terminated string. 
+
+__Returns__:
+`INGEST_DESIRED_PROPERTIES` returns `CODEFIRST_OK` if success, any other error indicates failure.
 
 __Example__:
 ```c
@@ -276,6 +281,7 @@ DECLARE_MODEL(Car,
     WITH_DESIRED_PROPERTY(ascii_char_ptr, firmwareVersionAsString)
     ...
     );
+
 int main(void)
 {
     (int)serializer_init(NULL);
@@ -285,6 +291,9 @@ int main(void)
     INGEST_DESIRED_PROPERTIES(car, "{\"softwareVersion\":3, \"firmwareVersionAsString\":\"the firmware 0.1\"}");
     ...
 }
+
+
+
 
 ## SERIALIZER APIs
 
