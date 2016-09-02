@@ -77,8 +77,8 @@ Twin.prototype._subscribe = function(done) {
   var receiver = twin._receiver;
 
   /* Codes_SRS_NODE_DEVICE_TWIN_18_011: [** `fromDeviceClient` shall call the `done` callback with `err`=`null` if it receives a `subscribed` event for the `response` topic. **]**  */
-  var handleSubscribed = function(eventname) {
-    if (eventname === Twin.responseEvent) {
+  var handleSubscribed = function(obj) {
+    if (obj.eventName === Twin.responseEvent) {
       cleanupAndReturn(null, twin);
     }
   };
@@ -109,7 +109,7 @@ Twin.prototype._subscribe = function(done) {
   receiver.on(Twin.subscribedEvent, handleSubscribed);
   receiver.on(Twin.errorEvent, handleError);
 
-/* Codes_SRS_NODE_DEVICE_TWIN_18_009: [** `fromDeviceClient` shall call the `done` callback passing a `TimeoutError` if it has not received a `subscribed` event within `Twin.timeout` milliseconds. **]**  */
+  /* Codes_SRS_NODE_DEVICE_TWIN_18_009: [** `fromDeviceClient` shall call the `done` callback passing a `TimeoutError` if it has not received a `subscribed` event within `Twin.timeout` milliseconds. **]**  */
   timeout = setTimeout(function() {
     cleanupAndReturn(new errors.TimeoutError('subscription to twin messages timed out'), null);
   }, Twin.timeout);

@@ -29,7 +29,7 @@ var FakeReceiver = function() {
           if (self.forceError) {
             self.emit('error', new Error('failed to subscribe to ' + eventname))                               ;
           } else if (self.successfulSubscription) {
-            self.emit('subscribed', eventname);
+            self.emit('subscribed', {eventName: eventname});
           }
           // else time out
         }
