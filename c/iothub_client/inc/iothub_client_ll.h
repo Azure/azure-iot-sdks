@@ -78,17 +78,17 @@ DEFINE_ENUM(IOTHUB_PROCESS_ITEM_RESULT, IOTHUB_PROCESS_ITEM_RESULT_VALUE);
 #include <stddef.h>
 #include <stdint.h>
 
-typedef struct IOTHUB_IOTHUB_METHOD_PROPERTY_TAG
+typedef struct IOTHUB_CLIENT_DEVICE_METHOD_PROPERTY_TAG
 {
     const char* key;
     const char* value;
-} IOTHUB_IOTHUB_METHOD_PROPERTY;
+} IOTHUB_CLIENT_DEVICE_METHOD_PROPERTY;
 
-typedef struct IOTHUB_CLIENT_METHOD_PROPERTIES_TAG
+typedef struct IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES_TAG
 {
     size_t size;
-    IOTHUB_IOTHUB_METHOD_PROPERTY* properties;
-} IOTHUB_CLIENT_METHOD_PROPERTIES;
+    IOTHUB_CLIENT_DEVICE_METHOD_PROPERTY* properties;
+} IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES;
 
 #define IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_VALUES \
     IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_SUCCESS,   \
@@ -144,8 +144,7 @@ extern "C"
 
     typedef void(*IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback);
     typedef void(*IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)(int status_code, void* userContextCallback);
-    typedef void(*IOTHUB_CLIENT_IOTHUB_METHOD_CALLBACK_ASYNC)(IOTHUB_CLIENT_METHOD_PROPERTIES properties, const unsigned char* payload, void* userContextCallback);
-    typedef void(*IOTHUB_CLIENT_IOTHUB_METHOD_EXECUTE_CALLBACK)(IOTHUB_CLIENT_IOTHUB_METHOD_STATUS status, IOTHUB_CLIENT_METHOD_PROPERTIES properties, const unsigned char* payload, void* userContextCallback);
+    typedef void(*IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC)(IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES properties, const unsigned char* payload, size_t size, void* userContextCallback);
 
     /** @brief	This struct captures IoTHub client configuration. */
     typedef struct IOTHUB_CLIENT_CONFIG_TAG
@@ -423,29 +422,13 @@ extern "C"
      * @brief	This API sets callback for cloud to device method call.
      *
      * @param	iotHubClientHandle		The handle created by a call to the create function.
-     * @param	iotHubMethodCallback	The callback which will be called by IoTHub.
+     * @param	deviceMethodCallback	The callback which will be called by IoTHub.
      * @param	userContextCallback		User specified context that will be provided to the
      * 									callback. This can be @c NULL.
      *
      * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
      */
-     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetIoTHubMethodCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_IOTHUB_METHOD_CALLBACK_ASYNC, iotHubMethodCallback, void*, userContextCallback);
-
-     /**
-     * @brief	This API executes the given method on IoTHub and return the result to the client.
-     *
-     * @param	iotHubClientHandle		The handle created by a call to the create function.
-     * @param	verb                    Optional parameter in topic to serialize corresponding system properties.
-     * @param	resource        		Optional parameter in topic to serialize corresponding system properties.
-     * @param	properties        		Serialized message properites
-     * @param	payload         		Binary message payload
-     * @param	iotHubExecuteCallback	The callback which will be called with the result of function executed on IoTHub.
-     * @param	userContextCallback		User specified context that will be provided to the
-     * 									callback. This can be @c NULL.
-     *
-     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
-     */
-     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_ExecuteIoTHubMethod, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const char*, verb, const char*, resource, IOTHUB_CLIENT_METHOD_PROPERTIES, properties, const unsigned char*, payload, IOTHUB_CLIENT_IOTHUB_METHOD_EXECUTE_CALLBACK, iotHubExecuteCallback, void*, userContextCallback);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetDeviceMethodCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, deviceMethodCallback, void*, userContextCallback);
 
 #ifndef DONT_USE_UPLOADTOBLOB
     /**

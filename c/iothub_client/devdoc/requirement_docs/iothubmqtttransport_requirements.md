@@ -1,9 +1,11 @@
-IoTHubMQTTTransport Requirements
+
+# IoTHubMQTTTransport Requirements
 ================
 
 ## Overview
 
 IoTHubMQTTTransport is the library that enables communications with the iothub system using the MQTT protocol. 
+
 
 ## Exposed API
 
@@ -12,10 +14,13 @@ extern const TRANSPORT_PROVIDER* MQTT_Protocol(void);
 ```
 
   The following static functions are provided in the fields of the TRANSPORT_PROVIDER structure:
+
+    - IoTHubTransportMqtt_Subscribe_DeviceMethod,
+    - IoTHubTransportMqtt_Unsubscribe_DeviceMethod,
     - IoTHubTransportMqtt_Subscribe_DeviceTwin,
     - IoTHubTransportMqtt_Unsubscribe_DeviceTwin,
     - IoTHubTransportMqtt_ProcessItem,
-	  - IoTHubTransportMqtt_GetHostname,
+    - IoTHubTransportMqtt_GetHostname,
     - IoTHubTransportMqtt_SetOption,
     - IoTHubTransportMqtt_Create,
     - IoTHubTransportMqtt_Destroy,
@@ -25,8 +30,8 @@ extern const TRANSPORT_PROVIDER* MQTT_Protocol(void);
     - IoTHubTransportMqtt_Unsubscribe,
     - IoTHubTransportMqtt_DoWork,
     - IoTHubTransportMqtt_GetSendStatus
-## IoTHubTransportMqtt_Create
 
+## IoTHubTransportMqtt_Create
 ```c
 TRANSPORT_LL_HANDLE IoTHubTransportMqtt_Create(const IOTHUBTRANSPORT_CONFIG* config)
 ```
@@ -97,13 +102,25 @@ int IoTHubTransportMqtt_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB
 ### IoTHubTransportMqtt_Unsubscribe_DeviceTwin
 
 ```c
-
 void IoTHubTransportMqtt_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state)
 ```
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_048: [**If the parameter 'handle' is NULL than IoTHubTransportMqtt_Unsubscribe_DeviceTwin shall do nothing.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_049: [**If 'subscribe_state' is set to IOTHUB_DEVICE_TWIN_DESIRED_STATE then IoTHubTransportMqtt_Unsubscribe_DeviceTwin shall send the get state topic to the mqtt client.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_050: [**If 'subscribe_state' is set to IOTHUB_DEVICE_TWIN_NOTIFICATION_STATE then IoTHubTransportMqtt_Unsubscribe_DeviceTwin shall send the notify state topic to the mqtt client.**]**  
+
+### IoTHubTransportMqtt_Subscribe_DeviceMethod
+
+```c
+int IoTHubTransportMqtt_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+```
+Not implemented (yet)
+
+### IoTHubTransportMqtt_Unsubscribe_DeviceMethod
+```c
+void IoTHubTransportMqtt_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+```
+Not implemented (yet)
 
 ### IoTHubTransportMqtt_Subscribe
 
@@ -196,6 +213,8 @@ const TRANSPORT_PROVIDER* MQTT_Protocol(void)
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_022: [**This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for it’s fields:
 
+IoTHubTransport_Subscribe_DeviceMethod = IoTHubTransportMqtt_Subscribe_DeviceMethod
+IoTHubTransport_Unsubscribe_DeviceMethod = IoTHubTransportMqtt_Unsubscribe_DeviceMethod
 IoTHubTransport_Subscribe_DeviceTwin = IoTHubTransportMqtt_Subscribe_DeviceTwin  
 IoTHubTransport_Unsubscribe_DeviceTwin = IoTHubTransportMqtt_Unsubscribe_DeviceTwin  
 IoTHubTransport_ProcessItem - IoTHubTransportMqtt_ProcessItem  

@@ -921,6 +921,20 @@ static void IoTHubTransportHttp_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE hand
     LogError("IoTHubTransportHttp_Unsubscribe_DeviceTwin Not supported");
 }
 
+static int IoTHubTransportHttp_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+{
+    (void)handle;
+    int result = __LINE__;
+    LogError("not implemented (yet)");
+    return result;
+}
+
+static void IoTHubTransportHttp_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+{
+    (void)handle;
+    LogError("not implemented (yet)");
+}
+
 /*produces a representation of the properties, if they exist*/
 /*if they do not exist, produces ""*/
 static int concat_Properties(STRING_HANDLE existing, MAP_HANDLE map, size_t* propertiesMessageSizeContribution)
@@ -2192,19 +2206,21 @@ static STRING_HANDLE IoTHubTransportHttp_GetHostname(TRANSPORT_LL_HANDLE handle)
 /*Codes_SRS_TRANSPORTMULTITHTTP_17_125: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:] */
 static TRANSPORT_PROVIDER thisTransportProvider =
 {
-    IoTHubTransportHttp_Subscribe_DeviceTwin, /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin; */
-    IoTHubTransportHttp_Unsubscribe_DeviceTwin, /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin; */
-    IoTHubTransportHttp_ProcessItem, /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem */
-    IoTHubTransportHttp_GetHostname, /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname; */
-    IoTHubTransportHttp_SetOption, /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;       */
-    IoTHubTransportHttp_Create, /*pfIoTHubTransport_Create IoTHubTransport_Create;                                                  */
-    IoTHubTransportHttp_Destroy, /*pfIoTHubTransport_Destroy IoTHubTransport_Destroy;                                                */
-    IoTHubTransportHttp_Register, /* pfIotHubTransport_Register IoTHubTransport_Register; */
-    IoTHubTransportHttp_Unregister, /* pfIotHubTransport_Unregister IoTHubTransport_Unegister; */
-    IoTHubTransportHttp_Subscribe, /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;                                            */
-    IoTHubTransportHttp_Unsubscribe, /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;                                        */
-    IoTHubTransportHttp_DoWork, /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork; */
-    IoTHubTransportHttp_GetSendStatus /* pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus */
+    IoTHubTransportHttp_Subscribe_DeviceMethod,     /*pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;*/
+    IoTHubTransportHttp_Unsubscribe_DeviceMethod,   /*pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMethod;*/
+    IoTHubTransportHttp_Subscribe_DeviceTwin,       /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;*/
+    IoTHubTransportHttp_Unsubscribe_DeviceTwin,     /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;*/
+    IoTHubTransportHttp_ProcessItem,                /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;*/
+    IoTHubTransportHttp_GetHostname,                /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;*/
+    IoTHubTransportHttp_SetOption,                  /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;*/
+    IoTHubTransportHttp_Create,                     /*pfIoTHubTransport_Create IoTHubTransport_Create;*/
+    IoTHubTransportHttp_Destroy,                    /*pfIoTHubTransport_Destroy IoTHubTransport_Destroy;*/
+    IoTHubTransportHttp_Register,                   /*pfIotHubTransport_Register IoTHubTransport_Register;*/
+    IoTHubTransportHttp_Unregister,                 /*pfIotHubTransport_Unregister IoTHubTransport_Unegister;*/
+    IoTHubTransportHttp_Subscribe,                  /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;*/
+    IoTHubTransportHttp_Unsubscribe,                /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;*/
+    IoTHubTransportHttp_DoWork,                     /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;*/
+    IoTHubTransportHttp_GetSendStatus               /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
 };
 
 const TRANSPORT_PROVIDER* HTTP_Protocol(void)

@@ -602,20 +602,20 @@ IoTHubClient_LL_ReportedStateComplete is a function only called by the transport
 
 
 
-## IoTHubClient_LL_SetIoTHubMethodCallback
+## IoTHubClient_LL_SetDeviceMethodCallback
 
 ```c
-extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetIoTHubMethodCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_METHOD_CALLBACK_ASYNC iotHubMethodCallback, void* userContextCallback)
+extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceMethodCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback)
 ```
 
-**SRS_IOTHUBCLIENT_LL_12_017: [** `IoTHubClient_LL_SetIoTHubMethodCallback` shall fail and return `IOTHUB_CLIENT_INVALID_ARG` if parameter `iotHubClientHandle` is `NULL`. **]**
+**SRS_IOTHUBCLIENT_LL_12_017: [** `IoTHubClient_LL_SetDeviceMethodCallback` shall fail and return `IOTHUB_CLIENT_INVALID_ARG` if parameter `iotHubClientHandle` is `NULL`. **]**
 
-**SRS_IOTHUBCLIENT_LL_12_018: [** If `iotHubMethodCallback` is `NULL`, then `IoTHubClient_LL_SetIoTHubMethodCallback` shall call the underlying layer's `IoTHubTransport_Unsubscribe_C2D_Method` function and return `IOTHUB_CLIENT_OK`. **]**
+**SRS_IOTHUBCLIENT_LL_12_018: [** If `deviceMethodCallback` is `NULL`, then `IoTHubClient_LL_SetDeviceMethodCallback` shall call the underlying layer's `IoTHubTransport_Unsubscribe_DeviceMethod` function and return `IOTHUB_CLIENT_OK`. **]**
 
-**SRS_IOTHUBCLIENT_LL_12_019: [** If `iotHubMethodCallback` is not `NULL`, then `IoTHubClient_LL_SetIoTHubMethodCallback` shall call the underlying layer's `IoTHubTransport_Subscribe_C2D_Method` function. **]**
+**SRS_IOTHUBCLIENT_LL_12_019: [** If `deviceMethodCallback` is not `NULL`, then `IoTHubClient_LL_SetDeviceMethodCallback` shall call the underlying layer's `IoTHubTransport_Subscribe_DeviceMethod` function. **]**
 
-**SRS_IOTHUBCLIENT_LL_12_020: [** If the underlying layer's `_Subscribe` function fails, then `IoTHubClient_LL_SetIoTHubMethodCallback` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
+**SRS_IOTHUBCLIENT_LL_12_020: [** If the underlying layer's `IoTHubTransport_Subscribe_DeviceMethod` function fails, then `IoTHubClient_LL_SetDeviceMethodCallback` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
 
-**SRS_IOTHUBCLIENT_LL_12_021: [** If adding the information fails for any reason, `IoTHubClient_LL_SetIoTHubMethodCallback` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
+**SRS_IOTHUBCLIENT_LL_12_021: [** If adding the information fails for any reason, `IoTHubClient_LL_SetDeviceMethodCallback` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
 
-**SRS_IOTHUBCLIENT_LL_12_022: [** Otherwise `IoTHubClient_LL_SetIoTHubMethodCallback` shall succeed and return `IOTHUB_CLIENT_OK`. **]**
+**SRS_IOTHUBCLIENT_LL_12_022: [** Otherwise `IoTHubClient_LL_SetDeviceMethodCallback` shall succeed and return `IOTHUB_CLIENT_OK`. **]**

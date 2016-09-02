@@ -36,6 +36,50 @@ extern "C" void gballoc_free(void* ptr);
 
 DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
 
+// Overloading operators for Micromock
+static bool operator==(IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES left, const IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES right)
+{
+    bool areEqual = true;
+
+    if (left.size == right.size)
+    {
+        if ((left.properties == NULL) && (right.properties != NULL))
+        {
+            areEqual = false;
+        }
+        if ((left.properties != NULL) && (right.properties == NULL))
+        {
+            areEqual = false;
+        }
+        if ((left.properties != NULL) && (right.properties != NULL))
+        {
+            for (size_t i = 0; i < left.size; i++)
+            {
+                if (strcmp(left.properties[i].key, right.properties[i].key) != 0)
+                {
+                    areEqual = false;
+                    break;
+                }
+                if (strcmp(left.properties[i].value, right.properties[i].value) != 0)
+                {
+                    areEqual = false;
+                    break;
+                }
+            }
+        }
+    }
+    else
+    {
+        areEqual = false;
+    }
+    return areEqual;
+}
+
+static std::ostream& operator<<(std::ostream& left, const IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES properties)
+{
+    return left << "struct IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES size = ([length=" << properties.size << " bytes] )";
+}
+
 namespace BASEIMPLEMENTATION
 {
 #define Lock(x) (LOCK_OK + gballocState - gballocState) /*compiler warning about constant in if condition*/
@@ -240,6 +284,15 @@ public:
     }
     MOCK_METHOD_END(TRANSPORT_LL_HANDLE, result2)
 
+        MOCK_STATIC_METHOD_1(, int, FAKE_IoTHubTransport_Subscribe_DeviceMethod, IOTHUB_DEVICE_HANDLE, handle)
+        MOCK_METHOD_END(int, 0)
+
+        MOCK_STATIC_METHOD_1(, void, FAKE_IoTHubTransport_Unsubscribe_DeviceMethod, IOTHUB_DEVICE_HANDLE, handle)
+        MOCK_VOID_METHOD_END()
+
+        MOCK_STATIC_METHOD_4(, void, deviceMethodCallback, IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES, properties, const unsigned char*, payload, size_t, size, void*, userContextCallback)
+        MOCK_VOID_METHOD_END()
+
         MOCK_STATIC_METHOD_2(, int, FAKE_IoTHubTransport_Subscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_DEVICE_TWIN_STATE, subscribe_state)
         MOCK_METHOD_END(int, 0)
         
@@ -376,7 +429,11 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , PDLIST_ENTRY, DList_RemoveH
 
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void*, gballoc_malloc, size_t, size);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientLLMocks, , void*, gballoc_realloc, void*, ptr, size_t, size);
-DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, gballoc_free, void*, ptr)
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, gballoc_free, void*, ptr);
+
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , int, FAKE_IoTHubTransport_Subscribe_DeviceMethod, IOTHUB_DEVICE_HANDLE, handle);
+DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, FAKE_IoTHubTransport_Unsubscribe_DeviceMethod, IOTHUB_DEVICE_HANDLE, handle);
+DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubClientLLMocks, , void, deviceMethodCallback, IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES, properties, const unsigned char*, payload, size_t, size, void*, userContextCallback);
 
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientLLMocks, , int, FAKE_IoTHubTransport_Subscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_DEVICE_TWIN_STATE, subscribe_state);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientLLMocks, , void, FAKE_IoTHubTransport_Unsubscribe_DeviceTwin, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_DEVICE_TWIN_STATE, subscribe_state);
@@ -430,6 +487,8 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientLLMocks, , void, IoTHubClient_LL_Uploa
 
 static TRANSPORT_PROVIDER FAKE_transport_provider =
 {
+    FAKE_IoTHubTransport_Subscribe_DeviceMethod, /*pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;*/
+    FAKE_IoTHubTransport_Unsubscribe_DeviceMethod, /*pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMethod;*/
     FAKE_IoTHubTransport_Subscribe_DeviceTwin, /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin; */
     FAKE_IoTHubTransport_Unsubscribe_DeviceTwin, /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin; */
     FAKE_IoTHubTransport_ProcessItem,   /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem     */
@@ -4868,6 +4927,88 @@ TEST_FUNCTION(IoTHubClient_LL_DoWork_SendReportedState_continue_processing_succe
 
     ///cleanup
     IoTHubClient_LL_Destroy(h);
+}
+
+/*Tests_SRS_IOTHUBCLIENT_LL_12_017: [ `IoTHubClient_LL_SetDeviceMethodCallback` shall fail and return `IOTHUB_CLIENT_INVALID_ARG` if parameter `iotHubClientHandle` is `NULL`. ]*/
+TEST_FUNCTION(IoTHubClient_LL_SetDeviceMethodCallback_with_NULL_iotHubClientHandle_fails)
+{
+    ///arrange
+    CIoTHubClientLLMocks mocks;
+
+    ///act
+    auto result = IoTHubClient_LL_SetDeviceMethodCallback(NULL, deviceMethodCallback, (void*)1);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+    mocks.AssertActualAndExpectedCalls();
+}
+
+/*Tests_SRS_IOTHUBCLIENT_LL_12_018: [ If `deviceMethodCallback` is `NULL`, then `IoTHubClient_LL_SetDeviceMethodCallback` shall call the underlying layer's `IoTHubTransport_Unsubscribe_DeviceMethod` function and return `IOTHUB_CLIENT_OK`. ]*/
+TEST_FUNCTION(IoTHubClient_LL_SetDeviceMethodCallback_with_NULL_callback_Unsubscribe_and_succeeds)
+{
+    ///arrange
+    CIoTHubClientLLMocks mocks;
+    auto handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+    mocks.ResetAllCalls();
+
+    STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Unsubscribe_DeviceMethod(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    ///act
+    auto result = IoTHubClient_LL_SetDeviceMethodCallback(handle, NULL, (void*)1);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    mocks.AssertActualAndExpectedCalls();
+
+    ///cleanup
+    IoTHubClient_LL_Destroy(handle);
+}
+
+/*Tests_SRS_IOTHUBCLIENT_LL_12_019: [ If `deviceMethodCallback` is not `NULL`, then `IoTHubClient_LL_SetDeviceMethodCallback` shall call the underlying layer's `IoTHubTransport_Subscribe_DeviceMethod` function. ]*/
+TEST_FUNCTION(IoTHubClient_LL_SetDeviceMethodCallback_with_non_NULL_succeeds)
+{
+    ///arrange
+    CIoTHubClientLLMocks mocks;
+    auto handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+    mocks.ResetAllCalls();
+    
+    STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Subscribe_DeviceMethod(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    ///act
+    auto result = IoTHubClient_LL_SetDeviceMethodCallback(handle, deviceMethodCallback, (void*)1);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    mocks.AssertActualAndExpectedCalls();
+
+    ///cleanup
+    IoTHubClient_LL_Destroy(handle);
+}
+
+/*Tests_SRS_IOTHUBCLIENT_LL_12_020: [ If the underlying layer's `IoTHubTransport_Subscribe_DeviceMethod` function fails, then `IoTHubClient_LL_SetDeviceMethodCallback` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+/*Tests_SRS_IOTHUBCLIENT_LL_12_021: [ If adding the information fails for any reason, `IoTHubClient_LL_SetDeviceMethodCallback` shall fail and return `IOTHUB_CLIENT_ERROR`. ]*/
+TEST_FUNCTION(IoTHubClient_LL_SetDeviceMethodCallback_fails_when_underlying_transport_fails)
+{
+    ///arrange
+    CIoTHubClientLLMocks mocks;
+    auto handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+    mocks.ResetAllCalls();
+
+    STRICT_EXPECTED_CALL(mocks, FAKE_IoTHubTransport_Subscribe_DeviceMethod(IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .SetReturn(1);
+
+    ///act
+    auto result = IoTHubClient_LL_SetDeviceMethodCallback(handle, deviceMethodCallback, (void*)1);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_ERROR, result);
+    mocks.AssertActualAndExpectedCalls();
+
+    ///cleanup
+    IoTHubClient_LL_Destroy(handle);
 }
 
 /*Tests_SRS_IOTHUBCLIENT_LL_07_003: [ IoTHubClient_LL_ReportedStateComplete shall enumerate through the IOTHUB_DEVICE_TWIN structures in queue_handle. ]*/

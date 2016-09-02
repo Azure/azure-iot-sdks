@@ -1439,6 +1439,20 @@ static void IoTHubTransportMqtt_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE hand
     }
 }
 
+static int IoTHubTransportMqtt_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+{
+    (void)handle;
+    int result = __LINE__;
+    LogError("not implemented (yet)");
+    return result;
+}
+
+static void IoTHubTransportMqtt_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+{
+    (void)handle;
+    LogError("not implemented (yet)");
+}
+
 static int IoTHubTransportMqtt_Subscribe(IOTHUB_DEVICE_HANDLE handle)
 {
     int result;
@@ -1867,20 +1881,23 @@ static STRING_HANDLE IoTHubTransportMqtt_GetHostname(TRANSPORT_LL_HANDLE handle)
     return result;
 }
 
-static TRANSPORT_PROVIDER myfunc = {
-    IoTHubTransportMqtt_Subscribe_DeviceTwin,
-    IoTHubTransportMqtt_Unsubscribe_DeviceTwin,
-    IoTHubTransportMqtt_ProcessItem,
-    IoTHubTransportMqtt_GetHostname,
-    IoTHubTransportMqtt_SetOption,
-    IoTHubTransportMqtt_Create,
-    IoTHubTransportMqtt_Destroy,
-    IoTHubTransportMqtt_Register,
-    IoTHubTransportMqtt_Unregister,
-    IoTHubTransportMqtt_Subscribe,
-    IoTHubTransportMqtt_Unsubscribe,
-    IoTHubTransportMqtt_DoWork,
-    IoTHubTransportMqtt_GetSendStatus
+static TRANSPORT_PROVIDER myfunc = 
+{
+    IoTHubTransportMqtt_Subscribe_DeviceMethod,     /*pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;*/
+    IoTHubTransportMqtt_Unsubscribe_DeviceMethod,   /*pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMethod;*/
+    IoTHubTransportMqtt_Subscribe_DeviceTwin,       /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;*/
+    IoTHubTransportMqtt_Unsubscribe_DeviceTwin,     /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;*/
+    IoTHubTransportMqtt_ProcessItem,                /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;*/
+    IoTHubTransportMqtt_GetHostname,                /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;*/
+    IoTHubTransportMqtt_SetOption,                  /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;*/
+    IoTHubTransportMqtt_Create,                     /*pfIoTHubTransport_Create IoTHubTransport_Create;*/
+    IoTHubTransportMqtt_Destroy,                    /*pfIoTHubTransport_Destroy IoTHubTransport_Destroy;*/
+    IoTHubTransportMqtt_Register,                   /*pfIotHubTransport_Register IoTHubTransport_Register;*/
+    IoTHubTransportMqtt_Unregister,                 /*pfIotHubTransport_Unregister IoTHubTransport_Unegister;*/
+    IoTHubTransportMqtt_Subscribe,                  /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;*/
+    IoTHubTransportMqtt_Unsubscribe,                /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;*/
+    IoTHubTransportMqtt_DoWork,                     /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;*/
+    IoTHubTransportMqtt_GetSendStatus               /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
 };
 
 /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_022: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for it’s fields: IoTHubTransport_Create = IoTHubTransportMqtt_Create

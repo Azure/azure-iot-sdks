@@ -34,7 +34,7 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceTwinCallback(IOTHUB_CLIENT_HAN
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, uint32_t reportedVersion, uint32_t lastSeenDesiredVersion, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback);
 
 ## IoTHub Methods
-extern IOTHUB_CLIENT_RESULT IoTHubClient_SetIoTHubMethodCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_METHOD_CALLBACK_ASYNC iotHubMethodCallback, void* userContextCallback);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceMethodCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback);
 unsigned char* payload, IOTHUB_CLIENT_IOTHUB_METHOD_EXECUTE_CALLBACK iotHubExecuteCallback, void* userContextCallback);
 ```
 
@@ -331,26 +331,26 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE 
 
 
 
-## IoTHubClient_SetIoTHubMethodCallback
+## IoTHubClient_SetDeviceMethodCallback
 ```c
-extern IOTHUB_CLIENT_RESULT IoTHubClient_SetIoTHubMethodCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_METHOD_CALLBACK_ASYNC iotHubMethodCallback, void* userContextCallback);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceMethodCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback);
 ```
 
-`IoTHubClient_SetIoTHubMethodCallback` sets up the callback for a method which will be called by IoTHub.
+`IoTHubClient_SetDeviceMethodCallback` sets up the callback for a method which will be called by IoTHub.
 
-**SRS_IOTHUBCLIENT_12_012: [** If `iotHubClientHandle` is `NULL`, `IoTHubClient_SetIoTHubMethodCallback` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+**SRS_IOTHUBCLIENT_12_012: [** If `iotHubClientHandle` is `NULL`, `IoTHubClient_SetDeviceMethodCallback` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]**
 
-**SRS_IOTHUBCLIENT_12_013: [** If acquiring the lock fails, `IoTHubClient_SetIoTHubMethodCallback` shall return `IOTHUB_CLIENT_ERROR`. **]**
+**SRS_IOTHUBCLIENT_12_013: [** If acquiring the lock fails, `IoTHubClient_SetDeviceMethodCallback` shall return `IOTHUB_CLIENT_ERROR`. **]**
 
 **SRS_IOTHUBCLIENT_12_014: [** If the transport handle is `NULL` and the worker thread is not initialized, the thread shall be started by calling `IoTHubTransport_StartWorkerThread`. **]**
 
-**SRS_IOTHUBCLIENT_12_015: [** If starting the thread fails, `IoTHubClient_SetIoTHubMethodCallback` shall return `IOTHUB_CLIENT_ERROR`. **]**
+**SRS_IOTHUBCLIENT_12_015: [** If starting the thread fails, `IoTHubClient_SetDeviceMethodCallback` shall return `IOTHUB_CLIENT_ERROR`. **]**
 
-**SRS_IOTHUBCLIENT_12_016: [** `IoTHubClient_SetIoTHubMethodCallback` shall call `IoTHubClient_LL_SetIoTHubMethodCallback`, while passing the `IoTHubClient_LL_handle` created by `IoTHubClient_LL_Create` along with the parameters `iotHubMethodCallback` and `userContextCallback`. **]**
+**SRS_IOTHUBCLIENT_12_016: [** `IoTHubClient_SetDeviceMethodCallback` shall call `IoTHubClient_LL_SetDeviceMethodCallback`, while passing the `IoTHubClient_LL_handle` created by `IoTHubClient_LL_Create` along with the parameters `deviceMethodCallback` and `userContextCallback`. **]**
 
-**SRS_IOTHUBCLIENT_12_017: [** When `IoTHubClient_LL_SetIoTHubMethodCallback` is called, `IoTHubClient_SetIoTHubMethodCallback` shall return the result of `IoTHubClient_LL_SetIoTHubMethodCallback`. **]**
+**SRS_IOTHUBCLIENT_12_017: [** When `IoTHubClient_LL_SetDeviceMethodCallback` is called, `IoTHubClient_SetDeviceMethodCallback` shall return the result of `IoTHubClient_LL_SetDeviceMethodCallback`. **]**
 
-**SRS_IOTHUBCLIENT_12_018: [** `IoTHubClient_SetIoTHubMethodCallback` shall be made thread-safe by using the lock created in IoTHubClient_Create. **]**
+**SRS_IOTHUBCLIENT_12_018: [** `IoTHubClient_SetDeviceMethodCallback` shall be made thread-safe by using the lock created in IoTHubClient_Create. **]**
 
 
 
