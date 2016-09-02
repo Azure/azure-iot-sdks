@@ -203,6 +203,22 @@ InvalidEtagError.prototype = Object.create(Error.prototype);
 InvalidEtagError.prototype.constructor = InvalidEtagError;
 InvalidEtagError.prototype.name = 'InvalidEtagError';
 
+/**
+ * @class       module:azure-iot-common.TimeoutError
+ * @classdesc   Error thrown when a timeout occurs
+ *
+ * @augments {Error}
+ */
+function TimeoutError(message) {
+  this.message = message;
+  this.stack = (new Error()).stack;
+  Error.call(this, message);
+}
+
+TimeoutError.prototype = Object.create(Error.prototype);
+TimeoutError.prototype.constructor = TimeoutError;
+TimeoutError.prototype.name = 'TimeoutError';
+
 module.exports = {
   ArgumentError: ArgumentError,
   DeviceMaximumQueueDepthExceededError: DeviceMaximumQueueDepthExceededError,
@@ -220,5 +236,6 @@ module.exports = {
   TooManyDevicesError: TooManyDevicesError,
   ThrottlingError: ThrottlingError,
   DeviceAlreadyExistsError: DeviceAlreadyExistsError,
-  InvalidEtagError: InvalidEtagError
+  InvalidEtagError: InvalidEtagError,
+  TimeoutError : TimeoutError
 };
