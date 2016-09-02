@@ -20,7 +20,7 @@ if defined CC3200_SDK_VERSION set sdkversion=%CC3200_SDK_VERSION%
 set cc3200sdk=CC3200SDK_%sdkversion%
 
 echo ********** INSTALLING CC3200 SDK **********
-if not exist "%install-root%\%cc3200sdk%" start /wait %installers-path%\%cc3200sdk%-windows-installer.exe --mode unattended --prefix %install-root%\%cc3200sdk%
+if not exist "%install-root%\%cc3200sdk%" start /wait %installers-path%\CC3200SDK-%sdkversion%-windows-installer.exe --mode unattended --prefix %install-root%\%cc3200sdk%
 
 echo ********** INSTALLING Tirtos Simplelink **********
 if not exist "%install-root%\tirtos_simplelink_2_14_01_20" start /wait %installers-path%\tirtos_simplelink_setupwin32_2_14_01_20.exe --mode unattended --prefix %install-root%
@@ -80,6 +80,10 @@ call:DoReplace "#define SECOND  0" "#define SECOND  %second%" %build-root%\c\ser
 echo ********** DOWNLOADING elf2cc32.exe **********
 if not exist "%build-root%\c\serializer\samples\simplesample_http\tirtos\cc3200\tools" mkdir %build-root%\c\serializer\samples\simplesample_http\tirtos\cc3200\tools
 powershell.exe -nologo -noprofile -command "& {Add-Type -A 'System.Net'; (new-object System.Net.WebClient).DownloadFile('https://github.com/tisb-vikram/azure-iot-sdks/blob/7da24633b2c4af3bc779998e9950146f061a8a10/c/serializer/samples/simplesample_http/tirtos/cc3200/tools/elf2cc32.exe?raw=true','%build-root%\c\serializer\samples\simplesample_http\tirtos\cc3200\tools\elf2cc32.exe'); }"
+if not exist "%install-root%\ns_1_10_00_00_eng\tools" mkdir %install-root%\ns_1_10_00_00_eng\tools
+powershell.exe -nologo -noprofile -command "& {Add-Type -A 'System.Net'; (new-object System.Net.WebClient).DownloadFile('https://github.com/tisb-vikram/azure-iot-sdks/blob/7da24633b2c4af3bc779998e9950146f061a8a10/c/serializer/samples/simplesample_http/tirtos/cc3200/tools/elf2cc32.exe?raw=true','%install-root%\ns_1_10_00_00_eng\tools\elf2cc32.exe'); }"
+
+set PATH=%PATH%;%install-root%\xdctools_3_31_01_33_core;%install-root%\xdctools_3_31_01_33_core\bin
 
 @echo on
 call %install-root%\xdctools_3_31_01_33_core\gmake.exe clean
