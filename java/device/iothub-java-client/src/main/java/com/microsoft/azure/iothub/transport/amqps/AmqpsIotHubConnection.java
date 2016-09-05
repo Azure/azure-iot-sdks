@@ -240,7 +240,9 @@ public final class AmqpsIotHubConnection extends BaseHandler
                 if (!this.executorService.awaitTermination(maxWaitTimeForTerminateExecutor, TimeUnit.SECONDS)) {
                     this.executorService.shutdownNow(); // Cancel currently executing tasks
                     // Wait a while for tasks to respond to being cancelled
-                    if (!this.executorService.awaitTermination(maxWaitTimeForTerminateExecutor, TimeUnit.SECONDS)){}
+                    if (!this.executorService.awaitTermination(maxWaitTimeForTerminateExecutor, TimeUnit.SECONDS)){
+                        System.err.println("Pool did not terminate");
+                    }
                 }
             } catch (InterruptedException ie) {
                 // (Re-)Cancel if current thread also interrupted
@@ -615,6 +617,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             {
                 try
                 {
+                    this.close();
                     System.out.println("Lost connection to the server. Reconnection attempt " + currentReconnectionAttempt++ + "...");
                     Thread.sleep(TransportUtils.generateSleepInterval(currentReconnectionAttempt));
                 }
