@@ -3525,5 +3525,71 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         my_gballoc_free(destination);
     }
 
+    /*Tests_SRS_CODEFIRST_02_030: [ If argument device is NULL then CodeFirst_IngestDesiredProperties shall fail and return CODEFIRST_INVALID_ARG. ]*/
+    TEST_FUNCTION(CodeFirst_IngestDesiredProperties_with_NULL_device_fails)
+    {
+        ///arrange
+
+        ///act
+        CODEFIRST_RESULT result = CodeFirst_IngestDesiredProperties(NULL, "{\"a\":3}");
+
+        ///assert
+        ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_INVALID_ARG, result);
+
+        ///clean
+    }
+
+    /*Tests_SRS_CODEFIRST_02_031: [ If argument desiredProperties is NULL then CodeFirst_IngestDesiredProperties shall fail and return CODEFIRST_INVALID_ARG. ]*/
+    TEST_FUNCTION(CodeFirst_IngestDesiredProperties_with_NULL_desiredProperties_fails)
+    {
+        ///arrange
+        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &testModelInModelReflected, sizeof(OuterType), false);
+        umock_c_reset_all_calls();
+
+        ///act
+        CODEFIRST_RESULT result = CodeFirst_IngestDesiredProperties(device, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_INVALID_ARG, result);
+
+        ///clean
+        CodeFirst_DestroyDevice(device);
+    }
+
+    /*Tests_SRS_CODEFIRST_02_032: [ CodeFirst_IngestDesiredProperties shall locate the device associated with device. ]*/
+    /*Tests_SRS_CODEFIRST_02_033: [ CodeFirst_IngestDesiredProperties shall call Device_IngestDesiredProperties. ]*/
+    /*Tests_SRS_CODEFIRST_02_035: [ Otherwise, CodeFirst_IngestDesiredProperties shall return CODEFIRST_OK. ]*/
+    TEST_FUNCTION(CodeFirst_IngestDesiredProperties_succeeds)
+    {
+        ///arrange
+        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &testModelInModelReflected, sizeof(OuterType), false);
+        umock_c_reset_all_calls();
+
+        ///act
+        CODEFIRST_RESULT result = CodeFirst_IngestDesiredProperties(device, "{\"a\":3}");
+
+        ///assert
+        ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
+
+        ///clean
+        CodeFirst_DestroyDevice(device);
+    }
+
+    /*Tests_SRS_CODEFIRST_02_034: [ If there is any failure, then CodeFirst_IngestDesiredProperties shall fail and return CODEFIRST_ERROR. ]*/
+    TEST_FUNCTION(CodeFirst_IngestDesiredProperties_fails)
+    {
+        ///arrange
+        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &testModelInModelReflected, sizeof(OuterType), false);
+        umock_c_reset_all_calls();
+
+        ///act
+        CODEFIRST_RESULT result = CodeFirst_IngestDesiredProperties(device-1, "{\"a\":3}"); /*notice how "device-1" is a non-valid memory address as far as FindDevice is concerned*/
+
+        ///assert
+        ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_ERROR, result);
+
+        ///clean
+        CodeFirst_DestroyDevice(device);
+    }
 
 END_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider);

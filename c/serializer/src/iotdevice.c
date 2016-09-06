@@ -374,3 +374,9 @@ void Device_DestroyTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTIO
         DataPublisher_DestroyTransaction_ReportedProperties(transactionHandle);
     }
 }
+
+DEVICE_RESULT Device_IngestDesiredProperties(DEVICE_HANDLE deviceHandle, const char* desiredProperties)
+{
+    (void)(deviceHandle, desiredProperties);
+    return DEVICE_ERROR;
+}
