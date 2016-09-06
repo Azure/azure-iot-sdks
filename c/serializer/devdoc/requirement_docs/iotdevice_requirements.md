@@ -206,7 +206,7 @@ void Device_DestroyTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTIO
 DEVICE_RESULT Device_IngestDesiredProperties(DEVICE_HANDLE deviceHandle, const char* desiredProperties)
 ```
 
-`Device_IngestDesiredProperties` acts as a pssthrough for desired properties towards CommandDecoder module.
+`Device_IngestDesiredProperties` acts as a passthrough for desired properties towards CommandDecoder module.
 
 **SRS_DEVICE_02_032: [** If `deviceHandle` is `NULL` then `Device_IngestDesiredProperties` shall fail and return `DEVICE_INVALID_ARG`. **]**
 
