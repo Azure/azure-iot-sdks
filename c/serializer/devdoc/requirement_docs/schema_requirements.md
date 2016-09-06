@@ -12,10 +12,12 @@ Schema
 	| -- <Struct Name>
 	| -- <0..n Property> (Primitive, Structs, User Defined)
     | -- <0..n ReportedProperty> (Primitive, Structs, User Defined)
+    | -- <0..n DesiredProperty> (Primitive, Structs, User Defined)
 	|--- <0..n Model Type> 
              |--- <Model Name>
              |--- <0..n Property> (Primitive, Structs, User Defined) 
              |--- <0..n ReportedProperty> (Primitive, Structs, User Defined)
+             |--- <0..n DesiredProperty> (Primitive, Structs, User Defined)
              |--- <0..n Actions>
              |--- <0..n Models>
 ```
@@ -56,6 +58,7 @@ extern SCHEMA_RESULT Schema_AddStructTypeProperty(SCHEMA_STRUCT_TYPE_HANDLE stru
  
 extern SCHEMA_RESULT Schema_AddModelProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName, const char* propertyType);
 extern SCHEMA_RESULT Schema_AddModelReportedProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* reportedPropertyName, const char* reportedPropertyType);
+extern SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyName, const char* desiredPropertyType);
 extern SCHEMA_RESULT Schema_AddModelModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName, SCHEMA_MODEL_TYPE_HANDLE modelType);
 
 extern SCHEMA_ACTION_HANDLE Schema_CreateModelAction(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* actionName);
@@ -73,13 +76,18 @@ extern SCHEMA_RESULT Schema_GetModelReportedPropertyCount(SCHEMA_MODEL_TYPE_HAND
 extern SCHEMA_REPORTED_PROPERTY_HANDLE Schema_GetModelReportedPropertyByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* reportedPropertyName);
 extern SCHEMA_REPORTED_PROPERTY_HANDLE Schema_GetModelReportedPropertyByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index);
 
-extern SCHEMA_RESULT Schema_GetModelModelCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t* modelCount);
-extern SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelModelByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName);
+extern SCHEMA_RESULT Schema_GetModelDesiredPropertyCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t* desiredPropertyCount);
+extern SCHEMA_DESIRED_PROPERTY_HANDLE Schema_GetModelDesiredPropertyByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyName);
+extern SCHEMA_DESIRED_PROPERTY_HANDLE Schema_GetModelDesiredPropertyByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index);
+
+extern SCHEMA_RESUL(Schema_GetModelModelCountSCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, ize_t* modelCount);
+extern SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelModelByNam(CHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName);
 extern SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelModelyByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index);
 extern const char* Schema_GetModelModelPropertyNameByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index);
 
 extern bool Schema_ModelPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyPath); 
 extern bool Schema_ModelReportedPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* reportedPropertyPath);
+extern bool Schema_ModelDesiredPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyPath);
 
 extern SCHEMA_RESULT Schema_GetModelActionCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t* actionCount);
 extern SCHEMA_ACTION_HANDLE Schema_GetModelActionByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* actionName);
@@ -592,3 +600,84 @@ void Schema_DestroyIfUnused(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle);
 **SRS_SCHEMA_07_190: [** Schema_DestroyIfUnused shall iterate through the ModuleTypeHandle objects and if all the DeviceCount variables == 0 then it will delete the schemaHandle. **]**
 
 **SRS_SCHEMA_07_191: [** If 1 or more DeviceCount variables are > 0 then Schema_DestroyIfUnused shall do nothing. **]**
+
+### Schema_AddModelDesiredProperty
+```c
+extern SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyName, const char* desiredPropertyType);
+```
+
+`Schema_AddModelDesiredProperty` adds a desired property to a model.
+
+If `modelTypeHandle` is `NULL` then `Schema_AddModelDesiredProperty` shall fail and return `SCHEMA_INVALID_ARG`.
+
+If `desiredPropertyName` is `NULL` then `Schema_AddModelDesiredProperty` shall fail and return `SCHEMA_INVALID_ARG`.
+
+If `desiredPropertyType` is `NULL` then `Schema_AddModelDesiredProperty` shall fail and return `SCHEMA_INVALID_ARG`.
+
+`Schema_AddModelDesiredProperty` shall the desired property given by the name `desiredPropertyName` and the type `desiredPropertyType` to the collection of existing desired properties.
+
+If any failure occurs then `Schema_AddModelDesiredProperty` shall fail and return `SCHEMA_ERROR`.
+
+Otherwise, `Schema_AddModelDesiredProperty` shall succeed and return `SCHEMA_OK`.
+
+### Schema_GetModelDesiredPropertyCount
+```c
+extern SCHEMA_RESULT Schema_GetModelDesiredPropertyCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t* desiredPropertyCount)
+```
+
+`Schema_GetModelDesiredPropertyCount` returns the number of desired properties for a model.
+
+If `modelTypeHandle` is `NULL` then `Schema_GetModelDesiredPropertyCount` shall fail and return `SCHEMA_INVALID_ARG`.
+
+If `desiredPropertyCount` is `NULL` then `Schema_GetModelDesiredPropertyCount` shall fail and return `SCHEMA_INVALID_ARG`.
+
+Otherwise, `Schema_GetModelDesiredPropertyCount` shall succeed and write in `desiredPropertyCount` the existing number of desired properties.
+
+### Schema_GetModelDesiredPropertyByName
+```c 
+extern SCHEMA_DESIRED_PROPERTY_HANDLE Schema_GetModelDesiredPropertyByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyName);
+```
+
+`Schema_GetModelReportedPropertyByName` returns the SCHEMA_DESIRED_PROPERTY_HANDLE for a desired property indicated by name.
+
+If `modelTypeHandle` is `NULL` then `Schema_GetModelReportedPropertyByName` shall fail and return `NULL`.
+
+If `desiredPropertyName` is `NULL` then `Schema_GetModelReportedPropertyByName` shall fail and return `NULL`.
+
+If a desired property having the name `desiredPropertyName` exists then `Schema_GetModelReportedPropertyByName` shall succeed and  return a non-`NULL` value.
+
+Otherwise, `Schema_GetModelReportedPropertyByName` shall fail and return `NULL`.
+
+
+### Schema_GetModelDesiredPropertyByIndex
+```c
+extern SCHEMA_DESIRED_PROPERTY_HANDLE Schema_GetModelDesiredPropertyByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index);
+```
+
+`Schema_GetModelDesiredPropertyByIndex` returns a `SCHEMA_DESIRED_PROPERTY_HANDLE` corresponding to an index.
+
+If `modelTypeHandle` is `NULL` then `Schema_GetModelDesiredPropertyByIndex` shall fail and return `NULL`.
+
+If index is outside the range for existing indexes of desire properties, then `Schema_GetModelDesiredPropertyByIndex` shall fail and return `NULL`.
+
+Otherwise, `Schema_GetModelDesiredPropertyByIndex` shall succeed and return a non-`NULL` value.
+
+
+### Schema_ModelDesiredPropertyByPathExists
+```c
+extern bool Schema_ModelDesiredPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyPath);
+```
+
+`Schema_ModelDesiredPropertyByPathExists` returns `true` if `desiredPropertyPath` can be located in the model.
+
+If `modelTypeHandle` is `NULL` then `Schema_ModelDesiredPropertyByPathExists` shall fail and return `false`.
+
+If `desiredPropertyPath` is `NULL` then `Schema_ModelDesiredPropertyByPathExists` shall fail and return `false`.
+
+`desiredPropertyPath` shall be assumed to be in the format model1/model2/.../desiredPropertyName.
+
+ If the desired property cannot be found `Schema_ModelDesiredPropertyByPathExists` shall fail and return `false`.
+
+If the path desiredPropertyPath points to a sub-model, `Schema_ModelDesiredPropertyByPathExists` shall succeed and `true`.
+
+If `desiredPropertyPath` exists then `Schema_ModelDesiredPropertyByPathExists` shall succeed and return `true`.

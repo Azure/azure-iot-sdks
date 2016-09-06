@@ -21,6 +21,7 @@ typedef struct SCHEMA_MODEL_TYPE_HANDLE_DATA_TAG* SCHEMA_MODEL_TYPE_HANDLE;
 typedef struct SCHEMA_STRUCT_TYPE_HANDLE_DATA_TAG* SCHEMA_STRUCT_TYPE_HANDLE;
 typedef struct SCHEMA_PROPERTY_HANDLE_DATA_TAG* SCHEMA_PROPERTY_HANDLE;
 typedef struct SCHEMA_REPORTED_PROPERTY_HANDLE_DATA_TAG* SCHEMA_REPORTED_PROPERTY_HANDLE;
+typedef struct SCHEMA_DESIRED_PROPERTY_HANDLE_DATA_TAG* SCHEMA_DESIRED_PROPERTY_HANDLE;
 typedef struct SCHEMA_ACTION_HANDLE_DATA_TAG* SCHEMA_ACTION_HANDLE;
 typedef struct SCHEMA_ACTION_ARGUMENT_HANDLE_DATA_TAG* SCHEMA_ACTION_ARGUMENT_HANDLE;
 
@@ -55,6 +56,7 @@ MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddStructTypeProperty, SCHEMA_STRUCT_T
 
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName, const char*, propertyType);
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelReportedProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, reportedPropertyName, const char*, reportedPropertyType);
+MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelDesiredProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, desiredPropertyName, const char*, desiredPropertyType);
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelModel, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName, SCHEMA_MODEL_TYPE_HANDLE, modelType);
 MOCKABLE_FUNCTION(, SCHEMA_ACTION_HANDLE, Schema_CreateModelAction, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, actionName);
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelActionArgument, SCHEMA_ACTION_HANDLE, actionHandle, const char*, argumentName, const char*, argumentType);
@@ -71,6 +73,10 @@ MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_GetModelReportedPropertyCount, SCHEMA_
 MOCKABLE_FUNCTION(, SCHEMA_REPORTED_PROPERTY_HANDLE, Schema_GetModelReportedPropertyByName, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, reportedPropertyName);
 MOCKABLE_FUNCTION(, SCHEMA_REPORTED_PROPERTY_HANDLE, Schema_GetModelReportedPropertyByIndex, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t, index);
 
+MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_GetModelDesiredPropertyCount, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t*, desiredPropertyCount);
+MOCKABLE_FUNCTION(, SCHEMA_DESIRED_PROPERTY_HANDLE, Schema_GetModelDesiredPropertyByName, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, desiredPropertyName);
+MOCKABLE_FUNCTION(, SCHEMA_DESIRED_PROPERTY_HANDLE, Schema_GetModelDesiredPropertyByIndex, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t, index);
+
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_GetModelModelCount, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t*, modelCount);
 MOCKABLE_FUNCTION(, SCHEMA_MODEL_TYPE_HANDLE, Schema_GetModelModelByName, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName);
 MOCKABLE_FUNCTION(, SCHEMA_MODEL_TYPE_HANDLE, Schema_GetModelModelyByIndex, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t, index);
@@ -79,6 +85,7 @@ MOCKABLE_FUNCTION(, const char*, Schema_GetModelModelPropertyNameByIndex, SCHEMA
 MOCKABLE_FUNCTION(, bool, Schema_ModelPropertyByPathExists, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyPath);
 
 MOCKABLE_FUNCTION(, bool, Schema_ModelReportedPropertyByPathExists, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, reportedPropertyPath);
+MOCKABLE_FUNCTION(, bool, Schema_ModelDesiredPropertyByPathExists, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, desiredPropertyPath);
 
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_GetModelActionCount, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t*, actionCount);
 MOCKABLE_FUNCTION(, SCHEMA_ACTION_HANDLE, Schema_GetModelActionByName, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, actionName);
