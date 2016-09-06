@@ -540,7 +540,8 @@ static void setup_iothubclient_ll_sendreportedstate_mocks()
         .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Subscribe_DeviceTwin(IGNORED_PTR_ARG, IOTHUB_DEVICE_TWIN_REPORTED_STATE))
-        .IgnoreArgument(1);
+        .IgnoreArgument(1)
+        .IgnoreArgument(2);
 
     STRICT_EXPECTED_CALL(DList_InsertTailList(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
@@ -2973,6 +2974,7 @@ TEST_FUNCTION(IoTHubClient_LL_DoWork_SendReportedState_succeed)
 
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_ProcessItem(IGNORED_PTR_ARG, IOTHUB_TYPE_DEVICE_TWIN, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
+        .IgnoreArgument_item_type()
         .IgnoreArgument(3);
 
     STRICT_EXPECTED_CALL(DList_RemoveEntryList(IGNORED_PTR_ARG))
@@ -3005,10 +3007,12 @@ TEST_FUNCTION(IoTHubClient_LL_DoWork_SendReportedState_continue_processing_succe
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*_DoWork will ask "what's the time"*/
-        .IgnoreAllArguments();
+        .IgnoreArgument_tick_counter()
+        .IgnoreArgument_current_ms();
 
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_ProcessItem(IGNORED_PTR_ARG, IOTHUB_TYPE_DEVICE_TWIN, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
+        .IgnoreArgument_item_type()
         .IgnoreArgument(3)
         .SetReturn(IOTHUB_PROCESS_CONTINUE);
 
