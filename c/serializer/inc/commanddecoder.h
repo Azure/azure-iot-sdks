@@ -39,6 +39,8 @@ MOCKABLE_FUNCTION(,COMMAND_DECODER_HANDLE, CommandDecoder_Create, SCHEMA_MODEL_T
 MOCKABLE_FUNCTION(,EXECUTE_COMMAND_RESULT, CommandDecoder_ExecuteCommand, COMMAND_DECODER_HANDLE, handle, const char*, command);
 MOCKABLE_FUNCTION(,void, CommandDecoder_Destroy, COMMAND_DECODER_HANDLE, commandDecoderHandle);
 
+MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, CommandDecoder_IngestDesiredProperties, COMMAND_DECODER_HANDLE, handle, const char*, desiredProperties);
+
 #ifdef __cplusplus
 }
 #endif

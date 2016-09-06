@@ -33,7 +33,7 @@ extern REPORTED_PROPERTIES_TRANSACTION_HANDLE Device_CreateTransaction_ReportedP
 extern DEVICE_RESULT Device_PublishTransacted_ReportedProperty(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle, const char* reportedPropertyPath, const AGENT_DATA_TYPE*, data);
 extern DEVICE_RESULT Device_CommitTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle, unsigned char** destination, size_t* destinationSize);
 extern void Device_DestroyTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle);
-
+extern DEVICE_RESULT Device_IngestDesiredProperties(DEVICE_HANDLE deviceHandle, const char* desiredProperties);
 
 extern EXECUTE_COMMAND_RESULT Device_ExecuteCommand(DEVICE_HANDLE deviceHandle, const char* command);
 ```c
@@ -201,3 +201,19 @@ void Device_DestroyTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTIO
 
 **SRS_DEVICE_02_031: [** Otherwise `Device_DestroyTransaction_ReportedProperties` shall free all used resources. **]**
 
+### Device_IngestDesiredProperties
+```c
+DEVICE_RESULT Device_IngestDesiredProperties(DEVICE_HANDLE deviceHandle, const char* desiredProperties)
+```
+
+`Device_IngestDesiredProperties` acts as a pssthrough for desired properties towards CommandDecoder module.
+
+**SRS_DEVICE_02_032: [** If `deviceHandle` is `NULL` then `Device_IngestDesiredProperties` shall fail and return `DEVICE_INVALID_ARG`. **]**
+
+**SRS_DEVICE_02_033: [** If `desiredProperties` is `NULL` then `Device_IngestDesiredProperties` shall fail and return `DEVICE_INVALID_ARG`. **]**
+
+**SRS_DEVICE_02_034: [** `Device_IngestDesiredProperties` shall call `CommandDecoder_IngestDesiredProperties`. **]**
+
+**SRS_DEVICE_02_035: [** If any failure happens then `Device_IngestDesiredProperties` shall fail and return `DEVICE_ERROR`. **]**
+
+**SRS_DEVICE_02_036: [** Otherwise, `Device_IngestDesiredProperties` shall succeed and return `DEVICE_OK`. **]**
