@@ -1050,17 +1050,8 @@ static TRANSPORT_LL_HANDLE IoTHubTransportMqtt_Create(const IOTHUBTRANSPORT_CONF
     return result;
 }
 
-/*forward declaration*/
-static void IoTHubTransportMqtt_Unsubscribe(IOTHUB_DEVICE_HANDLE handle);
-
 static void DisconnectFromClient(PMQTTTRANSPORT_HANDLE_DATA transportState)
 {
-    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_013: [If the parameter subscribe is true then IoTHubTransportMqtt_Destroy shall call IoTHubTransportMqtt_Unsubscribe.] */
-    if (transportState->subscribed)
-    {
-        IoTHubTransportMqtt_Unsubscribe(transportState);
-    }
-
     (void)mqtt_client_disconnect(transportState->mqttClient);
     xio_destroy(transportState->xioTransport);
     transportState->xioTransport = NULL;
@@ -1145,7 +1136,7 @@ static void IoTHubTransportMqtt_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
 {
     PMQTTTRANSPORT_HANDLE_DATA transportState = (PMQTTTRANSPORT_HANDLE_DATA)handle;
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_019: [If parameter handle is NULL then IoTHubTransportMqtt_Unsubscribe shall do nothing.] */
-    if (transportState != NULL && transportState->subscribed)
+    if (transportState != NULL)
     {
         /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_020: [IoTHubTransportMqtt_Unsubscribe shall call mqtt_client_unsubscribe to unsubscribe the mqtt message topic.] */
         const char* unsubscribe[1];

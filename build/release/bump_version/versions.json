@@ -21,7 +21,7 @@
         "mqtt-base": "1.0.13",
         "device": "1.0.13",
         "device-amqp": "1.0.13",
-        "device-amqp-ws": "1.0.13",
+        "device-amqp-ws": "1.0.14",
         "device-http": "1.0.14",
         "device-mqtt": "1.0.13",
         "service": "1.0.15",

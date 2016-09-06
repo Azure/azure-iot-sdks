@@ -1273,48 +1273,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_Destroy_parameter_NULL_succeed)
     // assert
 }
 
-/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_013: [If the parameter subscribe is true then IoTHubTransportMqtt_Destroy shall call IoTHubTransportMqtt_Unsubscribe.] */
-TEST_FUNCTION(IoTHubTransportMqtt_Destroy_Unsubscribe_succeeds)
-{
-    // arrange
-    CIoTHubTransportMqttMocks mocks;
-    IOTHUBTRANSPORT_CONFIG config = { 0 };
-    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
-
-    auto handle = IoTHubTransportMqtt_Create(&config);
-    (void)IoTHubTransportMqtt_Subscribe(handle);
-    CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
-    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
-    IoTHubTransportMqtt_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
-    mocks.ResetAllCalls();
-
-    EXPECTED_CALL(mocks, STRING_c_str(NULL));
-
-    EXPECTED_CALL(mocks, DList_IsListEmpty(IGNORED_PTR_ARG));
-
-    EXPECTED_CALL(mocks, STRING_delete(NULL));
-    EXPECTED_CALL(mocks, STRING_delete(NULL));
-    EXPECTED_CALL(mocks, STRING_delete(NULL));
-    EXPECTED_CALL(mocks, STRING_delete(NULL));
-    EXPECTED_CALL(mocks, STRING_delete(NULL));
-    EXPECTED_CALL(mocks, STRING_delete(NULL));
-    EXPECTED_CALL(mocks, STRING_delete(NULL));
-
-    STRICT_EXPECTED_CALL(mocks, mqtt_client_disconnect(TEST_MQTT_CLIENT_HANDLE));
-    STRICT_EXPECTED_CALL(mocks, mqtt_client_deinit(TEST_MQTT_CLIENT_HANDLE));
-    STRICT_EXPECTED_CALL(mocks, mqtt_client_unsubscribe(TEST_MQTT_CLIENT_HANDLE, IGNORED_NUM_ARG, IGNORED_PTR_ARG, 1))
-        .IgnoreArgument(2)
-        .IgnoreArgument(3);
-    EXPECTED_CALL(mocks, gballoc_free(NULL));
-    STRICT_EXPECTED_CALL(mocks, xio_destroy(TEST_XIO_HANDLE));
-    STRICT_EXPECTED_CALL(mocks, tickcounter_destroy(TEST_COUNTER_HANDLE));
-
-    // act
-    IoTHubTransportMqtt_Destroy(handle);
-
-    // assert
-}
-
 /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_014: [IoTHubTransportMqtt_Destroy shall free all the resources currently in use.] */
 TEST_FUNCTION(IoTHubTransportMqtt_Destroy_One_Message_Ack_succeeds)
 {
