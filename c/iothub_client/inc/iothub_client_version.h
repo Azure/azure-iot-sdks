@@ -10,6 +10,8 @@
 
 #define IOTHUB_SDK_VERSION "1.0.14"
 
+#include "azure_c_shared_utility/umock_c_prod.h"
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -22,7 +24,7 @@ extern "C"
      * @return  Pointer to a null terminated string containing the
      *          current IoT Hub Client SDK version.
      */
-    extern const char* IoTHubClient_GetVersionString(void);
+    MOCKABLE_FUNCTION(, const char*, IoTHubClient_GetVersionString);
 
 #ifdef __cplusplus
 }

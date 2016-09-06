@@ -259,6 +259,11 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                                 {
                                     config->deviceId = STRING_c_str(deviceIdString);
                                 }
+                                else
+                                {
+                                    LogError("Failure cloning device id string");
+                                    break;
+                                }
                             }
                             else if (strcmp(s_token, DEVICEKEY_TOKEN) == 0)
                             {
@@ -266,6 +271,11 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                                 if (deviceKeyString != NULL)
                                 {
                                     config->deviceKey = STRING_c_str(deviceKeyString);
+                                }
+                                else
+                                {
+                                    LogError("Failure cloning device key string");
+                                    break;
                                 }
                             }
                             else if (strcmp(s_token, DEVICESAS_TOKEN) == 0)
@@ -275,12 +285,18 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                                 {
                                     config->deviceSasToken = STRING_c_str(deviceSasTokenString);
                                 }
+                                else
+                                {
+                                    LogError("Failure cloning device sasToken string");
+                                    break;
+                                }
                             }
                             else if (strcmp(s_token, X509_TOKEN) == 0)
                             {
                                 if (strcmp(STRING_c_str(valueString), X509_TOKEN_ONLY_ACCEPTABLE_VALUE) != 0)
                                 {
                                     LogError("x509 option has wrong value, the only acceptable one is \"true\"");
+                                    break;
                                 }
                                 else
                                 {
@@ -294,6 +310,11 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                                 if (protocolGateway != NULL)
                                 {
                                     config->protocolGatewayHostName = STRING_c_str(protocolGateway);
+                                }
+                                else
+                                {
+                                    LogError("Failure cloning protocol Gateway Name");
+                                    break;
                                 }
                             }
                         }
