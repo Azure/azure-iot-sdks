@@ -3492,7 +3492,7 @@ TEST_FUNCTION(AMQP_on_message_received_callback_succeeds)
 	// assert
 	mocks.AssertActualAndExpectedCalls();
 
-	ASSERT_ARE_EQUAL_WITH_MSG(int, (int)disposition_result, (int)TEST_AMQP_DISPOSITION_ACCEPTED, "Expected ACCEPTED disposition");
+	ASSERT_ARE_EQUAL_WITH_MSG(void_ptr, (void*)disposition_result, (void*)TEST_AMQP_DISPOSITION_ACCEPTED, "Expected ACCEPTED disposition");
 
 	// cleanup
 	transport_interface->IoTHubTransport_Destroy(transport);
