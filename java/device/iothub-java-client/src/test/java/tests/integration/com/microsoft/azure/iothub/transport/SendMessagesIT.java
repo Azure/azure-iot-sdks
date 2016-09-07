@@ -27,7 +27,7 @@ public class SendMessagesIT
     private static Device deviceMqtt;
 
     // How much to wait until a message makes it to the server, in milliseconds
-    private Integer sendTimeout = 5000;
+    private Integer sendTimeout = 60000;
 
     @BeforeClass
     public static void setUp() throws Exception
