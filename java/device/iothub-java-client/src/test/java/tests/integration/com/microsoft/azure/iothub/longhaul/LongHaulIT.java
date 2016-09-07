@@ -50,10 +50,10 @@ public class LongHaulIT
         static Map<String, String> messageProperties = new HashMap<>(3);
 
         // How much to wait until receiving a message from the server, in milliseconds
-        private Integer receiveTimeout = 10000;
+        private Integer receiveTimeout = 60000;
 
         // How much to wait until a message makes it to the server until marking it failed, in milliseconds
-        private Integer sendTimeout = 5000;
+        private Integer sendTimeout = 60000;
 
         // How much to wait before attempting to send a new message
         private Integer nextMessageWaitDuration = 1000;

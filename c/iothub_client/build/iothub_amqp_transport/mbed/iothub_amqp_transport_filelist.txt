@@ -1,4 +1,6 @@
 set(mbed_project_files
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/iothubtransportamqp.h
+		${CMAKE_CURRENT_SOURCE_DIR}/../../../inc/uamqp_messaging.h
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../src/iothubtransportamqp.c
+		${CMAKE_CURRENT_SOURCE_DIR}/../../../src/uamqp_messaging.c
 		)

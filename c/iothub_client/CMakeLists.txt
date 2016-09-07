@@ -88,21 +88,25 @@ if(${use_amqp})
         set(iothub_client_amqp_transport_c_files
             ${iothub_client_ll_transport_c_files}
             ./src/iothubtransportamqp_websockets.c
+			./src/uamqp_messaging.c
         )
         
         set(iothub_client_amqp_transport_h_files
             ${iothub_client_ll_transport_h_files}
             ./inc/iothubtransportamqp_websockets.h
+			./inc/uamqp_messaging.h
         )
     else()
         set(iothub_client_amqp_transport_c_files
             ${iothub_client_ll_transport_c_files}
-            ./src/iothubtransportamqp.c
+			./src/iothubtransportamqp.c
+            ./src/uamqp_messaging.c
         )
 
         set(iothub_client_amqp_transport_h_files
             ${iothub_client_ll_transport_h_files}
-            ./inc/iothubtransportamqp.h
+			./inc/iothubtransportamqp.h
+            ./inc/uamqp_messaging.h
         )	
     endif()
     

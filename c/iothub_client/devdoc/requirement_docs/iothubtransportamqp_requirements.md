@@ -282,79 +282,15 @@ The below requirements only apply when authentication type is x509:
 
 **SRS_IOTHUBTRANSPORTAMQP_09_086: [**IoTHubTransportAMQP_DoWork shall move queued events to an “in-progress” list right before processing them for sending**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_09_087: [**If the event contains a message of type IOTHUBMESSAGE_BYTEARRAY, IoTHubTransportAMQP_DoWork shall obtain its char* representation and size using IoTHubMessage_GetByteArray()**]**
+**SRS_IOTHUBTRANSPORTAMQP_09_193: [**IoTHubTransportAMQP_DoWork shall get a MESSAGE_HANDLE instance out of the event's IOTHUB_MESSAGE_HANDLE instance by using message_create_from_iothub_message().**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_09_088: [**If IoTHubMessage_GetByteArray() fails, IoTHubTransportAMQP_DoWork shall remove the event from the in-progress list and invoke the upper layer callback reporting the error**]**
+**SRS_IOTHUBTRANSPORTAMQP_09_111: [**If message_create_from_iothub_message() fails, IoTHubTransportAMQP_DoWork notify the failure, roll back the event to waitToSend list and return**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_09_089: [**If the event contains a message of type IOTHUBMESSAGE_STRING, IoTHubTransportAMQP_DoWork shall obtain its char* representation using IoTHubMessage_GetString()**]**
+**SRS_IOTHUBTRANSPORTAMQP_09_097: [**IoTHubTransportAMQP_DoWork shall pass the MESSAGE_HANDLE intance to uAMQP for sending (along with on_message_send_complete callback) using messagesender_send()**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_09_090: [**If the event contains a message of type IOTHUBMESSAGE_STRING, IoTHubTransportAMQP_DoWork shall obtain the size of its char* representation using strlen()**]**
+**SRS_IOTHUBTRANSPORTAMQP_09_113: [**If messagesender_send() fails, IoTHubTransportAMQP_DoWork notify the failure, roll back the event to waitToSend list and return**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_09_091: [**If IoTHubMessage_GetString() fails, IoTHubTransportAMQP_DoWork shall remove the event from the in-progress list and invoke the upper layer callback reporting the error**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_092: [**If the event contains a message of type IOTHUBMESSAGE_UNKNOWN, IoTHubTransportAMQP_DoWork shall remove the event from the in-progress list and invoke the upper layer callback reporting the error**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_093: [**IoTHubTransportAMQP_DoWork shall create an amqp message using message_create() uAMQP API**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_111: [**If message_create() fails, IoTHubTransportAMQP_DoWork notify the failure, roll back the event to waitToSent list and return**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_095: [**IoTHubTransportAMQP_DoWork shall set the AMQP message body using message_add_body_amqp_data() uAMQP API**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_25_193: [**IoTHubTransportAMQP_DoWork shall set the AMQP the message-id and correlation-id if found to the UAMQP message before passing down**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_25_194: [**Uamqp message properties shall be retrieved using message_get_properties to update message-id/Correlation-Id **]**
-
-**SRS_IOTHUBTRANSPORTAMQP_25_195: [**If Uamqp message properties were not present then new properties shall be created using properties_create()**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_25_196: [**Message-id from the IotHub Client shall be read using IoTHubMessage_GetMessageId()**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_25_197: [**Uamqp message id shall be created using amqpvalue_create_string()**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_25_198: [**Message id would be set to Uamqp using properties_set_message_id()**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_25_199: [**Uamqp value used for message id shall be destroyed using amqpvalue_destroy() upon completion of its use**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_25_200: [**As message-id is optional field, if it is not set by the client, processing shall ignore and continue normally**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_25_201: [**Correlation-id from the IotHub Client shall be read using IoTHubMessage_GetCorrelationId()**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_25_202: [**Uamqp value for Correlation id shall be created using amqpvalue_create_string()**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_25_203: [**Correlation id would be set to Uamqp using properties_set_correlation_id()**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_25_204: [**Uamqp value used for Correlation id shall be destroyed using amqpvalue_destroy() upon completion of its use**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_25_205: [**As Correlation-id is optional field, if it is not set by the client, processing shall ignore and continue normally**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_25_206: [**Modified Uamqp properties shall be set using message_set_properties()**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_01_007: [**The IoTHub message properties shall be obtained by calling IoTHubMessage_Properties.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_01_015: [**The actual keys and values, as well as the number of properties shall be obtained by calling Map_GetInternals on the handle obtained from IoTHubMessage_Properties.**]** 
-
-**SRS_IOTHUBTRANSPORTAMQP_01_016: [**If the number of properties is 0, no uAMQP map shall be created and no application properties shall be set on the uAMQP message.**]** 
-
-**SRS_IOTHUBTRANSPORTAMQP_01_008: [**All properties shall be transferred to a uAMQP map.**]** 
-**SRS_IOTHUBTRANSPORTAMQP_01_009: [**The uAMQP map shall be created by calling amqpvalue_create_map.**]**
-
-
-For each property:
-
-**SRS_IOTHUBTRANSPORTAMQP_01_010: [**A key uAMQP value shall be created by using amqpvalue_create_string.**]**
-  
-**SRS_IOTHUBTRANSPORTAMQP_01_011: [**A value uAMQP value shall be created by using amqpvalue_create_string.**]**
-  
-**SRS_IOTHUBTRANSPORTAMQP_01_012: [**The key/value pair for the property shall be set into the uAMQP property map by calling amqpvalue_map_set_value.**]**
-  
-**SRS_IOTHUBTRANSPORTAMQP_01_013: [**After all properties have been filled in the uAMQP map, the uAMQP properties map shall be set on the uAMQP message by calling message_set_application_properties.**]**
-  
-**SRS_IOTHUBTRANSPORTAMQP_01_014: [**If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.**]**
-  
-**SRS_IOTHUBTRANSPORTAMQP_09_112: [**If message_add_body_amqp_data() fails, IoTHubTransportAMQP_DoWork notify the failure, roll back the event to waitToSent list and return**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_097: [**IoTHubTransportAMQP_DoWork shall pass the encoded AMQP message to AMQP for sending (along with on_message_send_complete callback) using messagesender_send()**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_113: [**If messagesender_send() fails, IoTHubTransportAMQP_DoWork notify the failure, roll back the event to waitToSent list and return**]**
+**SRS_IOTHUBTRANSPORTAMQP_09_194: [**IoTHubTransportAMQP_DoWork shall destroy the MESSAGE_HANDLE instance after messagesender_send() is invoked.**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_09_100: [**The callback 'on_message_send_complete' shall remove the target message from the in-progress list after the upper layer callback**]**
 
@@ -379,90 +315,16 @@ For each property:
 
 **SRS_IOTHUBTRANSPORTAMQP_09_123: [**IoTHubTransportAMQP_DoWork shall create each AMQP message_receiver passing the 'on_message_received' as the callback function**]**
 
+
 This section defines the functionality of the callback function 'on_message_received' (passed to AMQP message receiver).
-Reading AMQP properties (AMQP 1.0) 'message-id' and 'correlation-id' (optional):
 
+**SRS_IOTHUBTRANSPORTAMQP_09_195: [**The callback 'on_message_received' shall shall get a IOTHUB_MESSAGE_HANDLE instance out of the uamqp's MESSAGE_HANDLE instance by using IoTHubMessage_CreateFromUamqpMessage()**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_09_153: [**The callback 'on_message_received' shall read the message-id property from the uAMQP message and set it on the IoT Hub Message if the property is defined.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_154: [**The callback 'on_message_received' shall read the correlation-id property from the uAMQP message and set it on the IoT Hub Message if the property is defined.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_155: [**uAMQP message properties shall be retrieved using message_get_properties.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_156: [**If message_get_properties fails, the error shall be notified and 'on_message_received' shall continue.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_157: [**The message-id property shall be read from the uAMQP message by calling properties_get_message_id.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_158: [**If properties_get_message_id fails, the error shall be notified and 'on_message_received' shall continue.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_159: [**The message-id value shall be retrieved from the AMQP_VALUE as char\* by calling amqpvalue_get_string.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_160: [**If amqpvalue_get_string fails, the error shall be notified and 'on_message_received' shall continue.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_161: [**The message-id property shall be set on the IOTHUB_MESSAGE_HANDLE by calling IoTHubMessage_SetMessageId, passing the value read from the uAMQP message.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_162: [**If IoTHubMessage_SetMessageId fails, the error shall be notified and 'on_message_received' shall continue.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_163: [**The correlation-id property shall be read from the uAMQP message by calling properties_get_correlation_id.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_164: [**If properties_get_correlation_id fails, the error shall be notified and 'on_message_received' shall continue.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_165: [**The correlation-id value shall be retrieved from the AMQP_VALUE as char\* by calling amqpvalue_get_string.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_166: [**If amqpvalue_get_string fails, the error shall be notified and 'on_message_received' shall continue.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_167: [**The correlation-id property shall be set on the IOTHUB_MESSAGE_HANDLE by calling IoTHubMessage_SetCorrelationId, passing the value read from the uAMQP message.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_168: [**If IoTHubMessage_SetCorrelationId fails, the error shall be notified and 'on_message_received' shall continue.**]**
-
-Reading AMQP application properties (AMQP 1.0):
-
-
-**SRS_IOTHUBTRANSPORTAMQP_09_169: [**The callback 'on_message_received' shall read the application properties from the uAMQP message and set it on the IoT Hub Message if any are provided.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_188: [**If 'on_message_received' fails reading the application properties from the uAMQP message, it shall NOT call IoTHubClient_LL_MessageCallback and shall return disposition IOTHUBMESSAGE_REJECTED.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_170: [**The IOTHUB_MESSAGE_HANDLE properties shall be retrieved using IoTHubMessage_Properties.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_186: [**If IoTHubMessage_Properties fails, the error shall be notified and 'on_message_received' shall continue.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_171: [**uAMQP message application properties shall be retrieved using message_get_application_properties.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_172: [**If message_get_application_properties fails, the error shall be notified and 'on_message_received' shall continue.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_187: [**If message_get_application_properties succeeds but returns a NULL application properties map (there are no properties), 'on_message_received' shall continue normally.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_173: [**The actual uAMQP message application properties should be extracted from the result of message_get_application_properties using amqpvalue_get_inplace_described_value.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_174: [**If amqpvalue_get_inplace_described_value fails, the error shall be notified and 'on_message_received' shall continue.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_175: [**The number of items in the uAMQP message application properties shall be obtained using amqpvalue_get_map_pair_count.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_176: [**If amqpvalue_get_map_pair_count fails, the error shall be notified and 'on_message_received' shall continue.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_177: [**'on_message_received' shall iterate through each uAMQP application property and add it on IOTHUB_MESSAGE_HANDLE properties.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_178: [**The uAMQP application property name and value shall be obtained using amqpvalue_get_map_key_value_pair.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_179: [**If amqpvalue_get_map_key_value_pair fails, the error shall be notified and 'on_message_received' shall continue.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_180: [**The uAMQP application property name shall be extracted as string using amqpvalue_get_string.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_181: [**If amqpvalue_get_string fails, the error shall be notified and 'on_message_received' shall continue.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_182: [**The uAMQP application property value shall be extracted as string using amqpvalue_get_string.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_183: [**If amqpvalue_get_string fails, the error shall be notified and 'on_message_received' shall continue.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_184: [**The application property name and value shall be added to IOTHUB_MESSAGE_HANDLE properties using Map_AddOrUpdate.**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_09_185: [**If Map_AddOrUpdate fails, the error shall be notified and 'on_message_received' shall continue.**]**
-
-
-Reading the AMQP message content, notifying the message reception:
-
+**SRS_IOTHUBTRANSPORTAMQP_09_196: [**If IoTHubMessage_CreateFromUamqpMessage fails, the callback 'on_message_received' shall reject the incoming message by calling messaging_delivery_rejected() and return.**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_09_104: [**The callback 'on_message_received' shall invoke IoTHubClient_LL_MessageCallback() passing the client and the incoming message handles as parameters**]**
+
+**SRS_IOTHUBTRANSPORTAMQP_09_197: [**The callback 'on_message_received' shall destroy the IOTHUB_MESSAGE_HANDLE instance after invoking IoTHubClient_LL_MessageCallback().**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_09_105: [**The callback 'on_message_received' shall return the result of messaging_delivery_accepted() if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_ACCEPTED**]**
 
@@ -470,6 +332,7 @@ Reading the AMQP message content, notifying the message reception:
 
 **SRS_IOTHUBTRANSPORTAMQP_09_107: [**The callback 'on_message_received' shall return the result of messaging_delivery_rejected(“Rejected by application”, “Rejected by application”) if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_REJECTED**]**
   
+
 
 ### IoTHubTransportAMQP_Register
 
