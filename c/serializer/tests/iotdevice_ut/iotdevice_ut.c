@@ -167,6 +167,7 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         REGISTER_GLOBAL_MOCK_HOOK(CommandDecoder_Create, my_CommandDecoder_Create);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(CommandDecoder_Create, NULL);
         REGISTER_GLOBAL_MOCK_RETURNS(CommandDecoder_ExecuteCommand, EXECUTE_COMMAND_SUCCESS, EXECUTE_COMMAND_ERROR);
+        REGISTER_GLOBAL_MOCK_RETURNS(CommandDecoder_IngestDesiredProperties, EXECUTE_COMMAND_SUCCESS, EXECUTE_COMMAND_ERROR);
         REGISTER_GLOBAL_MOCK_HOOK(CommandDecoder_Destroy, my_CommandDecoder_Destroy);
         
         REGISTER_GLOBAL_MOCK_HOOK(DataPublisher_StartTransaction, my_DataPublisher_StartTransaction);
@@ -1285,4 +1286,85 @@ BEGIN_TEST_SUITE(IoTDevice_ut)
         ///clean
         Device_Destroy(h);
     }
+
+    /*Tests_SRS_DEVICE_02_032: [ If deviceHandle is NULL then Device_IngestDesiredProperties shall fail and return DEVICE_INVALID_ARG. ]*/
+    TEST_FUNCTION(Device_IngestDesiredProperties_with_NULL_deviceHandle_fails)
+    {
+        ///arrange
+
+        ///act
+        DEVICE_RESULT result = Device_IngestDesiredProperties(NULL, "{}");
+
+
+        ///assert
+        ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, result);
+
+        ///clean
+    }
+
+    /*Tests_SRS_DEVICE_02_033: [ If desiredProperties is NULL then Device_IngestDesiredProperties shall fail and return DEVICE_INVALID_ARG. ]*/
+    TEST_FUNCTION(Device_IngestDesiredProperties_with_NULL_desiredProperties_fails)
+    {        
+        ///arrange
+        DEVICE_HANDLE h;
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        umock_c_reset_all_calls();
+
+        ///act
+        DEVICE_RESULT result = Device_IngestDesiredProperties(NULL, "{}");
+
+        ///assert
+        ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_INVALID_ARG, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_Destroy(h);
+    }
+
+    /*Tests_SRS_DEVICE_02_034: [ Device_IngestDesiredProperties shall call CommandDecoder_IngestDesiredProperties. ]*/
+    /*Tests_SRS_DEVICE_02_036: [ Otherwise, Device_IngestDesiredProperties shall succeed and return DEVICE_OK. ]*/
+    TEST_FUNCTION(Device_IngestDesiredProperties_succeeds)
+    {
+        ///arrange
+        DEVICE_HANDLE h;
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(CommandDecoder_IngestDesiredProperties(IGNORED_PTR_ARG, "{}"))
+            .IgnoreArgument_handle();
+
+        ///act
+        DEVICE_RESULT result = Device_IngestDesiredProperties(h, "{}");
+
+        ///assert
+        ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_Destroy(h);
+    }
+
+    /*Tests_SRS_DEVICE_02_035: [ If any failure happens then Device_IngestDesiredProperties shall fail and return DEVICE_ERROR. ]*/
+    TEST_FUNCTION(Device_IngestDesiredProperties_fails)
+    {
+        ///arrange
+        DEVICE_HANDLE h;
+        Device_Create(irrelevantModel, DeviceActionCallback, TEST_CALLBACK_CONTEXT, false, &h);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(CommandDecoder_IngestDesiredProperties(IGNORED_PTR_ARG, "{}"))
+            .IgnoreArgument_handle()
+            .SetReturn(EXECUTE_COMMAND_FAILED);
+
+        ///act
+        DEVICE_RESULT result = Device_IngestDesiredProperties(h, "{}");
+
+        ///assert
+        ASSERT_ARE_EQUAL(DEVICE_RESULT, DEVICE_ERROR, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+        Device_Destroy(h);
+    }
+
 END_TEST_SUITE(IoTDevice_ut)

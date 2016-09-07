@@ -31,7 +31,7 @@
     IOTHUB_CLIENT_INVALID_ARG,            \
     IOTHUB_CLIENT_ERROR,                  \
     IOTHUB_CLIENT_INVALID_SIZE,           \
-    IOTHUB_CLIENT_INDEFINITE_TIME         \
+    IOTHUB_CLIENT_INDEFINITE_TIME
 
 /** @brief Enumeration specifying the status of calls to various APIs in this module.
 */
@@ -45,7 +45,7 @@ typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG* IOTHUB_CLIENT_LL_HANDLE;
 
 #define IOTHUB_CLIENT_STATUS_VALUES       \
     IOTHUB_CLIENT_SEND_STATUS_IDLE,       \
-    IOTHUB_CLIENT_SEND_STATUS_BUSY        \
+    IOTHUB_CLIENT_SEND_STATUS_BUSY
 
 /** @brief Enumeration returned by the ::IoTHubClient_LL_GetSendStatus
 *		   API to indicate the current sending status of the IoT Hub client.
