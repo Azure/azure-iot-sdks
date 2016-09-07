@@ -523,3 +523,9 @@ void CommandDecoder_Destroy(COMMAND_DECODER_HANDLE commandDecoderHandle)
         free(commandDecoderInstance);
     }
 }
+
+EXECUTE_COMMAND_RESULT CommandDecoder_IngestDesiredProperties(COMMAND_DECODER_HANDLE handle, const char* desiredProperties)
+{
+    (void)(handle, desiredProperties);
+    return EXECUTE_COMMAND_FAILED;
+}

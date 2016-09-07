@@ -1200,3 +1200,46 @@ EXECUTE_COMMAND_RESULT CodeFirst_ExecuteCommand(void* device, const char* comman
     }
     return result;
 }
+
+CODEFIRST_RESULT CodeFirst_IngestDesiredProperties(void* device, const char* desiredProperties)
+{
+    CODEFIRST_RESULT result;
+    /*Codes_SRS_CODEFIRST_02_030: [ If argument device is NULL then CodeFirst_IngestDesiredProperties shall fail and return CODEFIRST_INVALID_ARG. ]*/
+    /*Codes_SRS_CODEFIRST_02_031: [ If argument desiredProperties is NULL then CodeFirst_IngestDesiredProperties shall fail and return CODEFIRST_INVALID_ARG. ]*/
+    if (
+        (device == NULL) ||
+        (desiredProperties == NULL)
+        )
+    {
+        LogError("invalid argument void* device=%p, const char* desiredProperties=%p", device, desiredProperties);
+        result = CODEFIRST_INVALID_ARG;
+    }
+    else
+    {
+        /*Codes_SRS_CODEFIRST_02_032: [ CodeFirst_IngestDesiredProperties shall locate the device associated with device. ]*/
+        DEVICE_HEADER_DATA* deviceHeader = FindDevice(device);
+        if (deviceHeader == NULL)
+        {
+            /*Codes_SRS_CODEFIRST_02_034: [ If there is any failure, then CodeFirst_IngestDesiredProperties shall fail and return CODEFIRST_ERROR. ]*/
+            LogError("unable to find a device having this memory address %p", device);
+            result = CODEFIRST_ERROR;
+        }
+        else
+        {
+            /*Codes_SRS_CODEFIRST_02_033: [ CodeFirst_IngestDesiredProperties shall call Device_IngestDesiredProperties. ]*/
+            if (Device_IngestDesiredProperties(deviceHeader->DeviceHandle, desiredProperties) != DEVICE_OK)
+            {
+                LogError("failure in Device_IngestDesiredProperties");
+                result = result = CODEFIRST_ERROR;
+            }
+            else
+            {
+                /*Codes_SRS_CODEFIRST_02_035: [ Otherwise, CodeFirst_IngestDesiredProperties shall return CODEFIRST_OK. ]*/
+                result = CODEFIRST_OK;
+            }
+        }
+    }
+    return result;
+}
+
+
