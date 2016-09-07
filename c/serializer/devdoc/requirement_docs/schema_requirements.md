@@ -616,7 +616,7 @@ extern SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE mod
 
 **SRS_SCHEMA_02_027: [** `Schema_AddModelDesiredProperty` shall add the desired property given by the name `desiredPropertyName` and the type `desiredPropertyType` to the collection of existing desired properties. **]**
 
-**SRS_SCHEMA_02_047: [** If the desired property already exists, then `Schema_AddModelDesiredProperty` shall fail and return `SCHEMA_ERROR`. **]**
+**SRS_SCHEMA_02_047: [** If the desired property already exists, then `Schema_AddModelDesiredProperty` shall fail and return `SCHEMA_DUPLICATE_ELEMENT`. **]**
 
 **SRS_SCHEMA_02_028: [** If any failure occurs then `Schema_AddModelDesiredProperty` shall fail and return `SCHEMA_ERROR`. **]**
 

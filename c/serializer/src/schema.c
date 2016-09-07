@@ -606,7 +606,7 @@ SCHEMA_MODEL_TYPE_HANDLE Schema_CreateModelType(SCHEMA_HANDLE schemaHandle, cons
                     {
                         if ((modelType->reportedProperties = VECTOR_create(sizeof(SCHEMA_REPORTED_PROPERTY_HANDLE))) == NULL)
                         {
-                            LogError("failed to VECTOR_create");
+                            LogError("failed to VECTOR_create (reported properties)");
                             VECTOR_destroy(modelType->models);
                             free((void*)modelType->Name);
                             free((void*)modelType);
@@ -617,7 +617,7 @@ SCHEMA_MODEL_TYPE_HANDLE Schema_CreateModelType(SCHEMA_HANDLE schemaHandle, cons
                         {
                             if ((modelType->desiredProperties = VECTOR_create(sizeof(SCHEMA_DESIRED_PROPERTY_HANDLE))) == NULL)
                             {
-                                LogError("failure in VECTOR_create");
+                                LogError("failure in VECTOR_create (desired properties)");
                                 VECTOR_destroy(modelType->reportedProperties);
                                 VECTOR_destroy(modelType->models);
                                 free((void*)modelType->Name);
@@ -2249,9 +2249,9 @@ SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeH
         /*Codes_SRS_SCHEMA_02_027: [ Schema_AddModelDesiredProperty shall add the desired property given by the name desiredPropertyName and the type desiredPropertyType to the collection of existing desired properties. ]*/
         if (VECTOR_find_if(handleData->desiredProperties, reportedPropertyExists, desiredPropertyName) != NULL)
         {
-            /*Codes_SRS_SCHEMA_02_028: [ If any failure occurs then Schema_AddModelDesiredProperty shall fail and return SCHEMA_ERROR. ]*/
+            /*Codes_SRS_SCHEMA_02_047: [ If the desired property already exists, then Schema_AddModelDesiredProperty shall fail and return SCHEMA_DUPLICATE_ELEMENT. ]*/
             LogError("unable to Schema_AddModelDesiredProperty because a desired property with the same name (%s) already exists", desiredPropertyName);
-            result = SCHEMA_ERROR;
+            result = SCHEMA_DUPLICATE_ELEMENT;
         }
         else
         {

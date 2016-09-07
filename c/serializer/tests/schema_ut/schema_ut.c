@@ -4691,7 +4691,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_047: [ If the desired property already exists, then Schema_AddModelDesiredProperty shall fail and return SCHEMA_ERROR. ]*/
+    /*Tests_SRS_SCHEMA_02_047: [ If the desired property already exists, then Schema_AddModelDesiredProperty shall fail and return SCHEMA_DUPLICATE_ELEMENT. ]*/
     TEST_FUNCTION(Schema_AddModelDesiredProperty_the_same_desired_property_twice_fails)
     {
         ///arrange
@@ -4711,7 +4711,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, name, type);
 
         ///assert
-        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_ERROR, result);
+        ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_DUPLICATE_ELEMENT, result);
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         ///clean
