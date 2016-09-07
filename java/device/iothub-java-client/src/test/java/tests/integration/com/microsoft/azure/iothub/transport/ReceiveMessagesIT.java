@@ -32,7 +32,7 @@ public class ReceiveMessagesIT
     private static ServiceClient serviceClient;
 
     // How much to wait until receiving a message from the server, in milliseconds
-    private Integer receiveTimeout = 5000;
+    private Integer receiveTimeout = 60000;
 
     @BeforeClass
     public static void setUp() throws Exception
