@@ -4,18 +4,20 @@
 #this is CMakeLists.txt for iothubclient_ll_ut
 cmake_minimum_required(VERSION 2.8.11)
 
-compileAsC99()
+compileAsC11()
+
 set(theseTestsName iothubclient_ll_ut)
 
-set(${theseTestsName}_cpp_files
-${theseTestsName}.cpp
+set(${theseTestsName}_test_files
+${theseTestsName}.c
 )
 
 set(${theseTestsName}_c_files
 ../../src/iothub_client_ll.c
+real_doublylinkedlist.c
 )
 
 set(${theseTestsName}_h_files
 )
 
-build_test_artifacts(${theseTestsName} ON)
+build_c_test_artifacts(${theseTestsName} ON "tests/UnitTests")

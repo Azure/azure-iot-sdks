@@ -112,11 +112,16 @@ public class AmqpSend extends BaseHandler
             this.reactor = Proton.reactor(this);
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_008: [The function shall start the Proton reactor object]
             this.reactor.run();
+            this.reactor.free();
+
         }
         else
         {
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPSEND_12_009: [The function shall throw IOException if the send handler object is not initialized]
             throw new IOException("send handler is not initialized. call open before send");
         }
+
     }
+
+
 }
