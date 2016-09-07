@@ -100,6 +100,7 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
             this.reactor = Proton.reactor(this);
             // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_006: [The function shall start the Proton reactor object]
             this.reactor.run();
+            this.reactor.free();
             if (timeoutMs == 0)
                 // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_007: [The function shall acquire a semaphore for event handling with no timeout if the input timoutMs is equal to 0]
                 semaphore.acquire();
@@ -127,5 +128,7 @@ public class AmqpReceive extends BaseHandler implements AmqpFeedbackReceivedEven
         feedbackBatch = FeedbackBatchMessage.parse(feedbackJson);
         // Codes_SRS_SERVICE_SDK_JAVA_AMQPRECEIVE_12_011: [The function shall release the event handling semaphore]
         semaphore.release();
+
     }
+
 }
