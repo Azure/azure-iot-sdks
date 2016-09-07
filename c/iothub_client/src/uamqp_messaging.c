@@ -153,7 +153,7 @@ static int addApplicationPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_m
 					if ((map_key_value = amqpvalue_create_string(propertyKeys[i])) == NULL)
 					{
 						// Codes_SRS_UAMQP_MESSAGING_09_089: [If amqpvalue_create_string() fails, message_create_from_iothub_message() shall fail and return immediately..]
-						LogError("Failed to create uAMQP property key value.");
+						LogError("Failed to create uAMQP property key name.");
 						result = __LINE__;
 					}
 					// Codes_SRS_UAMQP_MESSAGING_09_090: [An AMQP_VALUE instance shall be created using amqpvalue_create_string() to hold each uAMQP property value.]
@@ -167,7 +167,7 @@ static int addApplicationPropertiesTouAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_m
 					else if (amqpvalue_set_map_value(uamqp_map, map_key_value, map_value_value) != 0)
 					{
 						// Codes_SRS_UAMQP_MESSAGING_09_093: [If amqpvalue_map_set_value() fails, message_create_from_iothub_message() shall fail and return immediately..]
-						LogError("Failed to create uAMQP property key value.");
+						LogError("Failed to set key/value into the the uAMQP property map.");
 						result = __LINE__;
 					}
 
@@ -231,8 +231,7 @@ static int readPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_h
 		if ((api_call_result = properties_get_message_id(uamqp_message_properties, &uamqp_message_property)) != 0)
 		{
 			// Codes_SRS_UAMQP_MESSAGING_09_011: [If properties_get_message_id fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.]
-			LogInfo("Failed to get value of uAMQP message 'message-id' property (%d).", api_call_result);
-			return_value = __LINE__;
+			LogInfo("Failed to get value of uAMQP message 'message-id' property (%d). No failure, since it is optional.", api_call_result);
 		}
 		// Codes_SRS_UAMQP_MESSAGING_09_012: [The type of the message-id property value shall be obtained using amqpvalue_get_type().]
 		// Codes_SRS_UAMQP_MESSAGING_09_013: [If the type of the message-id property value is AMQP_TYPE_NULL, IoTHubMessage_CreateFromuAMQPMessage() shall skip processing the message-id (as it is optional) and continue normally.]
@@ -258,8 +257,7 @@ static int readPropertiesFromuAMQPMessage(IOTHUB_MESSAGE_HANDLE iothub_message_h
 		if ((api_call_result = properties_get_correlation_id(uamqp_message_properties, &uamqp_message_property)) != 0)
 		{
 			// Codes_SRS_UAMQP_MESSAGING_09_019: [If properties_get_correlation_id() fails, IoTHubMessage_CreateFromuAMQPMessage() shall fail and return immediately.]
-			LogError("Failed to get value of uAMQP message 'correlation-id' property (%d).", api_call_result);
-			return_value = __LINE__;
+			LogError("Failed to get value of uAMQP message 'correlation-id' property (%d). No failure, since it is optional.", api_call_result);
 		}
 		// Codes_SRS_UAMQP_MESSAGING_09_020: [The type of the correlation-id property value shall be obtained using amqpvalue_get_type().]
 		// Codes_SRS_UAMQP_MESSAGING_09_021: [If the type of the correlation-id property value is AMQP_TYPE_NULL, IoTHubMessage_CreateFromuAMQPMessage() shall skip processing the correlation-id (as it is optional) and continue normally.]
