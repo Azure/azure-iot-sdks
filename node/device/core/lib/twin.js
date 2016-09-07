@@ -64,6 +64,7 @@ Twin.fromDeviceClient = function(client, done) {
 
           twin._subscribe( function(err) {
             client._twin = twin;
+            twin._clearReportedProperties();
             done(err, twin);
           });
         }
@@ -163,15 +164,28 @@ Twin.prototype._sendTwinRequest = function(method, resource, properties, body, d
 };
 
 
-Twin.prototype.reportTwinState = function (state, done) {
-  /* Codes_SRS_NODE_DEVICE_TWIN_18_025: [** `reportState` shall use _sendTwinRequest to send the patch object to the service. **]**  */
-  /* Codes_SRS_NODE_DEVICE_TWIN_18_026: [** When calling `_sendTwinRequest`, `reportState` shall pass `method`='PATCH', `resource`='/properties/reported/', `properties`={}, and `body`=the `body` parameter passed in to `reportState` as a string. **]**    */
-  /* Codes_SRS_NODE_DEVICE_TWIN_18_027: [** `reportState` shall call `done` with the results from `_sendTwinRequest` **]**  */
+Twin.prototype._reportState = function (state, done) {
+  /* Codes_SRS_NODE_DEVICE_TWIN_18_025: [** `update` shall use _sendTwinRequest to send the patch object to the service. **]**  */
+  /* Codes_SRS_NODE_DEVICE_TWIN_18_026: [** When calling `_sendTwinRequest`, `update` shall pass `method`='PATCH', `resource`='/properties/reported/', `properties`={}, and `body`=the `body` parameter passed in to `reportState` as a string. **]**    */
+  /* Codes_SRS_NODE_DEVICE_TWIN_18_027: [** `update` shall call `done` with the results from `_sendTwinRequest` **]**  */
   this._sendTwinRequest('PATCH', '/properties/reported/', {}, JSON.stringify(state), done);
 };
 
 Twin.prototype._onServiceResponse = function() {
 };
+
+Twin.prototype._clearReportedProperties = function () {
+  var self = this;
+  this.properties = { 
+    reported : {
+      update : function(state, done) {
+        self._reportState(state, done);
+      }
+    }
+  };
+};
+        
+
 
 module.exports = Twin;
 

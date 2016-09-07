@@ -27,9 +27,9 @@ client.getTwin(client, function(err, thermostat) {
   };
 
   // Report firmare version and tempeature.
-  thermostat.reportState(patch, function(err) {
+  thermostat.properties.reported.update(patch, function(err) {
     if (err) {
-      console.error('reportState failed');
+      console.error('update failed');
     } else {
       console.log('twin state updated successfully');
     }
@@ -76,7 +76,7 @@ The `fromDeviceclient` method creates a device twin connection to the given hub 
 
 **SRS_NODE_DEVICE_TWIN_18_011: [** `fromDeviceClient` shall call the `done` callback with `err`=`null` if it receives a `subscribed` event for the `response` topic. **]** 
 
-**SRS_NODE_DEVICE_TWIN_18_012: [** `fromDeviceClient` shall remove the handlers for both the `subscribed` and `error` events before calling the `done` callback. **]**  
+**SRS_NODE_DEVICE_TWIN_18_012: [** `fromDeviceClient` shall remove the handlers for both the `subscribed` and `error` events before calling the `done` callback. **]**
 
 
 ### _sendTwinRequest method (private)
@@ -101,14 +101,14 @@ The `fromDeviceclient` method creates a device twin connection to the given hub 
 **SRS_NODE_DEVICE_TWIN_18_022: [** If the response doesn't come within `Twin.timeout` milliseconds, `_sendTwinRequest` shall call `done` with `err`=`TimeoutError` **]**  
 
 
-### reportState method
-`reportState` is a method which application developers use to send reported state to the service.
+### update method
+`update` is a method which application developers use to send reported state to the service.
 
-**SRS_NODE_DEVICE_TWIN_18_025: [** `reportState` shall use _sendTwinRequest to send the patch object to the service. **]** 
+**SRS_NODE_DEVICE_TWIN_18_025: [** `update` shall use _sendTwinRequest to send the patch object to the service. **]** 
 
-**SRS_NODE_DEVICE_TWIN_18_026: [** When calling `_sendTwinRequest`, `reportState` shall pass `method`='PATCH', `resource`='/properties/reported/', `properties`={}, and `body`=the `body` parameter passed in to `reportState` as a string. **]**   
+**SRS_NODE_DEVICE_TWIN_18_026: [** When calling `_sendTwinRequest`, `update` shall pass `method`='PATCH', `resource`='/properties/reported/', `properties`={}, and `body`=the `body` parameter passed in to `reportState` as a string. **]**   
 
-**SRS_NODE_DEVICE_TWIN_18_027: [** `reportState` shall call `done` with the results from `_sendTwinRequest` **]** 
+**SRS_NODE_DEVICE_TWIN_18_027: [** `update` shall call `done` with the results from `_sendTwinRequest` **]** 
 
 
 

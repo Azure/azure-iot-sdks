@@ -337,17 +337,17 @@ describe('Twin', function () {
     });
   });
 
-  describe('reportTwinState', function () {
+  describe('update', function () {
     
-    /* Tests_SRS_NODE_DEVICE_TWIN_18_025: [** `reportState` shall use _sendTwinRequest to send the patch object to the service. **]**  */
-    /* Tests_SRS_NODE_DEVICE_TWIN_18_026: [** When calling `_sendTwinRequest`, `reportState` shall pass `method`='PATCH', `resource`='/properties/reported/', `properties`={}, and `body`=the `body` parameter passed in to `reportState` as a string. **]**    */
-    /* Tests_SRS_NODE_DEVICE_TWIN_18_027: [** `reportState` shall call `done` with the results from `_sendTwinRequest` **]**  */
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_025: [** `update` shall use _sendTwinRequest to send the patch object to the service. **]**  */
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_026: [** When calling `_sendTwinRequest`, `update` shall pass `method`='PATCH', `resource`='/properties/reported/', `properties`={}, and `body`=the `body` parameter passed in to `reportState` as a string. **]**    */
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_027: [** `update` shall call `done` with the results from `_sendTwinRequest` **]**  */
     it('calls _sendTwinRequest correctly', function(done)  {
       var client = new FakeClient();
       Twin.fromDeviceClient(client, function(err, twin) {
         var sendTwinRequest = sinon.spy(twin,'_sendTwinRequest');
         if (err) throw err;
-        twin.reportTwinState( { 'phone_number' : '867-5309' }, function(err) {
+        twin.properties.reported.update( { 'phone_number' : '867-5309' }, function(err) {
           if (err) throw err;
           assert(sendTwinRequest.calledOnce);
           assert.equal(sendTwinRequest.firstCall.args[0],'PATCH');
