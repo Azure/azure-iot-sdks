@@ -3180,7 +3180,8 @@ TEST_FUNCTION(IoTHubClient_LL_SetDeviceTwinCallback_unsubscribe_succeed)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Unsubscribe_DeviceTwin(IGNORED_PTR_ARG, IOTHUB_DEVICE_TWIN_NOTIFICATION_STATE))
-        .IgnoreArgument_handle();
+        .IgnoreArgument_handle()
+        .IgnoreArgument_subscribe_state();
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetDeviceTwinCallback(h, NULL, NULL);
@@ -3201,7 +3202,8 @@ TEST_FUNCTION(IoTHubClient_LL_SetDeviceTwinCallback_subscribe_succeed)
     umock_c_reset_all_calls();
 
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Subscribe_DeviceTwin(IGNORED_PTR_ARG, IOTHUB_DEVICE_TWIN_NOTIFICATION_STATE))
-        .IgnoreArgument_handle();
+        .IgnoreArgument_handle()
+        .IgnoreArgument_subscribe_state();
 
     //act
     IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetDeviceTwinCallback(h, iothub_device_twin_callback, (void*)1);
@@ -3223,6 +3225,7 @@ TEST_FUNCTION(IoTHubClient_LL_SetDeviceTwinCallback_subscribe_fail)
 
     STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_Subscribe_DeviceTwin(IGNORED_PTR_ARG, IOTHUB_DEVICE_TWIN_NOTIFICATION_STATE))
         .IgnoreArgument_handle()
+        .IgnoreArgument_subscribe_state()
         .SetReturn(__LINE__);
 
     //act
