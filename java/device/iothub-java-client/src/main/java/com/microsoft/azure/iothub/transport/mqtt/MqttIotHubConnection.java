@@ -242,7 +242,7 @@ public class MqttIotHubConnection implements MqttCallback
         // the function shall throw an IllegalStateException.]
         if (this.state == State.CLOSED)
         {
-            throw new IllegalStateException("The MQTT connection is currently closed. Call open() before attempting" +
+            throw new IllegalStateException("The MQTT connection is currently closed. Call open() before attempting " +
                     "to receive a message.");
         }
 

@@ -616,6 +616,8 @@ extern SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE mod
 
 **SRS_SCHEMA_02_027: [** `Schema_AddModelDesiredProperty` shall add the desired property given by the name `desiredPropertyName` and the type `desiredPropertyType` to the collection of existing desired properties. **]**
 
+**SRS_SCHEMA_02_047: [** If the desired property already exists, then `Schema_AddModelDesiredProperty` shall fail and return `SCHEMA_DUPLICATE_ELEMENT`. **]**
+
 **SRS_SCHEMA_02_028: [** If any failure occurs then `Schema_AddModelDesiredProperty` shall fail and return `SCHEMA_ERROR`. **]**
 
 **SRS_SCHEMA_02_029: [** Otherwise, `Schema_AddModelDesiredProperty` shall succeed and return `SCHEMA_OK`. **]**
@@ -638,15 +640,15 @@ extern SCHEMA_RESULT Schema_GetModelDesiredPropertyCount(SCHEMA_MODEL_TYPE_HANDL
 extern SCHEMA_DESIRED_PROPERTY_HANDLE Schema_GetModelDesiredPropertyByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyName);
 ```
 
-**SRS_SCHEMA_02_033: [** `Schema_GetModelReportedPropertyByName` returns the SCHEMA_DESIRED_PROPERTY_HANDLE for a desired property indicated by name. **]**
+`Schema_GetModelDesiredPropertyByName` returns the SCHEMA_DESIRED_PROPERTY_HANDLE for a desired property indicated by name.
 
-**SRS_SCHEMA_02_034: [** If `modelTypeHandle` is `NULL` then `Schema_GetModelReportedPropertyByName` shall fail and return `NULL`. **]**
+**SRS_SCHEMA_02_034: [** If `modelTypeHandle` is `NULL` then `Schema_GetModelDesiredPropertyByName` shall fail and return `NULL`. **]**
 
-**SRS_SCHEMA_02_035: [** If `desiredPropertyName` is `NULL` then `Schema_GetModelReportedPropertyByName` shall fail and return `NULL`. **]**
+**SRS_SCHEMA_02_035: [** If `desiredPropertyName` is `NULL` then `Schema_GetModelDesiredPropertyByName` shall fail and return `NULL`. **]**
 
-**SRS_SCHEMA_02_036: [** If a desired property having the name `desiredPropertyName` exists then `Schema_GetModelReportedPropertyByName` shall succeed and  return a non-`NULL` value. **]**
+**SRS_SCHEMA_02_036: [** If a desired property having the name `desiredPropertyName` exists then `Schema_GetModelDesiredPropertyByName` shall succeed and  return a non-`NULL` value. **]**
 
-**SRS_SCHEMA_02_037: [** Otherwise, `Schema_GetModelReportedPropertyByName` shall fail and return `NULL`. **]**
+**SRS_SCHEMA_02_037: [** Otherwise, `Schema_GetModelDesiredPropertyByName` shall fail and return `NULL`. **]**
 
 
 ### Schema_GetModelDesiredPropertyByIndex

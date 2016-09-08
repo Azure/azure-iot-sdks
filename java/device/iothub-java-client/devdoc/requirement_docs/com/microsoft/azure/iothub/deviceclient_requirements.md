@@ -11,9 +11,9 @@ Allows a single logical or physical device to connect to an IoT Hub.
 ```java
 public final class DeviceClient
 {
-    public static long SEND_PERIOD_MILLIS = 5000l;
-    public static long RECEIVE_PERIOD_MILLIS = 5000l;
-    public static long RECEIVE_PERIOD_MILLIS_MQTT = 5000l;
+    public static long SEND_PERIOD_MILLIS = 10l;
+    public static long RECEIVE_PERIOD_MILLIS = 10l;
+    public static long RECEIVE_PERIOD_MILLIS_MQTT = 10l;
     public static long RECEIVE_PERIOD_MILLIS_HTTPS = 25*60*1000; /*25 minutes*/
 
     public DeviceClient(String connString, IotHubClientProtocol protocol) throws URISyntaxException;
