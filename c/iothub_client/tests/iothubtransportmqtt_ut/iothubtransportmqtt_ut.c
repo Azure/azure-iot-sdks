@@ -165,19 +165,21 @@ static ON_MQTT_OPERATION_CALLBACK g_fnMqttOperationCallback;
 static void* g_callbackCtx;
 static bool g_nullMapVariable;
 
-static pfIoTHubTransport_GetHostname    IoTHubTransportMqtt_GetHostname;
-static pfIoTHubTransport_SetOption      IoTHubTransportMqtt_SetOption;
-static pfIoTHubTransport_Create         IoTHubTransportMqtt_Create;
-static pfIoTHubTransport_Destroy        IoTHubTransportMqtt_Destroy;
-static pfIotHubTransport_Register       IoTHubTransportMqtt_Register;
-static pfIotHubTransport_Unregister     IoTHubTransportMqtt_Unregister;
-static pfIoTHubTransport_Subscribe      IoTHubTransportMqtt_Subscribe;
-static pfIoTHubTransport_Unsubscribe    IoTHubTransportMqtt_Unsubscribe;
-static pfIoTHubTransport_DoWork         IoTHubTransportMqtt_DoWork;
-static pfIoTHubTransport_GetSendStatus  IoTHubTransportMqtt_GetSendStatus;
-static pfIoTHubTransport_Subscribe_DeviceTwin   IoTHubTransportMqtt_Subscribe_DeviceTwin;
-static pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransportMqtt_Unsubscribe_DeviceTwin;
-static pfIoTHubTransport_ProcessItem            IoTHubTransportMqtt_ProcessItem;
+static pfIoTHubTransport_GetHostname                IoTHubTransportMqtt_GetHostname;
+static pfIoTHubTransport_SetOption                  IoTHubTransportMqtt_SetOption;
+static pfIoTHubTransport_Create                     IoTHubTransportMqtt_Create;
+static pfIoTHubTransport_Destroy                    IoTHubTransportMqtt_Destroy;
+static pfIotHubTransport_Register                   IoTHubTransportMqtt_Register;
+static pfIotHubTransport_Unregister                 IoTHubTransportMqtt_Unregister;
+static pfIoTHubTransport_Subscribe                  IoTHubTransportMqtt_Subscribe;
+static pfIoTHubTransport_Unsubscribe                IoTHubTransportMqtt_Unsubscribe;
+static pfIoTHubTransport_DoWork                     IoTHubTransportMqtt_DoWork;
+static pfIoTHubTransport_GetSendStatus              IoTHubTransportMqtt_GetSendStatus;
+static pfIoTHubTransport_Subscribe_DeviceTwin       IoTHubTransportMqtt_Subscribe_DeviceTwin;
+static pfIoTHubTransport_Unsubscribe_DeviceTwin     IoTHubTransportMqtt_Unsubscribe_DeviceTwin;
+static pfIoTHubTransport_Subscribe_DeviceMethod     IoTHubTransportMqtt_Subscribe_DeviceMethod;
+static pfIoTHubTransport_Unsubscribe_DeviceMethod   IoTHubTransportMqtt_Unsubscribe_DeviceMethod;
+static pfIoTHubTransport_ProcessItem                IoTHubTransportMqtt_ProcessItem;
 
 #ifdef __cplusplus
 extern "C"
@@ -610,6 +612,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     IoTHubTransportMqtt_GetSendStatus = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_GetSendStatus;
     IoTHubTransportMqtt_Subscribe_DeviceTwin = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_Subscribe_DeviceTwin;
     IoTHubTransportMqtt_Unsubscribe_DeviceTwin = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_Unsubscribe_DeviceTwin;
+    IoTHubTransportMqtt_Subscribe_DeviceMethod = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_Subscribe_DeviceMethod;
+    IoTHubTransportMqtt_Unsubscribe_DeviceMethod = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_Unsubscribe_DeviceMethod;
     IoTHubTransportMqtt_ProcessItem = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_ProcessItem;
 }
 
@@ -1256,6 +1260,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Destroy_One_Message_Ack_succeeds)
     EXPECTED_CALL(STRING_delete(NULL));
     EXPECTED_CALL(STRING_delete(NULL));
     STRICT_EXPECTED_CALL(mqtt_client_deinit(TEST_MQTT_CLIENT_HANDLE)).IgnoreArgument(1);
+    EXPECTED_CALL(STRING_delete(NULL));
     EXPECTED_CALL(STRING_delete(NULL));
     EXPECTED_CALL(STRING_delete(NULL));
     EXPECTED_CALL(STRING_delete(NULL));
@@ -3546,6 +3551,175 @@ TEST_FUNCTION(IoTHubTransportMqtt_Subscribe_DeviceTwin_notify_fail)
         // assert
         ASSERT_ARE_NOT_EQUAL(int, result, 0);
     }
+
+    //cleanup
+    IoTHubTransportMqtt_Destroy(handle);
+    umock_c_negative_tests_deinit();
+}
+
+/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_003: [ IoTHubTransportMqtt_Subscribe_DeviceMethod shall set the signaling flag for DEVICE_METHOD topic for the receiver's topic list. ]*/
+/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_004: [ IoTHubTransportMqtt_Subscribe_DeviceMethod shall construct the DEVICE_METHOD topic string for subscribe. ]*/
+/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_005: [ IoTHubTransportMqtt_Subscribe_DeviceMethod shall schedule the send of the subscription. ]*/
+/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_007: [ On success IoTHubTransportMqtt_Subscribe_DeviceMethod shall return 0. ]*/
+TEST_FUNCTION(IoTHubTransportMqtt_Subscribe_DeviceMethod_Succeed)
+{
+    // arrange
+    CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
+    
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    umock_c_reset_all_calls();
+
+    EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument_psz();
+
+    // act
+    int result = IoTHubTransportMqtt_Subscribe_DeviceMethod(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, result, 0);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransportMqtt_Destroy(handle);
+}
+
+/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_001: [ If the parameter 'handle' is NULL than IoTHubTransportMqtt_Subscribe_DeviceMethod shall return a non-zero value. ]*/
+TEST_FUNCTION(IoTHubTransportMqtt_Subscribe_DeviceMethod_handle_NULL_fail)
+{
+    // arrange
+    umock_c_reset_all_calls();
+
+    // act
+    int result = IoTHubTransportMqtt_Subscribe_DeviceMethod(NULL);
+
+    // assert
+    ASSERT_ARE_NOT_EQUAL(int, result, 0);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_006: [ Upon failure IoTHubTransportMqtt_Subscribe_DeviceMethod shall return a non-zero value. ]*/
+TEST_FUNCTION(IoTHubTransportMqtt_Subscribe_DeviceMethod_fail)
+{
+    // arrange
+    int negativeTestsInitResult = umock_c_negative_tests_init();
+    ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
+
+    CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
+
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    umock_c_reset_all_calls();
+
+    EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG)).IgnoreArgument_psz();
+
+    umock_c_negative_tests_snapshot();
+
+    // act
+    size_t count = umock_c_negative_tests_call_count();
+    for (size_t index = 0; index < count; index++)
+    {
+        umock_c_negative_tests_reset();
+        umock_c_negative_tests_fail_call(index);
+
+        char tmp_msg[64];
+        sprintf(tmp_msg, "IoTHubTransportMqtt_Subscribe_DeviceMethod failure in test %zu/%zu", index, count);
+
+        int result = IoTHubTransportMqtt_Subscribe_DeviceMethod(handle);
+        // assert
+        ASSERT_ARE_NOT_EQUAL(int, result, 0);
+    }
+
+    //cleanup
+    IoTHubTransportMqtt_Destroy(handle);
+    umock_c_negative_tests_deinit();
+}
+
+
+/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_008: [ If the parameter 'handle' is NULL than IoTHubTransportMqtt_Unsubscribe_DeviceMethod shall do nothing and return. ]*/
+/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_009: [ If the MQTT transport has not been subscribed to DEVICE_METHOD topic IoTHubTransportMqtt_Unsubscribe_DeviceMethod shall do nothing and return. ]*/
+/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_010: [ IoTHubTransportMqtt_Unsubscribe_DeviceMethod shall construct the DEVICE_METHOD topic string for unsubscribe. ]*/
+/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_011: [ IoTHubTransportMqtt_Unsubscribe_DeviceMethod shall send the unsubscribe. ]*/
+/*Tests_SRS_IOTHUB_MQTT_TRANSPORT_12_012: [ IoTHubTransportMqtt_Unsubscribe_DeviceMethod shall removes the signaling flag for DEVICE_METHOD topic from the receiver's topic list. ]*/
+TEST_FUNCTION(IoTHubTransportMqtt_Unsubscribe_DeviceMethod_handle_OK)
+{
+    // arrange
+    CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
+    IoTHubTransportMqtt_Subscribe_DeviceMethod(handle);
+
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    umock_c_reset_all_calls();
+
+    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mqtt_client_unsubscribe(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, 1))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(3);
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+
+    // act
+    IoTHubTransportMqtt_Unsubscribe_DeviceMethod(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransportMqtt_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubTransportMqtt_Unsubscribe_DeviceMethod_handle_null)
+{
+    // arrange
+    umock_c_reset_all_calls();
+
+    // act
+    IoTHubTransportMqtt_Unsubscribe_DeviceMethod(NULL);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+TEST_FUNCTION(IoTHubTransportMqtt_Unsubscribe_DeviceMethod_negative_cases)
+{
+    // arrange
+    CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
+    IoTHubTransportMqtt_Subscribe_DeviceMethod(handle);
+
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    umock_c_reset_all_calls();
+
+    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).IgnoreArgument(1);
+    STRICT_EXPECTED_CALL(mqtt_client_unsubscribe(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, 1))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(3)
+        .SetReturn(1);
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+
+    umock_c_negative_tests_snapshot();
+
+    // act
+    IoTHubTransportMqtt_Unsubscribe_DeviceMethod(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
     IoTHubTransportMqtt_Destroy(handle);

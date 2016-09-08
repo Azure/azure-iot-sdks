@@ -143,7 +143,7 @@ void IoTHubTransportMqtt_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOT
 int IoTHubTransportMqtt_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
 ```
 
-**SRS_IOTHUB_MQTT_TRANSPORT_12_001: [** If the parameter 'handle' is `NULL` than `IoTHubTransportMqtt_Subscribe_DeviceMethod` shall return a non-zero value. **]**
+**SRS_IOTHUB_MQTT_TRANSPORT_12_001: [** If the parameter `handle` is `NULL` than `IoTHubTransportMqtt_Subscribe_DeviceMethod` shall return a non-zero value. **]**
 
 **SRS_IOTHUB_MQTT_TRANSPORT_12_002: [** If the MQTT transport has been previously subscribed to DEVICE_METHOD topic `IoTHubTransportMqtt_Subscribe_DeviceMethod` shall do nothing and return 0. **]**
 
@@ -164,7 +164,7 @@ int IoTHubTransportMqtt_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
 void IoTHubTransportMqtt_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
 ```
 
-**SRS_IOTHUB_MQTT_TRANSPORT_12_008: [** If the parameter 'handle' is `NULL` than `IoTHubTransportMqtt_Unsubscribe_DeviceMethod` shall do nothing and return. **]**
+**SRS_IOTHUB_MQTT_TRANSPORT_12_008: [** If the parameter `handle` is `NULL` than `IoTHubTransportMqtt_Unsubscribe_DeviceMethod` shall do nothing and return. **]**
 
 **SRS_IOTHUB_MQTT_TRANSPORT_12_009: [** If the MQTT transport has not been subscribed to DEVICE_METHOD topic `IoTHubTransportMqtt_Unsubscribe_DeviceMethod` shall do nothing and return. **]**
 
