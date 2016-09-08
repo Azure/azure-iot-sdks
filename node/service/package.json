@@ -10,6 +10,7 @@
     "azure-iot-amqp-base": "1.0.14",
     "azure-iot-common": "1.0.13",
     "azure-iot-http-base": "1.0.14",
+    "lodash": "^4.15.0",
     "uuid": "^2.0.1"
   },
   "devDependencies": {
