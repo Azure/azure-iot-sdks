@@ -1519,7 +1519,7 @@ static void setExpectedCallsForPrepareForConnectionRetry(CIoTHubTransportAMQPMoc
     }
 }
 
-// This is for a call to DoWork after the transport has connected and authenticated.
+// This is for a call to DoWork after the transport has isConnected and authenticated.
 static void setupSuccessfulDoWork(CIoTHubTransportAMQPMocks& mocks, IOTHUBTRANSPORT_CONFIG& config, time_t current_time, MESSAGERECEIVER_CREATION_ACTION msg_rcvr_action)
 {
     STRICT_EXPECTED_CALL(mocks, DList_IsListEmpty(config.waitingToSend)).SetReturn(1);
