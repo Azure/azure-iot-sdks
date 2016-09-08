@@ -1,7 +1,7 @@
-# azure-iot-device.Twin Requirements
+# azure-iot-device.DeviceTwin Requirements
 
 ## Overview
-azure-iot-device.Twin provides access to the Device Twin functionaliy of IoTHub.
+azure-iot-device.DeviceTwin provides access to the Device Twin functionaliy of IoTHub.
 
 ## Example usage
 ```js
@@ -60,9 +60,9 @@ The `fromDeviceclient` method creates a device twin connection to the given hub 
 
 **SRS_NODE_DEVICE_TWIN_18_028: [** if `fromDeviceClient` has previously been called for this client, it shall return the same object **]**
 
-**SRS_NODE_DEVICE_TWIN_18_029: [** if `fromDeviceClient` is called with 2 different `client`s, it shall return 2 unique `Twin` objects **]**
+**SRS_NODE_DEVICE_TWIN_18_029: [** if `fromDeviceClient` is called with 2 different `client`s, it shall return 2 unique `DeviceTwin` objects **]**
 
-**SRS_NODE_DEVICE_TWIN_18_003: [** `fromDeviceClient` shall allocate a new `Twin` object **]** 
+**SRS_NODE_DEVICE_TWIN_18_003: [** `fromDeviceClient` shall allocate a new `DeviceTwin` object **]** 
 
 **SRS_NODE_DEVICE_TWIN_18_004: [** `fromDeviceClient` shall call `getTwinReceiver` on the protocol object to get a twin receiver. **]** 
 
@@ -70,7 +70,7 @@ The `fromDeviceclient` method creates a device twin connection to the given hub 
 
 **SRS_NODE_DEVICE_TWIN_18_007: [** `fromDeviceClient` shall add handlers for the both the `subscribed` and `error` events on the twinReceiver **]** 
 
-**SRS_NODE_DEVICE_TWIN_18_009: [** `fromDeviceClient` shall call the `done` callback passing a `TimeoutError` if it has not received a `subscribed` event within `Twin.timeout` milliseconds. **]** 
+**SRS_NODE_DEVICE_TWIN_18_009: [** `fromDeviceClient` shall call the `done` callback passing a `TimeoutError` if it has not received a `subscribed` event within `DeviceTwin.timeout` milliseconds. **]** 
 
 **SRS_NODE_DEVICE_TWIN_18_010: [** `fromDeviceClient` shall call the `done` callback passing  the first error that is returned from `error` event on the twinReceiver. **]** 
 
@@ -98,17 +98,17 @@ The `fromDeviceclient` method creates a device twin connection to the given hub 
 
 **SRS_NODE_DEVICE_TWIN_18_021: [** Before calling `done`, `_sendTwinRequest` shall remove the handler for the `response` event **]** 
 
-**SRS_NODE_DEVICE_TWIN_18_022: [** If the response doesn't come within `Twin.timeout` milliseconds, `_sendTwinRequest` shall call `done` with `err`=`TimeoutError` **]**  
+**SRS_NODE_DEVICE_TWIN_18_022: [** If the response doesn't come within `DeviceTwin.timeout` milliseconds, `_sendTwinRequest` shall call `done` with `err`=`TimeoutError` **]**  
 
 
-### update method
+### properties.reported.update method
 `update` is a method which application developers use to send reported state to the service.
 
-**SRS_NODE_DEVICE_TWIN_18_025: [** `update` shall use _sendTwinRequest to send the patch object to the service. **]** 
+**SRS_NODE_DEVICE_TWIN_18_025: [** `properties.reported.update` shall use _sendTwinRequest to send the patch object to the service. **]** 
 
-**SRS_NODE_DEVICE_TWIN_18_026: [** When calling `_sendTwinRequest`, `update` shall pass `method`='PATCH', `resource`='/properties/reported/', `properties`={}, and `body`=the `body` parameter passed in to `reportState` as a string. **]**   
+**SRS_NODE_DEVICE_TWIN_18_026: [** When calling `_sendTwinRequest`, `properties.reported.update` shall pass `method`='PATCH', `resource`='/properties/reported/', `properties`={}, and `body`=the `body` parameter passed in to `reportState` as a string. **]**   
 
-**SRS_NODE_DEVICE_TWIN_18_027: [** `update` shall call `done` with the results from `_sendTwinRequest` **]** 
+**SRS_NODE_DEVICE_TWIN_18_027: [** `properties.reported.update` shall call `done` with the results from `_sendTwinRequest` **]** 
 
 
 
