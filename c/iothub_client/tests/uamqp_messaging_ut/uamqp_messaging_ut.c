@@ -34,31 +34,6 @@ void real_free(void* ptr)
 #include "iothub_message.h"
 #include "azure_uamqp_c/message.h"
 
-MOCKABLE_FUNCTION(, AMQP_VALUE, amqpvalue_create_string, const char*, value);
-MOCKABLE_FUNCTION(, int, amqpvalue_get_string, AMQP_VALUE, value, const char**, string_value);
-MOCKABLE_FUNCTION(, AMQP_VALUE, amqpvalue_create_map);
-MOCKABLE_FUNCTION(, int, amqpvalue_set_map_value, AMQP_VALUE, map, AMQP_VALUE, key, AMQP_VALUE, value);
-MOCKABLE_FUNCTION(, int, amqpvalue_get_map_pair_count, AMQP_VALUE, map, uint32_t*, pair_count);
-MOCKABLE_FUNCTION(, int, amqpvalue_get_map_key_value_pair, AMQP_VALUE, map, uint32_t, index, AMQP_VALUE*, key, AMQP_VALUE*, value);
-MOCKABLE_FUNCTION(, AMQP_TYPE, amqpvalue_get_type, AMQP_VALUE, value);
-MOCKABLE_FUNCTION(, void, amqpvalue_destroy, AMQP_VALUE, value);
-MOCKABLE_FUNCTION(, AMQP_VALUE, amqpvalue_get_inplace_described_value, AMQP_VALUE, value);
-MOCKABLE_FUNCTION(, PROPERTIES_HANDLE, properties_create);
-MOCKABLE_FUNCTION(, void, properties_destroy, PROPERTIES_HANDLE, properties);
-MOCKABLE_FUNCTION(, int, properties_get_message_id, PROPERTIES_HANDLE, properties, AMQP_VALUE*, message_id_value);
-MOCKABLE_FUNCTION(, int, properties_set_message_id, PROPERTIES_HANDLE, properties, AMQP_VALUE, message_id_value);
-MOCKABLE_FUNCTION(, int, properties_get_correlation_id, PROPERTIES_HANDLE, properties, AMQP_VALUE*, correlation_id_value);
-MOCKABLE_FUNCTION(, int, properties_set_correlation_id, PROPERTIES_HANDLE, properties, AMQP_VALUE, correlation_id_value);
-MOCKABLE_FUNCTION(, MESSAGE_HANDLE, message_create);
-MOCKABLE_FUNCTION(, int, message_add_body_amqp_data, MESSAGE_HANDLE, message, BINARY_DATA, binary_data);
-MOCKABLE_FUNCTION(, int, message_get_body_amqp_data, MESSAGE_HANDLE, message, size_t, index, BINARY_DATA*, binary_data);
-MOCKABLE_FUNCTION(, int, message_set_properties, MESSAGE_HANDLE, message, PROPERTIES_HANDLE, properties);
-MOCKABLE_FUNCTION(, int, message_get_properties, MESSAGE_HANDLE, message, PROPERTIES_HANDLE*, properties);
-MOCKABLE_FUNCTION(, int, message_set_application_properties, MESSAGE_HANDLE, message, AMQP_VALUE, application_properties);
-MOCKABLE_FUNCTION(, int, message_get_application_properties, MESSAGE_HANDLE, message, AMQP_VALUE*, application_properties);
-MOCKABLE_FUNCTION(, int, message_get_body_type, MESSAGE_HANDLE, message, MESSAGE_BODY_TYPE*, body_type);
-MOCKABLE_FUNCTION(, void, message_destroy, MESSAGE_HANDLE, message);
-
 #undef ENABLE_MOCKS
 
 #include "uamqp_messaging.h"
