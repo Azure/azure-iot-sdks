@@ -552,8 +552,6 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceTwinCallback(IOTHUB_CLIENT_
 
 **SRS_IOTHUBCLIENT_LL_10_003: [** If the underlying layer's `_Subscribe` function fails, then `IoTHubClient_LL_SetDeviceTwinCallback` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 
-**SRS_IOTHUBCLIENT_LL_10_004: [** If cloning and/or adding the information fails for any reason, `IoTHubClient_LL_SetDeviceTwinCallback` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
-
 **SRS_IOTHUBCLIENT_LL_10_005: [** Otherwise `IoTHubClient_LL_SetDeviceTwinCallback` shall succeed and return `IOTHUB_CLIENT_OK`.** ]**
 
 **SRS_IOTHUBCLIENT_LL_10_006: [** If `deviceTwinCallback` is `NULL`, then `IoTHubClient_LL_SetDeviceTwinCallback` shall call the underlying layer's `_Unsubscribe` function and return `IOTHUB_CLIENT_OK`.** ]**

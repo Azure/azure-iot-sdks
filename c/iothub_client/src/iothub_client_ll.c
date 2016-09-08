@@ -45,6 +45,7 @@ typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG
     uint64_t currentMessageTimeout;
     uint64_t current_device_twin_timeout;
     IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback;
+    void* deviceTwinContextCallback;
     IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback;
     void* deviceMethodUserContextCallback;
 #ifndef DONT_USE_UPLOADTOBLOB
@@ -1135,8 +1136,41 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetOption(IOTHUB_CLIENT_LL_HANDLE iotHubCli
 
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceTwinCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback)
 {
-    (void)iotHubClientHandle; (void)deviceTwinCallback;(void)userContextCallback;
-    return IOTHUB_CLIENT_ERROR;
+    IOTHUB_CLIENT_RESULT result;
+    /* Codes_SRS_IOTHUBCLIENT_LL_10_001: [ IoTHubClient_LL_SetDeviceTwinCallback shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter iotHubClientHandle is NULL.] */
+    if (iotHubClientHandle == NULL)
+    {
+        result = IOTHUB_CLIENT_INVALID_ARG;
+        LogError("Invalid argument specified iothubClientHandle=%p", iotHubClientHandle);
+    }
+    else
+    {
+        IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)iotHubClientHandle;
+        if (deviceTwinCallback == NULL)
+        {
+            /* Codes_SRS_IOTHUBCLIENT_LL_10_006: [ If deviceTwinCallback is NULL, then IoTHubClient_LL_SetDeviceTwinCallback shall call the underlying layer's _Unsubscribe function and return IOTHUB_CLIENT_OK.] */
+            handleData->IoTHubTransport_Unsubscribe_DeviceTwin(handleData->transportHandle, IOTHUB_DEVICE_TWIN_NOTIFICATION_STATE);
+            handleData->deviceTwinCallback = NULL;
+            result = IOTHUB_CLIENT_OK;
+        }
+        else
+        {
+            /* Codes_SRS_IOTHUBCLIENT_LL_10_002: [ If deviceTwinCallback is not NULL, then IoTHubClient_LL_SetDeviceTwinCallback shall call the underlying layer's _Subscribe function.] */
+            if (handleData->IoTHubTransport_Subscribe_DeviceTwin(handleData->transportHandle, IOTHUB_DEVICE_TWIN_NOTIFICATION_STATE) == 0)
+            {
+                handleData->deviceTwinCallback = deviceTwinCallback;
+                handleData->deviceTwinContextCallback = userContextCallback;
+                /* Codes_SRS_IOTHUBCLIENT_LL_10_005: [ Otherwise IoTHubClient_LL_SetDeviceTwinCallback shall succeed and return IOTHUB_CLIENT_OK.] */
+                result = IOTHUB_CLIENT_OK;
+            }
+            else
+            {
+                /* Codes_SRS_IOTHUBCLIENT_LL_10_003: [ If the underlying layer's _Subscribe function fails, then IoTHubClient_LL_SetDeviceTwinCallback shall fail and return IOTHUB_CLIENT_ERROR.] */
+                result = IOTHUB_CLIENT_ERROR;
+            }
+        }
+    }
+    return result;
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendReportedState(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback)
