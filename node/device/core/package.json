@@ -10,7 +10,9 @@
     "azure-iot-common": "1.0.13",
     "azure-iot-http-base": "1.0.14",
     "azure-storage": "^1.2.0",
-    "debug": "^2.2.0"
+    "debug": "^2.2.0",
+    "lodash": "^4.15.0",
+    "traverse": "^0.6.6"
   },
   "devDependencies": {
     "chai": "^3.5.0",

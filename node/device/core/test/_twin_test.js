@@ -358,8 +358,74 @@ describe('DeviceTwin', function () {
         });
       });
     });
+
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_031: [** `properties.reported.update` shall merge the contents of the patch object into `properties.reported` **]** */
+    it ('merges the patch contents', function(done) {
+      var client = new FakeClient();
+      DeviceTwin.fromDeviceClient(client, function(err, twin) {
+        twin.properties.reported.update( { 'phone_number' : '867-5309', 'name' : 'Jennifer' }, function(err) {
+          if (err) done(err);
+          twin.properties.reported.update( { 'name' : 'Jenny', 'age' : 42  }, function(err) {
+            if (err) done(err);
+            assert.equal(twin.properties.reported.name, 'Jenny');
+            assert.equal(twin.properties.reported.phone_number, '867-5309');
+            assert.equal(twin.properties.reported.age, 42);
+            done();
+          });
+        });
+      });
+    });
+            
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_032: [** When merging the patch, if any properties are set to `null`, `properties.reported.update` shall delete that property from `properties.reported`. **]** */
+    it('handles null properties when merging', function(done) {
+      var client = new FakeClient();
+      var patchAddStuff = {
+        a: {
+          b: { 
+            c: 'abc',
+            d: {
+              e: 'def'
+            }
+          }
+        }
+      };
+      var patchRemoveE = {
+        a: {
+          b: {
+            d: {
+              e: null
+            }
+          }
+        }
+      };
+      
+      DeviceTwin.fromDeviceClient(client, function(err, twin) {
+        twin.properties.reported.update( patchAddStuff, function(err) {
+          if (err) done(err);
+          twin.properties.reported.update( patchRemoveE, function(err) {
+            if (err) done(err);
+            assert.equal(twin.properties.reported.a.b.c, 'abc');
+            assert.isDefined(twin.properties.reported.a.b.d);
+            assert.isUndefined(twin.properties.reported.a.b.d.e);
+            done();
+          });
+        });
+      });
+    });
+
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_033: [** If `_sendTwinRequst` fails, `properties.reported.update` shall not merge the contents of the patch object into `properties.reported` **]** */
+    it ('does not merge patch if _sendTwinRequest fails', function(done) {
+      var client = new FakeClient();
+      DeviceTwin.fromDeviceClient(client, function(err, twin) {
+        client._transport.sendTwinRequest = sinon.stub(); // will cause timeout
+        twin.properties.reported.update( { 'phone_number' : '867-5309', 'name' : 'Jennifer' }, function(err) {
+          assert.instanceOf(err,errors.TimeoutError);
+          assert.isUndefined(twin.properties.reported.name);
+          done();
+        });
+      });
+    });
+
   });
-
-
 });
 

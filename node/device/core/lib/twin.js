@@ -6,6 +6,8 @@
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var errors = require('azure-iot-common').errors;
+var _ = require('lodash');
+var traverse = require('traverse');
 
 var DeviceTwin = function(client) {
   EventEmitter.call(this);
@@ -168,7 +170,25 @@ DeviceTwin.prototype._updateReportedProperties = function (state, done) {
   /* Codes_SRS_NODE_DEVICE_TWIN_18_025: [** `properties.reported.update` shall use _sendTwinRequest to send the patch object to the service. **]**  */
   /* Codes_SRS_NODE_DEVICE_TWIN_18_026: [** When calling `_sendTwinRequest`, `properties.reported.update` shall pass `method`='PATCH', `resource`='/properties/reported/', `properties`={}, and `body`=the `body` parameter passed in to `reportState` as a string. **]**    */
   /* Codes_SRS_NODE_DEVICE_TWIN_18_027: [** `properties.reported.update` shall call `done` with the results from `_sendTwinRequest` **]**  */
-  this._sendTwinRequest('PATCH', '/properties/reported/', {}, JSON.stringify(state), done);
+  var self = this;
+  this._sendTwinRequest('PATCH', '/properties/reported/', {}, JSON.stringify(state), function (err) {
+    /* Codes_SRS_NODE_DEVICE_TWIN_18_033: [** If `_sendTwinRequst` fails, `properties.reported.update` shall not merge the contents of the patch object into `properties.reported` **]** */
+    if (err) done(err);
+    self._ingestPatch(self.properties.reported, state, done);
+  });
+};
+
+/* Codes_SRS_NODE_DEVICE_TWIN_18_031: [** `properties.reported.update` shall merge the contents of the patch object into `properties.reported` **]** */
+DeviceTwin.prototype._ingestPatch = function(dest, patch, done) {
+  _.merge(dest, patch);
+
+  /* Codes_SRS_NODE_DEVICE_TWIN_18_032: [** When merging the patch, if any properties are set to `null`, `properties.reported.update` shall delete that property from `properties.reported`. **]** */
+  traverse(dest).forEach(function (prop) {
+    if (prop === null) {
+      this.remove();
+    }
+  });
+  done();
 };
 
 DeviceTwin.prototype._onServiceResponse = function() {
