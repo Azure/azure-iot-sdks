@@ -35,6 +35,11 @@ client.getTwin(client, function(err, thermostat) {
     }
   });
 
+  thermostat.on('properties.desired', function(patch) {
+    console.log('patch received:');
+    console.log(patch);
+  });
+
 });
  
 
@@ -70,13 +75,19 @@ The `fromDeviceclient` method creates a device twin connection to the given hub 
 
 **SRS_NODE_DEVICE_TWIN_18_007: [** `fromDeviceClient` shall add handlers for the both the `subscribed` and `error` events on the twinReceiver **]** 
 
-**SRS_NODE_DEVICE_TWIN_18_009: [** `fromDeviceClient` shall call the `done` callback passing a `TimeoutError` if it has not received a `subscribed` event within `DeviceTwin.timeout` milliseconds. **]** 
+**SRS_NODE_DEVICE_TWIN_18_031: [** `fromDeviceClient` shall subscribe to the response topic **]**
+
+**SRS_NODE_DEVICE_TWIN_18_032: [** `fromDeviceClient` shall subscribe to the desired property patch topic **]**
+
+**SRS_NODE_DEVICE_TWIN_18_009: [** `fromDeviceClient` shall call the `done` callback passing a `TimeoutError` if it has not received all necessary `subscribed` events within `DeviceTwin.timeout` milliseconds. **]** 
 
 **SRS_NODE_DEVICE_TWIN_18_010: [** `fromDeviceClient` shall call the `done` callback passing  the first error that is returned from `error` event on the twinReceiver. **]** 
 
-**SRS_NODE_DEVICE_TWIN_18_011: [** `fromDeviceClient` shall call the `done` callback with `err`=`null` if it receives a `subscribed` event for the `response` topic. **]** 
+**SRS_NODE_DEVICE_TWIN_18_033: [** `fromDeviceClient` shall do a GET call to retrieve desired properties from the service. **]**
 
-**SRS_NODE_DEVICE_TWIN_18_012: [** `fromDeviceClient` shall remove the handlers for both the `subscribed` and `error` events before calling the `done` callback. **]**  
+**SRS_NODE_DEVICE_TWIN_18_034: [** `fromDeviceClient` shall ignore any PATCH operations that arrive before the GET returns **]**
+
+**SRS_NODE_DEVICE_TWIN_18_012: [** `fromDeviceClient` shall remove the handlers for both the `subscribed` and `error` events before calling the `done` callback. **]**
 
 
 ### _sendTwinRequest method (private)
@@ -117,4 +128,20 @@ The `fromDeviceclient` method creates a device twin connection to the given hub 
 **SRS_NODE_DEVICE_TWIN_18_033: [** If `_sendTwinRequest` fails, `properties.reported.update` shall not merge the contents of the patch object into `properties.reported` **]**
 
 
+### events for desired property changes
 
+**SRS_NODE_DEVICE_TWIN_18_035: [** When a the results of a GET operation is received, the `DeviceTwin` object shall ingest the properties into `this.properties.desired`. **]**
+
+**SRS_NODE_DEVICE_TWIN_18_036: [** When a PATCH operation is received, the `DeviceTwin` object shall ingest the properties into `this.properties.desired`. **]**
+
+**SRS_NODE_DEVICE_TWIN_18_037: [** The `DeviceTwin` object shall respond to the service with status=200 after successfully ingesting a PATCH operation. **]**
+
+**SRS_NODE_DEVICE_TWIN_18_038: [** The `DeviceTwin` object shall respond to the service with a failed status if a PATCH operation fails to ingest. **]** 
+
+**SRS_NODE_DEVICE_TWIN_18_039: [** After ingesting a GET result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]**
+
+**SRS_NODE_DEVICE_TWIN_18_040: [** After ingesting a PATCH result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]**
+
+**SRS_NODE_DEVICE_TWIN_18_041: [** When firing a property changed event, the `DeviceTwin` object shall name the event from the property using dot notation starting with 'properties.desired.' **]**
+
+**SRS_NODE_DEVICE_TWIN_18_042: [** When firing a property changed event, the `DeviceTwin` object shall pass the changed value of the property as the event parameter **]**
