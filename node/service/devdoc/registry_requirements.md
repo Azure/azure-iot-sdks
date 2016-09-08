@@ -213,14 +213,8 @@ Request-Id: <guid>
 The `getDeviceTwin` method retrieves the latest Device Twin state in the device registry.
 
 **SRS_NODE_IOTHUB_REGISTRY_16_019: [** The `getDeviceTwin` method shall throw a `ReferenceError` if the `deviceId` parameter is falsy. **]**  
-**SRS_NODE_IOTHUB_REGISTRY_16_020: [** The `getDeviceTwin` method shall throw a `ReferenceError` if the `done` parameter is falsy. **]**    
-**SRS_NODE_IOTHUB_REGISTRY_16_036: [** The `getDeviceTwin` method shall construct an HTTP request using the information supplied by the caller as follows:
-```
-GET /twins/<deviceId>?api-version=<version> HTTP/1.1
-Authorization: <config.sharedAccessSignature>
-Request-Id: <guid>
-```
-**]**
+**SRS_NODE_IOTHUB_REGISTRY_16_020: [** The `getDeviceTwin` method shall throw a `ReferenceError` if the `done` parameter is falsy. **]**  
+**SRS_NODE_IOTHUB_REGISTRY_16_036: [** The `getDeviceTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub service. **]**  
 
 ### All HTTP requests
 All HTTP requests to the registry API should implement the following requirements:

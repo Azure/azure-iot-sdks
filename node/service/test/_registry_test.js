@@ -6,6 +6,7 @@ var assert = require('chai').assert;
 var endpoint = require('azure-iot-common').endpoint;
 var errors = require('azure-iot-common').errors;
 var Registry = require('../lib/registry.js');
+var DeviceTwin = require('../lib/device_twin.js');
 var PackageJson = require('../package.json');
 
 var fakeDevice = { deviceId: 'deviceId' };
@@ -449,50 +450,25 @@ describe('Registry', function() {
 
     testErrorCallback('getDeviceTwin', fakeDevice.deviceId);
 
-    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_036: [The `getDeviceTwin` method shall construct an HTTP request using the information supplied by the caller as follows:
-    ```
-    GET /twins/<deviceId>?api-version=<version> HTTP/1.1
-    Authorization: <config.sharedAccessSignature>
-    Request-Id: <guid>
-    ```]*/
-    it('constructs a valid HTTP request', function(testCallback) {
-      var fakeHttpResponse = { statusCode: 200 };
-      var fakeHttpHelper = {
-        buildRequest: function (method, path, httpHeaders, host, done) {
-          assert.equal(host, fakeConfig.host);
-          assert.equal(method, 'GET');
-          assert.equal(path, '/twins/' + fakeDevice.deviceId + endpoint.versionQueryString());
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows to trace requests/responses in the logs.]*/
-          assert.isString(httpHeaders['Request-Id']);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_042: [All requests shall contain a `Authorization` header that contains a valid shared access key.]*/
-          assert.equal(httpHeaders.Authorization, fakeConfig.sharedAccessSignature);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_040: [All requests shall contain a `User-Agent` header that uniquely identifies the SDK and SDK version used.]*/
-          assert.equal(httpHeaders['User-Agent'], PackageJson.name + '/' + PackageJson.version);
+    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_036: [The `getDeviceTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub servce.]*/
+    it('calls the \'done\' a \'DeviceTwin\' object', function(testCallback) {
+      var registry = new Registry({ host: 'host', sharedAccessSignature: 'sas' }, {
+        buildRequest: function(method, path, headers, body, done) {
           return {
-            write: function() {
-              assert.fail();
-            },
+            write: function() {},
             end: function() {
-              done(null, JSON.stringify(fakeDevice), fakeHttpResponse);
+              done(null, JSON.stringify({ deviceId: 'fakeTwin' }), { status: 200 });
             }
           };
         }
-      };
+      });
 
-      var registry = new Registry(fakeConfig, fakeHttpHelper);
-      registry.getDeviceTwin(fakeDevice.deviceId, function(err, result, response) {
-        /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_034: [When any registry operation receives an HTTP response with a status code < 300, it shall invoke the `done` callback function with the following arguments:
-        - `err`: `null`
-        - `result`: A javascript object parsed from the body of the HTTP response
-        - `response`: the Node.js `http.ServerResponse` object returned by the transport]*/
-        assert.isNull(err);
-        assert.deepEqual(result, fakeDevice);
-        assert.equal(response, fakeHttpResponse);
+      registry.getDeviceTwin('deviceId', function(err, twin) {
+        assert.instanceOf(twin, DeviceTwin);
         testCallback();
       });
     });
   });
-
 
   describe('importDevicesFromBlob', function() {
     /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_001: [A `ReferenceError` shall be thrown if `inputBlobContainerUri` is falsy]*/

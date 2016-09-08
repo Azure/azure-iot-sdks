@@ -12,6 +12,7 @@ var ConnectionString = require('./connection_string.js');
 var translateError = require('./registry_http_errors.js');
 var SharedAccessSignature = require('./shared_access_signature.js');
 var PackageJson = require('../package.json');
+var DeviceTwin = require('./device_twin.js');
 
 /**
  * @class           module:azure-iothub.Registry
@@ -108,6 +109,7 @@ Registry.prototype._executeApiCall = function (method, path, headers, requestBod
   httpHeaders['User-Agent'] = PackageJson.name + '/' + PackageJson.version;
 
   var request = this._http.buildRequest(method, path, httpHeaders, this._config.host, function (err, responseBody, response) {
+    if (done) {
       if (err) {
         if (response) {
           /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_035: [When any registry operation method receives an HTTP response with a status code >= 300, it shall invoke the done callback function with an error translated using the requirements detailed in `registry_http_errors_requirements.md`]*/
@@ -124,13 +126,14 @@ Registry.prototype._executeApiCall = function (method, path, headers, requestBod
         var result = responseBody ? JSON.parse(responseBody) : '';
         done(null, result, response);
       }
-    });
-
-    if (requestBody) {
-      request.write(JSON.stringify(requestBody));
     }
+  });
 
-    request.end();
+  if (requestBody) {
+    request.write(JSON.stringify(requestBody));
+  }
+
+  request.end();
 };
 
 /**
@@ -454,14 +457,8 @@ Registry.prototype.getDeviceTwin = function (deviceId, done) {
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_020: [The `getDeviceTwin` method shall throw a `ReferenceError` if the `done` parameter is falsy.]*/
   if (!done) throw new ReferenceError('the \'done\' argument cannot be falsy');
 
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_036: [** The `getDeviceTwin` method shall construct an HTTP request using the information supplied by the caller as follows:
-  ```
-  GET /twins/<deviceId>?api-version=<version> HTTP/1.1
-  Authorization: <config.sharedAccessSignature>
-  Request-Id: <guid>
-  ```]*/
-  var path = "/twins/" + deviceId + endpoint.versionQueryString();
-  this._executeApiCall('GET', path, null, null, done);
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_036: [The `getDeviceTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub servce.]*/
+  new DeviceTwin(deviceId, this).get(done);
 };
 
 module.exports = Registry;

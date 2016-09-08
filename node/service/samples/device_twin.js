@@ -11,5 +11,16 @@ registry.getDeviceTwin(deviceId, function(err, twin) {
     console.error(err.message);
   } else {
     console.log(JSON.stringify(twin, null, 2));
+    var tagPatch = {
+      random: Math.random().toString()
+    };
+
+    twin.tags.replace(tagPatch, function(err) {
+      if (err) {
+        console.error(err.message);
+      } else {
+        console.log('tags updated');
+      }
+    });
   }
 });
