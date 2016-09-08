@@ -22,17 +22,17 @@ client.open(function(err) {
     // Create device Twin
     client.getDeviceTwin(function(err, twin) {
       if (err) {
-        console.error('could not  get twin');
+        console.error('could not get twin');
       } else {
         console.log('twin created');
 
-        // There are 4 example here.  The app developer has the option to chose
+        // There are 4 examples here.  The app developer has the option to chose
         // which sample style to use (or mix and match).  All of the events 
         // shown here will fire and it's up to the app developer to decide what
-        //  to listen for.
+        // to listen for.
         //
         // If there is a collision between different handlers, it is up to the
-        // app developer to resolve the collisions.  In other words,  there is
+        // app developer to resolve the collisions.  In other words, there is
         // nothing that stops the developer from writing two different handlers
         // that process the same properties at different levels.
         //
@@ -50,8 +50,8 @@ client.open(function(err) {
         // Usage example #2: receiving an event if anything under 
         // properties.desired.climate changes
         //
-        // This code will output desired min and max 0temperature every time 
-        // the service updates either one
+        // This code will output desired min and max temperature every time 
+        // the service updates either one.
         //
         // For example (service API code):
         //  twin.properties.desired.update({
@@ -67,7 +67,9 @@ client.open(function(err) {
           // this function was called.
           //
           // If the delta contains a minTemp or a maxTemp, then update the
-          // hardware with the values stored in the twin.  We don't use the
+          // hardware with the values stored in the twin.  The twin has all the
+          // same values as the delta, but the delta only has values that
+          // have changed.  When we need the "current values", we don't use the
           // values stored in the delta because it's possible that the delta has
           // one or the other, but not both.
           //
@@ -96,15 +98,15 @@ client.open(function(err) {
         //    }
         //  });
 
-        twin.on('properties.desired.climate.hvac.systemControl.fanOn', function(delta) {
-          console.log('setting fan state to ' + delta);
+        twin.on('properties.desired.climate.hvac.systemControl.fanOn', function(fanOn) {
+          console.log('setting fan state to ' + fanOn);
         });
 
         // Usage example #4: handle add or delete operations.  The app developer
         // is responsible for inferring add/update/delete operations based on 
         // the contents of the patch.
         //
-        // This code will output the results of adding, updasting, or deleting
+        // This code will output the results of adding, updating, or deleting
         // modules.
         //
         // Add example (service API code):
@@ -132,7 +134,7 @@ client.open(function(err) {
 
         // To do this, first we have to keep track of "all modules that we know
         // about".
-        var moduleList= {};
+        var moduleList = {};
 
         // Then we add a handler for the parent of the properties that we care
         // about.
@@ -142,8 +144,8 @@ client.open(function(err) {
             if (delta[key] === null && moduleList[key]) {
               // If our patch contains a null value, but we have a record of 
               // this module, then this is a delete operation.
-              console.log('deleting module '+key);
-              moduleList[key] = null;
+              console.log('deleting module ' + key);
+              delete moduleList[key];
               
             } else if (delta[key]) {
               if (moduleList[key] {
@@ -151,6 +153,7 @@ client.open(function(err) {
                 // Must be an update operation.
                 console.log('updating module ' + key + ':');
                 console.log(JSON.stringify(delta[key]));
+                // Store the complete object instead of just the delta
                 moduleList[key] = twin.properties.desired.modules[key];
                 
               } else {
@@ -158,6 +161,7 @@ client.open(function(err) {
                 // before.  Must be an add operation.
                 console.log('adding module ' + key + ':');
                 console.log(JSON.stringify(delta[key]));
+                // Store the complete object instead of just the delta
                 moduleList[key] = twin.properties.desired.modules[key];
               }
             }
