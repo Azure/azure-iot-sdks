@@ -413,7 +413,7 @@ describe('DeviceTwin', function () {
       });
     });
 
-    /* Tests_SRS_NODE_DEVICE_TWIN_18_033: [** If `_sendTwinRequst` fails, `properties.reported.update` shall not merge the contents of the patch object into `properties.reported` **]** */
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_033: [** If `_sendTwinRequest` fails, `properties.reported.update` shall not merge the contents of the patch object into `properties.reported` **]** */
     it ('does not merge patch if _sendTwinRequest fails', function(done) {
       var client = new FakeClient();
       DeviceTwin.fromDeviceClient(client, function(err, twin) {

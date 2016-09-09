@@ -172,7 +172,7 @@ DeviceTwin.prototype._updateReportedProperties = function (state, done) {
   /* Codes_SRS_NODE_DEVICE_TWIN_18_027: [** `properties.reported.update` shall call `done` with the results from `_sendTwinRequest` **]**  */
   var self = this;
   this._sendTwinRequest('PATCH', '/properties/reported/', {}, JSON.stringify(state), function (err) {
-    /* Codes_SRS_NODE_DEVICE_TWIN_18_033: [** If `_sendTwinRequst` fails, `properties.reported.update` shall not merge the contents of the patch object into `properties.reported` **]** */
+    /* Codes_SRS_NODE_DEVICE_TWIN_18_033: [** If `_sendTwinRequest` fails, `properties.reported.update` shall not merge the contents of the patch object into `properties.reported` **]** */
     if (err) done(err);
     self._ingestPatch(self.properties.reported, state, done);
   });

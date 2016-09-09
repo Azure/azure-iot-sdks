@@ -114,7 +114,7 @@ The `fromDeviceclient` method creates a device twin connection to the given hub 
 
 **SRS_NODE_DEVICE_TWIN_18_032: [** When merging the patch, if any properties are set to `null`, `properties.reported.update` shall delete that property from `properties.reported`. **]**
 
-**SRS_NODE_DEVICE_TWIN_18_033: [** If `_sendTwinRequst` fails, `properties.reported.update` shall not merge the contents of the patch object into `properties.reported` **]**
+**SRS_NODE_DEVICE_TWIN_18_033: [** If `_sendTwinRequest` fails, `properties.reported.update` shall not merge the contents of the patch object into `properties.reported` **]**
 
 
 
