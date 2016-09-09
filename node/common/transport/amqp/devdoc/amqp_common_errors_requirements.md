@@ -21,6 +21,8 @@
 
 **SRS_NODE_DEVICE_AMQP_COMMON_ERRORS_16_008: [** `translateError` shall return an `InternalServerError` if the AMQP error condition is `amqp:internal-error`. **]**
 
+**SRS_NODE_DEVICE_AMQP_COMMON_ERRORS_16_011: [** `translateError` shall return an `IotHubQuotaExceededError` if the AMQP error condition is `amqp:resource-limit-exceeded`. **]**
+
 **SRS_NODE_DEVICE_AMQP_COMMON_ERRORS_16_009: [** `translateError` shall return an `ServiceUnavailableError` if the AMQP error condition is `com.microsoft:timeout`. **]**
 
 **SRS_NODE_DEVICE_AMQP_COMMON_ERRORS_16_010: [** `translateError` shall accept 2 argument:

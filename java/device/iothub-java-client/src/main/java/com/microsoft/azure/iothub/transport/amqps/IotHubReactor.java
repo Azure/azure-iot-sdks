@@ -36,5 +36,6 @@ public class IotHubReactor
             }
         }
         this.reactor.stop();
+        this.reactor.free();
     }
 }

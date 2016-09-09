@@ -52,7 +52,6 @@ void IoTHubTransportMqtt_Destroy(TRANSPORT_LL_HANDLE handle)
 ```
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_012: [**IoTHubTransportMqtt_Destroy shall do nothing if parameter handle is NULL.**]**  
-**SRS_IOTHUB_MQTT_TRANSPORT_07_013: [**If the parameter subscribe is true then IoTHubTransportMqtt_Destroy shall call IoTHubTransportMqtt_Unsubscribe.**]**  
 **SRS_IOTHUB_MQTT_TRANSPORT_07_014: [**IoTHubTransportMqtt_Destroy shall free all the resources currently in use.**]**  
 
 ### IoTHubTransportMqtt_Register

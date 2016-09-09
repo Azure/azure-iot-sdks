@@ -35,6 +35,10 @@ var translateError = function translateError(message, amqpError) {
         /*Codes_SRS_NODE_DEVICE_AMQP_COMMON_ERRORS_16_007: [`translateError` shall return an `MessageTooLargeError` if the AMQP error condition is `amqp:link-message-size-exceeded`.]*/
         error = new errors.MessageTooLargeError(message);
         break;
+      case 'amqp:resource-limit-exceeded':
+        /*Codes_SRS_NODE_DEVICE_AMQP_COMMON_ERRORS_16_011: [`translateError` shall return an `IotHubQuotaExceededError` if the AMQP error condition is `amqp:resource-limit-exceeded`.]*/
+        error = new errors.IotHubQuotaExceededError(message);
+        break;
       case 'com.microsoft:argument-out-of-range':
         /*Codes_SRS_NODE_DEVICE_AMQP_COMMON_ERRORS_16_003: [`translateError` shall return an `ArgumentError` if the AMQP error condition is `com.microsoft:argument-out-of-range`.]*/
         error = new errors.ArgumentError(message);

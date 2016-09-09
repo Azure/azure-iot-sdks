@@ -245,13 +245,26 @@ namespace Microsoft.Azure.Devices
                 Properties = new Fields()
             };
 
-            var amqpSession = amqpConnection.CreateSession(sessionSettings);
-            await amqpSession.OpenAsync(timeoutHelper.RemainingTime());
+            try
+            {
+                var amqpSession = amqpConnection.CreateSession(sessionSettings);
+                await amqpSession.OpenAsync(timeoutHelper.RemainingTime());
 
-            // This adds itself to amqpConnection.Extensions
-            var cbsLink = new AmqpCbsLink(amqpConnection);
-            await this.SendCbsTokenAsync(cbsLink, timeoutHelper.RemainingTime());
-            return amqpSession;
+                // This adds itself to amqpConnection.Extensions
+                var cbsLink = new AmqpCbsLink(amqpConnection);
+                await this.SendCbsTokenAsync(cbsLink, timeoutHelper.RemainingTime());
+                return amqpSession;
+            }
+            catch (Exception ex) when (!ex.IsFatal())
+            {
+                if (amqpConnection.TerminalException != null)
+                {
+                    throw AmqpClientHelper.ToIotHubClientContract(amqpConnection.TerminalException);
+                }
+
+                amqpConnection.SafeClose(ex);
+                throw;
+            }
         }
 
         void CloseConnection(AmqpSession amqpSession)
