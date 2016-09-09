@@ -70,9 +70,9 @@ else()
 	add_subdirectory(samples)
 endif()
 
-if(NOT IN_OPENWRT)
-# Disable tests and samples for OpenWRT
-add_subdirectory(tests)
+# Disable tests for OpenWRT
+if(NOT IN_OPENWRT AND NOT ${skip_unittests})
+	add_subdirectory(tests)
 endif()
 
 if(WIN32)
