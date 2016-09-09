@@ -13,6 +13,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(MEMORYCHECK_COMMAND_OPTIONS "--trace-children=yes --leak-check=full --error-exitcode=1")
 endif()
 
+# Set CMAKE_INSTALL_* if not defined
+include(GNUInstallDirs)
+
 include (CTest)
 
 if(MSVC)
