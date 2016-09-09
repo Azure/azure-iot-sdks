@@ -200,7 +200,11 @@ describe('DeviceTwin', function() {
         callback(null, fakeTwinUpdate, fakeResponse);
       });
 
+<<<<<<< 7dd517e050bdace2a8839e255db71cb520b69ad5
       twin.update(fakeTwinUpdate, function() {
+=======
+      twin.update(fakeTwinUpdate, function(err) {
+>>>>>>> [node] Service SDK: DeviceTwin update APIs
         assert.deepEqual(twin.tags, fakeTwinUpdate.tags);
         testCallback();
       });
