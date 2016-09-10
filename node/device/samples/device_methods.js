@@ -7,6 +7,8 @@ require('es5-shim');
 var Protocol = require('azure-iot-device-mqtt').Mqtt;
 var Client = require('azure-iot-device').Client;
 
+var client = null;
+
 function main() {
     // receive the IoT Hub connection string as a command line parameter
     if(process.argv.length < 3) {
@@ -16,7 +18,7 @@ function main() {
 
     // open a connection to the device
     var deviceConnectionString = process.argv[2];
-    var client = Client.fromConnectionString(deviceConnectionString, Protocol);
+    client = Client.fromConnectionString(deviceConnectionString, Protocol);
     client.open(onConnect);
 }
 

@@ -148,7 +148,7 @@ client.open(function(err) {
               delete moduleList[key];
               
             } else if (delta[key]) {
-              if (moduleList[key] {
+              if (moduleList[key]) {
                 // Our patch contains a module, and we've seen this before.
                 // Must be an update operation.
                 console.log('updating module ' + key + ':');
@@ -172,15 +172,15 @@ client.open(function(err) {
         var patch = {
           firmwareVersion:'1.2.1',
           weather:{
-            temperature:72,
-            humidity:17s
+            temperature: 72,
+            humidity: 17
           }
         };
 
          // send the patch
         twin.properties.reported.update(patch, function(err) {
           if (err) throw err;
-          console.log('twin state reported')
+          console.log('twin state reported');
         });
       }
     });
