@@ -11,7 +11,7 @@
         "service": "1.0.15"
     },
     "java": {
-        "device": "1.0.12",
+        "device": "1.0.13",
         "service": "1.0.9"
     },
     "node": {
