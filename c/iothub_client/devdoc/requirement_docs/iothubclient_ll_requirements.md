@@ -598,7 +598,19 @@ IoTHubClient_LL_ReportedStateComplete is a function only called by the transport
 
 **SRS_IOTHUBCLIENT_LL_07_009: [** `IoTHubClient_LL_ReportedStateComplete` shall remove the `IOTHUB_QUEUE_DATA_ITEM` item from the ack queue.]** 
 
+## IoTHubClient_LL_RetrievePropertyComplete
 
+```c
+void IoTHubClient_LL_RetrievePropertyComplete(IOTHUB_CLIENT_LL_HANDLE handle, DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size)
+```
+
+**SRS_IOTHUBCLIENT_LL_07_013: [** If `handle` is `NULL` then `IoTHubClient_LL_RetrievePropertyComplete` shall return.**]**
+
+**SRS_IOTHUBCLIENT_LL_07_014: [** If `deviceTwinCallback` is `NULL` then `IoTHubClient_LL_RetrievePropertyComplete` shall return.**]**
+
+**SRS_IOTHUBCLIENT_LL_07_015: [** If the the `update_state` parameter is `DEVICE_TWIN_UPDATE_PARTIAL` and a `DEVICE_TWIN_UPDATE_COMPLETE` message has not been previously received then `IoTHubClient_LL_RetrievePropertyComplete` shall return.**]** 
+
+**SRS_IOTHUBCLIENT_LL_07_016: [** If `deviceTwinCallback` is set and `DEVICE_TWIN_UPDATE_COMPLETE` has been encountered then `IoTHubClient_LL_RetrievePropertyComplete` shall call `deviceTwinCallback`.**]**
 
 ## IoTHubClient_LL_SetDeviceMethodCallback
 

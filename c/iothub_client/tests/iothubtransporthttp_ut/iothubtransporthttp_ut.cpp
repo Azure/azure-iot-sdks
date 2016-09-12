@@ -14472,7 +14472,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Unsubscribe_DeviceTwin_returns)
     mocks.ResetAllCalls();
 
     ///act
-    IoTHubTransportHttp_Unsubscribe_DeviceTwin(handle, IOTHUB_DEVICE_TWIN_REPORTED_STATE);
+    IoTHubTransportHttp_Unsubscribe_DeviceTwin(handle);
 
     ///assert
     mocks.AssertActualAndExpectedCalls();
@@ -14490,7 +14490,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Subscribe_DeviceTwin_returns)
     mocks.ResetAllCalls();
 
     ///act
-    int res = IoTHubTransportHttp_Subscribe_DeviceTwin(handle, IOTHUB_DEVICE_TWIN_REPORTED_STATE);
+    int res = IoTHubTransportHttp_Subscribe_DeviceTwin(handle);
 
     ///assert
     ASSERT_ARE_NOT_EQUAL(int, 0, res);
