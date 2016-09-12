@@ -11,12 +11,8 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
-//#include "azure_c_shared_utility/iot_logging.h"
-#define LogInfo(FORMAT, ...) do{(void)fprintf(stdout,"Info: " FORMAT "\r\n", ##__VA_ARGS__); }while(0)
-#define LogError(FORMAT, ...) do{ time_t t = time(NULL); (void)fprintf(stderr,"Error: Time:%.24s File:%s Func:%s Line:%d " FORMAT "\r\n", ctime(&t), __FILE__, __func__, __LINE__, ##__VA_ARGS__); }while(0)
+#include "iothub_client_sample_mqtt_dm.h"
 
-//#include "azure_c_shared_utility/thread_api.h"
-#define ThreadAPI_Sleep(x) usleep(x * 1000)
 
 pid_t child_download = -1;
 pid_t child_update = -1;
@@ -25,14 +21,14 @@ pid_t child_factory_reset = -1;
 #define TEMP_ZIP_LOCATION "/home/root/nf.zip"
 #define DOWNLOAD_DESTINATION "/home/root/newFirmware.zip"
 
-void _system(const char *command)
+static void _system(const char *command)
 {
     LogInfo("running [%s]", command);
     int i = system(command);
     LogInfo("Command [%s] returned %d", command, i);
 }
 
-bool is_process_running(pid_t *p)
+static bool is_process_running(pid_t *p)
 {
     if (*p <= 0)
     {
@@ -54,29 +50,29 @@ bool is_process_running(pid_t *p)
     }
 }
 
-bool is_download_happening()
+static bool is_download_happening()
 {
     return is_process_running(&child_download);
 }
 
-bool is_update_happening()
+static bool is_update_happening()
 {
     return is_process_running(&child_update);
 }
 
-bool is_factory_reset_happening()
+static bool is_factory_reset_happening()
 {
     return is_process_running(&child_factory_reset);
 }
 
-bool was_file_successfully_downloaded()
+static bool was_file_successfully_downloaded()
 {
     struct stat s;
-    int status = stat(DOWNLOAD_DESTINATION,&s);
+    int status = stat(DOWNLOAD_DESTINATION, &s);
     return (status == 0);
 }
 
-bool is_any_child_process_running()
+static bool is_any_child_process_running()
 {
     bool ret = false;
     if (is_download_happening())
@@ -97,7 +93,7 @@ bool is_any_child_process_running()
     return ret;
 }
 
-char *read_string_from_file(const char *filename)
+static char *read_string_from_file(const char *filename)
 {
     char *sn = NULL;
     FILE *fd = fopen(filename, "r");
@@ -118,26 +114,80 @@ char *read_string_from_file(const char *filename)
     return sn;
 }
 
-char *get_serial_number()
+static bool use_wget(const char *uri)
 {
-    return read_string_from_file("/factory/serial_number");
-}
-
-char *get_firmware_version()
-{
-    char *version = read_string_from_file("/etc/version");
-    if (version != NULL)
+    bool ret = false;
+    if (uri[0] == 'h' && uri[1] == 't' && uri[2] == 't' && uri[3] == 'p')
     {
-            char *atSign = strchr(version, '@');
-            if (atSign != NULL) 
-            {
-                *atSign = '\0';
-            }
+        ret = true;
     }
-    return version;
+    else if (uri[0] == 'f' && uri[1] == 't' && uri[2] == 'p')
+    {
+        ret = true;
+    }
+    return ret;
 }
 
-bool spawn_reboot_process()
+static const char *remove_file_prefix(const char *uri)
+{
+    if (uri[0] == 'f' && uri[1] == 'i' && uri[2] == 'l' && uri[3] == 'e' && uri[4] == ':' && uri[5] == '/' && uri[6] == '/')
+    {
+        return  uri + 7;
+    }
+    else
+    {
+        return uri;
+    }
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------------
+void device_get_name(char *&out)
+{
+    out = NULL;
+}
+
+void device_get_time(time_t &out)
+{
+    out = time(NULL);
+}
+
+void device_get_tz(char *&out)
+{
+    out = NULL;
+}
+
+void device_get_serial_number(char *&out)
+{
+    out = read_string_from_file("/factory/serial_number");
+}
+
+void device_get_firmware_version(char *&out)
+{
+    out = read_string_from_file("/etc/version");
+}
+
+FIRMWARE_UPDATE_STATE device_get_firmware_update_state()
+{
+	FIRMWARE_UPDATE_STATE rv = FIRMWARE_UPDATE_STATE_NONE;
+	struct stat s;
+	int    status = stat(TEMP_ZIP_LOCATION, &s);
+	if (status == 0)
+	{
+		rv = FIRMWARE_UPDATE_STATE_DOWNLOADING_IMAGE;
+	}
+	else
+	{
+		status = stat(DOWNLOAD_DESTINATION, &s);
+		if (status == 0)
+		{
+			rv = FIRMWARE_UPDATE_STATE_IMAGE_DOWNLOADED;
+		}
+	}
+	return rv;
+}
+
+bool device_reboot()
 {
     bool ret = false;
     LogInfo("\n\t REBOOT\n");
@@ -171,7 +221,7 @@ bool spawn_reboot_process()
     return ret;
 }
 
-bool spawn_factoryreset_process()
+bool device_factoryreset()
 {
     bool ret = false;
     LogInfo("\n\t FACTORY RESET\n");
@@ -226,33 +276,7 @@ bool spawn_factoryreset_process()
     return ret;
 }
 
-bool use_wget(const char *uri)
-{
-    bool ret = false;
-    if (uri[0] == 'h' && uri[1] == 't' && uri[2] == 't' && uri[3] == 'p')
-    {
-        ret = true;
-    }
-    else if (uri[0] == 'f' && uri[1] == 't' && uri[2] == 'p')
-    {
-        ret = true;
-    }
-    return ret;
-}
-
-const char *remove_file_prefix(const char *uri)
-{
-    if (uri[0] == 'f' && uri[1] == 'i' && uri[2] == 'l' && uri[3] == 'e' && uri[4] == ':' && uri[5] == '/' && uri[6] == '/')
-    {
-        return  uri+7;
-    }
-    else
-    {
-        return uri;
-    }
-}
-
-bool spawn_download_process(const char *uri)
+bool device_download_firmware(const char *uri)
 {
     bool ret = false;
     LogInfo("Downloading [%s]", uri);
@@ -303,7 +327,7 @@ bool spawn_download_process(const char *uri)
     return ret;
 }
 
-bool spawn_update_process()
+bool device_update_firmware()
 {
     bool ret = false;
     LogInfo("\n\t FIRMWARE UPDATE\n");
@@ -357,4 +381,12 @@ bool spawn_update_process()
         }
     }
     return ret;
+}
+
+void device_run_service()
+{
+    LogInfo("Running as service\r\n ");
+
+    chdir("/");
+    daemon(0, 1);
 }

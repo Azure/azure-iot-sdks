@@ -5,11 +5,11 @@
 Option(edison "set edison to ON to build the DM edison sample" OFF)
 
 function(add_sample_directory whatIsBuilding)
-	add_subdirectory(${whatIsBuilding})
+    add_subdirectory(${whatIsBuilding})
 
-	set_target_properties(${whatIsBuilding}
-			   PROPERTIES
-			   FOLDER "IoTHub_Samples")
+    set_target_properties(${whatIsBuilding}
+               PROPERTIES
+               FOLDER "IoTHub_Samples")
 endfunction()
 
 if(NOT ${use_mqtt})
