@@ -10,6 +10,7 @@ typedef void* IOTHUB_DEVICE_HANDLE;
 struct TRANSPORT_PROVIDER_TAG;
 typedef struct TRANSPORT_PROVIDER_TAG TRANSPORT_PROVIDER;
 
+union IOTHUB_IDENTITY_INFO_TAG;
 typedef union IOTHUB_IDENTITY_INFO_TAG IOTHUB_IDENTITY_INFO;
 
 #include "azure_c_shared_utility/doublylinkedlist.h"
