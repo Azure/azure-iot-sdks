@@ -108,16 +108,12 @@ This function is intended to remove a device as registered with the transport.  
 ### IoTHubTransportMqtt_Subscribe_DeviceTwin
 
 ```c
-int IoTHubTransportMqtt_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state)
+int IoTHubTransportMqtt_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
 ```
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_042: [**If the parameter `handle` is `NULL` than `IoTHubTransportMqtt_Subscribe` shall return a non-zero value. **]**
 
-**SRS_IOTHUB_MQTT_TRANSPORT_07_043: [**If the `subscribe_state` has been previously subscribed `IoTHubTransportMqtt_Subscribe_DeviceTwin` shall do nothing. **]**
-
-**SRS_IOTHUB_MQTT_TRANSPORT_07_044: [**If `subscribe_state` is set to `IOTHUB_DEVICE_TWIN_DESIRED_STATE` then `IoTHubTransportMqtt_Subscribe_DeviceTwin` shall construct the get state topic string. **]**
-
-**SRS_IOTHUB_MQTT_TRANSPORT_07_045: [**If subscribe_state is set to `IOTHUB_DEVICE_TWIN_NOTIFICATION_STATE` then `IoTHubTransportMqtt_Subscribe_DeviceTwin` shall construct the notify state topic string**]**
+**SRS_IOTHUB_MQTT_TRANSPORT_07_044: [**`IoTHubTransportMqtt_Subscribe_DeviceTwin` shall construct the get state topic string and the notify state topic string. **]**
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_046: [**Upon failure `IoTHubTransportMqtt_Subscribe_DeviceTwin` shall return a non-zero value. **]**
 
@@ -127,7 +123,7 @@ int IoTHubTransportMqtt_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB
 ### IoTHubTransportMqtt_Unsubscribe_DeviceTwin
 
 ```c
-void IoTHubTransportMqtt_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state)
+void IoTHubTransportMqtt_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
 ```
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_048: [** If the parameter `handle` is `NULL` than `IoTHubTransportMqtt_Unsubscribe_DeviceTwin` shall do nothing. **]**
@@ -237,6 +233,8 @@ void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HAN
 **SRS_IOTHUB_MQTT_TRANSPORT_07_029: [** `IoTHubTransportMqtt_DoWork` shall create a `MQTT_MESSAGE_HANDLE` and pass this to a call to  mqtt_client_publish. **]**
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_030: [** `IoTHubTransportMqtt_DoWork` shall call mqtt_client_dowork if it is connected. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_054: [** `IoTHubTransportMqtt_DoWork` shall subscribe to the Notification and get_state Topics if they are defined. **]**
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_033: [** `IoTHubTransportMqtt_DoWork` shall iterate through the Waiting Acknowledge messages looking for any message that has been waiting longer than 2 min. **]**
 

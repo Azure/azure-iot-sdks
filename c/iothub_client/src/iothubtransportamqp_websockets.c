@@ -34,17 +34,16 @@ static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create_WebSocketsOverTls(const IO
     return transport_state;
 }
 
-
-static  int IoTHubTransportAMQP_Subscribe_DeviceTwin_WebSocketsOverTls(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state)
+static  int IoTHubTransportAMQP_Subscribe_DeviceTwin_WebSocketsOverTls(IOTHUB_DEVICE_HANDLE handle)
 {
-    (void)(handle, subscribe_state);
+    (void)(handle);
     LogError("not implemented yet");
     return __LINE__;
 }
 
-static  void IoTHubTransportAMQP_Unsubscribe_DeviceTwin_WebSocketsOverTls(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state)
+static  void IoTHubTransportAMQP_Unsubscribe_DeviceTwin_WebSocketsOverTls(IOTHUB_DEVICE_HANDLE handle)
 {
-    (void)(handle, subscribe_state);
+    (void)(handle);
     LogError("not implemented yet");
 }
 

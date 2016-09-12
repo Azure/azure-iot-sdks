@@ -342,42 +342,42 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
     AMQP_VALUE result = NULL;
     int api_call_result;
     IOTHUB_MESSAGE_HANDLE iothub_message = NULL;
-	// Codes_SRS_IOTHUBTRANSPORTAMQP_09_195: [The callback 'on_message_received' shall shall get a IOTHUB_MESSAGE_HANDLE instance out of the uamqp's MESSAGE_HANDLE instance by using IoTHubMessage_CreateFromUamqpMessage()]
-	if ((api_call_result = IoTHubMessage_CreateFromUamqpMessage(message, &iothub_message)) != RESULT_OK)
-	{
-		LogError("Transport failed processing the message received (error = %d).", api_call_result);
+    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_195: [The callback 'on_message_received' shall shall get a IOTHUB_MESSAGE_HANDLE instance out of the uamqp's MESSAGE_HANDLE instance by using IoTHubMessage_CreateFromUamqpMessage()]
+    if ((api_call_result = IoTHubMessage_CreateFromUamqpMessage(message, &iothub_message)) != RESULT_OK)
+    {
+        LogError("Transport failed processing the message received (error = %d).", api_call_result);
 
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_196: [If IoTHubMessage_CreateFromUamqpMessage fails, the callback 'on_message_received' shall reject the incoming message by calling messaging_delivery_rejected() and return.]
-		result = messaging_delivery_rejected("Rejected due to failure reading AMQP message", "Failed reading AMQP message");
-	}
-	else
-	{
-		IOTHUBMESSAGE_DISPOSITION_RESULT disposition_result;
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_196: [If IoTHubMessage_CreateFromUamqpMessage fails, the callback 'on_message_received' shall reject the incoming message by calling messaging_delivery_rejected() and return.]
+        result = messaging_delivery_rejected("Rejected due to failure reading AMQP message", "Failed reading AMQP message");
+    }
+    else
+    {
+        IOTHUBMESSAGE_DISPOSITION_RESULT disposition_result;
 
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_104: [The callback 'on_message_received' shall invoke IoTHubClient_LL_MessageCallback() passing the client and the incoming message handles as parameters] 
-		disposition_result = IoTHubClient_LL_MessageCallback((IOTHUB_CLIENT_LL_HANDLE)context, iothub_message);
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_104: [The callback 'on_message_received' shall invoke IoTHubClient_LL_MessageCallback() passing the client and the incoming message handles as parameters] 
+        disposition_result = IoTHubClient_LL_MessageCallback((IOTHUB_CLIENT_LL_HANDLE)context, iothub_message);
 
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_197: [The callback 'on_message_received' shall destroy the IOTHUB_MESSAGE_HANDLE instance after invoking IoTHubClient_LL_MessageCallback().]
-		IoTHubMessage_Destroy(iothub_message);
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_197: [The callback 'on_message_received' shall destroy the IOTHUB_MESSAGE_HANDLE instance after invoking IoTHubClient_LL_MessageCallback().]
+        IoTHubMessage_Destroy(iothub_message);
 
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_105: [The callback 'on_message_received' shall return the result of messaging_delivery_accepted() if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_ACCEPTED] 
-		if (disposition_result == IOTHUBMESSAGE_ACCEPTED)
-		{
-			result = messaging_delivery_accepted();
-		}
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_106: [The callback 'on_message_received' shall return the result of messaging_delivery_released() if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_ABANDONED] 
-		else if (disposition_result == IOTHUBMESSAGE_ABANDONED)
-		{
-			result = messaging_delivery_released();
-		}
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_107: [The callback 'on_message_received' shall return the result of messaging_delivery_rejected("Rejected by application", "Rejected by application") if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_REJECTED] 
-		else if (disposition_result == IOTHUBMESSAGE_REJECTED)
-		{
-			result = messaging_delivery_rejected("Rejected by application", "Rejected by application");
-		}
-	}
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_105: [The callback 'on_message_received' shall return the result of messaging_delivery_accepted() if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_ACCEPTED] 
+        if (disposition_result == IOTHUBMESSAGE_ACCEPTED)
+        {
+            result = messaging_delivery_accepted();
+        }
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_106: [The callback 'on_message_received' shall return the result of messaging_delivery_released() if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_ABANDONED] 
+        else if (disposition_result == IOTHUBMESSAGE_ABANDONED)
+        {
+            result = messaging_delivery_released();
+        }
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_107: [The callback 'on_message_received' shall return the result of messaging_delivery_rejected("Rejected by application", "Rejected by application") if the IoTHubClient_LL_MessageCallback() returns IOTHUBMESSAGE_REJECTED] 
+        else if (disposition_result == IOTHUBMESSAGE_REJECTED)
+        {
+            result = messaging_delivery_rejected("Rejected by application", "Rejected by application");
+        }
+    }
 
-	return result;
+    return result;
 }
 
 static XIO_HANDLE getTLSIOTransport(const char* fqdn, int port)
@@ -1035,26 +1035,26 @@ static int sendPendingEvents(AMQP_TRANSPORT_INSTANCE* transport_state)
         // Codes_SRS_IOTHUBTRANSPORTAMQP_09_086: [IoTHubTransportAMQP_DoWork shall move queued events to an "in-progress" list right before processing them for sending]
         trackEventInProgress(message, transport_state);
 
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_193: [IoTHubTransportAMQP_DoWork shall get a MESSAGE_HANDLE instance out of the event's IOTHUB_MESSAGE_HANDLE instance by using message_create_from_iothub_message().]
-		if ((result = message_create_from_iothub_message(message->messageHandle, &amqp_message)) != RESULT_OK)
-		{
-			LogError("Failed creating AMQP message (error=%d).", result);
-			result = __LINE__;
-			is_message_error = true;
-		}
-					/* Codes_SRS_IOTHUBTRANSPORTAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_097: [IoTHubTransportAMQP_DoWork shall pass the MESSAGE_HANDLE intance to uAMQP for sending (along with on_message_send_complete callback) using messagesender_send()] 
-		else if (messagesender_send(transport_state->message_sender, amqp_message, on_message_send_complete, message) != RESULT_OK)
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_193: [IoTHubTransportAMQP_DoWork shall get a MESSAGE_HANDLE instance out of the event's IOTHUB_MESSAGE_HANDLE instance by using message_create_from_iothub_message().]
+        if ((result = message_create_from_iothub_message(message->messageHandle, &amqp_message)) != RESULT_OK)
+        {
+            LogError("Failed creating AMQP message (error=%d).", result);
+            result = __LINE__;
+            is_message_error = true;
+        }
+                    /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_014: [If any of the APIs fails while building the property map and setting it on the uAMQP message, IoTHubTransportAMQP_DoWork shall notify the failure by invoking the upper layer message send callback with IOTHUB_CLIENT_CONFIRMATION_ERROR.] */
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_097: [IoTHubTransportAMQP_DoWork shall pass the MESSAGE_HANDLE intance to uAMQP for sending (along with on_message_send_complete callback) using messagesender_send()] 
+        else if (messagesender_send(transport_state->message_sender, amqp_message, on_message_send_complete, message) != RESULT_OK)
         {
             LogError("Failed sending the AMQP message.");
-			result = __LINE__;
+            result = __LINE__;
         }
         else
         {
             result = RESULT_OK;
         }
 
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_194: [IoTHubTransportAMQP_DoWork shall destroy the MESSAGE_HANDLE instance after messagesender_send() is invoked.]
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_194: [IoTHubTransportAMQP_DoWork shall destroy the MESSAGE_HANDLE instance after messagesender_send() is invoked.]
         if (amqp_message != NULL)
         {
             // It can be destroyed because AMQP keeps a clone of the message.
@@ -1611,20 +1611,18 @@ static void IoTHubTransportAMQP_Unsubscribe(TRANSPORT_LL_HANDLE handle)
     }
 }
 
-static int IoTHubTransportAMQP_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state)
+static int IoTHubTransportAMQP_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
 {
     (void)handle;
-    (void)subscribe_state;
     /*Codes_SRS_IOTHUBTRANSPORTAMQP_02_009: [ IoTHubTransportAMQP_Subscribe_DeviceTwin shall return a non-zero value. ]*/
     int result = __LINE__;
     LogError("IoTHubTransportAMQP_Subscribe_DeviceTwin Not supported");
     return result;
 }
 
-static void IoTHubTransportAMQP_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle, IOTHUB_DEVICE_TWIN_STATE subscribe_state)
+static void IoTHubTransportAMQP_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
 {
     (void)handle;
-    (void)subscribe_state;
     /*Codes_SRS_IOTHUBTRANSPORTAMQP_02_010: [ IoTHubTransportAMQP_Unsubscribe_DeviceTwin shall return. ]*/
     LogError("IoTHubTransportAMQP_Unsubscribe_DeviceTwin Not supported");
 }
