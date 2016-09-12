@@ -72,6 +72,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         this.config = config;
         this.useWebSockets = useWebSockets;
 
+        // Codes_SRS_AMQPSTRANSPORT_15_004: [The function shall open an AMQPS connection with the IoT Hub given in the configuration.]
+        this.connection = new AmqpsIotHubConnection(this.config, this.useWebSockets);
         // Codes_SRS_AMQPSTRANSPORT_15_002: [The constructor shall set the transport state to CLOSED.]
         this.state = State.CLOSED;
     }
@@ -90,8 +92,6 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             return;
         }
 
-        // Codes_SRS_AMQPSTRANSPORT_15_004: [The function shall open an AMQPS connection with the IoT Hub given in the configuration.]
-        this.connection = new AmqpsIotHubConnection(this.config, this.useWebSockets);
         try
         {
             this.connection.open();
@@ -149,7 +149,8 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
 
         // Codes_SRS_AMQPSTRANSPORT_15_011: [The function shall add a packet containing the message, callback, and callback context to the queue of messages waiting to be sent.]
         IotHubOutboundPacket packet = new IotHubOutboundPacket(message, callback, callbackContext);
-        this.waitingMessages.add(packet);
+        boolean addStatus = this.waitingMessages.add(packet);
+        System.out.println("In AmqpsTransport this.waitingMessages.add(packet): " + addStatus);
     }
 
     /**
@@ -218,7 +219,9 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             }
         }
 
-        this.waitingMessages.addAll(failedMessages);
+        if(!failedMessages.isEmpty()) {
+            this.waitingMessages.addAll(failedMessages);
+        }
     }
 
     /**
