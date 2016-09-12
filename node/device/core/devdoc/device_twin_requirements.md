@@ -136,10 +136,6 @@ The `fromDeviceclient` method creates a device twin connection to the given hub 
 
 **SRS_NODE_DEVICE_TWIN_18_036: [** When a PATCH operation is received, the `DeviceTwin` object shall ingest the properties into `this.properties.desired`. **]**
 
-**SRS_NODE_DEVICE_TWIN_18_037: [** The `DeviceTwin` object shall respond to the service with status=200 after successfully ingesting a PATCH operation. **]**
-
-**SRS_NODE_DEVICE_TWIN_18_038: [** The `DeviceTwin` object shall respond to the service with a failed status if a PATCH operation fails to ingest. **]** 
-
 **SRS_NODE_DEVICE_TWIN_18_039: [** After ingesting a GET result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]**
 
 **SRS_NODE_DEVICE_TWIN_18_040: [** After ingesting a PATCH result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]**
