@@ -28,16 +28,16 @@ void initGlobalProperties(int argc, char *argv[])
 {
     for (int ii = 1; ii < argc; ++ii)
     {
-        if (0 == strncmp(argv[ii], "-console", 8))
+        if (0 == strcmp(argv[ii], "-console"))
         {
             asService = false;
         }
-        else if (0 == strncmp(argv[ii], "-cs", 3))
+        else if (0 == strcmp(argv[ii], "-cs"))
         {
 			connectionString = strdup(argv[++ii]);
 			LogInfo("   -cs = '%s'", connectionString);
         }
-        else if (0 == strncmp(argv[ii], "-logging", 8))
+        else if (0 == strcmp(argv[ii], "-logging"))
         {
             traceOn = true;
         }
