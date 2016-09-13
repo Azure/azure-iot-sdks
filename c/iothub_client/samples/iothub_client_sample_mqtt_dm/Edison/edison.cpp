@@ -11,6 +11,9 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/platform.h"
+
 #include "iothub_client_sample_mqtt_dm.h"
 
 
@@ -50,29 +53,29 @@ static bool is_process_running(pid_t *p)
     }
 }
 
-static bool is_download_happening()
+static bool is_download_happening(void)
 {
     return is_process_running(&child_download);
 }
 
-static bool is_update_happening()
+static bool is_update_happening(void)
 {
     return is_process_running(&child_update);
 }
 
-static bool is_factory_reset_happening()
+static bool is_factory_reset_happening(void)
 {
     return is_process_running(&child_factory_reset);
 }
 
-static bool was_file_successfully_downloaded()
+static bool was_file_successfully_downloaded(void)
 {
     struct stat s;
     int status = stat(DOWNLOAD_DESTINATION, &s);
     return (status == 0);
 }
 
-static bool is_any_child_process_running()
+static bool is_any_child_process_running(void)
 {
     bool ret = false;
     if (is_download_happening())
@@ -167,7 +170,7 @@ void device_get_firmware_version(char *&out)
     out = read_string_from_file("/etc/version");
 }
 
-FIRMWARE_UPDATE_STATE device_get_firmware_update_state()
+FIRMWARE_UPDATE_STATE device_get_firmware_update_state(void)
 {
 	FIRMWARE_UPDATE_STATE rv = FIRMWARE_UPDATE_STATE_NONE;
 	struct stat s;
@@ -187,7 +190,7 @@ FIRMWARE_UPDATE_STATE device_get_firmware_update_state()
 	return rv;
 }
 
-bool device_reboot()
+bool device_reboot(void)
 {
     bool ret = false;
     LogInfo("\n\t REBOOT\n");
@@ -221,7 +224,7 @@ bool device_reboot()
     return ret;
 }
 
-bool device_factoryreset()
+bool device_factoryreset(void)
 {
     bool ret = false;
     LogInfo("\n\t FACTORY RESET\n");
@@ -327,7 +330,7 @@ bool device_download_firmware(const char *uri)
     return ret;
 }
 
-bool device_update_firmware()
+bool device_update_firmware(void)
 {
     bool ret = false;
     LogInfo("\n\t FIRMWARE UPDATE\n");
@@ -383,10 +386,14 @@ bool device_update_firmware()
     return ret;
 }
 
-void device_run_service()
+bool device_run_service(void)
 {
-    LogInfo("Running as service\r\n ");
+    LogInfo("Running as service");
 
-    chdir("/");
-    daemon(0, 1);
+    int ret = chdir("/");
+	if (ret == 0)
+	{
+		ret = daemon(0, 1);
+	}
+	return (ret == 0);
 }

@@ -1,6 +1,17 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "serializer.h"
+#include "iothub_client.h"
+
+#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/platform.h"
+
+#include "iothubtransportmqtt.h"
+
 #include "iothub_client_sample_mqtt_dm.h"
 DEFINE_ENUM_STRINGS(FIRMWARE_UPDATE_STATE, FIRMWARE_UPDATE_STATE_VALUES)
 /* ENUM_TO_STRING(FIRMWARE_UPDATE_STATE, fw_update_state) */
@@ -18,13 +29,13 @@ static bool asService = true;
 static bool traceOn = false;
 
 
-void deviceTwinCallback(int status_code, void* userContextCallback)
+static void deviceTwinCallback(int status_code, void* userContextCallback)
 {
     (void)(userContextCallback);
     LogInfo("DT CallBack: Status_code = %u", status_code);
 }
 
-void initGlobalProperties(int argc, char *argv[])
+static void initGlobalProperties(int argc, char *argv[])
 {
     for (int ii = 1; ii < argc; ++ii)
     {
@@ -44,9 +55,9 @@ void initGlobalProperties(int argc, char *argv[])
     }
 }
 
-void iothub_client_sample_mqtt_dm_run(void)
+static void iothub_client_sample_mqtt_dm_run(void)
 {
-    LogInfo("Initialize Platform\n");
+    LogInfo("Initialize Platform");
 
     if (platform_init() != 0)
     {
@@ -64,7 +75,10 @@ void iothub_client_sample_mqtt_dm_run(void)
 
             if (asService)
             {
-                device_run_service();
+				if (device_run_service() == false)
+				{
+					LogError("Failed to run as a service");
+				}
             }
 
             IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, MQTT_Protocol);
@@ -75,36 +89,31 @@ void iothub_client_sample_mqtt_dm_run(void)
             else
             {
                 IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &traceOn);
-                if (serializer_init(NULL) != SERIALIZER_OK)
-                {
-                    LogError("Failed on serializer_init.");
-                }
-                else
-                {
-                    bool keepRunning = true;
-                    unsigned char *buffer;
-                    size_t         bufferSize;
 
-                    while (keepRunning)
+				bool keepRunning = true;
+                unsigned char *buffer;
+                size_t         bufferSize;
+
+                while (keepRunning)
+                {
+                    /*TODO*/
+                    /*Implement DM calls and serialize the model using SERIALIZE_REPORTED_PROPERTIES*/
+
+                    /* send the data up stream*/
+                    if (IoTHubClient_SendReportedState(iotHubClientHandle, buffer, bufferSize, deviceTwinCallback, NULL) != IOTHUB_CLIENT_OK)
                     {
-                        /*TODO*/
-                        /*Implement DM calls and serialize the model using SERIALIZE_REPORTED_PROPERTIES*/
-
-                        /* send the data up stream*/
-                        if (IoTHubClient_SendReportedState(iotHubClientHandle, buffer, bufferSize, deviceTwinCallback, NULL) != IOTHUB_CLIENT_OK)
-                        {
-                            keepRunning = false;
-                            LogError("Failure sending data!!!");
-                        }
-
-						else
-						{
-							ThreadAPI_Sleep(1000);
-						}
+                        keepRunning = false;
+                        LogError("Failure sending data!!!");
                     }
+
+					else
+					{
+						ThreadAPI_Sleep(1000);
+					}
                 }
             }
         }
+		serializer_deinit();
         platform_deinit();
     }
     LogInfo("Exiting.");

@@ -4,17 +4,6 @@
 #ifndef IOTHUB_CLIENT_SAMPLE_MQTT_DM_H
 #define IOTHUB_CLIENT_SAMPLE_MQTT_DM_H
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "serializer.h"
-#include "iothub_client.h"
-
-#include "azure_c_shared_utility/threadapi.h"
-#include "azure_c_shared_utility/platform.h"
-
-#include "iothubtransportmqtt.h"
-
 
 #define FIRMWARE_UPDATE_STATE_VALUES \
     FIRMWARE_UPDATE_STATE_NONE = 1, \
@@ -24,27 +13,20 @@
 DEFINE_ENUM(FIRMWARE_UPDATE_STATE, FIRMWARE_UPDATE_STATE_VALUES)
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+void device_get_name(char *&name);
+void device_get_time(time_t &time);
+void device_get_tz(char *&tz);
 
-    void device_get_name(char *&name);
-    void device_get_time(time_t &time);
-    void device_get_tz(char *&tz);
+void device_get_serial_number(char *&out);
+void device_get_firmware_version(char *&out);
 
-    void device_get_serial_number(char *&out);
-    void device_get_firmware_version(char *&out);
+bool device_reboot(void);
+bool device_factoryreset(void);
+FIRMWARE_UPDATE_STATE device_get_firmware_update_state();
+bool device_download_firmware(const char *uri);
+bool device_update_firmware(void);
 
-    bool device_reboot();
-    bool device_factoryreset();
-	FIRMWARE_UPDATE_STATE device_get_firmware_update_state();
-    bool device_download_firmware(const char *uri);
-    bool device_update_firmware();
+bool device_run_service(void);
 
-    void device_run_service();
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* IOTHUB_CLIENT_SAMPLE_MQTT_DM_H */
