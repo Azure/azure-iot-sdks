@@ -5,12 +5,11 @@
 
 var assert = require('chai').assert;
 var DeviceTwin = require('../lib/twin.js');
-
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var errors = require('azure-iot-common').errors;
-
 var sinon = require('sinon');
+var _ = require('lodash');
 
 
 var FakeReceiver = function() {
@@ -25,7 +24,7 @@ var FakeReceiver = function() {
     if (EventEmitter.listenerCount(self, eventname) === 0)
     {
       process.nextTick(function() {
-        if (eventname === DeviceTwin.responseEvent) {
+        if (eventname === DeviceTwin.responseEvent || eventname === DeviceTwin.postEvent) {
           if (self.forceError) {
             self.emit('error', new Error('failed to subscribe to ' + eventname))                               ;
           } else if (self.successfulSubscription) {
@@ -62,7 +61,7 @@ var FakeTransport = function(receiver) {
       var response = {
         'status' : self.status,
         '$rid' : self.responseId || properties.$rid,
-        'body' : ' '
+        'body' : '{}'
       };
       self._receiver.emit('response', response);
     });
@@ -98,7 +97,6 @@ describe('DeviceTwin', function () {
     });
     
     /* Tests_SRS_NODE_DEVICE_TWIN_18_003: [** `fromDeviceClient` shall allocate a new `DeviceTwin` object **]**  */
-    /* Tests_SRS_NODE_DEVICE_TWIN_18_011: [** `fromDeviceClient` shall call the `done` callback with `err`=`null` if it receives a `subscribed` event for the `response` topic. **]**  */
     it('Allocates a new twin object', function () {
       var client = new FakeClient();
       DeviceTwin.fromDeviceClient(client, function(err, obj) {
@@ -160,16 +158,19 @@ describe('DeviceTwin', function () {
       receiver.on("newListener", receiver._handleNewListener);
       var transport = new FakeTransport(receiver);
       var client = new FakeClient(transport);
-      DeviceTwin.fromDeviceClient(client, function(err, obj) {
+      DeviceTwin.fromDeviceClient(client, function(err) {
         if (err) throw err;
         assert(handleNewListener.withArgs('subscribed').calledOnce);
         assert(handleNewListener.withArgs('error').calledOnce);
-        assert(handleNewListener.withArgs('response', obj._onServiceResponse).calledOnce);
+        /* Tests_SRS_NODE_DEVICE_TWIN_18_031: [** `fromDeviceClient` shall subscribe to the response topic **]** */
+        assert(handleNewListener.withArgs('response').called);
+        /* Tests_SRS_NODE_DEVICE_TWIN_18_032: [** `fromDeviceClient` shall subscribe to the desired property patch topic **]** */
+        assert(handleNewListener.withArgs('post').called);
         done();
       });
     });
 
-    /* Tests_SRS_NODE_DEVICE_TWIN_18_009: [** `fromDeviceClient` shall call the `done` callback passing a `TimeoutError` if it has not received a `subscribed` event within `DeviceTwin.timeout` milliseconds. **]**  */
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_009: [** `fromDeviceClient` shall call the `done` callback passing a `TimeoutError` if it has not received all necessary `subscribed` events within `DeviceTwin.timeout` milliseconds. **]** */
     it('returns timeout correctly', function(done) {
       var receiver = new FakeReceiver();
       receiver.successfulSubscription = false;
@@ -229,6 +230,85 @@ describe('DeviceTwin', function () {
       clearTimeout(null);
       done();
     });
+
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_043: [** If the GET operation fails, `fromDeviceClient` shall call the done method with the error object in the first parameter **]** */
+    it('fails when the GET fails', function(done) {
+      var errorToReturn = new Error();
+      var client = new FakeClient();
+      var oldFunction = DeviceTwin.prototype._sendTwinRequest; 
+      DeviceTwin.prototype._sendTwinRequest = function(method, resource, properties, body, done) {
+        if (method === "GET") {
+          done(errorToReturn);
+        } else {
+          oldFunction(method, resource, properties, body, done);
+        }
+      };
+      DeviceTwin.fromDeviceClient(client, function(err) {
+        DeviceTwin.prototype._sendTwinRequest = oldFunction;
+        assert.equal(err, errorToReturn);
+        done();
+      });
+    });
+    
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_035: [** When a the results of a GET operation is received, the `DeviceTwin` object shall merge the properties into `this.properties.desired`. **]** */
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_039: [** After mergeing a GET result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]** */
+    it('fires property changed events recursively', function(done) {
+      var client = new FakeClient();
+      
+      var patch = {
+        desired : {
+          foo : {
+            bar : 1
+          },
+          baz : 1
+        }
+      };
+
+      client._transport.sendTwinRequest = function(method, resource, properties, body, done)  {
+        void(method, resource, properties, body);
+
+        process.nextTick(function() {
+          var response = {
+            'status' : 200,
+            '$rid' : properties.$rid,
+            'body' : JSON.stringify(patch)
+          };
+          client._transport._receiver.emit('response', response);
+        });
+
+        if (done) {
+          done();
+        }
+      };
+
+      DeviceTwin.fromDeviceClient(client, function(err, twin) {
+        if (err) throw err;
+        var eventCount = 0;
+
+        var propArray = [
+          'desired',
+          'desired.foo',
+          'desired.foo.bar',
+          'desired.baz' 
+        ];
+        
+        propArray.forEach(function(prop) {
+          assert.deepEqual(_.at(twin.properties, prop), _.at(patch, prop));
+        });
+
+        propArray.forEach(function(prop) {
+          twin.on('properties.'+prop, function(delta) {
+            assert.deepEqual(_.at(patch,prop)[0],delta);
+            eventCount++;
+            if (eventCount === propArray.length) {
+              done();
+            }
+          });
+        });
+
+      });
+    });
+
   });
     
   describe('_sendTwinRequest', function () {
@@ -236,7 +316,6 @@ describe('DeviceTwin', function () {
     var transport;
     var client;
     var twin;
-    var sendTwinRequest;
     
     beforeEach(function(done) {
       receiver = new FakeReceiver();
@@ -244,7 +323,6 @@ describe('DeviceTwin', function () {
       sinon.spy(receiver, 'removeListener');
       transport = new FakeTransport(receiver);
       client = new FakeClient(transport);
-      sendTwinRequest = sinon.spy(client._transport, 'sendTwinRequest');
       DeviceTwin.fromDeviceClient(client, function(err, obj) {
         if (err) throw err;
         twin = obj;
@@ -255,6 +333,7 @@ describe('DeviceTwin', function () {
     /* Tests_SRS_NODE_DEVICE_TWIN_18_016: [** `_sendTwinRequest` shall use the `sendTwinRequest` method on the transport to send the request **]**  */
     /* Tests_SRS_NODE_DEVICE_TWIN_18_019: [** `_sendTwinRequest` shall call `done` with `err`=`null` if the response event returns `status`===200 or 204 **]**   */
     it ('uses the right parameters', function(done) {
+      var sendTwinRequest = sinon.spy(client._transport, 'sendTwinRequest');
       twin._sendTwinRequest('fake_method', 'fake_resource', {}, 'fake_body', function(err) {
         if (err) throw err;
         assert(sendTwinRequest.calledOnce);
@@ -286,6 +365,7 @@ describe('DeviceTwin', function () {
     /* Tests_SRS_NODE_DEVICE_TWIN_18_014: [** `_sendTwinRequest` shall use an arbitrary starting `rid` and increment it by one for every call to `_sendTwinRequest` **]**  */
     /* Tests_SRS_NODE_DEVICE_TWIN_18_017: [** `_sendTwinRequest` shall put the `rid` value into the `properties` object that gets passed to `sendTwinRequest` on the transport **]**  */
     it ('uses and incriments request ID', function(done) {
+      var sendTwinRequest = sinon.spy(client._transport, 'sendTwinRequest');
       twin._sendTwinRequest('fake_method', 'fake_resource', {}, 'fake_body', function(err) {
         if (err) throw err;
         twin._sendTwinRequest('fake_method2', 'fake_resource2', {}, 'fake_body2', function(err) {
@@ -302,7 +382,7 @@ describe('DeviceTwin', function () {
     it ('adds a response handler', function(done) {
         twin._sendTwinRequest('fake_method', 'fake_resource', {}, 'fake_body', function(err) {
           if (err) throw err;
-          assert(receiver.on.withArgs('response').calledTwice);   // once for the empty implementation and once for our handler
+          assert(receiver.on.withArgs('response').calledThrice);   // once for the empty implementation, once for the GET handler, and once for our handler
           done();
         });
     });
@@ -311,7 +391,7 @@ describe('DeviceTwin', function () {
     it ('removes the response handler', function(done) {
         twin._sendTwinRequest('fake_method', 'fake_resource', {}, 'fake_body', function(err) {
           if (err) throw err;
-          assert(receiver.removeListener.withArgs('response').calledOnce);
+          assert(receiver.removeListener.withArgs('response').calledTwice); // Once for the GET handler and once for our handler
           done();
         });
     });
@@ -427,5 +507,60 @@ describe('DeviceTwin', function () {
     });
 
   });
+
+  describe('PATCH operations', function() {
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_040: [** After mergeing a PATCH result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]** */
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_036: [** When a PATCH operation is received, the `DeviceTwin` object shall merge the properties into `this.properties.desired`. **]** */
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_041: [** When firing a property changed event, the `DeviceTwin` object shall name the event from the property using dot notation starting with 'properties.desired.' **]** */
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_042: [** When firing a property changed event, the `DeviceTwin` object shall pass the changed value of the property as the event parameter **]** */
+    it('fires and merges', function(done) {
+      var client = new FakeClient();
+      
+      var patch = {
+        desired : {
+          foo : {
+            bar : 1
+          },
+          baz : 1
+        }
+      };
+
+      DeviceTwin.fromDeviceClient(client, function(err, twin) {
+        if (err) throw err;
+        var eventCount = 0;
+
+        var propArray = [
+          'desired',
+          'desired.foo',
+          'desired.foo.bar',
+          'desired.baz' 
+        ];
+
+        client._transport._receiver.emit('post', JSON.stringify(patch.desired));
+
+        propArray.forEach(function(prop) {
+          twin.on('properties.'+prop, function(delta) {
+            
+            assert.deepEqual(_.at(patch,prop)[0],delta);
+            eventCount++;
+
+            if (eventCount === propArray.length) {
+              propArray.forEach(function(prop) {
+                assert.deepEqual(_.at(twin.properties, prop), _.at(patch, prop));
+              });
+              done();
+            }
+
+          });
+        });
+
+      });
+    });
+    
+  });
+  
 });
 
+
+
+ 
