@@ -7,9 +7,10 @@
   "license": "MIT",
   "dependencies": {
     "azure-iot-device": "1.0.13",
-    "azure-iot-device-amqp": "1.0.13",
-    "azure-iot-device-http": "1.0.14",
-    "azure-iot-device-mqtt": "1.0.13",
+    "azure-iot-device": "1.0.14",
+    "azure-iot-device-amqp": "1.0.14",
+    "azure-iot-device-http": "1.0.15",
+    "azure-iot-device-mqtt": "1.0.14"
     "es5-shim": "^4.5.9"
   },
   "devDependencies": {

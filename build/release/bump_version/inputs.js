@@ -1075,9 +1075,14 @@ module.exports = [
             },
             {
                 "taskType": "xmlReplaceTask",
-                "search": "//project/dependencies/dependency[groupId = 'com.microsoft.azure.iothub.service.sdk']/version",
+                "search": "//project/dependencies/dependency[groupId = 'com.microsoft.azure.iot.service.sdk']/version",
                 "replaceString": "java.service"
-            }
+            },
+	    {
+		"taskType": "xmlReplaceTask",
+		"search": "//project/parent[groupId = 'com.microsoft.azure.iot.service.sdk']/version",
+		"replaceString": "java.service"
+	    }
         ]
     },
     {
@@ -1091,9 +1096,14 @@ module.exports = [
             },
             {
                 "taskType": "xmlReplaceTask",
-                "search": "//project/dependencies/dependency[groupId = 'com.microsoft.azure.iothub.service.sdk']/version",
+                "search": "//project/dependencies/dependency[groupId = 'com.microsoft.azure.iot.service.sdk']/version",
                 "replaceString": "java.service"
-            }
+            },
+	    {
+		"taskType": "xmlReplaceTask",
+		"search": "//project/parent[groupId = 'com.microsoft.azure.iot.service.sdk']/version",
+		"replaceString": "java.service"
+	    }
         ]
     },
     {
@@ -1107,9 +1117,14 @@ module.exports = [
             },
             {
                 "taskType": "xmlReplaceTask",
-                "search": "//project/dependencies/dependency[groupId = 'com.microsoft.azure.iothub.service.sdk']/version",
+                "search": "//project/dependencies/dependency[groupId = 'com.microsoft.azure.iot.service.sdk']/version",
                 "replaceString": "java.service"
-            }
+            },
+	    {
+		"taskType": "xmlReplaceTask",
+		"search": "//project/parent[groupId = 'com.microsoft.azure.iot.service.sdk']/version",
+		"replaceString": "java.service"
+	    }
         ]
     },
         {

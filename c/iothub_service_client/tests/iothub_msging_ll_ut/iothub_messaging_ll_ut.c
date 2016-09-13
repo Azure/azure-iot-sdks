@@ -40,42 +40,8 @@
 TEST_DEFINE_ENUM_TYPE(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES);
 
-MOCKABLE_FUNCTION(, SESSION_HANDLE, session_create, CONNECTION_HANDLE, connection, ON_LINK_ATTACHED, on_link_attached, void*, callback_context);
-MOCKABLE_FUNCTION(, int, session_set_incoming_window, SESSION_HANDLE, session, uint32_t, incoming_window);
-MOCKABLE_FUNCTION(, int, session_set_outgoing_window, SESSION_HANDLE, session, uint32_t, outgoing_window);
-MOCKABLE_FUNCTION(, void, session_destroy, SESSION_HANDLE, session);
-MOCKABLE_FUNCTION(, const SASL_MECHANISM_INTERFACE_DESCRIPTION*, saslplain_get_interface);
-MOCKABLE_FUNCTION(, void, saslmechanism_destroy, SASL_MECHANISM_HANDLE, sasl_mechanism);
-MOCKABLE_FUNCTION(, SASL_MECHANISM_HANDLE, saslmechanism_create, const SASL_MECHANISM_INTERFACE_DESCRIPTION*, sasl_mechanism_interface_description, void*, sasl_mechanism_create_parameters);
 MOCKABLE_FUNCTION(, const IO_INTERFACE_DESCRIPTION*, saslclientio_get_interface_description);
-MOCKABLE_FUNCTION(, int, properties_set_to, PROPERTIES_HANDLE, properties, AMQP_VALUE, to_value)
-MOCKABLE_FUNCTION(, PROPERTIES_HANDLE, properties_create);
-MOCKABLE_FUNCTION(, void, properties_destroy, PROPERTIES_HANDLE, properties);
-MOCKABLE_FUNCTION(, AMQP_VALUE, messaging_create_source, const char*, address);
-MOCKABLE_FUNCTION(, AMQP_VALUE, messaging_create_target, const char*, address);
-MOCKABLE_FUNCTION(, int, message_set_properties, MESSAGE_HANDLE, message, PROPERTIES_HANDLE, properties);
-MOCKABLE_FUNCTION(, int, messagesender_send, MESSAGE_SENDER_HANDLE, message_sender, MESSAGE_HANDLE, message, ON_MESSAGE_SEND_COMPLETE, on_message_send_complete, void*, callback_context);
-MOCKABLE_FUNCTION(, MESSAGE_HANDLE, message_create);
-MOCKABLE_FUNCTION(, void, message_destroy, MESSAGE_HANDLE, message);
-MOCKABLE_FUNCTION(, int, message_add_body_amqp_data, MESSAGE_HANDLE, message, BINARY_DATA, binary_data);
-MOCKABLE_FUNCTION(, int, messagesender_open, MESSAGE_SENDER_HANDLE, message_sender);
-MOCKABLE_FUNCTION(, void, messagesender_destroy, MESSAGE_SENDER_HANDLE, message_sender);
-MOCKABLE_FUNCTION(, MESSAGE_SENDER_HANDLE, messagesender_create, LINK_HANDLE, link, ON_MESSAGE_SENDER_STATE_CHANGED, on_message_sender_state_changed, void*, context);
-MOCKABLE_FUNCTION(, int, link_set_max_message_size, LINK_HANDLE, link, uint64_t, max_message_size);
-MOCKABLE_FUNCTION(, int, link_set_snd_settle_mode, LINK_HANDLE, link, sender_settle_mode, snd_settle_mode);
-MOCKABLE_FUNCTION(, int, link_set_rcv_settle_mode, LINK_HANDLE, link, sender_settle_mode, snd_settle_mode);
-MOCKABLE_FUNCTION(, void, link_destroy, LINK_HANDLE, link);
-MOCKABLE_FUNCTION(, void, connection_destroy, CONNECTION_HANDLE, connection);
-MOCKABLE_FUNCTION(, LINK_HANDLE, link_create, SESSION_HANDLE, session, const char*, name, role, role, AMQP_VALUE, source, AMQP_VALUE, target);
-MOCKABLE_FUNCTION(, AMQP_VALUE, amqpvalue_create_string, const char*, value);
-MOCKABLE_FUNCTION(, void, amqpvalue_destroy, AMQP_VALUE, value);
-MOCKABLE_FUNCTION(, CONNECTION_HANDLE, connection_create, XIO_HANDLE, xio, const char*, hostname, const char*, container_id, ON_NEW_ENDPOINT, on_new_endpoint, void*, callback_context);
-MOCKABLE_FUNCTION(, void, connection_dowork, CONNECTION_HANDLE, connection);
-MOCKABLE_FUNCTION(, AMQP_VALUE, messaging_delivery_rejected, const char*, error_condition, const char*, error_description);
-MOCKABLE_FUNCTION(, AMQP_VALUE, messaging_delivery_accepted);
-MOCKABLE_FUNCTION(, MESSAGE_RECEIVER_HANDLE, messagereceiver_create, LINK_HANDLE, link, ON_MESSAGE_RECEIVER_STATE_CHANGED, on_message_receiver_state_changed, void*, context);
-MOCKABLE_FUNCTION(, int, messagereceiver_open, MESSAGE_RECEIVER_HANDLE, message_receiver, ON_MESSAGE_RECEIVED, on_message_received, const void*, callback_context);
-MOCKABLE_FUNCTION(, int, message_get_body_amqp_data, MESSAGE_HANDLE, message, size_t, index, BINARY_DATA*, binary_data);
+
 MOCKABLE_FUNCTION(, JSON_Array*, json_array_get_array, const JSON_Array*, array, size_t, index);
 MOCKABLE_FUNCTION(, JSON_Value*, json_parse_string, const char *, string);
 MOCKABLE_FUNCTION(, const char*, json_object_get_string, const JSON_Object *, object, const char *, name);
@@ -88,7 +54,6 @@ MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value *, value);
 MOCKABLE_FUNCTION(, void, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, void*, context);
 MOCKABLE_FUNCTION(, void, TEST_FUNC_IOTHUB_SEND_COMPLETE_CALLBACK, void*, context, IOTHUB_MESSAGING_RESULT, messagingResult);
 MOCKABLE_FUNCTION(, void, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, void*, context, IOTHUB_SERVICE_FEEDBACK_BATCH*, feedbackBatch);
-MOCKABLE_FUNCTION(, void, messagereceiver_destroy, MESSAGE_RECEIVER_HANDLE, message_receiver);
 #undef ENABLE_MOCKS
 
 static TEST_MUTEX_HANDLE g_testByTest;

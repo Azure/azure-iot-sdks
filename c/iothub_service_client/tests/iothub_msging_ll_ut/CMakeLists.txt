@@ -6,6 +6,11 @@ cmake_minimum_required(VERSION 2.8.11)
 
 compileAsC11()
 
+if(MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /bigobj")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /bigobj")
+endif()
+
 set(theseTestsName iothub_messaging_ll_ut)
 
 set(${theseTestsName}_test_files
