@@ -67,7 +67,7 @@ var propPatch = {
     }
 };
 
-// When the twin is manually created and not retrieved from the IoT Hub, the second parameter (force) must be set to true because we have no valid twin version information. 
+// When the twin is manually created and not retrieved from the IoT Hub, the second parameter (force) must be set to true because we have no valid twin etag. 
 twin.properties.desired.update(propPatch, true, function (err) {
   if (err) {
     console.error(err.constructor.name + ': ' + err.message);
@@ -79,9 +79,9 @@ twin.properties.desired.update(propPatch, true, function (err) {
 
 ## Constructors
 In the majority of cases, users are better of creating `DeviceTwin` objects using the `Registry.getDeviceTwin()` API. This will not only return a new DeviceTwin instance but will 
-populate it with the latest state from the Device Registry, including version information that is used to protect a twin against multiple concurrent updates.
+populate it with the latest state from the Device Registry, including the etag that is used to protect a twin against multiple concurrent updates.
 
-In advanced cases where benefitting from optimistic concurrency is not desired or desirable, the `DeviceTwin` constructors allow the users to create an empty `DeviceTwin` object initialized with only the arguments passed to it. It will also set the etag/version properties to `*`
+In advanced cases where benefitting from optimistic concurrency is not desired or desirable, the `DeviceTwin` constructors allow the users to create an empty `DeviceTwin` object initialized with only the arguments passed to it. It will also set the etag to `*`
 so that if a user calls `update` or `replace` on `tags`, `properties.desired` or the `DeviceTwin` object itself, the call succeeds. This allows updating/replacing parts of the twin without
 having to get it first which can be useful in some high performance scenarios.
 
@@ -96,12 +96,12 @@ having to get it first which can be useful in some high performance scenarios.
 
 **SRS_NODE_IOTHUB_DEVICETWIN_16_007: [** The `DeviceTwin(device, registryClient)` constructor shall throw an `ArgumentError` if `device` is an object and does not have a `deviceId` property. **]**
 
-**SRS_NODE_IOTHUB_DEVICETWIN_16_005: [** The `DeviceTwin(device, registryClient)` constructor shall set the `DeviceTwin.etag`, `DeviceTwin.tags.$version` and `DeviceTwin.properties.desired.$version` to `*`. **]**
+**SRS_NODE_IOTHUB_DEVICETWIN_16_005: [** The `DeviceTwin(device, registryClient)` constructor shall set the `DeviceTwin.etag` to `*`. **]**
 
 ## DeviceTwin.tags
 ### replace(newTags, force, done)
 The `replace` method is used to replace the existing tag dictionary with the one passed as a parameter. 
-To satisfy optimistic concurrency requirements, the HTTP request `If-Match` header will be populated with the `DeviceTwin.tags.$version` field if defined. If not defined, `*` will be used.
+To satisfy optimistic concurrency requirements, the HTTP request `If-Match` header will be populated with the `DeviceTwin.etag` field if defined. If not defined, `*` will be used.
 
 **SRS_NODE_IOTHUB_DEVICETWIN_16_009: [** The `replace` method shall construct an HTTP request using information supplied by the caller, as follows:
 ```
@@ -109,7 +109,7 @@ PUT /twins/<DeviceTwin.deviceId>/tags?api-version=<version> HTTP/1.1
 Authorization: <config.sharedAccessSignature>
 Content-Type: application/json; charset=utf-8
 Request-Id: <guid>
-If-Match: <DeviceTwin.tags.$version> | *
+If-Match: <DeviceTwin.etags> | *
 
 <tags object>
 ```
@@ -118,79 +118,62 @@ If-Match: <DeviceTwin.tags.$version> | *
 ## DeviceTwin.properties.desired
 ### replace(newProps, force, done)
 The `replace` method is used to replace the existing desired properties dictionary with the one passed as a parameter. 
-To satisfy optimistic concurrency requirements, the HTTP request `If-Match` header will be populated with the `DeviceTwin.properties.desired.$version` field if defined. If not defined, `*` will be used.
+To satisfy optimistic concurrency requirements, the HTTP request `If-Match` header will be populated with the `DeviceTwin.etag` field if defined. If not defined, `*` will be used.
 
-The `replace` method shall construct an HTTP request using information supplied by the caller, as follows:
+**SRS_NODE_IOTHUB_DEVICETWIN_16_016: [** The `replace` method shall construct an HTTP request using information supplied by the caller, as follows:
 ```
 PUT /twins/<DeviceTwin.deviceId>/properties/desired?api-version=<version> HTTP/1.1
 Authorization: <config.sharedAccessSignature>
 Content-Type: application/json; charset=utf-8
 Request-Id: <guid>
-If-Match: <DeviceTwin.properties.desired.$version> | *
+If-Match: <DeviceTwin.etag> | *
 
 <desired properties object>
 ```
+**]**
 
 ### update(patch, force, done)
 The `update` method is used to update the existing desired properties dictionary with the values passed as a patch argument. 
-To satisfy optimistic concurrency requirements, the HTTP request `If-Match` header will be populated with the `DeviceTwin.properties.desired.$version` field if defined. If not defined, `*` will be used.
+To satisfy optimistic concurrency requirements, the HTTP request `If-Match` header will be populated with the `DeviceTwin.etag` field if defined. If not defined, `*` will be used.
 
-The `update` method shall construct an HTTP request using information supplied by the caller, as follows:
+**SRS_NODE_IOTHUB_DEVICETWIN_16_018: [** The `update` method shall construct an HTTP request using information supplied by the caller, as follows:
 ```
 PATCH /twins/<DeviceTwin.deviceId>/properties/desired?api-version=<version> HTTP/1.1
 Authorization: <config.sharedAccessSignature>
 Content-Type: application/json; charset=utf-8
 Request-Id: <guid>
-If-Match: <DeviceTwin.properties.desired.$version> | *
+If-Match: <DeviceTwin.etag> | *
 
 <desired properties object>
 ```
+**]**
 
 ## Methods
 ### get(done)
 The `get` method is used to refresh the `DeviceTwin` instance with the latest values from the IoT Hub Registry.
 
-**SRS_NODE_IOTHUB_DEVICETWIN_16_014: [** The `get` method shall construct an HTTP request using information supplied by the caller, as follows:
-```
-GET /twins/<DeviceTwin.deviceId>?api-version=<version> HTTP/1.1
-Authorization: <config.sharedAccessSignature>
-Request-Id: <guid>
-``` **]**
+**SRS_NODE_IOTHUB_DEVICETWIN_16_020: [** The `get` method shall call the `getDeviceTwin` method of the `Registry` instance stored in `_registry` property with the following parameters:
+- `this.deviceId`
+- `done`
+**]**
 
-### update(patch, force, done)
+### update(patch, done)
 The `update` method is used to update any part of the device twin stored in the IoT Hub registry with the values passed as a patch argument. 
 To satisfy optimistic concurrency requirements, the HTTP request `If-Match` header will be populated with the `DeviceTwin.eTag` field if defined. If not defined, `*` will be used.
 
-The `update` method shall construct an HTTP request using information supplied by the caller, as follows:
-```
-PATCH /twins/<DeviceTwin.deviceId>?api-version=<version> HTTP/1.1
-Authorization: <config.sharedAccessSignature>
-Content-Type: application/json; charset=utf-8
-Request-Id: <guid>
-If-Match: <DeviceTwin.eTag> | *
+**SRS_NODE_IOTHUB_DEVICETWIN_16_019: [** The `update` method shall call the `updateDeviceTwin` method of the `Registry` instance stored in `_registry` property with the following parameters:
+- `this.deviceId`
+- `patch`
+- `this.etag`
+- `done`
+**]**
 
-<deviceInfo>
-```
+### All twin methods calling to a Registry API
+**SRS_NODE_IOTHUB_DEVICETWIN_16_021: [** The method shall merge the twin returned in the callback of the `Registry` method call with its parent object. **]**  
+**SRS_NODE_IOTHUB_DEVICETWIN_16_022: [** The method shall call the `done` callback with an `Error` object if the request failed **]**  
+**SRS_NODE_IOTHUB_DEVICETWIN_16_023: [** The method shall call the `done` callback with a `null` error object, its parent instance as a second argument and the transport `response` object as a third argument if the request succeeded. **]**  
 
 ### toJSON()
 The `toJSON` method is called when calling `JSON.stringify()` on a `DeviceTwin` object.
 
 **SRS_NODE_IOTHUB_DEVICETWIN_16_015: [** The `toJSON` method shall return a copy of the `DeviceTwin` object that doesn't contain the `_registry` private property. **]**
-
-# All Device Twin update/replace methods
-On top of the [common registry requirements](registry_requirements.md) the device twin methods must implement the following requirements:
-
-**SRS_NODE_IOTHUB_DEVICETWIN_16_008: [** The method shall throw a `ReferenceError` if the patch object is falsy. **]**
-
-**SRS_NODE_IOTHUB_DEVICETWIN_16_010: [** The method shall set the `If-Match` header to `*` if the `force` argument is `true` **]**
-
-**SRS_NODE_IOTHUB_DEVICETWIN_16_011: [** The method shall throw an `InvalidEtagError` if the `force` argument is set to false and the corresponding `$version` property is undefined or set to `*`. **]**
-
-**SRS_NODE_IOTHUB_DEVICETWIN_16_012: [** The method shall throw a `ReferenceError` if the `force` argument does not meet one of the following conditions:
-- `force` is boolean and `true`,
-- `force` is boolean and `false`.
-- `force` is a function and `done` is `undefined`.
-- `force` is `undefined` and `done` is `undefined`
-**]**
-
-**SRS_NODE_IOTHUB_DEVICETWIN_16_013: [** The `force` argument shall be optional, in other words, the method shall use the `force` argument as the callback if `done` is `undefined` and `force` is a function. **]**

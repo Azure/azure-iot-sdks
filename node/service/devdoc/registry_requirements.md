@@ -215,6 +215,31 @@ The `getDeviceTwin` method retrieves the latest Device Twin state in the device 
 **SRS_NODE_IOTHUB_REGISTRY_16_019: [** The `getDeviceTwin` method shall throw a `ReferenceError` if the `deviceId` parameter is falsy. **]**  
 **SRS_NODE_IOTHUB_REGISTRY_16_020: [** The `getDeviceTwin` method shall throw a `ReferenceError` if the `done` parameter is falsy. **]**  
 **SRS_NODE_IOTHUB_REGISTRY_16_036: [** The `getDeviceTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub service. **]**  
+**SRS_NODE_IOTHUB_REGISTRY_16_049: [** The `getDeviceTwin` method shall construct an HTTP request using information supplied by the caller, as follows:
+```
+GET /twins/<DeviceTwin.deviceId>?api-version=<version> HTTP/1.1
+Authorization: <config.sharedAccessSignature>
+Request-Id: <guid>
+``` **]**
+
+### updateDeviceTwin(deviceId, patch, etag, done)
+The `updateDeviceTwin` method updates the device twin identified with the `deviceId` argument with the properties and tags contained in the `patch` object.
+
+**SRS_NODE_IOTHUB_REGISTRY_16_044: [** The `updateDeviceTwin` method shall throw a `ReferenceError` if the `deviceId` argument is `undefined`, `null` or an empty string. **]**  
+**SRS_NODE_IOTHUB_REGISTRY_16_045: [** The `updateDeviceTwin` method shall throw a `ReferenceError` if the `patch` argument is falsy. **]**  
+**SRS_NODE_IOTHUB_REGISTRY_16_046: [** The `updateDeviceTwin` method shall throw a `ReferenceError` if the `etag` argument is falsy. **]**  
+**SRS_NODE_IOTHUB_REGISTRY_16_050: [** The `updateDeviceTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub service. **]**  
+**SRS_NODE_IOTHUB_REGISTRY_16_048: [** The `updateDeviceTwin` method shall construct an HTTP request using information supplied by the caller, as follows:
+```
+PATCH /twins/<deviceId>?api-version=<version> HTTP/1.1
+Authorization: <config.sharedAccessSignature>
+Content-Type: application/json; charset=utf-8
+Request-Id: <guid>
+If-Match: <etag>
+
+<patch>
+```
+**]**
 
 ### All HTTP requests
 All HTTP requests to the registry API should implement the following requirements:

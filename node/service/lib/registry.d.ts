@@ -5,21 +5,28 @@ import { Http } from 'azure-iot-http-base';
 
 declare class Registry {
     constructor(config: Registry.TransportConfig, httpRequestBuilder: Http);
+
+    // CRUD operations
     create(deviceInfo: { deviceId: string; }, done: Registry.ResponseCallback): void;
     update(deviceInfo: { deviceId: string; }, done: Registry.ResponseCallback): void;
     get(deviceId: string, done: Registry.ResponseCallback): void;
     list(done: (err: Error, devices?: any[], response?: any) => void): void;
     delete(deviceId: string, done: Registry.ResponseCallback): void;
+
+    // Bulk Import/Export Jobs
     importDevicesFromBlob(inputBlobContainerUri: string, outputBlobContainerUri: string, done: Registry.JobCallback): void;
     exportDevicesToBlob(outputBlobContainerUri: string, excludeKeys: boolean, done: Registry.JobCallback): void;
     listJobs(done: (err: Error, jobsList?: string[]) => void): void;
     getJob(jobId: string, done: Registry.JobCallback): void;
     cancelJob(jobId: string, done: Registry.JobCallback): void;
-    getDeviceTwin(deviceId: string, done: Registry.ResponseCallback): void;
 
+    // Device Twin
+    getDeviceTwin(deviceId: string, done: Registry.ResponseCallback): void;
+    updateDeviceTwin(deviceId: string, patch: any, etag: string, done: Registry.ResponseCallback): void;
+
+    // Factory methods
     static fromConnectionString(value: string): Registry;
     static fromSharedAccessSignature(value: string): Registry;
-
 }
 
 declare namespace Registry {

@@ -4,7 +4,6 @@
 'use strict';
 
 var errors = require('azure-iot-common').errors;
-var endpoint = require('azure-iot-common').endpoint;
 var _ = require('lodash');
 
 /**
@@ -34,53 +33,13 @@ function DeviceTwin(device, registryClient) {
     }
   }
 
-  /*Codes_SRS_NODE_IOTHUB_DEVICETWIN_16_005: [The `DeviceTwin(device, registryClient)` constructor shall set the `DeviceTwin.etag`, `DeviceTwin.tags.$version` and `DeviceTwin.properties.desired.$version` to `*`.]*/
+  /*Codes_SRS_NODE_IOTHUB_DEVICETWIN_16_005: [The `DeviceTwin(device, registryClient)` constructor shall set the `DeviceTwin.etag` to `*`.]*/
   this.etag = this.etag || '*';
-  this.tags = this.tags || { $version: '*' };
+  this.tags = this.tags || {};
 
-  this.properties = _.assign({ desired: { $version: '*' } }, this.properties);
+  this.properties = _.assign({ desired: {} }, this.properties);
 
   this._registry = registryClient;
-  
-  var self = this;
-  /**
-   * @method            module:azure-iothub.DeviceTwin.tags.replace
-   * @description       Replaces tags stored in the IoT Hub service for this device twin.
-   * @param {Object}    newTags     Object containing the new tags to apply to the device twin.
-   * @param {Boolean}   force       Boolean indicating whether the replacement should be forced 
-   *                                even if the twin changed between the time it was 
-   *                                retrieved and the time of this update.
-   * @param {Function}  done        The function to call when the operation is
-   *                                complete. `done` will be called with three
-   *                                arguments: an Error object (can be null), a
-   *                                {@link module:azure-iothub.DeviceTwin|DeviceTwin}
-   *                                object representing the created device
-   *                                identity, and a transport-specific response
-   *                                object useful for logging or debugging.
-   */
-  this.tags.replace = function(newTags, force, done) {
-    throwOnInvalidArgs(newTags, force, done);
-    var ifMatch = calculateIfMatchValue(self.tags.$version, force);
-    var callback = getCallbackArg(force, done);
-
-    /*Codes_SRS_NODE_IOTHUB_DEVICETWIN_16_009: [The `replace` method shall construct an HTTP request using information supplied by the caller, as follows:
-    ```
-    PUT /twins/<DeviceTwin.deviceId>/tags?api-version=<version> HTTP/1.1
-    Authorization: <config.sharedAccessSignature>
-    Content-Type: application/json; charset=utf-8
-    Request-Id: <guid>
-    If-Match: <DeviceTwin.tags.$version> | *
-
-    <tags object>
-    ``]*/
-    var path = '/twins/' + self.deviceId + '/tags' + endpoint.versionQueryString();
-    var headers = {
-      'Content-Type': 'application/json; charset=utf-8',
-      'If-Match': ifMatch
-    };
-
-    self._registry._executeApiCall('PUT', path, headers, newTags, callback);
-  };
 }
 
 /**
@@ -95,19 +54,50 @@ function DeviceTwin(device, registryClient) {
  *                                object useful for logging or debugging.
  */
 DeviceTwin.prototype.get = function(done) {
-  /*Codes_SRS_NODE_IOTHUB_DEVICETWIN_16_014: [The `get` method shall construct an HTTP request using information supplied by the caller, as follows:
-  ```
-  GET /twins/<DeviceTwin.deviceId>?api-version=<version> HTTP/1.1
-  Authorization: <config.sharedAccessSignature>
-  Request-Id: <guid>
-  ```]*/
+  /*Codes_SRS_NODE_IOTHUB_DEVICETWIN_16_020: [The `get` method shall call the `getDeviceTwin` method of the `Registry` instance stored in `_registry` property with the following parameters:
+  - `this.deviceId`
+  - `done`]*/
   var self = this;
-  var path = "/twins/" + self.deviceId + endpoint.versionQueryString();
-  self._registry._executeApiCall('GET', path, null, null, function(err, newTwin, response) {
-    if (err) {
+  self._registry.getDeviceTwin(self.deviceId, function(err, result, response) {
+    if(err) {
+    /*Codes_SRS_NODE_IOTHUB_DEVICETWIN_16_022: [The method shall call the `done` callback with an `Error` object if the request failed]*/
       done(err);
     } else {
-      _.merge(self, newTwin);
+      /*Codes_SRS_NODE_IOTHUB_DEVICETWIN_16_021: [The method shall merge the twin returned in the callback of the `Registry` method call with its parent object.]*/
+      _.merge(self, result);
+      /*Codes_SRS_NODE_IOTHUB_DEVICETWIN_16_023: [The method shall call the `done` callback with a `null` error object, its parent instance as a second argument and the transport `response` object as a third argument if the request succeeded.]*/
+      done(null, self, response);
+    }
+  });
+};
+
+/**
+ * @method            module:azure-iothub.DeviceTwin.update
+ * @description       Update the device twin with the patch provided as argument.
+ * @param {Object}    patch       Object containing the new values to apply to this device twin.
+ * @param {Function}  done        The function to call when the operation is
+ *                                complete. `done` will be called with three
+ *                                arguments: an Error object (can be null), a
+ *                                {@link module:azure-iothub.DeviceTwin|DeviceTwin}
+ *                                object representing the created device
+ *                                identity, and a transport-specific response
+ *                                object useful for logging or debugging.
+ */
+DeviceTwin.prototype.update = function(patch, done) {
+  /*Codes_SRS_NODE_IOTHUB_DEVICETWIN_16_019: [The `update` method shall call the `updateDeviceTwin` method of the `Registry` instance stored in `_registry` property with the following parameters:
+  - `this.deviceId`
+  - `patch`
+  - `this.etag`
+  - `done`]*/
+  var self = this;
+  self._registry.updateDeviceTwin(self.deviceId, patch, self.etag, function(err, result, response) {
+    if(err) {
+      /*Codes_SRS_NODE_IOTHUB_DEVICETWIN_16_022: [The method shall call the `done` callback with an `Error` object if the request failed]*/
+      done(err);
+    } else {
+      /*Codes_SRS_NODE_IOTHUB_DEVICETWIN_16_021: [The method shall merge the twin returned in the callback of the `Registry` method call with its parent object.]*/
+      _.merge(self, result);
+      /*Codes_SRS_NODE_IOTHUB_DEVICETWIN_16_023: [The method shall call the `done` callback with a `null` error object, its parent instance as a second argument and the transport `response` object as a third argument if the request succeeded.]*/
       done(null, self, response);
     }
   });
@@ -122,37 +112,5 @@ DeviceTwin.prototype.toJSON = function() {
 
   return serializable;
 };
-
-function throwOnInvalidArgs(patch, force, done) {
-  /*Codes_SRS_NODE_IOTHUB_DEVICETWIN_16_008: [The method shall throw a `ReferenceError` if the patch object is falsy.]*/
-  if(!patch) throw new ReferenceError('The patch object cannot be \'' + patch + '\'');
-
-  /*Codes_SRS_NODE_IOTHUB_DEVICETWIN_16_012: [The method shall throw a ReferenceError if the `force` argument does not meet one of the following conditions:
-  - `force` is boolean and `true`,
-  - `force` is boolean and `false`.
-  - `force` is a function and `done` is `undefined`
-  - `force` is `undefined` and `done` is `undefined`]*/
-  if (!(force === true ||
-      force === false ||
-      force === undefined ||
-      (typeof(force) === 'function' && done === undefined))) {
-    throw new ReferenceError('invalid second parameter');
-  }
-}
-
-function calculateIfMatchValue(etag, force) {
-  /*Codes_SRS_NODE_IOTHUB_DEVICETWIN_16_011: [The method shall throw an `InvalidEtagError` if the `force` argument is set to false and `DeviceTwin.tags.$version` is undefined or set to `*`.]*/
-  if (force === false && etag === '*') {
-    throw new errors.InvalidEtagError('\'force\' cannot be \'false\' if \'tags.$version\' is \'*\'');
-  }
-
-  /*Codes_SRS_NODE_IOTHUB_DEVICETWIN_16_010: [The method shall set the `If-Match` header to `*` if the `force` argument is `true`]*/
-  return force ? '*' : etag;
-}
-
-function getCallbackArg(force, done) {
-  /*Codes_SRS_NODE_IOTHUB_DEVICETWIN_16_013: [The `force` argument shall be optional, in other words, the method shall use the `force` argument as the callback if `done` is `undefined` and `force` is a function.]*/
-  return (!done && typeof(force) === 'function') ? force : done;
-}
 
 module.exports = DeviceTwin;

@@ -6,13 +6,7 @@ import Registry = require('./registry');
 declare class DeviceTwin {
     constructor(device: string|{ deviceId: string; }, registryClient: Registry);
     get(done: Registry.ResponseCallback): void;
-    tags: DeviceTwin.DeviceTwinTags;
-}
-
-declare namespace DeviceTwin {
-    interface DeviceTwinTags {
-      replace(newTags: any, force: boolean, done: Registry.ResponseCallback): void;
-    }
+    update(patch: any, done: Registry.ResponseCallback): void;
 }
 
 export = DeviceTwin;
