@@ -145,6 +145,38 @@ describe('MqttReceiver', function () {
           'second call to mqttClient.subscribe was not with topic topic_message');
       });
 
+      // Tests_Tests_SRS_NODE_DEVICE_MQTT_RECEIVER_13_002: [ When a listener is added for the method event, the topic should be subscribed to. ]*/
+      it('does not subscribe twice to the same topic for multiple event registrations', function () {
+        // setup
+        var mqttClient = new FakeMqttClient();
+        var onSpy = sinon.spy(mqttClient, 'on');
+        var subscribeStub = sinon
+              .stub(mqttClient, 'subscribe');
+
+        // stub should call 'done' with no error
+        subscribeStub.onCall(0).callsArgWithAsync(2, null);
+        subscribeStub.onCall(1).callsArgWith(2, null);
+
+        // test
+        var receiver = new MqttReceiver(mqttClient, 'topic_message');
+        receiver.on('method_UpdateFirmware', function () { });
+        receiver.on('method_Reboot', function () { });
+        receiver.on('message', function () { });
+        receiver.on('message', function () { });
+
+        // assert
+        assert.isTrue(onSpy.calledOnce,
+          'mqttClient.on was called more than once');
+        assert.isTrue(onSpy.calledWith('message'),
+          'mqttClient.on was not called for "message" event');
+        assert.isTrue(subscribeStub.calledTwice,
+          'mqttClient.subscribe was not called twice');
+        assert.isTrue(subscribeStub.firstCall.calledWith('$iothub/methods/POST/#', { qos: 0}),
+          'first call to mqttClient.subscribe was not with topic $iothub/methods/POST/#');
+        assert.isTrue(subscribeStub.secondCall.calledWith('topic_message'),
+          'second call to mqttClient.subscribe was not with topic topic_message');
+      });
+
       // Tests_SRS_NODE_DEVICE_MQTT_RECEIVER_13_003: [ If there is a listener for the method event, a method_<METHOD NAME> event shall be emitted for each message received. ]
       /* Tests_SRS_NODE_DEVICE_MQTT_RECEIVER_13_005: [ When a method_<METHOD NAME> event is emitted the parameter shall conform to the shape as defined by the interface specified below:
 

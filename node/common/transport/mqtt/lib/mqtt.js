@@ -7,6 +7,7 @@ var MqttReceiver = require('./mqtt_receiver.js');
 var debug = require('debug')('mqtt-common');
 var PackageJson = require('../package.json');
 var results = require('azure-iot-common').results;
+var endpoint = require('azure-iot-common').endpoint;
 
 /**
  * @class           module:azure-iot-mqtt-base.Mqtt
@@ -54,7 +55,9 @@ Mqtt.prototype.connect = function (config, done) {
     clean: false,
     clientId: config.deviceId,
     rejectUnauthorized: true,
-    username: config.host + '/' + config.deviceId + '/DeviceClientType=' + versionString,
+    username: config.host + '/' + config.deviceId +
+              '/DeviceClientType=' + versionString +
+              '&' + endpoint.versionQueryString().substr(1),
     reconnectPeriod: 0  // Client will handle reconnection at the higher level.
   };
 
