@@ -23,7 +23,7 @@ var badConnStrings = [
   makeConnectionString('host', 'device', 'bad')
 ];
 
-describe('Over AMQP/WS', function () {
+describe.skip('Over AMQP/WS', function () {
   this.timeout(60000);
   runTests(AmqpWs, connectionString, badConnStrings);
 });
