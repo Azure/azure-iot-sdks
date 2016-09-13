@@ -58,8 +58,6 @@ DeviceTwin.fromDeviceClient = function(client, done) {
     /* Codes_SRS_NODE_DEVICE_TWIN_18_003: [** `fromDeviceClient` shall allocate a new `DeviceTwin` object **]**  */
     var twin = new DeviceTwin(client);
 
-    twin.on("newListener", twin._handleNewListener.bind(twin));
-
     /* Codes_SRS_NODE_DEVICE_TWIN_18_005: [** If the protocol does not contain a `getTwinReceiver` method, `fromDeviceClient` shall call the `done` callback with a `NotImplementedError` object **]**  */
     if (!client._transport.getTwinReceiver) {
       done(new errors.NotImplementedError('transport does not support DeviceTwin'));
@@ -74,9 +72,7 @@ DeviceTwin.fromDeviceClient = function(client, done) {
           twin._subscribe( function(err) {
             if (err) {
               done(err);
-            }
-            else
-            {
+            } else {
               client._twin = twin;
               twin._getPropertiesFromService(function (err) {
                 /* Codes_SRS_NODE_DEVICE_TWIN_18_043: [** If the GET operation fails, `fromDeviceClient` shall call the done method with the error object in the first parameter **]** */
@@ -271,17 +267,17 @@ DeviceTwin.prototype._getPropertiesFromService = function(done) {
   });
 };
 
-/* Codes_SRS_NODE_DEVICE_TWIN_18_039: [** After mergeing a GET result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]** */
-/* Codes_SRS_NODE_DEVICE_TWIN_18_040: [** After mergeing a PATCH result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]** */
-DeviceTwin.prototype._fireChangeEvents = function(obj) {
+/* Codes_SRS_NODE_DEVICE_TWIN_18_039: [** After merging a GET result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]** */
+/* Codes_SRS_NODE_DEVICE_TWIN_18_040: [** After merging a PATCH result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]** */
+DeviceTwin.prototype._fireChangeEvents = function(desiredProperties) {
   var self = this;
-  this.emit(DeviceTwin.desiredPath,obj);
-  traverse(obj).forEach(function() {
+  this.emit(DeviceTwin.desiredPath, desiredProperties);
+  traverse(desiredProperties).forEach(function() {
     var path = this.path.join('.');
     if (path) {
       /* Codes_SRS_NODE_DEVICE_TWIN_18_041: [** When firing a property changed event, the `DeviceTwin` object shall name the event from the property using dot notation starting with 'properties.desired.' **]** */
       /* Codes_SRS_NODE_DEVICE_TWIN_18_042: [** When firing a property changed event, the `DeviceTwin` object shall pass the changed value of the property as the event parameter **]** */
-      self.emit(DeviceTwin.desiredPath+'.'+path, _.at(obj,path)[0]);
+      self.emit(DeviceTwin.desiredPath + '.' + path, _.at(desiredProperties,path)[0]);
     }
   });
 };
@@ -294,19 +290,5 @@ DeviceTwin.prototype._onServicePost = function(body) {
   
 };
 
-DeviceTwin.prototype._handleNewListener = function(eventName)
-{
-  var self = this;
-  if (eventName.indexOf(DeviceTwin.desiredPath) === 0) {
-    var obj = _.at(this,eventName)[0];
-    if (obj) {
-      process.nextTick(function() {
-        self.emit(eventName, obj);
-      });
-    }
-  }
-};
-
-        
 module.exports = DeviceTwin;
 

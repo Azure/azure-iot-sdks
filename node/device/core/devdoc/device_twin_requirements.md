@@ -138,7 +138,7 @@ The `fromDeviceclient` method creates a device twin connection to the given hub 
 
 **SRS_NODE_DEVICE_TWIN_18_039: [** After merging a GET result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]**
 
-**SRS_NODE_DEVICE_TWIN_18_040: [** After mergeing a PATCH result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]**
+**SRS_NODE_DEVICE_TWIN_18_040: [** After merging a PATCH result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]**
 
 **SRS_NODE_DEVICE_TWIN_18_041: [** When firing a property changed event, the `DeviceTwin` object shall name the event from the property using dot notation starting with 'properties.desired.' **]**
 

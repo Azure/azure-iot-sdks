@@ -251,7 +251,6 @@ describe('DeviceTwin', function () {
     });
     
     /* Tests_SRS_NODE_DEVICE_TWIN_18_035: [** When a the results of a GET operation is received, the `DeviceTwin` object shall merge the properties into `this.properties.desired`. **]** */
-    /* Tests_SRS_NODE_DEVICE_TWIN_18_039: [** After mergeing a GET result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]** */
     it('fires property changed events recursively', function(done) {
       var client = new FakeClient();
       
@@ -283,7 +282,6 @@ describe('DeviceTwin', function () {
 
       DeviceTwin.fromDeviceClient(client, function(err, twin) {
         if (err) throw err;
-        var eventCount = 0;
 
         var propArray = [
           'desired',
@@ -296,15 +294,8 @@ describe('DeviceTwin', function () {
           assert.deepEqual(_.at(twin.properties, prop), _.at(patch, prop));
         });
 
-        propArray.forEach(function(prop) {
-          twin.on('properties.'+prop, function(delta) {
-            assert.deepEqual(_.at(patch,prop)[0],delta);
-            eventCount++;
-            if (eventCount === propArray.length) {
-              done();
-            }
-          });
-        });
+        done();
+
 
       });
     });
@@ -509,7 +500,7 @@ describe('DeviceTwin', function () {
   });
 
   describe('PATCH operations', function() {
-    /* Tests_SRS_NODE_DEVICE_TWIN_18_040: [** After mergeing a PATCH result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]** */
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_040: [** After merging a PATCH result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]** */
     /* Tests_SRS_NODE_DEVICE_TWIN_18_036: [** When a PATCH operation is received, the `DeviceTwin` object shall merge the properties into `this.properties.desired`. **]** */
     /* Tests_SRS_NODE_DEVICE_TWIN_18_041: [** When firing a property changed event, the `DeviceTwin` object shall name the event from the property using dot notation starting with 'properties.desired.' **]** */
     /* Tests_SRS_NODE_DEVICE_TWIN_18_042: [** When firing a property changed event, the `DeviceTwin` object shall pass the changed value of the property as the event parameter **]** */
@@ -536,8 +527,6 @@ describe('DeviceTwin', function () {
           'desired.baz' 
         ];
 
-        client._transport._receiver.emit('post', JSON.stringify(patch.desired));
-
         propArray.forEach(function(prop) {
           twin.on('properties.'+prop, function(delta) {
             
@@ -553,6 +542,8 @@ describe('DeviceTwin', function () {
 
           });
         });
+
+        client._transport._receiver.emit('post', JSON.stringify(patch.desired));
 
       });
     });
