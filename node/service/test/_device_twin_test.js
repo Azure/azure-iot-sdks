@@ -4,48 +4,13 @@
 "use strict";
 
 var assert = require('chai').assert;
+var sinon = require('sinon');
 var errors = require('azure-iot-common').errors;
-var endpoint = require('azure-iot-common').endpoint;
 var Registry = require('../lib/registry.js');
 var DeviceTwin = require('../lib/device_twin.js');
-var PackageJson = require('../package.json');
 
 var fakeConfig = { host: 'host', sharedAccessSignature: 'sas' };
 var testRegistry = new Registry(fakeConfig, {});
-
-var fakeRegistryValidatesEtag = new Registry(fakeConfig, {
-  buildRequest: function (method, path, httpHeaders) {
-    assert.equal(httpHeaders['If-Match'], '*');
-    return {
-      write: function() { },
-      end: function() { }
-    };
-  }
-});
-
-var fakeRegistryCallsBack = new Registry(fakeConfig, {
-  buildRequest: function (method, path, httpHeaders, host, done) {
-    assert.equal(httpHeaders['If-Match'], '*');
-    return {
-      write: function() { },
-      end: function() {
-        done();
-      }
-    };
-  }
-});
-
-var fakeRegistryCallsBackWithError = new Registry(fakeConfig, {
-  buildRequest: function (method, path, httpHeaders, host, done) {
-    assert.equal(httpHeaders['If-Match'], '*');
-    return {
-      write: function() { },
-      end: function() {
-        done(new errors.DeviceNotFoundError('fake device not found'));
-      }
-    };
-  }
-});
 
 describe('DeviceTwin', function() {
   describe('#constructor', function() {
@@ -93,195 +58,177 @@ describe('DeviceTwin', function() {
       }, errors.ArgumentError);
     });
 
-    /*Tests_SRS_NODE_IOTHUB_DEVICETWIN_16_005: [The `DeviceTwin(device, registryClient)` constructor shall set the `DeviceTwin.etag`, `DeviceTwin.tags.$version` and `DeviceTwin.properties.desired.$version` to `*`.]*/
+    /*Tests_SRS_NODE_IOTHUB_DEVICETWIN_16_005: [The `DeviceTwin(device, registryClient)` constructor shall set the `DeviceTwin.etag` to `*`.]*/
     ['deviceId', { deviceId: 'deviceId' }].forEach(function(device) {
       var twin = new DeviceTwin(device, testRegistry);
       assert.instanceOf(twin, DeviceTwin);
       assert.equal(twin.etag, '*');
-      assert.equal(twin.tags.$version, '*');
-      assert.equal(twin.properties.desired.$version, '*');
-    });
-  });
-
-  /*Tests_SRS_NODE_IOTHUB_DEVICETWIN_16_008: [The method shall throw a `ReferenceError` if the patch object is falsy.]*/
-  function throwsOnBadPatch(fn) {
-    [undefined, null].forEach(function(badPatch) {
-      it('throws a \'ReferenceError\' if the patch object is ' + badPatch + '\'', function() {
-        assert.throws(function() {
-          fn(badPatch, true, function() {});
-        }, ReferenceError);
-        assert.throws(function() {
-          fn(badPatch, false, function() {});
-        }, ReferenceError);
-      });
-    });
-  }
-
-  /*Tests_SRS_NODE_IOTHUB_DEVICETWIN_16_011: [The method shall throw an `InvalidEtagError` if the `force` argument is set to false and the corresponding `$version` property is undefined or set to `*`.]*/
-  function throwsInvalidEtag(fn) {
-    it('throws a \'InvalidEtagError\' if the the \'force\' argument is false and the corresponding etag is set to \'*\'', function() {
-      assert.throws(function() {
-        fn({ foo: 'bar' }, false, function() {});
-      }, errors.InvalidEtagError);
-    });
-  }
-
-  /*Tests_SRS_NODE_IOTHUB_DEVICETWIN_16_012: [The method shall throw a ReferenceError if the `force` argument does not meet one of the following conditions:
-  - `force` is boolean and `true`,
-  - `force` is boolean and `false`.
-  - `force` is a function and `done` is `undefined`.
-  - `force` is `undefined` and `done` is `undefined`]*/
-  function throwsOnInvalidForce(fn) {
-    [{}, '', null].forEach(function(badForce) {
-      it('throws a \'ReferenceError\' if force is not a boolean or a function', function() {
-        assert.throws(function() {
-          fn({ foo: 'bar' }, badForce);
-        });
-        assert.throws(function() {
-          fn({ foo: 'bar' }, badForce, function() {});
-        });
-      });
-    });
-  }
-
-  /*Tests_SRS_NODE_IOTHUB_DEVICETWIN_16_010: [The method shall set the `If-Match` header to `*` if the `force` argument is `true`]*/
-  function verifyEtagIfForceIsTrue(fn) {
-    it('verifies that \'If-Match\' is \'*\' if \'force\' is \'true\'', function() {
-      fn({ foo: 'bar' }, true, function() {});
-    });
-  }
-
-  /*Tests_SRS_NODE_IOTHUB_DEVICETWIN_16_013: [** The method shall use the `force` argument as the callback if `done` is `undefined` and `force` is a function.]*/
-  function verifyForceIsCallback(fn) {
-    it('uses the \'force\' argument as the callback if \'done\' is \'undefined\' and \'force\' is a function', function(testCallback) {
-      fn({ foo: 'bar' }, testCallback);
-    });
-  }
-
-  function verifyCallbackWithError(fn) {
-    it('calls the \'done\' callback with an \'Error\' if the request fails', function(testCallback) {
-      fn({ foo: 'bar' }, function(err) {
-        assert.instanceOf(err, errors.DeviceNotFoundError);
-        testCallback();
-      });
-    });
-  }
-
-  describe('tags.replace', function() {
-    throwsOnBadPatch(new DeviceTwin('deviceId', new Registry({ host: 'host', sharedAccessSignature: 'sas' })).tags.replace);
-    throwsInvalidEtag(new DeviceTwin('deviceId', new Registry({ host: 'host', sharedAccessSignature: 'sas' })).tags.replace);
-    throwsOnInvalidForce(new DeviceTwin('deviceId', new Registry({ host: 'host', sharedAccessSignature: 'sas' })).tags.replace);
-    verifyEtagIfForceIsTrue(new DeviceTwin({
-      deviceId: 'deviceId',
-        tags: {
-          etag: 'etag=='
-        }
-      }, fakeRegistryValidatesEtag).tags.replace);
-
-    verifyForceIsCallback(new DeviceTwin('deviceId', fakeRegistryCallsBack).tags.replace);
-    verifyCallbackWithError(new DeviceTwin('deviceId', fakeRegistryCallsBackWithError).tags.replace);
-
-    /*Tests_SRS_NODE_IOTHUB_DEVICETWIN_16_009: [The `replace` method shall construct an HTTP request using information supplied by the caller, as follows:
-    ```
-    PUT /twins/<DeviceTwin.deviceId>/tags?api-version=<version> HTTP/1.1
-    Authorization: <config.sharedAccessSignature>
-    Content-Type: application/json; charset=utf-8
-    Request-Id: <guid>
-    If-Match: <DeviceTwin.tags.$version> | *
-
-    <tags object>
-    ``]*/
-    it('creates a valid HTTP request', function(testCallback) {
-      var fakeDeviceId = 'deviceId';
-      var fakeTwinPatch = {
-        foo: 'bar'
-      };
-      var fakeHttpResponse = { statusCode: 200 };
-      var fakeEtag = 'etag==';
-
-      var fakeHttpHelper = {
-        buildRequest: function (method, path, httpHeaders, host, done) {
-          assert.equal(host, fakeConfig.host);
-          assert.equal(method, 'PUT');
-          assert.equal(path, '/twins/' + fakeDeviceId + '/tags' + endpoint.versionQueryString());
-          assert.equal(httpHeaders['Content-Type'], 'application/json; charset=utf-8');
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows tracing of requests/responses in the logs.]*/
-          assert.isString(httpHeaders['Request-Id']);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_042: [All requests shall contain a `Authorization` header that contains a valid shared access key.]*/
-          assert.equal(httpHeaders.Authorization, fakeConfig.sharedAccessSignature);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_040: [All requests shall contain a `User-Agent` header that uniquely identifies the SDK and SDK version used.]*/
-          assert.equal(httpHeaders['User-Agent'], PackageJson.name + '/' + PackageJson.version);
-          assert.equal(httpHeaders['If-Match'], fakeEtag);
-          return {
-            write: function(body) {
-              assert.equal(body, JSON.stringify(fakeTwinPatch));
-            },
-            end: function() {
-              done(null, '', fakeHttpResponse);
-            }
-          };
-        }
-      };
-
-      var registry = new Registry(fakeConfig, fakeHttpHelper);
-      var twin = new DeviceTwin(fakeDeviceId, registry);
-      twin.tags.$version = fakeEtag;
-
-      twin.tags.replace(fakeTwinPatch, false, testCallback);
     });
   });
 
   describe('get', function() {
-    /*Tests_SRS_NODE_IOTHUB_DEVICETWIN_16_014: [The `get` method shall construct an HTTP request using information supplied by the caller, as follows:
-    ```
-    GET /twins/<DeviceTwin.deviceId>?api-version=<version> HTTP/1.1
-    Authorization: <config.sharedAccessSignature>
-    Request-Id: <guid>
-    ```]*/
-    it('constructs a valid HTTP request', function(testCallback) {
+    /*Tests_SRS_NODE_IOTHUB_DEVICETWIN_16_020: [The `get` method shall call the `getDeviceTwin` method of the `Registry` instance stored in `_registry` property with the following parameters:
+    - `this.deviceId`
+    - `done`]*/
+    it('calls the getDeviceTwin method on the Registry', function() {
       var fakeDeviceId = 'deviceId';
-      var fakeDeviceTwin = {
-        deviceId: fakeDeviceId
+      var registry = new Registry(fakeConfig, {});
+      var twin = new DeviceTwin(fakeDeviceId, registry);
+
+      sinon.stub(registry, 'getDeviceTwin');
+
+      twin.get(function() {});
+      assert(registry.getDeviceTwin.calledWith(fakeDeviceId));
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_DEVICETWIN_16_021: [The method shall merge the twin returned in the callback of the `Registry` method call with its parent object.]*/
+    it('merges the result of the getDeviceTwin call with the current instance', function(testCallback) {
+      var fakeDeviceId = 'deviceId';
+      var registry = new Registry(fakeConfig, {});
+      var twin = new DeviceTwin(fakeDeviceId, registry);
+
+      sinon.stub(registry, 'getDeviceTwin', function(deviceId, callback) {
+        callback(new Error('fake error'));
+      });
+
+      twin.get(function(err) {
+        assert.instanceOf(err, Error);
+        testCallback();
+      });
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_DEVICETWIN_16_022: [The method shall call the `done` callback with an `Error` object if the request failed]*/
+    it('calls the done callback with an Error object if the request failed', function(testCallback) {
+      var fakeDeviceId = 'deviceId';
+      var fakeTwinUpdate = { 
+        deviceId: fakeDeviceId,
+        tags: {
+          update: 42
+        } 
       };
-      var fakeHttpResponse = { statusCode: 200 };
-      var fakeHttpHelper = {
-        buildRequest: function (method, path, httpHeaders, host, done) {
-          assert.equal(host, fakeConfig.host);
-          assert.equal(method, 'GET');
-          assert.equal(path, '/twins/' + fakeDeviceId + endpoint.versionQueryString());
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows to trace requests/responses in the logs.]*/
-          assert.isString(httpHeaders['Request-Id']);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_042: [All requests shall contain a `Authorization` header that contains a valid shared access key.]*/
-          assert.equal(httpHeaders.Authorization, fakeConfig.sharedAccessSignature);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_040: [All requests shall contain a `User-Agent` header that uniquely identifies the SDK and SDK version used.]*/
-          assert.equal(httpHeaders['User-Agent'], PackageJson.name + '/' + PackageJson.version);
-          return {
-            write: function() {
-              assert.fail();
-            },
-            end: function() {
-              done(null, JSON.stringify(fakeDeviceTwin), fakeHttpResponse);
-            }
-          };
+      var fakeResponse = { statusCode: 200 };
+      var registry = new Registry(fakeConfig, {});
+      var twin = new DeviceTwin(fakeDeviceId, registry);
+
+      sinon.stub(registry, 'getDeviceTwin', function(deviceId, callback) {
+        callback(null, fakeTwinUpdate, fakeResponse);
+      });
+
+      twin.get(function() {
+        assert.deepEqual(twin.tags, fakeTwinUpdate.tags);
+        testCallback();
+      });
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_DEVICETWIN_16_023: [The method shall call the `done` callback with a `null` error object, its parent instance as a second argument and the transport `response` object as a third argument if the request succeede**/
+    it('calls the done callback with a null error object, a twin and a response', function(testCallback) {
+      var fakeDeviceId = 'deviceId';
+      var fakeTwin = { deviceId: fakeDeviceId };
+      var fakeResponse = { statusCode: 200 };
+      var registry = new Registry(fakeConfig, {});
+      var twin = new DeviceTwin(fakeDeviceId, registry);
+
+      sinon.stub(registry, 'getDeviceTwin', function(deviceId, callback) {
+        callback(null, fakeTwin, fakeResponse);
+      });
+
+      twin.get(function(err, twin, resp) {
+        assert.isNull(err);
+        assert.equal(twin.deviceId, fakeDeviceId);
+        assert.equal(resp, fakeResponse);
+        testCallback();
+      });
+    });
+  });
+
+  describe('update', function() {
+    /*Tests_SRS_NODE_IOTHUB_DEVICETWIN_16_019: [The `update` method shall call the `updateDeviceTwin` method of the `Registry` instance stored in `_registry` property with the following parameters:
+    - `this.deviceId`
+    - `patch`
+    - `this.etag`
+    - `done`]*/
+    it('calls the updateDeviceTwin method on the Registry', function() {
+      var fakeDeviceId = 'deviceId';
+      var fakeEtag = 'etag==';
+      var fakePatch = {
+        tags: {
+          fake: 'fake'
         }
       };
 
-      var registry = new Registry(fakeConfig, fakeHttpHelper);
-      registry.getDeviceTwin(fakeDeviceId, function(err, result, response) {
-        /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_034: [When any registry operation receives an HTTP response with a status code < 300, it shall invoke the `done` callback function with the following arguments:
-        - `err`: `null`
-        - `result`: A javascript object parsed from the body of the HTTP response
-        - `response`: the Node.js `http.ServerResponse` object returned by the transport]*/
+      var registry = new Registry(fakeConfig, {});
+      var twin = new DeviceTwin(fakeDeviceId, registry);
+
+      sinon.stub(registry, 'updateDeviceTwin');
+
+      twin.etag = fakeEtag;
+      twin.update(fakePatch, function() {});
+      assert(registry.updateDeviceTwin.calledWith(fakeDeviceId, fakePatch, fakeEtag));
+    });
+
+    
+    /*Tests_SRS_NODE_IOTHUB_DEVICETWIN_16_021: [The method shall merge the twin returned in the callback of the `Registry` method call with its parent object.]*/
+    it('merges the result of the updateDeviceTwin call with the current instance', function(testCallback) {
+      var fakeDeviceId = 'deviceId';
+      var registry = new Registry(fakeConfig, {});
+      var twin = new DeviceTwin(fakeDeviceId, registry);
+
+      sinon.stub(registry, 'updateDeviceTwin', function(deviceId, patch, etag, callback) {
+        callback(new Error('fake error'));
+      });
+
+      twin.update({}, function(err) {
+        assert.instanceOf(err, Error);
+        testCallback();
+      });
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_DEVICETWIN_16_022: [The method shall call the `done` callback with an `Error` object if the request failed]*/
+    it('calls the done callback with an Error object if the request failed', function(testCallback) {
+      var fakeDeviceId = 'deviceId';
+      var fakeTwinUpdate = { 
+        deviceId: fakeDeviceId,
+        tags: {
+          update: 42
+        } 
+      };
+      var fakeResponse = { statusCode: 200 };
+      var registry = new Registry(fakeConfig, {});
+      var twin = new DeviceTwin(fakeDeviceId, registry);
+
+      sinon.stub(registry, 'updateDeviceTwin', function(deviceId, patch, etag, callback) {
+        callback(null, fakeTwinUpdate, fakeResponse);
+      });
+
+      twin.update(fakeTwinUpdate, function() {
+        assert.deepEqual(twin.tags, fakeTwinUpdate.tags);
+        testCallback();
+      });
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_DEVICETWIN_16_023: [The method shall call the `done` callback with a `null` error object, its parent instance as a second argument and the transport `response` object as a third argument if the request succeede**/
+    it('calls the done callback with a null error object, a twin and a response', function(testCallback) {
+      var fakeDeviceId = 'deviceId';
+      var fakeTwin = { deviceId: fakeDeviceId };
+      var fakeResponse = { statusCode: 200 };
+      var registry = new Registry(fakeConfig, {});
+      var twin = new DeviceTwin(fakeDeviceId, registry);
+
+      sinon.stub(registry, 'updateDeviceTwin', function(deviceId, patch, etag, callback) {
+        callback(null, fakeTwin, fakeResponse);
+      });
+
+      twin.update({}, function(err, twin, resp) {
         assert.isNull(err);
-        assert.deepEqual(result.deviceId, fakeDeviceId);
-        assert.equal(response, fakeHttpResponse);
+        assert.equal(twin.deviceId, fakeDeviceId);
+        assert.equal(resp, fakeResponse);
         testCallback();
       });
     });
   });
 
   describe('toJSON', function() {
-    /*Codes_SRS_NODE_IOTHUB_DEVICETWIN_16_015: [The `toJSON` method shall return a copy of the `DeviceTwin` object that doesn't contain the `_registry` private property.]*/
+    /*Tests_SRS_NODE_IOTHUB_DEVICETWIN_16_015: [The `toJSON` method shall return a copy of the `DeviceTwin` object that doesn't contain the `_registry` private property.]*/
     it('does not throw when calling JSON.stringify on a DeviceTwin object', function() {
       var twin = new DeviceTwin('deviceId', new Registry(fakeConfig));
       assert.doesNotThrow(function() {

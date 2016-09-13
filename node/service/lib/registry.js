@@ -109,23 +109,21 @@ Registry.prototype._executeApiCall = function (method, path, headers, requestBod
   httpHeaders['User-Agent'] = PackageJson.name + '/' + PackageJson.version;
 
   var request = this._http.buildRequest(method, path, httpHeaders, this._config.host, function (err, responseBody, response) {
-    if (done) {
-      if (err) {
-        if (response) {
-          /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_035: [When any registry operation method receives an HTTP response with a status code >= 300, it shall invoke the done callback function with an error translated using the requirements detailed in `registry_http_errors_requirements.md`]*/
-          done(translateError(responseBody, response));
-        } else {
-          /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_033: [If any registry operation method encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
-          done(err);
-        }
+    if (err) {
+      if (response) {
+        /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_035: [When any registry operation method receives an HTTP response with a status code >= 300, it shall invoke the done callback function with an error translated using the requirements detailed in `registry_http_errors_requirements.md`]*/
+        done(translateError(responseBody, response));
       } else {
-        /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_034: [When any registry operation receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
-          - `err`: `null`
-          - `result`: A javascript object parsed from the body of the HTTP response
-          - `response`: the Node.js `http.ServerResponse` object returned by the transport]*/
-        var result = responseBody ? JSON.parse(responseBody) : '';
-        done(null, result, response);
+        /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_033: [If any registry operation method encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
+        done(err);
       }
+    } else {
+      /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_034: [When any registry operation receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
+        - `err`: `null`
+        - `result`: A javascript object parsed from the body of the HTTP response
+        - `response`: the Node.js `http.ServerResponse` object returned by the transport]*/
+      var result = responseBody ? JSON.parse(responseBody) : '';
+      done(null, result, response);
     }
   });
 
@@ -457,8 +455,67 @@ Registry.prototype.getDeviceTwin = function (deviceId, done) {
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_020: [The `getDeviceTwin` method shall throw a `ReferenceError` if the `done` parameter is falsy.]*/
   if (!done) throw new ReferenceError('the \'done\' argument cannot be falsy');
 
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_036: [The `getDeviceTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub servce.]*/
-  new DeviceTwin(deviceId, this).get(done);
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_049: [The `getDeviceTwin` method shall construct an HTTP request using information supplied by the caller, as follows:
+  ```
+  GET /twins/<deviceId>?api-version=<version> HTTP/1.1
+  Authorization: <config.sharedAccessSignature>
+  Request-Id: <guid>
+  ```]*/
+  var self = this;
+  var path = "/twins/" + deviceId + endpoint.versionQueryString();
+  self._executeApiCall('GET', path, null, null, function(err, newTwin, response) {
+    if (err) {
+      done(err);
+    } else {
+      /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_036: [The `getDeviceTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub service.]*/
+      done(null, new DeviceTwin(newTwin, self), response);
+    }
+  });
+};
+
+/**
+ * @method              module:azure-iothub.Registry#updateDeviceTwin
+ * @description         Updates the Device Twin of a specific device with the given patch.
+ * @param {String}      deviceId   The device identifier.
+ * @param {Object}      patch      The desired properties and tags to patch the device twin with.
+ * @param {string}      etag       The latest etag for this device twin or '*' to force an update even if
+ *                                 the device twin has been updated since the etag was obtained.
+ * @param {Function}    done       The callback that will be called with either an Error object or 
+ *                                 the device twin instance.
+ */
+Registry.prototype.updateDeviceTwin = function(deviceId, patch, etag, done) {
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_044: [The `updateDeviceTwin` method shall throw a `ReferenceError` if the `deviceId` argument is `undefined`, `null` or an empty string.]*/
+  if (deviceId === null || deviceId === undefined || deviceId === '') throw new ReferenceError('deviceId cannot be \'' + deviceId + '\'');
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_045: [The `updateDeviceTwin` method shall throw a `ReferenceError` if the `patch` argument is falsy.]*/
+  if (!patch) throw new ReferenceError('patch cannot be \'' + patch + '\'');
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_046: [The `updateDeviceTwin` method shall throw a `ReferenceError` if the `etag` argument is falsy.]*/
+  if (!etag) throw new ReferenceError('etag cannot be \'' + etag + '\'');
+
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_048: [The `updateDeviceTwin` method shall construct an HTTP request using information supplied by the caller, as follows:
+  ```
+  PATCH /twins/<deviceId>?api-version=<version> HTTP/1.1
+  Authorization: <config.sharedAccessSignature>
+  Content-Type: application/json; charset=utf-8
+  Request-Id: <guid>
+  If-Match: <etag>
+
+  <patch>
+  ```]*/
+  var path = "/twins/" + deviceId + endpoint.versionQueryString();
+  var headers = {
+    'Content-Type': 'application/json; charset=utf-8',
+    'If-Match': etag
+  };
+
+  var self = this;
+  self._executeApiCall('PATCH', path, headers, patch,  function(err, newTwin, response) {
+    if (err) {
+      done(err);
+    } else {
+      /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_050: [The `updateDeviceTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub service.]*/
+      done(null, new DeviceTwin(newTwin, self), response);
+    }
+  });
 };
 
 module.exports = Registry;

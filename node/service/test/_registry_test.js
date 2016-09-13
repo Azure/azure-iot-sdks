@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 "use strict";
+var _ = require('lodash');
 var assert = require('chai').assert;
 var endpoint = require('azure-iot-common').endpoint;
 var errors = require('azure-iot-common').errors;
@@ -22,7 +23,7 @@ function testFalsyArg(methodUnderTest, argName, argValue, ExpectedErrorType) {
   });
 }
 
-function testErrorCallback(methodUnderTest, arg1, arg2) {
+function testErrorCallback(methodUnderTest, arg1, arg2, arg3) {
   /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_035: [** When any registry operation method receives an HTTP response with a status code >= 300, it shall invoke the `done` callback function with an error translated using the requirements detailed in `registry_http_errors_requirements.md`]*/
   it('calls the done callback with a proper error if an HTTP error occurs', function(testCallback) {
     var FakeHttpErrorHelper = {
@@ -44,7 +45,9 @@ function testErrorCallback(methodUnderTest, arg1, arg2) {
       testCallback();
     };
 
-    if (arg1 && arg2) {
+    if (arg1 && arg2 && arg3) {
+      registry[methodUnderTest](arg1, arg2, arg3, callback);
+    } else if (arg1 && arg2) {
       registry[methodUnderTest](arg1, arg2, callback);
     } else if (arg1 && !arg2) {
       registry[methodUnderTest](arg1, callback);
@@ -74,7 +77,9 @@ function testErrorCallback(methodUnderTest, arg1, arg2) {
       testCallback();
     };
 
-    if (arg1 && arg2) {
+    if (arg1 && arg2 && arg3) {
+      registry[methodUnderTest](arg1, arg2, arg3, callback);
+    } else if (arg1 && arg2) {
       registry[methodUnderTest](arg1, arg2, callback);
     } else if (arg1 && !arg2) {
       registry[methodUnderTest](arg1, callback);
@@ -468,6 +473,115 @@ describe('Registry', function() {
         testCallback();
       });
     });
+  });
+
+  describe('updateDeviceTwin', function() {
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_044: [The `updateDeviceTwin` method shall throw a `ReferenceError` if the `deviceId` argument is `undefined`, `null` or an empty string.]*/
+    [undefined, null, ''].forEach(function(badDeviceId) {
+      it('throws a \'ReferenceError\' if \'deviceId\' is \'' + badDeviceId + '\'', function() {
+        var registry = new Registry({ host: 'host', sharedAccessSignature: 'sas' });
+        assert.throws(function() {
+          registry.updateDeviceTwin(badDeviceId, {}, 'etag==', function() {});
+        }, ReferenceError);
+      });
+    });
+
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_045: [The `updateDeviceTwin` method shall throw a `ReferenceError` if the `patch` argument is falsy.]*/
+    [undefined, null].forEach(function(badPatch) {
+      it('throws a \'ReferenceError\' if \'patch\' is \'' + badPatch + '\'', function() {
+        var registry = new Registry({ host: 'host', sharedAccessSignature: 'sas' });
+        assert.throws(function() {
+          registry.updateDeviceTwin('deviceId', badPatch, 'etag==', function() {});
+        }, ReferenceError);
+      });
+    });
+
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_046: [The `updateDeviceTwin` method shall throw a `ReferenceError` if the `etag` argument is falsy.]*/
+    [undefined, null, ''].forEach(function(badEtag) {
+      it('throws a \'ReferenceError\' if \'etag\' is \'' + badEtag + '\'', function() {
+        var registry = new Registry({ host: 'host', sharedAccessSignature: 'sas' });
+        assert.throws(function() {
+          registry.updateDeviceTwin('deviceId', {}, badEtag, function() {});
+        }, ReferenceError);
+      });
+    });
+
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_048: [The `updateDeviceTwin` method shall construct an HTTP request using information supplied by the caller, as follows:
+    ```
+    PATCH /twins/<deviceId>?api-version=<version> HTTP/1.1
+    Authorization: <config.sharedAccessSignature>
+    Content-Type: application/json; charset=utf-8
+    Request-Id: <guid>
+    If-Match: <etag>
+
+    <patch>
+    ```]*/
+    it('creates a valid HTTP request', function(testCallback) {
+      var fakeDeviceId = 'deviceId';
+      var fakeTwinPatch = {
+        tags: {
+          foo: 'bar'
+        }
+      };
+      var fakeHttpResponse = { statusCode: 200 };
+      var fakeEtag = 'etag==';
+
+      var fakeHttpHelper = {
+        buildRequest: function (method, path, httpHeaders, host, done) {
+          assert.equal(host, fakeConfig.host);
+          assert.equal(method, 'PATCH');
+          assert.equal(path, '/twins/' + fakeDeviceId + endpoint.versionQueryString());
+          assert.equal(httpHeaders['Content-Type'], 'application/json; charset=utf-8');
+          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows tracing of requests/responses in the logs.]*/
+          assert.isString(httpHeaders['Request-Id']);
+          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_042: [All requests shall contain a `Authorization` header that contains a valid shared access key.]*/
+          assert.equal(httpHeaders.Authorization, fakeConfig.sharedAccessSignature);
+          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_040: [All requests shall contain a `User-Agent` header that uniquely identifies the SDK and SDK version used.]*/
+          assert.equal(httpHeaders['User-Agent'], PackageJson.name + '/' + PackageJson.version);
+          assert.equal(httpHeaders['If-Match'], fakeEtag);
+          return {
+            write: function(body) {
+              assert.equal(body, JSON.stringify(fakeTwinPatch));
+            },
+            end: function() {
+              var fakeResponseBody = {
+                deviceId: fakeDeviceId
+              };
+              _.merge(fakeResponseBody, fakeTwinPatch);
+              done(null, JSON.stringify(fakeResponseBody), fakeHttpResponse);
+            }
+          };
+        }
+      };
+
+      var registry = new Registry(fakeConfig, fakeHttpHelper);
+      registry.updateDeviceTwin(fakeDeviceId, fakeTwinPatch, fakeEtag, function(err, twin) {
+        assert.equal(twin.deviceId, fakeDeviceId);
+        assert.equal(twin.tags.foo, 'bar');
+        testCallback();
+      });
+    });
+
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_050: [The `updateDeviceTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub service.]*/
+    it('calls the \'done\' a \'DeviceTwin\' object', function(testCallback) {
+      var registry = new Registry({ host: 'host', sharedAccessSignature: 'sas' }, {
+        buildRequest: function(method, path, headers, body, done) {
+          return {
+            write: function() {},
+            end: function() {
+              done(null, JSON.stringify({ deviceId: 'fakeTwin' }), { status: 200 });
+            }
+          };
+        }
+      });
+
+      registry.updateDeviceTwin('deviceId', {}, 'etag==', function(err, twin) {
+        assert.instanceOf(twin, DeviceTwin);
+        testCallback();
+      });
+    });
+
+    testErrorCallback('updateDeviceTwin', 'deviceId', {}, 'etag==');
   });
 
   describe('importDevicesFromBlob', function() {

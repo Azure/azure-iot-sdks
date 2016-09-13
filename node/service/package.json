@@ -17,7 +17,8 @@
     "chai": "^3.5.0",
     "istanbul": "^0.4.4",
     "jshint": "^2.9.2",
-    "mocha": "^3.0.1"
+    "mocha": "^3.0.1",
+    "sinon": "^1.17.5"
   },
   "scripts": {
     "lint": "jshint --show-non-errors .",
