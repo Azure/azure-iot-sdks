@@ -179,6 +179,7 @@ MqttTwinReceiver.prototype._onResponseMessage = function(topic, message){
     /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_012: [** The `requestId` parameter of the `response` event shall be parsed out of the topic name from the {request id} field **]** */
     /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_013: [** The `body` parameter of the `response` event shall be the body of the received MQTT message **]**  */
     var response = {
+      'topic' : topic,
       'status' : path[3],
       '$rid' : query.$rid,
       'body' : message
@@ -191,7 +192,7 @@ MqttTwinReceiver.prototype._onResponseMessage = function(topic, message){
 
 MqttTwinReceiver.prototype._onPostMessage = function(topic, message) {
   /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_020: [** If there is a listener for the post event, a post event shal be emitteded for each post message received **]** */
-  if (topic.indexOf('$iothub/twin/PATCH/properties/desired/') === 0)
+  if (topic.indexOf('$iothub/twin/PATCH/properties/desired') === 0)
   {
   /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_022: [** When a post event it emitted, the parameter shall be the body of the message **]** */
     this.emit(MqttTwinReceiver.postEvent, message);

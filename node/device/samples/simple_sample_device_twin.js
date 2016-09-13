@@ -6,7 +6,7 @@
 var Client = require('azure-iot-device').Client;
 var Protocol = require('azure-iot-device-mqtt').Mqtt;
 
-var connectionString = '[IoT device connection string]';
+var connectionString = process.argv[2];
 
 // create the IoTHub client
 var client = Client.fromConnectionString(connectionString, Protocol);
