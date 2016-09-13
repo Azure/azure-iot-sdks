@@ -39,9 +39,7 @@
 #define EPOCH_TIME_T_VALUE          0
 #define DEFAULT_MQTT_KEEPALIVE      4*60 // 4 min
 #define DEFAULT_PORT_NUMBER         8883
-#define DEFAULT_TEMP_STRING_LEN     256
 #define BUILD_CONFIG_USERNAME       24
-#define EVENT_TOPIC_DEFAULT_LEN     27
 #define SAS_TOKEN_DEFAULT_LEN       10
 #define RESEND_TIMEOUT_VALUE_MIN    1*60
 #define MAX_SEND_RECOUNT_LIMIT      2
@@ -59,6 +57,8 @@ static const char* TOPIC_DEVICE_DEVICE = "devices/%s/messages/events/";
 
 static const char* TOPIC_DEVICE_METHOD_SUBSCRIBE = "$iothub/methods/POST";
 static const char* TOPIC_DEVICE_METHOD_RESPONSE = "$iothub/methods/res";
+
+static const char* IOTHUB_API_VERSION = "2016-04-25-preview";
 
 static const char* PROPERTY_SEPARATOR = "&";
 static const char* REPORTED_PROPERTIES_TOPIC = "$iothub/twin/PATCH/properties/reported/?$rid=%"PRIu16;
@@ -212,6 +212,28 @@ static uint16_t get_next_packet_id(PMQTTTRANSPORT_HANDLE_DATA transportState)
     return transportState->packetId;
 }
 
+static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
+{
+    switch (rtn_code)
+    {
+        case CONNECTION_ACCEPTED:
+            return "Accepted";
+        case CONN_REFUSED_UNACCEPTABLE_VERSION:
+            return "Unacceptable Version";
+        case CONN_REFUSED_ID_REJECTED:
+            return "Id Rejected";
+        case CONN_REFUSED_SERVER_UNAVAIL:
+            return "Server Unavailable";
+        case CONN_REFUSED_BAD_USERNAME_PASSWORD:
+            return "Bad Username/Password";
+        case CONN_REFUSED_NOT_AUTHORIZED:
+            return "Not Authorized";
+        case CONN_REFUSED_UNKNOWN:
+        default:
+            return "Unknown";
+    }
+}
+
 static int parse_device_twin_topic_info(const char* resp_topic, bool* patch_msg, size_t* request_id, int* status_code)
 {
     int result;
@@ -332,22 +354,10 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
             {
                 for (size_t index = 0; index < propertyCount && result != NULL; index++)
                 {
-                    size_t len = strlen(propertyKeys[index]) + strlen(propertyValues[index]) + 2;
-                    char* propValues = malloc(len+1);
-                    if (propValues == NULL)
+                    if (STRING_sprintf(result, "%s=%s%s", propertyKeys[index], propertyValues[index], propertyCount - 1 == index ? "" : PROPERTY_SEPARATOR) != 0)
                     {
                         STRING_delete(result);
                         result = NULL;
-                    }
-                    else
-                    {
-                        sprintf(propValues, "%s=%s%s", propertyKeys[index], propertyValues[index], propertyCount - 1 == index ? "" : "&");
-                        if (STRING_concat(result, propValues) != 0)
-                        {
-                            STRING_delete(result);
-                            result = NULL;
-                        }
-                        free(propValues);
                     }
                 }
             }
@@ -747,7 +757,7 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                     }
                     else
                     {
-                        LogError("Connection not accepted, return code: %d.", connack->returnCode);
+                        LogError("Connection Not Accepted: 0x%x: %s", connack->returnCode, retrieve_mqtt_return_codes(connack->returnCode) );
                         (void)mqtt_client_disconnect(transport_data->mqttClient);
                         transport_data->isConnected = false;
                         transport_data->currPacketState = PACKET_TYPE_ERROR;
@@ -815,9 +825,8 @@ const XIO_HANDLE getIoTransportProvider(const char* fqdn, int port)
     return xio_create(io_interface_description, &tls_io_config);
 }
 
-static int SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
+static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
 {
-    int result;
     if ( (transport_data->topics_ToSubscribe & SUBSCRIBE_TELEMETRY_TOPIC) ||
          (transport_data->topics_ToSubscribe & SUBSCRIBE_GET_REPORTED_STATE_TOPIC) ||
          (transport_data->topics_ToSubscribe & SUBSCRIBE_NOTIFICATION_STATE_TOPIC)
@@ -861,30 +870,26 @@ static int SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
             if (mqtt_client_subscribe(transport_data->mqttClient, get_next_packet_id(transport_data), subscribe, subscribe_count) != 0)
             {
                 /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_017: [Upon failure IoTHubTransportMqtt_Subscribe shall return a non-zero value.] */
-                result = __LINE__;
+                LogError("Failure: mqtt_client_subscribe returned error.");
             }
             else
             {
                 /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_018: [On success IoTHubTransportMqtt_Subscribe shall return 0.] */
                 transport_data->topics_ToSubscribe &= ~topic_subscription;
                 transport_data->currPacketState = SUBSCRIBE_TYPE;
-                result = 0;
             }
         }
         else
         {
             /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_017: [Upon failure IoTHubTransportMqtt_Subscribe shall return a non-zero value.] */
             LogError("Failure: subscribe_topic is empty.");
-            result = __LINE__;
         }
         transport_data->currPacketState = SUBSCRIBE_TYPE;
     }
     else
     {
         transport_data->currPacketState = PUBLISH_TYPE;
-        result = 0;
     }
-    return result;
 }
 
 static const unsigned char* RetrieveMessagePayload(IOTHUB_MESSAGE_HANDLE messageHandle, size_t* length)
@@ -1098,20 +1103,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transportState)
 
 static STRING_HANDLE buildConfigForUsername(const IOTHUB_CLIENT_CONFIG* upperConfig)
 {
-    STRING_HANDLE result;
-
-    size_t len = strlen(upperConfig->iotHubName)+strlen(upperConfig->iotHubSuffix)+strlen(upperConfig->deviceId)+strlen(CLIENT_DEVICE_TYPE_PREFIX)+strlen(IOTHUB_SDK_VERSION);
-    char* eventTopic = malloc(len + BUILD_CONFIG_USERNAME + 1);
-    if (eventTopic == NULL)
-    {
-        result = NULL;
-    }
-    else
-    {
-        (void)sprintf(eventTopic, "%s.%s/%s/DeviceClientType=%s%%2F%s", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId, CLIENT_DEVICE_TYPE_PREFIX, IOTHUB_SDK_VERSION);
-        result = STRING_construct(eventTopic);
-        free(eventTopic);
-    }
+    STRING_HANDLE result = STRING_construct_sprintf("%s.%s/%s/api-version=%s&DeviceClientType=%s%%2F%s", upperConfig->iotHubName, upperConfig->iotHubSuffix, upperConfig->deviceId, IOTHUB_API_VERSION, CLIENT_DEVICE_TYPE_PREFIX, IOTHUB_SDK_VERSION);
     return result;
 }
 
@@ -1221,9 +1213,8 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
             else
             {
                 /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [The hostname shall be constructed using the iothubname and iothubSuffix.] */
-                char tempAddress[DEFAULT_TEMP_STRING_LEN];
-                (void)snprintf(tempAddress, DEFAULT_TEMP_STRING_LEN, "%s.%s", upperConfig->iotHubName, upperConfig->iotHubSuffix);
-                if ((state->hostAddress = STRING_construct(tempAddress)) == NULL)
+                state->hostAddress = STRING_construct_sprintf("%s.%s", upperConfig->iotHubName, upperConfig->iotHubSuffix);
+                if (state->hostAddress == NULL)
                 {
                     LogError("failure constructing host address.");
                     STRING_delete(state->devicesPath);
@@ -1439,59 +1430,52 @@ static int IoTHubTransportMqtt_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
     }
     else
     {
-        if (transportState->topic_GetState == NULL || transportState->topic_NotifyState == NULL)
+        if (transportState->topic_GetState == NULL)
         {
+            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_044: [IoTHubTransportMqtt_Subscribe_DeviceTwin shall construct the get state topic string and the notify state topic string.] */
+            transportState->topic_GetState = STRING_construct(TOPIC_GET_DESIRED_STATE);
             if (transportState->topic_GetState == NULL)
             {
-                /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_044: [IoTHubTransportMqtt_Subscribe_DeviceTwin shall construct the get state topic string and the notify state topic string.] */
-                transportState->topic_GetState = STRING_construct(TOPIC_GET_DESIRED_STATE);
-                if (transportState->topic_GetState == NULL)
-                {
-                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_046: [Upon failure IoTHubTransportMqtt_Subscribe_DeviceTwin shall return a non-zero value.] */
-                    LogError("Failure: unable constructing reported state topic");
-                    result = __LINE__;
-                }
-                else
-                {
-                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_047: [On success IoTHubTransportMqtt_Subscribe_DeviceTwin shall return 0.] */
-                    transportState->topics_ToSubscribe |= SUBSCRIBE_GET_REPORTED_STATE_TOPIC;
-                    result = 0;
-                }
+                /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_046: [Upon failure IoTHubTransportMqtt_Subscribe_DeviceTwin shall return a non-zero value.] */
+                LogError("Failure: unable constructing reported state topic");
+                result = __LINE__;
             }
             else
             {
+                /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_047: [On success IoTHubTransportMqtt_Subscribe_DeviceTwin shall return 0.] */
+                transportState->topics_ToSubscribe |= SUBSCRIBE_GET_REPORTED_STATE_TOPIC;
                 result = 0;
-            }
-            if (result == 0 && transportState->topic_NotifyState == NULL)
-            {
-                /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_044: [`IoTHubTransportMqtt_Subscribe_DeviceTwin` shall construct the get state topic string and the notify state topic string.] */
-                transportState->topic_NotifyState = STRING_construct(TOPIC_NOTIFICATION_STATE);
-                if (transportState->topic_NotifyState == NULL)
-                {
-                    LogError("Failure: unable constructing notify state topic");
-                    result = __LINE__;
-                }
-                else
-                {
-                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_047: [On success IoTHubTransportMqtt_Subscribe_DeviceTwin shall return 0.] */
-                    transportState->topics_ToSubscribe |= SUBSCRIBE_NOTIFICATION_STATE_TOPIC;
-                    result = 0;
-                }
-            }
-            if (result == 0)
-            {
-                if (transportState->currPacketState != CONNACK_TYPE &&
-                    transportState->currPacketState != CONNECT_TYPE &&
-                    transportState->currPacketState != DISCONNECT_TYPE &&
-                    transportState->currPacketState != PACKET_TYPE_ERROR)
-                {
-                    transportState->currPacketState = SUBSCRIBE_TYPE;
-                }
             }
         }
         else
         {
             result = 0;
+        }
+        if (result == 0 && transportState->topic_NotifyState == NULL)
+        {
+            /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_044: [`IoTHubTransportMqtt_Subscribe_DeviceTwin` shall construct the get state topic string and the notify state topic string.] */
+            transportState->topic_NotifyState = STRING_construct(TOPIC_NOTIFICATION_STATE);
+            if (transportState->topic_NotifyState == NULL)
+            {
+                LogError("Failure: unable constructing notify state topic");
+                result = __LINE__;
+            }
+            else
+            {
+                /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_047: [On success IoTHubTransportMqtt_Subscribe_DeviceTwin shall return 0.] */
+                transportState->topics_ToSubscribe |= SUBSCRIBE_NOTIFICATION_STATE_TOPIC;
+                result = 0;
+            }
+        }
+        if (result == 0)
+        {
+            if (transportState->currPacketState != CONNACK_TYPE &&
+                transportState->currPacketState != CONNECT_TYPE &&
+                transportState->currPacketState != DISCONNECT_TYPE &&
+                transportState->currPacketState != PACKET_TYPE_ERROR)
+            {
+                transportState->currPacketState = SUBSCRIBE_TYPE;
+            }
         }
     }
     return result;
@@ -1759,7 +1743,7 @@ static void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT
         {
             if (transport_data->currPacketState == CONNACK_TYPE || transport_data->currPacketState == SUBSCRIBE_TYPE)
             {
-                (void)SubscribeToMqttProtocol(transport_data);
+                SubscribeToMqttProtocol(transport_data);
             }
             else if (transport_data->currPacketState == SUBACK_TYPE)
             {
