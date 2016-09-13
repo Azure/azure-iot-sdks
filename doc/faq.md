@@ -175,7 +175,7 @@ Windows: `set _JAVA_OPTIONS=-Xmx512M`
 
 Linux: `export _JAVA_OPTIONS=-Xmx512M`
 
-[1]: media/platformtoolset.png
+[1]: media/PlatformToolset.png
 
 <a name="nodepromisify"/>
 ## Using promises instead of callbacks with the device client
@@ -195,6 +195,6 @@ And there you have it. All the existing functions of the client still exist, and
 Events are unchanged, so you still subscribe to those the way you would with the un-promisified client.
 
 <a name="whyunotypescript" />
-## Why not use typescript instead of javascript for the SDK?
-At the time when the SDK development was started, pure javascript felt like a better choice in order to make contributions as easy as possible for any node developer, whether or not he or she was aware and proficient with typescript. 
-We regularly reevaluate this decision as we move forward and you are most welcome to provide feedback or contribute by opening issues or pull-requests and help us decide what to do in the future.
+## Why not use TypeScript instead of JavaScript for the SDK?
+At the time when the SDK development was started, pure JavaScript felt like a better choice in order to make contributions as easy as possible for any Node developer, whether or not he or she was aware and proficient with TypesSript. 
+We regularly re-evaluate this decision as we move forward and you are most welcome to provide feedback or contribute by opening issues or pull-requests and help us decide what to do in the future.
