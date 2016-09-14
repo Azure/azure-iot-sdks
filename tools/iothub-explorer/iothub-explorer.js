@@ -336,7 +336,7 @@ else if (command === 'update-twin') {
         else {
           console.log(JSON.stringify(updatedTwin, null, 2));
         }
-      })
+      });
     }
   });
 }
