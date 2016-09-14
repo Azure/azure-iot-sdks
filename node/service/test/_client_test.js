@@ -102,13 +102,13 @@ describe('Client', function () {
     });
   });
 
-  describe('#invokeMethod', function() {
+  describe('#invokeDeviceMethod', function() {
     /*Tests_SRS_NODE_IOTHUB_CLIENT_16_005: [The `invokeDeviceMethod` method shall throw a `ReferenceError` if `deviceId` is `null`, `undefined` or an empty string.]*/
     [undefined, null, ''].forEach(function(badDeviceId) {
       it('throws if \'deviceId\' is \'' + badDeviceId + '\'', function() {
         var client = new Client({}, {});
         assert.throws(function() {
-          client.invokeMethod(badDeviceId, 'method', { foo: 'bar' }, 42, function() {});
+          client.invokeDeviceMethod(badDeviceId, 'method', { foo: 'bar' }, 42, function() {});
         }, ReferenceError);
       });
     });
@@ -118,7 +118,7 @@ describe('Client', function () {
       it('throws if \'methodName\' is \'' + badMethodName + '\'', function() {
         var client = new Client({}, {});
         assert.throws(function() {
-          client.invokeMethod('deviceId', badMethodName, { foo: 'bar' }, 42, function() {});
+          client.invokeDeviceMethod('deviceId', badMethodName, { foo: 'bar' }, 42, function() {});
         }, ReferenceError);
       });
     });
@@ -128,7 +128,7 @@ describe('Client', function () {
       it('throws if \'methodName\' is of type \'' + badMethodType + '\'', function() {
         var client = new Client({}, {});
         assert.throws(function() {
-          client.invokeMethod('deviceId', badMethodType, { foo: 'bar' }, 42, function() {});
+          client.invokeDeviceMethod('deviceId', badMethodType, { foo: 'bar' }, 42, function() {});
         }, TypeError);
       });
     });
@@ -146,7 +146,7 @@ describe('Client', function () {
       };
       var client = new Client({}, fakeRestClient);
 
-      client.invokeMethod('deviceId', 'method', {}, 42, function(err, result, response) {
+      client.invokeDeviceMethod('deviceId', 'method', {}, 42, function(err, result, response) {
         assert.isNull(err);
         assert.equal(result, fakeResult);
         assert.equal(response, fakeResponse);
@@ -164,7 +164,7 @@ describe('Client', function () {
       };
       var client = new Client({}, fakeRestClientFails);
 
-      client.invokeMethod('deviceId', 'method', function(err) {
+      client.invokeDeviceMethod('deviceId', 'method', function(err) {
         assert.equal(err, fakeError);
         testCallback();
       });
@@ -181,7 +181,7 @@ describe('Client', function () {
       };
       var client = new Client({}, fakeRestClient);
 
-      client.invokeMethod('deviceId', 'method', testCallback);
+      client.invokeDeviceMethod('deviceId', 'method', testCallback);
     });
 
     it('works when timeout is omitted', function(testCallback) {
@@ -192,7 +192,7 @@ describe('Client', function () {
       };
       var client = new Client({}, fakeRestClient);
 
-      client.invokeMethod('deviceId', 'method', {}, testCallback);
+      client.invokeDeviceMethod('deviceId', 'method', {}, testCallback);
     });
   });
 

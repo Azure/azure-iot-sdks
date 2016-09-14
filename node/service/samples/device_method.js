@@ -13,7 +13,7 @@ var timeoutInSeconds = 10;
 
 var client = Client.fromConnectionString(connectionString);
 
-client.invokeMethod(targetDevice, methodName, payload, timeoutInSeconds, function (err, result) {
+client.invokeDeviceMethod(targetDevice, methodName, payload, timeoutInSeconds, function (err, result) {
   if (err) {
     console.error('Failed to invoke method \'' + methodName + '\': ' + err.message);
   } else {

@@ -52,6 +52,12 @@ The `executeApiCall` method builds the HTTP request using the passed arguments a
 
 **SRS_NODE_IOTHUB_REST_API_CLIENT_16_011: [** If the HTTP request fails without an HTTP error code the `executeApiCall` shall call the `done` callback with the error itself as the only argument. **]**
 
+**SRS_NODE_IOTHUB_REST_API_CLIENT_16_031: [** If there's is a `Content-Type` header and its value is `application/json; charset=utf8` , the body of the request shall be stringified using `JSON.stringify()`. **]**
+
+**SRS_NODE_IOTHUB_REST_API_CLIENT_16_032: [** If there's is a `Content-Type` header and its value is `text/plain; charset=utf8`, the `body` argument shall be used. **]**
+
+**SRS_NODE_IOTHUB_REST_API_CLIENT_16_033: [** The `executeApiCall` shall throw a `TypeError` if there's is a `Content-Type` header and its value is `text/plain; charset=utf8` and the `body` argument is not a string. **]**
+
 ### translateError(result, response)
 The `translateError` method translates HTTP errors into Azure IoT Hub errors, effectively abstracting the error that is returned to the SDK user of from the transport layer.
 
@@ -72,7 +78,7 @@ The `translateError` method translates HTTP errors into Azure IoT Hub errors, ef
 
 **SRS_NODE_IOTHUB_REST_API_CLIENT_16_018: [** `translateError` shall return an `DeviceNotFoundError` if the HTTP response status code is `404` and if the error code within the body of the error response is `DeviceNotFound`. **]**
 
-**SRS_NODE_IOTHUB_REST_API_CLIENT_16_019: [** `translateError` shall return a `RequestTimeoutError` if the HTTP response status code is `408`. **]**
+**SRS_NODE_IOTHUB_REST_API_CLIENT_16_019: [** `translateError` shall return a `DeviceTimeoutError` if the HTTP response status code is `408`. **]**
 
 **SRS_NODE_IOTHUB_REST_API_CLIENT_16_020: [** `translateError` shall return an `DeviceAlreadyExistsError` if the HTTP response status code is `409`. **]**
 
@@ -93,5 +99,7 @@ The `translateError` method translates HTTP errors into Azure IoT Hub errors, ef
 - the HTTP response object itself. **]**
 
 ### updateSharedAccessSignature(sharedAccessSignature)
+
+**SRS_NODE_IOTHUB_REST_API_CLIENT_16_034: [** The `updateSharedAccessSignature` method shall throw a `ReferenceError` if the `sharedAccessSignature` argument is falsy. **]**
 
 **SRS_NODE_IOTHUB_REST_API_CLIENT_16_028: [** The `updateSharedAccessSignature` method shall update the `sharedAccessSignature` configuration parameter that is used in the `Authorization` header of all HTTP requests. **]**

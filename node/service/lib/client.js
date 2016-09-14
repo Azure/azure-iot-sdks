@@ -213,7 +213,7 @@ Client.prototype.send = function send(deviceId, message, done) {
 };
 
 /**
- * @method            module:azure-iothub.Client#invokeMethod
+ * @method            module:azure-iothub.Client#invokeDeviceMethod
  * @description       Invokes a method on a particular device.
  * @param {String}    deviceId    The identifier of an existing device identity.
  * @param {String}    methodName  The name of the method to be invoked on the device.
@@ -225,7 +225,7 @@ Client.prototype.send = function send(deviceId, message, done) {
  * @throws {ReferenceError}       If one of the required parameters is null, undefined or empty.
  * @throws {TypeError}            If one of the parameters is of the wrong type.
  */
-Client.prototype.invokeMethod = function (deviceId, methodName, payload, timeout, done) {
+Client.prototype.invokeDeviceMethod = function (deviceId, methodName, payload, timeout, done) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_16_005: [The `invokeDeviceMethod` method shall throw a `ReferenceError` if `deviceId` is `null`, `undefined` or an empty string.]*/
   if (deviceId === undefined || deviceId === null || deviceId === '') throw new ReferenceError('deviceId cannot be \'' + deviceId + '\'');
 
