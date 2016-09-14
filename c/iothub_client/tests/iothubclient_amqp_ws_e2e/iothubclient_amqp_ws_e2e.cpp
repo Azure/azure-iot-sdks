@@ -23,6 +23,7 @@ BEGIN_TEST_SUITE(iothubclient_amqp_ws_e2e)
     TEST_SUITE_CLEANUP(TestClassCleanup)
     {
         e2e_deinit();
+        TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
     }
 
     TEST_FUNCTION(IoTHub_AMQP_WS_SendEvent_e2e)
