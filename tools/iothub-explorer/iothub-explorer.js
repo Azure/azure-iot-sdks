@@ -203,7 +203,7 @@ else if (command === 'monitor-events') {
                 receiver.on('message', function (eventData) {
                   if (eventData.systemProperties['iothub-connection-device-id'] === arg1) {
                     console.log('Event received: ');
-                    console.log(eventData.body);
+                    console.log((typeof eventData.body === 'string') ? eventData.body : JSON.stringify(eventData.body, null, 2));
                     console.log('');
                   }
                 });
