@@ -79,8 +79,7 @@ public final class DeviceClientConfig
         this.deviceKey = deviceKey;
         // Codes_SRS_DEVICECLIENTCONFIG_25_017: [**The constructor shall save sharedAccessToken.**] **
         this.sharedAccessToken = sharedAccessToken;
-        DefaultCertificate cert = new DefaultCertificate();
-        this.pathToCertificate = cert.getDefaultCertificate();
+
     }
 
     /**
@@ -241,6 +240,10 @@ public final class DeviceClientConfig
      */
     public String getPathToCertificate()
     {
+        if (this.pathToCertificate  == null) {
+            DefaultCertificate cert = new DefaultCertificate();
+            this.pathToCertificate = cert.getDefaultCertificate();
+        }
         return this.pathToCertificate;
     }
 
