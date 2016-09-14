@@ -31,10 +31,10 @@ device_provision(hubConnectionString, function (err, provisionedDevices) {
         device_acknowledge_tests(hubConnectionString, protocolToTest, deviceToTest);
         });
       generalProtocols.forEach(function(protocolToTest) {
-        file_upload_tests(hubConnectionString, protocolToTest, deviceToTest);
         device_service_tests(hubConnectionString, protocolToTest, deviceToTest);
       });
     });
+    file_upload_tests(hubConnectionString, deviceHttp.Http, provisionedDevices[1]);
     service_client(hubConnectionString);
     registry_tests(hubConnectionString, storageConnectionString);
   }
