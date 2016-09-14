@@ -59,8 +59,8 @@ if (NOT ${ARCHITECTURE} STREQUAL "ARM")
 	add_subdirectory(samples)
 endif()
 
-if(NOT IN_OPENWRT)
 # Disable tests for OpenWRT
-add_subdirectory(tests)
+if(NOT IN_OPENWRT AND NOT ${skip_unittests})
+	add_subdirectory(tests)
 endif()
 

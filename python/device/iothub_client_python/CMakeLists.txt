@@ -76,4 +76,7 @@ if(${use_mqtt})
 endif()
 
 add_subdirectory(src)
-add_subdirectory(test)
+
+if(NOT ${skip_unittests})
+    add_subdirectory(test)
+endif()
