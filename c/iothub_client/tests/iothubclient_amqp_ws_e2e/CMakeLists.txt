@@ -9,7 +9,7 @@ if(NOT (${use_amqp}))
 endif()
 
 compileAsC11()
-set(theseTestsName iothubclient_amqp_e2e)
+set(theseTestsName iothubclient_amqp_ws_e2e)
 
 set(${theseTestsName}_cpp_files
 	${theseTestsName}.cpp
