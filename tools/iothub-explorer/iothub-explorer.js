@@ -302,6 +302,44 @@ else if (command === 'sas-token') {
     }
   });
 }
+else if (command === 'get-twin') {
+  if (!arg1) inputError('No device ID given');
+
+  var registry = connString ? Registry.fromConnectionString(connString) : Registry.fromSharedAccessSignature(sas.toString());
+  registry.getDeviceTwin(arg1, function (err, deviceTwin) {
+    if (err) serviceError(err);
+    else console.log(JSON.stringify(deviceTwin, null, 2));
+  });
+}
+else if (command === 'update-twin') {
+  if (!arg1) inputError('No device ID given');
+  if (!arg2) inputError('No device-json given');
+  var updateInfo;
+  try {
+    updateInfo = JSON.parse(arg2);
+  }
+  catch (e) {
+    if (e instanceof SyntaxError) inputError('device-json isn\'t valid JSON');
+    else throw e;
+  }
+
+  var registry = connString ? Registry.fromConnectionString(connString) : Registry.fromSharedAccessSignature(sas.toString());
+  registry.getDeviceTwin(arg1, function (err, deviceTwin){
+    if (err) {
+      serviceError(err);
+    }
+    else {
+      registry.updateDeviceTwin(deviceTwin.deviceId, updateInfo, deviceTwin.etag, function (err, updatedTwin){
+        if (err) {
+          serviceError(err);
+        }
+        else {
+          console.log(JSON.stringify(updatedTwin, null, 2));
+        }
+      })
+    }
+  });
+}
 else {
   inputError('\'' + command + '\' is not a valid command');
   usage();
@@ -442,6 +480,10 @@ function usage() {
     '  {green}iothub-explorer{/green} {white}[<connection-string>] sas-token <device-id> [--duration=<num-seconds>]{/white}',
     '    {grey}Generates a SAS Token for the given device with an expiry time <num-seconds> from now',
     '    Default duration is 3600 (one hour).{/grey}',
+    '  {green}iothub-explorer{/green} {white}[<connection-string>] get-twin <device-id> []{/white}',
+    '    {grey}Get device twin information.{/grey}',
+    '  {green}iothub-explorer{/green} {white}[<connection-string>] update-twin <device-id> <device-json>{/white}',
+    '    {grey}Updates device twin info and returns twin information about the updated device.{/grey}',
     '  {green}iothub-explorer{/green} {white}help{/white}',
     '    {grey}Displays this help message.{/grey}',
     '',
