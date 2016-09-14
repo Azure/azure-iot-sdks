@@ -34,7 +34,7 @@ registry.create({deviceId: 'dev1'}, function (err, dev) {
 
 ## Constructors/Factory methods
 
-### Registry(config, httpRequestBuilder) [constructor]
+### Registry(config, restApiClient) [constructor]
 The `Registry` constructor initializes a new instance of a `Registry` object that is used to conduct operations on the device registry.
 
 **SRS_NODE_IOTHUB_REGISTRY_16_023: [** The `Registry` constructor shall throw a `ReferenceError` if the `config` object is falsy. **]**  
@@ -42,8 +42,8 @@ The `Registry` constructor initializes a new instance of a `Registry` object tha
 - `host`: the IoT Hub hostname
 - `sharedAccessSignature`: shared access signature with the permissions for the desired operations.
  **]**
-**SRS_NODE_IOTHUB_REGISTRY_16_024: [** The `Registry` constructor shall use the `httpRequestBuilder` provided as a second argument if it is provided. **]**  
-**SRS_NODE_IOTHUB_REGISTRY_16_025: [** The `Registry` constructor shall use `azure-iot-http-base.Http` if no `httpRequestBuilder` argument is provided. **]**  
+**SRS_NODE_IOTHUB_REGISTRY_16_024: [** The `Registry` constructor shall use the `restApiClient` provided as a second argument if it is provided. **]**  
+**SRS_NODE_IOTHUB_REGISTRY_16_025: [** The `Registry` constructor shall use `azure-iothub.RestApiClient` if no `restApiClient` argument is provided. **]**  
 
 ### fromConnectionString(value) [static]
 The `fromConnectionString` static method returns a new instance of the `Registry` object.

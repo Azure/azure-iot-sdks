@@ -28,7 +28,7 @@
     "alltest": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter spec test/_*_test*.js",
     "ci": "npm -s run lint && npm -s run alltest-min && npm -s run check-cover",
     "test": "npm -s run lint && npm -s run unittest",
-    "check-cover": "istanbul check-coverage --statements 98 --branches 96 --functions 98 --lines 98"
+    "check-cover": "istanbul check-coverage --statements 98 --branches 97 --functions 98 --lines 98"
   },
   "engines": {
     "node": ">= 0.10"

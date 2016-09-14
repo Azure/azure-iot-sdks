@@ -78,7 +78,7 @@ describe('Client', function () {
     var testSubject;
 
     beforeEach('prepare test subject', function () {
-      testSubject = new Client({});
+      testSubject = new Client({}, {});
     });
 
     /*Tests_SRS_NODE_IOTHUB_CLIENT_05_013: [The send method shall throw ReferenceError if the deviceId or message arguments are falsy.]*/
@@ -102,12 +102,106 @@ describe('Client', function () {
     });
   });
 
+  describe('#invokeMethod', function() {
+    /*Tests_SRS_NODE_IOTHUB_CLIENT_16_005: [The `invokeDeviceMethod` method shall throw a `ReferenceError` if `deviceId` is `null`, `undefined` or an empty string.]*/
+    [undefined, null, ''].forEach(function(badDeviceId) {
+      it('throws if \'deviceId\' is \'' + badDeviceId + '\'', function() {
+        var client = new Client({}, {});
+        assert.throws(function() {
+          client.invokeMethod(badDeviceId, 'method', { foo: 'bar' }, 42, function() {});
+        }, ReferenceError);
+      });
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_CLIENT_16_006: [The `invokeDeviceMethod` method shall throw a `ReferenceError` if `methodName` is `null`, `undefined` or an empty string.]*/
+    [undefined, null, ''].forEach(function(badMethodName) {
+      it('throws if \'methodName\' is \'' + badMethodName + '\'', function() {
+        var client = new Client({}, {});
+        assert.throws(function() {
+          client.invokeMethod('deviceId', badMethodName, { foo: 'bar' }, 42, function() {});
+        }, ReferenceError);
+      });
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_CLIENT_16_007: [The `invokeDeviceMethod` method shall throw a `TypeError` if `methodName` is not a `string`.]*/
+    [{}, function(){}, 42].forEach(function(badMethodType) {
+      it('throws if \'methodName\' is of type \'' + badMethodType + '\'', function() {
+        var client = new Client({}, {});
+        assert.throws(function() {
+          client.invokeMethod('deviceId', badMethodType, { foo: 'bar' }, 42, function() {});
+        }, TypeError);
+      });
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_CLIENT_16_009: [The `invokeDeviceMethod` method shall initialize a new instance of `DeviceMethod` with the `methodName` and `timeout` values passed in the arguments.]*/
+    /*Tests_SRS_NODE_IOTHUB_CLIENT_16_010: [The `invokeDeviceMethod` method shall use the newly created instance of `DeviceMethod` to invoke the method with the `payload` argument on the device specified with the `deviceid` argument .]*/
+    /*Tests_SRS_NODE_IOTHUB_CLIENT_16_013: [The `invokeDeviceMethod` method shall call the `done` callback with a `null` first argument, the result of the method execution in the second argument, and the transport-specific response object as a third argument.]*/
+    it('uses the DeviceMethod client to invoke the method', function(testCallback) {
+      var fakeResult = { foo: 'bar' };
+      var fakeResponse = { statusCode: 200 };
+      var fakeRestClient = {
+        executeApiCall: function(method, path, headers, body, timeout, callback) {
+          callback(null, fakeResult, fakeResponse);
+        }
+      };
+      var client = new Client({}, fakeRestClient);
+
+      client.invokeMethod('deviceId', 'method', {}, 42, function(err, result, response) {
+        assert.isNull(err);
+        assert.equal(result, fakeResult);
+        assert.equal(response, fakeResponse);
+        testCallback();
+      });
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_CLIENT_16_012: [The `invokeDeviceMethod` method shall call the `done` callback with a standard javascript `Error` object if the request failed.]*/
+    it('works when payload and timeout are omitted', function(testCallback) {
+      var fakeError = new Error('fake error');
+      var fakeRestClientFails = {
+        executeApiCall: function(method, path, headers, body, timeout, callback) {
+          callback(fakeError);
+        }
+      };
+      var client = new Client({}, fakeRestClientFails);
+
+      client.invokeMethod('deviceId', 'method', function(err) {
+        assert.equal(err, fakeError);
+        testCallback();
+      });
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_CLIENT_16_011: [The `payload` and `timeout` arguments are optional, meaning that:
+    - If payload is a function and timeout and done are undefined, payload shall be used as the callback, the actual payload shall be null, and the the timeout should be set to the default (30 seconds)
+    - If timeout is a function, and done is undefined, timeout shall be used as the callback and the actual timeout shall be set to the default (30 seconds). the payload shall be set to the value of the payload argument.]*/
+    it('works when payload and timeout are omitted', function(testCallback) {
+      var fakeRestClient = {
+        executeApiCall: function(method, path, headers, body, timeout, callback) {
+          callback();
+        }
+      };
+      var client = new Client({}, fakeRestClient);
+
+      client.invokeMethod('deviceId', 'method', testCallback);
+    });
+
+    it('works when timeout is omitted', function(testCallback) {
+      var fakeRestClient = {
+        executeApiCall: function(method, path, headers, body, timeout, callback) {
+          callback();
+        }
+      };
+      var client = new Client({}, fakeRestClient);
+
+      client.invokeMethod('deviceId', 'method', {}, testCallback);
+    });
+  });
+
   describe('#open', function() {
     /*Tests_SRS_NODE_IOTHUB_CLIENT_16_004: [The `disconnect` event shall be emitted when the client is disconnected from the server.]*/
     /*Tests_SRS_NODE_IOTHUB_CLIENT_16_002: [If the transport successfully establishes a connection the `open` method shall subscribe to the `disconnect` event of the transport.]*/
     it('subscribes to the \'disconnect\' event once connected', function(done) {
       var simulatedAmqp = new SimulatedAmqp();
-      var client = new Client(simulatedAmqp);
+      var client = new Client(simulatedAmqp, {});
       client.open(function() {
         client.on('disconnect', function() {
           done();
@@ -122,7 +216,7 @@ describe('Client', function () {
     /*Tests_SRS_NODE_IOTHUB_CLIENT_16_003: [The `close` method shall remove the listener that has been attached to the transport `disconnect` event.]*/
     it('unsubscribes for the \'disconnect\' event when disconnecting', function(done) {
       var simulatedAmqp = new SimulatedAmqp();
-      var client = new Client(simulatedAmqp);
+      var client = new Client(simulatedAmqp, {});
       var disconnectReceived = false;
       client.open(function() {
         client.on('disconnect', function() {

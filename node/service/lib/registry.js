@@ -3,15 +3,12 @@
 
 'use strict';
 
-var uuid = require('uuid');
 var anHourFromNow = require('azure-iot-common').anHourFromNow;
 var ArgumentError = require('azure-iot-common').errors.ArgumentError;
 var endpoint = require('azure-iot-common').endpoint;
-var HttpRequestBuilder = require('azure-iot-http-base').Http;
+var RestApiClient = require('./rest_api_client.js');
 var ConnectionString = require('./connection_string.js');
-var translateError = require('./registry_http_errors.js');
 var SharedAccessSignature = require('./shared_access_signature.js');
-var PackageJson = require('../package.json');
 var DeviceTwin = require('./device_twin.js');
 
 /**
@@ -27,7 +24,7 @@ var DeviceTwin = require('./device_twin.js');
  *                              - sharedAccessSignature: A shared access signature with valid access rights and expiry. 
  */
 /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_001: [The Registry constructor shall accept a transport object]*/
-function Registry(config, httpRequestBuilder) {
+function Registry(config, restApiClient) {
   if (!config) {
     /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_023: [The `Registry` constructor shall throw a `ReferenceError` if the config object is falsy.]*/
     throw new ReferenceError('The \'config\' parameter cannot be \'' + config + '\'');
@@ -39,10 +36,10 @@ function Registry(config, httpRequestBuilder) {
   }
   this._config = config;
 
-  /*SRS_NODE_IOTHUB_REGISTRY_16_024: [The `Registry` constructor shall use the `httpRequestBuilder` provided as a second argument if it is provided.]*/
-  /*SRS_NODE_IOTHUB_REGISTRY_16_025: [The `Registry` constructor shall use `azure-iot-http-base.Http` if no `httpRequestBuilder` argument is provided.]*/
+  /*SRS_NODE_IOTHUB_REGISTRY_16_024: [The `Registry` constructor shall use the `restApiClient` provided as a second argument if it is provided.]*/
+  /*SRS_NODE_IOTHUB_REGISTRY_16_025: [The `Registry` constructor shall use `azure-iothub.RestApiClient` if no `restApiClient` argument is provided.]*/
   // This httpRequestBuilder parameter is used only for unit-testing purposes and should not be used in other situations.
-  this._http = httpRequestBuilder || new HttpRequestBuilder();
+  this._restApiClient = restApiClient || new RestApiClient(config);
 }
 
 /**
@@ -98,42 +95,6 @@ Registry.fromSharedAccessSignature = function fromSharedAccessSignature(value) {
   return new Registry(config);
 };
 
-Registry.prototype._executeApiCall = function (method, path, headers, requestBody, done) {
-  var httpHeaders = headers || {};
-
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_040: [All requests shall contain a `User-Agent` header that uniquely identifies the SDK and SDK version used.]*/
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows tracing of requests/responses in the logs.]*/  
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_042: [All requests shall contain a `Authorization` header that contains a valid shared access key.]*/
-  httpHeaders.Authorization = this._config.sharedAccessSignature;
-  httpHeaders['Request-Id'] = uuid.v4();
-  httpHeaders['User-Agent'] = PackageJson.name + '/' + PackageJson.version;
-
-  var request = this._http.buildRequest(method, path, httpHeaders, this._config.host, function (err, responseBody, response) {
-    if (err) {
-      if (response) {
-        /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_035: [When any registry operation method receives an HTTP response with a status code >= 300, it shall invoke the done callback function with an error translated using the requirements detailed in `registry_http_errors_requirements.md`]*/
-        done(translateError(responseBody, response));
-      } else {
-        /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_033: [If any registry operation method encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
-        done(err);
-      }
-    } else {
-      /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_034: [When any registry operation receives an HTTP response with a status code < 300, it shall invoke the done callback function with the following arguments:
-        - `err`: `null`
-        - `result`: A javascript object parsed from the body of the HTTP response
-        - `response`: the Node.js `http.ServerResponse` object returned by the transport]*/
-      var result = responseBody ? JSON.parse(responseBody) : '';
-      done(null, result, response);
-    }
-  });
-
-  if (requestBody) {
-    request.write(JSON.stringify(requestBody));
-  }
-
-  request.end();
-};
-
 /**
  * @method            module:azure-iothub.Registry#create
  * @description       Creates a new device identity on an IoT hub.
@@ -171,7 +132,7 @@ Registry.prototype.create = function (deviceInfo, done) {
     'Content-Type': 'application/json; charset=utf-8'
   };
 
-  this._executeApiCall('PUT', path, httpHeaders, deviceInfo, done);
+  this._restApiClient.executeApiCall('PUT', path, httpHeaders, deviceInfo, done);
 };
 
 /**
@@ -213,7 +174,7 @@ Registry.prototype.update = function (deviceInfo, done) {
     'If-Match': '*'
   };
 
-  this._executeApiCall('PUT', path, httpHeaders, deviceInfo, done);
+  this._restApiClient.executeApiCall('PUT', path, httpHeaders, deviceInfo, done);
 };
 
 /**
@@ -243,7 +204,7 @@ Registry.prototype.get = function (deviceId, done) {
   ```]*/
   var path = endpoint.devicePath(deviceId) + endpoint.versionQueryString();
 
-  this._executeApiCall('GET', path, null, null, done);
+  this._restApiClient.executeApiCall('GET', path, null, null, done);
 };
 
 /**
@@ -268,7 +229,7 @@ Registry.prototype.list = function (done) {
   ```]*/
   var path = endpoint.devicePath('') + endpoint.versionQueryString();
 
-  this._executeApiCall('GET', path, null, null, done);
+  this._restApiClient.executeApiCall('GET', path, null, null, done);
 };
 
 /**
@@ -301,7 +262,7 @@ Registry.prototype.delete = function (deviceId, done) {
     'If-Match': '*'
   };
 
-  this._executeApiCall('DELETE', path, httpHeaders, null, done);
+  this._restApiClient.executeApiCall('DELETE', path, httpHeaders, null, done);
 };
 
 /**
@@ -341,7 +302,7 @@ Registry.prototype.importDevicesFromBlob = function (inputBlobContainerUri, outp
     'outputBlobContainerUri': outputBlobContainerUri
   };
 
-  this._executeApiCall('POST', path, httpHeaders, importRequest, done);
+  this._restApiClient.executeApiCall('POST', path, httpHeaders, importRequest, done);
 };
 
 /**
@@ -379,7 +340,7 @@ Registry.prototype.exportDevicesToBlob = function (outputBlobContainerUri, exclu
     'excludeKeysInExport': excludeKeys
   };
 
-  this._executeApiCall('POST', path, httpHeaders, exportRequest, done);
+  this._restApiClient.executeApiCall('POST', path, httpHeaders, exportRequest, done);
 };
 
 /**
@@ -397,7 +358,7 @@ Registry.prototype.listJobs = function (done) {
   ```]*/
   var path = "/jobs" + endpoint.versionQueryString();
   
-  this._executeApiCall('GET', path, null, null, done);
+  this._restApiClient.executeApiCall('GET', path, null, null, done);
 };
 
 /**
@@ -418,7 +379,7 @@ Registry.prototype.getJob = function (jobId, done) {
   Request-Id: <guid>
   ```]*/
   var path = "/jobs/" + jobId + endpoint.versionQueryString();
-  this._executeApiCall('GET', path, null, null, done);
+  this._restApiClient.executeApiCall('GET', path, null, null, done);
 };
 
 /**
@@ -439,7 +400,7 @@ Registry.prototype.cancelJob = function (jobId, done) {
   Request-Id: <guid>
   ```]*/
   var path = "/jobs/" + jobId + endpoint.versionQueryString();
-  this._executeApiCall('DELETE', path, null, null, done);
+  this._restApiClient.executeApiCall('DELETE', path, null, null, done);
 };
 
 /**
@@ -463,7 +424,7 @@ Registry.prototype.getDeviceTwin = function (deviceId, done) {
   ```]*/
   var self = this;
   var path = "/twins/" + deviceId + endpoint.versionQueryString();
-  self._executeApiCall('GET', path, null, null, function(err, newTwin, response) {
+  this._restApiClient.executeApiCall('GET', path, null, null, function(err, newTwin, response) {
     if (err) {
       done(err);
     } else {
@@ -508,7 +469,7 @@ Registry.prototype.updateDeviceTwin = function(deviceId, patch, etag, done) {
   };
 
   var self = this;
-  self._executeApiCall('PATCH', path, headers, patch,  function(err, newTwin, response) {
+  this._restApiClient.executeApiCall('PATCH', path, headers, patch,  function(err, newTwin, response) {
     if (err) {
       done(err);
     } else {

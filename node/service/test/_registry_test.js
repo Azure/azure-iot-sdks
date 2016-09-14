@@ -2,13 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 "use strict";
-var _ = require('lodash');
+
 var assert = require('chai').assert;
 var endpoint = require('azure-iot-common').endpoint;
 var errors = require('azure-iot-common').errors;
 var Registry = require('../lib/registry.js');
 var DeviceTwin = require('../lib/device_twin.js');
-var PackageJson = require('../package.json');
 
 var fakeDevice = { deviceId: 'deviceId' };
 var fakeConfig = { host: 'host', sharedAccessSignature: 'sas' };
@@ -27,13 +26,8 @@ function testErrorCallback(methodUnderTest, arg1, arg2, arg3) {
   /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_035: [** When any registry operation method receives an HTTP response with a status code >= 300, it shall invoke the `done` callback function with an error translated using the requirements detailed in `registry_http_errors_requirements.md`]*/
   it('calls the done callback with a proper error if an HTTP error occurs', function(testCallback) {
     var FakeHttpErrorHelper = {
-      buildRequest: function (method, path, httpHeaders, host, done) {
-        return {
-          write: function() {},
-          end: function() {
-            done(new Error('Not found'), "{\"Message\":\"ErrorCode:DeviceNotFound;\\\"fake test error message\\\"\"}", { statusCode: 404 });
-          }
-        };
+      executeApiCall: function (method, path, httpHeaders, body, done) {
+        done(new errors.DeviceNotFoundError('Not found'));
       }
     };
 
@@ -59,13 +53,8 @@ function testErrorCallback(methodUnderTest, arg1, arg2, arg3) {
   /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_033: [If any registry operation method encounters an error before it can send the request, it shall invoke the `done` callback function and pass the standard JavaScript `Error` object with a text description of the error (err.message).]*/
   it('calls the done callback with a standard error if not an HTTP error', function(testCallback) {
     var FakeGenericErrorHelper = {
-      buildRequest: function (method, path, httpHeaders, host, done) {
-        return {
-          write: function() {},
-          end: function() {
-            done(new Error('Fake Error'));
-          }
-        };
+      executeApiCall: function (method, path, httpHeaders, body, done) {
+        done(new Error('Fake Error'));
       }
     };
 
@@ -181,41 +170,19 @@ describe('Registry', function() {
     <deviceInfo>
     ```]*/
     it('constructs a valid HTTP request', function(testCallback) {
-      var fakeHttpResponse = { statusCode: 200 };
       var fakeHttpHelper = {
-        buildRequest: function (method, path, httpHeaders, host, done) {
-          assert.equal(host, fakeConfig.host);
+        executeApiCall: function (method, path, httpHeaders, body, done) {
           assert.equal(method, 'PUT');
           assert.equal(path, '/devices/' + fakeDevice.deviceId + endpoint.versionQueryString());
           assert.equal(httpHeaders['Content-Type'], 'application/json; charset=utf-8');
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows tracing of requests/responses in the logs.]*/
-          assert.isString(httpHeaders['Request-Id']);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_042: [All requests shall contain a `Authorization` header that contains a valid shared access key.]*/
-          assert.equal(httpHeaders.Authorization, fakeConfig.sharedAccessSignature);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_040: [All requests shall contain a `User-Agent` header that uniquely identifies the SDK and SDK version used.]*/
-          assert.equal(httpHeaders['User-Agent'], PackageJson.name + '/' + PackageJson.version);
-          return {
-            write: function(body) {
-              assert.equal(body, JSON.stringify(fakeDevice));
-            },
-            end: function() {
-              done(null, JSON.stringify(fakeDevice), fakeHttpResponse);
-            }
-          };
+          assert.equal(body, fakeDevice);
+
+          done();
         }
       };
 
       var registry = new Registry(fakeConfig, fakeHttpHelper);
-      registry.create(fakeDevice, function(err, result, response) {
-        /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_034: [When any registry operation receives an HTTP response with a status code < 300, it shall invoke the `done` callback function with the following arguments:
-        - `err`: `null`
-        - `result`: A javascript object parsed from the body of the HTTP response
-        - `response`: the Node.js `http.ServerResponse` object returned by the transport]*/
-        assert.isNull(err);
-        assert.deepEqual(result, fakeDevice);
-        assert.equal(response, fakeHttpResponse);
-        testCallback();
-      });
+      registry.create(fakeDevice, testCallback);
     });
   });
 
@@ -242,41 +209,18 @@ describe('Registry', function() {
     <deviceInfo>
     ```]*/
     it('constructs a valid HTTP request', function(testCallback) {
-      var fakeHttpResponse = { statusCode: 200 };
       var fakeHttpHelper = {
-        buildRequest: function (method, path, httpHeaders, host, done) {
-          assert.equal(host, fakeConfig.host);
+        executeApiCall: function (method, path, httpHeaders, body, done) {
           assert.equal(method, 'PUT');
           assert.equal(path, '/devices/' + fakeDevice.deviceId + endpoint.versionQueryString());
           assert.equal(httpHeaders['Content-Type'], 'application/json; charset=utf-8');
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows to trace requests/responses in the logs.]*/
-          assert.isString(httpHeaders['Request-Id']);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_042: [All requests shall contain a `Authorization` header that contains a valid shared access key.]*/
-          assert.equal(httpHeaders.Authorization, fakeConfig.sharedAccessSignature);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_040: [All requests shall contain a `User-Agent` header that uniquely identifies the SDK and SDK version used.]*/
-          assert.equal(httpHeaders['User-Agent'], PackageJson.name + '/' + PackageJson.version);
-          return {
-            write: function(body) {
-              assert.equal(body, JSON.stringify(fakeDevice));
-            },
-            end: function() {
-              done(null, JSON.stringify(fakeDevice), fakeHttpResponse);
-            }
-          };
+          assert.equal(body, fakeDevice);
+          done();
         }
       };
 
       var registry = new Registry(fakeConfig, fakeHttpHelper);
-      registry.update(fakeDevice, function(err, result, response) {
-        /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_034: [When any registry operation receives an HTTP response with a status code < 300, it shall invoke the `done` callback function with the following arguments:
-        - `err`: `null`
-        - `result`: A javascript object parsed from the body of the HTTP response
-        - `response`: the Node.js `http.ServerResponse` object returned by the transport]*/
-        assert.isNull(err);
-        assert.deepEqual(result, fakeDevice);
-        assert.equal(response, fakeHttpResponse);
-        testCallback();
-      });
+      registry.update(fakeDevice, testCallback);
     });
   });
 
@@ -295,40 +239,16 @@ describe('Registry', function() {
     Request-Id: <guid>
     ```]*/
     it('constructs a valid HTTP request', function(testCallback) {
-      var fakeHttpResponse = { statusCode: 200 };
       var fakeHttpHelper = {
-        buildRequest: function (method, path, httpHeaders, host, done) {
-          assert.equal(host, fakeConfig.host);
+        executeApiCall: function (method, path, httpHeaders, body, done) {
           assert.equal(method, 'GET');
           assert.equal(path, '/devices/' + fakeDevice.deviceId + endpoint.versionQueryString());
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows to trace requests/responses in the logs.]*/
-          assert.isString(httpHeaders['Request-Id']);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_042: [All requests shall contain a `Authorization` header that contains a valid shared access key.]*/
-          assert.equal(httpHeaders.Authorization, fakeConfig.sharedAccessSignature);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_040: [All requests shall contain a `User-Agent` header that uniquely identifies the SDK and SDK version used.]*/
-          assert.equal(httpHeaders['User-Agent'], PackageJson.name + '/' + PackageJson.version);
-          return {
-            write: function() {
-              assert.fail();
-            },
-            end: function() {
-              done(null, JSON.stringify(fakeDevice), fakeHttpResponse);
-            }
-          };
+          done();
         }
       };
 
       var registry = new Registry(fakeConfig, fakeHttpHelper);
-      registry.get(fakeDevice.deviceId, function(err, result, response) {
-        /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_034: [When any registry operation receives an HTTP response with a status code < 300, it shall invoke the `done` callback function with the following arguments:
-        - `err`: `null`
-        - `result`: A javascript object parsed from the body of the HTTP response
-        - `response`: the Node.js `http.ServerResponse` object returned by the transport]*/
-        assert.isNull(err);
-        assert.deepEqual(result, fakeDevice);
-        assert.equal(response, fakeHttpResponse);
-        testCallback();
-      });
+      registry.get(fakeDevice.deviceId, testCallback);
     });
   });
 
@@ -342,44 +262,16 @@ describe('Registry', function() {
     Request-Id: <guid>
     ```]*/
     it('constructs a valid HTTP request', function(testCallback) {
-      var fakeHttpResponseBody = [
-        { deviceId: 'device1' },
-        { deviceId: 'device2' }
-      ];
-      var fakeHttpResponse = { statusCode: 204 };
       var fakeHttpHelper = {
-        buildRequest: function (method, path, httpHeaders, host, done) {
-          assert.equal(host, fakeConfig.host);
+        executeApiCall: function (method, path, httpHeaders, body, done) {
           assert.equal(method, 'GET');
           assert.equal(path, '/devices/' + endpoint.versionQueryString());
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows to trace requests/responses in the logs.]*/
-          assert.isString(httpHeaders['Request-Id']);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_042: [All requests shall contain a `Authorization` header that contains a valid shared access key.]*/
-          assert.equal(httpHeaders.Authorization, fakeConfig.sharedAccessSignature);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_040: [All requests shall contain a `User-Agent` header that uniquely identifies the SDK and SDK version used.]*/
-          assert.equal(httpHeaders['User-Agent'], PackageJson.name + '/' + PackageJson.version);
-          return {
-            write: function() {
-              assert.fail();
-            },
-            end: function() {
-              done(null, JSON.stringify(fakeHttpResponseBody), fakeHttpResponse);
-            }
-          };
+          done();
         }
       };
 
       var registry = new Registry(fakeConfig, fakeHttpHelper);
-      registry.list(function(err, result, response) {
-        /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_034: [When any registry operation receives an HTTP response with a status code < 300, it shall invoke the `done` callback function with the following arguments:
-        - `err`: `null`
-        - `result`: A javascript object parsed from the body of the HTTP response
-        - `response`: the Node.js `http.ServerResponse` object returned by the transport]*/
-        assert.isNull(err);
-        assert.deepEqual(result, fakeHttpResponseBody);
-        assert.equal(response, fakeHttpResponse);
-        testCallback();
-      });
+      registry.list(testCallback);
     });
   });
 
@@ -399,41 +291,17 @@ describe('Registry', function() {
     Request-Id: <guid>
     ```]*/
     it('constructs a valid HTTP request', function(testCallback) {
-      var fakeHttpResponse = { statusCode: 204 };
       var fakeHttpHelper = {
-        buildRequest: function (method, path, httpHeaders, host, done) {
-          assert.equal(host, fakeConfig.host);
+        executeApiCall: function (method, path, httpHeaders, body, done) {
           assert.equal(method, 'DELETE');
           assert.equal(path, '/devices/' + fakeDevice.deviceId + endpoint.versionQueryString());
           assert.equal(httpHeaders['If-Match'], '*');
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows to trace requests/responses in the logs.]*/
-          assert.isString(httpHeaders['Request-Id']);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_042: [All requests shall contain a `Authorization` header that contains a valid shared access key.]*/
-          assert.equal(httpHeaders.Authorization, fakeConfig.sharedAccessSignature);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_040: [All requests shall contain a `User-Agent` header that uniquely identifies the SDK and SDK version used.]*/
-          assert.equal(httpHeaders['User-Agent'], PackageJson.name + '/' + PackageJson.version);
-          return {
-            write: function() {
-              assert.fail();
-            },
-            end: function() {
-              done(null, '', fakeHttpResponse);
-            }
-          };
+          done();
         }
       };
 
       var registry = new Registry(fakeConfig, fakeHttpHelper);
-      registry.delete(fakeDevice.deviceId, function(err, result, response) {
-        /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_034: [When any registry operation receives an HTTP response with a status code < 300, it shall invoke the `done` callback function with the following arguments:
-        - `err`: `null`
-        - `result`: A javascript object parsed from the body of the HTTP response
-        - `response`: the Node.js `http.ServerResponse` object returned by the transport]*/
-        assert.isNull(err);
-        assert.equal(result, '');
-        assert.equal(response, fakeHttpResponse);
-        testCallback();
-      });
+      registry.delete(fakeDevice.deviceId, testCallback);
     });
   });
 
@@ -456,15 +324,10 @@ describe('Registry', function() {
     testErrorCallback('getDeviceTwin', fakeDevice.deviceId);
 
     /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_036: [The `getDeviceTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub servce.]*/
-    it('calls the \'done\' a \'DeviceTwin\' object', function(testCallback) {
+    it('calls the \'done\' callback with a \'DeviceTwin\' object', function(testCallback) {
       var registry = new Registry({ host: 'host', sharedAccessSignature: 'sas' }, {
-        buildRequest: function(method, path, headers, body, done) {
-          return {
-            write: function() {},
-            end: function() {
-              done(null, JSON.stringify({ deviceId: 'fakeTwin' }), { status: 200 });
-            }
-          };
+        executeApiCall: function (method, path, httpHeaders, body, done) {
+          done(null, { deviceId: 'fakeTwin' }, { status: 200 });
         }
       });
 
@@ -527,51 +390,25 @@ describe('Registry', function() {
       var fakeEtag = 'etag==';
 
       var fakeHttpHelper = {
-        buildRequest: function (method, path, httpHeaders, host, done) {
-          assert.equal(host, fakeConfig.host);
+        executeApiCall: function (method, path, httpHeaders, body, done) {
           assert.equal(method, 'PATCH');
           assert.equal(path, '/twins/' + fakeDeviceId + endpoint.versionQueryString());
           assert.equal(httpHeaders['Content-Type'], 'application/json; charset=utf-8');
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows tracing of requests/responses in the logs.]*/
-          assert.isString(httpHeaders['Request-Id']);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_042: [All requests shall contain a `Authorization` header that contains a valid shared access key.]*/
-          assert.equal(httpHeaders.Authorization, fakeConfig.sharedAccessSignature);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_040: [All requests shall contain a `User-Agent` header that uniquely identifies the SDK and SDK version used.]*/
-          assert.equal(httpHeaders['User-Agent'], PackageJson.name + '/' + PackageJson.version);
           assert.equal(httpHeaders['If-Match'], fakeEtag);
-          return {
-            write: function(body) {
-              assert.equal(body, JSON.stringify(fakeTwinPatch));
-            },
-            end: function() {
-              var fakeResponseBody = {
-                deviceId: fakeDeviceId
-              };
-              _.merge(fakeResponseBody, fakeTwinPatch);
-              done(null, JSON.stringify(fakeResponseBody), fakeHttpResponse);
-            }
-          };
+          assert.equal(body, fakeTwinPatch);
+          done(null, new DeviceTwin(fakeDeviceId, {}), fakeHttpResponse);
         }
       };
 
       var registry = new Registry(fakeConfig, fakeHttpHelper);
-      registry.updateDeviceTwin(fakeDeviceId, fakeTwinPatch, fakeEtag, function(err, twin) {
-        assert.equal(twin.deviceId, fakeDeviceId);
-        assert.equal(twin.tags.foo, 'bar');
-        testCallback();
-      });
+      registry.updateDeviceTwin(fakeDeviceId, fakeTwinPatch, fakeEtag, testCallback);
     });
 
     /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_050: [The `updateDeviceTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub service.]*/
     it('calls the \'done\' a \'DeviceTwin\' object', function(testCallback) {
       var registry = new Registry({ host: 'host', sharedAccessSignature: 'sas' }, {
-        buildRequest: function(method, path, headers, body, done) {
-          return {
-            write: function() {},
-            end: function() {
-              done(null, JSON.stringify({ deviceId: 'fakeTwin' }), { status: 200 });
-            }
-          };
+        executeApiCall: function (method, path, httpHeaders, body, done) {
+          done(null, JSON.stringify({ deviceId: 'fakeTwin' }), { status: 200 });
         }
       });
 
@@ -621,51 +458,22 @@ describe('Registry', function() {
     }
     ```]*/
     it('constructs a valid HTTP request', function(testCallback) {
-      var fakeHttpResponse = { statusCode: 200 };
       var fakeInputBlob = "input";
       var fakeOutputBlob = "output";
-      var fakeResponseBody = {
-        jobId: 42
-      };
       var fakeHttpHelper = {
-        buildRequest: function (method, path, httpHeaders, host, done) {
-          assert.equal(host, fakeConfig.host);
+        executeApiCall: function (method, path, httpHeaders, body, done) {
           assert.equal(method, 'POST');
           assert.equal(path, '/jobs/create' + endpoint.versionQueryString());
           assert.equal(httpHeaders['Content-Type'], 'application/json; charset=utf-8');
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows to trace requests/responses in the logs.]*/
-          assert.isString(httpHeaders['Request-Id']);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_042: [All requests shall contain a `Authorization` header that contains a valid shared access key.]*/
-          assert.equal(httpHeaders.Authorization, fakeConfig.sharedAccessSignature);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_040: [All requests shall contain a `User-Agent` header that uniquely identifies the SDK and SDK version used.]*/
-          assert.equal(httpHeaders['User-Agent'], PackageJson.name + '/' + PackageJson.version);
-          return {
-            write: function(body) {
-              var fakeRequestBody = {
-                type: 'import',
-                inputBlobContainerUri: fakeInputBlob,
-                outputBlobContainerUri: fakeOutputBlob
-              };
-              assert.equal(body, JSON.stringify(fakeRequestBody));
-            },
-            end: function() {
-              done(null, JSON.stringify(fakeResponseBody), fakeHttpResponse);
-            }
-          };
+          assert.equal(body.type, 'import');
+          assert.equal(body.inputBlobContainerUri, fakeInputBlob);
+          assert.equal(body.outputBlobContainerUri, fakeOutputBlob);
+          done();
         }
       };
 
       var registry = new Registry(fakeConfig, fakeHttpHelper);
-      registry.importDevicesFromBlob(fakeInputBlob, fakeOutputBlob, function(err, result, response) {
-        /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_034: [When any registry operation receives an HTTP response with a status code < 300, it shall invoke the `done` callback function with the following arguments:
-        - `err`: `null`
-        - `result`: A javascript object parsed from the body of the HTTP response
-        - `response`: the Node.js `http.ServerResponse` object returned by the transport]*/
-        assert.isNull(err);
-        assert.deepEqual(result, fakeResponseBody);
-        assert.equal(response, fakeHttpResponse);
-        testCallback();
-      });
+      registry.importDevicesFromBlob(fakeInputBlob, fakeOutputBlob, testCallback);
     });
   });
 
@@ -700,50 +508,21 @@ describe('Registry', function() {
     ```]*/
     [true, false].forEach(function(fakeExcludeKeys) {
       it('constructs a valid HTTP request when excludeKeys is \'' + fakeExcludeKeys + '\'', function(testCallback) {
-        var fakeHttpResponse = { statusCode: 200 };
         var fakeOutputBlob = "output";
-        var fakeResponseBody = {
-          jobId: 42
-        };
         var fakeHttpHelper = {
-          buildRequest: function (method, path, httpHeaders, host, done) {
-            assert.equal(host, fakeConfig.host);
+        executeApiCall: function (method, path, httpHeaders, body, done) {
             assert.equal(method, 'POST');
             assert.equal(path, '/jobs/create' + endpoint.versionQueryString());
             assert.equal(httpHeaders['Content-Type'], 'application/json; charset=utf-8');
-            /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows to trace requests/responses in the logs.]*/
-            assert.isString(httpHeaders['Request-Id']);
-            /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_042: [All requests shall contain a `Authorization` header that contains a valid shared access key.]*/
-            assert.equal(httpHeaders.Authorization, fakeConfig.sharedAccessSignature);
-            /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_040: [All requests shall contain a `User-Agent` header that uniquely identifies the SDK and SDK version used.]*/
-            assert.equal(httpHeaders['User-Agent'], PackageJson.name + '/' + PackageJson.version);
-            return {
-              write: function(body) {
-                var fakeRequestBody = {
-                  type: 'export',
-                  outputBlobContainerUri: fakeOutputBlob,
-                  excludeKeysInExport: fakeExcludeKeys
-                };
-                assert.equal(body, JSON.stringify(fakeRequestBody));
-              },
-              end: function() {
-                done(null, JSON.stringify(fakeResponseBody), fakeHttpResponse);
-              }
-            };
+            assert.equal(body.type, 'export');
+            assert.equal(body.outputBlobContainerUri, fakeOutputBlob);
+            assert.equal(body.excludeKeysInExport, fakeExcludeKeys);
+            done();
           }
         };
 
         var registry = new Registry(fakeConfig, fakeHttpHelper);
-        registry.exportDevicesToBlob(fakeOutputBlob, fakeExcludeKeys, function(err, result, response) {
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_034: [When any registry operation receives an HTTP response with a status code < 300, it shall invoke the `done` callback function with the following arguments:
-          - `err`: `null`
-          - `result`: A javascript object parsed from the body of the HTTP response
-          - `response`: the Node.js `http.ServerResponse` object returned by the transport]*/
-          assert.isNull(err);
-          assert.deepEqual(result, fakeResponseBody);
-          assert.equal(response, fakeHttpResponse);
-          testCallback();
-        });
+        registry.exportDevicesToBlob(fakeOutputBlob, fakeExcludeKeys, testCallback);
       });
     });
   });
@@ -758,44 +537,16 @@ describe('Registry', function() {
     Request-Id: <guid>
     ```]*/
     it('constructs a valid HTTP request', function(testCallback) {
-      var fakeHttpResponseBody = [
-        { jobId: 42 },
-        { jobId: 43 }
-      ];
-      var fakeHttpResponse = { statusCode: 204 };
       var fakeHttpHelper = {
-        buildRequest: function (method, path, httpHeaders, host, done) {
-          assert.equal(host, fakeConfig.host);
+        executeApiCall: function (method, path, httpHeaders, body, done) {
           assert.equal(method, 'GET');
           assert.equal(path, '/jobs' + endpoint.versionQueryString());
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows to trace requests/responses in the logs.]*/
-          assert.isString(httpHeaders['Request-Id']);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_042: [All requests shall contain a `Authorization` header that contains a valid shared access key.]*/
-          assert.equal(httpHeaders.Authorization, fakeConfig.sharedAccessSignature);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_040: [All requests shall contain a `User-Agent` header that uniquely identifies the SDK and SDK version used.]*/
-          assert.equal(httpHeaders['User-Agent'], PackageJson.name + '/' + PackageJson.version);
-          return {
-            write: function() {
-              assert.fail();
-            },
-            end: function() {
-              done(null, JSON.stringify(fakeHttpResponseBody), fakeHttpResponse);
-            }
-          };
+          done();
         }
       };
 
       var registry = new Registry(fakeConfig, fakeHttpHelper);
-      registry.listJobs(function(err, result, response) {
-        /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_034: [When any registry operation receives an HTTP response with a status code < 300, it shall invoke the `done` callback function with the following arguments:
-        - `err`: `null`
-        - `result`: A javascript object parsed from the body of the HTTP response
-        - `response`: the Node.js `http.ServerResponse` object returned by the transport]*/
-        assert.isNull(err);
-        assert.deepEqual(result, fakeHttpResponseBody);
-        assert.equal(response, fakeHttpResponse);
-        testCallback();
-      });
+      registry.listJobs(testCallback);
     });
   });
 
@@ -814,43 +565,19 @@ describe('Registry', function() {
     Request-Id: <guid>
     ```]*/
     it('constructs a valid HTTP request', function(testCallback) {
-      var fakeHttpResponse = { statusCode: 200 };
       var fakeJob = {
         jobId: '42'
       };
       var fakeHttpHelper = {
-        buildRequest: function (method, path, httpHeaders, host, done) {
-          assert.equal(host, fakeConfig.host);
+        executeApiCall: function (method, path, httpHeaders, body, done) {
           assert.equal(method, 'GET');
           assert.equal(path, '/jobs/' + fakeJob.jobId + endpoint.versionQueryString());
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows to trace requests/responses in the logs.]*/
-          assert.isString(httpHeaders['Request-Id']);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_042: [All requests shall contain a `Authorization` header that contains a valid shared access key.]*/
-          assert.equal(httpHeaders.Authorization, fakeConfig.sharedAccessSignature);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_040: [All requests shall contain a `User-Agent` header that uniquely identifies the SDK and SDK version used.]*/
-          assert.equal(httpHeaders['User-Agent'], PackageJson.name + '/' + PackageJson.version);
-          return {
-            write: function() {
-              assert.fail();
-            },
-            end: function() {
-              done(null, JSON.stringify(fakeJob), fakeHttpResponse);
-            }
-          };
+          done();
         }
       };
 
       var registry = new Registry(fakeConfig, fakeHttpHelper);
-      registry.getJob(fakeJob.jobId, function(err, result, response) {
-        /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_034: [When any registry operation receives an HTTP response with a status code < 300, it shall invoke the `done` callback function with the following arguments:
-        - `err`: `null`
-        - `result`: A javascript object parsed from the body of the HTTP response
-        - `response`: the Node.js `http.ServerResponse` object returned by the transport]*/
-        assert.isNull(err);
-        assert.deepEqual(result, fakeJob);
-        assert.equal(response, fakeHttpResponse);
-        testCallback();
-      });
+      registry.getJob(fakeJob.jobId, testCallback);
     });
   });
 
@@ -869,41 +596,17 @@ describe('Registry', function() {
     Request-Id: <guid>
     ```]*/
     it('constructs a valid HTTP request', function(testCallback) {
-      var fakeHttpResponse = { statusCode: 204 };
       var fakeJobId = '42';
       var fakeHttpHelper = {
-        buildRequest: function (method, path, httpHeaders, host, done) {
-          assert.equal(host, fakeConfig.host);
+        executeApiCall: function (method, path, httpHeaders, body, done) {
           assert.equal(method, 'DELETE');
           assert.equal(path, '/jobs/' + fakeJobId + endpoint.versionQueryString());
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_041: [All requests shall contain a `Request-Id` header that uniquely identifies the request and allows to trace requests/responses in the logs.]*/
-          assert.isString(httpHeaders['Request-Id']);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_042: [All requests shall contain a `Authorization` header that contains a valid shared access key.]*/
-          assert.equal(httpHeaders.Authorization, fakeConfig.sharedAccessSignature);
-          /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_040: [All requests shall contain a `User-Agent` header that uniquely identifies the SDK and SDK version used.]*/
-          assert.equal(httpHeaders['User-Agent'], PackageJson.name + '/' + PackageJson.version);
-          return {
-            write: function() {
-              assert.fail();
-            },
-            end: function() {
-              done(null, '', fakeHttpResponse);
-            }
-          };
+          done();
         }
       };
 
       var registry = new Registry(fakeConfig, fakeHttpHelper);
-      registry.cancelJob(fakeJobId, function(err, result, response) {
-        /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_034: [When any registry operation receives an HTTP response with a status code < 300, it shall invoke the `done` callback function with the following arguments:
-        - `err`: `null`
-        - `result`: A javascript object parsed from the body of the HTTP response
-        - `response`: the Node.js `http.ServerResponse` object returned by the transport]*/
-        assert.isNull(err);
-        assert.equal(result, '');
-        assert.equal(response, fakeHttpResponse);
-        testCallback();
-      });
+      registry.cancelJob(fakeJobId, testCallback);
     });
   });
 });

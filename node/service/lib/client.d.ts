@@ -10,6 +10,7 @@ declare class Client extends EventEmitter {
     open(done: (err: Error, result?: results.Connected) => void): void;
     close(done: (err: Error) => void): void;
     send(deviceId: string, message: Message | Message.BufferConvertible, done: (err: Error, result?: results.MessageEnqueued) => void): void;
+    invokeMethod(deviceId: string, methodName: string, payload: any, timeout: number, done: (err: Error, result: any, response: any) => void): void;
     getFeedbackReceiver(done: (err: Error, receiver?: Client.ServiceReceiver) => void): void;
     getFileNotificationReceiver(done: (err: Error, receiver?: Client.ServiceReceiver) => void): void;
 
