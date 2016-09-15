@@ -286,7 +286,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2e)
     TEST_FUNCTION(IoTHub_MQTT_SendEvent_e2e)
     {
         // arrange
-        IOTHUB_CLIENT_CONFIG iotHubConfig;
+        IOTHUB_CLIENT_CONFIG iotHubConfig = {0};
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
         IOTHUB_MESSAGE_HANDLE msgHandle;
 
@@ -374,7 +374,7 @@ BEGIN_TEST_SUITE(iothubclient_mqtt_e2e)
     TEST_FUNCTION(IoTHub_MQTT_RecvMessage_E2ETest)
     {
         // arrange
-        IOTHUB_CLIENT_CONFIG iotHubConfig;
+        IOTHUB_CLIENT_CONFIG iotHubConfig = {0};
         IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 
         EXPECTED_RECEIVE_DATA* notifyData = MessageData_Create();
