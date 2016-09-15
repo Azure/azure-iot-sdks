@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Queue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import javax.naming.SizeLimitExceededException;
 
@@ -62,7 +63,7 @@ public final class HttpsTransport implements IotHubTransport
         this.waitingList = new LinkedList<>();
         this.inProgressList = new LinkedList<>();
         // Codes_SRS_HTTPSTRANSPORT_11_002: [The constructor shall initialize an empty queue for adding callbacks waiting to be invoked.]
-        this.callbackList = new LinkedList<>();
+        this.callbackList = new LinkedBlockingDeque<>();
 
         this.config = config;
 
