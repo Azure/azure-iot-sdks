@@ -149,7 +149,7 @@ describe('RestApiClient', function() {
       var testMethod = 'GET';
       var testPath = '/test/path';
       var testHeaderKey = 'Content-Type';
-      var testHeaderValue = 'text/plain; charset=utf8';
+      var testHeaderValue = 'text/plain; charset=utf-8';
       var testHeaders = {};
       testHeaders[testHeaderKey] = testHeaderValue;
       var testRequestBody = 'foo';
@@ -252,10 +252,10 @@ describe('RestApiClient', function() {
       });
     });
 
-    /*Tests_SRS_NODE_IOTHUB_REST_API_CLIENT_16_031: [If there's is a `Content-Type` header and its value is `application/json; charset=utf8` , the body of the request shall be stringified using `JSON.stringify()`.]*/
-    it('calls JSON.stringify on the request body if the Content-Type header is \'application/json; charset=utf8\'', function(testCallback) {
+    /*Tests_SRS_NODE_IOTHUB_REST_API_CLIENT_16_031: [If there's is a `Content-Type` header and its value is `application/json; charset=utf-8` , the body of the request shall be stringified using `JSON.stringify()`.]*/
+    it('calls JSON.stringify on the request body if the Content-Type header is \'application/json; charset=utf-8\'', function(testCallback) {
       var testHeaders = {
-        'Content-Type': 'application/json; charset=utf8'
+        'Content-Type': 'application/json; charset=utf-8'
       };
       var testRequestBody = {
         key: 'value'
@@ -278,10 +278,10 @@ describe('RestApiClient', function() {
       client.executeApiCall('GET', '/test/path', testHeaders, testRequestBody, testCallback);
     });
 
-    /*Tests_SRS_NODE_IOTHUB_REST_API_CLIENT_16_032: [If there's is a `Content-Type` header and its value is `text/plain; charset=utf8`, the `body` argument shall be used.]*/
-    it('sends the request body directly if the Content-Type header is \'text/plain; charset=utf8\'', function(testCallback) {
+    /*Tests_SRS_NODE_IOTHUB_REST_API_CLIENT_16_032: [If there's is a `Content-Type` header and its value is `text/plain; charset=utf-8`, the `body` argument shall be used.]*/
+    it('sends the request body directly if the Content-Type header is \'text/plain; charset=utf-8\'', function(testCallback) {
       var testHeaders = {
-        'Content-Type': 'text/plain; charset=utf8'
+        'Content-Type': 'text/plain; charset=utf-8'
       };
       var testRequestBody = 'foo';
 
@@ -302,10 +302,10 @@ describe('RestApiClient', function() {
       client.executeApiCall('GET', '/test/path', testHeaders, testRequestBody, testCallback);
     });
 
-    /*Tests_SRS_NODE_IOTHUB_REST_API_CLIENT_16_033: [The `executeApiCall` shall throw a `TypeError` if there's is a `Content-Type` header and its value is `text/plain; charset=utf8` and the `body` argument is not a string.]*/
-    it('throws a TypeError if the Content-Type header is \'text/plain; charset=utf8\' but the requestBody argument is not a string', function() {
+    /*Tests_SRS_NODE_IOTHUB_REST_API_CLIENT_16_033: [The `executeApiCall` shall throw a `TypeError` if there's is a `Content-Type` header and its value is `text/plain; charset=utf-8` and the `body` argument is not a string.]*/
+    it('throws a TypeError if the Content-Type header is \'text/plain; charset=utf-8\' but the requestBody argument is not a string', function() {
       var testHeaders = {
-        'Content-Type': 'text/plain; charset=utf8'
+        'Content-Type': 'text/plain; charset=utf-8'
       };
       var testRequestBody = {
         key: 'value'

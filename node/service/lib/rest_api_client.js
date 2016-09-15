@@ -90,15 +90,15 @@ RestApiClient.prototype.executeApiCall = function (method, path, headers, reques
   }
 
   if (requestBody) {
-    /*Codes_SRS_NODE_IOTHUB_REST_API_CLIENT_16_031: [If there's is a `Content-Type` header and its value is `application/json; charset=utf8` , the body of the request shall be stringified using `JSON.stringify()`.]*/
-    if (headers['Content-Type'] === 'application/json; charset=utf8') {
+    /*Codes_SRS_NODE_IOTHUB_REST_API_CLIENT_16_031: [If there's is a `Content-Type` header and its value is `application/json; charset=utf-8` , the body of the request shall be stringified using `JSON.stringify()`.]*/
+    if (headers['Content-Type'] === 'application/json; charset=utf-8') {
       request.write(JSON.stringify(requestBody));
-    } else if (headers['Content-Type'] === 'text/plain; charset=utf8') {
+    } else if (headers['Content-Type'] === 'text/plain; charset=utf-8') {
       if (typeof requestBody !== 'string') {
-        /*Codes_SRS_NODE_IOTHUB_REST_API_CLIENT_16_033: [The `executeApiCall` shall throw a `TypeError` if there's is a `Content-Type` header and its value is `text/plain; charset=utf8` and the `body` argument is not a string.]*/
+        /*Codes_SRS_NODE_IOTHUB_REST_API_CLIENT_16_033: [The `executeApiCall` shall throw a `TypeError` if there's is a `Content-Type` header and its value is `text/plain; charset=utf-8` and the `body` argument is not a string.]*/
         throw new TypeError('requestBody must be a string');
       } else {
-        /*Codes_SRS_NODE_IOTHUB_REST_API_CLIENT_16_032: [If there's is a `Content-Type` header and its value is `text/plain; charset=utf8`, the `body` argument shall be used.]*/
+        /*Codes_SRS_NODE_IOTHUB_REST_API_CLIENT_16_032: [If there's is a `Content-Type` header and its value is `text/plain; charset=utf-8`, the `body` argument shall be used.]*/
         request.write(requestBody);
       }
     }
