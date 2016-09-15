@@ -104,6 +104,7 @@ static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 #define TEST_DEVICE_TOKEN "thisIsDeviceSasToken"
 #define TEST_IOTHUB_NAME "thisIsIotBuhName"
 #define TEST_IOTHUB_SUFFIX "thisIsIotHubSuffix"
+#define TEST_IOTHUB_GWHOSTNAME "thisIsGWHostname"
 #define TEST_BLANK_SAS_TOKEN " "
 #define TEST_IOTHUB_CLIENT_LL_HANDLE (IOTHUB_CLIENT_LL_HANDLE)0x34333
 #define TEST_IOTHUB_CLIENT_LL_HANDLE2 (IOTHUB_CLIENT_LL_HANDLE)0x34344
@@ -149,7 +150,8 @@ static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_IOTHUBCLIENT_CONFIG =
     TEST_DEVICE_KEY,                                /* const char* deviceKey;                       */
     NULL,                                           /* const char* deviceSasToken;                  */
     TEST_IOTHUB_NAME,                               /* const char* iotHubName;                      */
-    TEST_IOTHUB_SUFFIX                              /* const char* iotHubSuffix;                    */
+    TEST_IOTHUB_SUFFIX,                              /* const char* iotHubSuffix;                    */
+    NULL                                       /* const char* protocolGatewayHostName;                  */
 };
 
 static DLIST_ENTRY waitingToSend;
@@ -160,13 +162,32 @@ static IOTHUBTRANSPORT_CONFIG TEST_CONFIG =
     &waitingToSend
 };
 
+static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_IOTHUBCLIENT_GW_CONFIG =
+{
+    HTTP_Protocol,                                  /* IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;   */
+    TEST_DEVICE_ID,                                 /* const char* deviceId;                        */
+    TEST_DEVICE_KEY,                                /* const char* deviceKey;                       */
+    NULL,                                           /* const char* deviceSasToken;                  */
+    TEST_IOTHUB_NAME,                               /* const char* iotHubName;                      */
+    TEST_IOTHUB_SUFFIX,                              /* const char* iotHubSuffix;                    */
+    TEST_IOTHUB_GWHOSTNAME	                    /* const char* protocolGatewayHostName;                  */
+};
+
+static IOTHUBTRANSPORT_CONFIG TEST_GW_CONFIG =
+{
+    &TEST_CONFIG_IOTHUBCLIENT_GW_CONFIG,
+    &waitingToSend
+};
+
 static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_IOTHUBCLIENT_CONFIG2 =
 {
     HTTP_Protocol,                                  /* IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;   */
     TEST_DEVICE_ID2,                                 /* const char* deviceId;                        */
     TEST_DEVICE_KEY2,                                /* const char* deviceKey;                       */
+    NULL,                                           /* const char* deviceSasToken;                  */
     TEST_IOTHUB_NAME,                               /* const char* iotHubName;                      */
-    TEST_IOTHUB_SUFFIX                              /* const char* iotHubSuffix;                    */
+    TEST_IOTHUB_SUFFIX,                              /* const char* iotHubSuffix;                    */
+    NULL                                       /* const char* protocolGatewayHostName;                  */
 };
 
 static DLIST_ENTRY waitingToSend2;
@@ -188,8 +209,10 @@ static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_IOTHUBCLIENT_CONFIG_NULL_PROTOCOL 
     NULL,                                       /*IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;  */
     TEST_DEVICE_ID,                             /*const char* deviceId;                       */
     TEST_DEVICE_KEY,                            /*const char* deviceKey;                      */
+    NULL,                                       /* const char* deviceSasToken;                  */
     TEST_IOTHUB_NAME,                           /*const char* iotHubName;                     */
-    TEST_IOTHUB_SUFFIX                          /* const char* iotHubSuffix;                    */
+    TEST_IOTHUB_SUFFIX,                          /* const char* iotHubSuffix;                    */
+    NULL                                       /* const char* protocolGatewayHostName;                  */
 };
 
 static IOTHUBTRANSPORT_CONFIG TEST_CONFIG_NULL_PROTOCOL =
@@ -203,8 +226,10 @@ static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_IOTHUBCLIENT_CONFIG_NULL_IOTHUB_NA
     HTTP_Protocol,                              /*IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;  */
     TEST_DEVICE_ID,                             /*const char* deviceId;                       */
     TEST_DEVICE_KEY,                            /*const char* deviceKey;                      */
+    NULL,                                       /* const char* deviceSasToken;                  */
     NULL,                                       /*const char* iotHubName;                     */
-    TEST_IOTHUB_SUFFIX                          /* const char* iotHubSuffix;                    */
+    TEST_IOTHUB_SUFFIX,                          /* const char* iotHubSuffix;                    */
+    NULL                                       /* const char* protocolGatewayHostName;                  */
 };
 
 static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_IOTHUBCLIENT_CONFIG_NULL_IOTHUB_SUFFIX =
@@ -212,8 +237,10 @@ static const IOTHUB_CLIENT_CONFIG TEST_CONFIG_IOTHUBCLIENT_CONFIG_NULL_IOTHUB_SU
     HTTP_Protocol,                                  /* IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol;   */
     TEST_DEVICE_ID,                                 /* const char* deviceId;                        */
     TEST_DEVICE_KEY,                                /* const char* deviceKey;                       */
+    NULL,                                           /* const char* deviceSasToken;                  */
     TEST_IOTHUB_NAME,                               /* const char* iotHubName;                      */
-    NULL                                            /* const char* iotHubSuffix;                    */
+    NULL,                                            /* const char* iotHubSuffix;                    */
+    NULL                                       /* const char* protocolGatewayHostName;                  */
 };
 
 static IOTHUBTRANSPORT_CONFIG TEST_CONFIG_NULL_IOTHUB_NAME =
@@ -1352,6 +1379,17 @@ static void setupCreateHappyPathHostname(CIoTHubTransportHttpMocks &mocks, bool 
             .IgnoreArgument(1);
     }
 }
+static void setupCreateHappyPathGWHostname(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
+{
+    (void)mocks;
+
+    STRICT_EXPECTED_CALL(mocks, STRING_construct(TEST_IOTHUB_GWHOSTNAME));
+    if (deallocateCreated == true)
+    {
+        STRICT_EXPECTED_CALL(mocks, STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+    }
+}
 static void setupCreateHappyPathApiExHandle(CIoTHubTransportHttpMocks &mocks, bool deallocateCreated)
 {
     (void)mocks;
@@ -1947,7 +1985,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_config_parameter_fails)
     ASSERT_IS_NULL(result);
 }
 
-//Tests_SRS_TRANSPORTMULTITHTTP_17_003: [ If fields iotHubName or iotHubSuffix in transportConfig are NULL, then IoTHubTransportHttp_Create shall return NULL. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_003: [ If fields protocol, iotHubName or iotHubSuffix in transportConfig are NULL, then IoTHubTransportHttp_Create shall return NULL. ]
 TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_protocol_parameter_fails)
 {
     // arrange
@@ -1959,7 +1997,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_protocol_parameter_fails)
     ASSERT_IS_NULL(result);
 }
 
-//Tests_SRS_TRANSPORTMULTITHTTP_17_003: [ If fields iotHubName or iotHubSuffix in transportConfig are NULL, then IoTHubTransportHttp_Create shall return NULL. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_003: [ If fields protocol, iotHubName or iotHubSuffix in transportConfig are NULL, then IoTHubTransportHttp_Create shall return NULL. ]
 TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_iothub_name_fails)
 {
     // arrange
@@ -1971,7 +2009,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_iothub_name_fails)
     ASSERT_IS_NULL(result);
 }
 
-//Tests_SRS_TRANSPORTMULTITHTTP_17_003: [ If fields iotHubName or iotHubSuffix in transportConfig are NULL, then IoTHubTransportHttp_Create shall return NULL. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_003: [ If fields protocol, iotHubName or iotHubSuffix in transportConfig are NULL, then IoTHubTransportHttp_Create shall return NULL. ]
 TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_iothub_suffix_fails)
 {
     // arrange
@@ -1983,8 +2021,7 @@ TEST_FUNCTION(IoTHubTransportHttp_Create_with_NULL_iothub_suffix_fails)
     ASSERT_IS_NULL(result);
 }
 
-
-//Tests_SRS_TRANSPORTMULTITHTTP_17_005: [ IoTHubTransportHttp_Create shall create an immutable string (further called hostname) containing config->transportConfig->iotHubName + config->transportConfig->iotHubSuffix. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_005: [If config->upperConfig->protocolGatewayHostName is NULL, `IoTHubTransportHttp_Create` shall create an immutable string (further called hostname) containing `config->transportConfig->iotHubName + config->transportConfig->iotHubSuffix`.] 
 //Tests_SRS_TRANSPORTMULTITHTTP_17_007: [ IoTHubTransportHttp_Create shall create a HTTPAPIEX_HANDLE by a call to HTTPAPIEX_Create passing for hostName the hostname so far constructed by IoTHubTransportHttp_Create. ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_009: [ IoTHubTransportHttp_Create shall call VECTOR_create to create a list of registered devices. ]
 //Tests_SRS_TRANSPORTMULTITHTTP_17_130: [ IoTHubTransportHttp_Create shall allocate memory for the handle. ]
@@ -1998,6 +2035,32 @@ TEST_FUNCTION(IoTHubTransportHttp_Create_happy_path)
 
     ///act
     auto result = IoTHubTransportHttp_Create(&TEST_CONFIG);
+
+    ///assert
+    ASSERT_IS_NOT_NULL(result);
+    mocks.AssertActualAndExpectedCalls();
+
+    ///cleanup
+    IoTHubTransportHttp_Destroy(result);
+}
+
+//Tests_SRS_TRANSPORTMULTITHTTP_20_001: [If config->upperConfig->protocolGatewayHostName is not NULL, IoTHubTransportHttp_Create shall use it as hostname] 
+//Tests_SRS_TRANSPORTMULTITHTTP_17_007: [ IoTHubTransportHttp_Create shall create a HTTPAPIEX_HANDLE by a call to HTTPAPIEX_Create passing for hostName the hostname so far constructed by IoTHubTransportHttp_Create. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_009: [ IoTHubTransportHttp_Create shall call VECTOR_create to create a list of registered devices. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_130: [ IoTHubTransportHttp_Create shall allocate memory for the handle. ]
+//Tests_SRS_TRANSPORTMULTITHTTP_17_011: [ Otherwise, IoTHubTransportHttp_Create shall succeed and return a non-NULL value. ]
+TEST_FUNCTION(IoTHubTransportHttp_Create_happy_path_with_gwhostname)
+{
+    ///arrange
+    CIoTHubTransportHttpMocks mocks;
+
+    setupCreateHappyPathAlloc(mocks, false);
+    setupCreateHappyPathGWHostname(mocks, false);
+    setupCreateHappyPathApiExHandle(mocks, false);
+    setupCreateHappyPathPerDeviceList(mocks, false);
+
+    ///act
+    auto result = IoTHubTransportHttp_Create(&TEST_GW_CONFIG);
 
     ///assert
     ASSERT_IS_NOT_NULL(result);

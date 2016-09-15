@@ -58,7 +58,8 @@ extern "C"
 **SRS_TRANSPORTMULTITHTTP_17_001: [**If parameter `config` is `NULL`, then `IoTHubTransportHttp_Create` shall return `NULL`.**]**   
 **SRS_TRANSPORTMULTITHTTP_17_002: [** If field `transportConfig` is `NULL`, then `IoTHubTransportHttp_Create` shall return `NULL`. **]**  
 **SRS_TRANSPORTMULTITHTTP_17_003: [** If fields `protocol`, `iotHubName` or `iotHubSuffix` in `transportConfig` are NULL, then `IoTHubTransportHttp_Create` shall return `NULL`. **]**    
-**SRS_TRANSPORTMULTITHTTP_17_005: [** `IoTHubTransportHttp_Create` shall create an immutable string (further called hostname) containing `config->transportConfig->iotHubName + config->transportConfig->iotHubSuffix`. **]**   
+**SRS_TRANSPORTMULTITHTTP_17_005: [**If config->upperConfig->protocolGatewayHostName is NULL, `IoTHubTransportHttp_Create` shall create an immutable string (further called hostname) containing `config->transportConfig->iotHubName + config->transportConfig->iotHubSuffix`. **]**   
+**SRS_TRANSPORTMULTITHTTP_20_001: [**If config->upperConfig->protocolGatewayHostName is not NULL, IoTHubTransportHttp_Create shall use it as hostname**]
 **SRS_TRANSPORTMULTITHTTP_17_006: [** If creating the hostname fails then `IoTHubTransportHttp_Create` shall fail and return `NULL`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_007: [** `IoTHubTransportHttp_Create` shall create a `HTTPAPIEX_HANDLE` by a call to `HTTPAPIEX_Create` passing for `hostName` the hostname so far constructed by `IoTHubTransportHttp_Create`. **]**   
 **SRS_TRANSPORTMULTITHTTP_17_008: [** If creating the `HTTPAPIEX_HANDLE` fails then `IoTHubTransportHttp_Create` shall fail and return `NULL`. **]**   
