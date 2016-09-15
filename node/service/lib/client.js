@@ -215,17 +215,17 @@ Client.prototype.send = function send(deviceId, message, done) {
 /**
  * @method            module:azure-iothub.Client#invokeDeviceMethod
  * @description       Invokes a method on a particular device.
- * @param {String}    deviceId    The identifier of an existing device identity.
- * @param {String}    methodName  The name of the method to be invoked on the device.
- * @param {Object}    payload     The payload of the method (optional).
- * @param {Number}    timeout     The timeout that the IoT Hub shall wait for the device to 
- *                                respond before considering the method execution failed. (optional, defaults to 30 seconds)
- * @param {Function}  done        The callback to call with the result of the method execution.
+ * @param {String}    deviceId             The identifier of an existing device identity.
+ * @param {String}    methodName           The name of the method to be invoked on the device.
+ * @param {Object}    payload              The payload of the method (optional).
+ * @param {Number}    timeoutInSeconds     The timeout that the IoT Hub shall wait for the device to 
+ *                                         respond before considering the method execution failed. (optional, defaults to 30 seconds)
+ * @param {Function}  done                 The callback to call with the result of the method execution.
  * 
- * @throws {ReferenceError}       If one of the required parameters is null, undefined or empty.
- * @throws {TypeError}            If one of the parameters is of the wrong type.
+ * @throws {ReferenceError}  If one of the required parameters is null, undefined or empty.
+ * @throws {TypeError}       If one of the parameters is of the wrong type.
  */
-Client.prototype.invokeDeviceMethod = function (deviceId, methodName, payload, timeout, done) {
+Client.prototype.invokeDeviceMethod = function (deviceId, methodName, payload, timeoutInSeconds, done) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_16_005: [The `invokeDeviceMethod` method shall throw a `ReferenceError` if `deviceId` is `null`, `undefined` or an empty string.]*/
   if (deviceId === undefined || deviceId === null || deviceId === '') throw new ReferenceError('deviceId cannot be \'' + deviceId + '\'');
 
@@ -237,17 +237,17 @@ Client.prototype.invokeDeviceMethod = function (deviceId, methodName, payload, t
   /*Codes_SRS_NODE_IOTHUB_CLIENT_16_011: [The `payload` and `timeout` arguments are optional, meaning that:
   - If payload is a function and timeout and done are undefined, payload shall be used as the callback, the actual payload shall be null, and the the timeout should be set to the default (30 seconds)
   - If timeout is a function, and done is undefined, timeout shall be used as the callback and the actual timeout shall be set to the default (30 seconds). the payload shall be set to the value of the payload argument.]*/
-  if(typeof payload === 'function' && !timeout && !done) {
+  if(typeof payload === 'function' && !timeoutInSeconds && !done) {
     done = payload;
-    timeout = DeviceMethod.defaultTimeout;
+    timeoutInSeconds = DeviceMethod.defaultTimeout;
     payload = null;
-  } else if (typeof timeout === 'function' && !done) {
-    done = timeout;
-    timeout = DeviceMethod.defaultTimeout;
+  } else if (typeof timeoutInSeconds === 'function' && !done) {
+    done = timeoutInSeconds;
+    timeoutInSeconds = DeviceMethod.defaultTimeout;
   }
 
   /*Codes_SRS_NODE_IOTHUB_CLIENT_16_009: [The `invokeDeviceMethod` method shall initialize a new `DeviceMethod` instance with the `methodName` and `timeout` values passed in the arguments.]*/
-  var method = new DeviceMethod(methodName, timeout, this._restApiClient);
+  var method = new DeviceMethod(methodName, timeoutInSeconds, this._restApiClient);
 
   /*Codes_SRS_NODE_IOTHUB_CLIENT_16_010: [The `invokeDeviceMethod` method shall use the newly created instance of `DeviceMethod` to invoke the method with the `payload` argument on the device specified with the `deviceid` argument .]*/
   /*Codes_SRS_NODE_IOTHUB_CLIENT_16_012: [The `invokeDeviceMethod` method shall call the `done` callback with a standard javascript `Error` object if the request failed.]*/

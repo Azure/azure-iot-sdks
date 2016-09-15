@@ -119,7 +119,7 @@ The `close` method closes the connection opened by open.
 
 **SRS_NODE_IOTHUB_CLIENT_16_003: [** The `close` method shall remove the listener that has been attached to the transport `disconnect` event. **]**
 
-### invokeDeviceMethod(deviceId, methodName, payload, timeout, done)
+### invokeDeviceMethod(deviceId, methodName, payload, timeoutInSeconds, done)
 The `invokeDeviceMethod` method calls a device method on a specific device and calls back with the result of this method's execution.
 
 **SRS_NODE_IOTHUB_CLIENT_16_005: [** The `invokeDeviceMethod` method shall throw a `ReferenceError` if `deviceId` is `null`, `undefined` or an empty string. **]**
@@ -127,13 +127,13 @@ The `invokeDeviceMethod` method calls a device method on a specific device and c
 **SRS_NODE_IOTHUB_CLIENT_16_006: [** The `invokeDeviceMethod` method shall throw a `ReferenceError` if `methodName` is `null`, `undefined` or an empty string. **]**
 **SRS_NODE_IOTHUB_CLIENT_16_007: [** The `invokeDeviceMethod` method shall throw a `TypeError` if `methodName` is not a `string`. **]**
 
-**SRS_NODE_IOTHUB_CLIENT_16_009: [** The `invokeDeviceMethod` method shall initialize a new instance of `DeviceMethod` with the `methodName` and `timeout` values passed in the arguments. **]**
+**SRS_NODE_IOTHUB_CLIENT_16_009: [** The `invokeDeviceMethod` method shall initialize a new instance of `DeviceMethod` with the `methodName` and `timeoutInSeconds` values passed in the arguments. **]**
 
 **SRS_NODE_IOTHUB_CLIENT_16_010: [** The `invokeDeviceMethod` method shall use the newly created instance of `DeviceMethod` to invoke the method with the `payload` argument on the device specified with the `deviceid` argument . **]**
 
-**SRS_NODE_IOTHUB_CLIENT_16_011: [** The `payload` and `timeout` arguments are optional, meaning that:
-- If payload is a function and timeout and done are undefined, payload shall be used as the callback, the actual payload shall be null, and the the timeout should be set to the default (30 seconds)
-- If timeout is a function, and done is undefined, timeout shall be used as the callback and the actual timeout shall be set to the default (30 seconds). the payload shall be set to the value of the payload argument. **]**
+**SRS_NODE_IOTHUB_CLIENT_16_011: [** The `payload` and `timeoutInSeconds` arguments are optional, meaning that:
+- If `payload` is a function and `timeoutInSeconds` and `done` are `undefined`, `payload` shall be used as the callback, the actual payload shall be `null`, and the the timeout should be set to the default (30 seconds)
+- If `timeout` is a function, and `done` is `undefined`, `timeoutInSeconds` shall be used as the callback and the actual timeout shall be set to the default (30 seconds). the payload shall be set to the value of the payload argument. **]**
 
 **SRS_NODE_IOTHUB_CLIENT_16_012: [** The `invokeDeviceMethod` method shall call the `done` callback with a standard javascript `Error` object if the request failed. **]**
 
