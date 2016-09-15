@@ -36,22 +36,24 @@ namespace Microsoft.Azure.Devices.Client
                 throw new ArgumentNullException("builder");
             }
 
-            this.HostName = builder.HostName;
+            this.Audience = builder.HostName;
+            this.HostName = builder.GatewayHostName == null || builder.GatewayHostName == "" ? builder.HostName : builder.GatewayHostName;
             this.SharedAccessKeyName = builder.SharedAccessKeyName;
             this.SharedAccessKey = builder.SharedAccessKey;
             this.SharedAccessSignature = builder.SharedAccessSignature; 
             this.IotHubName = builder.IotHubName;
             this.DeviceId = builder.DeviceId;
+
 #if WINDOWS_UWP || PCL
-            this.HttpsEndpoint = new UriBuilder("https", builder.HostName).Uri;
+            this.HttpsEndpoint = new UriBuilder("https", this.HostName).Uri;
 #elif !NETMF
-            this.HttpsEndpoint = new UriBuilder(Uri.UriSchemeHttps, builder.HostName).Uri;
+            this.HttpsEndpoint = new UriBuilder(Uri.UriSchemeHttps, this.HostName).Uri;
 #elif NETMF
-            this.HttpsEndpoint = new Uri("https://" + builder.HostName);
+            this.HttpsEndpoint = new Uri("https://" + this.HostName);
 #endif
 
 #if !NETMF && !PCL
-            this.AmqpEndpoint = new UriBuilder(CommonConstants.AmqpsScheme, builder.HostName, AmqpConstants.DefaultSecurePort).Uri;
+            this.AmqpEndpoint = new UriBuilder(CommonConstants.AmqpsScheme, this.HostName, AmqpConstants.DefaultSecurePort).Uri;
 #endif
         }
 
@@ -86,9 +88,11 @@ namespace Microsoft.Azure.Devices.Client
             private set;
         }
 #endif
+
         public string Audience
         {
-            get { return this.HostName; }
+            get;
+            private set;
         }
 
         public string SharedAccessKeyName
