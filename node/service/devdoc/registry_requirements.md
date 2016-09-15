@@ -241,6 +241,24 @@ If-Match: <etag>
 ```
 **]**
 
+### queryTwins(sqlQuery, done)
+The `queryTwins` method runs a SQL query on the device twins and calls the callback with the result of the query, either a list of matching devices or an aggregated result.
+
+**SRS_NODE_IOTHUB_REGISTRY_16_051: [** The `queryTwins` method shall throw a `ReferenceError` if the sqlQuery argument is falsy. **]**
+
+**SRS_NODE_IOTHUB_REGISTRY_16_052: [** The `queryTwins` method shall throw a `TypeError` if the sqlQuery argument is not a string. **]**
+
+**SRS_NODE_IOTHUB_REGISTRY_16_053: [** The `queryTwins` method shall construct an HTTP request using the information supplied by the caller as follows:
+```
+POST /devices/query?api-version=<version> HTTP/1.1
+Authorization: <config.sharedAccessSignature>
+Content-Type: text/plain; charset=utf-8
+Request-Id: <guid>
+
+<sqlQuery>
+```
+**]**
+
 ### All HTTP requests
 All HTTP requests to the registry API should implement the following requirements:
 

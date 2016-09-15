@@ -469,7 +469,7 @@ Registry.prototype.updateDeviceTwin = function(deviceId, patch, etag, done) {
   };
 
   var self = this;
-  this._restApiClient.executeApiCall('PATCH', path, headers, patch,  function(err, newTwin, response) {
+  this._restApiClient.executeApiCall('PATCH', path, headers, patch, function(err, newTwin, response) {
     if (err) {
       done(err);
     } else {
@@ -478,5 +478,36 @@ Registry.prototype.updateDeviceTwin = function(deviceId, patch, etag, done) {
     }
   });
 };
+
+/**
+ * @method              module:azure-iothub.Registry#queryTwins
+ * @description         Get device twins matching a specific query.
+ * @param {String}      sqlQuery   The query defining twins.
+ * @param {Function}    done       The callback that will be called with either an Error object or 
+ *                                 the results of the query.
+ */
+Registry.prototype.queryTwins = function (sqlQuery, done) {
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_051: [The `queryTwins` method shall throw a `ReferenceError` if the sqlQuery argument is falsy.]*/
+  if (!sqlQuery) throw new ReferenceError('sqlQuery cannot be \'' + sqlQuery + '\'');
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_052: [The `queryTwins` method shall throw a `TypeError` if the sqlQuery argument is not a string.]*/
+  if (typeof sqlQuery !== 'string') throw new TypeError('sqlQuery must be a string');
+
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_053: [The `queryTwins` method shall construct an HTTP request using the information supplied by the caller as follows:
+  ```
+  POST /devices/query?api-version=<version> HTTP/1.1
+  Authorization: <config.sharedAccessSignature>
+  Content-Type: text/plain; charset=utf-8
+  Request-Id: <guid>
+
+  <sqlQuery>
+  ```]*/
+  var path = '/devices/query' + endpoint.versionQueryString();
+  var headers = {
+    'Content-Type': 'text/plain; charset=utf-8'
+  };
+  
+  this._restApiClient.executeApiCall('POST', path, headers, sqlQuery, done);
+};
+
 
 module.exports = Registry;

@@ -14,7 +14,7 @@ var fakeConfig = { host: 'host', sharedAccessSignature: 'sas' };
 
 function testFalsyArg(methodUnderTest, argName, argValue, ExpectedErrorType) {
   var errorName = ExpectedErrorType ? ExpectedErrorType.name : 'Error';
-  it('throws a ' + errorName + ' if \'' + argName + '\' is \'' + JSON.stringify(argValue) + '\'', function() {
+  it('throws a ' + errorName + ' if \'' + argName + '\' is \'' + JSON.stringify(argValue) + '\' (type:' + typeof(argValue) + ')', function() {
     var registry = new Registry({ host: 'host', sharedAccessSignature: 'sas' });
     assert.throws(function() {
       registry[methodUnderTest](argValue, function() {});
@@ -420,6 +420,47 @@ describe('Registry', function() {
 
     testErrorCallback('updateDeviceTwin', 'deviceId', {}, 'etag==');
   });
+
+  describe('queryTwins', function() {
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_051: [The `queryTwins` method shall throw a `ReferenceError` if the sqlQuery argument is falsy.]*/
+    [undefined, null, ''].forEach(function(badQuery){
+      testFalsyArg('queryTwins', 'sqlQuery', badQuery, ReferenceError);
+    });
+
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_052: [The `queryTwins` method shall throw a `TypeError` if the sqlQuery argument is not a string.]*/
+    [{}, 42, function(){}].forEach(function(badQuery){
+      testFalsyArg('queryTwins', 'sqlQuery', badQuery, TypeError);
+    });
+
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_053: [The `queryTwins` method shall construct an HTTP request using the information supplied by the caller as follows:
+    ```
+    POST /devices/query?api-version=<version> HTTP/1.1
+    Authorization: <config.sharedAccessSignature>
+    Content-Type: text/plain; charset=utf-8
+    Request-Id: <guid>
+
+    <sqlQuery>
+    ```]*/
+    it('creates a valid HTTP request', function(testCallback) {
+      var fakeQuery = 'SELECT * FROM devices';
+
+      var fakeHttpHelper = {
+        executeApiCall: function (method, path, httpHeaders, body, done) {
+          assert.equal(method, 'POST');
+          assert.equal(path, '/devices/query' + endpoint.versionQueryString());
+          assert.equal(httpHeaders['Content-Type'], 'text/plain; charset=utf-8');
+          assert.equal(body, fakeQuery);
+          done(null, {},  { statusCode: 200 });
+        }
+      };
+
+      var registry = new Registry(fakeConfig, fakeHttpHelper);
+      registry.queryTwins(fakeQuery, testCallback);
+    });
+
+    testErrorCallback('queryTwins', 'SELECT * FROM devices');
+  });
+
 
   describe('importDevicesFromBlob', function() {
     /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_001: [A `ReferenceError` shall be thrown if `inputBlobContainerUri` is falsy]*/
