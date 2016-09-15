@@ -51,7 +51,7 @@ SimulatedHttp.prototype.updateDevice = function (path, deviceInfo, done) {
 };
 
 SimulatedHttp.prototype.getDevice = function (path, done) {
-  var device = { deviceId: 'testDevice' };
+  var device = { deviceId: path.split('/')[2].split('?')[0] };
   this.handleRequest(done, JSON.stringify(device));
 };
 
