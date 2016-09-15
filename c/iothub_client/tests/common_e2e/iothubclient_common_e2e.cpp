@@ -287,6 +287,7 @@ extern "C" void e2e_send_event_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
     IOTHUB_CLIENT_HANDLE iotHubClientHandle;
     IOTHUB_MESSAGE_HANDLE msgHandle;
+    time_t beginOperation, nowTime;
 
     iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
     iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
@@ -317,7 +318,6 @@ extern "C" void e2e_send_event_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
         ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "SendEventAsync failed");
     }
 
-    time_t beginOperation, nowTime;
     beginOperation = time(NULL);
     while (
         (nowTime = time(NULL)),
@@ -380,22 +380,18 @@ extern "C" void e2e_recv_message_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     IOTHUB_CLIENT_HANDLE iotHubClientHandle;
 
     EXPECTED_RECEIVE_DATA* notifyData = MessageData_Create();
+    IOTHUB_TEST_HANDLE iotHubTestHandle;
+    IOTHUB_TEST_CLIENT_RESULT testResult;
+    IOTHUB_CLIENT_RESULT result;
+    time_t beginOperation, nowTime;
+
     ASSERT_IS_NOT_NULL_WITH_MSG(notifyData, "Could not create the C2D message to be sent to the device");
 
-    // act
     iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
     iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
     iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
     iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
     iotHubConfig.protocol = protocol;
-
-    IOTHUB_TEST_HANDLE iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), IoTHubAccount_GetDeviceId(g_iothubAcctInfo), IoTHubAccount_GetDeviceKey(g_iothubAcctInfo), IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo));
-    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubTestHandle, "Could not initialize IoTHubTest to send C2D messages to the device");
-
-    IOTHUB_TEST_CLIENT_RESULT testResult = IoTHubTest_SendMessage(iotHubTestHandle, (const unsigned char*)notifyData->toBeSend, notifyData->toBeSendSize);
-    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, testResult, "Sending C2D message to device failed");
-
-    IoTHubTest_Deinit(iotHubTestHandle);
 
     iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not create IoTHubClient");
@@ -405,10 +401,18 @@ extern "C" void e2e_recv_message_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
     (void)IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates);
 
-    IOTHUB_CLIENT_RESULT result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, notifyData);
+    result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, notifyData);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Setting message callback failed");
 
-    time_t beginOperation, nowTime;
+    iotHubTestHandle = IoTHubTest_Initialize(IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo), IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo), IoTHubAccount_GetDeviceId(g_iothubAcctInfo), IoTHubAccount_GetDeviceKey(g_iothubAcctInfo), IoTHubAccount_GetEventhubListenName(g_iothubAcctInfo), IoTHubAccount_GetEventhubAccessKey(g_iothubAcctInfo), IoTHubAccount_GetSharedAccessSignature(g_iothubAcctInfo), IoTHubAccount_GetEventhubConsumerGroup(g_iothubAcctInfo));
+    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubTestHandle, "Could not initialize IoTHubTest to send C2D messages to the device");
+
+    // act
+    testResult = IoTHubTest_SendMessage(iotHubTestHandle, (const unsigned char*)notifyData->toBeSend, notifyData->toBeSendSize);
+    ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_OK, testResult, "Sending C2D message to device failed");
+
+    IoTHubTest_Deinit(iotHubTestHandle);
+
     beginOperation = time(NULL);
     while (
         (nowTime = time(NULL)), (difftime(nowTime, beginOperation) < MAX_CLOUD_TRAVEL_TIME) //time box
