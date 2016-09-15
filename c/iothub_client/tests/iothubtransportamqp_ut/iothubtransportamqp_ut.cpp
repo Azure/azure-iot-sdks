@@ -3300,9 +3300,6 @@ TEST_FUNCTION(AMQP_messagereceiver_ERROR_state_change_triggers_reconnection)
     transport_interface->IoTHubTransport_Destroy(transport);
 }
 
-
-        TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME };
-
 // Codes_SRS_IOTHUBTRANSPORTAMQP_09_041: [IoTHubTransportAMQP_GetSendStatus shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter.] 
 // Codes_SRS_IOTHUBTRANSPORTAMQP_09_042: [IoTHubTransportAMQP_GetSendStatus shall return IOTHUB_CLIENT_OK and status IOTHUB_CLIENT_SEND_STATUS_IDLE if there are currently no event items to be sent or being sent.]
 TEST_FUNCTION(AMQP_GetSendStatus_idle_succeeds)
