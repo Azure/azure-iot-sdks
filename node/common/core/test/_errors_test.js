@@ -26,7 +26,10 @@ describe('errors', function() {
     errors.ThrottlingError,
     errors.DeviceAlreadyExistsError,
     errors.InvalidEtagError,
-    errors.TimeoutError
+    errors.TimeoutError,
+    errors.BadDeviceResponseError,
+    errors.GatewayTimeoutError,
+    errors.DeviceTimeoutError
   ].forEach(function(ErrorCtor) {
     /*Tests_SRS_NODE_COMMON_ERRORS_16_001: All custom error types shall inherit from the standard Javascript error object.*/
     it(ErrorCtor.name + ' inherits from the standard javascript \'Error\' object', function() {

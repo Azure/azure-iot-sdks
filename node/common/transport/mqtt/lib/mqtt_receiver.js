@@ -39,6 +39,7 @@ function MqttReceiver(mqttClient, topicMessage) {
     'message': {
       name: topicMessage,
       listenersCount: 0,
+      subscribeInProgress: false,
       subscribed: false,
       topicMatchRegex: /^devices\/.*\/messages\/devicebound\/.*$/g,
       handler: this._onC2DMessage.bind(this)
@@ -46,6 +47,7 @@ function MqttReceiver(mqttClient, topicMessage) {
     'method': {
       name: TOPIC_METHODS_SUBSCRIBE,
       listenersCount: 0,
+      subscribeInProgress: false,
       subscribed: false,
       topicMatchRegex: /^\$iothub\/methods\/POST\/.*$/g,
       handler: this._onDeviceMethod.bind(this)
@@ -87,7 +89,7 @@ function MqttReceiver(mqttClient, topicMessage) {
       }
 
       // lazy-init MQTT subscription
-      if (topic.subscribed === false) {
+      if (topic.subscribed === false && topic.subscribeInProgress === false) {
         // Codes_SRS_NODE_DEVICE_MQTT_RECEIVER_16_003: [ When a listener is added for the message event, the topic should be subscribed to. ]
         // Codes_SRS_NODE_DEVICE_MQTT_RECEIVER_13_002: [ When a listener is added for the method event, the topic should be subscribed to. ]
         self._setupSubscription(topic);
@@ -126,7 +128,9 @@ function MqttReceiver(mqttClient, topicMessage) {
 util.inherits(MqttReceiver, EventEmitter);
 
 MqttReceiver.prototype._setupSubscription = function (topic) {
+  topic.subscribeInProgress = true;
   this._mqttClient.subscribe(topic.name, { qos: 0 }, function (err) {
+    topic.subscribeInProgress = false;
     if(!err) {
       topic.subscribed = true;
     }

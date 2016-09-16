@@ -23,6 +23,7 @@ declare class Registry {
     // Device Twin
     getDeviceTwin(deviceId: string, done: Registry.ResponseCallback): void;
     updateDeviceTwin(deviceId: string, patch: any, etag: string, done: Registry.ResponseCallback): void;
+    queryTwins(sqlQuery: string, done: Registry.ResponseCallback): void;
 
     // Factory methods
     static fromConnectionString(value: string): Registry;
