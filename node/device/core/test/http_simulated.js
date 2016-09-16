@@ -22,25 +22,33 @@ function makeError(statusCode) {
 function SimulatedHttp(config) {
   this._receiver = null;
   this.handleRequest = function (done) {
-    var sig = SharedAccessSignature.parse(config.sharedAccessSignature);
+    if (this._x509) {
+        done(null, new results.MessageEnqueued(new Response(204)));
+    } else {
+      var sig = SharedAccessSignature.parse(config.sharedAccessSignature);
 
-    if (config.host === 'bad') {                      // bad host
-      done(new Error('getaddrinfo ENOTFOUND bad'));
-    }
-    else if (config.deviceId === 'bad') {             // bad policy
-      done(makeError(404));
-    }
-    else {
-      var cmpSig = (SharedAccessSignature.create(config.host, config.deviceId, 'bad', sig.se)).toString();
-      if (config.sharedAccessSignature === cmpSig) {  // bad key
-        done(makeError(401));
+      if (config.host.indexOf('bad') >= 0) {                      // bad host
+        done(new Error('getaddrinfo ENOTFOUND bad'));
+      }
+      else if (config.deviceId.indexOf('bad') >= 0) {             // bad policy
+        done(makeError(404));
       }
       else {
-        done(null, new results.MessageEnqueued(new Response(204)));
+        var cmpSig = (SharedAccessSignature.create(config.host, config.deviceId, 'bad', sig.se)).toString();
+        if (config.sharedAccessSignature === cmpSig) {  // bad key
+          done(makeError(401));
+        }
+        else {
+          done(null, new results.MessageEnqueued(new Response(204)));
+        }
       }
     }
   };
 }
+
+SimulatedHttp.prototype.setOptions = function() {
+  this._x509 = true;
+};
 
 SimulatedHttp.prototype.sendEvent = function (message, done) {
   this.handleRequest(function (err, response) {

@@ -11,7 +11,6 @@ function makeConnectionString(host, policy, key) {
 }
 
 var connectionString = process.env.IOTHUB_CONNECTION_STRING;
-var deviceId = process.env.IOTHUB_DEVICE_ID;
 var cn = ConnectionString.parse(connectionString);
 
 var badConnStrings = [
@@ -22,5 +21,5 @@ var badConnStrings = [
 
 describe('Over real HTTPS', function () {
   this.timeout(60000);
-  runTests(null, connectionString, badConnStrings, deviceId);
+  runTests(null, connectionString, badConnStrings);
 });
