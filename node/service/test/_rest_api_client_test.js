@@ -252,7 +252,7 @@ describe('RestApiClient', function() {
       });
     });
 
-    /*Tests_SRS_NODE_IOTHUB_REST_API_CLIENT_16_031: [If there's is a `Content-Type` header and its value is `application/json; charset=utf-8` , the body of the request shall be stringified using `JSON.stringify()`.]*/
+    /*Tests_SRS_NODE_IOTHUB_REST_API_CLIENT_16_031: [If there's is a `Content-Type` header and its value is `application/json; charset=utf-8` and the `body` argument is not a `string`, the body of the request shall be stringified using `JSON.stringify()`.]*/
     it('calls JSON.stringify on the request body if the Content-Type header is \'application/json; charset=utf-8\'', function(testCallback) {
       var testHeaders = {
         'Content-Type': 'application/json; charset=utf-8'
@@ -266,6 +266,32 @@ describe('RestApiClient', function() {
           return {
             write: function(body) {
               assert.equal(body, JSON.stringify(testRequestBody));
+            },
+            end: function() {
+              requestCallback();
+            }
+          };
+        }
+      };
+
+      var client = new RestApiClient(fakeConfig, fakeHttpHelper);
+      client.executeApiCall('GET', '/test/path', testHeaders, testRequestBody, testCallback);
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_REST_API_CLIENT_16_035: [If there's is a `Content-Type` header and its value is `application/json; charset=utf-8` and the `body` argument is a `string` it shall be used as is as the body of the request.]*/
+    it('uses the body argument as is if it is a string and the Content-Type header is \'application/json; charset=utf-8\'', function(testCallback) {
+      var testHeaders = {
+        'Content-Type': 'application/json; charset=utf-8'
+      };
+      var testRequestBody = JSON.stringify({
+        key: 'value'
+      });
+
+      var fakeHttpHelper = {
+        buildRequest: function(method, path, headers, host, requestCallback) {
+          return {
+            write: function(body) {
+              assert.equal(body, testRequestBody);
             },
             end: function() {
               requestCallback();

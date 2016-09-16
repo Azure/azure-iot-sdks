@@ -52,7 +52,9 @@ The `executeApiCall` method builds the HTTP request using the passed arguments a
 
 **SRS_NODE_IOTHUB_REST_API_CLIENT_16_011: [** If the HTTP request fails without an HTTP error code the `executeApiCall` shall call the `done` callback with the error itself as the only argument. **]**
 
-**SRS_NODE_IOTHUB_REST_API_CLIENT_16_031: [** If there's is a `Content-Type` header and its value is `application/json; charset=utf-8` , the body of the request shall be stringified using `JSON.stringify()`. **]**
+**SRS_NODE_IOTHUB_REST_API_CLIENT_16_031: [** If there's is a `Content-Type` header and its value is `application/json; charset=utf-8` and the `body` argument is not a `string`, the body of the request shall be stringified using `JSON.stringify()`. **]**
+
+**SRS_NODE_IOTHUB_REST_API_CLIENT_16_035: [** If there's is a `Content-Type` header and its value is `application/json; charset=utf-8` and the `body` argument is a `string` it shall be used as is as the body of the request. **]**
 
 **SRS_NODE_IOTHUB_REST_API_CLIENT_16_032: [** If there's is a `Content-Type` header and its value is `text/plain; charset=utf-8`, the `body` argument shall be used as is. **]**
 
