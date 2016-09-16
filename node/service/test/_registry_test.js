@@ -236,9 +236,8 @@ var badConnStrings = [
   makeConnectionString('host', 'bad', 'key'),
   makeConnectionString('host', 'policy', 'bad')
 ];
-var deviceId = 'testDevice';
 
 describe('Over simulated HTTPS', function () {
-  runTests(SimulatedHttp, connectionString, badConnStrings, deviceId);
+  runTests(SimulatedHttp, connectionString, badConnStrings);
   bulkTests(SimulatedHttp, connectionString);
 });

@@ -12,6 +12,7 @@ import com.microsoft.azure.iothub.transport.State;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * <p>
@@ -55,10 +56,10 @@ public final class MqttTransport implements IotHubTransport
     {
         // Codes_SRS_MQTTTRANSPORT_15_001: [The constructor shall initialize an empty transport queue
         // for adding messages to be sent as a batch.]
-        this.waitingList = new LinkedList<>();
+        this.waitingList = new LinkedBlockingDeque<>();
         // Codes_SRS_MQTTTRANSPORT_15_002: [The constructor shall initialize an empty queue
         // for completed messages whose callbacks are waiting to be invoked.]
-        this.callbackList = new LinkedList<>();
+        this.callbackList = new LinkedBlockingDeque<>();
         this.config = config;
         this.state = State.CLOSED;
     }
