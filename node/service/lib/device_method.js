@@ -25,8 +25,8 @@ function DeviceMethod(methodName, timeoutInSeconds, restApiClient) {
   /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_013: [The `DeviceMethod` constructor shall set the `DeviceMethod.name` property to the `methodName` argument value.]*/
   this.name = methodName;
 
-  /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_006: [The `DeviceMethod` constructor shall set the `DeviceMethod.timeout` property to the `timeoutInSeconds` argument value.]*/
-  this.timeout = timeoutInSeconds;
+  /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_006: [The `DeviceMethod` constructor shall set the `DeviceMethod.timeoutInSeconds` property to the `timeoutInSeconds` argument value.]*/
+  this.timeoutInSeconds = timeoutInSeconds;
 }
 
 DeviceMethod.defaultTimeout = 30;
@@ -62,7 +62,7 @@ DeviceMethod.prototype.invokeOn = function (deviceId, payload, done) {
 
   var requestBody = {
     methodName: this.name,
-    timeoutInSeconds: this.timeout,
+    timeoutInSeconds: this.timeoutInSeconds,
     payloadJson: payload
   };
 
@@ -74,13 +74,13 @@ DeviceMethod.prototype.invokeOn = function (deviceId, payload, done) {
   Request-Id: <guid>
   {
     "methodName": <DeviceMethod.name>,
-    "timeoutInSeconds": <DeviceMethod.timeout>,
+    "timeoutInSeconds": <DeviceMethod.timeoutInSeconds>,
     "payloadJson": <payload>
   }
   ```]*/
   /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_009: [The `invokeOn` method shall invoke the `done` callback with an standard javascript `Error` object if the method execution failed.]*/
   /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_010: [The `invokeOn` method shall invoke the `done` callback with a `null` first argument, a result second argument and a transport-specific response third argument if the method execution succeede**/
-  this._client.executeApiCall('POST', path, headers, requestBody, this.timeout * 1000, done);
+  this._client.executeApiCall('POST', path, headers, requestBody, this.timeoutInSeconds * 1000, done);
 };
 
 module.exports = DeviceMethod;

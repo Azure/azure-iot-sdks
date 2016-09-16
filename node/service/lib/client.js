@@ -237,11 +237,13 @@ Client.prototype.invokeDeviceMethod = function (deviceId, methodName, payload, t
   /*Codes_SRS_NODE_IOTHUB_CLIENT_16_011: [The `payload` and `timeout` arguments are optional, meaning that:
   - If payload is a function and timeout and done are undefined, payload shall be used as the callback, the actual payload shall be null, and the the timeout should be set to the default (30 seconds)
   - If timeout is a function, and done is undefined, timeout shall be used as the callback and the actual timeout shall be set to the default (30 seconds). the payload shall be set to the value of the payload argument.]*/
-  if(typeof payload === 'function' && !timeoutInSeconds && !done) {
+  if(typeof payload === 'function') {
+    if (timeoutInSeconds !== undefined || done !== undefined) throw new TypeError('The callback must be the last argument');
     done = payload;
     timeoutInSeconds = DeviceMethod.defaultTimeout;
     payload = null;
-  } else if (typeof timeoutInSeconds === 'function' && !done) {
+  } else if (typeof timeoutInSeconds === 'function') {
+    if (done !== undefined) throw new TypeError('The callback must be the last argument');    
     done = timeoutInSeconds;
     timeoutInSeconds = DeviceMethod.defaultTimeout;
   }

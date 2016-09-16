@@ -27,11 +27,11 @@ describe('DeviceMethod', function() {
       });
     });
 
-    /*Tests_SRS_NODE_IOTHUB_DEVICE_METHOD_16_006: [The `DeviceMethod` constructor shall set the `DeviceMethod.timeout` property to the `timeoutInSeconds` argument value.]*/
-    it('sets the DeviceMethod.timeout property to the timeOutInSeconds argument value', function() {
+    /*Tests_SRS_NODE_IOTHUB_DEVICE_METHOD_16_006: [The `DeviceMethod` constructor shall set the `DeviceMethod.timeoutInSeconds` property to the `timeoutInSeconds` argument value.]*/
+    it('sets the DeviceMethod.timeoutInSeconds property to the timeOutInSeconds argument value', function() {
       var testTimeout = 42;
       var method = new DeviceMethod('foo', testTimeout, {});
-      assert.equal(method.timeout, testTimeout);
+      assert.equal(method.timeoutInSeconds, testTimeout);
     });
 
     /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_013: [The `DeviceMethod` constructor shall set the `DeviceMethod.name` property to the `methodName` argument value.]*/

@@ -184,6 +184,20 @@ describe('Client', function () {
       client.invokeDeviceMethod('deviceId', 'method', testCallback);
     });
 
+    it('throws a TypeError if payload is a function and timeoutInSeconds and done are not undefined', function() {
+      var client = new Client({}, {});
+      assert.throws(function() {
+        client.invokeDeviceMethod('deviceId', 'method', function() {}, 'foo', 'bar');
+      }, TypeError);
+    });
+    
+    it('throws a TypeError if payload is a function and timeoutInSeconds and done are not undefined', function() {
+      var client = new Client({}, {});
+      assert.throws(function() {
+        client.invokeDeviceMethod('deviceId', 'method', { foo: 'bar' }, function() {}, 'foo');
+      }, TypeError);
+    });
+
     it('works when timeout is omitted', function(testCallback) {
       var fakeRestClient = {
         executeApiCall: function(method, path, headers, body, timeout, callback) {

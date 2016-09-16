@@ -54,12 +54,12 @@ The `executeApiCall` method builds the HTTP request using the passed arguments a
 
 **SRS_NODE_IOTHUB_REST_API_CLIENT_16_031: [** If there's is a `Content-Type` header and its value is `application/json; charset=utf-8` , the body of the request shall be stringified using `JSON.stringify()`. **]**
 
-**SRS_NODE_IOTHUB_REST_API_CLIENT_16_032: [** If there's is a `Content-Type` header and its value is `text/plain; charset=utf-8`, the `body` argument shall be used. **]**
+**SRS_NODE_IOTHUB_REST_API_CLIENT_16_032: [** If there's is a `Content-Type` header and its value is `text/plain; charset=utf-8`, the `body` argument shall be used as is. **]**
 
 **SRS_NODE_IOTHUB_REST_API_CLIENT_16_033: [** The `executeApiCall` shall throw a `TypeError` if there's is a `Content-Type` header and its value is `text/plain; charset=utf-8` and the `body` argument is not a string. **]**
 
 ### translateError(result, response)
-The `translateError` method translates HTTP errors into Azure IoT Hub errors, effectively abstracting the error that is returned to the SDK user of from the transport layer.
+The `translateError` method translates HTTP errors into Azure IoT Hub errors, effectively abstracting the error that is returned to the SDK user from the transport layer.
 
 **SRS_NODE_IOTHUB_REST_API_CLIENT_16_012: [** Any error object returned by `translateError` shall inherit from the generic `Error` Javascript object and have 3 properties:
 - `response` shall contain the `IncomingMessage` object returned by the HTTP layer.
