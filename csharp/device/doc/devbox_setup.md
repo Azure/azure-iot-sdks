@@ -40,6 +40,19 @@ For building Android sample open **csharp\device\samples\DeviceClientSampleAndro
 
 To check for any latest Xamarin update for Visual Studio check Tools->Options->Xamarin->Other.
 
+## Running CppUWPSample (Universal Windows) sample application
+
+Visual Studio is having an issue with getting all the depedencies (dll) of the Microsoft.Azure.Devices.Client.WinRT which is referenced in the project to the proper location.  This leads to an exception thrown about not loading file or assembly during run-time.  You will have to manually copy the dlls in the appropriate location in order to run the sample application successfully.  Follow the below steps if needed:
+* Build the UWPSample (Universal Windows) project
+* Note the location of the bin folder, i.e. ...\azure-iot-sdks\csharp\device\samples\UWPSample\bin\x86\Debug\
+* Build the CppUWPSample (Universal Windows) project
+* Note the location of the Appx folder, i.e. ...\azure-iot-sdks\csharp\device\Debug\CppUWPSample\Appx
+* Copy all dll files from the UWPSample bin folder to the CppUWPSample Appx folder.  When prompt about duplicated file names, choose "Skip these files"
+
+Now you are ready to run the CppUWPSample.
+
+
+
 [visual-studio]: https://www.visualstudio.com/
 [readme]: ../readme.md
 [lnk-sdk-vs2015]: http://go.microsoft.com/fwlink/?LinkId=518003
