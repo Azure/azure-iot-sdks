@@ -28,7 +28,7 @@ function badConfigTests(opName, Transport, requestFn) {
   var badConnectionStrings = [
     makeConnectionString('bad' + Math.random(), deviceId, 'key=='),
     makeConnectionString(host, 'bad' + Math.random(), 'key=='),
-    makeConnectionString(host, deviceId, 'bad' + Math.random())
+    makeConnectionString(host, deviceId, 'bad')
   ];
 
   function makeRequestWith(connectionString, test, done) {

@@ -27,10 +27,10 @@ function SimulatedHttp(config) {
     } else {
       var sig = SharedAccessSignature.parse(config.sharedAccessSignature);
 
-      if (config.host === 'bad') {                      // bad host
+      if (config.host.indexOf('bad') >= 0) {                      // bad host
         done(new Error('getaddrinfo ENOTFOUND bad'));
       }
-      else if (config.deviceId === 'bad') {             // bad policy
+      else if (config.deviceId.indexOf('bad') >= 0) {             // bad policy
         done(makeError(404));
       }
       else {
