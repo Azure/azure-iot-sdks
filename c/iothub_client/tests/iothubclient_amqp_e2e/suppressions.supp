@@ -3,3 +3,8 @@
 	Helgrind:Race
 	obj:/*lib*/libcrypto*
 }
+{
+	DRD CRYPTO_malloc allow customization race in OpenSSL
+	drd:ConflictingAccess
+	obj:/*lib*/libcrypto*
+}
