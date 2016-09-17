@@ -864,13 +864,16 @@ static void setup_message_recv_device_method_mocks()
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_create_from_char(IGNORED_PTR_ARG))
         .IgnoreArgument_input();
     STRICT_EXPECTED_CALL(STRING_new());
-    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "&"))
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "/"))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
         .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(STRING_length(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle()
+        .SetReturn(7);
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument_handle()
-        .SetReturn("2");
+        .SetReturn("?$rid=2");
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG))
@@ -3404,7 +3407,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_method_fail)
 
     umock_c_negative_tests_snapshot();
 
-    size_t calls_cannot_fail[] = { 0, 4, 5, 6, 7, 9, 12, 13 };
+    size_t calls_cannot_fail[] = { 4, 5, 6, 7, 8, 9, 10, 13, 14 };
 
     // act
     size_t count = umock_c_negative_tests_call_count();
