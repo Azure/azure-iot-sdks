@@ -33,14 +33,14 @@ typedef struct EVENT_INSTANCE_TAG
     size_t messageTrackingId;  // For tracking the messages within the user callback.
 } EVENT_INSTANCE;
 
-static void DeviceMethodCallback(IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES properties, const unsigned char* payload, size_t size, void* userContextCallback)
+static int DeviceMethodCallback(const unsigned char* payload, size_t size, void* userContextCallback)
 {
-    (void)properties;
     (void*)payload;
     (void)size;
     (void*)userContextCallback;
     callbackCounter++;
     g_continueRunning = false;
+    return 200;
 }
 
 void iothub_client_sample_device_method_run(void)

@@ -629,3 +629,16 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceMethodCallback(IOTHUB_CLIEN
 **SRS_IOTHUBCLIENT_LL_12_021: [** If adding the information fails for any reason, `IoTHubClient_LL_SetDeviceMethodCallback` shall fail and return `IOTHUB_CLIENT_ERROR`. **]**
 
 **SRS_IOTHUBCLIENT_LL_12_022: [** Otherwise `IoTHubClient_LL_SetDeviceMethodCallback` shall succeed and return `IOTHUB_CLIENT_OK`. **]**
+
+## IoTHubClient_LL_DeviceMethodComplete
+
+```c
+int IoTHubClient_LL_DeviceMethodComplete(IOTHUB_CLIENT_LL_HANDLE handle, const unsigned char* payLoad, size_t size)
+```
+
+**SRS_IOTHUBCLIENT_LL_07_017: [** If `handle` is NULL then `IoTHubClient_LL_DeviceMethodComplete` shall return 500. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_018: [** If `deviceMethodCallback` is not NULL `IoTHubClient_LL_DeviceMethodComplete` shall execute `deviceMethodCallback` and return the status. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_019: [** If `deviceMethodCallback` is NULL `IoTHubClient_LL_DeviceMethodComplete` shall return 404. **]**
+

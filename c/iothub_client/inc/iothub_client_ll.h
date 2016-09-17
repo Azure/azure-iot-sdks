@@ -54,7 +54,8 @@ DEFINE_ENUM(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
 
 #define IOTHUB_IDENTITY_TYPE_VALUE  \
     IOTHUB_TYPE_TELEMETRY,          \
-    IOTHUB_TYPE_DEVICE_TWIN
+    IOTHUB_TYPE_DEVICE_TWIN,        \
+    IOTHUB_TYPE_DEVICE_METHODS
 DEFINE_ENUM(IOTHUB_IDENTITY_TYPE, IOTHUB_IDENTITY_TYPE_VALUE);
 
 #define IOTHUB_PROCESS_ITEM_RESULT_VALUE    \
@@ -71,18 +72,6 @@ DEFINE_ENUM(IOTHUB_PROCESS_ITEM_RESULT, IOTHUB_PROCESS_ITEM_RESULT_VALUE);
 #include "iothub_transport_ll.h"
 #include <stddef.h>
 #include <stdint.h>
-
-typedef struct IOTHUB_CLIENT_DEVICE_METHOD_PROPERTY_TAG
-{
-    const char* key;
-    const char* value;
-} IOTHUB_CLIENT_DEVICE_METHOD_PROPERTY;
-
-typedef struct IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES_TAG
-{
-    size_t size;
-    IOTHUB_CLIENT_DEVICE_METHOD_PROPERTY* properties;
-} IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES;
 
 #define IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_VALUES \
     IOTHUB_CLIENT_IOTHUB_METHOD_STATUS_SUCCESS,   \
@@ -138,7 +127,7 @@ extern "C"
 
     typedef void(*IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback);
     typedef void(*IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)(int status_code, void* userContextCallback);
-    typedef void(*IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC)(IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES properties, const unsigned char* payload, size_t size, void* userContextCallback);
+    typedef int(*IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC)(const unsigned char* payload, size_t size, void* userContextCallback);
 
     /** @brief	This struct captures IoTHub client configuration. */
     typedef struct IOTHUB_CLIENT_CONFIG_TAG

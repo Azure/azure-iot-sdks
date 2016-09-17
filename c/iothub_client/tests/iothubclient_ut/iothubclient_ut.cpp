@@ -45,49 +45,6 @@ namespace BASEIMPLEMENTATION
 DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 
 // Overloading operators for Micromock
-static bool operator==(IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES left, const IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES right)
-{
-    bool areEqual = true;
-
-    if (left.size == right.size)
-    {
-        if ((left.properties == NULL) && (right.properties != NULL))
-        {
-            areEqual = false;
-        }
-        if ((left.properties != NULL) && (right.properties == NULL))
-        {
-            areEqual = false;
-        }
-        if ((left.properties != NULL) && (right.properties != NULL))
-        {
-            for (size_t i = 0; i < left.size; i++)
-            {
-                if (strcmp(left.properties[i].key, right.properties[i].key) != 0)
-                {
-                    areEqual = false;
-                    break;
-                }
-                if (strcmp(left.properties[i].value, right.properties[i].value) != 0)
-                {
-                    areEqual = false;
-                    break;
-                }
-            }
-        }
-    }
-    else
-    {
-        areEqual = false;
-    }
-    return areEqual;
-}
-
-static std::ostream& operator<<(std::ostream& left, const IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES properties)
-{
-    return left << "struct IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES size = ([length=" << properties.size << " bytes] )";
-}
-
 static MICROMOCK_MUTEX_HANDLE g_testByTest;
 static MICROMOCK_GLOBAL_SEMAPHORE_HANDLE g_dllByDll;
 
@@ -169,8 +126,8 @@ public:
     MOCK_STATIC_METHOD_3(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetDeviceTwinCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, deviceTwinCallback, void*, userContextCallback)
     MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK);
 
-    MOCK_STATIC_METHOD_4(, void, deviceMethodCallback, IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES, properties, const unsigned char*, payLoad, size_t, size, void*, userContextCallback)
-    MOCK_VOID_METHOD_END();
+    MOCK_STATIC_METHOD_3(, int, deviceMethodCallback, const unsigned char*, payLoad, size_t, size, void*, userContextCallback)
+    MOCK_METHOD_END(int, 200);
 
     MOCK_STATIC_METHOD_3(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetDeviceMethodCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, deviceMethodCallback, void*, userContextCallback);
     MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK);
@@ -411,7 +368,7 @@ DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubC
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , void, sendReportedCallback, int, status_code, void*, userContextCallback);
 DECLARE_GLOBAL_MOCK_METHOD_5(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SendReportedState, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const unsigned char*, reportedState, size_t, size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, reportedStateCallback, void*, userContextCallback);
 
-DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubClientMocks, , void, deviceMethodCallback, IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES, properties, const unsigned char*, payLoad, size_t, size, void*, userContextCallback)
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientMocks, , int, deviceMethodCallback, const unsigned char*, payLoad, size_t, size, void*, userContextCallback)
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetDeviceMethodCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, deviceMethodCallback, void*, userContextCallback);
 
 #ifndef DONT_USE_UPLOADTOBLOB

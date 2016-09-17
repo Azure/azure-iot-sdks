@@ -59,7 +59,7 @@ MOCKABLE_FUNCTION(, void, test_event_confirmation_callback, IOTHUB_CLIENT_CONFIR
 MOCKABLE_FUNCTION(, IOTHUBMESSAGE_DISPOSITION_RESULT, test_message_callback_async, IOTHUB_MESSAGE_HANDLE, message, void*, userContextCallback);
 MOCKABLE_FUNCTION(, void, iothub_reported_state_callback, int, status_code, void*, userContextCallback);
 MOCKABLE_FUNCTION(, void, iothub_device_twin_callback, DEVICE_TWIN_UPDATE_STATE, update_state, const unsigned char*, payLoad, size_t, size, void*, userContextCallback);
-MOCKABLE_FUNCTION(, void, deviceMethodCallback, IOTHUB_CLIENT_DEVICE_METHOD_PROPERTIES, properties, const unsigned char*, payload, size_t, size, void*, userContextCallback);
+MOCKABLE_FUNCTION(, int, deviceMethodCallback, const unsigned char*, payload, size_t, size, void*, userContextCallback);
 
 MOCKABLE_FUNCTION(, STRING_HANDLE, FAKE_IoTHubTransport_GetHostname, TRANSPORT_LL_HANDLE, handle);
 MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_SetOption, TRANSPORT_LL_HANDLE, handle, const char*, optionName, const void*, value);
@@ -421,6 +421,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubClient_LL_UploadToBlob_Destroy, my_IoTHubClient_LL_UploadToBlob_Destroy);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubClient_LL_UploadToBlob_SetOption, IOTHUB_CLIENT_OK);
 #endif
+
+    REGISTER_GLOBAL_MOCK_RETURN(deviceMethodCallback, 200);
 
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubMessage_Clone, (IOTHUB_MESSAGE_HANDLE)0x44);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(IoTHubMessage_Clone, NULL);
@@ -3151,6 +3153,65 @@ TEST_FUNCTION(IoTHubClient_LL_ReportedStateComplete_NULL_fail)
     IoTHubClient_LL_ReportedStateComplete(NULL, 2, TEST_DEVICE_TWIN_STATUS_CODE);
 
     //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+/* Tests_SRS_IOTHUBCLIENT_LL_07_018: [ If deviceMethodCallback is not NULL IoTHubClient_LL_DeviceMethodComplete shall execute deviceMethodCallback and return the status. ] */
+TEST_FUNCTION(IoTHubClient_LL_DeviceMethodComplete_succeed)
+{
+    //arrange
+    IOTHUB_CLIENT_LL_HANDLE h = IoTHubClient_LL_Create(&TEST_CONFIG);
+    IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetDeviceMethodCallback(h, deviceMethodCallback, (void*)1);
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(deviceMethodCallback(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument_payload()
+        .IgnoreArgument_size()
+        .IgnoreArgument_userContextCallback();
+
+    //act
+    int status = IoTHubClient_LL_DeviceMethodComplete(h, (const unsigned char*)TEST_STRING_VALUE, strlen(TEST_STRING_VALUE) );
+
+    //assert
+    ASSERT_ARE_EQUAL(int, 200, status);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubClient_LL_Destroy(h);
+}
+
+/* Tests_SRS_IOTHUBCLIENT_LL_07_019: [ If deviceMethodCallback is NULL IoTHubClient_LL_DeviceMethodComplete shall return 404. ] */
+TEST_FUNCTION(IoTHubClient_LL_DeviceMethodComplete_No_callback_succeed)
+{
+    //arrange
+    IOTHUB_CLIENT_LL_HANDLE h = IoTHubClient_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+
+    //act
+    int status = IoTHubClient_LL_DeviceMethodComplete(h, (const unsigned char*)TEST_STRING_VALUE, strlen(TEST_STRING_VALUE) );
+
+    //assert
+    ASSERT_ARE_EQUAL(int, 404, status);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubClient_LL_Destroy(h);
+}
+
+/* Tests_SRS_IOTHUBCLIENT_LL_07_017: [ If handle is NULL then IoTHubClient_LL_DeviceMethodComplete shall return 500. ] */
+TEST_FUNCTION(IoTHubClient_LL_DeviceMethodComplete_handle_NULL_succeed)
+{
+    //arrange
+
+    //act
+    int status = IoTHubClient_LL_DeviceMethodComplete(NULL, (const unsigned char*)TEST_STRING_VALUE, strlen(TEST_STRING_VALUE) );
+
+    //assert
+    ASSERT_ARE_EQUAL(int, 500, status);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
