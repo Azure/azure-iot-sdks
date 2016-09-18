@@ -1,7 +1,7 @@
 {
   "name": "node-red-contrib-azure-iot-hub",
   "description": "Connector to azure on Node-Red",
-  "version": "0.2.7",
+  "version": "0.2.9",
   "engines": {
     "node": ">=0.10.0"
   },
@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/lcarli/Azure_IoT_Hub"
+    "url": "https://github.com/lcarli/NodeRedIoTHub"
   },
   "author": {
     "name": "Lucas Humenhuk",
