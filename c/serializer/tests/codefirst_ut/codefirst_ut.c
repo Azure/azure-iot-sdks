@@ -3646,9 +3646,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &ALL_REFLECTED(testModelInModelReflected), sizeof(OuterType), false);
         umock_c_reset_all_calls();
 
-        int a;
-        int b = a + 1;
-
         ///act
         CODEFIRST_RESULT result = CodeFirst_IngestDesiredProperties(device-1, "{\"a\":3}"); /*notice how "device-1" is a non-valid memory address as far as FindDevice is concerned*/
 

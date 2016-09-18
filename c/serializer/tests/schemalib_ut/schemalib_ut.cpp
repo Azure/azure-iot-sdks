@@ -255,6 +255,7 @@ template <> static std::wstring Microsoft::VisualStudio::CppUnitTestFramework::T
 //
 namespace BASEIMPLEMENTATION
 {
+#include "crt_abstractions.c"
 #include "strings.c"
 };
 
@@ -370,6 +371,10 @@ public:
     /* DataPublisher mocks */
     MOCK_STATIC_METHOD_1(, void, DataPublisher_SetMaxBufferSize, size_t, bytes)
     MOCK_VOID_METHOD_END()
+
+    MOCK_STATIC_METHOD_2(, int, mallocAndStrcpy_s, char**, destination, const char*, source);
+        int result2 = BASEIMPLEMENTATION::mallocAndStrcpy_s(destination, source);
+    MOCK_METHOD_END(int, result2);
 };
 
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubSchemaClientMocks, , CODEFIRST_RESULT, CodeFirst_Init, const char*, overrideSchemaNamespace);
@@ -401,6 +406,8 @@ DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubSchemaClientMocks, , AGENT_DATA_TYPES_RESULT
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubSchemaClientMocks, , void, BufferProcess_SetRetryInterval, uint64_t, milliseconds);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubSchemaClientMocks, , void, DataMarshaller_SetMaxBufferSize, size_t, bytes);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubSchemaClientMocks, , void, DataPublisher_SetMaxBufferSize, size_t, bytes);
+
+DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubSchemaClientMocks, , int, mallocAndStrcpy_s, char**, destination, const char*, source);
 
 /*because serializer.h*/
 
