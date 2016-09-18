@@ -162,7 +162,7 @@ DEVICE_RESULT Device_PublishTransacted(TRANSACTION_HANDLE transactionHandle, con
         (transactionHandle == NULL) ||
         (propertyPath == NULL) ||
         (data == NULL)
-	   )
+       )
     {
         result = DEVICE_INVALID_ARG;
         LOG_DEVICE_ERROR;
@@ -375,24 +375,26 @@ void Device_DestroyTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTIO
     }
 }
 
-DEVICE_RESULT Device_IngestDesiredProperties(DEVICE_HANDLE deviceHandle, const char* desiredProperties)
+DEVICE_RESULT Device_IngestDesiredProperties(void* startAddress, DEVICE_HANDLE deviceHandle, const char* desiredProperties)
 {
     DEVICE_RESULT result;
     /*Codes_SRS_DEVICE_02_032: [ If deviceHandle is NULL then Device_IngestDesiredProperties shall fail and return DEVICE_INVALID_ARG. ]*/
     /*Codes_SRS_DEVICE_02_033: [ If desiredProperties is NULL then Device_IngestDesiredProperties shall fail and return DEVICE_INVALID_ARG. ]*/
+    /*Codes_SRS_DEVICE_02_037: [ If startAddress is NULL then Device_IngestDesiredProperties shall fail and return DEVICE_INVALID_ARG. ]*/
     if (
         (deviceHandle == NULL) ||
-        (desiredProperties == NULL)
+        (desiredProperties == NULL) ||
+        (startAddress == NULL)
         )
     {
-        LogError("invalid argument DEVICE_HANDLE deviceHandle=%p, const char* desiredProperties=%p\n", deviceHandle, desiredProperties);
+        LogError("invalid argument void* startAddress=%p, DEVICE_HANDLE deviceHandle=%p, const char* desiredProperties=%p\n", startAddress, deviceHandle, desiredProperties);
         result = DEVICE_INVALID_ARG;
     }
     else
     {
         /*Codes_SRS_DEVICE_02_034: [ Device_IngestDesiredProperties shall call CommandDecoder_IngestDesiredProperties. ]*/
         DEVICE_HANDLE_DATA* device = (DEVICE_HANDLE_DATA*)deviceHandle;
-        if (CommandDecoder_IngestDesiredProperties(device->commandDecoderHandle, desiredProperties) != COMMANDDECODER_OK)
+        if (CommandDecoder_IngestDesiredProperties(startAddress, device->commandDecoderHandle, desiredProperties) != COMMANDDECODER_OK)
         {
             /*Codes_SRS_DEVICE_02_035: [ If any failure happens then Device_IngestDesiredProperties shall fail and return DEVICE_ERROR. ]*/
             LogError("failure in CommandDecoder_IngestDesiredProperties");
