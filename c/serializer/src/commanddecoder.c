@@ -571,6 +571,18 @@ static bool validateModel_vs_Multitree(void* startAddress, SCHEMA_MODEL_TYPE_HAN
                             i = nChildren;
                             break;
                         }
+                        case (SCHEMA_PROPERTY):
+                        {
+                            LogError("cannot ingest name (WITH_DATA instead of WITH_DESIRED_PROPERTY): %s", STRING_c_str);
+                            i = nChildren;
+                            break;
+                        }
+                        case (SCHEMA_REPORTED_PROPERTY):
+                        {
+                            LogError("cannot ingest name (WITH_REPORTED_PROPERTY instead of WITH_DESIRED_PROPERTY): %s", STRING_c_str);
+                            i = nChildren;
+                            break;
+                        }
                         case (SCHEMA_DESIRED_PROPERTY):
                         {
                             /*Codes_SRS_COMMAND_DECODER_02_007: [ If the child name corresponds to a desired property then an AGENT_DATA_TYPE shall be constructed from the MULTITREE node. ]*/
@@ -609,33 +621,23 @@ static bool validateModel_vs_Multitree(void* startAddress, SCHEMA_MODEL_TYPE_HAN
                         }
                         case(SCHEMA_MODEL_IN_MODEL):
                         {
-                            SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle;
-                            desiredPropertyHandle = Schema_GetModelDesiredPropertyByName(modelHandle, childName_str);
-                            if (desiredPropertyHandle == NULL)
+                            SCHEMA_MODEL_TYPE_HANDLE modelModel = Schema_GetModelModelByName(modelHandle, childName_str);
+                            if (modelModel == NULL)
                             {
-                                LogError("failure in Schema_GetModelDesiredPropertyByName");
+                                LogError("child %s does not exist in model\n", childName_str);
                                 i = nChildren;
                             }
                             else
                             {
-                                SCHEMA_MODEL_TYPE_HANDLE modelModel = Schema_GetModelModelByName(modelHandle, childName_str);
-                                if (modelModel == NULL)
+                                /*Codes_SRS_COMMAND_DECODER_02_009: [ If the child name corresponds to a model in model then the function shall call itself recursively. ]*/
+                                if (!validateModel_vs_Multitree(startAddress, modelModel, child, offset + Schema_GetModelModelByName_Offset(modelHandle, childName_str)))
                                 {
-                                    LogError("child %s does not exist in model\n", childName_str);
+                                    LogError("failure in validateModel_vs_Multitree");
                                     i = nChildren;
                                 }
                                 else
                                 {
-                                    /*Codes_SRS_COMMAND_DECODER_02_009: [ If the child name corresponds to a model in model then the function shall call itself recursively. ]*/
-                                    if (!validateModel_vs_Multitree(startAddress, modelModel, child, offset + Schema_GetModelModelByName_Offset(modelHandle, childName_str)))
-                                    {
-                                        LogError("failure in validateModel_vs_Multitree");
-                                        i = nChildren;
-                                    }
-                                    else
-                                    {
-                                        nProcessedChildren++;
-                                    }
+                                    nProcessedChildren++;
                                 }
                             }
                             break;

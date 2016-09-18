@@ -3072,19 +3072,16 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         STRICT_EXPECTED_CALL(Schema_GetModelElementTypeByName(TEST_MODEL_HANDLE, "modelInModel"))
             .SetReturn(SCHEMA_MODEL_IN_MODEL);
 
-        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyByName(TEST_MODEL_HANDLE, "modelInModel"))
-            .SetReturn(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD);
-
         STRICT_EXPECTED_CALL(Schema_GetModelModelByName(TEST_MODEL_HANDLE, "modelInModel"))
             .SetReturn(SCHEMA_MODEL_TYPE_HANDLE_MODEL_IN_MODEL);
 
-        STRICT_EXPECTED_CALL(Schema_GetModelModelByName_Offset(TEST_MODEL_HANDLE, "modelInModel")) /*10*/
+        STRICT_EXPECTED_CALL(Schema_GetModelModelByName_Offset(TEST_MODEL_HANDLE, "modelInModel")) /*9*/
             .SetReturn(10);
 
         /*here recursion happens*/
 
         {
-            STRICT_EXPECTED_CALL(MultiTree_GetChildCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*11*/
+            STRICT_EXPECTED_CALL(MultiTree_GetChildCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*10*/
                 .IgnoreArgument_treeHandle()
                 .CopyOutArgumentBuffer_count(&one, sizeof(one));
 
@@ -3095,9 +3092,9 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             STRICT_EXPECTED_CALL(STRING_new())
                 .SetReturn(TEST_STRING_HANDLE_CHILD_NAME);
 
-            STRICT_EXPECTED_CALL(MultiTree_GetName(childHandle, TEST_STRING_HANDLE_CHILD_NAME)); /*14*/ /*this fills in TEST_STRING_HANDLE_CHILD_NAME with "int_field"*/
+            STRICT_EXPECTED_CALL(MultiTree_GetName(childHandle, TEST_STRING_HANDLE_CHILD_NAME)); /*13*/ /*this fills in TEST_STRING_HANDLE_CHILD_NAME with "int_field"*/
 
-            STRICT_EXPECTED_CALL(STRING_c_str(TEST_STRING_HANDLE_CHILD_NAME)) /*15*/
+            STRICT_EXPECTED_CALL(STRING_c_str(TEST_STRING_HANDLE_CHILD_NAME)) /*14*/
                 .SetReturn("int_field");
 
             STRICT_EXPECTED_CALL(Schema_GetModelElementTypeByName(SCHEMA_MODEL_TYPE_HANDLE_MODEL_IN_MODEL, "int_field"))
@@ -3106,15 +3103,15 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyByName(SCHEMA_MODEL_TYPE_HANDLE_MODEL_IN_MODEL, "int_field"))
                 .SetReturn(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD);
 
-            STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyType(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD)) /*18*/
+            STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyType(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD)) /*17*/
                 .SetReturn("int");
 
-            STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(SCHEMA_MODEL_TYPE_HANDLE_MODEL_IN_MODEL)) /*19*/
+            STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(SCHEMA_MODEL_TYPE_HANDLE_MODEL_IN_MODEL)) /*18*/
                 .SetReturn(TEST_SCHEMA);
 
             /*this is DecodeValueFromNodea expected calls*/
 
-            STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("int")) /*20*/
+            STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("int")) /*19*/
                 .SetReturn(EDM_INT32_TYPE);
 
             STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -3126,10 +3123,10 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
                 .IgnoreArgument_agentData()
                 .SetReturn(AGENT_DATA_TYPES_OK);
 
-            STRICT_EXPECTED_CALL(Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD)) /*23*/
+            STRICT_EXPECTED_CALL(Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD)) /*22*/
                 .SetReturn(int_pfDesiredPropertyFromAGENT_DATA_TYPE);
 
-            STRICT_EXPECTED_CALL(Schema_GetModelDesiredProperty_offset(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD)) /*24*/
+            STRICT_EXPECTED_CALL(Schema_GetModelDesiredProperty_offset(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD)) /*23*/
                 .SetReturn(2);
 
             STRICT_EXPECTED_CALL(int_pfDesiredPropertyFromAGENT_DATA_TYPE(IGNORED_PTR_ARG, (unsigned char*)deviceMemoryArea + 12))  /*notice here the new offset (2+10)*/
@@ -3197,21 +3194,21 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         {
             2, /*MultiTree_GetChildCount*/
             6, /*STRING_c_str*/
-            10, /*Schema_GetModelModelByName_Offset*/
-            11, /*MultiTree_GetChildCount*/
-            14, /*MultiTree_GetName*/
-            15, /*STRING_c_str*/
-            18, /*Schema_GetModelDesiredPropertyType*/
-            19, /*Schema_GetSchemaForModelType*/
-            20, /*CodeFirst_GetPrimitiveType*/
-            23, /*Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE*/
-            24, /*Schema_GetModelDesiredProperty_offset*/
+            9, /*Schema_GetModelModelByName_Offset*/
+            10, /*MultiTree_GetChildCount*/
+            13, /*MultiTree_GetName*/
+            14, /*STRING_c_str*/
+            17, /*Schema_GetModelDesiredPropertyType*/
+            18, /*Schema_GetSchemaForModelType*/
+            19, /*CodeFirst_GetPrimitiveType*/
+            22, /*Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE*/
+            23, /*Schema_GetModelDesiredProperty_offset*/
 
-            26, /*Destroy_AGENT_DATA_TYPE*/
+            25, /*Destroy_AGENT_DATA_TYPE*/
+            26, /*STRING_delete*/
             27, /*STRING_delete*/
-            28, /*STRING_delete*/
-            29, /*MultiTree_Destroy*/
-            30, /*gballoc_free*/
+            28, /*MultiTree_Destroy*/
+            29, /*gballoc_free*/
         };
 
         for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
