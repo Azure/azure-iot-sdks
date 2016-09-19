@@ -8,7 +8,7 @@ var AmqpWs = require('../lib/amqp_ws.js');
 var clientTests = require('azure-iot-device/test/_client_common_testrun.js');
 
 
-describe.skip('Over AMQP/WS', function () {
+describe('Over AMQP/WS', function () {
   this.timeout(60000);
   var registry = Registry.fromConnectionString(process.env.IOTHUB_CONNECTION_STRING);
   clientTests.sendEventTests(AmqpWs, registry);
