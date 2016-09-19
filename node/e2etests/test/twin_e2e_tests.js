@@ -3,15 +3,15 @@
 
 'use strict';
 
-var assert = require('chai').assert;
-var deviceMqtt = require('azure-iot-device-mqtt').Mqtt;
 var Registry = require('azure-iothub').Registry;
-var _ = require('lodash');
-var deviceSas = require('azure-iot-device').SharedAccessSignature;
+var ConnectionString = require('azure-iothub').ConnectionString;
 var anHourFromNow = require('azure-iot-common').anHourFromNow;
 var deviceSdk = require('azure-iot-device');
+var deviceSas = deviceSdk.SharedAccessSignature;
+var deviceMqtt = require('azure-iot-device-mqtt').Mqtt;
 var uuid = require('uuid');
-var ConnectionString = require('azure-iothub').ConnectionString;
+var _ = require('lodash');
+var assert = require('chai').assert;
 
 var newProps = {
   foo : 1,
@@ -57,21 +57,21 @@ var runTests = function (hubConnectionString) {
       var registry = Registry.fromConnectionString(hubConnectionString);
 
       registry.create(deviceDescription, function (err) {
-        if (err) throw err;
+        if (err) return done(err);
 
         var host = ConnectionString.parse(hubConnectionString).HostName;
-        var deviceConnectionString = deviceSas.create(host, deviceDescription.deviceId, deviceDescription.authentication.SymmetricKey.primaryKey, anHourFromNow()).toString();
+        var deviceAccessSignature = deviceSas.create(host, deviceDescription.deviceId, deviceDescription.authentication.SymmetricKey.primaryKey, anHourFromNow()).toString();
 
-        deviceClient = deviceSdk.Client.fromSharedAccessSignature(deviceConnectionString, deviceMqtt);
+        deviceClient = deviceSdk.Client.fromSharedAccessSignature(deviceAccessSignature, deviceMqtt);
 
         deviceClient.open(function(err) {
-          if (err) throw err;
+          if (err) return done(err);
           deviceClient.getDeviceTwin(function(err, twin) {
-            if (err) throw err;
+            if (err) return done(err);
             deviceTwin = twin;
 
             registry.getDeviceTwin(deviceDescription.deviceId, function(err, twin) {
-              if (err) throw err;
+              if (err) return done(err);
               serviceTwin = twin;
               done();
             });
@@ -84,11 +84,11 @@ var runTests = function (hubConnectionString) {
       this.timeout(20000);
       if (deviceClient) {
         deviceClient.close(function(err) {
-          if (err) throw err;
+          if (err) return done(err);
             
           var registry = Registry.fromConnectionString(hubConnectionString);
           registry.delete(deviceDescription.deviceId, function(err) {
-            if (err) throw err;
+            if (err) return done(err);
             done();
           });
         });
@@ -109,7 +109,7 @@ var runTests = function (hubConnectionString) {
       var compare = function(left, right) {
         _.every(_.keys(right), function(key) {
           if (typeof right[key] !== 'function' && !key.startsWith('$')) {
-            assert.equal(left[key],right[key],'key ' + key + ' not matched between service and device'); 
+            assert.equal(left[key], right[key], 'key ' + key + ' not matched between service and device'); 
           }
         });
       };
@@ -117,27 +117,27 @@ var runTests = function (hubConnectionString) {
       compare(right, left);
     };
 
-    it ('round-trips reported properties', function(done) {
+    it ('sends and receives reported properties', function(done) {
       assertObjectIsEmpty(serviceTwin.properties.reported);
       assertObjectIsEmpty(deviceTwin.properties.reported);
 
       deviceTwin.properties.reported.update(newProps, function(err) {
-        if (err) throw err;
+        if (err) return done(err);
         serviceTwin.get(function(err) {
-          if (err) throw err;
+          if (err) return done(err);
           assertObjectsAreEqual(newProps, serviceTwin.properties.reported);
           done();
         });
       });
     });
 
-    it ('round trips and merges reported properties', function(done) {
+    it ('sends and receives merged reported properties', function(done) {
       deviceTwin.properties.reported.update(newProps, function(err) {
-        if (err) throw err;
+        if (err) return done(err);
         deviceTwin.properties.reported.update(moreNewProps, function(err) {
-          if (err) throw err;
+          if (err) return done(err);
           serviceTwin.get(function(err) {
-            if (err) throw err;
+            if (err) return done(err);
             assertObjectsAreEqual(mergeResult, serviceTwin.properties.reported);
             done();
           });
@@ -145,7 +145,7 @@ var runTests = function (hubConnectionString) {
       });
     });
 
-    it ('round-trips desired properties', function(done) {
+    it ('sends and receives desired properties', function(done) {
       assertObjectIsEmpty(deviceTwin.properties.desired);
 
       deviceTwin.on('properties.desired', function() {
@@ -154,13 +154,13 @@ var runTests = function (hubConnectionString) {
      });
 
       serviceTwin.update( { properties : { desired : newProps } }, function(err) {
-        if (err) throw err;
+        if (err) return done(err);
       });
     });
 
-    it ('round-trips and merges desired properties', function(done) {
+    it ('sends and receives mergee desired properties', function(done) {
       serviceTwin.update( { properties : { desired : newProps } }, function(err) {
-        if (err) throw err;
+        if (err) return done(err);
 
         deviceTwin.on('properties.desired', function() {
           assertObjectsAreEqual(mergeResult, deviceTwin.properties.desired);
@@ -168,14 +168,14 @@ var runTests = function (hubConnectionString) {
         });
         
         serviceTwin.update( { properties : { desired : moreNewProps } }, function(err) {
-          if (err) throw err;
+          if (err) return done(err);
         });
       });
     });
 
-    it ('round-trips and merges desired properties using etag *', function(done) {
+    it ('sends and receives merged desired properties using etag *', function(done) {
       serviceTwin.update( { properties : { desired : newProps } }, function(err) {
-        if (err) throw err;
+        if (err) return done(err);
 
         assert.isDefined(serviceTwin.etag);
         assert.notEqual(serviceTwin.etag, "*");
@@ -187,7 +187,7 @@ var runTests = function (hubConnectionString) {
         });
         
         serviceTwin.update( { properties : { desired : moreNewProps } }, function(err) {
-          if (err) throw err;
+          if (err) return done(err);
         });
       });
     });
@@ -196,7 +196,7 @@ var runTests = function (hubConnectionString) {
       assertObjectIsEmpty(serviceTwin.tags);
 
       serviceTwin.update( { tags : newProps }, function(err) {
-        if (err) throw err;
+        if (err) return done(err);
 
         assertObjectsAreEqual(newProps, serviceTwin.tags);
         done();
@@ -207,9 +207,9 @@ var runTests = function (hubConnectionString) {
       assertObjectIsEmpty(serviceTwin.tags);
 
       serviceTwin.update( { tags : newProps }, function(err) {
-        if (err) throw err;
+        if (err) return done(err);
         serviceTwin.update( { tags: moreNewProps }, function(err) {
-          if (err) throw err;
+          if (err) return done(err);
           assertObjectsAreEqual(mergeResult, serviceTwin.tags);
           done();
         });
@@ -220,14 +220,14 @@ var runTests = function (hubConnectionString) {
       assertObjectIsEmpty(serviceTwin.tags);
 
       serviceTwin.update( { tags : newProps }, function(err) {
-        if (err) throw err;
+        if (err) return done(err);
 
         assert.isDefined(serviceTwin.etag);
         assert.notEqual(serviceTwin.etag, "*");
         serviceTwin.etag = "*";
 
         serviceTwin.update( { tags: moreNewProps }, function(err) {
-          if (err) throw err;
+          if (err) return done(err);
           assertObjectsAreEqual(mergeResult, serviceTwin.tags);
           done();
         });
