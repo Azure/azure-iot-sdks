@@ -5,7 +5,7 @@ serializer_int are integration tests for serializer. These tests will usually:
 2. set data structures to values and produce a JSON out of them
 
 The below table summarizes the extend of the tests. Columns are the major component tested, rows are the place of test. 
-Cell are the test name. All these are positive test cases (that is, no bad data offered as input).
+Cell contain the test name. All these are positive test cases (that is, no bad data offered as input).
 
 | where\what               | WITH_DATA                             | WITH_REPORTED_PROPERTY                             | WITH_DESIRED_PROPERTY                             | WITH_ACTION                     |
 |--------------------------|---------------------------------------|----------------------------------------------------|---------------------------------------------------|---------------------------------|

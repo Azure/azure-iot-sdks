@@ -16,7 +16,7 @@ set(${theseTestsName}_c_files
     ../../../parson/parson.c
 )
 
- if(MSVC)
+if(MSVC)
     set_source_files_properties(../../../parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
 endif()
 
