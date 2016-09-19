@@ -59,7 +59,7 @@ MOCKABLE_FUNCTION(, void, test_event_confirmation_callback, IOTHUB_CLIENT_CONFIR
 MOCKABLE_FUNCTION(, IOTHUBMESSAGE_DISPOSITION_RESULT, test_message_callback_async, IOTHUB_MESSAGE_HANDLE, message, void*, userContextCallback);
 MOCKABLE_FUNCTION(, void, iothub_reported_state_callback, int, status_code, void*, userContextCallback);
 MOCKABLE_FUNCTION(, void, iothub_device_twin_callback, DEVICE_TWIN_UPDATE_STATE, update_state, const unsigned char*, payLoad, size_t, size, void*, userContextCallback);
-MOCKABLE_FUNCTION(, int, deviceMethodCallback, const unsigned char*, payload, size_t, size, void*, userContextCallback);
+MOCKABLE_FUNCTION(, int, deviceMethodCallback, const char*, method_name, const unsigned char*, payload, size_t, size, void*, userContextCallback);
 
 MOCKABLE_FUNCTION(, STRING_HANDLE, FAKE_IoTHubTransport_GetHostname, TRANSPORT_LL_HANDLE, handle);
 MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_SetOption, TRANSPORT_LL_HANDLE, handle, const char*, optionName, const void*, value);
@@ -133,6 +133,7 @@ static const char* TEST_STRING_VALUE = "Test string value";
 #define TEST_MESSAGE_HANDLE                 (IOTHUB_MESSAGE_HANDLE)0x51
 #define TEST_TIME_VALUE                     (time_t)123456
 
+static const char* TEST_METHOD_NAME = "method_name";
 static const char* TEST_CHAR = "TestChar";
 static uint64_t g_current_ms = 0;
 
@@ -3168,13 +3169,14 @@ TEST_FUNCTION(IoTHubClient_LL_DeviceMethodComplete_succeed)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(deviceMethodCallback(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(deviceMethodCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument_method_name()
         .IgnoreArgument_payload()
         .IgnoreArgument_size()
         .IgnoreArgument_userContextCallback();
 
     //act
-    int status = IoTHubClient_LL_DeviceMethodComplete(h, (const unsigned char*)TEST_STRING_VALUE, strlen(TEST_STRING_VALUE) );
+    int status = IoTHubClient_LL_DeviceMethodComplete(h, TEST_METHOD_NAME, (const unsigned char*)TEST_STRING_VALUE, strlen(TEST_STRING_VALUE) );
 
     //assert
     ASSERT_ARE_EQUAL(int, 200, status);
@@ -3192,7 +3194,7 @@ TEST_FUNCTION(IoTHubClient_LL_DeviceMethodComplete_No_callback_succeed)
     umock_c_reset_all_calls();
 
     //act
-    int status = IoTHubClient_LL_DeviceMethodComplete(h, (const unsigned char*)TEST_STRING_VALUE, strlen(TEST_STRING_VALUE) );
+    int status = IoTHubClient_LL_DeviceMethodComplete(h, TEST_METHOD_NAME, (const unsigned char*)TEST_STRING_VALUE, strlen(TEST_STRING_VALUE) );
 
     //assert
     ASSERT_ARE_EQUAL(int, 404, status);
@@ -3208,7 +3210,7 @@ TEST_FUNCTION(IoTHubClient_LL_DeviceMethodComplete_handle_NULL_succeed)
     //arrange
 
     //act
-    int status = IoTHubClient_LL_DeviceMethodComplete(NULL, (const unsigned char*)TEST_STRING_VALUE, strlen(TEST_STRING_VALUE) );
+    int status = IoTHubClient_LL_DeviceMethodComplete(NULL, TEST_METHOD_NAME, (const unsigned char*)TEST_STRING_VALUE, strlen(TEST_STRING_VALUE) );
 
     //assert
     ASSERT_ARE_EQUAL(int, 500, status);

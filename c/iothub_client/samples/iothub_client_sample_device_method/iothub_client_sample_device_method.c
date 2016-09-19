@@ -33,11 +33,12 @@ typedef struct EVENT_INSTANCE_TAG
     size_t messageTrackingId;  // For tracking the messages within the user callback.
 } EVENT_INSTANCE;
 
-static int DeviceMethodCallback(const unsigned char* payload, size_t size, void* userContextCallback)
+static int DeviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, void* userContextCallback)
 {
-    (void*)payload;
+    (void)method_name;
+    (void)payload;
     (void)size;
-    (void*)userContextCallback;
+    (void)userContextCallback;
     callbackCounter++;
     g_continueRunning = false;
     return 200;

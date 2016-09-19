@@ -980,7 +980,7 @@ void IoTHubClient_LL_SendComplete(IOTHUB_CLIENT_LL_HANDLE handle, PDLIST_ENTRY c
     }
 }
 
-int IoTHubClient_LL_DeviceMethodComplete(IOTHUB_CLIENT_LL_HANDLE handle, const unsigned char* payLoad, size_t size)
+int IoTHubClient_LL_DeviceMethodComplete(IOTHUB_CLIENT_LL_HANDLE handle, const char* method_name, const unsigned char* payLoad, size_t size)
 {
     int result;
     if (handle == NULL)
@@ -995,7 +995,7 @@ int IoTHubClient_LL_DeviceMethodComplete(IOTHUB_CLIENT_LL_HANDLE handle, const u
         IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)handle;
         if (handleData->deviceMethodCallback)
         {
-            result = handleData->deviceMethodCallback(payLoad, size, handleData->deviceMethodUserContextCallback);
+            result = handleData->deviceMethodCallback(method_name, payLoad, size, handleData->deviceMethodUserContextCallback);
         }
         else
         {

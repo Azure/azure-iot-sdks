@@ -323,9 +323,12 @@ int my_STRING_TOKENIZER_get_next_token(STRING_TOKENIZER_HANDLE t, STRING_HANDLE 
             text = ""; // Done
             break;
         case 8:
+        case 9:
+        case 10:
+        case 11:
             text = "200";
             break;
-        case 9:
+        case 12:
             text = "2";
             break;
         case 7:
@@ -862,9 +865,29 @@ static void setup_iothubtransportmqtt_dowork_events_mocks(const char* const** pp
 static void setup_message_recv_device_method_mocks()
 {
     STRICT_EXPECTED_CALL(mqttmessage_getTopicName(TEST_MQTT_MESSAGE_HANDLE)).SetReturn(TEST_MQTT_DEV_METHOD_MSG);
+    STRICT_EXPECTED_CALL(STRING_new());
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_create_from_char(IGNORED_PTR_ARG))
         .IgnoreArgument_input();
     STRICT_EXPECTED_CALL(STRING_new());
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "/"))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "/"))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "/"))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "/"))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument_s1()
+        .IgnoreArgument_s2();
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "/"))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
@@ -880,7 +903,10 @@ static void setup_message_recv_device_method_mocks()
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG))
         .IgnoreArgument_t();
     STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(TEST_MQTT_MESSAGE_HANDLE));
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_DeviceMethodComplete(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_DeviceMethodComplete(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument_method_name()
         .IgnoreArgument_payLoad()
         .IgnoreArgument_size();
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
@@ -893,6 +919,8 @@ static void setup_message_recv_device_method_mocks()
     STRICT_EXPECTED_CALL(mqtt_client_publish(TEST_MQTT_CLIENT_HANDLE, TEST_MQTT_MESSAGE_HANDLE))
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(mqttmessage_destroy(TEST_MQTT_MESSAGE_HANDLE));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
 }
@@ -3373,7 +3401,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_method_succeed)
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
-    g_tokenizerIndex = 6;
+    g_tokenizerIndex = 8;
     IoTHubTransportMqtt_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
     umock_c_reset_all_calls();
 
@@ -4534,6 +4562,5 @@ TEST_FUNCTION(IoTHubTransportMqtt_ProcessItem_fail)
     CONSTBUFFER_Destroy(cbh);
     umock_c_negative_tests_deinit();
 }
-
 
 END_TEST_SUITE(iothubtransportmqtt_ut)

@@ -127,7 +127,7 @@ extern "C"
 
     typedef void(*IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback);
     typedef void(*IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)(int status_code, void* userContextCallback);
-    typedef int(*IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC)(const unsigned char* payload, size_t size, void* userContextCallback);
+    typedef int(*IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC)(const char* method_name, const unsigned char* payload, size_t size, void* userContextCallback);
 
     /** @brief	This struct captures IoTHub client configuration. */
     typedef struct IOTHUB_CLIENT_CONFIG_TAG
