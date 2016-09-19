@@ -15,6 +15,7 @@ set(${theseTestsName}_c_files
     ../../src/codefirst.c
     ./c_bool_size.c
     ${SHARED_UTIL_SRC_FOLDER}/gballoc.c
+    ${SHARED_UTIL_SRC_FOLDER}/crt_abstractions.c
     ${LOCK_C_FILE}
 )
 

@@ -17,7 +17,6 @@ void my_gballoc_free(void * t)
     free(t);
 }
 
-
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
@@ -72,13 +71,13 @@ void my_gballoc_free(void * t)
 #undef STRING_length 
 #undef STRING_compare 
 
-
 #include "umock_c.h"
 #include "umocktypes_charptr.h"
 #include "umocktypes_bool.h"
 #include "umocktypes_stdint.h"
 #include "umock_c_negative_tests.h"
 
+#include "crt_abstractions.h"
 #define ENABLE_MOCKS
 #include "agenttypesystem.h"
 #include "schema.h"
@@ -101,6 +100,8 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(SCHEMA_RESULT, SCHEMA_RESULT_VALUES);
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
+
+/*the below namespace only exists to prove that it can be compiled with all the data types*/
 BEGIN_NAMESPACE(DummyDataProvider)
 
 DECLARE_MODEL(TruckType,
@@ -168,12 +169,28 @@ WITH_REPORTED_PROPERTY(ascii_char_ptr, reported_this_is_ascii_char_ptr),
 WITH_REPORTED_PROPERTY(ascii_char_ptr_no_quotes, reported_this_is_ascii_char_ptr_no_quotes),
 WITH_REPORTED_PROPERTY(EDM_DATE_TIME_OFFSET, reported_this_is_EdmDateTimeOffset),
 WITH_REPORTED_PROPERTY(EDM_GUID, reported_this_is_EdmGuid),
-WITH_REPORTED_PROPERTY(EDM_BINARY, reported_this_is_EdmBinary)
+WITH_REPORTED_PROPERTY(EDM_BINARY, reported_this_is_EdmBinary),
+
+WITH_DESIRED_PROPERTY(double, desired_this_is_double),
+WITH_DESIRED_PROPERTY(int, desired_this_is_int),
+WITH_DESIRED_PROPERTY(float, desired_this_is_float),
+WITH_DESIRED_PROPERTY(long, desired_this_is_long),
+WITH_DESIRED_PROPERTY(int8_t, desired_this_is_int8_t),
+WITH_DESIRED_PROPERTY(uint8_t, desired_this_is_uint8_t),
+WITH_DESIRED_PROPERTY(int16_t, desired_this_is_int16_t),
+WITH_DESIRED_PROPERTY(int32_t, desired_this_is_int32_t),
+WITH_DESIRED_PROPERTY(int64_t, desired_this_is_int64_t),
+WITH_DESIRED_PROPERTY(bool, desired_this_is_bool),
+WITH_DESIRED_PROPERTY(ascii_char_ptr, desired_this_is_ascii_char_ptr),
+WITH_DESIRED_PROPERTY(ascii_char_ptr_no_quotes, desired_this_is_ascii_char_ptr_no_quotes),
+WITH_DESIRED_PROPERTY(EDM_DATE_TIME_OFFSET, desired_this_is_EdmDateTimeOffset),
+WITH_DESIRED_PROPERTY(EDM_GUID, desired_this_is_EdmGuid),
+WITH_DESIRED_PROPERTY(EDM_BINARY, desired_this_is_EdmBinary)
 );
 
 END_NAMESPACE(DummyDataProvider)
 
-static const char TEST_MODEL_NAME[] = "SimpleDevice";
+static const char TEST_MODEL_NAME[] = "SimpleDevice_Model";
 
 bool DummyDataProvider_reset_wasCalled;
 EXECUTE_COMMAND_RESULT reset(TruckType* device)
@@ -501,82 +518,80 @@ static EDM_GUID someEdmGuid;
 static EDM_BINARY someEdmBinary;
 static void* g_InvokeActionCallbackArgument;
 
-typedef struct SimpleDevice_TAG
-{
-    unsigned char __SimpleDevice_begin;
-    int reported_this_is_int;
-    double reported_this_is_double;
-    double this_is_double;
-    int this_is_int;
-} SimpleDevice;
-
 static const WRAPPER_ARGUMENT setSpeedArguments[] = { { "double", "theSpeed" } };
-/*                                                                      type                                 * next                             reportedProperty                                                                                                                                                                            structure                       field                                                       property                                                                                                                                                    action                                                          model*/
-static const REFLECTED_SOMETHING reported_this_is_int               = { REFLECTION_REPORTED_PROPERTY_TYPE,  NULL,                               {   { "reported_this_is_int", "int", Create_AGENT_DATA_TYPE_From_Ptr_reported_this_is_int, offsetof(SimpleDevice, reported_this_is_int), sizeof(int), "SimpleDevice" },                     { 0 },                          { 0 },                                                      { 0 },                                                                                                                                                      { 0 },                                                          { 0 } } };
-static const REFLECTED_SOMETHING reported_this_is_double            = { REFLECTION_REPORTED_PROPERTY_TYPE,  &reported_this_is_int,              {   { "reported_this_is_double", "double", Create_AGENT_DATA_TYPE_From_Ptr_reported_this_is_double, offsetof(SimpleDevice, reported_this_is_double), sizeof(double), "SimpleDevice" },      { 0 },                          { 0 },                                                      { 0 },                                                                                                                                                      { 0 },                                                          { 0 } } };
-static const REFLECTED_SOMETHING this_is_double_Property            = { REFLECTION_PROPERTY_TYPE,           &reported_this_is_double,           {   { 0 },                                                                                                                                                                                  { 0 },                          { 0 },                                                      { "this_is_double", "double", Create_AGENT_DATA_TYPE_From_Ptr_this_is_double, offsetof(SimpleDevice, this_is_double), sizeof(double), "SimpleDevice"},      { 0 },                                                          { 0 } } };
-static const REFLECTED_SOMETHING this_is_int_Property               = { REFLECTION_PROPERTY_TYPE,           &this_is_double_Property,           {   { 0 },                                                                                                                                                                                  { 0 },                          { 0 },                                                      { "this_is_int", "int", Create_AGENT_DATA_TYPE_From_Ptr_this_is_int, offsetof(SimpleDevice, this_is_int), sizeof(int), "SimpleDevice"},                     { 0 },                                                          { 0 } } };
-static const REFLECTED_SOMETHING SimpleDevice_Model                 = { REFLECTION_MODEL_TYPE,              &this_is_int_Property,              {   { 0 },                                                                                                                                                                                  { 0 },                          { 0 },                                                      { 0 },                                                                                                                                                      { 0 },                                                          { "SimpleDevice"} } };
-static const REFLECTED_SOMETHING whereIsMyDevice_Struct             = { REFLECTION_STRUCT_TYPE,             &SimpleDevice_Model,                {   { 0 },                                                                                                                                                                                  { "GeoLocation" },              { 0 },                                                      { 0 },                                                                                                                                                      { 0 },                                                          { 0 } } };
-static const REFLECTED_SOMETHING Lat_Field                          = { REFLECTION_FIELD_TYPE,              &whereIsMyDevice_Struct,            {   { 0 },                                                                                                                                                                                  { 0 },                          { "Lat", "double", "GeoLocation" },                         { 0 },                                                                                                                                                      { 0 },                                                          { 0 } } };
-static const REFLECTED_SOMETHING Long_Field                         = { REFLECTION_FIELD_TYPE,              &Lat_Field,                         {   { 0 },                                                                                                                                                                                  { 0 },                          { "Long", "double", "GeoLocation" },                        { 0 },                                                                                                                                                      { 0 },                                                          { 0 } } };
-static const REFLECTED_SOMETHING theCarIsBehindTheVan_Struct        = { REFLECTION_STRUCT_TYPE,             &Long_Field,                        {   { 0 },                                                                                                                                                                                  { "theCarIsBehindTheVan" },     { 0 },                                                      { 0 },                                                                                                                                                      { 0 },                                                          { 0 } } };
-static const REFLECTED_SOMETHING Alt_Field                          = { REFLECTION_FIELD_TYPE,              &theCarIsBehindTheVan_Struct,       {   { 0 },                                                                                                                                                                                  { 0 },                          { "Alt", "int", "theCarIsBehindTheVan" },                   { 0 },                                                                                                                                                      { 0 },                                                          { 0 } } };
-static const REFLECTED_SOMETHING whereIsMyCar_Field                 = { REFLECTION_FIELD_TYPE,              &Alt_Field,                         {   { 0 },                                                                                                                                                                                  { 0 },                          { "whereIsMyCar", "GeoLocation", "theCarIsBehindTheVan" },  { 0 },                                                                                                                                                      { 0 },                                                          { 0 } } };
-static const REFLECTED_SOMETHING setSpeed_Action                    = { REFLECTION_ACTION_TYPE,             &whereIsMyCar_Field,                {   { 0 },                                                                                                                                                                                  { 0 },                          { 0 },                                                      { 0 },                                                                                                                                                      { "setSpeed", 1, setSpeedArguments, NULL, "TruckType" },        { 0 } } };
-static const REFLECTED_SOMETHING reset_Action                       = { REFLECTION_ACTION_TYPE,             &setSpeed_Action,                   {   { 0 },                                                                                                                                                                                  { 0 },                          { 0 },                                                      { 0 },                                                                                                                                                      { "reset", 0, NULL, NULL, "TruckType" },                        { 0 } } };
-static const REFLECTED_SOMETHING truckType_Model                    = { REFLECTION_MODEL_TYPE,              &reset_Action,                      {   { 0 },                                                                                                                                                                                  { 0 },                          { 0 },                                                      { 0 },                                                                                                                                                      { 0 },                                                          { "TruckType"} } };
-static const REFLECTED_DATA_FROM_DATAPROVIDER testReflectedData     = { &truckType_Model };
+
+BEGIN_NAMESPACE(testReflectedData)
+
+DECLARE_STRUCT(whereIsMyDevice_Struct,
+    double, Lat_Field,
+    double, Long_Field
+);
+
+DECLARE_STRUCT(theCarIsBehindTheVan_Struct,
+    int, Alt_Field,
+    whereIsMyDevice_Struct, whereIsMyCar_Field
+);
+
+DECLARE_MODEL(truckType_Model,
+    WITH_ACTION(reset_Action),
+    WITH_ACTION(setSpeed_Action, double, theSpeed)
+);
+
+DECLARE_MODEL(SimpleDevice_Model,
+    WITH_DATA(double, this_is_double_Property),
+    WITH_DATA(int, this_is_int_Property),
+    WITH_REPORTED_PROPERTY(int, new_reported_this_is_int),
+    WITH_REPORTED_PROPERTY(double, new_reported_this_is_double)
+);
 
 
-typedef struct InnerType_TAG
+END_NAMESPACE(testReflectedData)
+
+EXECUTE_COMMAND_RESULT reset_Action(truckType_Model* m)
 {
-    unsigned char __InnerType_begin;
-    double this_is_double;
-    int this_is_reported_int_Property_2;
-    int this_is_int;
-} InnerType;
-
-typedef struct OuterType_TAG
-{
-    unsigned char __OuterType_begin;
-    InnerType Inner;
-    int this_is_int;
-} OuterType;
-
-void* OuterType_reset_device;
-EXECUTE_COMMAND_RESULT OuterType_reset(void* device, size_t ParameterCount, const AGENT_DATA_TYPE* values)
-{
-    (void)ParameterCount;
-    (void)values;
-    OuterType_reset_device = device;
+    (void)m;
     return EXECUTE_COMMAND_SUCCESS;
 }
 
-void* InnerType_reset_device;
-EXECUTE_COMMAND_RESULT InnerType_reset(void* device, size_t ParameterCount, const AGENT_DATA_TYPE* values)
+EXECUTE_COMMAND_RESULT setSpeed_Action(truckType_Model* m, double theSpeed)
 {
-    (void)ParameterCount;
-    (void)values;
-    InnerType_reset_device = device;
+    (void)(m, theSpeed);
     return EXECUTE_COMMAND_SUCCESS;
 }
 
 static const SCHEMA_MODEL_TYPE_HANDLE TEST_INNERTYPE_MODEL_HANDLE = (SCHEMA_MODEL_TYPE_HANDLE)0x5555;
 static const SCHEMA_MODEL_TYPE_HANDLE TEST_OUTERTYPE_MODEL_HANDLE = (SCHEMA_MODEL_TYPE_HANDLE)0x5556;
 
-/*                                                                      type                                 * next                             reportedProperty                                                                                                                                                                            structure                       field                                                       property                                                                                                                                                    action                                                          model*/
-static const REFLECTED_SOMETHING OuterType_reset_Action             = { REFLECTION_ACTION_TYPE,             NULL,                               {   { 0 },                                                                                                                                                                                  { 0 },                          { 0 },                                                      { 0 },                                                                                                                                                      { "reset", 0, NULL, OuterType_reset, "OuterType" },             { 0 } } };
-static const REFLECTED_SOMETHING InnerType_reset_Action             = { REFLECTION_ACTION_TYPE,             &OuterType_reset_Action,            {   { 0 },                                                                                                                                                                                  { 0 },                          { 0 },                                                      { 0 },                                                                                                                                                      { "reset", 0, NULL, InnerType_reset, "InnerType" },             { 0 } } };
-static const REFLECTED_SOMETHING this_is_int_Property_2             = { REFLECTION_PROPERTY_TYPE,           &InnerType_reset_Action,            {   { 0 },                                                                                                                                                                                  { 0 },                          { 0 },                                                      { "this_is_int", "int", Create_AGENT_DATA_TYPE_From_Ptr_this_is_int, offsetof(InnerType, this_is_int), sizeof(int), "InnerType" },                          { 0 },                                                          { 0 } } };
-static const REFLECTED_SOMETHING this_is_reported_int_Property_2    = { REFLECTION_REPORTED_PROPERTY_TYPE,  &this_is_int_Property_2,            {   { "this_is_reported_int_Property_2", "int", Create_AGENT_DATA_TYPE_From_Ptr_this_is_int, offsetof(InnerType, this_is_reported_int_Property_2), sizeof(int), "InnerType" },              { 0 },                          { 0 },                                                      { 0 },                                                                                                                                                      { 0 },                                                          { 0 } } };
-static const REFLECTED_SOMETHING this_is_double_Property_2          = { REFLECTION_PROPERTY_TYPE,           &this_is_reported_int_Property_2,   {   { 0 },                                                                                                                                                                                  { 0 },                          { 0 },                                                      { "this_is_double", "double", Create_AGENT_DATA_TYPE_From_Ptr_this_is_double, offsetof(InnerType, this_is_double), sizeof(double), "InnerType"},            { 0 },                                                          { 0 } } };
-static const REFLECTED_SOMETHING InnerType_Model                    = { REFLECTION_MODEL_TYPE,              &this_is_double_Property_2,         {   { 0 },                                                                                                                                                                                  { 0 },                          { 0 },                                                      { 0 },                                                                                                                                                      { 0 },                                                          { "InnerType"} } };
-static const REFLECTED_SOMETHING Inner_Property                     = { REFLECTION_PROPERTY_TYPE,           &InnerType_Model,                   {   { 0 },                                                                                                                                                                                  { 0 },                          { 0 },                                                      { "Inner", "InnerType", Create_AGENT_DATA_TYPE_From_Ptr_this_is_double, offsetof(OuterType, Inner), sizeof(InnerType), "OuterType"},                        { 0 },                                                          { 0 } } };
-static const REFLECTED_SOMETHING OuterType_Model                    = { REFLECTION_MODEL_TYPE,              &Inner_Property,                    {   { 0 },                                                                                                                                                                                  { 0 },                          { 0 },                                                      { 0 },                                                                                                                                                      { 0 },                                                          { "OuterType"} } };
-const REFLECTED_DATA_FROM_DATAPROVIDER testModelInModelReflected    = { &OuterType_Model };
+BEGIN_NAMESPACE(testModelInModelReflected)
+DECLARE_MODEL(InnerType,
+    WITH_DATA(int, this_is_int2),
+    WITH_DATA(double, this_is_double2),
+    WITH_ACTION(InnerType_reset_Action),
+    WITH_REPORTED_PROPERTY(int, this_is_reported_int_Property_2),
+    WITH_DESIRED_PROPERTY(int, this_is_desired_int_Property_2)
+);
+
+DECLARE_MODEL(OuterType,
+    WITH_DATA(InnerType, Inner),
+    WITH_ACTION(OuterType_reset_Action)
+);
+
+END_NAMESPACE(testModelInModelReflected)
 
 
+void* OuterType_reset_device;
+EXECUTE_COMMAND_RESULT OuterType_reset_Action(OuterType* device)
+{
+    OuterType_reset_device = device;
+    return EXECUTE_COMMAND_SUCCESS;
+}
+
+void* InnerType_reset_device;
+EXECUTE_COMMAND_RESULT InnerType_reset_Action(InnerType* device)
+{
+    InnerType_reset_device = device;
+    return EXECUTE_COMMAND_SUCCESS;
+}
 static unsigned char edmBinarySource[] = { 1, 42, 43, 44, 1 };
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
@@ -600,9 +615,29 @@ static REPORTED_PROPERTIES_TRANSACTION_HANDLE my_Device_CreateTransaction_Report
     return (REPORTED_PROPERTIES_TRANSACTION_HANDLE)my_gballoc_malloc(1);
 }
 
-void my_Device_DestroyTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle)
+static void my_Device_DestroyTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle)
 {
     my_gballoc_free(transactionHandle);
+}
+
+static SCHEMA_RESULT my_Schema_GetModelDesiredPropertyCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t* desiredPropertyCount)
+{
+    (void)modelTypeHandle;
+    if (desiredPropertyCount != NULL)
+    {
+        *desiredPropertyCount = 0;
+    }
+    return SCHEMA_OK;
+}
+
+static SCHEMA_RESULT my_Schema_GetModelModelCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t* modelCount)
+{
+    (void)modelTypeHandle;
+    if (modelCount != NULL)
+    {
+        *modelCount = 0;
+    }
+    return SCHEMA_OK;
 }
 
 BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
@@ -629,12 +664,15 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_STRUCT_TYPE_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_ACTION_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(REPORTED_PROPERTIES_TRANSACTION_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(pfDesiredPropertyInitialize, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(pfDesiredPropertyFromAGENT_DATA_TYPE   , void*);
+        REGISTER_UMOCK_ALIAS_TYPE(    pfDesiredPropertyDeinitialize      , void*);
         
-        
+
         REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelName, TEST_MODEL_NAME);
         REGISTER_GLOBAL_MOCK_HOOK(Create_AGENT_DATA_TYPE_from_DOUBLE, my_Create_AGENT_DATA_TYPE_from_DOUBLE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Create_AGENT_DATA_TYPE_from_DOUBLE, AGENT_DATA_TYPES_JSON_ENCODER_ERRROR);
-
 
         REGISTER_UMOCK_VALUE_TYPE(EDM_DATE_TIME_OFFSET,
             umockvalue_stringify_EDM_DATE_TIME_OFFSET,
@@ -703,7 +741,11 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         REGISTER_GLOBAL_MOCK_RETURNS(Device_CommitTransaction_ReportedProperties, DEVICE_OK, DEVICE_ERROR);
 
         REGISTER_GLOBAL_MOCK_HOOK(Device_DestroyTransaction_ReportedProperties, my_Device_DestroyTransaction_ReportedProperties);
-
+        
+        REGISTER_GLOBAL_MOCK_HOOK(Schema_GetModelDesiredPropertyCount, my_Schema_GetModelDesiredPropertyCount);
+        REGISTER_GLOBAL_MOCK_HOOK(Schema_GetModelModelCount, my_Schema_GetModelModelCount);
+        
+        
     }
 
 
@@ -1531,13 +1573,13 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     {
         ///arrange
         (void)CodeFirst_Init(NULL);
-        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testModelInModelReflected, sizeof(OuterType), false);
+        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testModelInModelReflected), sizeof(OuterType), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("OuterType");
 
         ///act
-       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "reset", 0, NULL);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "", "OuterType_reset_Action", 0, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result);
@@ -1556,13 +1598,13 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     {
         ///arrange
         (void)CodeFirst_Init(NULL);
-        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testModelInModelReflected, sizeof(OuterType), false);
+        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testModelInModelReflected), sizeof(OuterType), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("OuterType");
 
         ///act
-       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "Inner", "reset", 0, NULL);
+       EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "Inner", "InnerType_reset_Action", 0, NULL);
 
 
 
@@ -1580,7 +1622,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     {
         ///arrange
         (void)CodeFirst_Init(NULL);
-        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testModelInModelReflected, sizeof(OuterType), false);
+        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testModelInModelReflected), sizeof(OuterType), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("OuterType");
@@ -1601,7 +1643,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     {
         ///arrange
         (void)CodeFirst_Init(NULL);
-        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testModelInModelReflected, sizeof(OuterType), false);
+        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testModelInModelReflected), sizeof(OuterType), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("OuterType");
@@ -1622,7 +1664,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     {
         ///arrange
         (void)CodeFirst_Init(NULL);
-        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testModelInModelReflected, sizeof(OuterType), false);
+        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testModelInModelReflected), sizeof(OuterType), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE)).SetReturn("OuterType");
@@ -1660,7 +1702,11 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_CreateDevice_With_Valid_Arguments_and_includePropertyPath_false_Succeeds_1)
     {
         // arrange
-
+        size_t zero = 0;
+        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+            .CopyOutArgumentBuffer_desiredPropertyCount(&zero, sizeof(zero));
+        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+            .CopyOutArgumentBuffer_modelCount(&zero, sizeof(zero));
         STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
             .IgnoreArgument(3).IgnoreArgument(5);
         STRICT_EXPECTED_CALL(Schema_AddDeviceRef(IGNORED_PTR_ARG))
@@ -1680,6 +1726,11 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_CreateDevice_With_Valid_Arguments_and_includePropertyPath_false_Succeeds_2)
     {
         // arrange
+        size_t zero = 0;
+        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+            .CopyOutArgumentBuffer_desiredPropertyCount(&zero, sizeof(zero));
+        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+            .CopyOutArgumentBuffer_modelCount(&zero, sizeof(zero));
 
         STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
             .IgnoreArgument(3).IgnoreArgument(5);
@@ -1701,6 +1752,11 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_CreateDevice_With_Valid_Arguments_and_includePropertyPath_true_Succeeds)
     {
         // arrange
+        size_t zero = 0;
+        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+            .CopyOutArgumentBuffer_desiredPropertyCount(&zero, sizeof(zero));
+        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+            .CopyOutArgumentBuffer_modelCount(&zero, sizeof(zero));
 
         STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, true, IGNORED_PTR_ARG))
             .IgnoreArgument(3).IgnoreArgument(5);
@@ -1819,7 +1875,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_With_One_Property_Succeeds)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         unsigned char* destination;
         size_t destinationSize;
         umock_c_reset_all_calls();
@@ -1833,7 +1889,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
@@ -1843,10 +1899,10 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
-        device->this_is_double = 42.0;
+        device->this_is_double_Property = 42.0;
 
         // act
-        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->this_is_double);
+        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->this_is_double_Property);
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
@@ -1870,7 +1926,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_2_Properties_Succeeds)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
@@ -1882,7 +1938,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
@@ -1896,7 +1952,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, 0));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
@@ -1906,13 +1962,13 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
-        device->this_is_double = 42.0;
-        device->this_is_int = 1;
+        device->this_is_double_Property = 42.0;
+        device->this_is_int_Property = 1;
         unsigned char* destination;
         size_t destinationSize;
 
         // act
-        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 2, &device->this_is_double, &device->this_is_int);
+        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 2, &device->this_is_double_Property, &device->this_is_int_Property);
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
@@ -1926,12 +1982,12 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(When_StartTransaction_Fails_CodeFirst_SendAsync_Fails)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE))
             .SetReturn((TRANSACTION_HANDLE)NULL);
-        device->this_is_double = 42.0;
+        device->this_is_double_Property = 42.0;
         unsigned char* destination;
         size_t destinationSize;
 
@@ -1950,7 +2006,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(When_PublishTransacted_Fails_CodeFirst_SendAsync_Fails)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
@@ -1962,7 +2018,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3).SetReturn(DEVICE_ERROR);
         EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
@@ -1970,12 +2026,12 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_handle();
         STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle();
-        device->this_is_double = 42.0;
+        device->this_is_double_Property = 42.0;
         unsigned char* destination;
         size_t destinationSize;
 
         // act
-        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->this_is_double);
+        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->this_is_double_Property);
 
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -1990,7 +2046,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(When_PublishTransacted_Fails_For_The_2nd_Property_CodeFirst_SendAsync_Fails)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
@@ -2002,7 +2058,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
@@ -2016,7 +2072,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, 0));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3).SetReturn(DEVICE_ERROR);
         EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
@@ -2024,13 +2080,13 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_handle();
         STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle();
-        device->this_is_double = 42.0;
-        device->this_is_int = 1;
+        device->this_is_double_Property = 42.0;
+        device->this_is_int_Property = 1;
         unsigned char* destination;
         size_t destinationSize;
 
         // act
-        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 2, &device->this_is_double, &device->this_is_int);
+        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 2, &device->this_is_double_Property, &device->this_is_int_Property);
 
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2045,7 +2101,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(When_EndTransacted_Fails_CodeFirst_SendAsync_Fails)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
@@ -2057,7 +2113,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
@@ -2068,12 +2124,12 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument(2)
             .IgnoreArgument(3)
             .SetReturn(DEVICE_ERROR);
-        device->this_is_double = 42.0;
+        device->this_is_double_Property = 42.0;
         unsigned char* destination;
         size_t destinationSize;
 
         // act
-        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->this_is_double);
+        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->this_is_double_Property);
 
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2087,10 +2143,10 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(When_An_Invalid_Pointer_Is_Passed_CodeFirst_SendAsync_Fails)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
-        device->this_is_double = 42.0;
+        device->this_is_double_Property = 42.0;
         unsigned char* destination;
         size_t destinationSize;
 
@@ -2109,7 +2165,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(When_A_Pointer_Within_The_Device_Block_But_Mismatched_Is_Passed_CodeFirst_SendAsync_Fails)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
@@ -2119,7 +2175,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_handle();
         STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle();
-        device->this_is_double = 42.0;
+        device->this_is_double_Property = 42.0;
         unsigned char* destination;
         size_t destinationSize;
 
@@ -2139,7 +2195,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(When_Creating_The_Agent_Data_Type_Fails_Then_CodeFirst_SendAsync_Fails)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
@@ -2154,12 +2210,12 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_handle();
         STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle();
-        device->this_is_double = 42.0;
+        device->this_is_double_Property = 42.0;
         unsigned char* destination;
         size_t destinationSize;
 
         // act
-        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->this_is_double);
+        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->this_is_double_Property);
 
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2174,7 +2230,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(When_Creating_The_Agent_Data_Type_Fails_For_The_2nd_Property_Then_CodeFirst_SendAsync_Fails)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
@@ -2186,7 +2242,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
@@ -2203,12 +2259,12 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_handle();
         STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle();
-        device->this_is_double = 42.0;
+        device->this_is_double_Property = 42.0;
         unsigned char* destination;
         size_t destinationSize;
 
         // act
-        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 2, &device->this_is_double, &device->this_is_int);
+        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 2, &device->this_is_double_Property, &device->this_is_int_Property);
 
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2222,8 +2278,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(Properties_From_2_Different_Devices_Make_CodeFirst_SendAsync_Fail)
     {
         // arrange
-        SimpleDevice* device1 = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
-        SimpleDevice* device2 = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device1 = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
+        SimpleDevice_Model* device2 = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
@@ -2235,7 +2291,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
@@ -2243,13 +2299,13 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle();
-        device1->this_is_double = 42.0;
-        device2->this_is_double = 42.0;
+        device1->this_is_double_Property = 42.0;
+        device2->this_is_double_Property = 42.0;
         unsigned char* destination;
         size_t destinationSize;
 
         // act
-        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 2, &device1->this_is_double, &device2->this_is_double);
+        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 2, &device1->this_is_double_Property, &device2->this_is_double_Property);
 
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2274,7 +2330,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_With_One_Property_Succeeds_2)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
@@ -2287,7 +2343,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
@@ -2297,12 +2353,12 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
-        device->this_is_double = 42.0;
+        device->this_is_double_Property = 42.0;
         unsigned char* destination;
         size_t destinationSize;
 
         // act
-        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->this_is_double);
+        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->this_is_double_Property);
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
@@ -2326,7 +2382,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_2_Properties_Succeeds_2)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
@@ -2338,7 +2394,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_NUM_ARG)));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
@@ -2352,7 +2408,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
@@ -2362,13 +2418,13 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
-        device->this_is_double = 42.0;
-        device->this_is_int = 1;
+        device->this_is_double_Property = 42.0;
+        device->this_is_int_Property = 1;
         unsigned char* destination;
         size_t destinationSize;
 
         // act
-        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 2, &device->this_is_double, &device->this_is_int);
+        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 2, &device->this_is_double_Property, &device->this_is_int_Property);
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
@@ -2383,18 +2439,18 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_The_Entire_Device_State)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
         EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_NUM_ARG)));
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
         EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
@@ -2403,8 +2459,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
-        device->this_is_double = 42.0;
-        device->this_is_int = 1;
+        device->this_is_double_Property = 42.0;
+        device->this_is_int_Property = 1;
         unsigned char* destination;
         size_t destinationSize;
 
@@ -2423,7 +2479,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_When_Create_Agent_Data_Type_For_The_First_Property_Fails_Send_The_Entire_Device_State_Fails)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
@@ -2433,8 +2489,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .SetReturn(AGENT_DATA_TYPES_ERROR);
         STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle();
-        device->this_is_double = 42.0;
-        device->this_is_int = 1;
+        device->this_is_double_Property = 42.0;
+        device->this_is_int_Property = 1;
         unsigned char* destination;
         size_t destinationSize;
 
@@ -2453,22 +2509,22 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_When_Publish_For_The_First_Property_Fails_Send_The_Entire_Device_State_Fails)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
         
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3)
             .SetReturn(DEVICE_ERROR);
         EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle();
-        device->this_is_double = 42.0;
-        device->this_is_int = 1;
+        device->this_is_double_Property = 42.0;
+        device->this_is_int_Property = 1;
         unsigned char* destination;
         size_t destinationSize;
 
@@ -2487,13 +2543,13 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_When_Create_Agent_Data_Type_For_The_Second_Property_Fails_Send_The_Entire_Device_State_Fails)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
         EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
@@ -2501,8 +2557,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .SetReturn(AGENT_DATA_TYPES_ERROR);
         STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle();
-        device->this_is_double = 42.0;
-        device->this_is_int = 1;
+        device->this_is_double_Property = 42.0;
+        device->this_is_int_Property = 1;
         unsigned char* destination;
         size_t destinationSize;
 
@@ -2521,26 +2577,26 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_When_Publish_For_The_Second_Property_Fails_Send_The_Entire_Device_State_Fails)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_int_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
         EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_NUM_ARG)));
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3)
             .SetReturn(DEVICE_ERROR);
         EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
         STRICT_EXPECTED_CALL(Device_CancelTransaction(IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle();
-        device->this_is_double = 42.0;
-        device->this_is_int = 1;
+        device->this_is_double_Property = 42.0;
+        device->this_is_int_Property = 1;
         unsigned char* destination;
         size_t destinationSize;
 
@@ -2560,7 +2616,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_Can_Send_A_Property_From_A_Child_Model)
     {
         // arrange
-        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &testModelInModelReflected, sizeof(OuterType), false);
+        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &ALL_REFLECTED(testModelInModelReflected), sizeof(OuterType), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
@@ -2578,7 +2634,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, (double)(IGNORED_NUM_ARG)));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "Inner/this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "Inner/this_is_double2", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
@@ -2588,12 +2644,12 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
-        device->Inner.this_is_double = 42.0;
+        device->Inner.this_is_double2 = 42.0;
         unsigned char* destination;
         size_t destinationSize;
 
         // act
-        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->Inner.this_is_double);
+        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->Inner.this_is_double2);
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
@@ -2608,7 +2664,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_Can_Send_The_Last_Property_From_A_Child_Model_With_2_Properties)
     {
         // arrange
-        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &testModelInModelReflected, sizeof(OuterType), false);
+        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &ALL_REFLECTED(testModelInModelReflected), sizeof(OuterType), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
@@ -2626,7 +2682,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "Inner/this_is_int", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "Inner/this_is_int2", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
@@ -2636,12 +2692,12 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
-        device->Inner.this_is_int = 1;
+        device->Inner.this_is_int2 = 1;
         unsigned char* destination;
         size_t destinationSize;
 
         // act
-        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->Inner.this_is_int);
+        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->Inner.this_is_int2);
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
@@ -2656,12 +2712,12 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_With_NULL_destination_and_NonNulldestinationSize_Fails)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         size_t destinationSize;
         umock_c_reset_all_calls();
 
         // act
-        CODEFIRST_RESULT result = CodeFirst_SendAsync(NULL, &destinationSize, 1, &device->this_is_double);
+        CODEFIRST_RESULT result = CodeFirst_SendAsync(NULL, &destinationSize, 1, &device->this_is_double_Property);
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_INVALID_ARG, result);
@@ -2675,12 +2731,12 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_With_nonNULL_destination_and_NulldestinationSize_Fails)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         unsigned char* destination;
         umock_c_reset_all_calls();
 
         // act
-        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, NULL, 1, &device->this_is_double);
+        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, NULL, 1, &device->this_is_double_Property);
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_INVALID_ARG, result);
@@ -2694,7 +2750,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_With_One_Property_CallBackAndUserContext_Succeeds)
     {
         // arrange
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
@@ -2706,7 +2762,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
@@ -2716,11 +2772,11 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         size_t destinationSize;
         STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_PTR_ARG, &destination, &destinationSize))
             .IgnoreArgument_transactionHandle();
-        device->this_is_double = 42.0;
+        device->this_is_double_Property = 42.0;
 
 
         // act
-        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->this_is_double);
+        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->this_is_double_Property);
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
@@ -2739,34 +2795,38 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///arrange
         STRICT_EXPECTED_CALL(Schema_GetSchemaByNamespace("TestSchema"));
         STRICT_EXPECTED_CALL(Schema_Create("TestSchema"));
-        STRICT_EXPECTED_CALL(Schema_CreateStructType(TEST_SCHEMA_HANDLE, "theCarIsBehindTheVan"))
+        STRICT_EXPECTED_CALL(Schema_CreateStructType(TEST_SCHEMA_HANDLE, "theCarIsBehindTheVan_Struct"))
             .SetReturn(TEST_CAR_BEHIND_VAN_HANDLE);
-        STRICT_EXPECTED_CALL(Schema_AddStructTypeProperty(TEST_CAR_BEHIND_VAN_HANDLE, "whereIsMyCar", "GeoLocation"));
-        STRICT_EXPECTED_CALL(Schema_AddStructTypeProperty(TEST_CAR_BEHIND_VAN_HANDLE, "Alt", "int"));
-        STRICT_EXPECTED_CALL(Schema_CreateStructType(TEST_SCHEMA_HANDLE, "GeoLocation"));
-        STRICT_EXPECTED_CALL(Schema_AddStructTypeProperty(TEST_STRUCT_TYPE_HANDLE, "Long", "double"));
-        STRICT_EXPECTED_CALL(Schema_AddStructTypeProperty(TEST_STRUCT_TYPE_HANDLE, "Lat", "double"));
-        STRICT_EXPECTED_CALL(Schema_CreateModelType(TEST_SCHEMA_HANDLE, "TruckType"))
+        STRICT_EXPECTED_CALL(Schema_AddStructTypeProperty(TEST_CAR_BEHIND_VAN_HANDLE, "whereIsMyCar_Field", "whereIsMyDevice_Struct"));
+        STRICT_EXPECTED_CALL(Schema_AddStructTypeProperty(TEST_CAR_BEHIND_VAN_HANDLE, "Alt_Field", "int"));
+        STRICT_EXPECTED_CALL(Schema_CreateStructType(TEST_SCHEMA_HANDLE, "whereIsMyDevice_Struct"));
+        STRICT_EXPECTED_CALL(Schema_AddStructTypeProperty(TEST_STRUCT_TYPE_HANDLE, "Long_Field", "double"));
+        STRICT_EXPECTED_CALL(Schema_AddStructTypeProperty(TEST_STRUCT_TYPE_HANDLE, "Lat_Field", "double"));
+        STRICT_EXPECTED_CALL(Schema_CreateModelType(TEST_SCHEMA_HANDLE, "SimpleDevice_Model"))
             .SetReturn(TEST_TRUCKTYPE_MODEL_HANDLE);
-        STRICT_EXPECTED_CALL(Schema_CreateModelType(TEST_SCHEMA_HANDLE, "SimpleDevice"));
-        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "TruckType")).SetReturn(TEST_TRUCKTYPE_MODEL_HANDLE);
-        STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_TRUCKTYPE_MODEL_HANDLE, "reset"))
-            .SetReturn(RESET_ACTION_HANDLE);
-        
-        STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_TRUCKTYPE_MODEL_HANDLE, "setSpeed"))
+        STRICT_EXPECTED_CALL(Schema_CreateModelType(TEST_SCHEMA_HANDLE, "truckType_Model"));
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "SimpleDevice_Model")).SetReturn(TEST_TRUCKTYPE_MODEL_HANDLE);
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "double")).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(Schema_AddModelReportedProperty(TEST_TRUCKTYPE_MODEL_HANDLE, "new_reported_this_is_double", "double"));
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "int")).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(Schema_AddModelReportedProperty(TEST_TRUCKTYPE_MODEL_HANDLE, "new_reported_this_is_int", "int"));
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "int")).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_TRUCKTYPE_MODEL_HANDLE, "this_is_int_Property", "int"));
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "double")).SetReturn(NULL);
+        STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_TRUCKTYPE_MODEL_HANDLE, "this_is_double_Property", "double"));
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "truckType_Model")).SetReturn(TEST_MODEL_HANDLE);
+        STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_MODEL_HANDLE, "setSpeed_Action"))
             .SetReturn(SETSPEED_ACTION_HANDLE);
         STRICT_EXPECTED_CALL(Schema_AddModelActionArgument(SETSPEED_ACTION_HANDLE, "theSpeed", "double"));
-        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "SimpleDevice")).SetReturn(TEST_MODEL_HANDLE);
-        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "int")).SetReturn((SCHEMA_MODEL_TYPE_HANDLE)NULL);
-        STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_MODEL_HANDLE, "this_is_int", "int"));
-        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "double")).SetReturn((SCHEMA_MODEL_TYPE_HANDLE)NULL);
-        STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_MODEL_HANDLE, "this_is_double", "double"));
+        STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_MODEL_HANDLE, "reset_Action"))
+            .SetReturn(RESET_ACTION_HANDLE);
 
         ///act
-        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testReflectedData);
+        
+        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &ALL_REFLECTED(testReflectedData));
 
         ///assert
-        
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(void_ptr, TEST_SCHEMA_HANDLE, result);
     }
 
@@ -2784,22 +2844,28 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .SetReturn(TEST_INNERTYPE_MODEL_HANDLE);
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "OuterType"))
             .SetReturn(TEST_OUTERTYPE_MODEL_HANDLE);
+        STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_OUTERTYPE_MODEL_HANDLE, "OuterType_reset_Action"));
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "InnerType"))
             .SetReturn(TEST_INNERTYPE_MODEL_HANDLE);
-        STRICT_EXPECTED_CALL(Schema_AddModelModel(TEST_OUTERTYPE_MODEL_HANDLE, "Inner", TEST_INNERTYPE_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_OUTERTYPE_MODEL_HANDLE, "reset"));
+        STRICT_EXPECTED_CALL(Schema_AddModelModel(TEST_OUTERTYPE_MODEL_HANDLE, "Inner", TEST_INNERTYPE_MODEL_HANDLE, 8));
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "InnerType"))
             .SetReturn(TEST_INNERTYPE_MODEL_HANDLE);
-        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "double"));
-        STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_double", "double"));
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "int"));
+        STRICT_EXPECTED_CALL(Schema_AddModelDesiredProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_desired_int_Property_2", "int", IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+            .IgnoreArgument_desiredPropertyDeinitialize()
+            .IgnoreArgument_desiredPropertyInitialize()
+            .IgnoreArgument_desiredPropertyFromAGENT_DATA_TYPE()
+            .IgnoreArgument_offset();
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "int"));
         STRICT_EXPECTED_CALL(Schema_AddModelReportedProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_reported_int_Property_2", "int"));
+        STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_INNERTYPE_MODEL_HANDLE, "InnerType_reset_Action"));
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "double"));
+        STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_double2", "double"));
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "int"));
-        STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_int", "int"));
-        STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_INNERTYPE_MODEL_HANDLE, "reset"));
+        STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_int2", "int"));
         
         ///act
-        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testModelInModelReflected);
+        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &ALL_REFLECTED(testModelInModelReflected));
 
         ///assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -2816,7 +2882,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .SetReturn((SCHEMA_HANDLE)NULL);
 
         ///act
-        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testReflectedData);
+        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &ALL_REFLECTED(testReflectedData));
 
         ///assert
         ASSERT_IS_NULL(result);
@@ -2832,7 +2898,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Schema_Destroy(TEST_SCHEMA_HANDLE));
 
         ///act
-        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testReflectedData);
+        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &ALL_REFLECTED(testReflectedData));
 
         ///assert
         ASSERT_IS_NULL(result);
@@ -2843,13 +2909,13 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     {
         ///arrange
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "TruckType")).SetReturn(TEST_MODEL_HANDLE);
-        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "SimpleDevice")).SetReturn(TEST_MODEL_HANDLE);
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "SimpleDevice_Model")).SetReturn(TEST_MODEL_HANDLE);
         STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_MODEL_HANDLE, "this_is_int", "int"))
             .SetReturn(SCHEMA_ERROR);
         STRICT_EXPECTED_CALL(Schema_Destroy(TEST_SCHEMA_HANDLE));
 
         ///act
-        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testReflectedData);
+        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &ALL_REFLECTED(testReflectedData));
 
         ///assert
         ASSERT_IS_NULL(result);
@@ -2865,7 +2931,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Schema_Destroy(TEST_SCHEMA_HANDLE));
 
         ///act
-        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testReflectedData);
+        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &ALL_REFLECTED(testReflectedData));
 
         ///assert
         ASSERT_IS_NULL(result);
@@ -2883,7 +2949,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Schema_Destroy(TEST_SCHEMA_HANDLE));
 
         ///act
-        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testReflectedData);
+        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &ALL_REFLECTED(testReflectedData));
 
         ///assert
         ASSERT_IS_NULL(result);
@@ -2899,7 +2965,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Schema_Destroy(TEST_SCHEMA_HANDLE));
 
         ///act
-        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testReflectedData);
+        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &ALL_REFLECTED(testReflectedData));
 
         ///assert
         ASSERT_IS_NULL(result);
@@ -2915,7 +2981,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Schema_Destroy(TEST_SCHEMA_HANDLE));
 
         ///act
-        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testReflectedData);
+        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &ALL_REFLECTED(testReflectedData));
 
         ///assert
         ASSERT_IS_NULL(result);
@@ -2930,7 +2996,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Schema_Destroy(TEST_SCHEMA_HANDLE));
 
         ///act
-        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testReflectedData);
+        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &ALL_REFLECTED(testReflectedData));
 
         ///assert
         ASSERT_IS_NULL(result);
@@ -2945,7 +3011,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .SetReturn((SCHEMA_HANDLE)TEST_SCHEMA_HANDLE);
 
         ///act
-        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &testReflectedData);
+        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &ALL_REFLECTED(testReflectedData));
 
         ///assert
         ASSERT_ARE_EQUAL(void_ptr, TEST_SCHEMA_HANDLE, result);
@@ -3212,8 +3278,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_modelTypeHandle();
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_CommitTransaction_ReportedProperties(IGNORED_PTR_ARG, &destination, &destinationSize))
-            .IgnoreArgument_transactionHandle();
         STRICT_EXPECTED_CALL(Device_DestroyTransaction_ReportedProperties(IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle();
 
@@ -3258,14 +3322,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 5.5))
             .IgnoreArgument_agentData();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted_ReportedProperty(IGNORED_PTR_ARG, "reported_this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted_ReportedProperty(IGNORED_PTR_ARG, "new_reported_this_is_double", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument_data();
         EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
 
         STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, -5))
             .IgnoreArgument_agentData();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted_ReportedProperty(IGNORED_PTR_ARG, "reported_this_is_int", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted_ReportedProperty(IGNORED_PTR_ARG, "new_reported_this_is_int", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument_data();
         EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
@@ -3291,11 +3355,11 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         /// arrange
         size_t destinationSize = 1000;
         unsigned char *destination = (unsigned char*)my_gballoc_malloc(destinationSize);
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
-        device->reported_this_is_double = 5.5; /*the only reported properties*/
-        device->reported_this_is_int = -5; /*the only reported properties*/
+        device->new_reported_this_is_double = 5.5; /*the only reported properties*/
+        device->new_reported_this_is_int = -5; /*the only reported properties*/
 
         CodeFirst_SendReportedAsync_all_inert_path();
 
@@ -3317,12 +3381,12 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///arrange
         size_t destinationSize = 1000;
         unsigned char *destination = (unsigned char*)my_gballoc_malloc(destinationSize);
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         (void)umock_c_negative_tests_init();
         umock_c_reset_all_calls();
 
-        device->reported_this_is_double = 5.5; /*the only reported properties*/
-        device->reported_this_is_int = -5; /*the only reported properties*/
+        device->new_reported_this_is_double = 5.5; /*the only reported properties*/
+        device->new_reported_this_is_int = -5; /*the only reported properties*/
 
         CodeFirst_SendReportedAsync_all_inert_path();
 
@@ -3371,13 +3435,13 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Device_CreateTransaction_ReportedProperties(TEST_DEVICE_HANDLE));
         STRICT_EXPECTED_CALL(STRING_new());
         STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
-        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "reported_this_is_double"))
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, "new_reported_this_is_double"))
             .IgnoreArgument_handle();
         STRICT_EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 5.5))
             .IgnoreArgument_agentData();
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted_ReportedProperty(IGNORED_PTR_ARG, "reported_this_is_double", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted_ReportedProperty(IGNORED_PTR_ARG, "new_reported_this_is_double", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument_data();
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
@@ -3403,16 +3467,16 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         /// arrange
         size_t destinationSize = 1000;
         unsigned char *destination = (unsigned char*)my_gballoc_malloc(destinationSize);
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
-        device->reported_this_is_double = 5.5; /*the only reported properties*/
-        device->reported_this_is_int = -5; /*the only reported properties*/
+        device->new_reported_this_is_double = 5.5; /*the only reported properties*/
+        device->new_reported_this_is_int = -5; /*the only reported properties*/
 
         CodeFirst_SendReportedAsync_one_inert_path();
 
         /// act
-        CODEFIRST_RESULT result = CodeFirst_SendAsyncReported(&destination, &destinationSize, 1, &(device->reported_this_is_double));
+        CODEFIRST_RESULT result = CodeFirst_SendAsyncReported(&destination, &destinationSize, 1, &(device->new_reported_this_is_double));
 
         /// assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
@@ -3429,12 +3493,12 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         /// arrange
         size_t destinationSize = 1000;
         unsigned char *destination = (unsigned char*)my_gballoc_malloc(destinationSize);
-        SimpleDevice* device = (SimpleDevice*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &testReflectedData, sizeof(SimpleDevice), false);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         (void)umock_c_negative_tests_init();
         umock_c_reset_all_calls();
 
-        device->reported_this_is_double = 5.5; /*the only reported properties*/
-        device->reported_this_is_int = -5; /*the only reported properties*/
+        device->new_reported_this_is_double = 5.5; /*the only reported properties*/
+        device->new_reported_this_is_int = -5; /*the only reported properties*/
 
         CodeFirst_SendReportedAsync_one_inert_path();
         umock_c_negative_tests_snapshot();
@@ -3465,7 +3529,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
                 sprintf(temp_str, "On failed call %zu", i);
 
                 ///act
-                CODEFIRST_RESULT result = CodeFirst_SendAsyncReported(&destination, &destinationSize, 1, &(device->reported_this_is_double));
+                CODEFIRST_RESULT result = CodeFirst_SendAsyncReported(&destination, &destinationSize, 1, &(device->new_reported_this_is_double));
 
                 ///assert
                 ASSERT_ARE_NOT_EQUAL_WITH_MSG(CODEFIRST_RESULT, CODEFIRST_OK, result, temp_str);
@@ -3483,7 +3547,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         /// arrange
         size_t destinationSize = 1000;
         unsigned char *destination = (unsigned char*)my_gballoc_malloc(destinationSize);
-        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &testModelInModelReflected, sizeof(OuterType), false);
+        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &ALL_REFLECTED(testModelInModelReflected), sizeof(OuterType), false);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
@@ -3501,7 +3565,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_SINT32(IGNORED_PTR_ARG, (int32_t)(IGNORED_NUM_ARG)));
         STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
             .IgnoreArgument_handle();
-        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "Inner/this_is_int", IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "Inner/this_is_int2", IGNORED_PTR_ARG))
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(3);
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
@@ -3511,10 +3575,10 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
             .IgnoreArgument_transactionHandle()
             .IgnoreArgument(2)
             .IgnoreArgument(3);
-        device->Inner.this_is_int = 1;
+        device->Inner.this_is_int2 = 1;
 
         // act
-        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->Inner.this_is_int);
+        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->Inner.this_is_int2);
 
         // assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
@@ -3543,7 +3607,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_IngestDesiredProperties_with_NULL_desiredProperties_fails)
     {
         ///arrange
-        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &testModelInModelReflected, sizeof(OuterType), false);
+        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &ALL_REFLECTED(testModelInModelReflected), sizeof(OuterType), false);
         umock_c_reset_all_calls();
 
         ///act
@@ -3562,7 +3626,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_IngestDesiredProperties_succeeds)
     {
         ///arrange
-        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &testModelInModelReflected, sizeof(OuterType), false);
+        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &ALL_REFLECTED(testModelInModelReflected), sizeof(OuterType), false);
         umock_c_reset_all_calls();
 
         ///act
@@ -3579,7 +3643,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_IngestDesiredProperties_fails)
     {
         ///arrange
-        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &testModelInModelReflected, sizeof(OuterType), false);
+        OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &ALL_REFLECTED(testModelInModelReflected), sizeof(OuterType), false);
         umock_c_reset_all_calls();
 
         ///act

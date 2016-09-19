@@ -44,6 +44,7 @@ static const SCHEMA_MODEL_TYPE_HANDLE TEST_MODEL_HANDLE = (SCHEMA_MODEL_TYPE_HAN
 namespace BASEIMPLEMENTATION
 {
     #include "strings.c"
+    #include "crt_abstractions.c"
 };
 
 static int bool_Compare(bool left, bool right)
@@ -245,6 +246,10 @@ public:
 
     MOCK_STATIC_METHOD_1(, const char*, STRING_c_str, STRING_HANDLE, s)
         MOCK_METHOD_END(const char*, BASEIMPLEMENTATION::STRING_c_str(s))
+
+    MOCK_STATIC_METHOD_2(, int, mallocAndStrcpy_s, char**, destination, const char*, source)
+        int result2 = BASEIMPLEMENTATION::mallocAndStrcpy_s(destination, source);
+    MOCK_METHOD_END(int, result2);
 };
 
 DECLARE_GLOBAL_MOCK_METHOD_2(AgentMacroMocks, , AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_SINT32, AGENT_DATA_TYPE*, agentData, int32_t, v);
@@ -267,6 +272,7 @@ DECLARE_GLOBAL_MOCK_METHOD_1(AgentMacroMocks, , void, STRING_delete, STRING_HAND
 DECLARE_GLOBAL_MOCK_METHOD_2(AgentMacroMocks, , int, STRING_concat, STRING_HANDLE, s1, const char*, s2);
 DECLARE_GLOBAL_MOCK_METHOD_2(AgentMacroMocks, , int, STRING_concat_with_STRING, STRING_HANDLE, s1, STRING_HANDLE, s2);
 DECLARE_GLOBAL_MOCK_METHOD_1(AgentMacroMocks, , const char*, STRING_c_str, STRING_HANDLE, s);
+DECLARE_GLOBAL_MOCK_METHOD_2(AgentMacroMocks, , int, mallocAndStrcpy_s, char**, destination, const char*, source);
 
 static size_t g_NumProperties;
 static CODEFIRST_RESULT g_SendResult;

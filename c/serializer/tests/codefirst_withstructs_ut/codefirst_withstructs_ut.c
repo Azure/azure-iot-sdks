@@ -190,6 +190,25 @@ static DEVICE_RESULT my_Device_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, pfDe
     return DEVICE_OK;
 }
 
+static SCHEMA_RESULT my_Schema_GetModelDesiredPropertyCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t* desiredPropertyCount)
+{
+    (void)modelTypeHandle;
+    if (desiredPropertyCount != NULL)
+    {
+        *desiredPropertyCount = 0;
+    }
+    return SCHEMA_OK;
+}
+
+static SCHEMA_RESULT my_Schema_GetModelModelCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t* modelCount)
+{
+    (void)modelTypeHandle;
+    if (modelCount != NULL)
+    {
+        *modelCount = 0;
+    }
+    return SCHEMA_OK;
+}
 
 BEGIN_TEST_SUITE(CodeFirst_ut_Two_Providers_With_Structs)
 
@@ -209,6 +228,11 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_HOOK(Device_Create, my_Device_Create);
     REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_MODEL_TYPE_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(pfDeviceActionCallback, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(DEVICE_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
+    
+    REGISTER_GLOBAL_MOCK_HOOK(Schema_GetModelDesiredPropertyCount, my_Schema_GetModelDesiredPropertyCount);
+    REGISTER_GLOBAL_MOCK_HOOK(Schema_GetModelModelCount, my_Schema_GetModelModelCount);
 
 }
 

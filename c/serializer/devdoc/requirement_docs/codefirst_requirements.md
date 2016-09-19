@@ -90,6 +90,8 @@ extern void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLEC
 
 **SRS_CODEFIRST_99_081: [** CodeFirst_CreateDevice shall use Device_Create to create a device handle. **]**
 
+**SRS_CODEFIRST_02_036: [** `CodeFirst_CreateDevice` shall initialize all the desired properties to their default values. **]**
+
 **SRS_CODEFIRST_01_001: [** CodeFirst_CreateDevice shall pass the includePropertyPath argument to Device_Create. **]**
 
 **SRS_CODEFIRST_99_082: [** CodeFirst_CreateDevice shall pass to Device_Create the function CodeFirst_InvokeAction as action callback argument. **]**

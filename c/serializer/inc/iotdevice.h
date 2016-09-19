@@ -46,7 +46,7 @@ MOCKABLE_FUNCTION(, void, Device_DestroyTransaction_ReportedProperties, REPORTED
 
 MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, Device_ExecuteCommand, DEVICE_HANDLE, deviceHandle, const char*, command);
 
-MOCKABLE_FUNCTION(, DEVICE_RESULT, Device_IngestDesiredProperties, DEVICE_HANDLE, deviceHandle, const char*, desiredProperties);
+MOCKABLE_FUNCTION(, DEVICE_RESULT, Device_IngestDesiredProperties, void*, startAddress, DEVICE_HANDLE, deviceHandle, const char*, desiredProperties);
 #ifdef __cplusplus
 }
 #endif

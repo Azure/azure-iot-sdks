@@ -9,61 +9,104 @@ Schema
 ```code 
  |--- <Schema Namespace>
  |--- <0..n Struct Type> 
-	| -- <Struct Name>
-	| -- <0..n Property> (Primitive, Structs, User Defined)
-    | -- <0..n ReportedProperty> (Primitive, Structs, User Defined)
-    | -- <0..n DesiredProperty> (Primitive, Structs, User Defined)
-	|--- <0..n Model Type> 
-             |--- <Model Name>
-             |--- <0..n Property> (Primitive, Structs, User Defined) 
-             |--- <0..n ReportedProperty> (Primitive, Structs, User Defined)
-             |--- <0..n DesiredProperty> (Primitive, Structs, User Defined)
-             |--- <0..n Actions>
-             |--- <0..n Models>
+ |	 |-- <Struct Name>
+ |   |-- <0..n Property> (Primitive, Structs, User Defined)
+ |   |-- <0..n ReportedProperty> (Primitive, Structs, User Defined)
+ |   |-- <0..n DesiredProperty> (Primitive, Structs, User Defined)
+ |	 |--- <0..n Model Type> 
+ |            |--- <Model Name>
+ |            |--- <0..n Property> (Primitive, Structs, User Defined) 
+ |            |--- <0..n ReportedProperty> (Primitive, Structs, User Defined)
+ |            |--- <0..n DesiredProperty> (Primitive, Structs, User Defined)
+ |            |--- <0..n Actions>
+ |            |--- <0..n Models>
+ |--- <0..n Model Type> 
+     |--- <Model Name>
+     |--- <0..n Property> (Primitive, Structs, User Defined) 
+     |--- <0..n ReportedProperty> (Primitive, Structs, User Defined)
+     |--- <0..n DesiredProperty> (Primitive, Structs, User Defined)
+     |--- <0..n Actions>
+     |--- <0..n Models>
 ```
 
 Exposed API
 **SRS_SCHEMA_99_095: [** Schema shall expose the following API: **]**
 ```c
-typedef void* SCHEMA_HANDLE;
-typedef void* SCHEMA_MODEL_TYPE_HANDLE;
-typedef void* SCHEMA_STRUCT_TYPE_HANDLE;
-typedef void* SCHEMA_PROPERTY_HANDLE;
-typedef void* SCHEMA_ACTION_HANDLE;
-typedef void* SCHEMA_ACTION_ARGUMENT_HANDLE;
- 
+typedef struct SCHEMA_HANDLE_DATA_TAG* SCHEMA_HANDLE;
+typedef struct SCHEMA_MODEL_TYPE_HANDLE_DATA_TAG* SCHEMA_MODEL_TYPE_HANDLE;
+typedef struct SCHEMA_STRUCT_TYPE_HANDLE_DATA_TAG* SCHEMA_STRUCT_TYPE_HANDLE;
+typedef struct SCHEMA_PROPERTY_HANDLE_DATA_TAG* SCHEMA_PROPERTY_HANDLE;
+typedef struct SCHEMA_REPORTED_PROPERTY_HANDLE_DATA_TAG* SCHEMA_REPORTED_PROPERTY_HANDLE;
+typedef struct SCHEMA_DESIRED_PROPERTY_HANDLE_DATA_TAG* SCHEMA_DESIRED_PROPERTY_HANDLE;
+typedef struct SCHEMA_ACTION_HANDLE_DATA_TAG* SCHEMA_ACTION_HANDLE;
+typedef struct SCHEMA_ACTION_ARGUMENT_HANDLE_DATA_TAG* SCHEMA_ACTION_ARGUMENT_HANDLE;
+
+typedef int(*pfDesiredPropertyFromAGENT_DATA_TYPE)(const AGENT_DATA_TYPE* source, void* dest);
+typedef void(*pfDesiredPropertyInitialize)(void* destination);
+typedef void(*pfDesiredPropertyDeinitialize)(void* destination);
+
+
 #define SCHEMA_RESULT_VALUES    \
 SCHEMA_OK,                      \
 SCHEMA_INVALID_ARG,             \
 SCHEMA_DUPLICATE_ELEMENT,       \
 SCHEMA_ELEMENT_NOT_FOUND,       \
+SCHEMA_MODEL_IN_USE,            \
+SCHEMA_DEVICE_COUNT_ZERO,       \
 SCHEMA_ERROR
- 
+
 DEFINE_ENUM(SCHEMA_RESULT, SCHEMA_RESULT_VALUES)
- 
+
+#define SCHEMA_ELEMENT_TYPE_VALUES \
+SCHEMA_NOT_FOUND, \
+SCHEMA_SEARCH_INVALID_ARG, \
+SCHEMA_MODEL, \
+SCHEMA_STRUCT, \
+SCHEMA_PROPERTY, \
+SCHEMA_REPORTED_PROPERTY, \
+SCHEMA_DESIRED_PROPERTY, \
+SCHEMA_MODEL_ACTION, \
+SCHEMA_MODEL_IN_MODEL
+
+DEFINE_ENUM(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
+
+#include "azure_c_shared_utility/umock_c_prod.h"
 extern SCHEMA_HANDLE Schema_Create(const char* schemaNamespace);
 extern size_t Schema_GetSchemaCount(void);
 extern SCHEMA_HANDLE Schema_GetSchemaByNamespace(const char* schemaNamespace);
-extern const char* Schema_GetNamespace(SCHEMA_HANDLE schemaHandle);
-extern SCHEMA_RESULT Schema_AddDeviceRef(SCHEMA_MODEL_TYPE_HANDLE modleTypeHandle);
-extern void Schema_ReleaseDeviceRef(SCHEMA_MODEL_TYPE_HANDLE modleTypeHandle);
+extern const char* Schema_GetSchemaNamespace(SCHEMA_HANDLE schemaHandle);
+extern SCHEMA_RESULT Schema_AddDeviceRef(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle);
+extern SCHEMA_RESULT Schema_ReleaseDeviceRef(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle);
+
 extern SCHEMA_MODEL_TYPE_HANDLE Schema_CreateModelType(SCHEMA_HANDLE schemaHandle, const char* modelName);
-extern SCHEMA_HANDLE Schema_GetSchemaForModelType(SCHEMA_MODEL_TYPE_HANDLE modelHandle);
+extern SCHEMA_HANDLE Schema_GetSchemaForModelType(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle);
 extern const char* Schema_GetModelName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle);
+
 extern SCHEMA_STRUCT_TYPE_HANDLE Schema_CreateStructType(SCHEMA_HANDLE schemaHandle, const char* structTypeName);
 
 extern const char* Schema_GetStructTypeName(SCHEMA_STRUCT_TYPE_HANDLE structTypeHandle);
 
 extern SCHEMA_RESULT Schema_AddStructTypeProperty(SCHEMA_STRUCT_TYPE_HANDLE structTypeHandle, const char* propertyName, const char* propertyType);
- 
+
 extern SCHEMA_RESULT Schema_AddModelProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName, const char* propertyType);
 extern SCHEMA_RESULT Schema_AddModelReportedProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* reportedPropertyName, const char* reportedPropertyType);
-extern SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyName, const char* desiredPropertyType);
-extern SCHEMA_RESULT Schema_AddModelModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName, SCHEMA_MODEL_TYPE_HANDLE modelType);
-
+extern SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyName, const char* desiredPropertyType, pfDesiredPropertyFromAGENT_DATA_TYPE desiredPropertyFromAGENT_DATA_TYPE, pfDesiredPropertyInitialize desiredPropertyInitialize, pfDesiredPropertyDeinitialize desiredPropertyDeinitialize, size_t offset);
+extern SCHEMA_RESULT Schema_AddModelModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName, SCHEMA_MODEL_TYPE_HANDLE modelType, size_t offset);
 extern SCHEMA_ACTION_HANDLE Schema_CreateModelAction(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* actionName);
 extern SCHEMA_RESULT Schema_AddModelActionArgument(SCHEMA_ACTION_HANDLE actionHandle, const char* argumentName, const char* argumentType);
- 
+extern pfDesiredPropertyFromAGENT_DATA_TYPE Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle);
+
+extern size_t Schema_GetModelModelByName_Offset(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName);
+extern size_t Schema_GetModelModelByIndex_Offset(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index);
+
+extern size_t Schema_GetModelDesiredProperty_offset(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle);
+extern size_t Schema_GetModelDesiredProperty_(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle);
+extern const char* Schema_GetModelDesiredPropertyType(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle);
+extern pfDesiredPropertyDeinitialize Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle);
+extern pfDesiredPropertyInitialize Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle);
+
+extern SCHEMA_ELEMENT_TYPE Schema_GetModelElementTypeByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* elementName);
+
 extern SCHEMA_RESULT Schema_GetModelCount(SCHEMA_HANDLE schemaHandle, size_t* modelCount);
 extern SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelByName(SCHEMA_HANDLE schemaHandle, const char* modelName);
 extern SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelByIndex(SCHEMA_HANDLE schemaHandle, size_t index);
@@ -80,24 +123,28 @@ extern SCHEMA_RESULT Schema_GetModelDesiredPropertyCount(SCHEMA_MODEL_TYPE_HANDL
 extern SCHEMA_DESIRED_PROPERTY_HANDLE Schema_GetModelDesiredPropertyByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyName);
 extern SCHEMA_DESIRED_PROPERTY_HANDLE Schema_GetModelDesiredPropertyByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index);
 
-extern SCHEMA_RESUL(Schema_GetModelModelCountSCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t* modelCount);
-extern SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelModelByNam(CHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName);
+extern SCHEMA_RESULT Schema_GetModelModelCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t* modelCount);
+extern SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelModelByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName);
 extern SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelModelyByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index);
 extern const char* Schema_GetModelModelPropertyNameByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index);
 
-extern bool Schema_ModelPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyPath); 
-extern bool Schema_ModelReportedPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* reportedPropertyPath);
-extern bool Schema_ModelDesiredPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyPath);
+extern _Bool Schema_ModelPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyPath);
+
+extern _Bool Schema_ModelReportedPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* reportedPropertyPath);
+extern _Bool Schema_ModelDesiredPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyPath);
 
 extern SCHEMA_RESULT Schema_GetModelActionCount(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t* actionCount);
 extern SCHEMA_ACTION_HANDLE Schema_GetModelActionByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* actionName);
 extern SCHEMA_ACTION_HANDLE Schema_GetModelActionByIndex(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index);
 
-extern const char* Schema_GetModelActionName(SCHEMA_ACTION_HANDLE actionHandle);
 extern SCHEMA_RESULT Schema_GetModelActionArgumentCount(SCHEMA_ACTION_HANDLE actionHandle, size_t* argumentCount);
+extern const char* Schema_GetModelActionName(SCHEMA_ACTION_HANDLE actionHandle);
+
 extern SCHEMA_ACTION_ARGUMENT_HANDLE Schema_GetModelActionArgumentByName(SCHEMA_ACTION_HANDLE actionHandle, const char* actionArgumentName);
 extern SCHEMA_ACTION_ARGUMENT_HANDLE Schema_GetModelActionArgumentByIndex(SCHEMA_ACTION_HANDLE actionHandle, size_t argumentIndex);
- 
+extern const char* Schema_GetActionArgumentName(SCHEMA_ACTION_ARGUMENT_HANDLE actionArgumentHandle);
+extern const char* Schema_GetActionArgumentType(SCHEMA_ACTION_ARGUMENT_HANDLE actionArgumentHandle);
+
 extern SCHEMA_RESULT Schema_GetStructTypeCount(SCHEMA_HANDLE schemaHandle, size_t* structTypeCount);
 extern SCHEMA_STRUCT_TYPE_HANDLE Schema_GetStructTypeByName(SCHEMA_HANDLE schemaHandle, const char* structTypeName);
 extern SCHEMA_STRUCT_TYPE_HANDLE Schema_GetStructTypeByIndex(SCHEMA_HANDLE schemaHandle, size_t index);
@@ -107,12 +154,9 @@ extern SCHEMA_PROPERTY_HANDLE Schema_GetStructTypePropertyByName(SCHEMA_STRUCT_T
 extern SCHEMA_PROPERTY_HANDLE Schema_GetStructTypePropertyByIndex(SCHEMA_STRUCT_TYPE_HANDLE structTypeHandle, size_t index);
 extern const char* Schema_GetPropertyName(SCHEMA_PROPERTY_HANDLE propertyHandle);
 extern const char* Schema_GetPropertyType(SCHEMA_PROPERTY_HANDLE propertyHandle);
-extern const char* Schema_GetActionArgumentName(SCHEMA_ACTION_ARGUMENT_HANDLE actionArgumentHandle);
-extern const char* Schema_GetActionArgumentType(SCHEMA_ACTION_ARGUMENT_HANDLE actionArgumentHandle);
- 
+
 extern void Schema_Destroy(SCHEMA_HANDLE schemaHandle);
-extern void Schema_DestroyIfUnused(SCHEMA_MODEL_TYPE_HANDLE modelHandle); 
-SCHEMA_HANDLE Schema_Create(const char* schemaNamespace);
+extern SCHEMA_RESULT Schema_DestroyIfUnused(SCHEMA_MODEL_TYPE_HANDLE modelHandle);
 ```
 
 **SRS_SCHEMA_99_001: [** Schema_Create shall create a schema with a given namespace. **]**
@@ -485,7 +529,7 @@ const char* Schema_GetModelName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle);
 
 ### Schema_AddModelModel
 ```c
-SCHEMA_RESULT Schema_AddModelModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName, SCHEMA_MODEL_TYPE_HANDLE modelType);
+SCHEMA_RESULT Schema_AddModelModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName, SCHEMA_MODEL_TYPE_HANDLE modelType, size_t offset);
 ```
 
 **SRS_SCHEMA_99_163: [** Schema_AddModelModel shall insert an existing model, identified by the handle modelType, into the existing model identified by modelTypeHandle under a property having the name propertyName. **]**
@@ -603,7 +647,7 @@ void Schema_DestroyIfUnused(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle);
 
 ### Schema_AddModelDesiredProperty
 ```c
-extern SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyName, const char* desiredPropertyType);
+extern SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyName, const char* desiredPropertyType, pfDesiredPropertyFromAGENT_DATA_TYPE desiredPropertyFromAGENT_DATA_TYPE, pfDesiredPropertyInitialize desiredPropertyInitialize, pfDesiredPropertyDeinitialize desiredPropertyDeinitialize, size_t offset);
 ```
 
 `Schema_AddModelDesiredProperty` adds a desired property to a model.
@@ -613,6 +657,12 @@ extern SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE mod
 **SRS_SCHEMA_02_025: [** If `desiredPropertyName` is `NULL` then `Schema_AddModelDesiredProperty` shall fail and return `SCHEMA_INVALID_ARG`. **]**
 
 **SRS_SCHEMA_02_026: [** If `desiredPropertyType` is `NULL` then `Schema_AddModelDesiredProperty` shall fail and return `SCHEMA_INVALID_ARG`. **]**
+
+**SRS_SCHEMA_02_048: [** If `desiredPropertyFromAGENT_DATA_TYPE` is `NULL` then `Schema_AddModelDesiredProperty` shall fail and return `SCHEMA_INVALID_ARG`. **]**
+
+**SRS_SCHEMA_02_049: [** If `desiredPropertyInitialize` is `NULL` then `Schema_AddModelDesiredProperty` shall fail and return `SCHEMA_INVALID_ARG`. **]**
+
+**SRS_SCHEMA_02_050: [** If `desiredPropertyDeinitialize` is `NULL` then `Schema_AddModelDesiredProperty` shall fail and return `SCHEMA_INVALID_ARG`. **]**
 
 **SRS_SCHEMA_02_027: [** `Schema_AddModelDesiredProperty` shall add the desired property given by the name `desiredPropertyName` and the type `desiredPropertyType` to the collection of existing desired properties. **]**
 
@@ -683,3 +733,109 @@ extern bool Schema_ModelDesiredPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE mod
 **SRS_SCHEMA_02_045: [** If the path desiredPropertyPath points to a sub-model, `Schema_ModelDesiredPropertyByPathExists` shall succeed and `true`. **]**
 
 **SRS_SCHEMA_02_046: [** If `desiredPropertyPath` exists then `Schema_ModelDesiredPropertyByPathExists` shall succeed and return `true`. **]**
+
+###  Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE
+```c
+extern pfDesiredPropertyFromAGENT_DATA_TYPE Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle);
+```
+
+`Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE` returns the original `desiredPropertyFromAGENT_DATA_TYPE` that was passed to `Schema_AddModelDesiredProperty`.
+
+**SRS_SCHEMA_02_051: [** If `desiredPropertyHandle` is `NULL` then `Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE` shall fail and return `NULL`. **]**
+
+**SRS_SCHEMA_02_052: [** Otherwise `Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE` shall succeed and return a non-`NULL` value. **]**
+
+### Schema_GetModelModelByName_Offset
+```c
+size_t Schema_GetModelModelByName_Offset(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName);
+```
+
+`Schema_GetModelModelByName_Offset` returns the offset in memory for a model in model specified by name.
+
+**SRS_SCHEMA_02_053: [** If `modelTypeHandle` is `NULL` then `Schema_GetModelModelByName_Offset` shall fail and return 0. **]**
+
+**SRS_SCHEMA_02_054: [** If `propertyName` is `NULL` then `Schema_GetModelModelByName_Offset` shall fail and return 0. **]**
+
+**SRS_SCHEMA_02_056: [** If `propertyName` is not a model then `Schema_GetModelModelByName_Offset` shall fail and return 0. **]**
+
+**SRS_SCHEMA_02_055: [** Otherwise `Schema_GetModelModelByName_Offset` shall succeed and return the offset. **]**
+
+### Schema_GetModelModelByIndex_Offset
+```c
+size_t Schema_GetModelModelByIndex_Offset(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index);
+```
+
+`Schema_GetModelModelByIndex_Offset` returns the offset in memory for a model in model specified by index.
+
+**SRS_SCHEMA_02_057: [** If `modelTypeHandle` is `NULL` then `Schema_GetModelModelByIndex_Offset` shall fail and return 0. **]**
+
+**SRS_SCHEMA_02_058: [** If `index` is not valid then `Schema_GetModelModelByIndex_Offset` shall fail and return 0. **]**
+
+ **SRS_SCHEMA_02_059: [** Otherwise `Schema_GetModelModelByIndex_Offset` shall succeed and return the offset. **]**
+
+ ### Schema_GetModelDesiredProperty_offset
+ ```c
+ size_t Schema_GetModelDesiredProperty_offset(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle);
+ ```
+
+`Schema_GetModelDesiredProperty_offset` returns the offset of a desired property.
+
+**SRS_SCHEMA_02_060: [** If `desiredPropertyHandle` is `NULL` then `Schema_GetModelDesiredProperty_offset` shall fail and return 0. **]**
+
+**SRS_SCHEMA_02_061: [** Otherwise `Schema_GetModelDesiredProperty_offset` shall succeed and return the offset. **]**
+
+### const char* Schema_GetModelDesiredPropertyType(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle);
+```c
+const char* Schema_GetModelDesiredPropertyType(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle);
+```
+
+`Schema_GetModelDesiredPropertyType` returns the type of a desired property.
+
+**SRS_SCHEMA_02_062: [** If `desiredPropertyHandle` is `NULL` then `Schema_GetModelDesiredPropertyType` shall fail and return `NULL`. **]**
+
+**SRS_SCHEMA_02_063: [** Otherwise, `Schema_GetModelDesiredPropertyType` shall return the type of the desired property. **]** 
+
+### Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize
+```c
+pfDesiredPropertyDeinitialize Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle);
+```
+
+`Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize` returns the desired property deinitialize function pointer.
+
+**SRS_SCHEMA_02_064: [** If `desiredPropertyHandle` is `NULL` then `Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize` shall fail and return `NULL`. **]**
+
+**SRS_SCHEMA_02_065: [** Otherwise `Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize` shall return a non-`NULL` function pointer. **]**
+
+### Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize
+```c
+pfDesiredPropertyInitialize Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle);
+```
+
+`Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize` returns the initialize function for a desired property.
+
+**SRS_SCHEMA_02_066: [** If `desiredPropertyHandle` is `NULL` then `Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize` shall fail and return `NULL`. **]**
+
+**SRS_SCHEMA_02_067: [** Otherwise `Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize` shall return a non-`NULL` function pointer. **]**
+
+### Schema_GetModelElementTypeByName
+```c
+SCHEMA_ELEMENT_TYPE Schema_GetModelElementTypeByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* elementName);
+```
+
+`Schema_GetModelElementTypeByName` returns the type of a model element by its name.
+
+**SRS_SCHEMA_02_068: [** If `modelTypeHandle` is `NULL` then `Schema_GetModelElementTypeByName` shall fail and return `SCHEMA_SEARCH_INVALID_ARG`. **]**
+
+**SRS_SCHEMA_02_069: [** If `elementName` is `NULL` then `Schema_GetModelElementTypeByName` shall fail and return `SCHEMA_SEARCH_INVALID_ARG`. **]**
+
+**SRS_SCHEMA_02_070: [** If `elementName` is a property then `Schema_GetModelElementTypeByName` shall return `SCHEMA_PROPERTY`. **]**
+
+**SRS_SCHEMA_02_071: [** If `elementName` is a reported property then `Schema_GetModelElementTypeByName` shall return `SCHEMA_REPORTED_PROPERTY`. **]**
+
+**SRS_SCHEMA_02_072: [** If `elementName` is a desired property then `Schema_GetModelElementTypeByName` shall return `SCHEMA_DESIRED_PROPERTY`. **]**
+
+**SRS_SCHEMA_02_073: [** If `elementName` is a model action then `Schema_GetModelElementTypeByName` shall return `SCHEMA_MODEL_ACTION`. **]**
+
+**SRS_SCHEMA_02_075: [** If `elementName` is a model in mode then `Schema_GetModelElementTypeByName` shall return `SCHEMA_MODEL_IN_MODEL`. **]**
+
+**SRS_SCHEMA_02_074: [** Otherwise `Schema_GetModelElementTypeByName` shall return `SCHEMA_NOT_FOUND`. **]**
