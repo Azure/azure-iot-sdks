@@ -13,6 +13,7 @@
     "azure-iot-device-amqp": "1.0.14"
   },
   "devDependencies": {
+    "azure-iothub": "^1.0.16",
     "chai": "^3.5.0",
     "istanbul": "^0.4.4",
     "jshint": "^2.9.2",

@@ -246,11 +246,16 @@ describe('Client', function () {
   });
 });
 
+var fakeRegistry = {
+  create: function(device, done) { done(); },
+  delete: function(deviceId, done) { done(); }
+};
+
 describe('Over simulated AMQP', function () {
   var opts = {
     transport: function () { return new SimulatedAmqp(); },
     connectionString: process.env.IOTHUB_CONNECTION_STRING,
-    id: 'id'
+    registry: fakeRegistry
   };
   transportSpecificTests(opts);
 });

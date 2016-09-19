@@ -97,7 +97,8 @@ static const char* TEST_DEVICE_KEY = "thisIsDeviceKey";
 static const char* TEST_DEVICE_SAS = "thisIsDeviceSasToken";
 static const char* TEST_IOTHUB_NAME = "thisIsIotHubName";
 static const char* TEST_IOTHUB_SUFFIX = "thisIsIotHubSuffix";
-static const char* TEST_PROTOCOL_GATEWAY_HOSTNAME = "ssl://thisIsAGatewayHostName.net";
+static const char* TEST_PROTOCOL_GATEWAY_HOSTNAME = NULL;
+static const char* TEST_PROTOCOL_GATEWAY_HOSTNAME_NON_NULL = "ssl://thisIsAGatewayHostName.net";
 static const char* TEST_VERY_LONG_DEVICE_ID = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890";
 static const char* TEST_MQTT_MESSAGE_TOPIC = "devices/thisIsDeviceID/messages/devicebound/#";
 static const char* TEST_MQTT_MSG_TOPIC = "devices/jebrandoDevice/messages/devicebound/iothub-ack=Full&%24.to=%2Fdevices%2FjebrandoDevice%2Fmessages%2FdeviceBound&%24.cid&%24.uid";
@@ -4533,5 +4534,6 @@ TEST_FUNCTION(IoTHubTransportMqtt_ProcessItem_fail)
     CONSTBUFFER_Destroy(cbh);
     umock_c_negative_tests_deinit();
 }
+
 
 END_TEST_SUITE(iothubtransportmqtt_ut)

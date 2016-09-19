@@ -1374,8 +1374,17 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
             }
             else
             {
-                /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [The hostname shall be constructed using the iothubname and iothubSuffix.] */
-                state->hostAddress = STRING_construct_sprintf("%s.%s", upperConfig->iotHubName, upperConfig->iotHubSuffix);
+                /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [If the upperConfig contains a valid protocolGatewayHostName value the this shall be used for the hostname, otherwise the hostname shall be constructed using the iothubname and iothubSuffix.] */
+
+                if (upperConfig->protocolGatewayHostName == NULL)
+                {
+                     state->hostAddress = STRING_construct_sprintf("%s.%s", upperConfig->iotHubName, upperConfig->iotHubSuffix);
+                }
+                else
+                {
+                    state->hostAddress = STRING_construct(upperConfig->protocolGatewayHostName);
+                }
+                
                 if (state->hostAddress == NULL)
                 {
                     LogError("failure constructing host address.");
