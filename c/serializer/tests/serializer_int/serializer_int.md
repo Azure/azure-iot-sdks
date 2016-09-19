@@ -1,6 +1,6 @@
-# serializer_local tests
+# serializer_int tests
 
-serializer_local are integration tests for serializer. These tests will usually: 
+serializer_int are integration tests for serializer. These tests will usually: 
 1. receive a JSON / test produced data structures from JSON
 2. set data structures to values and produce a JSON out of them
 

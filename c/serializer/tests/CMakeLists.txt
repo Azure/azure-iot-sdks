@@ -22,7 +22,7 @@ add_subdirectory(schema_ut)
 add_subdirectory(schemalib_ut)
 add_subdirectory(schemalib_without_init_ut)
 add_subdirectory(schemaserializer_ut)
-add_subdirectory(serializer_local)
+add_subdirectory(serializer_int)
 
 if(${use_amqp} AND ${use_http} AND (${run_e2e_tests} OR ${nuget_e2e_tests}))
 	add_subdirectory(serializer_e2e)

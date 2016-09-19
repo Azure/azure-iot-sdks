@@ -525,7 +525,7 @@ static bool areTwoJsonsEqual(const unsigned char* left, size_t leftSize, const c
     return result;
 }
 
-BEGIN_TEST_SUITE(serializer_local)
+BEGIN_TEST_SUITE(serializer_int)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
@@ -1773,4 +1773,4 @@ BEGIN_TEST_SUITE(serializer_local)
         ///clean
         DESTROY_MODEL_INSTANCE(modelWithData);
     }
-END_TEST_SUITE(serializer_local)
+END_TEST_SUITE(serializer_int)
