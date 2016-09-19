@@ -14,6 +14,9 @@ extern "C" {
 #include <stddef.h>
 #endif
 
+
+#include "agenttypesystem.h"
+
 /* Codes_SRS_SCHEMA_99_095: [Schema shall expose the following API:] */
 
 typedef struct SCHEMA_HANDLE_DATA_TAG* SCHEMA_HANDLE;
@@ -25,6 +28,11 @@ typedef struct SCHEMA_DESIRED_PROPERTY_HANDLE_DATA_TAG* SCHEMA_DESIRED_PROPERTY_
 typedef struct SCHEMA_ACTION_HANDLE_DATA_TAG* SCHEMA_ACTION_HANDLE;
 typedef struct SCHEMA_ACTION_ARGUMENT_HANDLE_DATA_TAG* SCHEMA_ACTION_ARGUMENT_HANDLE;
 
+typedef int(*pfDesiredPropertyFromAGENT_DATA_TYPE)(const AGENT_DATA_TYPE* source, void* dest);
+typedef void(*pfDesiredPropertyInitialize)(void* destination);
+typedef void(*pfDesiredPropertyDeinitialize)(void* destination);
+
+
 #define SCHEMA_RESULT_VALUES    \
 SCHEMA_OK,                      \
 SCHEMA_INVALID_ARG,             \
@@ -35,6 +43,18 @@ SCHEMA_DEVICE_COUNT_ZERO,       \
 SCHEMA_ERROR
 
 DEFINE_ENUM(SCHEMA_RESULT, SCHEMA_RESULT_VALUES)
+
+#define SCHEMA_ELEMENT_TYPE_VALUES \
+SCHEMA_NOT_FOUND, \
+SCHEMA_SEARCH_INVALID_ARG, \
+SCHEMA_PROPERTY, \
+SCHEMA_REPORTED_PROPERTY, \
+SCHEMA_DESIRED_PROPERTY, \
+SCHEMA_MODEL_ACTION, \
+SCHEMA_MODEL_IN_MODEL
+
+DEFINE_ENUM(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
+
 
 #include "azure_c_shared_utility/umock_c_prod.h"
 MOCKABLE_FUNCTION(, SCHEMA_HANDLE, Schema_Create, const char*, schemaNamespace);
@@ -56,10 +76,21 @@ MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddStructTypeProperty, SCHEMA_STRUCT_T
 
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName, const char*, propertyType);
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelReportedProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, reportedPropertyName, const char*, reportedPropertyType);
-MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelDesiredProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, desiredPropertyName, const char*, desiredPropertyType);
-MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelModel, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName, SCHEMA_MODEL_TYPE_HANDLE, modelType);
+MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelDesiredProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, desiredPropertyName, const char*, desiredPropertyType, pfDesiredPropertyFromAGENT_DATA_TYPE, desiredPropertyFromAGENT_DATA_TYPE, pfDesiredPropertyInitialize, desiredPropertyInitialize, pfDesiredPropertyDeinitialize, desiredPropertyDeinitialize, size_t, offset);
+MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelModel, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName, SCHEMA_MODEL_TYPE_HANDLE, modelType, size_t, offset);
 MOCKABLE_FUNCTION(, SCHEMA_ACTION_HANDLE, Schema_CreateModelAction, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, actionName);
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelActionArgument, SCHEMA_ACTION_HANDLE, actionHandle, const char*, argumentName, const char*, argumentType);
+MOCKABLE_FUNCTION(, pfDesiredPropertyFromAGENT_DATA_TYPE, Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE, SCHEMA_DESIRED_PROPERTY_HANDLE, desiredPropertyHandle);
+
+MOCKABLE_FUNCTION(, size_t, Schema_GetModelModelByName_Offset, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName);
+MOCKABLE_FUNCTION(, size_t, Schema_GetModelModelByIndex_Offset, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t, index);
+
+MOCKABLE_FUNCTION(, size_t, Schema_GetModelDesiredProperty_offset, SCHEMA_DESIRED_PROPERTY_HANDLE, desiredPropertyHandle);
+MOCKABLE_FUNCTION(, const char*, Schema_GetModelDesiredPropertyType, SCHEMA_DESIRED_PROPERTY_HANDLE, desiredPropertyHandle);
+MOCKABLE_FUNCTION(, pfDesiredPropertyDeinitialize, Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize, SCHEMA_DESIRED_PROPERTY_HANDLE, desiredPropertyHandle);
+MOCKABLE_FUNCTION(, pfDesiredPropertyInitialize, Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize, SCHEMA_DESIRED_PROPERTY_HANDLE, desiredPropertyHandle);
+
+MOCKABLE_FUNCTION(, SCHEMA_ELEMENT_TYPE, Schema_GetModelElementTypeByName, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, elementName);
 
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_GetModelCount, SCHEMA_HANDLE, schemaHandle, size_t*, modelCount);
 MOCKABLE_FUNCTION(, SCHEMA_MODEL_TYPE_HANDLE, Schema_GetModelByName, SCHEMA_HANDLE, schemaHandle, const char*, modelName);

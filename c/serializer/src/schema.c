@@ -29,8 +29,12 @@ typedef struct SCHEMA_REPORTED_PROPERTY_HANDLE_DATA_TAG
 
 typedef struct SCHEMA_DESIRED_PROPERTY_HANDLE_DATA_TAG
 {
+    pfDesiredPropertyInitialize desiredPropertInitialize;
+    pfDesiredPropertyDeinitialize desiredPropertDeinitialize;
     const char* desiredPropertyName;
     const char* desiredPropertyType;
+    pfDesiredPropertyFromAGENT_DATA_TYPE desiredPropertyFromAGENT_DATA_TYPE;
+    size_t offset;
 } SCHEMA_DESIRED_PROPERTY_HANDLE_DATA;
 
 typedef struct SCHEMA_ACTION_ARGUMENT_HANDLE_DATA_TAG
@@ -48,6 +52,7 @@ typedef struct SCHEMA_ACTION_HANDLE_DATA_TAG
 
 typedef struct MODEL_IN_MODEL_TAG
 {
+    size_t offset; /*offset of the model in model (offsetof)*/
     const char* propertyName;
     SCHEMA_MODEL_TYPE_HANDLE modelHandle;
 } MODEL_IN_MODEL;
@@ -1887,7 +1892,7 @@ const char* Schema_GetModelName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle)
 }
 
 /*Codes_SRS_SCHEMA_99_163: [Schema_AddModelModel shall insert an existing model, identified by the handle modelType, into the existing model identified by modelTypeHandle under a property having the name propertyName.]*/
-SCHEMA_RESULT Schema_AddModelModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName, SCHEMA_MODEL_TYPE_HANDLE modelType)
+SCHEMA_RESULT Schema_AddModelModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName, SCHEMA_MODEL_TYPE_HANDLE modelType, size_t offset)
 {
     SCHEMA_RESULT result;
     /*Codes_SRS_SCHEMA_99_165: [If any of the parameters is NULL then Schema_AddModelModel shall return SCHEMA_INVALID_ARG.]*/
@@ -1905,6 +1910,7 @@ SCHEMA_RESULT Schema_AddModelModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, con
         SCHEMA_MODEL_TYPE_HANDLE_DATA* parentModel = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
         MODEL_IN_MODEL temp;
         temp.modelHandle = modelType;
+        temp.offset = offset;
         if (mallocAndStrcpy_s((char**)&(temp.propertyName), propertyName) != 0)
         {
             result = SCHEMA_ERROR;
@@ -1920,6 +1926,7 @@ SCHEMA_RESULT Schema_AddModelModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, con
         else
         {
             /*Codes_SRS_SCHEMA_99_164: [If the function succeeds, then the return value shall be SCHEMA_OK.]*/
+            
             result = SCHEMA_OK;
         }
     }
@@ -1983,6 +1990,69 @@ SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelModelByName(SCHEMA_MODEL_TYPE_HANDLE mod
         else
         {
             result = ((MODEL_IN_MODEL*)temp)->modelHandle;
+        }
+    }
+    return result;
+}
+
+size_t Schema_GetModelModelByName_Offset(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName)
+{
+    size_t result;
+    /*Codes_SRS_SCHEMA_02_053: [ If modelTypeHandle is NULL then Schema_GetModelModelByName_Offset shall fail and return 0. ]*/
+    /*Codes_SRS_SCHEMA_02_054: [ If propertyName is NULL then Schema_GetModelModelByName_Offset shall fail and return 0. ]*/
+    if (
+        (modelTypeHandle == NULL) ||
+        (propertyName == NULL)
+        )
+    {
+        /*Codes_SRS_SCHEMA_99_171: [If Schema_GetModelModelByName is unable to provide the handle it shall return NULL.]*/
+        result = 0;
+        LogError("error SCHEMA_INVALID_ARG");
+    }
+    else
+    {
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* model = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
+        /*Codes_SRS_SCHEMA_02_056: [ If propertyName is not a model then Schema_GetModelModelByName_Offset shall fail and return 0. ]*/
+        void* temp = VECTOR_find_if(model->models, matchModelName, propertyName);
+        if (temp == NULL)
+        {
+            LogError("specified propertyName not found (%s)", propertyName);
+            result = 0;
+        }
+        else
+        {
+            /*Codes_SRS_SCHEMA_02_055: [ Otherwise Schema_GetModelModelByName_Offset shall succeed and return the offset. ]*/
+            result = ((MODEL_IN_MODEL*)temp)->offset;
+        }
+    }
+    return result;
+}
+
+size_t Schema_GetModelModelByIndex_Offset(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index)
+{
+    size_t result;
+    /*Codes_SRS_SCHEMA_02_057: [ If modelTypeHandle is NULL then Schema_GetModelModelByIndex_Offset shall fail and return 0. ]*/
+    if (
+        (modelTypeHandle == NULL)
+        )
+    {
+        result = 0;
+        LogError("error SCHEMA_INVALID_ARG");
+    }
+    else
+    {
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* model = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
+        /*Codes_SRS_SCHEMA_02_058: [ If index is not valid then Schema_GetModelModelByIndex_Offset shall fail and return 0. ]*/
+        void* temp = VECTOR_element(model->models, index);
+        if (temp == 0)
+        {
+            LogError("specified index [out of bounds] (%zu)", index);
+            result = 0;
+        }
+        else
+        {
+            /*Codes_SRS_SCHEMA_02_059: [ Otherwise Schema_GetModelModelByIndex_Offset shall succeed and return the offset. ]*/
+            result = ((MODEL_IN_MODEL*)temp)->offset;
         }
     }
     return result;
@@ -2228,26 +2298,33 @@ static bool desiredPropertyExists(const void* element, const void* value)
     return (strcmp(desiredProperty->desiredPropertyName, value) == 0);
 }
 
-SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyName, const char* desiredPropertyType)
+SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyName, const char* desiredPropertyType, pfDesiredPropertyFromAGENT_DATA_TYPE desiredPropertyFromAGENT_DATA_TYPE, pfDesiredPropertyInitialize desiredPropertyInitialize, pfDesiredPropertyDeinitialize desiredPropertyDeinitialize, size_t offset)
 {
     SCHEMA_RESULT result;
     /*Codes_SRS_SCHEMA_02_024: [ If modelTypeHandle is NULL then Schema_AddModelDesiredProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
     /*Codes_SRS_SCHEMA_02_025: [ If desiredPropertyName is NULL then Schema_AddModelDesiredProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
     /*Codes_SRS_SCHEMA_02_026: [ If desiredPropertyType is NULL then Schema_AddModelDesiredProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
+    /*Codes_SRS_SCHEMA_02_048: [ If desiredPropertyFromAGENT_DATA_TYPE is NULL then Schema_AddModelDesiredProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
+    /*Codes_SRS_SCHEMA_02_049: [ If desiredPropertyInitialize is NULL then Schema_AddModelDesiredProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
+    /*Codes_SRS_SCHEMA_02_050: [ If desiredPropertyDeinitialize is NULL then Schema_AddModelDesiredProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
     if (
         (modelTypeHandle == NULL) ||
         (desiredPropertyName == NULL) ||
-        (desiredPropertyType == NULL)
+        (desiredPropertyType == NULL) ||
+        (desiredPropertyFromAGENT_DATA_TYPE == NULL) ||
+        (desiredPropertyInitialize == NULL) ||
+        (desiredPropertyDeinitialize== NULL)
         )
     {
-        LogError("invalid arg SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, const char* desiredPropertyName=%p, const char* desiredPropertyType=%p", modelTypeHandle, desiredPropertyName, desiredPropertyType);
+        LogError("invalid arg SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, const char* desiredPropertyName=%p, const char* desiredPropertyType=%p, pfDesiredPropertyFromAGENT_DATA_TYPE desiredPropertyFromAGENT_DATA_TYPE=%p, pfDesiredPropertyInitialize desiredPropertyInitialize=%p, pfDesiredPropertyDeinitialize desiredPropertyDeinitialize=%p, size_t offset=%zu",
+            modelTypeHandle, desiredPropertyName, desiredPropertyType, desiredPropertyFromAGENT_DATA_TYPE, desiredPropertyInitialize, desiredPropertyDeinitialize, offset);
         result = SCHEMA_INVALID_ARG;
     }
     else
     {
         SCHEMA_MODEL_TYPE_HANDLE_DATA* handleData = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
         /*Codes_SRS_SCHEMA_02_027: [ Schema_AddModelDesiredProperty shall add the desired property given by the name desiredPropertyName and the type desiredPropertyType to the collection of existing desired properties. ]*/
-        if (VECTOR_find_if(handleData->desiredProperties, reportedPropertyExists, desiredPropertyName) != NULL)
+        if (VECTOR_find_if(handleData->desiredProperties, desiredPropertyExists, desiredPropertyName) != NULL)
         {
             /*Codes_SRS_SCHEMA_02_047: [ If the desired property already exists, then Schema_AddModelDesiredProperty shall fail and return SCHEMA_DUPLICATE_ELEMENT. ]*/
             LogError("unable to Schema_AddModelDesiredProperty because a desired property with the same name (%s) already exists", desiredPropertyName);
@@ -2295,12 +2372,15 @@ SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeH
                         else
                         {
                             /*Codes_SRS_SCHEMA_02_029: [ Otherwise, Schema_AddModelDesiredProperty shall succeed and return SCHEMA_OK. ]*/
+                            desiredProperty->desiredPropertyFromAGENT_DATA_TYPE = desiredPropertyFromAGENT_DATA_TYPE;
+                            desiredProperty->desiredPropertInitialize = desiredPropertyInitialize;
+                            desiredProperty->desiredPropertDeinitialize = desiredPropertyDeinitialize;
+                            desiredProperty->offset = offset;
                             result = SCHEMA_OK;
                         }
                     }
                 }
             }
-
         }
     }
     return result;
@@ -2348,10 +2428,15 @@ SCHEMA_DESIRED_PROPERTY_HANDLE Schema_GetModelDesiredPropertyByName(SCHEMA_MODEL
         /*Codes_SRS_SCHEMA_02_036: [ If a desired property having the name desiredPropertyName exists then Schema_GetModelDesiredPropertyByName shall succeed and return a non-NULL value. ]*/
         /*Codes_SRS_SCHEMA_02_037: [ Otherwise, Schema_GetModelDesiredPropertyByName shall fail and return NULL. ]*/
         SCHEMA_MODEL_TYPE_HANDLE_DATA* handleData = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
-        result = VECTOR_find_if(handleData->desiredProperties, desiredPropertyExists, desiredPropertyName);
-        if (result == NULL)
+        SCHEMA_DESIRED_PROPERTY_HANDLE* temp = VECTOR_find_if(handleData->desiredProperties, desiredPropertyExists, desiredPropertyName);
+        if (temp == NULL)
         {
-            LogError("no such property by name %s", desiredPropertyName);
+            LogError("no such desired property by name %s", desiredPropertyName);
+            result = NULL;
+        }
+        else
+        {
+            result = *temp;
         }
     }
     return result;
@@ -2371,10 +2456,15 @@ SCHEMA_DESIRED_PROPERTY_HANDLE Schema_GetModelDesiredPropertyByIndex(SCHEMA_MODE
         SCHEMA_MODEL_TYPE_HANDLE_DATA* handleData = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
         /*Codes_SRS_SCHEMA_02_039: [ If index is outside the range for existing indexes of desire properties, then Schema_GetModelDesiredPropertyByIndex shall fail and return NULL. ]*/
         /*Codes_SRS_SCHEMA_02_040: [ Otherwise, Schema_GetModelDesiredPropertyByIndex shall succeed and return a non-NULL value. ]*/
-        result = VECTOR_element(handleData->desiredProperties, index);
-        if (result == NULL)
+        SCHEMA_DESIRED_PROPERTY_HANDLE* temp = VECTOR_element(handleData->desiredProperties, index);
+        if (temp == NULL)
         {
             LogError("VECTOR_element produced NULL (likely out of bounds index)");
+            result = NULL;
+        }
+        else
+        {
+            result = *temp;
         }
     }
     return result;
@@ -2463,3 +2553,190 @@ bool Schema_ModelDesiredPropertyByPathExists(SCHEMA_MODEL_TYPE_HANDLE modelTypeH
     }
     return result;
 }
+
+const char* Schema_GetModelDesiredPropertyType(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle)
+{
+    const char* result;
+    /*Codes_SRS_SCHEMA_02_062: [ If desiredPropertyHandle is NULL then Schema_GetModelDesiredPropertyType shall fail and return NULL. ]*/
+    if (desiredPropertyHandle == NULL)
+    {
+        LogError("invalid argument SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle=%p", desiredPropertyHandle);
+        result = NULL;
+    }
+    else
+    {
+        /*Codes_SRS_SCHEMA_02_063: [ Otherwise, Schema_GetModelDesiredPropertyType shall return the type of the desired property. ]*/
+        SCHEMA_DESIRED_PROPERTY_HANDLE_DATA* desirePropertyHandleData = (SCHEMA_DESIRED_PROPERTY_HANDLE_DATA*)desiredPropertyHandle;
+        result = desirePropertyHandleData->desiredPropertyType;
+    }
+    return result;
+}
+
+pfDesiredPropertyFromAGENT_DATA_TYPE Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle)
+{
+    pfDesiredPropertyFromAGENT_DATA_TYPE result;
+    if (desiredPropertyHandle == NULL)
+    {
+        LogError("invalid argument SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle=%p", desiredPropertyHandle);
+        result = NULL;
+    }
+    else
+    {
+        SCHEMA_DESIRED_PROPERTY_HANDLE_DATA* desirePropertyHandleData = (SCHEMA_DESIRED_PROPERTY_HANDLE_DATA*)desiredPropertyHandle;
+        result = desirePropertyHandleData->desiredPropertyFromAGENT_DATA_TYPE;
+    }
+    return result;
+}
+
+size_t Schema_GetModelDesiredProperty_offset(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle)
+{
+    size_t result;
+    /*Codes_SRS_SCHEMA_02_060: [ If desiredPropertyHandle is NULL then Schema_GetModelDesiredProperty_offset shall fail and return 0. ]*/
+    if (desiredPropertyHandle == NULL)
+    {
+        LogError("invalid argument SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle=%p", desiredPropertyHandle);
+        result = 0;
+    }
+    else
+    {
+        /*Codes_SRS_SCHEMA_02_061: [ Otherwise Schema_GetModelDesiredProperty_offset shall succeed and return the offset. ]*/
+        SCHEMA_DESIRED_PROPERTY_HANDLE_DATA* desirePropertyHandleData = (SCHEMA_DESIRED_PROPERTY_HANDLE_DATA*)desiredPropertyHandle;
+        result = desirePropertyHandleData->offset;
+    }
+    return result;
+}
+
+static bool modelInModelExists(const void* element, const void* value)
+{
+    MODEL_IN_MODEL* modelInModel = (MODEL_IN_MODEL*)element;
+    return (strcmp(modelInModel->propertyName, value) == 0);
+}
+
+SCHEMA_ELEMENT_TYPE Schema_GetModelElementTypeByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* elementName)
+{
+    SCHEMA_ELEMENT_TYPE result;
+    /*Codes_SRS_SCHEMA_02_068: [ If modelTypeHandle is NULL then Schema_GetModelElementTypeByName shall fail and return SCHEMA_SEARCH_INVALID_ARG. */
+    /*Codes_SRS_SCHEMA_02_069: [ If elementName is NULL then Schema_GetModelElementTypeByName shall fail and return SCHEMA_SEARCH_INVALID_ARG. ]*/
+    if (
+        (modelTypeHandle == NULL) ||
+        (elementName == NULL)
+        )
+    {
+        LogError("invalid argument SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, const char* elementName=%p", modelTypeHandle, elementName);
+        result = SCHEMA_SEARCH_INVALID_ARG;
+    }
+    else
+    {
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* handleData = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
+
+        /*Codes_SRS_SCHEMA_02_072: [ If elementName is a desired property then Schema_GetModelElementTypeByName shall return SCHEMA_DESIRED_PROPERTY. ]*/
+        if (VECTOR_find_if(handleData->desiredProperties, desiredPropertyExists, elementName) != NULL)
+        {
+            result = SCHEMA_DESIRED_PROPERTY;
+        }
+        else
+        {
+            /*Codes_SRS_SCHEMA_02_070: [ If elementName is a property then Schema_GetModelElementTypeByName shall return SCHEMA_PROPERTY. ]*/
+            size_t nProcessedProperties = 0;
+            for (size_t i = 0; i < handleData->PropertyCount;i++)
+            {
+                SCHEMA_PROPERTY_HANDLE_DATA* property = (SCHEMA_PROPERTY_HANDLE_DATA*)(handleData->Properties[i]);
+                if (strcmp(property->PropertyName, elementName) == 0)
+                {
+                    i = handleData->PropertyCount; /*found its type, so get out*/
+                }
+                else
+                {
+                    nProcessedProperties++;
+                }
+            }
+
+            if (nProcessedProperties < handleData->PropertyCount)
+            {
+                result = SCHEMA_PROPERTY;
+            }
+            else
+            {
+                /*Codes_SRS_SCHEMA_02_071: [ If elementName is a reported property then Schema_GetModelElementTypeByName shall return SCHEMA_REPORTED_PROPERTY. ]*/
+                if (VECTOR_find_if(handleData->reportedProperties, reportedPropertyExists, elementName) != NULL)
+                {
+                    result = SCHEMA_REPORTED_PROPERTY;
+                }
+                else
+                {
+                    /*Codes_SRS_SCHEMA_02_073: [ If elementName is a model action then Schema_GetModelElementTypeByName shall return SCHEMA_MODEL_ACTION. ]*/
+                    size_t nProcessedActions = 0;
+                    for (size_t i = 0;i < handleData->ActionCount; i++)
+                    {
+                        SCHEMA_ACTION_HANDLE_DATA* actionHandleData = (SCHEMA_ACTION_HANDLE_DATA*)(handleData->Actions[i]);
+                        if (strcmp(actionHandleData->ActionName, elementName) == 0)
+                        {
+                            i = handleData->ActionCount; /*get out quickly*/
+                        }
+                        else
+                        {
+                            nProcessedActions++;
+                        }
+                    }
+
+                    if (nProcessedActions < handleData->ActionCount)
+                    {
+                        result = SCHEMA_MODEL_ACTION;
+                    }
+                    else
+                    {
+                        /*Codes_SRS_SCHEMA_02_075: [ If elementName is a model in mode then Schema_GetModelElementTypeByName shall return SCHEMA_MODEL_IN_MODEL. ]*/
+                        if (VECTOR_find_if(handleData->models, modelInModelExists, elementName) != NULL)
+                        {
+                            result = SCHEMA_MODEL_IN_MODEL;
+                        }
+                        else
+                        {
+                            /*Codes_SRS_SCHEMA_02_074: [ Otherwise Schema_GetModelElementTypeByName shall return SCHEMA_NOT_FOUND. ]*/
+                            result = SCHEMA_NOT_FOUND;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return result;
+}
+
+pfDesiredPropertyDeinitialize Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle)
+{
+    pfDesiredPropertyDeinitialize result;
+    /*Ccodes_SRS_SCHEMA_02_064: [ If desiredPropertyHandle is NULL then Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize shall fail and return NULL. ]*/
+    if (desiredPropertyHandle == NULL)
+    {
+        LogError("invalid argument SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle=%p", desiredPropertyHandle);
+        result = NULL;
+    }
+    else
+    {
+        /*Codes_SRS_SCHEMA_02_065: [ Otherwise Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize shall return a non-NULL function pointer. ]*/
+        SCHEMA_DESIRED_PROPERTY_HANDLE_DATA* handleData = (SCHEMA_DESIRED_PROPERTY_HANDLE_DATA*)desiredPropertyHandle;
+        result = handleData->desiredPropertDeinitialize;
+    }
+    return result;
+}
+
+pfDesiredPropertyInitialize Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle)
+{
+    pfDesiredPropertyInitialize result;
+    /*Codes_SRS_SCHEMA_02_066: [ If desiredPropertyHandle is NULL then Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize shall fail and return NULL. ]*/
+    if (desiredPropertyHandle == NULL)
+    {
+        LogError("invalid argument SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle=%p", desiredPropertyHandle);
+        result = NULL;
+    }
+    else
+    {
+        /*Codes_SRS_SCHEMA_02_067: [ Otherwise Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize shall return a non-NULL function pointer. ]*/
+        SCHEMA_DESIRED_PROPERTY_HANDLE_DATA* handleData = (SCHEMA_DESIRED_PROPERTY_HANDLE_DATA*)desiredPropertyHandle;
+        result = handleData->desiredPropertInitialize;
+    }
+    return result;
+}
+
+

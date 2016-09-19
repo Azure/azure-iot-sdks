@@ -52,7 +52,6 @@ MULTITREE_HANDLE MultiTree_Create(MULTITREE_CLONE_FUNCTION cloneFunction, MULTIT
             result->value = NULL;
             result->cloneFunction = cloneFunction;
             result->freeFunction = freeFunction;
-            result->value = NULL;
             result->nChildren = 0;
             result->children = NULL;
         }

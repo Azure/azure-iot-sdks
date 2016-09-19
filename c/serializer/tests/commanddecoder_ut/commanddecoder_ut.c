@@ -21,12 +21,23 @@ void my_gballoc_free(void * t)
 #include <crtdbg.h>
 #endif
 
+#define GBALLOC_H
+/*want crt_abstractions to use real malloc*/
+#define mallocAndStrcpy_s real_mallocAndStrcpy_s
+#define unsignedIntToString real_unsignedIntToString
+#define size_tToString real_size_tToString 
+#include "crt_abstractions.c"
+#undef mallocAndStrcpy_s 
+#undef unsignedIntToString 
+#undef size_tToString 
+#undef CRT_ABSTRACTIONS_H
+#undef GBALLOC_H
+
 #include "umock_c.h"
 #include "umocktypes_charptr.h"
 #include "umocktypes_bool.h"
 #include "umocktypes_stdint.h"
 #include "umock_c_negative_tests.h"
-
 
 
 #define ENABLE_MOCKS
@@ -43,6 +54,7 @@ void my_gballoc_free(void * t)
 #include "jsondecoder.h"
 
 MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, ActionCallbackMock, void*, actionCallbackContext, const char*, relativeActionPath, const char*, actionName, size_t, parameterCount, const AGENT_DATA_TYPE*, parameterValues);
+MOCKABLE_FUNCTION(, int, int_pfDesiredPropertyFromAGENT_DATA_TYPE, const AGENT_DATA_TYPE*, source, void*, dest);
 #undef ENABLE_MOCKS
 
 #include "azure_c_shared_utility/lock.h"
@@ -114,7 +126,15 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(AGENT_DATA_TYPE_TYPE, AGENT_DATA_TYPE_TYPE_VALUES);
 TEST_DEFINE_ENUM_TYPE(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT_VALUES);
 
+TEST_DEFINE_ENUM_TYPE(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
 
+
+
+#define TEST_STRING_HANDLE_CHILD_NAME (STRING_HANDLE) 0x3
+#define TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD (SCHEMA_DESIRED_PROPERTY_HANDLE)0x4
+#define TEST_SCHEMA (SCHEMA_HANDLE)0x5
+#define SCHEMA_MODEL_TYPE_HANDLE_MODEL_IN_MODEL (SCHEMA_MODEL_TYPE_HANDLE)0x6
 
 static const SCHEMA_MODEL_TYPE_HANDLE TEST_MODEL_HANDLE = (SCHEMA_MODEL_TYPE_HANDLE)0x4301;
 static void* TEST_CALLBACK_CONTEXT_VALUE = (void*)0x4242;
@@ -212,6 +232,9 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_ACTION_ARGUMENT_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_STRUCT_TYPE_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_PROPERTY_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_DESIRED_PROPERTY_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(pfDesiredPropertyFromAGENT_DATA_TYPE, void*);
         
         REGISTER_UMOCK_ALIAS_TYPE(JSON_DECODER_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(MULTITREE_RESULT, int);
@@ -219,6 +242,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         REGISTER_UMOCK_ALIAS_TYPE(AGENT_DATA_TYPE_TYPE, int);
         REGISTER_UMOCK_ALIAS_TYPE(AGENT_DATA_TYPES_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(EXECUTE_COMMAND_RESULT, int);
+        REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_ELEMENT_TYPE, int);
 
         REGISTER_GLOBAL_MOCK_HOOK(JSONDecoder_JSON_To_MultiTree, my_JSONDecoder_JSON_To_MultiTree);
         REGISTER_GLOBAL_MOCK_HOOK(MultiTree_Destroy, my_MultiTree_Destroy);
@@ -229,6 +253,21 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         REGISTER_GLOBAL_MOCK_RETURN(MultiTree_GetChildByName, MULTITREE_OK);
         REGISTER_GLOBAL_MOCK_RETURN(MultiTree_GetValue, MULTITREE_OK);
         REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelModelByName, TEST_CHILD_MODEL_HANDLE);
+        
+        REGISTER_GLOBAL_MOCK_HOOK(mallocAndStrcpy_s, real_mallocAndStrcpy_s);
+
+
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(mallocAndStrcpy_s, __LINE__);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(JSONDecoder_JSON_To_MultiTree, JSON_DECODER_ERROR);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(MultiTree_GetChild, MULTITREE_ERROR);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_new, NULL);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(MultiTree_GetName, MULTITREE_ERROR);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelElementTypeByName, SCHEMA_NOT_FOUND);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelDesiredPropertyByName, NULL);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(MultiTree_GetValue, MULTITREE_ERROR);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(CreateAgentDataType_From_String, AGENT_DATA_TYPES_ERROR);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(int_pfDesiredPropertyFromAGENT_DATA_TYPE, __LINE__);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelModelByName, NULL);
         
     }
 
@@ -2787,4 +2826,422 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         // cleanup
         CommandDecoder_Destroy(commandDecoderHandle);
     }
+
+    /*Tests_SRS_COMMAND_DECODER_02_001: [ If startAddress is NULL then CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_ERROR. ]*/
+    TEST_FUNCTION(CommandDecoder_IngestDesiredProperties_with_NULL_startAddress_fails) 
+    {
+        ///arrange
+        COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
+        umock_c_reset_all_calls();
+
+        ///act
+        EXECUTE_COMMAND_RESULT result = CommandDecoder_IngestDesiredProperties(NULL, commandDecoderHandle, "some properties");
+        
+        ///assert
+        ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
+
+        ///clean
+        CommandDecoder_Destroy(commandDecoderHandle);
+    }
+
+    /*Tests_SRS_COMMAND_DECODER_02_002: [ If handle is NULL then CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_ERROR. ]*/
+    TEST_FUNCTION(CommandDecoder_IngestDesiredProperties_with_NULL_handle_fails)
+    {
+        ///arrange
+        char deviceMemoryArea[100];
+
+        ///act
+        EXECUTE_COMMAND_RESULT result = CommandDecoder_IngestDesiredProperties(deviceMemoryArea, NULL, "some properties");
+
+        ///assert
+        ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
+
+        ///clean
+    }
+
+    /*Tests_SRS_COMMAND_DECODER_02_003: [ If desiredProperties is NULL then CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_ERROR. ]*/
+    TEST_FUNCTION(CommandDecoder_IngestDesiredProperties_with_NULL_desiredProperties_fails)
+    {
+        ///arrange
+        COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
+        umock_c_reset_all_calls();
+        char deviceMemoryArea[100];
+
+        ///act
+        EXECUTE_COMMAND_RESULT result = CommandDecoder_IngestDesiredProperties(deviceMemoryArea, commandDecoderHandle, NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
+
+        ///clean
+        CommandDecoder_Destroy(commandDecoderHandle);
+    }
+
+    void CommandDecoder_IngestDesiredProperties_with_1_simple_desired_property_succeeds_inert_path(unsigned char* deviceMemoryArea, const char* desiredPropertiesJSON, const char* three, size_t one, MULTITREE_HANDLE childHandle)
+    {
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, desiredPropertiesJSON))
+            .IgnoreArgument_destination();
+
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_json()
+            .IgnoreArgument_multiTreeHandle();
+
+        STRICT_EXPECTED_CALL(MultiTree_GetChildCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_treeHandle()
+            .CopyOutArgumentBuffer_count(&one, sizeof(one));
+
+        STRICT_EXPECTED_CALL(MultiTree_GetChild(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
+            .IgnoreArgument_treeHandle()
+            .CopyOutArgumentBuffer_childHandle(&childHandle, sizeof(childHandle));
+
+        STRICT_EXPECTED_CALL(STRING_new())
+            .SetReturn(TEST_STRING_HANDLE_CHILD_NAME);
+
+        STRICT_EXPECTED_CALL(MultiTree_GetName(childHandle, TEST_STRING_HANDLE_CHILD_NAME)); /*this fills in TEST_STRING_HANDLE_CHILD_NAME with "int_field"*/
+
+        STRICT_EXPECTED_CALL(STRING_c_str(TEST_STRING_HANDLE_CHILD_NAME))
+            .SetReturn("int_field");
+
+        STRICT_EXPECTED_CALL(Schema_GetModelElementTypeByName(TEST_MODEL_HANDLE, "int_field"))
+            .SetReturn(SCHEMA_DESIRED_PROPERTY);
+
+        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyByName(TEST_MODEL_HANDLE, "int_field"))
+            .SetReturn(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD);
+
+        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyType(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD))
+            .SetReturn("int");
+
+        STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(TEST_MODEL_HANDLE))
+            .SetReturn(TEST_SCHEMA);
+
+        /*this is DecodeValueFromNode expected calls*/
+
+        STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("int"))
+            .SetReturn(EDM_INT32_TYPE);
+
+        STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_treeHandle()
+            .CopyOutArgumentBuffer_destination(&three, sizeof(three));
+
+        STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(IGNORED_PTR_ARG, EDM_INT32_TYPE, IGNORED_PTR_ARG))
+            .IgnoreArgument_source()
+            .IgnoreArgument_agentData()
+            .SetReturn(AGENT_DATA_TYPES_OK);
+
+        STRICT_EXPECTED_CALL(Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD))
+            .SetReturn(int_pfDesiredPropertyFromAGENT_DATA_TYPE);
+
+        STRICT_EXPECTED_CALL(Schema_GetModelDesiredProperty_offset(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD))
+            .SetReturn(2);
+
+        STRICT_EXPECTED_CALL(int_pfDesiredPropertyFromAGENT_DATA_TYPE(IGNORED_PTR_ARG, (unsigned char*)deviceMemoryArea + 2))
+            .IgnoreArgument_source();
+
+        STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
+            .IgnoreArgument_agentData();
+
+        STRICT_EXPECTED_CALL(STRING_delete(TEST_STRING_HANDLE_CHILD_NAME));
+
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument_treeHandle();
+
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+    }
+
+    /*case1: a simple property (non-recursive) is ingested*/
+    /*the property is called "int_field" and shall have the value 3*/
+    /*Tests_SRS_COMMAND_DECODER_02_005: [ CommandDecoder_IngestDesiredProperties shall create a MULTITREE_HANDLE ouf of the clone of desiredProperties. ]*/
+    /*Tests_SRS_COMMAND_DECODER_02_007: [ If the child name corresponds to a desired property then an AGENT_DATA_TYPE shall be constructed from the MULTITREE node. ]*/
+    /*Tests_SRS_COMMAND_DECODER_02_008: [ The desired property shall be constructed in memory by calling pfDesiredPropertyFromAGENT_DATA_TYPE. ]*/
+    /*Tests_SRS_COMMAND_DECODER_02_010: [ If the complete MULTITREE has been parsed then CommandDecoder_IngestDesiredProperties shall succeed and return EXECUTE_COMMAND_SUCCESS. ]*/
+    TEST_FUNCTION(CommandDecoder_IngestDesiredProperties_with_1_simple_desired_property_happy_path)
+    {
+        ///arrange
+        COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
+        umock_c_reset_all_calls();
+        unsigned char deviceMemoryArea[100];
+        const char* desiredPropertiesJSON = "{\"int_field\":3}";
+        const char* three = "3";
+        size_t one = 1;
+        MULTITREE_HANDLE childHandle = (MULTITREE_HANDLE)0x11;
+
+        CommandDecoder_IngestDesiredProperties_with_1_simple_desired_property_succeeds_inert_path(deviceMemoryArea, desiredPropertiesJSON, three, one, childHandle);
+
+        ///act
+        EXECUTE_COMMAND_RESULT result = CommandDecoder_IngestDesiredProperties(deviceMemoryArea, commandDecoderHandle, desiredPropertiesJSON);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+        ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result);
+
+        ///clean
+        CommandDecoder_Destroy(commandDecoderHandle);
+
+    }
+
+    /*Tests_SRS_COMMAND_DECODER_02_011: [ Otherwise CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_FAILED. ]*/
+    TEST_FUNCTION(CommandDecoder_IngestDesiredProperties_with_1_simple_desired_property_succeeds_unhappy_paths)
+    {
+        ///arrange
+        COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
+        unsigned char deviceMemoryArea[100];
+        const char* desiredPropertiesJSON = "{\"int_field\":3}";
+        const char* three = "3";
+        size_t one = 1;
+        MULTITREE_HANDLE childHandle = (MULTITREE_HANDLE)0x11;
+        (void)umock_c_negative_tests_init();
+        umock_c_reset_all_calls();
+
+        CommandDecoder_IngestDesiredProperties_with_1_simple_desired_property_succeeds_inert_path(deviceMemoryArea, desiredPropertiesJSON, three, one, childHandle);
+
+        umock_c_negative_tests_snapshot();
+
+        size_t calls_that_cannot_fail[] =
+        {
+            2,/*MultiTree_GetChildCount*/
+            6, /*STRING_c_str*/
+            9, /*Schema_GetModelDesiredPropertyType*/
+            10, /*Schema_GetSchemaForModelType*/
+            11, /*CodeFirst_GetPrimitiveType*/
+            14, /*Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE*/
+            15, /*Schema_GetModelDesiredProperty_offset*/
+            17, /*Destroy_AGENT_DATA_TYPE*/
+            18, /*STRING_delete*/
+            19, /*MultiTree_Destroy*/
+            20 /*gballoc_free*/
+        };
+
+        for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+        {
+            size_t j;
+            umock_c_negative_tests_reset();
+
+            for (j = 0;j<sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++) /*not running the tests that cannot fail*/
+            {
+                if (calls_that_cannot_fail[j] == i)
+                    break;
+            }
+
+            if (j == sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]))
+            {
+
+                umock_c_negative_tests_fail_call(i);
+                char temp_str[128];
+                sprintf(temp_str, "On failed call %zu", i);
+
+                ///act
+                EXECUTE_COMMAND_RESULT result = CommandDecoder_IngestDesiredProperties(deviceMemoryArea, commandDecoderHandle, desiredPropertiesJSON);
+
+                ///assert
+                ASSERT_ARE_NOT_EQUAL_WITH_MSG(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result, temp_str);
+            }
+        }
+
+        umock_c_negative_tests_deinit();
+
+        ///clean
+        CommandDecoder_Destroy(commandDecoderHandle);
+    }
+
+    void CommandDecoder_IngestDesiredProperties_with_1_simple_model_in_model_desired_property_inert_path(unsigned char* deviceMemoryArea, const char* desiredPropertiesJSON, const char* three, size_t one, MULTITREE_HANDLE childHandle)
+    {
+        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, desiredPropertiesJSON))
+            .IgnoreArgument_destination();
+
+        STRICT_EXPECTED_CALL(JSONDecoder_JSON_To_MultiTree(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_json()
+            .IgnoreArgument_multiTreeHandle();
+
+        STRICT_EXPECTED_CALL(MultiTree_GetChildCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*2*/
+            .IgnoreArgument_treeHandle()
+            .CopyOutArgumentBuffer_count(&one, sizeof(one));
+
+        STRICT_EXPECTED_CALL(MultiTree_GetChild(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
+            .IgnoreArgument_treeHandle()
+            .CopyOutArgumentBuffer_childHandle(&childHandle, sizeof(childHandle));
+
+        STRICT_EXPECTED_CALL(STRING_new())
+            .SetReturn(TEST_STRING_HANDLE_CHILD_NAME);
+
+        STRICT_EXPECTED_CALL(MultiTree_GetName(childHandle, TEST_STRING_HANDLE_CHILD_NAME)); /*this fills in TEST_STRING_HANDLE_CHILD_NAME with "modelInModel"*/
+
+        STRICT_EXPECTED_CALL(STRING_c_str(TEST_STRING_HANDLE_CHILD_NAME)) /*6*/
+            .SetReturn("modelInModel");
+
+        STRICT_EXPECTED_CALL(Schema_GetModelElementTypeByName(TEST_MODEL_HANDLE, "modelInModel"))
+            .SetReturn(SCHEMA_MODEL_IN_MODEL);
+
+        STRICT_EXPECTED_CALL(Schema_GetModelModelByName(TEST_MODEL_HANDLE, "modelInModel"))
+            .SetReturn(SCHEMA_MODEL_TYPE_HANDLE_MODEL_IN_MODEL);
+
+        STRICT_EXPECTED_CALL(Schema_GetModelModelByName_Offset(TEST_MODEL_HANDLE, "modelInModel")) /*9*/
+            .SetReturn(10);
+
+        /*here recursion happens*/
+
+        {
+            STRICT_EXPECTED_CALL(MultiTree_GetChildCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*10*/
+                .IgnoreArgument_treeHandle()
+                .CopyOutArgumentBuffer_count(&one, sizeof(one));
+
+            STRICT_EXPECTED_CALL(MultiTree_GetChild(IGNORED_PTR_ARG, 0, IGNORED_PTR_ARG))
+                .IgnoreArgument_treeHandle()
+                .CopyOutArgumentBuffer_childHandle(&childHandle, sizeof(childHandle));
+
+            STRICT_EXPECTED_CALL(STRING_new())
+                .SetReturn(TEST_STRING_HANDLE_CHILD_NAME);
+
+            STRICT_EXPECTED_CALL(MultiTree_GetName(childHandle, TEST_STRING_HANDLE_CHILD_NAME)); /*13*/ /*this fills in TEST_STRING_HANDLE_CHILD_NAME with "int_field"*/
+
+            STRICT_EXPECTED_CALL(STRING_c_str(TEST_STRING_HANDLE_CHILD_NAME)) /*14*/
+                .SetReturn("int_field");
+
+            STRICT_EXPECTED_CALL(Schema_GetModelElementTypeByName(SCHEMA_MODEL_TYPE_HANDLE_MODEL_IN_MODEL, "int_field"))
+                .SetReturn(SCHEMA_DESIRED_PROPERTY);
+
+            STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyByName(SCHEMA_MODEL_TYPE_HANDLE_MODEL_IN_MODEL, "int_field"))
+                .SetReturn(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD);
+
+            STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyType(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD)) /*17*/
+                .SetReturn("int");
+
+            STRICT_EXPECTED_CALL(Schema_GetSchemaForModelType(SCHEMA_MODEL_TYPE_HANDLE_MODEL_IN_MODEL)) /*18*/
+                .SetReturn(TEST_SCHEMA);
+
+            /*this is DecodeValueFromNodea expected calls*/
+
+            STRICT_EXPECTED_CALL(CodeFirst_GetPrimitiveType("int")) /*19*/
+                .SetReturn(EDM_INT32_TYPE);
+
+            STRICT_EXPECTED_CALL(MultiTree_GetValue(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+                .IgnoreArgument_treeHandle()
+                .CopyOutArgumentBuffer_destination(&three, sizeof(three));
+
+            STRICT_EXPECTED_CALL(CreateAgentDataType_From_String(IGNORED_PTR_ARG, EDM_INT32_TYPE, IGNORED_PTR_ARG))
+                .IgnoreArgument_source()
+                .IgnoreArgument_agentData()
+                .SetReturn(AGENT_DATA_TYPES_OK);
+
+            STRICT_EXPECTED_CALL(Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD)) /*22*/
+                .SetReturn(int_pfDesiredPropertyFromAGENT_DATA_TYPE);
+
+            STRICT_EXPECTED_CALL(Schema_GetModelDesiredProperty_offset(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD)) /*23*/
+                .SetReturn(2);
+
+            STRICT_EXPECTED_CALL(int_pfDesiredPropertyFromAGENT_DATA_TYPE(IGNORED_PTR_ARG, (unsigned char*)deviceMemoryArea + 12))  /*notice here the new offset (2+10)*/
+                .IgnoreArgument_source();
+
+            STRICT_EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG))
+                .IgnoreArgument_agentData();
+
+            STRICT_EXPECTED_CALL(STRING_delete(TEST_STRING_HANDLE_CHILD_NAME));
+        }
+
+        STRICT_EXPECTED_CALL(STRING_delete(TEST_STRING_HANDLE_CHILD_NAME));
+
+        STRICT_EXPECTED_CALL(MultiTree_Destroy(IGNORED_PTR_ARG))
+            .IgnoreArgument_treeHandle();
+
+        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+            .IgnoreArgument_ptr();
+    }
+
+    /*Tests_SRS_COMMAND_DECODER_02_009: [ If the child name corresponds to a model in model then the function shall call itself recursively. ]*/
+    TEST_FUNCTION(CommandDecoder_IngestDesiredProperties_with_1_simple_model_in_model_desired_property_happy_path)
+    {
+        ///arrange
+        COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
+        umock_c_reset_all_calls();
+        unsigned char deviceMemoryArea[100];
+        const char* desiredPropertiesJSON = "{\"modelInModel\":{\"int_field\":3}}";
+        const char* three = "3";
+        size_t one = 1;
+        MULTITREE_HANDLE childHandle = (MULTITREE_HANDLE)0x11;
+
+        CommandDecoder_IngestDesiredProperties_with_1_simple_model_in_model_desired_property_inert_path(deviceMemoryArea, desiredPropertiesJSON, three, one, childHandle);
+
+        ///act
+        EXECUTE_COMMAND_RESULT result = CommandDecoder_IngestDesiredProperties(deviceMemoryArea, commandDecoderHandle, desiredPropertiesJSON);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+        ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result);
+
+        ///clean
+        CommandDecoder_Destroy(commandDecoderHandle);
+
+    }
+
+    /*Tests_SRS_COMMAND_DECODER_02_011: [ Otherwise CommandDecoder_IngestDesiredProperties shall fail and return EXECUTE_COMMAND_FAILED. ]*/
+    TEST_FUNCTION(CommandDecoder_IngestDesiredProperties_with_1_simple_model_in_model_desired_property_unhappy_paths)
+    {
+        ///arrange
+        COMMAND_DECODER_HANDLE commandDecoderHandle = CommandDecoder_Create(TEST_MODEL_HANDLE, ActionCallbackMock, TEST_CALLBACK_CONTEXT_VALUE);
+        unsigned char deviceMemoryArea[100];
+        const char* desiredPropertiesJSON = "{\"modelInModel\":{\"int_field\":3}}";
+        const char* three = "3";
+        size_t one = 1;
+        MULTITREE_HANDLE childHandle = (MULTITREE_HANDLE)0x11;
+        (void)umock_c_negative_tests_init();
+        umock_c_reset_all_calls();
+
+        CommandDecoder_IngestDesiredProperties_with_1_simple_model_in_model_desired_property_inert_path(deviceMemoryArea, desiredPropertiesJSON, three, one, childHandle);
+
+        umock_c_negative_tests_snapshot();
+
+        size_t calls_that_cannot_fail[] =
+        {
+            2, /*MultiTree_GetChildCount*/
+            6, /*STRING_c_str*/
+            9, /*Schema_GetModelModelByName_Offset*/
+            10, /*MultiTree_GetChildCount*/
+            13, /*MultiTree_GetName*/
+            14, /*STRING_c_str*/
+            17, /*Schema_GetModelDesiredPropertyType*/
+            18, /*Schema_GetSchemaForModelType*/
+            19, /*CodeFirst_GetPrimitiveType*/
+            22, /*Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE*/
+            23, /*Schema_GetModelDesiredProperty_offset*/
+
+            25, /*Destroy_AGENT_DATA_TYPE*/
+            26, /*STRING_delete*/
+            27, /*STRING_delete*/
+            28, /*MultiTree_Destroy*/
+            29, /*gballoc_free*/
+        };
+
+        for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
+        {
+            size_t j;
+            umock_c_negative_tests_reset();
+
+            for (j = 0;j<sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++) /*not running the tests that cannot fail*/
+            {
+                if (calls_that_cannot_fail[j] == i)
+                    break;
+            }
+
+            if (j == sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]))
+            {
+
+                umock_c_negative_tests_fail_call(i);
+                char temp_str[128];
+                sprintf(temp_str, "On failed call %zu", i);
+
+                ///act
+                EXECUTE_COMMAND_RESULT result = CommandDecoder_IngestDesiredProperties(deviceMemoryArea, commandDecoderHandle, desiredPropertiesJSON);
+
+                ///assert
+                ASSERT_ARE_NOT_EQUAL_WITH_MSG(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result, temp_str);
+            }
+            
+        }
+
+        umock_c_negative_tests_deinit();
+
+        ///clean
+        CommandDecoder_Destroy(commandDecoderHandle);
+    }
+
 END_TEST_SUITE(CommandDecoder_ut)

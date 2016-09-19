@@ -45,10 +45,82 @@ static const char* g_OverrideSchemaNamespace;
 static size_t g_DeviceCount = 0;
 static DEVICE_HEADER_DATA** g_Devices = NULL;
 
+static void deinitializeDesiredProperties(SCHEMA_MODEL_TYPE_HANDLE model, void* destination)
+{
+    size_t nDesiredProperties;
+    if (Schema_GetModelDesiredPropertyCount(model, &nDesiredProperties) != SCHEMA_OK)
+    {
+        LogError("unexpected error in Schema_GetModelDesiredPropertyCount");
+    }
+    else
+    {
+        size_t nProcessedDesiredProperties = 0;
+        for (size_t i = 0;i < nDesiredProperties;i++)
+        {
+            SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle = Schema_GetModelDesiredPropertyByIndex(model, i);
+            if (desiredPropertyHandle == NULL)
+            {
+                LogError("unexpected error in Schema_GetModelDesiredPropertyByIndex");
+                i = nDesiredProperties;
+            }
+            else
+            {
+                pfDesiredPropertyDeinitialize desiredPropertyDeinitialize = Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize(desiredPropertyHandle);
+                if (desiredPropertyDeinitialize == NULL)
+                {
+                    LogError("unexpected error in Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize");
+                    i = nDesiredProperties;
+                }
+                else
+                {
+                    size_t offset = Schema_GetModelDesiredProperty_offset(desiredPropertyHandle);
+                    desiredPropertyDeinitialize((char*)destination + offset);
+                    nProcessedDesiredProperties++;
+                }
+            }
+        }
+
+        if (nDesiredProperties == nProcessedDesiredProperties)
+        {
+            /*recursively go in the model and initialize the other fields*/
+            size_t nModelInModel;
+            if (Schema_GetModelModelCount(model, &nModelInModel) != SCHEMA_OK)
+            {
+                LogError("unexpected error in Schema_GetModelModelCount");
+            }
+            else
+            {
+                size_t nProcessedModelInModel = 0;
+                for (size_t i = 0; i < nModelInModel;i++)
+                {
+                    SCHEMA_MODEL_TYPE_HANDLE modelInModel = Schema_GetModelModelyByIndex(model, i);
+                    if (modelInModel == NULL)
+                    {
+                        LogError("unexpected failure in Schema_GetModelModelyByIndex");
+                        i = nModelInModel;
+                    }
+                    else
+                    {
+                        size_t offset = Schema_GetModelModelByIndex_Offset(model, i);
+                        deinitializeDesiredProperties(modelInModel, (char*)destination + offset);
+                        nProcessedModelInModel++;
+                    }
+                }
+
+                if (nProcessedModelInModel == nModelInModel)
+                {
+                    /*all is fine... */
+                }
+            }
+        }
+    }
+}
+
 static void DestroyDevice(DEVICE_HEADER_DATA* deviceHeader)
 {
     /* Codes_SRS_CODEFIRST_99_085:[CodeFirst_DestroyDevice shall free all resources associated with a device.] */
     /* Codes_SRS_CODEFIRST_99_087:[In order to release the device handle, CodeFirst_DestroyDevice shall call Device_Destroy.] */
+    
     Device_Destroy(deviceHeader->DeviceHandle);
     free(deviceHeader->data);
     free(deviceHeader);
@@ -126,7 +198,7 @@ static CODEFIRST_RESULT buildModel(SCHEMA_HANDLE schemaHandle, const REFLECTED_D
             /* if this is a model type use the appropriate APIs for it */
             if (childModelHande != NULL)
             {
-                if (Schema_AddModelModel(modelTypeHandle, something->what.property.name, childModelHande) != SCHEMA_OK)
+                if (Schema_AddModelModel(modelTypeHandle, something->what.property.name, childModelHande, something->what.property.offset) != SCHEMA_OK)
                 {
                     /*Codes_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CODEFIRST_SCHEMA_ERROR shall be returned.]*/
                     result = CODEFIRST_SCHEMA_ERROR;
@@ -154,7 +226,7 @@ static CODEFIRST_RESULT buildModel(SCHEMA_HANDLE schemaHandle, const REFLECTED_D
             /* if this is a model type use the appropriate APIs for it */
             if (childModelHande != NULL)
             {
-                if (Schema_AddModelModel(modelTypeHandle, something->what.reportedProperty.name, childModelHande) != SCHEMA_OK)
+                if (Schema_AddModelModel(modelTypeHandle, something->what.reportedProperty.name, childModelHande, something->what.reportedProperty.offset) != SCHEMA_OK)
                 {
                     /*Codes_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CODEFIRST_SCHEMA_ERROR shall be returned.]*/
                     result = CODEFIRST_SCHEMA_ERROR;
@@ -169,6 +241,40 @@ static CODEFIRST_RESULT buildModel(SCHEMA_HANDLE schemaHandle, const REFLECTED_D
                     /*Codes_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CODEFIRST_SCHEMA_ERROR shall be returned.]*/
                     result = CODEFIRST_SCHEMA_ERROR;
                     LogError("add reported property failed %s", ENUM_TO_STRING(CODEFIRST_RESULT, result));
+                    goto out;
+                }
+            }
+        }
+
+        if ((something->type == REFLECTION_DESIRED_PROPERTY_TYPE) &&
+            (strcmp(something->what.desiredProperty.modelName, modelReflectedData->what.model.name) == 0))
+        {
+            SCHEMA_MODEL_TYPE_HANDLE childModelHande = Schema_GetModelByName(schemaHandle, something->what.desiredProperty.type);
+
+            /* if this is a model type use the appropriate APIs for it */
+            if (childModelHande != NULL)
+            {
+                if (Schema_AddModelModel(modelTypeHandle, something->what.desiredProperty.name, childModelHande, something->what.desiredProperty.offset) != SCHEMA_OK)
+                {
+                    /*Codes_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CODEFIRST_SCHEMA_ERROR shall be returned.]*/
+                    result = CODEFIRST_SCHEMA_ERROR;
+                    LogError("add model failed %s", ENUM_TO_STRING(CODEFIRST_RESULT, result));
+                    goto out;
+                }
+            }
+            else
+            {
+                if (Schema_AddModelDesiredProperty(modelTypeHandle, 
+                    something->what.desiredProperty.name, 
+                    something->what.desiredProperty.type, 
+                    something->what.desiredProperty.FromAGENT_DATA_TYPE, 
+                    something->what.desiredProperty.desiredPropertInitialize, 
+                    something->what.desiredProperty.desiredPropertDeinitialize, 
+                    something->what.desiredProperty.offset) != SCHEMA_OK)
+                {
+                    /*Codes_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CODEFIRST_SCHEMA_ERROR shall be returned.]*/
+                    result = CODEFIRST_SCHEMA_ERROR;
+                    LogError("add desired property failed %s", ENUM_TO_STRING(CODEFIRST_RESULT, result));
                     goto out;
                 }
             }
@@ -542,6 +648,81 @@ AGENT_DATA_TYPE_TYPE CodeFirst_GetPrimitiveType(const char* typeName)
     }
 }
 
+static void initializeDesiredProperties(SCHEMA_MODEL_TYPE_HANDLE model, void* destination)
+{
+    /*this function assumes that at the address given by destination there is an instance of a model*/
+    /*some constituents of the model need to be initialized - ascii_char_ptr for example should be set to NULL*/
+
+    size_t nDesiredProperties;
+    if (Schema_GetModelDesiredPropertyCount(model, &nDesiredProperties) != SCHEMA_OK)
+    {
+        LogError("unexpected error in Schema_GetModelDesiredPropertyCount");
+    }
+    else
+    {
+        size_t nProcessedDesiredProperties = 0;
+        for (size_t i = 0;i < nDesiredProperties;i++)
+        {
+            SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle = Schema_GetModelDesiredPropertyByIndex(model, i);
+            if (desiredPropertyHandle == NULL)
+            {
+                LogError("unexpected error in Schema_GetModelDesiredPropertyByIndex");
+                i = nDesiredProperties;
+            }
+            else
+            {
+                pfDesiredPropertyInitialize desiredPropertyInitialize = Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize(desiredPropertyHandle);
+                if (desiredPropertyInitialize == NULL)
+                {
+                    LogError("unexpected error in Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize");
+                    i = nDesiredProperties;
+                }
+                else
+                {
+                    /*Codes_SRS_CODEFIRST_02_036: [ CodeFirst_CreateDevice shall initialize all the desired properties to their default values. ]*/
+                    size_t offset = Schema_GetModelDesiredProperty_offset(desiredPropertyHandle);
+                    desiredPropertyInitialize((char*)destination + offset);
+                    nProcessedDesiredProperties++;
+                }
+            }
+        }
+
+        if (nDesiredProperties == nProcessedDesiredProperties)
+        {
+            /*recursively go in the model and initialize the other fields*/
+            size_t nModelInModel;
+            if (Schema_GetModelModelCount(model, &nModelInModel) != SCHEMA_OK)
+            {
+                LogError("unexpected error in Schema_GetModelModelCount");
+            }
+            else
+            {
+                size_t nProcessedModelInModel = 0;
+                for (size_t i = 0; i < nModelInModel;i++)
+                {
+                    SCHEMA_MODEL_TYPE_HANDLE modelInModel = Schema_GetModelModelyByIndex(model, i);
+                    if (modelInModel == NULL)
+                    {
+                        LogError("unexpected failure in Schema_GetModelModelyByIndex");
+                        i = nModelInModel;
+                    }
+                    else
+                    {
+                        size_t offset = Schema_GetModelModelByIndex_Offset(model, i);
+                        initializeDesiredProperties(modelInModel, (char*)destination + offset);
+                        nProcessedModelInModel++;
+                    }
+                }
+
+                if (nProcessedModelInModel == nModelInModel)
+                {
+                    /*all is fine... */
+                }
+            }
+        }
+    }
+}
+
 /* Codes_SRS_CODEFIRST_99_079:[CodeFirst_CreateDevice shall create a device and allocate a memory block that should hold the device data.] */
 void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DATA_FROM_DATAPROVIDER* metadata, size_t dataSize, bool includePropertyPath)
 {
@@ -581,6 +762,8 @@ void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DAT
         else
         {
             DEVICE_HEADER_DATA** newDevices;
+
+            initializeDesiredProperties(model, deviceHeader->data);
 
             if (Device_Create(model, CodeFirst_InvokeAction, deviceHeader,
                 includePropertyPath, &deviceHeader->DeviceHandle) != DEVICE_OK)
@@ -645,6 +828,7 @@ void CodeFirst_DestroyDevice(void* device)
         {
             if (g_Devices[i]->data == device)
             {
+                deinitializeDesiredProperties(g_Devices[i]->ModelHandle, g_Devices[i]->data);
                 Schema_ReleaseDeviceRef(g_Devices[i]->ModelHandle);
 
                 // Delete the Created Schema if all the devices are unassociated
@@ -1227,7 +1411,7 @@ CODEFIRST_RESULT CodeFirst_IngestDesiredProperties(void* device, const char* des
         else
         {
             /*Codes_SRS_CODEFIRST_02_033: [ CodeFirst_IngestDesiredProperties shall call Device_IngestDesiredProperties. ]*/
-            if (Device_IngestDesiredProperties(deviceHeader->DeviceHandle, desiredProperties) != DEVICE_OK)
+            if (Device_IngestDesiredProperties(device, deviceHeader->DeviceHandle, desiredProperties) != DEVICE_OK)
             {
                 LogError("failure in Device_IngestDesiredProperties");
                 result = result = CODEFIRST_ERROR;
