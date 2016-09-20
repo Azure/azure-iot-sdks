@@ -36,6 +36,9 @@
             this.jsonLabel2 = new System.Windows.Forms.Label();
             this.jsonRichTextBox1 = new System.Windows.Forms.RichTextBox();
             this.jsonRichTextBox2 = new System.Windows.Forms.RichTextBox();
+            this.jsonLabel3 = new System.Windows.Forms.Label();
+            this.sendBtn = new System.Windows.Forms.Button();
+            this.jsonRichTextBox3 = new System.Windows.Forms.RichTextBox();
             this.propertyGridView = new System.Windows.Forms.TabPage();
             this.tabTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.propLabel1 = new System.Windows.Forms.Label();
@@ -43,10 +46,10 @@
             this.reportedPropertiesGrid = new System.Windows.Forms.PropertyGrid();
             this.desiredPropertiesGrid = new System.Windows.Forms.PropertyGrid();
             this.toolbarPanel = new System.Windows.Forms.Panel();
+            this.deviceListCombo = new System.Windows.Forms.ComboBox();
             this.refreshBtn = new System.Windows.Forms.Button();
             this.mainTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.deviceListCombo = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.SuspendLayout();
             this.propertyTabs.SuspendLayout();
@@ -91,18 +94,23 @@
             // 
             // jsonTableLayoutPanel
             // 
-            this.jsonTableLayoutPanel.ColumnCount = 2;
-            this.jsonTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.jsonTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.jsonTableLayoutPanel.ColumnCount = 3;
+            this.jsonTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 34F));
+            this.jsonTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33F));
+            this.jsonTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33F));
             this.jsonTableLayoutPanel.Controls.Add(this.jsonLabel1, 0, 0);
             this.jsonTableLayoutPanel.Controls.Add(this.jsonLabel2, 1, 0);
-            this.jsonTableLayoutPanel.Controls.Add(this.jsonRichTextBox1, 0, 1);
-            this.jsonTableLayoutPanel.Controls.Add(this.jsonRichTextBox2, 1, 1);
+            this.jsonTableLayoutPanel.Controls.Add(this.jsonRichTextBox1, 0, 2);
+            this.jsonTableLayoutPanel.Controls.Add(this.jsonRichTextBox2, 1, 2);
+            this.jsonTableLayoutPanel.Controls.Add(this.jsonLabel3, 2, 0);
+            this.jsonTableLayoutPanel.Controls.Add(this.sendBtn, 2, 1);
+            this.jsonTableLayoutPanel.Controls.Add(this.jsonRichTextBox3, 2, 2);
             this.jsonTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.jsonTableLayoutPanel.Location = new System.Drawing.Point(3, 3);
             this.jsonTableLayoutPanel.Name = "jsonTableLayoutPanel";
-            this.jsonTableLayoutPanel.RowCount = 2;
+            this.jsonTableLayoutPanel.RowCount = 3;
             this.jsonTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.jsonTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 28F));
             this.jsonTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.jsonTableLayoutPanel.Size = new System.Drawing.Size(849, 559);
             this.jsonTableLayoutPanel.TabIndex = 0;
@@ -113,7 +121,7 @@
             this.jsonLabel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.jsonLabel1.Location = new System.Drawing.Point(3, 0);
             this.jsonLabel1.Name = "jsonLabel1";
-            this.jsonLabel1.Size = new System.Drawing.Size(418, 20);
+            this.jsonLabel1.Size = new System.Drawing.Size(282, 20);
             this.jsonLabel1.TabIndex = 0;
             this.jsonLabel1.Text = "Reported Properties";
             this.jsonLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -122,9 +130,9 @@
             // 
             this.jsonLabel2.AutoSize = true;
             this.jsonLabel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.jsonLabel2.Location = new System.Drawing.Point(427, 0);
+            this.jsonLabel2.Location = new System.Drawing.Point(291, 0);
             this.jsonLabel2.Name = "jsonLabel2";
-            this.jsonLabel2.Size = new System.Drawing.Size(419, 20);
+            this.jsonLabel2.Size = new System.Drawing.Size(274, 20);
             this.jsonLabel2.TabIndex = 1;
             this.jsonLabel2.Text = "DesiredProperties";
             this.jsonLabel2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -133,10 +141,10 @@
             // 
             this.jsonRichTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.jsonRichTextBox1.Font = new System.Drawing.Font("Courier New", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.jsonRichTextBox1.Location = new System.Drawing.Point(3, 23);
+            this.jsonRichTextBox1.Location = new System.Drawing.Point(3, 51);
             this.jsonRichTextBox1.Name = "jsonRichTextBox1";
             this.jsonRichTextBox1.ReadOnly = true;
-            this.jsonRichTextBox1.Size = new System.Drawing.Size(418, 533);
+            this.jsonRichTextBox1.Size = new System.Drawing.Size(282, 505);
             this.jsonRichTextBox1.TabIndex = 2;
             this.jsonRichTextBox1.Text = "";
             // 
@@ -144,12 +152,44 @@
             // 
             this.jsonRichTextBox2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.jsonRichTextBox2.Font = new System.Drawing.Font("Courier New", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.jsonRichTextBox2.Location = new System.Drawing.Point(427, 23);
+            this.jsonRichTextBox2.Location = new System.Drawing.Point(291, 51);
             this.jsonRichTextBox2.Name = "jsonRichTextBox2";
             this.jsonRichTextBox2.ReadOnly = true;
-            this.jsonRichTextBox2.Size = new System.Drawing.Size(419, 533);
+            this.jsonRichTextBox2.Size = new System.Drawing.Size(274, 505);
             this.jsonRichTextBox2.TabIndex = 3;
             this.jsonRichTextBox2.Text = "";
+            // 
+            // jsonLabel3
+            // 
+            this.jsonLabel3.AutoSize = true;
+            this.jsonLabel3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.jsonLabel3.Location = new System.Drawing.Point(571, 0);
+            this.jsonLabel3.Name = "jsonLabel3";
+            this.jsonLabel3.Size = new System.Drawing.Size(275, 20);
+            this.jsonLabel3.TabIndex = 4;
+            this.jsonLabel3.Text = "Twin Editor ( use JSON format )";
+            this.jsonLabel3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // sendBtn
+            // 
+            this.sendBtn.Dock = System.Windows.Forms.DockStyle.Top;
+            this.sendBtn.Location = new System.Drawing.Point(571, 23);
+            this.sendBtn.Name = "sendBtn";
+            this.sendBtn.Size = new System.Drawing.Size(275, 22);
+            this.sendBtn.TabIndex = 5;
+            this.sendBtn.Text = "Send";
+            this.sendBtn.UseVisualStyleBackColor = true;
+            this.sendBtn.Click += new System.EventHandler(this.sendBtn_Click);
+            // 
+            // jsonRichTextBox3
+            // 
+            this.jsonRichTextBox3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.jsonRichTextBox3.Font = new System.Drawing.Font("Courier New", 12F);
+            this.jsonRichTextBox3.Location = new System.Drawing.Point(571, 51);
+            this.jsonRichTextBox3.Name = "jsonRichTextBox3";
+            this.jsonRichTextBox3.Size = new System.Drawing.Size(275, 505);
+            this.jsonRichTextBox3.TabIndex = 6;
+            this.jsonRichTextBox3.Text = "";
             // 
             // propertyGridView
             // 
@@ -229,6 +269,16 @@
             this.toolbarPanel.Size = new System.Drawing.Size(863, 28);
             this.toolbarPanel.TabIndex = 1;
             // 
+            // deviceListCombo
+            // 
+            this.deviceListCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.deviceListCombo.FormattingEnabled = true;
+            this.deviceListCombo.Location = new System.Drawing.Point(82, 1);
+            this.deviceListCombo.Name = "deviceListCombo";
+            this.deviceListCombo.Size = new System.Drawing.Size(308, 21);
+            this.deviceListCombo.TabIndex = 1;
+            this.deviceListCombo.SelectedIndexChanged += new System.EventHandler(this.deviceListCombo_SelectedIndexChanged);
+            // 
             // refreshBtn
             // 
             this.refreshBtn.Location = new System.Drawing.Point(1, 1);
@@ -263,16 +313,6 @@
             this.checkBox1.TabIndex = 0;
             this.checkBox1.Text = "checkBox1";
             this.checkBox1.UseVisualStyleBackColor = true;
-            // 
-            // deviceListCombo
-            // 
-            this.deviceListCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.deviceListCombo.FormattingEnabled = true;
-            this.deviceListCombo.Location = new System.Drawing.Point(82, 1);
-            this.deviceListCombo.Name = "deviceListCombo";
-            this.deviceListCombo.Size = new System.Drawing.Size(308, 21);
-            this.deviceListCombo.TabIndex = 1;
-            this.deviceListCombo.SelectedIndexChanged += new System.EventHandler(this.deviceListCombo_SelectedIndexChanged);
             // 
             // DeviceTwinPropertiesForm
             // 
@@ -319,5 +359,8 @@
         private System.Windows.Forms.TableLayoutPanel mainTableLayoutPanel;
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.ComboBox deviceListCombo;
+        private System.Windows.Forms.Label jsonLabel3;
+        private System.Windows.Forms.Button sendBtn;
+        private System.Windows.Forms.RichTextBox jsonRichTextBox3;
     }
 }

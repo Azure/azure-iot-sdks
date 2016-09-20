@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.Devices;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,6 +23,7 @@ namespace DeviceExplorer
         private String reportedPropertiesJson;
         private String desiredPropertiesJson;
         private bool initialIndexSet;
+        private dynamic registryManager;
 
         public DeviceTwinPropertiesForm()
         {
@@ -33,7 +35,7 @@ namespace DeviceExplorer
             bool isOK = false;
             string exStr = "";
 
-            dynamic registryManager = RegistryManager.CreateFromConnectionString(iotHubConnectionString);
+            registryManager = RegistryManager.CreateFromConnectionString(iotHubConnectionString);
             dynamic repProps = null;
             dynamic desProps = null;
             dynamic tags = null;
@@ -144,7 +146,36 @@ namespace DeviceExplorer
 
         private async void refreshBtn_Click(object sender, EventArgs e)
         {
+            //sendBtn.Enabled = false;
             await UpdateDialogData();
+        }
+
+        private async void sendBtn_Click(object sender, EventArgs e)
+        {
+            jsonRichTextBox1.Text = "";
+            jsonRichTextBox2.Text = "";
+            if (registryManager != null)
+            {
+                try
+                {
+                    var deviceTwin = await registryManager.GetTwinAsync(deviceName);
+                    dynamic dp = JsonConvert.DeserializeObject<Twin>(jsonRichTextBox3.Text);
+                    dp.Id = deviceName;
+                    dp.ETag = deviceTwin.ETag;
+                    registryManager.UpdateTwinAsync(dp);
+                }
+                catch (Exception ex)
+                {
+                    string errMess = "Update Twin failed. Exception: " + ex.ToString();
+                    MessageBox.Show(errMess, "Device Twin Desired Properties Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Registry Manager is no initialized!", "Device Twin Desired Properties Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            await Task.Delay(1000);
+            refreshBtn_Click(this, null);
         }
     }
 }
