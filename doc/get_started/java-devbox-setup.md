@@ -161,7 +161,7 @@ For testing the Android sample on Android Device [click] [certify-iot-device-and
 
 [readme]: ../../java/device/readme.md
 [lnk-getstarted]: java-run-sample.md
-[android-studio]: https://developer.android.com/studio/index
+[android-studio]: https://developer.android.com/studio/index.html
 [certify-iot-device-android]:https://github.com/Azure/azure-iot-sdks/blob/master/doc/iotcertification/iot_certification_android_java/iot_certification_android_java.md
 [maven-repository]:http://search.maven.org/#search%7Cga%7C1%7Ciothub-java-device-client
 
