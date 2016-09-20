@@ -23,10 +23,12 @@ namespace DeviceExplorer
         private String desiredPropertiesJson;
         private bool initialIndexSet;
         private dynamic registryManager;
+        private bool runOnce = true;
 
         public DeviceTwinPropertiesForm()
         {
             InitializeComponent();
+
         }
 
         public async Task<bool> GetDeviceTwinData()
@@ -105,6 +107,12 @@ namespace DeviceExplorer
             desiredPropertiesGrid.SelectedObject = desiredProperties;
             desiredPropertiesGrid.Refresh();
             jsonRichTextBox2.Text = desiredPropertiesJson;
+
+            if (runOnce)
+            {
+                runOnce = false;
+                jsonRichTextBox3.Text = "{ properties: { desired: { }}}";
+            }
 
             return isOK;
         }
