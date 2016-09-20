@@ -52,7 +52,8 @@ static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin";
 static const char TOPIC_DEVICE_METHOD_PREFIX[] = "$iothub/methods";
 
 static const char* TOPIC_GET_DESIRED_STATE = "$iothub/twin/res/#";
-static const char* TOPIC_NOTIFICATION_STATE = "$iothub/twin/PATCH/properties/desired";
+static const char* TOPIC_NOTIFICATION_STATE = "$iothub/twin/PATCH/properties/desired/#";
+
 static const char* TOPIC_DEVICE_MSG = "devices/%s/messages/devicebound/#";
 static const char* TOPIC_DEVICE_DEVICE = "devices/%s/messages/events/";
 
