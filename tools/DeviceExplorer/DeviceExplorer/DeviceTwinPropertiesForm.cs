@@ -14,7 +14,6 @@ namespace DeviceExplorer
 {
     public partial class DeviceTwinPropertiesForm : Form
     {
-        private System.Windows.Forms.PropertyGrid propertyGrid;
         private String iotHubConnectionString;
         private String deviceName;
         private List<string> deviceList;
@@ -76,7 +75,7 @@ namespace DeviceExplorer
                     isOK = true;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 exStr = "Device Twin functionality is not found." + Environment.NewLine +
                     "Make sure you are using the latest Microsoft.Azure.Devices package.";
@@ -146,7 +145,6 @@ namespace DeviceExplorer
 
         private async void refreshBtn_Click(object sender, EventArgs e)
         {
-            //sendBtn.Enabled = false;
             await UpdateDialogData();
         }
 
