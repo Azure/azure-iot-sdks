@@ -10,6 +10,7 @@ var RestApiClient = require('./rest_api_client.js');
 var ConnectionString = require('./connection_string.js');
 var SharedAccessSignature = require('./shared_access_signature.js');
 var DeviceTwin = require('./device_twin.js');
+var Query = require('./query.js');
 
 /**
  * @class           module:azure-iothub.Registry
@@ -480,33 +481,63 @@ Registry.prototype.updateDeviceTwin = function(deviceId, patch, etag, done) {
 };
 
 /**
- * @method              module:azure-iothub.Registry#queryTwins
- * @description         Get device twins matching a specific query.
- * @param {String}      sqlQuery   The query defining twins.
- * @param {Function}    done       The callback that will be called with either an Error object or 
- *                                 the results of the query.
+ * @method              module:azure-iothub.Registry#createQuery
+ * @description         Creates a query that can be run on the IoT Hub instance to find information about devices or jobs.
+ * @param {String}      sqlQuery   The query written as an SQL string.
+ * @param {Number}      pageSize   The desired number of results per page.
+ * 
+ * @throws {ReferenceError}        If the sqlQuery argument is falsy.
+ * @throws {TypeError}             If the sqlQuery argument is not a string or the pageSize argument not a number, null or undefined.
  */
-Registry.prototype.queryTwins = function (sqlQuery, done) {
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_051: [The `queryTwins` method shall throw a `ReferenceError` if the sqlQuery argument is falsy.]*/
+Registry.prototype.createQuery = function(sqlQuery, pageSize) {
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_051: [The `createQuery` method shall throw a `ReferenceError` if the `sqlQuery` argument is falsy.]*/
   if (!sqlQuery) throw new ReferenceError('sqlQuery cannot be \'' + sqlQuery + '\'');
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_052: [The `queryTwins` method shall throw a `TypeError` if the sqlQuery argument is not a string.]*/
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_052: [The `createQuery` method shall throw a `TypeError` if the `sqlQuery` argument is not a string.]*/
   if (typeof sqlQuery !== 'string') throw new TypeError('sqlQuery must be a string');
 
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_053: [The `queryTwins` method shall construct an HTTP request using the information supplied by the caller as follows:
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_053: [The `createQuery` method shall throw a `TypeError` if the `pageSize` argument is not `null`, `undefined` or a number.]*/
+  if (pageSize !== null && pageSize !== undefined && typeof pageSize !== 'number') throw new TypeError('pageSize must be a number or be null or undefined');
+
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_054: [The `createQuery` method shall return a new `Query` instance initialized with the `sqlQuery` and the `pageSize` argument if specified.]*/
+  return new Query(sqlQuery, pageSize, this);
+};
+
+/**
+ * @method               module:azure-iothub.Registry#executeQuery
+ * @description          Executes a query on the IoT Hub instance.
+ * @param  {Query}       query      The query that shall be executed. the query must not be falsy and must have the following fields:
+ *                                  - sql: the SQL string describing the query.
+ *                                  - pageSize: a positive integer indicating the number of results per page.
+ *                                  - continuationToken: the token returned by previous calls of the same query in order to move to the next page.
+ * @param  {Function}    done       The callback that will be called with either an Error object or 
+ *                                  the results of the query.
+ * 
+ * @throws {ReferenceError}         If the query argument is falsy.
+ * @throws {TypeError}              If the query argument is missing one or more of the sql, pageSize or continuationToken properties.
+ */
+Registry.prototype.executeQuery = function (query, done) {
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_055: [The `executeQuery` method shall throw a `ReferenceError` if `query` is falsy.]*/
+  if (!query) throw new ReferenceError('query cannot be \'' + query + '\'');
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_056: [The `executeQuery` method shall throw a `TypeError` if `query` is missing one of the following properties: `sql`, `pageSize`, `continuationToken`.]*/
+  if (!query.sql) throw new TypeError('query.sql cannot be \'' + query.sql + '\'');
+  if (!query.pageSize) throw new TypeError('query.pageSize cannot be \'' + query.pageSize + '\'');
+  if (query.continuationToken === undefined) throw new TypeError('query.continuationToken cannot be \'' + query.continuationToken + '\'');
+
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_057: [The `executeQuery` method shall construct an HTTP request as follows:
   ```
   POST /devices/query?api-version=<version> HTTP/1.1
   Authorization: <config.sharedAccessSignature>
-  Content-Type: text/plain; charset=utf-8
+  Content-Type: application/json; charset=utf-8
   Request-Id: <guid>
 
-  <sqlQuery>
+  <query>
   ```]*/
   var path = '/devices/query' + endpoint.versionQueryString();
   var headers = {
-    'Content-Type': 'text/plain; charset=utf-8'
+    'Content-Type': 'application/json; charset=utf-8'
   };
   
-  this._restApiClient.executeApiCall('POST', path, headers, sqlQuery, done);
+  this._restApiClient.executeApiCall('POST', path, headers, query, done);
 };
 
 

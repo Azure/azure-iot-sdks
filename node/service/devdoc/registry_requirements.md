@@ -241,21 +241,32 @@ If-Match: <etag>
 ```
 **]**
 
-### queryTwins(sqlQuery, done)
-The `queryTwins` method runs a SQL query on the device twins and calls the callback with the result of the query, either a list of matching devices or an aggregated result.
+### createQuery(sqlQuery, pageSize)
+The `createQuery` method initializes a new instance of a `DeviceQuery` object with the `sqlQuery` and `pageSize` arguments.
 
-**SRS_NODE_IOTHUB_REGISTRY_16_051: [** The `queryTwins` method shall throw a `ReferenceError` if the sqlQuery argument is falsy. **]**
+**SRS_NODE_IOTHUB_REGISTRY_16_051: [** The `createQuery` method shall throw a `ReferenceError` if the `sqlQuery` argument is falsy. **]**
 
-**SRS_NODE_IOTHUB_REGISTRY_16_052: [** The `queryTwins` method shall throw a `TypeError` if the sqlQuery argument is not a string. **]**
+**SRS_NODE_IOTHUB_REGISTRY_16_052: [** The `createQuery` method shall throw a `TypeError` if the `sqlQuery` argument is not a string. **]**
 
-**SRS_NODE_IOTHUB_REGISTRY_16_053: [** The `queryTwins` method shall construct an HTTP request using the information supplied by the caller as follows:
+**SRS_NODE_IOTHUB_REGISTRY_16_053: [** The `createQuery` method shall throw a `TypeError` if the `pageSize` argument is not `null`, `undefined` or a number. **]**
+
+**SRS_NODE_IOTHUB_REGISTRY_16_054: [** The `createQuery` method shall return a new `DeviceQuery` instance initialized with the `sqlQuery` and the `pageSize` argument if specified. **]**
+
+### executeQuery(query, done)
+The `executeQuery` method runs a SQL query against the device databases and calls the `done` callback with the results.
+
+**SRS_NODE_IOTHUB_REGISTRY_16_055: [** The `executeQuery` method shall throw a `ReferenceError` if `query` is falsy. **]**
+
+**SRS_NODE_IOTHUB_REGISTRY_16_056: [** The `executeQuery` method shall throw a `TypeError` if `query` is missing one of the following properties: `sql`, `pageSize`, `continuationToken`. **]**
+
+**SRS_NODE_IOTHUB_REGISTRY_16_057: [** The `executeQuery` method shall construct an HTTP request as follows:
 ```
 POST /devices/query?api-version=<version> HTTP/1.1
 Authorization: <config.sharedAccessSignature>
-Content-Type: text/plain; charset=utf-8
+Content-Type: application/json; charset=utf-8
 Request-Id: <guid>
 
-<sqlQuery>
+<query>
 ```
 **]**
 
