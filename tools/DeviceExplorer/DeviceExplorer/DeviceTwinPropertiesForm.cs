@@ -40,12 +40,12 @@ namespace DeviceExplorer
 
             try
             {
-                var deviceTwin = await registryManager.GetDeviceTwinAsync(deviceName);
+                var deviceTwin = await registryManager.GetTwinAsync(deviceName);
                 if (deviceTwin != null)
                 {
                     tags = deviceTwin.Tags;
-                    repProps = deviceTwin.ReportedProperties;
-                    desProps = deviceTwin.DesiredProperties;
+                    repProps = deviceTwin.Properties.Reported;
+                    desProps = deviceTwin.Properties.Desired;
 
                     Console.WriteLine(repProps.ToJson());
 
