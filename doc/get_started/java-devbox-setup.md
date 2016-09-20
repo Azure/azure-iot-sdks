@@ -157,7 +157,7 @@ This repository contains various .Net sample applications that illustrate how to
 
 To learn how to run a simple *Getting started* Java application that sends messages to an IoT hub, see [Getting started - running a Java sample][lnk-getstarted].
 
-For testing the Android sample on Android Device [click] [certify-iot-device-android]
+For testing the **Android sample** on Android device follow [certify IoT device running Android] [certify-iot-device-android] documentation
 
 [readme]: ../../java/device/readme.md
 [lnk-getstarted]: java-run-sample.md
