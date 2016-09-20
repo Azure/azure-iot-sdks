@@ -95,7 +95,7 @@ describe('Query', function() {
     it('saves the continuationToken', function(testCallback) {
       var fakeContinuationToken = 'continuationToken';
       var fakeRegistry = {
-        executeQuery: sinon.stub().callsArgWith(1, null, { results: [], continuationToken: fakeContinuationToken }, { statusCode: 200 })
+        executeQuery: sinon.stub().callsArgWith(1, null, { Result: [], ContinuationToken: fakeContinuationToken }, { statusCode: 200 })
       };
 
       var query = new Query('SELECT * FROM devices', 1337, fakeRegistry);
@@ -108,7 +108,7 @@ describe('Query', function() {
     it('uses the previous continuationToken in the following query', function(testCallback) {
       var fakeContinuationToken = 'fakeContinuationToken';
       var fakeRegistry = {
-        executeQuery: sinon.stub().callsArgWith(1, null, { results: [], continuationToken: fakeContinuationToken }, { statusCode: 200 })
+        executeQuery: sinon.stub().callsArgWith(1, null, { Result: [], ContinuationToken: fakeContinuationToken }, { statusCode: 200 })
       };
 
       var query = new Query('SELECT * FROM devices', 1337, fakeRegistry);
@@ -126,7 +126,7 @@ describe('Query', function() {
     [{ token: 'a string', more: true }, { token: null, more: false }].forEach(function(testConfig) {
       it('sets hasMoreResults to \'' + testConfig.more + '\' if the continuationToken is \'' + testConfig.token + '\'', function(testCallback) {
         var fakeRegistry = {
-          executeQuery: sinon.stub().callsArgWith(1, null, { results: [], continuationToken: testConfig.token }, { statusCode: 200 })
+          executeQuery: sinon.stub().callsArgWith(1, null, { Result: [], ContinuationToken: testConfig.token }, { statusCode: 200 })
         };
 
         var query = new Query('SELECT * FROM devices', 1337, fakeRegistry);
@@ -166,7 +166,7 @@ describe('Query', function() {
       ];
       var fakeResponse = { statusCode: 200 };
       var fakeRegistry = {
-        executeQuery: sinon.stub().callsArgWith(1, null, { results: fakeResults, continuationToken: null }, fakeResponse)
+        executeQuery: sinon.stub().callsArgWith(1, null, { Result: fakeResults, ContinuationToken: null }, fakeResponse)
       };
 
       var query = new Query('SELECT * FROM devices', 1337, fakeRegistry);
@@ -191,7 +191,7 @@ describe('Query', function() {
 
       var fakeResponse = { statusCode: 200 };
       var fakeRegistry = {
-        executeQuery: sinon.stub().callsArgWith(1, null, { results: fakeResults, continuationToken: null }, fakeResponse)
+        executeQuery: sinon.stub().callsArgWith(1, null, { Result: fakeResults, ContinuationToken: null }, fakeResponse)
       };
 
       var query = new Query('SELECT * FROM devices', 1337, fakeRegistry);

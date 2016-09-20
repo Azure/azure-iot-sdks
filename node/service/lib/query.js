@@ -55,14 +55,16 @@ Query.prototype.next = function(done) {
       done(err);
     } else {
       /*Codes_SRS_NODE_SERVICE_QUERY_16_006: [The `next` method shall set the `Query.continuationToken` property to the `continuationToken` value of the query result.]*/
-      self._continuationToken = result.continuationToken;
+      self._continuationToken = result.ContinuationToken;
 
       /*Codes_SRS_NODE_SERVICE_QUERY_16_013: [The `next` method shall set the `Query.hasMoreResults` property to `true` if the `continuationToken` property of the result object is not `null`.]*/
       /*Codes_SRS_NODE_SERVICE_QUERY_16_014: [The `next` method shall set the `Query.hasMoreResults` property to `false` if the `continuationToken` property of the result object is `null`.]*/
       self.hasMoreResults = self._continuationToken !== null;
 
+      var actualResult = result.AggregateResult || result.DeviceJobsResult || result.Result;
+
       /*Codes_SRS_NODE_SERVICE_QUERY_16_007: [The `next` method shall call the `done` callback with a `null` error object, the results of the query and the response of the underlying transport if the request was successful.]*/
-      done(null, result.results, response);
+      done(null, actualResult, response);
     }
   });
 };
