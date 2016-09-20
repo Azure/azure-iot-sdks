@@ -156,11 +156,27 @@ namespace DeviceExplorer
             {
                 try
                 {
-                    var deviceTwin = await registryManager.GetTwinAsync(deviceName);
-                    dynamic dp = JsonConvert.DeserializeObject<Twin>(jsonRichTextBox3.Text);
-                    dp.Id = deviceName;
-                    dp.ETag = deviceTwin.ETag;
-                    registryManager.UpdateTwinAsync(dp);
+                    string assemblyClassName = "Twin";
+                    Type typeFound = (from assembly in AppDomain.CurrentDomain.GetAssemblies()
+                                from assemblyType in assembly.GetTypes()
+                                where assemblyType.Name == assemblyClassName
+                                select assemblyType).FirstOrDefault();
+
+                    if (typeFound != null)
+                    {
+                        string typeName = typeFound.GetType().Name;
+                        var deviceTwin = await registryManager.GetTwinAsync(deviceName);
+                        dynamic dp = JsonConvert.DeserializeObject(jsonRichTextBox3.Text, typeFound);
+                        dp.Id = deviceName;
+                        dp.ETag = deviceTwin.ETag;
+                        registryManager.UpdateTwinAsync(dp);
+                    }
+                    else
+                    {
+                        string exStr = "Device Twin functionality is not found." + Environment.NewLine +
+                            "Make sure you are using the latest Microsoft.Azure.Devices package.";
+                        MessageBox.Show(exStr, "Device Twin Properties", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
                 catch (Exception ex)
                 {
