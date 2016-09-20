@@ -74,6 +74,7 @@ static const char* REQUEST_ID_PROPERTY = "?$rid=";
 #define SUBSCRIBE_TELEMETRY_TOPIC               0x0004
 #define SUBSCRIBE_METHODS_TOPIC                 0x0008
 #define SUBSCRIBE_DEVICE_METHOD_TOPIC           0x0010
+#define SUBSCRIBE_TOPIC_COUNT                   4
 
 typedef struct SYSTEM_PROPERTY_INFO_TAG
 {
@@ -1018,7 +1019,7 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     {
         uint32_t topic_subscription = 0;
         size_t subscribe_count = 0;
-        SUBSCRIBE_PAYLOAD subscribe[3];
+        SUBSCRIBE_PAYLOAD subscribe[SUBSCRIBE_TOPIC_COUNT];
         if ((transport_data->topic_MqttMessage != NULL) && (SUBSCRIBE_TELEMETRY_TOPIC & transport_data->topics_ToSubscribe))
         {
             subscribe[subscribe_count].subscribeTopic = STRING_c_str(transport_data->topic_MqttMessage);
