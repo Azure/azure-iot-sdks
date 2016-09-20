@@ -147,7 +147,7 @@ In your main pom.xml file, add the Azure IoT Device SDK as a dependency using yo
 ## Building for Android Device
 - Download and install [Android Studio][android-studio]
 - Load and build **sample** located at java\device\samples\android-sample
-- Sample has dependence on remote library `iothub-java-device-client`. It is currently set to use `iothub-java-device-client:1.0.7`. If you want to point it to the later version update `java\device\samples\android-sample\app\build.gradle` to point to the version you want to use. For list of available versions search [Maven Repository] [maven-repository]
+- Sample has dependence on remote library `iothub-java-device-client`. It is currently set to use `iothub-java-device-client:1.0.7`. If you want to point it to the later version, please update `java\device\samples\android-sample\app\build.gradle` file to point to the version you want to use. For list of available versions search [Maven Repository] [maven-repository]
 
 
 <a name="samplecode">
