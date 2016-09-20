@@ -29,25 +29,24 @@ function onConnect(err) {
         console.log('Connected to device. Registering handlers for methods.');
 
         // register handlers for all the method names we are interested in
-        client.onDeviceMethod('reboot', onReboot);
-        client.onDeviceMethod('updateFirmware', onUpdateFirmware);
+        client.onDeviceMethod('getDeviceLog', onGetDeviceLog);
+        client.onDeviceMethod('lockDoor', onLockDoor);
     }
 }
 
-function onReboot(request, response) {
+function onGetDeviceLog(request, response) {
     printDeviceMethodRequest(request);
 
-    // Implement actual device reboot logic here.
+    // Implement actual logic here.
 
     // add some properties to the response
     response.properties = {
-        'RebootTimeInMS': '8500',
-        'DeviceStatus': 'Ready'
+        'logDate': Date.now().toISOString(),
     };
 
     // add a payload to the response
-    response.write('Boot log line 1');
-    response.write('Boot log line 2');
+    response.write('log line 1');
+    response.write('log line 2');
 
     // complete the response
     response.end(200, function(err) {
@@ -61,14 +60,14 @@ function onReboot(request, response) {
     });
 }
 
-function onUpdateFirmware(request, response) {
+function onDoorLock(request, response) {
     printDeviceMethodRequest(request);
 
-    // Implement actual device firmware update logic here.
+    // Implement actual logic here.
 
     // add some properties to the response
     response.properties = {
-        'NewFirmwareVersion': '1.5.0'
+        'doorState': 'locked'
     };
 
     // complete the response
