@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.Devices;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,7 +14,6 @@ namespace DeviceExplorer
 {
     public partial class DeviceTwinPropertiesForm : Form
     {
-        private System.Windows.Forms.PropertyGrid propertyGrid;
         private String iotHubConnectionString;
         private String deviceName;
         private List<string> deviceList;
@@ -22,6 +22,7 @@ namespace DeviceExplorer
         private String reportedPropertiesJson;
         private String desiredPropertiesJson;
         private bool initialIndexSet;
+        private dynamic registryManager;
 
         public DeviceTwinPropertiesForm()
         {
@@ -33,7 +34,7 @@ namespace DeviceExplorer
             bool isOK = false;
             string exStr = "";
 
-            dynamic registryManager = RegistryManager.CreateFromConnectionString(iotHubConnectionString);
+            registryManager = RegistryManager.CreateFromConnectionString(iotHubConnectionString);
             dynamic repProps = null;
             dynamic desProps = null;
             dynamic tags = null;
@@ -74,7 +75,7 @@ namespace DeviceExplorer
                     isOK = true;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 exStr = "Device Twin functionality is not found." + Environment.NewLine +
                     "Make sure you are using the latest Microsoft.Azure.Devices package.";
@@ -145,6 +146,50 @@ namespace DeviceExplorer
         private async void refreshBtn_Click(object sender, EventArgs e)
         {
             await UpdateDialogData();
+        }
+
+        private async void sendBtn_Click(object sender, EventArgs e)
+        {
+            jsonRichTextBox1.Text = "";
+            jsonRichTextBox2.Text = "";
+            if (registryManager != null)
+            {
+                try
+                {
+                    string assemblyClassName = "Twin";
+                    Type typeFound = (from assembly in AppDomain.CurrentDomain.GetAssemblies()
+                                from assemblyType in assembly.GetTypes()
+                                where assemblyType.Name == assemblyClassName
+                                select assemblyType).FirstOrDefault();
+
+                    if (typeFound != null)
+                    {
+                        string typeName = typeFound.GetType().Name;
+                        var deviceTwin = await registryManager.GetTwinAsync(deviceName);
+                        dynamic dp = JsonConvert.DeserializeObject(jsonRichTextBox3.Text, typeFound);
+                        dp.Id = deviceName;
+                        dp.ETag = deviceTwin.ETag;
+                        registryManager.UpdateTwinAsync(dp);
+                    }
+                    else
+                    {
+                        string exStr = "Device Twin functionality is not found." + Environment.NewLine +
+                            "Make sure you are using the latest Microsoft.Azure.Devices package.";
+                        MessageBox.Show(exStr, "Device Twin Properties", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    string errMess = "Update Twin failed. Exception: " + ex.ToString();
+                    MessageBox.Show(errMess, "Device Twin Desired Properties Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Registry Manager is no initialized!", "Device Twin Desired Properties Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            await Task.Delay(1000);
+            refreshBtn_Click(this, null);
         }
     }
 }
