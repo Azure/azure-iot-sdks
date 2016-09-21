@@ -16,13 +16,13 @@ for %%i in ("%build-root%") do set build-root=%%~fi
 REM check that we have a valid argument
 if "%1" equ "" (
   set jenkins_job=_integrate-into-develop
-) else if "%1" equ "c" (
+) else if /i "%1" equ "c" (
   set jenkins_job=_integrate-into-develop-c-and-wrappers
-) else if "%1" equ "csharp" (
+) else if /i "%1" equ "csharp" (
   set jenkins_job=_integrate-into-develop-csharp
-) else if "%1" equ "java" (
+) else if /i "%1" equ "java" (
   set jenkins_job=_integrate-into-develop-java
-) else if "%1" equ "node" (
+) else if /i "%1" equ "node" (
   set jenkins_job=_integrate-into-develop-node
 ) else (
   echo Usage:
