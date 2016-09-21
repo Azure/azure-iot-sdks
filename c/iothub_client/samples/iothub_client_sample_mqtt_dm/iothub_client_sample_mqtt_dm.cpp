@@ -33,6 +33,13 @@ DECLARE_STRUCT(factoryreset_t,
     ascii_char_ptr, version
 );
 
+DECLARE_STRUCT(device_t,
+    ascii_char_ptr, time,
+    ascii_char_ptr, time_zone,
+    ascii_char_ptr, fw_version,
+    ascii_char_ptr, name
+);
+
 DECLARE_STRUCT(firmwareUpdate_t,
     ascii_char_ptr, fwPackageUri,
     int,            downloadCompletedTime,
@@ -44,16 +51,17 @@ DECLARE_STRUCT(firmwareUpdate_t,
 DECLARE_MODEL(iothubDM_t,
     WITH_REPORTED_PROPERTY(reboot_t, reboot),
     WITH_REPORTED_PROPERTY(factoryreset_t, factoryreset),
-    WITH_REPORTED_PROPERTY(firmwareUpdate_t, firmwareUpdate)
+    WITH_REPORTED_PROPERTY(firmwareUpdate_t, firmwareUpdate),
+    WITH_REPORTED_PROPERTY(device_t, device)
 );
 
-DECLARE_MODEL(device_t,
+DECLARE_MODEL(thingie_t,
     WITH_REPORTED_PROPERTY(iothubDM_t, iothubDM)
 );
 
 DECLARE_MODEL(root_t,
-    WITH_REPORTED_PROPERTY(device_t, desired),
-    WITH_REPORTED_PROPERTY(device_t, reported)
+    WITH_REPORTED_PROPERTY(thingie_t, desired),
+    WITH_REPORTED_PROPERTY(thingie_t, reported)
 );
 
 END_NAMESPACE(Contoso);
@@ -73,10 +81,15 @@ static bool traceOn = false;
 /*keep track of run state.*/
 static int exitCode = 0;
 
+/*reported*/
+static bool reported = false;
+
+
 static void deviceTwinCallback(int status_code, void* userContextCallback)
 {
     (void)(userContextCallback);
     LogInfo("DT CallBack: Status_code = %u", status_code);
+	reported = true;
 }
 
 static void initGlobalProperties(int argc, char *argv[])
@@ -89,13 +102,13 @@ static void initGlobalProperties(int argc, char *argv[])
         }
         else if (0 == strcmp(argv[ii], "-cs"))
         {
-			++ii;
+            ++ii;
             if (ii < argc)
             {
-                connectionString = strdup(argv[ii]);
+                connectionString = _strdup(argv[ii]);
             }
-			LogInfo("connectionString = '%s'", connectionString);
-		}
+            LogInfo("connectionString = '%s'", connectionString);
+        }
         else if (0 == strcmp(argv[ii], "-logging"))
         {
             traceOn = true;
@@ -125,7 +138,7 @@ static void iothub_client_sample_mqtt_dm_run(void)
             root_t *root = CREATE_MODEL_INSTANCE(Contoso, root_t);
             if (root == NULL)
             {
-				LogError("Failed on CREATE_MODEL_INSTANCE.");
+                LogError("Failed on CREATE_MODEL_INSTANCE.");
                 exitCode = -3;
             }
 
@@ -149,6 +162,7 @@ static void iothub_client_sample_mqtt_dm_run(void)
                     }
                     else
                     {
+                        LogInfo("Device successfully connected.");
                         if (!asService)
                         {
                             IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &traceOn);
@@ -158,22 +172,28 @@ static void iothub_client_sample_mqtt_dm_run(void)
                         size_t         bufferSize = 0;
 
                         bool keepRunning = true;
+                        /*TODO: Implement DM calls*/
+                        root->reported.iothubDM.device.time = (char *) "Time Is Money";
+                        root->reported.iothubDM.device.time_zone = (char *) "anywhere";
+                        root->reported.iothubDM.device.fw_version = (char *) "OneTwo12";
+                        root->reported.iothubDM.device.name = (char *) "HSEdison";
+                        
                         while (keepRunning)
                         {
-                            /*TODO: Implement DM calls*/
-                            /*serialize the model using SERIALIZE_REPORTED_PROPERTIES
-                            if (SERIALIZE_REPORTED_PROPERTIES(&buffer, &bufferSize, *root) != CODEFIRST_OK)
+                            /*serialize the model using SERIALIZE_REPORTED_PROPERTIES */
+                            if (SERIALIZE_REPORTED_PROPERTIES(&buffer, &bufferSize, root->reported.iothubDM.device) != CODEFIRST_OK)
                             {
                                 keepRunning = false;
                                 LogError("Failed serializing reported state.");
                                 exitCode = -6;
                             }
-                            else*/
+                            else
                             {
-                            //    LogInfo("Serialized = %*.*s", (int)bufferSize, (int)bufferSize, buffer);
+                                LogInfo("Serialized = %*.*s", (int)bufferSize, (int)bufferSize, buffer);
 
                                 /* send the data up stream*/
-                                if (IoTHubClient_SendReportedState(iotHubClientHandle, buffer, bufferSize, deviceTwinCallback, NULL) != IOTHUB_CLIENT_OK)
+                                IOTHUB_CLIENT_RESULT result = IoTHubClient_SendReportedState(iotHubClientHandle, buffer, bufferSize, deviceTwinCallback, NULL);
+                                if (result != IOTHUB_CLIENT_OK)
                                 {
                                     keepRunning = false;
                                     LogError("Failure sending data!!!");
@@ -182,7 +202,11 @@ static void iothub_client_sample_mqtt_dm_run(void)
 
                                 else
                                 {
-                                    ThreadAPI_Sleep(1000);
+                                    LogInfo("SendReportedState returned '%d'", result);
+									while (!reported)
+									{
+										ThreadAPI_Sleep(6000);
+									}
                                 }
                                 free(buffer);
                                 buffer = NULL;
@@ -205,5 +229,6 @@ int main(int argc, char *argv[])
     initGlobalProperties(argc, argv);
     iothub_client_sample_mqtt_dm_run();
 
+    LogInfo("Exit Code: %d", exitCode);
     return exitCode;
 }
