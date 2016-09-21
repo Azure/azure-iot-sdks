@@ -2,14 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import RestApiClient = require('./rest_api_client');
+import DeviceMethodParams = require('./device_method_params');
 
 declare class DeviceMethod {
-    name: string;
-    payload: any;
-    timeout: number;
+    params: DeviceMethodParams;
 
-    constructor(methodName: string, timeoutInSeconds: Number, restApiClient: RestApiClient);
-    invokeOn(deviceId: string, payload?: any, done?: DeviceMethod.ResponseCallback): void;
+    constructor(params: DeviceMethodParams, restApiClient?: RestApiClient);
+    invokeOn(deviceId: string, done?: DeviceMethod.ResponseCallback): void;
 }
 
 declare namespace DeviceMethod {

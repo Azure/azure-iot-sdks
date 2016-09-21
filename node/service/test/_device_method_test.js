@@ -9,44 +9,65 @@ var DeviceMethod = require('../lib/device_method.js');
 
 describe('DeviceMethod', function() {
   describe('#constructor', function() {
-    /*Tests_SRS_NODE_IOTHUB_DEVICE_METHOD_16_004: [The `DeviceMethod` constructor shall throw a `ReferenceError` if `methodName` is `null`, `undefined` or an empty string.]*/
-    [undefined, null, ''].forEach(function(badMethodName) {
-      it('throws a \'ReferenceError\' if methodName is \'' + badMethodName + '\'', function() {
+    [undefined, null, ''].forEach(function(badParams) {
+      it('throws a \'ReferenceError\' if params is \'' + badParams + '\'', function() {
         assert.throws(function() {
-          return new DeviceMethod(badMethodName, 30, {});
+          return new DeviceMethod(badParams, {});
         }, ReferenceError);
       });
     });
 
-    /*Tests_SRS_NODE_IOTHUB_DEVICE_METHOD_16_005: [The `DeviceMethod` constructor shall throw a `TypeError` if `methodName` is not a `string`.]*/
-    [{}, function() {}, 42].forEach(function(badMethodType) {
-      it('throws a \'ReferenceError\' if methodName is \'' + typeof badMethodType + '\'', function() {
+    /*Tests_SRS_NODE_IOTHUB_DEVICE_METHOD_16_004: [The `DeviceMethod` constructor shall throw a `ReferenceError` if `params.methodName` is `null`, `undefined` or an empty string.]*/
+    [undefined, null, ''].forEach(function(badMethodName) {
+      it('throws a \'ReferenceError\' if params.methodName is \'' + badMethodName + '\'', function() {
         assert.throws(function() {
-          return new DeviceMethod(badMethodType, 30, {});
+          return new DeviceMethod({ methodName: badMethodName }, {});
+        }, ReferenceError);
+      });
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_DEVICE_METHOD_16_005: [The `DeviceMethod` constructor shall throw a `TypeError` if `params.methodName` is not a `string`.]*/
+    [{}, function() {}, 42].forEach(function(badMethodType) {
+      it('throws a \'TypeError\' if params.methodName is \'' + typeof badMethodType + '\'', function() {
+        assert.throws(function() {
+          return new DeviceMethod({ methodName: badMethodType }, {});
         }, TypeError);
       });
     });
 
-    /*Tests_SRS_NODE_IOTHUB_DEVICE_METHOD_16_006: [The `DeviceMethod` constructor shall set the `DeviceMethod.timeoutInSeconds` property to the `timeoutInSeconds` argument value.]*/
+    /*Tests_SRS_NODE_IOTHUB_DEVICE_METHOD_16_006: [The `DeviceMethod` constructor shall set the `DeviceMethod.params.timeoutInSeconds` property to the `timeoutInSeconds` argument value.]*/
     it('sets the DeviceMethod.timeoutInSeconds property to the timeOutInSeconds argument value', function() {
       var testTimeout = 42;
-      var method = new DeviceMethod('foo', testTimeout, {});
-      assert.equal(method.timeoutInSeconds, testTimeout);
+      var method = new DeviceMethod({ methodName: 'foo', payloadJson: null, timeoutInSeconds: testTimeout }, {});
+      assert.equal(method.params.timeoutInSeconds, testTimeout);
     });
 
-    /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_013: [The `DeviceMethod` constructor shall set the `DeviceMethod.name` property to the `methodName` argument value.]*/
+    [undefined, null, 0].forEach(function (badTimeoutValue) {
+      it('sets the DeviceMethod.params.timeoutInSeconds property to the default timeout value if params.timeOutInSeconds is \'' + badTimeoutValue + '\'', function() {
+        var method = new DeviceMethod({ methodName: 'foo', payloadJson: null, timeoutInSeconds: badTimeoutValue }, {});
+        assert.equal(method.params.timeoutInSeconds, DeviceMethod.defaultTimeout);
+      });
+    });
+
+    /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_013: [The `DeviceMethod` constructor shall set the `DeviceMethod.params.methodName` property to the `params.methodName` argument value.]*/
     it('sets the DeviceMethod.name property to the methodName argument value', function() {
       var methodName = 'foo';
-      var method = new DeviceMethod(methodName, 42, {});
-      assert.equal(method.name, methodName);
+      var method = new DeviceMethod({ methodName: methodName }, {});
+      assert.equal(method.params.methodName, methodName);
     });
 
-    /*Tests_SRS_NODE_IOTHUB_DEVICE_METHOD_16_001: [The `DeviceMethod` constructor shall throw a `ReferenceError` if the `restApiClient` argument is falsy.]*/
-    [undefined, null, '', 0].forEach(function(badRestClient) {
-      it('throw a ReferenceError if the restApiClient argument is \'' + badRestClient + '\'', function() {
-        assert.throws(function(){
-          return new DeviceMethod('foo', 42, badRestClient);
-        }, ReferenceError);
+    /*Tests_SRS_NODE_IOTHUB_DEVICE_METHOD_16_015: [The `DeviceMethod` constructor shall set the `DeviceMethod.params.payloadJson` property value to the `params.payloadJson` argument value or to the default (`null`) if the `payload` argument is `null` or `undefined`.]*/
+    [-1, 0, '', { foo: 'bar' }].forEach(function(goodPayload) {
+      it('sets the DeviceMethod.params.payloadJson property to the params.payloadJson argument value: \'' + JSON.stringify(goodPayload) + '\'', function() {
+        var method = new DeviceMethod({ methodName: 'foo', payloadJson: goodPayload, timeoutInSeconds: 42 }, {});
+        assert.equal(method.params.payloadJson, goodPayload);
+      });
+    });
+
+    [undefined, null].forEach(function(badPayload) {
+      it('sets the DeviceMethod.params.payload property to the default payload value if params.payload is \'' + badPayload + '\'', function() {
+        var method = new DeviceMethod({ methodName: 'foo', payloadJson: badPayload, timeoutInSeconds: 42 }, {});
+        assert.equal(method.params.payloadJson, DeviceMethod.defaultPayload);
       });
     });
   });
@@ -55,7 +76,7 @@ describe('DeviceMethod', function() {
     /*Tests_SRS_NODE_IOTHUB_DEVICE_METHOD_16_008: [The `invokeOn` method shall throw a `ReferenceError` if `deviceId` is `null`, `undefined` or an empty string.]*/
     [undefined, null, ''].forEach(function(badDeviceId) {
       it('throws a ReferenceError if \'deviceId\' is \'' + badDeviceId + '\'', function() {
-        var method = new DeviceMethod('foo', 42, {});
+        var method = new DeviceMethod({ methodName: 'foo', payloadJson: null, timeoutInSeconds: 42 }, {});
         assert.throws(function() {
           method.invokeOn(badDeviceId, {}, function() {});
         });
@@ -71,8 +92,8 @@ describe('DeviceMethod', function() {
         }
       };
 
-      var method = new DeviceMethod('foo', 42, fakeRestClientFails);
-      method.invokeOn('deviceId', {}, function(err) {
+      var method = new DeviceMethod({ methodName: 'foo', payloadJson: null, timeoutInSeconds: 42 }, fakeRestClientFails);
+      method.invokeOn('deviceId', function(err) {
         assert.equal(err, fakeError);
         testCallback();
       });
@@ -92,8 +113,8 @@ describe('DeviceMethod', function() {
         }
       };
 
-      var method = new DeviceMethod('foo', 42, fakeRestClientSucceeds);
-      method.invokeOn('deviceId', {}, function(err, result, response) {
+      var method = new DeviceMethod({ methodName: 'foo', payloadJson: null, timeoutInSeconds: 42 }, fakeRestClientSucceeds);
+      method.invokeOn('deviceId', function(err, result, response) {
         assert.isNull(err);
         assert.equal(result, fakeResult);
         assert.equal(response, fakeResponse);
@@ -110,13 +131,16 @@ describe('DeviceMethod', function() {
     {
       "methodName": <DeviceMethod.name>,
       "timeoutInSeconds": <DeviceMethod.timeout>,
-      "payloadJson": <payload>
+      "payloadJson": <payloadJson>
     }
     ```]*/
     it('builds a correct HTTP request', function(testCallback) {
-      var fakeMethodName = 'method';
-      var fakeTimeout = 42;
-      var fakePayload = { foo: 'bar' };
+      var fakeMethodParams = {
+        methodName: 'method',
+        payloadJson: { foo: 'bar' },
+        timeoutInSeconds: 42
+      };
+
       var fakeDeviceId = 'deviceId';
 
       var fakeRestClient = {
@@ -124,29 +148,16 @@ describe('DeviceMethod', function() {
           assert.equal(method, 'POST');
           assert.equal(path, '/twins/' + fakeDeviceId + '/methods' + endpoint.versionQueryString());
           assert.equal(headers['Content-Type'], 'application/json; charset=utf-8');
-          assert.equal(body.methodName, fakeMethodName);
-          assert.equal(body.timeoutInSeconds, fakeTimeout);
-          assert.equal(body.payloadJson, fakePayload);
-          assert.equal(timeout, fakeTimeout * 1000);
+          assert.equal(body.methodName, fakeMethodParams.methodName);
+          assert.equal(body.timeoutInSeconds, fakeMethodParams.timeoutInSeconds);
+          assert.equal(body.payloadJson, fakeMethodParams.payloadJson);
+          assert.equal(timeout, fakeMethodParams.timeoutInSeconds * 1000);
           callback();
         }
       };
 
-      var method = new DeviceMethod(fakeMethodName, fakeTimeout, fakeRestClient);
-      method.invokeOn(fakeDeviceId, fakePayload, testCallback);
-    });
-
-    /*Tests_SRS_NODE_IOTHUB_DEVICE_METHOD_16_012: [If `payload` is a function and `done` is `undefined`, `payload` shall be used as the callback and the actual payload shall be set to `null`.]*/
-    it('payload is an optional argument', function(testCallback) {
-      var fakeRestClient = {
-        executeApiCall: function(method, path, headers, body, timeout, callback) {
-          assert.isNull(body.payloadJson);
-          callback();
-        }
-      };
-
-      var method = new DeviceMethod('fakeMethodName', 42, fakeRestClient);
-      method.invokeOn('fakeDeviceId', testCallback);
+      var method = new DeviceMethod(fakeMethodParams, fakeRestClient);
+      method.invokeOn(fakeDeviceId, testCallback);
     });
   });
 });

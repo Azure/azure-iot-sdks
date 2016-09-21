@@ -115,20 +115,20 @@ describe('Client', function () {
 
     /*Tests_SRS_NODE_IOTHUB_CLIENT_16_006: [The `invokeDeviceMethod` method shall throw a `ReferenceError` if `methodName` is `null`, `undefined` or an empty string.]*/
     [undefined, null, ''].forEach(function(badMethodName) {
-      it('throws if \'methodName\' is \'' + badMethodName + '\'', function() {
+      it('throws if \'methodParams.methodName\' is \'' + badMethodName + '\'', function() {
         var client = new Client({}, {});
         assert.throws(function() {
-          client.invokeDeviceMethod('deviceId', badMethodName, { foo: 'bar' }, 42, function() {});
+          client.invokeDeviceMethod('deviceId', { methodName: badMethodName, payloadJson: { foo: 'bar' }, timeoutInSeconds: 42 }, function() {});
         }, ReferenceError);
       });
     });
 
     /*Tests_SRS_NODE_IOTHUB_CLIENT_16_007: [The `invokeDeviceMethod` method shall throw a `TypeError` if `methodName` is not a `string`.]*/
     [{}, function(){}, 42].forEach(function(badMethodType) {
-      it('throws if \'methodName\' is of type \'' + badMethodType + '\'', function() {
+      it('throws if \'methodParams.methodName\' is of type \'' + badMethodType + '\'', function() {
         var client = new Client({}, {});
         assert.throws(function() {
-          client.invokeDeviceMethod('deviceId', badMethodType, { foo: 'bar' }, 42, function() {});
+          client.invokeDeviceMethod('deviceId', { methodName: badMethodType, payloadJson: { foo: 'bar' }, timeoutInSeconds: 42 }, function() {});
         }, TypeError);
       });
     });
@@ -137,6 +137,12 @@ describe('Client', function () {
     /*Tests_SRS_NODE_IOTHUB_CLIENT_16_010: [The `invokeDeviceMethod` method shall use the newly created instance of `DeviceMethod` to invoke the method with the `payload` argument on the device specified with the `deviceid` argument .]*/
     /*Tests_SRS_NODE_IOTHUB_CLIENT_16_013: [The `invokeDeviceMethod` method shall call the `done` callback with a `null` first argument, the result of the method execution in the second argument, and the transport-specific response object as a third argument.]*/
     it('uses the DeviceMethod client to invoke the method', function(testCallback) {
+      var fakeMethodParams = {
+        methodName: 'method',
+        payloadJson: null,
+        timeoutInSeconds: 42
+      };
+
       var fakeResult = { foo: 'bar' };
       var fakeResponse = { statusCode: 200 };
       var fakeRestClient = {
@@ -146,7 +152,7 @@ describe('Client', function () {
       };
       var client = new Client({}, fakeRestClient);
 
-      client.invokeDeviceMethod('deviceId', 'method', {}, 42, function(err, result, response) {
+      client.invokeDeviceMethod('deviceId', fakeMethodParams, function(err, result, response) {
         assert.isNull(err);
         assert.equal(result, fakeResult);
         assert.equal(response, fakeResponse);
@@ -164,49 +170,10 @@ describe('Client', function () {
       };
       var client = new Client({}, fakeRestClientFails);
 
-      client.invokeDeviceMethod('deviceId', 'method', function(err) {
+      client.invokeDeviceMethod('deviceId', { methodName: 'method' }, function(err) {
         assert.equal(err, fakeError);
         testCallback();
       });
-    });
-
-    /*Tests_SRS_NODE_IOTHUB_CLIENT_16_011: [The `payload` and `timeout` arguments are optional, meaning that:
-    - If payload is a function and timeout and done are undefined, payload shall be used as the callback, the actual payload shall be null, and the the timeout should be set to the default (30 seconds)
-    - If timeout is a function, and done is undefined, timeout shall be used as the callback and the actual timeout shall be set to the default (30 seconds). the payload shall be set to the value of the payload argument.]*/
-    it('works when payload and timeout are omitted', function(testCallback) {
-      var fakeRestClient = {
-        executeApiCall: function(method, path, headers, body, timeout, callback) {
-          callback();
-        }
-      };
-      var client = new Client({}, fakeRestClient);
-
-      client.invokeDeviceMethod('deviceId', 'method', testCallback);
-    });
-
-    it('throws a TypeError if payload is a function and timeoutInSeconds and done are not undefined', function() {
-      var client = new Client({}, {});
-      assert.throws(function() {
-        client.invokeDeviceMethod('deviceId', 'method', function() {}, 'foo', 'bar');
-      }, TypeError);
-    });
-    
-    it('throws a TypeError if payload is a function and timeoutInSeconds and done are not undefined', function() {
-      var client = new Client({}, {});
-      assert.throws(function() {
-        client.invokeDeviceMethod('deviceId', 'method', { foo: 'bar' }, function() {}, 'foo');
-      }, TypeError);
-    });
-
-    it('works when timeout is omitted', function(testCallback) {
-      var fakeRestClient = {
-        executeApiCall: function(method, path, headers, body, timeout, callback) {
-          callback();
-        }
-      };
-      var client = new Client({}, fakeRestClient);
-
-      client.invokeDeviceMethod('deviceId', 'method', {}, testCallback);
     });
   });
 

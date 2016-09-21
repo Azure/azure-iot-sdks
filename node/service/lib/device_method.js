@@ -8,34 +8,36 @@ var endpoint = require('azure-iot-common').endpoint;
 /**
  * @class                  module:azure-iothub.DeviceMethod
  * @classdesc              Constructs a DeviceMethod object that provides APIs to trigger the execution of a device method.
- * @param {String}         methodName          The name of the method that shall be invoked.
- * @param {Number}         timeoutInSeconds    The number of seconds IoT Hub shall wait for the device 
- *                                             to send a response before deeming the method execution a failure.
+ * @param {Object}         params              An object describing the method and shall have the following properties: 
+ *                                             - methodName          The name of the method that shall be invoked.
+ *                                             - payloadJson         [optional] The payload to use for the method call.
+ *                                             - timeoutInSeconds    [optional] The number of seconds IoT Hub shall wait for the device 
+ *                                                                   to send a response before deeming the method execution a failure.
  * @param {RestApiClient}  restApiClient       The REST client used to execute API calls.
  */
-function DeviceMethod(methodName, timeoutInSeconds, restApiClient) {
+function DeviceMethod(params, restApiClient) {
+  if (!params) throw new ReferenceError('params cannot be \'' + params + '\'');
   /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_004: [The `DeviceMethod` constructor shall throw a `ReferenceError` if `methodName` is `null`, `undefined` or an empty string.]*/
-  if (methodName === null || methodName === undefined || methodName === '') throw new ReferenceError('methodName cannot be \'' + methodName + '\'');
+  if (params.methodName === null || params.methodName === undefined || params.methodName === '') throw new ReferenceError('params.methodName cannot be \'' + params.methodName + '\'');
   /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_005: [The `DeviceMethod` constructor shall throw a `TypeError` if `methodName` is not a `string`.]*/
-  if (typeof methodName !== 'string') throw new TypeError('methodName must be a string');
-  /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_001: [The `DeviceMethod` constructor shall throw a `ReferenceError` if the `restApiClient` argument is falsy.]*/
-  if (!restApiClient) throw new ReferenceError('restApiClient cannot be \'' + restApiClient + '\'');
+  if (typeof params.methodName !== 'string') throw new TypeError('methodName must be a string');
+
   this._client = restApiClient;
 
-  /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_013: [The `DeviceMethod` constructor shall set the `DeviceMethod.name` property to the `methodName` argument value.]*/
-  this.name = methodName;
-
-  /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_006: [The `DeviceMethod` constructor shall set the `DeviceMethod.timeoutInSeconds` property to the `timeoutInSeconds` argument value.]*/
-  this.timeoutInSeconds = timeoutInSeconds;
+  this.params = params;
+  /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_006: [The `DeviceMethod` constructor shall set the `DeviceMethod.params.timeoutInSeconds` property value to the `timeoutInSeconds` argument value or to the default (`30`) if the `timeoutInSeconds` value is falsy.]*/
+  this.params.timeoutInSeconds = this.params.timeoutInSeconds || DeviceMethod.defaultTimeout;
+  /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_015: [The `DeviceMethod` constructor shall set the `DeviceMethod.params.payload` property value to the `payload` argument value or to the default (`null`) if the `payload` argument is `null` or `undefined`.]*/
+  this.params.payloadJson = (this.params.payloadJson === undefined || this.params.payloadJson === null) ? DeviceMethod.defaultPayload : this.params.payloadJson;
 }
 
 DeviceMethod.defaultTimeout = 30;
+DeviceMethod.defaultPayload = null;
 
 /**
  * @method            module:azure-iothub.DeviceMethod.invokeOn
  * @description       Invokes the method on the specified device with the specified payload.
  * @param {String}    deviceId    Identifier of the device on which the method will run.
- * @param {Object}    payload     Payload to be used when executing the method on the specified device.
  * @param {Function}  done        The function to call when the operation is
  *                                complete. `done` will be called with three
  *                                arguments: an Error object (can be null), a
@@ -44,26 +46,14 @@ DeviceMethod.defaultTimeout = 30;
  *                                identity, and a transport-specific response
  *                                object useful for logging or debugging.
  */
-DeviceMethod.prototype.invokeOn = function (deviceId, payload, done) {
+DeviceMethod.prototype.invokeOn = function (deviceId, done) {
   /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_008: [The `invokeOn` method shall throw a `ReferenceError` if `deviceId` is `null`, `undefined` or an empty string.]*/
   if (deviceId === null || deviceId === undefined || deviceId === '') throw new ReferenceError('deviceId cannot be \'' + deviceId + '\'');
-
-  /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_012: [If `payload` is a function and `done` is `undefined`, `payload` shall be used as the callback and the actual payload shall be set to `null`.]*/
-  if (typeof payload === 'function' && !done) {
-    done = payload;
-    payload = null;
-  }
 
   var path = '/twins/' + deviceId + '/methods' + endpoint.versionQueryString();
 
   var headers = {
     'Content-Type': 'application/json; charset=utf-8'
-  };
-
-  var requestBody = {
-    methodName: this.name,
-    timeoutInSeconds: this.timeoutInSeconds,
-    payloadJson: payload
   };
 
   /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_011: [The `invokeOn` method shall construct an HTTP request using information supplied by the caller, as follows:
@@ -73,14 +63,14 @@ DeviceMethod.prototype.invokeOn = function (deviceId, payload, done) {
   Content-Type: application/json; charset=utf-8
   Request-Id: <guid>
   {
-    "methodName": <DeviceMethod.name>,
-    "timeoutInSeconds": <DeviceMethod.timeoutInSeconds>,
-    "payloadJson": <payload>
+    "methodName": <DeviceMethod.params.methodName>,
+    "timeoutInSeconds": <DeviceMethod.params.timeoutInSeconds>,
+    "payloadJson": <DeviceMethod.params.payloadJson>
   }
   ```]*/
   /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_009: [The `invokeOn` method shall invoke the `done` callback with an standard javascript `Error` object if the method execution failed.]*/
   /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_010: [The `invokeOn` method shall invoke the `done` callback with a `null` first argument, a result second argument and a transport-specific response third argument if the method execution succeede**/
-  this._client.executeApiCall('POST', path, headers, requestBody, this.timeoutInSeconds * 1000, done);
+  this._client.executeApiCall('POST', path, headers, this.params, this.params.timeoutInSeconds * 1000, done);
 };
 
 module.exports = DeviceMethod;

@@ -5,19 +5,21 @@
 
 var Client = require('azure-iothub').Client;
 
-var connectionString = '[Hub Connection String]';
-var targetDevice = '[Device Id]';
-var methodName = '[Method Name]';
-var payload = '[Method Payload]';
-var timeoutInSeconds = 10;
+var connectionString = '<Hub Connection String>';
+var targetDevice = '<Device Id>';
+var methodParams = {
+  methodName: '<Method Name>', 
+  payloadJson: '[Method Payload]',
+  timeoutInSeconds: 42
+};
 
 var client = Client.fromConnectionString(connectionString);
 
-client.invokeDeviceMethod(targetDevice, methodName, payload, timeoutInSeconds, function (err, result) {
+client.invokeDeviceMethod(targetDevice, methodParams, function (err, result) {
   if (err) {
-    console.error('Failed to invoke method \'' + methodName + '\': ' + err.message);
+    console.error('Failed to invoke method \'' + methodParams.methodName + '\': ' + err.message);
   } else {
-    console.log(methodName + ' on ' + targetDevice + ':');
+    console.log(methodParams.methodName + ' on ' + targetDevice + ':');
     console.log(JSON.stringify(result, null, 2));
   }
 });

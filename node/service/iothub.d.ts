@@ -7,3 +7,4 @@ export import Registry = require('./lib/registry');
 export import SharedAccessSignature = require('./lib/shared_access_signature');
 export import Amqp = require('./lib/amqp');
 export import AmqpWs = require('./lib/amqp_ws');
+export import DeviceMethodParams = require('./lib/device_method_params');

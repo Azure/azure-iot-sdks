@@ -215,46 +215,28 @@ Client.prototype.send = function send(deviceId, message, done) {
 /**
  * @method            module:azure-iothub.Client#invokeDeviceMethod
  * @description       Invokes a method on a particular device.
- * @param {String}    deviceId             The identifier of an existing device identity.
- * @param {String}    methodName           The name of the method to be invoked on the device.
- * @param {Object}    payload              The payload of the method (optional).
- * @param {Number}    timeoutInSeconds     The timeout that the IoT Hub shall wait for the device to 
- *                                         respond before considering the method execution failed. (optional, defaults to 30 seconds)
- * @param {Function}  done                 The callback to call with the result of the method execution.
+ * @param {String}    deviceId            The identifier of an existing device identity.
+ * @param {Object}    params              An object describing the method and shall have the following properties: 
+ *                                        - methodName          The name of the method that shall be invoked.
+ *                                        - payloadJson         [optional] The payload to use for the method call.
+ *                                        - timeoutInSeconds    [optional] The number of seconds IoT Hub shall wait for the device 
+ *                                                              to send a response before deeming the method execution a failure.
+ * @param {Function}  done                The callback to call with the result of the method execution.
  * 
  * @throws {ReferenceError}  If one of the required parameters is null, undefined or empty.
  * @throws {TypeError}       If one of the parameters is of the wrong type.
  */
-Client.prototype.invokeDeviceMethod = function (deviceId, methodName, payload, timeoutInSeconds, done) {
+Client.prototype.invokeDeviceMethod = function (deviceId, methodParams, done) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_16_005: [The `invokeDeviceMethod` method shall throw a `ReferenceError` if `deviceId` is `null`, `undefined` or an empty string.]*/
   if (deviceId === undefined || deviceId === null || deviceId === '') throw new ReferenceError('deviceId cannot be \'' + deviceId + '\'');
 
-  /*Codes_SRS_NODE_IOTHUB_CLIENT_16_006: [The `invokeDeviceMethod` method shall throw a `ReferenceError` if `methodName` is `null`, `undefined` or an empty string.]*/
-  if (methodName === undefined || methodName === null || methodName === '') throw new ReferenceError('methodName cannot be \'' + methodName + '\'');
-  /*Codes_SRS_NODE_IOTHUB_CLIENT_16_007: [The `invokeDeviceMethod` method shall throw a `TypeError` if `methodName` is not a `string`.]*/
-  if (typeof methodName !== 'string') throw new TypeError('methodName must be a string');
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_16_009: [The `invokeDeviceMethod` method shall initialize a new `DeviceMethod` instance with the `methodName`, `payload` and `timeout` values passed in the arguments.]*/
+  var method = new DeviceMethod(methodParams, this._restApiClient);
 
-  /*Codes_SRS_NODE_IOTHUB_CLIENT_16_011: [The `payload` and `timeout` arguments are optional, meaning that:
-  - If payload is a function and timeout and done are undefined, payload shall be used as the callback, the actual payload shall be null, and the the timeout should be set to the default (30 seconds)
-  - If timeout is a function, and done is undefined, timeout shall be used as the callback and the actual timeout shall be set to the default (30 seconds). the payload shall be set to the value of the payload argument.]*/
-  if(typeof payload === 'function') {
-    if (timeoutInSeconds !== undefined || done !== undefined) throw new TypeError('The callback must be the last argument');
-    done = payload;
-    timeoutInSeconds = DeviceMethod.defaultTimeout;
-    payload = null;
-  } else if (typeof timeoutInSeconds === 'function') {
-    if (done !== undefined) throw new TypeError('The callback must be the last argument');    
-    done = timeoutInSeconds;
-    timeoutInSeconds = DeviceMethod.defaultTimeout;
-  }
-
-  /*Codes_SRS_NODE_IOTHUB_CLIENT_16_009: [The `invokeDeviceMethod` method shall initialize a new `DeviceMethod` instance with the `methodName` and `timeout` values passed in the arguments.]*/
-  var method = new DeviceMethod(methodName, timeoutInSeconds, this._restApiClient);
-
-  /*Codes_SRS_NODE_IOTHUB_CLIENT_16_010: [The `invokeDeviceMethod` method shall use the newly created instance of `DeviceMethod` to invoke the method with the `payload` argument on the device specified with the `deviceid` argument .]*/
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_16_010: [The `invokeDeviceMethod` method shall use the newly created instance of `DeviceMethod` to invoke the method on the device specified with the `deviceid` argument .]*/
   /*Codes_SRS_NODE_IOTHUB_CLIENT_16_012: [The `invokeDeviceMethod` method shall call the `done` callback with a standard javascript `Error` object if the request failed.]*/
   /*Codes_SRS_NODE_IOTHUB_CLIENT_16_013: [The `invokeDeviceMethod` method shall call the `done` callback with a `null` first argument, the result of the method execution in the second argument, and the transport-specific response object as a third argument.]*/
-  method.invokeOn(deviceId, payload, done);
+  method.invokeOn(deviceId, done);
 };
 
 

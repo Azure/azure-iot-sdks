@@ -4,13 +4,14 @@
 import { EventEmitter } from 'events';
 import { results, Message, Receiver } from 'azure-iot-common';
 import { AmqpMessage } from 'azure-iot-amqp-base';
+import DeviceMethodParams = require('./device_method_params');
 
 declare class Client extends EventEmitter {
     constructor(transport: Client.Transport);
     open(done: (err: Error, result?: results.Connected) => void): void;
     close(done: (err: Error) => void): void;
     send(deviceId: string, message: Message | Message.BufferConvertible, done: (err: Error, result?: results.MessageEnqueued) => void): void;
-    invokeDeviceMethod(deviceId: string, methodName: string, payload?: any, timeout?: number, done?: (err: Error, result?: any, response?: any) => void): void;
+    invokeDeviceMethod(deviceId: string, methodParams: DeviceMethodParams, done?: (err: Error, result?: any, response?: any) => void): void;
     getFeedbackReceiver(done: (err: Error, receiver?: Client.ServiceReceiver) => void): void;
     getFileNotificationReceiver(done: (err: Error, receiver?: Client.ServiceReceiver) => void): void;
 
