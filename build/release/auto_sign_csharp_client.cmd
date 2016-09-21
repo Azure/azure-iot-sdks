@@ -45,6 +45,9 @@ if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 xcopy /q /y /R %client-build-root%\csharp\service\Microsoft.Azure.Devices\bin\Release_Delay_Sign\Microsoft.Azure.Devices.dll %client-build-root%\build\tosign\
 if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
+xcopy /q /y /R %client-build-root%\csharp\service\Microsoft.Azure.Devices.Uwp\bin\Release_Delay_Sign\Microsoft.Azure.Devices.Uwp.dll %client-build-root%\build\tosign\
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+
 rem -- Auto-sign the managed dlls placed in the "tosign" Folder
 csu.exe /s=True /w=True /i=%client-build-root%\build\tosign /o=%client-build-root%\build\signed /c1=72 /c2=401 /d="Signing Azure IoT Managed Client binaries"
 if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
@@ -72,6 +75,12 @@ xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.dll %cli
 if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.dll %client-build-root%\csharp\service\Microsoft.Azure.Devices\obj\Release_Delay_Sign\
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+
+xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Uwp.dll %client-build-root%\csharp\service\Microsoft.Azure.Devices.Uwp\bin\Release_Delay_Sign\
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+
+xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Uwp.dll %client-build-root%\csharp\service\Microsoft.Azure.Devices.Uwp\obj\Release_Delay_Sign\
 if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 rem -- Clean directories
