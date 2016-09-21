@@ -8,6 +8,7 @@ var endpoint = require('azure-iot-common').endpoint;
 var errors = require('azure-iot-common').errors;
 var Registry = require('../lib/registry.js');
 var DeviceTwin = require('../lib/device_twin.js');
+var Query = require('../lib/query.js');
 
 var fakeDevice = { deviceId: 'deviceId' };
 var fakeConfig = { host: 'host', sharedAccessSignature: 'sas' };
@@ -421,47 +422,6 @@ describe('Registry', function() {
     testErrorCallback('updateDeviceTwin', 'deviceId', {}, 'etag==');
   });
 
-  describe('queryTwins', function() {
-    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_051: [The `queryTwins` method shall throw a `ReferenceError` if the sqlQuery argument is falsy.]*/
-    [undefined, null, ''].forEach(function(badQuery){
-      testFalsyArg('queryTwins', 'sqlQuery', badQuery, ReferenceError);
-    });
-
-    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_052: [The `queryTwins` method shall throw a `TypeError` if the sqlQuery argument is not a string.]*/
-    [{}, 42, function(){}].forEach(function(badQuery){
-      testFalsyArg('queryTwins', 'sqlQuery', badQuery, TypeError);
-    });
-
-    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_053: [The `queryTwins` method shall construct an HTTP request using the information supplied by the caller as follows:
-    ```
-    POST /devices/query?api-version=<version> HTTP/1.1
-    Authorization: <config.sharedAccessSignature>
-    Content-Type: text/plain; charset=utf-8
-    Request-Id: <guid>
-
-    <sqlQuery>
-    ```]*/
-    it('creates a valid HTTP request', function(testCallback) {
-      var fakeQuery = 'SELECT * FROM devices';
-
-      var fakeHttpHelper = {
-        executeApiCall: function (method, path, httpHeaders, body, done) {
-          assert.equal(method, 'POST');
-          assert.equal(path, '/devices/query' + endpoint.versionQueryString());
-          assert.equal(httpHeaders['Content-Type'], 'text/plain; charset=utf-8');
-          assert.equal(body, fakeQuery);
-          done(null, {},  { statusCode: 200 });
-        }
-      };
-
-      var registry = new Registry(fakeConfig, fakeHttpHelper);
-      registry.queryTwins(fakeQuery, testCallback);
-    });
-
-    testErrorCallback('queryTwins', 'SELECT * FROM devices');
-  });
-
-
   describe('importDevicesFromBlob', function() {
     /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_001: [A `ReferenceError` shall be thrown if `inputBlobContainerUri` is falsy]*/
     [undefined, null, ''].forEach(function(badUri) {
@@ -648,6 +608,87 @@ describe('Registry', function() {
 
       var registry = new Registry(fakeConfig, fakeHttpHelper);
       registry.cancelJob(fakeJobId, testCallback);
+    });
+  });
+
+  describe('#createQuery', function() {
+    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_051: [The `createQuery` method shall throw a `ReferenceError` if the `sqlQuery` argument is falsy.]*/
+    [undefined, null, ''].forEach(function(badSql) {
+      testFalsyArg('createQuery', 'sqlQuery', badSql, ReferenceError);
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_052: [The `createQuery` method shall throw a `TypeError` if the `sqlQuery` argument is not a string.]*/
+    [42, {}, function() {}].forEach(function(badSql) {
+      testFalsyArg('createQuery', 'sqlQuery', badSql, TypeError);
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_053: [The `createQuery` method shall throw a `TypeError` if the `pageSize` argument is not `null`, `undefined` or a number.]*/
+    ['foo', {}, function() {}].forEach(function(badPageSize) {
+      it('throws a TypeError if pageSize is of type \'' + typeof(badPageSize) + '\'', function() {
+        var registry = new Registry(fakeConfig, {});
+        assert.throws(function() {
+          registry.createQuery('foo', badPageSize);
+        }, TypeError);
+      });
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_054: [The `createQuery` method shall return a new `Query` instance initialized with the `sqlQuery` and the `pageSize` argument if specified.]*/
+    it('returns a Query instance', function() {
+      var registry = new Registry(fakeConfig, {});
+      var fakeSql = 'SELECT * FROM devices';
+      var fakePageSize = 42;
+      var query = registry.createQuery(fakeSql, fakePageSize);
+      assert.instanceOf(query, Query);
+      assert.equal(query.toJSON().sql, fakeSql);
+      assert.equal(query.toJSON().pageSize, fakePageSize);
+    });
+  });
+
+  describe('#executeQuery', function() {
+    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_055: [The `executeQuery` method shall throw a `ReferenceError` if `query` is falsy.]*/
+    [undefined, null].forEach(function(badQuery) {
+      testFalsyArg('executeQuery', 'query', badQuery, ReferenceError);
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_056: [The `executeQuery` method shall throw a `TypeError` if `query` is missing one of the following properties: `sql`, `pageSize`, `continuationToken`.]*/
+    [
+      { pageSize: 100, continuationToken: 'token' },
+      { sql: 'sql', continuationToken: 'token' },
+      { sql: 'sql', pageSize: 100 }
+    ].forEach(function(badQuery) {
+      testFalsyArg('executeQuery', 'query', badQuery, TypeError);
+    });
+
+    testErrorCallback('executeQuery', { sql: 'sql', pageSize: 42, continuationToken: null });
+
+    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_057: [The `executeQuery` method shall construct an HTTP request as follows:
+    ```
+    POST /devices/query?api-version=<version> HTTP/1.1
+    Authorization: <config.sharedAccessSignature>
+    Content-Type: application/json; charset=utf-8
+    Request-Id: <guid>
+
+    <query>
+    ```]*/
+    it('constructs a valid HTTP request', function(testCallback) {
+      var fakeQuery = {
+        sql: 'sql',
+        pageSize: 42,
+        continuationToken: null
+      };
+
+      var fakeHttpHelper = {
+        executeApiCall: function (method, path, httpHeaders, body, done) {
+          assert.equal(method, 'POST');
+          assert.equal(path, '/devices/query' + endpoint.versionQueryString());
+          assert.equal(httpHeaders['Content-Type'], 'application/json; charset=utf-8');
+          assert.equal(body, fakeQuery);
+          done();
+        }
+      };
+
+      var registry = new Registry(fakeConfig, fakeHttpHelper);
+      registry.executeQuery(fakeQuery, testCallback);
     });
   });
 });

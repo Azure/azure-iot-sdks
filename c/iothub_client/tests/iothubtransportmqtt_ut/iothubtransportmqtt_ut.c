@@ -323,9 +323,12 @@ int my_STRING_TOKENIZER_get_next_token(STRING_TOKENIZER_HANDLE t, STRING_HANDLE 
             text = ""; // Done
             break;
         case 8:
+        case 9:
+        case 10:
+        case 11:
             text = "200";
             break;
-        case 9:
+        case 12:
             text = "2";
             break;
         case 7:
@@ -692,7 +695,7 @@ static void SetupIothubTransportConfigWithKeyAndSasToken(IOTHUBTRANSPORT_CONFIG*
     config->upperConfig = &g_iothubClientConfig;
 }
 
-static void setup_iothubtransportmqtt_create_mocks()
+static void setup_iothubtransportmqtt_create_mocks(bool use_gateway)
 {
     STRICT_EXPECTED_CALL(tickcounter_create());
 
@@ -701,6 +704,12 @@ static void setup_iothubtransportmqtt_create_mocks()
     STRICT_EXPECTED_CALL(STRING_construct(TEST_DEVICE_KEY));
 
     EXPECTED_CALL(mqtt_client_init(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+
+    if (use_gateway)
+    {
+        STRICT_EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG))
+            .IgnoreArgument_psz();
+    }
 
     EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
     EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
@@ -862,9 +871,29 @@ static void setup_iothubtransportmqtt_dowork_events_mocks(const char* const** pp
 static void setup_message_recv_device_method_mocks()
 {
     STRICT_EXPECTED_CALL(mqttmessage_getTopicName(TEST_MQTT_MESSAGE_HANDLE)).SetReturn(TEST_MQTT_DEV_METHOD_MSG);
+    STRICT_EXPECTED_CALL(STRING_new());
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_create_from_char(IGNORED_PTR_ARG))
         .IgnoreArgument_input();
     STRICT_EXPECTED_CALL(STRING_new());
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "/"))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "/"))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "/"))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "/"))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(3);
+    STRICT_EXPECTED_CALL(STRING_concat_with_STRING(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument_s1()
+        .IgnoreArgument_s2();
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_get_next_token(IGNORED_PTR_ARG, IGNORED_PTR_ARG, "/"))
         .IgnoreArgument(1)
         .IgnoreArgument(2)
@@ -880,7 +909,10 @@ static void setup_message_recv_device_method_mocks()
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG))
         .IgnoreArgument_t();
     STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(TEST_MQTT_MESSAGE_HANDLE));
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_DeviceMethodComplete(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_DeviceMethodComplete(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument_method_name()
         .IgnoreArgument_payLoad()
         .IgnoreArgument_size();
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
@@ -893,6 +925,8 @@ static void setup_message_recv_device_method_mocks()
     STRICT_EXPECTED_CALL(mqtt_client_publish(TEST_MQTT_CLIENT_HANDLE, TEST_MQTT_MESSAGE_HANDLE))
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(mqttmessage_destroy(TEST_MQTT_MESSAGE_HANDLE));
+    STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
 }
@@ -1093,7 +1127,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_with_deviceSasToken_blank_fails)
 TEST_FUNCTION(IoTHubTransportMqtt_Create_with_deviceKey_blank_fails)
 {
     // arrange
-    IOTHUBTRANSPORT_CONFIG config ={ 0 };
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, "", TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
     // act
@@ -1121,7 +1155,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_with_NULL_iothub_name_fails)
 TEST_FUNCTION(IoTHubTransportMqtt_Create_with_very_long_device_id_fails)
 {
     // arrange
-    IOTHUBTRANSPORT_CONFIG config ={ 0 };
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_VERY_LONG_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
     // act
@@ -1135,7 +1169,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_with_very_long_device_id_fails)
 TEST_FUNCTION(IoTHubTransportMqtt_Create_with_empty_device_id_fails)
 {
     // arrange
-    IOTHUBTRANSPORT_CONFIG config ={ 0 };
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_EMPTY_STRING, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
     // act
@@ -1149,7 +1183,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_with_empty_device_id_fails)
 TEST_FUNCTION(IoTHubTransportMqtt_Create_with_empty_device_key_fails)
 {
     // arrange
-    IOTHUBTRANSPORT_CONFIG config ={ 0 };
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_EMPTY_STRING, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
     // act
@@ -1163,7 +1197,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_with_empty_device_key_fails)
 TEST_FUNCTION(IoTHubTransportMqtt_Create_with_both_deviceKey_and_deviceSasToken_defined_fails)
 {
     // arrange
-    IOTHUBTRANSPORT_CONFIG config ={ 0 };
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
 
     SetupIothubTransportConfigWithKeyAndSasToken(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_DEVICE_SAS, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
@@ -1178,7 +1212,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_with_both_deviceKey_and_deviceSasToken_
 TEST_FUNCTION(IoTHubTransportMqtt_Create_with_empty_iothub_name_fails)
 {
     // arrange
-    IOTHUBTRANSPORT_CONFIG config ={ 0 };
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_EMPTY_STRING, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
     // act
@@ -1196,7 +1230,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_validConfig_Succeed)
     IOTHUBTRANSPORT_CONFIG config ={ 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, NULL);
 
-    setup_iothubtransportmqtt_create_mocks();
+    setup_iothubtransportmqtt_create_mocks(false);
 
     // act
     TRANSPORT_LL_HANDLE result = IoTHubTransportMqtt_Create(&config);
@@ -1216,7 +1250,26 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_with_NULL_protocol_gateway_hostname_Suc
     IOTHUBTRANSPORT_CONFIG config = { 0 };
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, NULL);
 
-    setup_iothubtransportmqtt_create_mocks();
+    setup_iothubtransportmqtt_create_mocks(false);
+
+    // act
+    TRANSPORT_LL_HANDLE result = IoTHubTransportMqtt_Create(&config);
+
+    // assert
+    ASSERT_IS_NOT_NULL(result);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    // clean up
+    IoTHubTransportMqtt_Destroy(result);
+}
+
+TEST_FUNCTION(IoTHubTransportMqtt_Create_with_protocol_gateway_hostname_Succeeds)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME_NON_NULL);
+
+    setup_iothubtransportmqtt_create_mocks(true);
 
     // act
     TRANSPORT_LL_HANDLE result = IoTHubTransportMqtt_Create(&config);
@@ -1242,7 +1295,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Create_validConfig_fail)
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, NULL);
     umock_c_reset_all_calls();
 
-    setup_iothubtransportmqtt_create_mocks();
+    setup_iothubtransportmqtt_create_mocks(false);
 
     umock_c_negative_tests_snapshot();
 
@@ -3373,7 +3426,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_MessageRecv_device_method_succeed)
     SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
 
     TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
-    g_tokenizerIndex = 6;
+    g_tokenizerIndex = 8;
     IoTHubTransportMqtt_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
     umock_c_reset_all_calls();
 
@@ -4534,6 +4587,5 @@ TEST_FUNCTION(IoTHubTransportMqtt_ProcessItem_fail)
     CONSTBUFFER_Destroy(cbh);
     umock_c_negative_tests_deinit();
 }
-
 
 END_TEST_SUITE(iothubtransportmqtt_ut)

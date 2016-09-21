@@ -4,6 +4,8 @@
 #ifndef IOTHUB_CLIENT_SAMPLE_MQTT_DM_H
 #define IOTHUB_CLIENT_SAMPLE_MQTT_DM_H
 
+#include "iothub_client.h"
+
 
 #define FIRMWARE_UPDATE_STATE_VALUES \
     FIRMWARE_UPDATE_STATE_NONE = 1, \

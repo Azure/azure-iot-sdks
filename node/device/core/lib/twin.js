@@ -50,9 +50,11 @@ DeviceTwin.fromDeviceClient = function(client, done) {
     throw new ReferenceError('done parameter is required');
   }
 
-  /* Codes_SRS_NODE_DEVICE_TWIN_18_028: [** if `fromDeviceClient` has previously been called for this client, it shall return the same object **]** */
+  /* Codes_SRS_NODE_DEVICE_TWIN_18_028: [** if `fromDeviceClient` has previously been called for this client, it shall perform a GET operation and return the same object **]** */
   if (client._twin) {
-    done(null,client._twin);
+    client._twin._getPropertiesFromService(function (err) {
+        done(err,client._twin);
+      });
   } else {
     /* Codes_SRS_NODE_DEVICE_TWIN_18_029: [** if `fromDeviceClient` is called with 2 different `client`s, it shall return 2 unique `DeviceTwin` objects **]** */
     /* Codes_SRS_NODE_DEVICE_TWIN_18_003: [** `fromDeviceClient` shall allocate a new `DeviceTwin` object **]**  */

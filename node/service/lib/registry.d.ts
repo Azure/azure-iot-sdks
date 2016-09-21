@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import { Http } from 'azure-iot-http-base';
+import Query = require('./query');
 
 declare class Registry {
     constructor(config: Registry.TransportConfig, httpRequestBuilder: Http);
@@ -23,7 +24,10 @@ declare class Registry {
     // Device Twin
     getDeviceTwin(deviceId: string, done: Registry.ResponseCallback): void;
     updateDeviceTwin(deviceId: string, patch: any, etag: string, done: Registry.ResponseCallback): void;
-    queryTwins(sqlQuery: string, done: Registry.ResponseCallback): void;
+
+    // Queries
+    createQuery(sqlQuery: string, pageSize: number) : Query;
+    executeQuery(query: Registry.QueryDescription, done: (err: Error, result: any, response: any) => void): void;
 
     // Factory methods
     static fromConnectionString(value: string): Registry;
@@ -37,6 +41,12 @@ declare namespace Registry {
     }
 
     interface JobStatus {
+    }
+
+    interface QueryDescription {
+        sql: string;
+        pageSize: number;
+        continuationToken: string;
     }
 
     type ResponseCallback = (err: Error, device: any, response: any) => void;

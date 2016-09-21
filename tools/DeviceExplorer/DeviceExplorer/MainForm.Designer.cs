@@ -50,6 +50,7 @@
             this.dhConStringTextBox = new System.Windows.Forms.TextBox();
             this.tabManagement = new System.Windows.Forms.TabPage();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.deviceTwinPropertiesBtn = new System.Windows.Forms.Button();
             this.sasTokenButton = new System.Windows.Forms.Button();
             this.createDeviceButton = new System.Windows.Forms.Button();
             this.listDevicesButton = new System.Windows.Forms.Button();
@@ -101,7 +102,6 @@
             this.sendMessageToDeviceButton = new System.Windows.Forms.Button();
             this.textBoxMessage = new System.Windows.Forms.TextBox();
             this.ehStringToolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.deviceTwinPropertiesBtn = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.groupBox5.SuspendLayout();
@@ -144,7 +144,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 25);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(632, 601);
+            this.tabPage2.Size = new System.Drawing.Size(751, 601);
             this.tabPage2.TabIndex = 3;
             this.tabPage2.Text = "Configuration";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -385,6 +385,16 @@
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Actions";
             // 
+            // deviceTwinPropertiesBtn
+            // 
+            this.deviceTwinPropertiesBtn.Location = new System.Drawing.Point(626, 21);
+            this.deviceTwinPropertiesBtn.Name = "deviceTwinPropertiesBtn";
+            this.deviceTwinPropertiesBtn.Size = new System.Drawing.Size(100, 30);
+            this.deviceTwinPropertiesBtn.TabIndex = 7;
+            this.deviceTwinPropertiesBtn.Text = "Twin Props.";
+            this.deviceTwinPropertiesBtn.UseVisualStyleBackColor = true;
+            this.deviceTwinPropertiesBtn.Click += new System.EventHandler(this.deviceTwinPropertiesBtn_Click);
+            // 
             // sasTokenButton
             // 
             this.sasTokenButton.Location = new System.Drawing.Point(502, 21);
@@ -544,7 +554,7 @@
             this.tabData.Location = new System.Drawing.Point(4, 25);
             this.tabData.Name = "tabData";
             this.tabData.Padding = new System.Windows.Forms.Padding(3);
-            this.tabData.Size = new System.Drawing.Size(632, 601);
+            this.tabData.Size = new System.Drawing.Size(751, 601);
             this.tabData.TabIndex = 1;
             this.tabData.Text = "Data";
             this.tabData.UseVisualStyleBackColor = true;
@@ -736,7 +746,7 @@
             this.tabMessagesToDevice.Location = new System.Drawing.Point(4, 25);
             this.tabMessagesToDevice.Name = "tabMessagesToDevice";
             this.tabMessagesToDevice.Padding = new System.Windows.Forms.Padding(3);
-            this.tabMessagesToDevice.Size = new System.Drawing.Size(632, 601);
+            this.tabMessagesToDevice.Size = new System.Drawing.Size(751, 601);
             this.tabMessagesToDevice.TabIndex = 2;
             this.tabMessagesToDevice.Text = "Messages To Device";
             this.tabMessagesToDevice.UseVisualStyleBackColor = true;
@@ -924,16 +934,6 @@
             this.textBoxMessage.Size = new System.Drawing.Size(516, 22);
             this.textBoxMessage.TabIndex = 4;
             // 
-            // deviceTwinPropertiesBtn
-            // 
-            this.deviceTwinPropertiesBtn.Location = new System.Drawing.Point(626, 21);
-            this.deviceTwinPropertiesBtn.Name = "deviceTwinPropertiesBtn";
-            this.deviceTwinPropertiesBtn.Size = new System.Drawing.Size(100, 30);
-            this.deviceTwinPropertiesBtn.TabIndex = 7;
-            this.deviceTwinPropertiesBtn.Text = "Twin Props.";
-            this.deviceTwinPropertiesBtn.UseVisualStyleBackColor = true;
-            this.deviceTwinPropertiesBtn.Click += new System.EventHandler(this.deviceTwinPropertiesBtn_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -943,7 +943,7 @@
             this.MinimumSize = new System.Drawing.Size(680, 605);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Device Explorer";
+            this.Text = "Device Explorer Twin";
             this.Shown += new System.EventHandler(this.MainForm_Shown);
             this.tabControl1.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);

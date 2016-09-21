@@ -1,19 +1,26 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
 'use strict';
 
 var Registry = require('azure-iothub').Registry;
 
-var connectionString = "[IoT Hub Connection String]";
-var sqlQuery = 'SELECT * FROM devices';
-
+var connectionString = '<IOTHUB CONNECTION STRING>';
 var registry = Registry.fromConnectionString(connectionString);
 
-registry.queryTwins(sqlQuery, function(err, result) {
+var query = registry.createQuery('SELECT * FROM devices', 100);
+var onResults = function(err, results) {
   if (err) {
-    console.error('Cannot query twins: ' + err.message);
+    console.error('Failed to fetch the results: ' + err.message);
   } else {
-    console.log(JSON.stringify(result, null, 2));
+    // Do something with the results
+    results.forEach(function(twin) {
+      console.log(twin.deviceId);
+    });
+
+    if (query.hasMoreResults) {
+        query.nextAsTwin(onResults);
+    }
   }
-});
+};
+
+query.nextAsTwin(onResults);

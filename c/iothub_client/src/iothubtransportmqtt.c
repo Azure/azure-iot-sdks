@@ -52,14 +52,15 @@ static const char TOPIC_DEVICE_TWIN_PREFIX[] = "$iothub/twin";
 static const char TOPIC_DEVICE_METHOD_PREFIX[] = "$iothub/methods";
 
 static const char* TOPIC_GET_DESIRED_STATE = "$iothub/twin/res/#";
-static const char* TOPIC_NOTIFICATION_STATE = "$iothub/twin/PATCH/properties/desired";
+static const char* TOPIC_NOTIFICATION_STATE = "$iothub/twin/PATCH/properties/desired/#";
+
 static const char* TOPIC_DEVICE_MSG = "devices/%s/messages/devicebound/#";
 static const char* TOPIC_DEVICE_DEVICE = "devices/%s/messages/events/";
 
 static const char* TOPIC_DEVICE_METHOD_SUBSCRIBE = "$iothub/methods/POST/#";
 static const char* TOPIC_DEVICE_METHOD_RESPONSE = "$iothub/methods/res";
 
-static const char* IOTHUB_API_VERSION = "2016-04-25-preview";
+static const char* IOTHUB_API_VERSION = "2016-09-30-preview";
 
 static const char* PROPERTY_SEPARATOR = "&";
 static const char* REPORTED_PROPERTIES_TOPIC = "$iothub/twin/PATCH/properties/reported/?$rid=%"PRIu16;
@@ -74,6 +75,7 @@ static const char* REQUEST_ID_PROPERTY = "?$rid=";
 #define SUBSCRIBE_TELEMETRY_TOPIC               0x0004
 #define SUBSCRIBE_METHODS_TOPIC                 0x0008
 #define SUBSCRIBE_DEVICE_METHOD_TOPIC           0x0010
+#define SUBSCRIBE_TOPIC_COUNT                   4
 
 typedef struct SYSTEM_PROPERTY_INFO_TAG
 {
@@ -240,7 +242,7 @@ static const char* retrieve_mqtt_return_codes(CONNECT_RETURN_CODE rtn_code)
     }
 }
 
-static int retrieve_device_method_rid_info(const char* resp_topic, uint16_t* request_id)
+static int retrieve_device_method_rid_info(const char* resp_topic, STRING_HANDLE method_name, uint16_t* request_id)
 {
     int result;
     STRING_TOKENIZER_HANDLE token_handle = STRING_TOKENIZER_create_from_char(resp_topic);
@@ -261,20 +263,34 @@ static int retrieve_device_method_rid_info(const char* resp_topic, uint16_t* req
         }
         else
         {
+            size_t token_index = 0;
             size_t request_id_length = strlen(REQUEST_ID_PROPERTY);
             result = __LINE__;
             while (STRING_TOKENIZER_get_next_token(token_handle, token_value, "/") == 0)
             {
-                if (STRING_length(token_value) >= request_id_length)
+                if (token_index == 3)
                 {
-                    const char* request_id_value = STRING_c_str(token_value);
-                    if (memcmp(request_id_value, REQUEST_ID_PROPERTY, request_id_length) == 0)
+                    if (STRING_concat_with_STRING(method_name, token_value) != 0)
                     {
-                        *request_id = (uint16_t)atol(request_id_value+request_id_length);
-                        result = 0;
+                        result = __LINE__;
+                        *request_id = 0;
                         break;
                     }
                 }
+                else if (token_index == 4)
+                {
+                    if (STRING_length(token_value) >= request_id_length)
+                    {
+                        const char* request_id_value = STRING_c_str(token_value);
+                        if (memcmp(request_id_value, REQUEST_ID_PROPERTY, request_id_length) == 0)
+                        {
+                            *request_id = (uint16_t)atol(request_id_value+request_id_length);
+                            result = 0;
+                            break;
+                        }
+                    }
+                }
+                token_index++;
             }
             STRING_delete(token_value);
         }
@@ -465,7 +481,6 @@ static STRING_HANDLE addPropertiesTouMqttMessage(IOTHUB_MESSAGE_HANDLE iothub_me
 static int publish_mqtt_telemetry_msg(PMQTTTRANSPORT_HANDLE_DATA transport_data, MQTT_MESSAGE_DETAILS_LIST* mqttMsgEntry, const unsigned char* payload, size_t len)
 {
     int result;
-    mqttMsgEntry->packet_id = get_next_packet_id(transport_data);
     STRING_HANDLE msgTopic = addPropertiesTouMqttMessage(mqttMsgEntry->iotHubMessageEntry->messageHandle, STRING_c_str(transport_data->topic_MqttEvent));
     if (msgTopic == NULL)
     {
@@ -815,18 +830,27 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
             else if (type == IOTHUB_TYPE_DEVICE_METHODS)
             {
                 uint16_t request_id;
-                if (retrieve_device_method_rid_info(topic_resp, &request_id) != 0)
+                STRING_HANDLE method_name = STRING_new();
+                if (method_name == NULL)
                 {
-                    LogError("Failure: retrieve device topic info");
+                    LogError("Failure: allocating method_name string value");
                 }
                 else
                 {
-                    const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(msgHandle);
-                    int status_code = IoTHubClient_LL_DeviceMethodComplete(transportData->llClientHandle, payload->message, payload->length);
-                    if (publish_device_method_message(transportData, status_code, request_id) != 0)
+                    if (retrieve_device_method_rid_info(topic_resp, method_name, &request_id) != 0)
                     {
-                        LogError("Failure: publishing device method response");
+                        LogError("Failure: retrieve device topic info");
                     }
+                    else
+                    {
+                        const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(msgHandle);
+                        int status_code = IoTHubClient_LL_DeviceMethodComplete(transportData->llClientHandle, STRING_c_str(method_name), payload->message, payload->length);
+                        if (publish_device_method_message(transportData, status_code, request_id) != 0)
+                        {
+                            LogError("Failure: publishing device method response");
+                        }
+                    }
+                    STRING_delete(method_name);
                 }
             }
             else
@@ -996,7 +1020,7 @@ static void SubscribeToMqttProtocol(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     {
         uint32_t topic_subscription = 0;
         size_t subscribe_count = 0;
-        SUBSCRIBE_PAYLOAD subscribe[3];
+        SUBSCRIBE_PAYLOAD subscribe[SUBSCRIBE_TOPIC_COUNT];
         if ((transport_data->topic_MqttMessage != NULL) && (SUBSCRIBE_TELEMETRY_TOPIC & transport_data->topics_ToSubscribe))
         {
             subscribe[subscribe_count].subscribeTopic = STRING_c_str(transport_data->topic_MqttMessage);
@@ -1375,7 +1399,6 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
             else
             {
                 /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [If the upperConfig contains a valid protocolGatewayHostName value the this shall be used for the hostname, otherwise the hostname shall be constructed using the iothubname and iothubSuffix.] */
-
                 if (upperConfig->protocolGatewayHostName == NULL)
                 {
                      state->hostAddress = STRING_construct_sprintf("%s.%s", upperConfig->iotHubName, upperConfig->iotHubSuffix);
@@ -2005,6 +2028,7 @@ static void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT
                         {
                             mqttMsgEntry->retryCount = 0;
                             mqttMsgEntry->iotHubMessageEntry = iothubMsgList;
+                            mqttMsgEntry->packet_id = get_next_packet_id(transport_data);
                             if (publish_mqtt_telemetry_msg(transport_data, mqttMsgEntry, messagePayload, messageLength) != 0)
                             {
                                 (void)(DList_RemoveEntryList(currentListEntry));

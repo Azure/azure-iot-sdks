@@ -105,12 +105,16 @@ describe('DeviceTwin', function () {
       });
     });
 
-    /* Tests_SRS_NODE_DEVICE_TWIN_18_028: [** if `fromDeviceClient` has previously been called for this client, it shall return the same object **]** */
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_044: [** `fromDeviceClient` shall do a GET call to retrieve desired properties from the service. **]** */
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_028: [** if `fromDeviceClient` has previously been called for this client, it shall perform a GET operation and return the same object **]** */
     it('returns the same object if called twice', function (done) {
       var client = new FakeClient();
+      sinon.spy(client._transport, "sendTwinRequest");
       DeviceTwin.fromDeviceClient(client, function(err, obj1) {
+        assert(client._transport.sendTwinRequest.withArgs('GET').calledOnce);
         if (err) throw err;
         DeviceTwin.fromDeviceClient(client, function(err, obj2) {
+          assert(client._transport.sendTwinRequest.withArgs('GET').calledTwice);
           assert.equal(obj1, obj2);
           done();
         });
