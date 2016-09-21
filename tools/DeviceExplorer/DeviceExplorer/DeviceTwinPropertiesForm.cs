@@ -111,7 +111,7 @@ namespace DeviceExplorer
             if (runOnce)
             {
                 runOnce = false;
-                jsonRichTextBox3.Text = "{ properties: { desired: { }}}";
+                jsonRichTextBox3.Text = "{ \"properties\": { \"desired\": { " + Environment.NewLine + Environment.NewLine + Environment.NewLine + Environment.NewLine + "}}}";
             }
 
             return isOK;
