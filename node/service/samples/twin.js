@@ -9,7 +9,7 @@ var connectionString = "[IoT Hub Connection String]";
 var deviceId = '[Device ID]';
 
 var registry = Registry.fromConnectionString(connectionString);
-registry.getDeviceTwin(deviceId, function(err, twin) {
+registry.getTwin(deviceId, function(err, twin) {
   if (err) {
     console.error(err.message);
   } else {
@@ -31,8 +31,8 @@ registry.getDeviceTwin(deviceId, function(err, twin) {
         console.error(err.message);
       } else {
         console.log(JSON.stringify(twin, null, 2));
-        // method 2: using the updateDeviceTwin method on the Registry object
-        registry.updateDeviceTwin(twin.deviceId, { properties: { desired: { telemetryInterval: 2000 }}}, twin.etag, function(err, twin) {
+        // method 2: using the updateTwin method on the Registry object
+        registry.updateTwin(twin.deviceId, { properties: { desired: { telemetryInterval: 2000 }}}, twin.etag, function(err, twin) {
           if (err) {
             console.error(err.message);
           } else {

@@ -6,7 +6,7 @@
 var assert = require('chai').assert;
 var sinon = require('sinon');
 var Query = require('../lib/query.js');
-var DeviceTwin = require('../lib/device_twin.js');
+var DeviceTwin = require('../lib/twin.js');
 
 describe('Query', function() {
   describe('#constructor', function() {

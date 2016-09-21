@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import Registry = require('./registry');
-import DeviceTwin = require('./device_twin');
+import DeviceTwin = require('./twin');
 
 declare class Query {
     sql: string;

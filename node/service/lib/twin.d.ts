@@ -3,10 +3,10 @@
 
 import Registry = require('./registry');
 
-declare class DeviceTwin {
-    constructor(device: string|{ deviceId: string; }, registryClient: Registry);
+declare class Twin {
+    constructor(device: string | { deviceId: string; }, registryClient: Registry);
     get(done: Registry.ResponseCallback): void;
     update(patch: any, done: Registry.ResponseCallback): void;
 }
 
-export = DeviceTwin;
+export = Twin;

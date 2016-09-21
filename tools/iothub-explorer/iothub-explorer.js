@@ -306,9 +306,9 @@ else if (command === 'get-twin') {
   if (!arg1) inputError('No device ID given');
 
   var registry = connString ? Registry.fromConnectionString(connString) : Registry.fromSharedAccessSignature(sas.toString());
-  registry.getDeviceTwin(arg1, function (err, deviceTwin) {
+  registry.getTwin(arg1, function (err, twin) {
     if (err) serviceError(err);
-    else console.log(JSON.stringify(deviceTwin, null, 2));
+    else console.log(JSON.stringify(twin, null, 2));
   });
 }
 else if (command === 'update-twin') {
@@ -324,12 +324,12 @@ else if (command === 'update-twin') {
   }
 
   var registry = connString ? Registry.fromConnectionString(connString) : Registry.fromSharedAccessSignature(sas.toString());
-  registry.getDeviceTwin(arg1, function (err, deviceTwin){
+  registry.getTwin(arg1, function (err, twin){
     if (err) {
       serviceError(err);
     }
     else {
-      registry.updateDeviceTwin(deviceTwin.deviceId, updateInfo, deviceTwin.etag, function (err, updatedTwin){
+      registry.updateTwin(twin.deviceId, updateInfo, twin.etag, function (err, updatedTwin){
         if (err) {
           serviceError(err);
         }

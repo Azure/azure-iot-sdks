@@ -32,7 +32,7 @@ var moreNewProps = {
 var mergeResult =  _.merge(newProps, moreNewProps);
 
 var runTests = function (hubConnectionString) {
-  describe('Device Twin', function() {
+  describe('Twin', function() {
 
     this.timeout(120000);
     var deviceClient, deviceTwin;
@@ -66,11 +66,11 @@ var runTests = function (hubConnectionString) {
 
         deviceClient.open(function(err) {
           if (err) return done(err);
-          deviceClient.getDeviceTwin(function(err, twin) {
+          deviceClient.getTwin(function(err, twin) {
             if (err) return done(err);
             deviceTwin = twin;
 
-            registry.getDeviceTwin(deviceDescription.deviceId, function(err, twin) {
+            registry.getTwin(deviceDescription.deviceId, function(err, twin) {
               if (err) return done(err);
               serviceTwin = twin;
               done();

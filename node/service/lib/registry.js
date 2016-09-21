@@ -9,7 +9,7 @@ var endpoint = require('azure-iot-common').endpoint;
 var RestApiClient = require('./rest_api_client.js');
 var ConnectionString = require('./connection_string.js');
 var SharedAccessSignature = require('./shared_access_signature.js');
-var DeviceTwin = require('./device_twin.js');
+var Twin = require('./twin.js');
 var Query = require('./query.js');
 
 /**
@@ -405,19 +405,19 @@ Registry.prototype.cancelJob = function (jobId, done) {
 };
 
 /**
- * @method              module:azure-iothub.Registry#getDeviceTwin
+ * @method              module:azure-iothub.Registry#getTwin
  * @description         Gets the Device Twin of the device with the specified device identifier.
  * @param {String}      deviceId   The device identifier.
  * @param {Function}    done       The callback that will be called with either an Error object or 
  *                                 the device twin instance.
  */
-Registry.prototype.getDeviceTwin = function (deviceId, done) {
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_019: [The `getDeviceTwin` method shall throw a `ReferenceError` if the `deviceId` parameter is falsy.]*/
+Registry.prototype.getTwin = function (deviceId, done) {
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_019: [The `getTwin` method shall throw a `ReferenceError` if the `deviceId` parameter is falsy.]*/
   if (!deviceId) throw new ReferenceError('the \'deviceId\' cannot be falsy');
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_020: [The `getDeviceTwin` method shall throw a `ReferenceError` if the `done` parameter is falsy.]*/
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_020: [The `getTwin` method shall throw a `ReferenceError` if the `done` parameter is falsy.]*/
   if (!done) throw new ReferenceError('the \'done\' argument cannot be falsy');
 
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_049: [The `getDeviceTwin` method shall construct an HTTP request using information supplied by the caller, as follows:
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_049: [The `getTwin` method shall construct an HTTP request using information supplied by the caller, as follows:
   ```
   GET /twins/<deviceId>?api-version=<version> HTTP/1.1
   Authorization: <config.sharedAccessSignature>
@@ -429,14 +429,14 @@ Registry.prototype.getDeviceTwin = function (deviceId, done) {
     if (err) {
       done(err);
     } else {
-      /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_036: [The `getDeviceTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub service.]*/
-      done(null, new DeviceTwin(newTwin, self), response);
+      /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_036: [The `getTwin` method shall call the `done` callback with a `Twin` object updated with the latest property values stored in the IoT Hub service.]*/
+      done(null, new Twin(newTwin, self), response);
     }
   });
 };
 
 /**
- * @method              module:azure-iothub.Registry#updateDeviceTwin
+ * @method              module:azure-iothub.Registry#updateTwin
  * @description         Updates the Device Twin of a specific device with the given patch.
  * @param {String}      deviceId   The device identifier.
  * @param {Object}      patch      The desired properties and tags to patch the device twin with.
@@ -445,15 +445,15 @@ Registry.prototype.getDeviceTwin = function (deviceId, done) {
  * @param {Function}    done       The callback that will be called with either an Error object or 
  *                                 the device twin instance.
  */
-Registry.prototype.updateDeviceTwin = function(deviceId, patch, etag, done) {
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_044: [The `updateDeviceTwin` method shall throw a `ReferenceError` if the `deviceId` argument is `undefined`, `null` or an empty string.]*/
+Registry.prototype.updateTwin = function(deviceId, patch, etag, done) {
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_044: [The `updateTwin` method shall throw a `ReferenceError` if the `deviceId` argument is `undefined`, `null` or an empty string.]*/
   if (deviceId === null || deviceId === undefined || deviceId === '') throw new ReferenceError('deviceId cannot be \'' + deviceId + '\'');
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_045: [The `updateDeviceTwin` method shall throw a `ReferenceError` if the `patch` argument is falsy.]*/
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_045: [The `updateTwin` method shall throw a `ReferenceError` if the `patch` argument is falsy.]*/
   if (!patch) throw new ReferenceError('patch cannot be \'' + patch + '\'');
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_046: [The `updateDeviceTwin` method shall throw a `ReferenceError` if the `etag` argument is falsy.]*/
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_046: [The `updateTwin` method shall throw a `ReferenceError` if the `etag` argument is falsy.]*/
   if (!etag) throw new ReferenceError('etag cannot be \'' + etag + '\'');
 
-  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_048: [The `updateDeviceTwin` method shall construct an HTTP request using information supplied by the caller, as follows:
+  /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_048: [The `updateTwin` method shall construct an HTTP request using information supplied by the caller, as follows:
   ```
   PATCH /twins/<deviceId>?api-version=<version> HTTP/1.1
   Authorization: <config.sharedAccessSignature>
@@ -474,8 +474,8 @@ Registry.prototype.updateDeviceTwin = function(deviceId, patch, etag, done) {
     if (err) {
       done(err);
     } else {
-      /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_050: [The `updateDeviceTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub service.]*/
-      done(null, new DeviceTwin(newTwin, self), response);
+      /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_050: [The `updateTwin` method shall call the `done` callback with a `Twin` object updated with the latest property values stored in the IoT Hub service.]*/
+      done(null, new Twin(newTwin, self), response);
     }
   });
 };

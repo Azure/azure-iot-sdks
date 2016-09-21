@@ -7,7 +7,7 @@ var assert = require('chai').assert;
 var endpoint = require('azure-iot-common').endpoint;
 var errors = require('azure-iot-common').errors;
 var Registry = require('../lib/registry.js');
-var DeviceTwin = require('../lib/device_twin.js');
+var DeviceTwin = require('../lib/twin.js');
 var Query = require('../lib/query.js');
 
 var fakeDevice = { deviceId: 'deviceId' };
@@ -306,25 +306,25 @@ describe('Registry', function() {
     });
   });
 
-  describe('#getDeviceTwin', function () {
-    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_019: [The `getDeviceTwin` method shall throw a `ReferenceError` if the `deviceId` parameter is falsy.]*/
+  describe('#getTwin', function () {
+    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_019: [The `getTwin` method shall throw a `ReferenceError` if the `deviceId` parameter is falsy.]*/
     [undefined, null, ''].forEach(function(badDeviceId) {
-      testFalsyArg('getDeviceTwin', 'deviceId', badDeviceId, ReferenceError);
+      testFalsyArg('getTwin', 'deviceId', badDeviceId, ReferenceError);
     });
 
-    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_020: [The `getDeviceTwin` method shall throw a `ReferenceError` if the `done` parameter is falsy.]*/
+    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_020: [The `getTwin` method shall throw a `ReferenceError` if the `done` parameter is falsy.]*/
     [undefined, null].forEach(function(badCallback) {
       it('throws a ReferenceError if \'done\' is \'' + badCallback + '\'', function() {
         var registry = new Registry({ host: 'host', sharedAccessSignature: 'sas' });
         assert.throws(function(){
-          registry.getDeviceTwin('deviceId', badCallback);
+          registry.getTwin('deviceId', badCallback);
         }, ReferenceError);
       });
     });
 
-    testErrorCallback('getDeviceTwin', fakeDevice.deviceId);
+    testErrorCallback('getTwin', fakeDevice.deviceId);
 
-    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_036: [The `getDeviceTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub servce.]*/
+    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_036: [The `getTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub servce.]*/
     it('calls the \'done\' callback with a \'DeviceTwin\' object', function(testCallback) {
       var registry = new Registry({ host: 'host', sharedAccessSignature: 'sas' }, {
         executeApiCall: function (method, path, httpHeaders, body, done) {
@@ -332,45 +332,45 @@ describe('Registry', function() {
         }
       });
 
-      registry.getDeviceTwin('deviceId', function(err, twin) {
+      registry.getTwin('deviceId', function(err, twin) {
         assert.instanceOf(twin, DeviceTwin);
         testCallback();
       });
     });
   });
 
-  describe('updateDeviceTwin', function() {
-    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_044: [The `updateDeviceTwin` method shall throw a `ReferenceError` if the `deviceId` argument is `undefined`, `null` or an empty string.]*/
+  describe('updateTwin', function() {
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_044: [The `updateTwin` method shall throw a `ReferenceError` if the `deviceId` argument is `undefined`, `null` or an empty string.]*/
     [undefined, null, ''].forEach(function(badDeviceId) {
       it('throws a \'ReferenceError\' if \'deviceId\' is \'' + badDeviceId + '\'', function() {
         var registry = new Registry({ host: 'host', sharedAccessSignature: 'sas' });
         assert.throws(function() {
-          registry.updateDeviceTwin(badDeviceId, {}, 'etag==', function() {});
+          registry.updateTwin(badDeviceId, {}, 'etag==', function() {});
         }, ReferenceError);
       });
     });
 
-    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_045: [The `updateDeviceTwin` method shall throw a `ReferenceError` if the `patch` argument is falsy.]*/
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_045: [The `updateTwin` method shall throw a `ReferenceError` if the `patch` argument is falsy.]*/
     [undefined, null].forEach(function(badPatch) {
       it('throws a \'ReferenceError\' if \'patch\' is \'' + badPatch + '\'', function() {
         var registry = new Registry({ host: 'host', sharedAccessSignature: 'sas' });
         assert.throws(function() {
-          registry.updateDeviceTwin('deviceId', badPatch, 'etag==', function() {});
+          registry.updateTwin('deviceId', badPatch, 'etag==', function() {});
         }, ReferenceError);
       });
     });
 
-    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_046: [The `updateDeviceTwin` method shall throw a `ReferenceError` if the `etag` argument is falsy.]*/
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_046: [The `updateTwin` method shall throw a `ReferenceError` if the `etag` argument is falsy.]*/
     [undefined, null, ''].forEach(function(badEtag) {
       it('throws a \'ReferenceError\' if \'etag\' is \'' + badEtag + '\'', function() {
         var registry = new Registry({ host: 'host', sharedAccessSignature: 'sas' });
         assert.throws(function() {
-          registry.updateDeviceTwin('deviceId', {}, badEtag, function() {});
+          registry.updateTwin('deviceId', {}, badEtag, function() {});
         }, ReferenceError);
       });
     });
 
-    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_048: [The `updateDeviceTwin` method shall construct an HTTP request using information supplied by the caller, as follows:
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_048: [The `updateTwin` method shall construct an HTTP request using information supplied by the caller, as follows:
     ```
     PATCH /twins/<deviceId>?api-version=<version> HTTP/1.1
     Authorization: <config.sharedAccessSignature>
@@ -402,10 +402,10 @@ describe('Registry', function() {
       };
 
       var registry = new Registry(fakeConfig, fakeHttpHelper);
-      registry.updateDeviceTwin(fakeDeviceId, fakeTwinPatch, fakeEtag, testCallback);
+      registry.updateTwin(fakeDeviceId, fakeTwinPatch, fakeEtag, testCallback);
     });
 
-    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_050: [The `updateDeviceTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub service.]*/
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_050: [The `updateTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub service.]*/
     it('calls the \'done\' a \'DeviceTwin\' object', function(testCallback) {
       var registry = new Registry({ host: 'host', sharedAccessSignature: 'sas' }, {
         executeApiCall: function (method, path, httpHeaders, body, done) {
@@ -413,13 +413,13 @@ describe('Registry', function() {
         }
       });
 
-      registry.updateDeviceTwin('deviceId', {}, 'etag==', function(err, twin) {
+      registry.updateTwin('deviceId', {}, 'etag==', function(err, twin) {
         assert.instanceOf(twin, DeviceTwin);
         testCallback();
       });
     });
 
-    testErrorCallback('updateDeviceTwin', 'deviceId', {}, 'etag==');
+    testErrorCallback('updateTwin', 'deviceId', {}, 'etag==');
   });
 
   describe('importDevicesFromBlob', function() {

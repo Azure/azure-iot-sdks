@@ -3,7 +3,7 @@
 
 'use strict';
 
-var DeviceTwin = require('./device_twin.js');
+var Twin = require('./twin.js');
 
 /**
  * @class                  module:azure-iothub.Query
@@ -85,7 +85,7 @@ Query.prototype.nextAsTwin = function(done) {
       if (result) {
         /*SRS_NODE_SERVICE_QUERY_16_009: [The `nextAsTwin` method shall call the `done` callback with a `null` error object and a collection of `Twin` objects created from the results of the query if the request was successful.]*/
         var twins = result.map(function(twinJson) {
-          return new DeviceTwin(twinJson, self._registry);
+          return new Twin(twinJson, self._registry);
         });
         done(null, twins, response);
       } else {
