@@ -4,5 +4,5 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 set(shared_util_base_path ../../../../azure-c-shared-utility)
-set(mbed_project_base "simple_sample_with_strings" CACHE STRING "The item being built")
+set(mbed_project_base "devicetwin_simplesample" CACHE STRING "The item being built")
 include (${shared_util_base_path}/tools/mbed_build_scripts/mbedbldtemplate.txt)
