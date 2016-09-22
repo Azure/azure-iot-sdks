@@ -106,7 +106,7 @@ module.exports = function(hubConnectionString) {
       // make the method call via the service
       var methodParams = {
         methodName: methodName, 
-        payloadJson: JSON.stringify(methodPayload),
+        payload: methodPayload,
         timeoutInSeconds: 20
       };
       ServiceClient
@@ -116,8 +116,8 @@ module.exports = function(hubConnectionString) {
               methodParams,
               function(err, result) {
                 if(!err) {
-                  assert.strictEqual(parseInt(result.status), methodResult);
-                  assert.deepEqual(JSON.parse(result.payloadJson), responsePayload);
+                  assert.strictEqual(result.status, methodResult);
+                  assert.deepEqual(result.payload, responsePayload);
                 }
                 done(err);
               });
