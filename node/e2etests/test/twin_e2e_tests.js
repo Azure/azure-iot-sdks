@@ -29,7 +29,7 @@ var moreNewProps = {
   }
 };
 
-var mergeResult =  _.merge(newProps, moreNewProps);
+var mergeResult =  _.merge(JSON.parse(JSON.stringify(newProps)), moreNewProps);
 
 var runTests = function (hubConnectionString) {
   describe('Twin', function() {
@@ -148,27 +148,27 @@ var runTests = function (hubConnectionString) {
     it ('sends and receives desired properties', function(done) {
       assertObjectIsEmpty(deviceTwin.properties.desired);
 
-      deviceTwin.on('properties.desired', function() {
-        assertObjectsAreEqual(newProps, deviceTwin.properties.desired);
-        done();
-     });
-
-      serviceTwin.update( { properties : { desired : newProps } }, function(err) {
-        if (err) return done(err);
-      });
-    });
-
-    it ('sends and receives mergee desired properties', function(done) {
       serviceTwin.update( { properties : { desired : newProps } }, function(err) {
         if (err) return done(err);
 
         deviceTwin.on('properties.desired', function() {
-          assertObjectsAreEqual(mergeResult, deviceTwin.properties.desired);
+          assertObjectsAreEqual(newProps, deviceTwin.properties.desired);
           done();
         });
-        
+      });
+    });
+
+    it ('sends and receives merged desired properties', function(done) {
+      serviceTwin.update( { properties : { desired : newProps } }, function(err) {
+        if (err) return done(err);
+
         serviceTwin.update( { properties : { desired : moreNewProps } }, function(err) {
           if (err) return done(err);
+
+          deviceTwin.on('properties.desired', function() {
+            assertObjectsAreEqual(mergeResult, deviceTwin.properties.desired);
+            done();
+          });
         });
       });
     });
@@ -181,13 +181,13 @@ var runTests = function (hubConnectionString) {
         assert.notEqual(serviceTwin.etag, "*");
         serviceTwin.etag = "*";
 
-        deviceTwin.on('properties.desired', function() {
-          assertObjectsAreEqual(mergeResult, deviceTwin.properties.desired);
-          done();
-        });
-        
         serviceTwin.update( { properties : { desired : moreNewProps } }, function(err) {
           if (err) return done(err);
+          deviceTwin.on('properties.desired', function() {
+            assertObjectsAreEqual(mergeResult, deviceTwin.properties.desired);
+            done();
+        });
+        
         });
       });
     });
