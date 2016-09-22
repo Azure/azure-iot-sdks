@@ -66,7 +66,7 @@ var runTests = function (hubConnectionString) {
 
         deviceClient.open(function(err) {
           if (err) return done(err);
-          deviceClient.getTwin(function(err, twin) {
+          deviceClient.getDeviceTwin(function(err, twin) {
             if (err) return done(err);
             deviceTwin = twin;
 
