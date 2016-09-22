@@ -31,20 +31,14 @@ query.nextAsTwin(onResults);
 
 ## Public Interface
 
-### Query(sqlQuery, pageSize, registry) [constructor]
+### Query(executeQueryFn, registry) [constructor]
 The `Query` constructor initializes a new instance of the `Query` class.
 
-**SRS_NODE_SERVICE_QUERY_16_001: [** The `Query` constructor shall throw a `ReferenceError` if `sqlQuery` is falsy. **]**
+**SRS_NODE_SERVICE_QUERY_16_001: [** The `Query` constructor shall throw a `ReferenceError` if `executeQueryFn` is falsy. **]**
 
-**SRS_NODE_SERVICE_QUERY_16_002: [** The `Query` constructor shall throw a `ReferenceError` if `registry` is falsy. **]**
+**SRS_NODE_SERVICE_QUERY_16_011: [** The `Query` constructor shall throw a `TypeError` if `executeQueryFn` is not a function. **]**
 
-**SRS_NODE_SERVICE_QUERY_16_011: [** The `Query` constructor shall throw a `TypeError` if `sqlQuery` is not a string. **]**
-
-**SRS_NODE_SERVICE_QUERY_16_012: [** The `Query` constructor shall throw a `TypeError` if `pageSize` is not a number, null or undefined. **]**
-
-**SRS_NODE_SERVICE_QUERY_16_003: [** The `Query` constructor shall set the Query.sql property to the `sqlQuery` argument value. **]**
-
-**SRS_NODE_SERVICE_QUERY_16_004: [** The `Query` constructor shall set the Query.pageSize property to the `pageSize` argument value. **]**
+**SRS_NODE_SERVICE_QUERY_16_015: [** The `Query` constructor shall initialize the `hasMoreResults` property to `true`. **]**
 
 ### next(done)
 The `next` method runs the query and calls the `done` callback with a new page of results.

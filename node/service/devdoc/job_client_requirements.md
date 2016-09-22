@@ -91,16 +91,21 @@ User-Agent: <sdk-name>/<sdk-version>
 ```
 **]**
 
-### getJobs(jobType, jobStatus, done)
-The `getJobs` method queries the IoT Hub instance for all jobs matching `jobType` and `jobStatus` if specified and calls the `done` callback with that list.
+### createQuery(jobType, jobStatus, pageSize)
+The `createQuery` method creates a query that can be used to find all jobs matching `jobType` and `jobStatus` and get them in a pages of a specified size.
 
-**SRS_NODE_JOB_CLIENT_16_010: [** If `jobType` is a function, `jobType` shall be considered the callback and a `TypeError` shall be thrown if `jobStatus` and/or `done` are not `undefined`. **]**
+**SRS_NODE_JOB_CLIENT_16_032: [** The `createQuery` method shall throw a `TypeError` if the `jobType` and `jobStatus` arguments are not `null`, `undefined` or of type `string`. **]**
 
-**SRS_NODE_JOB_CLIENT_16_011: [** If `jobStatus` is a function, `jobStatus` shall be considered the callback and a `TypeError` shall be thrown if `done` is not `undefined`. **]**
+**SRS_NODE_JOB_CLIENT_16_033: [** The `createQuery` method shall throw a `TypeError` if the `pageSize` argument is not `null`, `undefined` or a number. **]**
 
-**SRS_NODE_JOB_CLIENT_16_012: [** The `getJobs` method shall construct the HTTP request as follows:
+**SRS_NODE_JOB_CLIENT_16_034: [** The `createQuery` method shall return a new `Query` instance. **]**
+
+### _getJobsFunc(jobType, jobStatus, pageSize)
+The `_getJobsFunc` method gets a new page of jobs matching `jobType` and `jobStatus` if specified and calls the `done` callback with that list.
+
+**SRS_NODE_JOB_CLIENT_16_012: [** The `_getJobsFunc` method shall construct the HTTP request as follows:
 ```
-GET /jobs/v2/query?api-version=<version>&jobType=<jobType>&jobStatus=<jobStatus>
+GET /jobs/v2/query?api-version=<version>[&jobType=<jobType>][&jobStatus=<jobStatus>][&pageSize=<pageSize>][&continuationToken=<continuationToken>]
 Authorization: <config.sharedAccessSignature>
 Content-Type: application/json; charset=utf-8
 Request-Id: <guid>
@@ -108,6 +113,7 @@ User-Agent: <sdk-name>/<sdk-version>
 ```
 **]**
 
+**SRS_NODE_JOB_CLIENT_16_035: [** The `_getJobsFunc` function shall return a function that can be used by the `Query` object to get a new page of results **]**
 
 ### scheduleDeviceMethod(jobId, queryOrDevices, methodParams, jobStartTime, maxExecutionTimeInSeconds, done)
 The `scheduleDeviceMethod` method schedules a device method call on a list of devices at a specific time.
