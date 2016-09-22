@@ -984,6 +984,7 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                 xio_close(transport_data->xioTransport, NULL, NULL);
                 transport_data->isConnected = false;
                 transport_data->currPacketState = PACKET_TYPE_ERROR;
+                transport_data->device_twin_get_sent = false;
                 if (transport_data->topic_MqttMessage != NULL)
                 {
                     transport_data->topics_ToSubscribe |= SUBSCRIBE_TELEMETRY_TOPIC;
@@ -1277,9 +1278,25 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 if ((current_time - transport_data->mqtt_connect_time) / 1000 > (SAS_TOKEN_DEFAULT_LIFETIME*SAS_REFRESH_MULTIPLIER))
                 {
                     (void)mqtt_client_disconnect(transport_data->mqttClient);
-                    transport_data->topics_ToSubscribe = UNSUBSCRIBE_FROM_TOPIC;
                     transport_data->isConnected = false;
                     transport_data->currPacketState = UNKNOWN_TYPE;
+                    transport_data->device_twin_get_sent = false;
+                    if (transport_data->topic_MqttMessage != NULL)
+                    {
+                        transport_data->topics_ToSubscribe |= SUBSCRIBE_TELEMETRY_TOPIC;
+                    }
+                    if (transport_data->topic_GetState != NULL)
+                    {
+                        transport_data->topics_ToSubscribe |= SUBSCRIBE_GET_REPORTED_STATE_TOPIC;
+                    }
+                    if (transport_data->topic_NotifyState != NULL)
+                    {
+                        transport_data->topics_ToSubscribe |= SUBSCRIBE_NOTIFICATION_STATE_TOPIC;
+                    }
+                    if (transport_data->topic_DeviceMethods != NULL)
+                    {
+                        transport_data->topics_ToSubscribe |= SUBSCRIBE_DEVICE_METHOD_TOPIC;
+                    }
                 }
             }
         }
@@ -1946,6 +1963,7 @@ static void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT
                 if ((transport_data->topic_NotifyState != NULL || transport_data->topic_GetState != NULL) &&
                     !transport_data->device_twin_get_sent)
                 {
+                    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_055: [ IoTHubTransportMqtt_DoWork shall send a device twin get property message upon successfully retrieving a SUBACK on device twin topics. ] */
                     if (publish_device_twin_get_message(transport_data) == 0)
                     {
                         transport_data->device_twin_get_sent = true;

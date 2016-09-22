@@ -224,7 +224,7 @@ IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportMqtt_ProcessItem(TRANSPORT_LL_HANDLE h
 void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
 ```
 
-**SRS_IOTHUB_MQTT_TRANSPORT_07_026: [** `IoTHubTransportMqtt_DoWork` shall do nothing if parameter 'handle' and/or 'iotHubClientHandle' is `NULL`. **]**
+**SRS_IOTHUB_MQTT_TRANSPORT_07_026: [** `IoTHubTransportMqtt_DoWork` shall do nothing if parameter 'handle' and/or**07_055: [**  **]** 'iotHubClientHandle' is `NULL`. **]**
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_027: [** `IoTHubTransportMqtt_DoWork` shall inspect the 'waitingToSend' `DLIST` passed in config structure. **]**
 
@@ -242,6 +242,7 @@ void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HAN
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_053: [** `IoTHubTransportMqtt_DoWork` Shall send the mqtt subscribe message if any of the 'MessageTopic', get_state_topic, or notify_state_topic Topics are entered. **]**
 
+**SRS_IOTHUB_MQTT_TRANSPORT_07_055: [** `IoTHubTransportMqtt_DoWork` shall send a device twin get property message upon successfully retrieving a SUBACK on device twin topics. **]**
 
 ### IoTHubTransportMqtt_GetSendStatus
 
