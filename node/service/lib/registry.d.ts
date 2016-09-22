@@ -3,9 +3,10 @@
 
 import { Http } from 'azure-iot-http-base';
 import Query = require('./query');
+import RestApiClient = require('./rest_api_client');
 
 declare class Registry {
-    constructor(config: Registry.TransportConfig, httpRequestBuilder: Http);
+    constructor(config: Registry.TransportConfig, restApiClient: RestApiClient);
 
     // CRUD operations
     create(deviceInfo: { deviceId: string; }, done: Registry.ResponseCallback): void;
