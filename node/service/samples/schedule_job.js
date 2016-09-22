@@ -15,7 +15,7 @@ var maxExecutionTimeInSeconds =  3600;
 
 var methodParams = {
   methodName: '<method name>',
-  payloadJson: null,
+  payload: null,
   timeoutInSeconds: 42
 };
 

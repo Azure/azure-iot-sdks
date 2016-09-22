@@ -10,7 +10,7 @@ var endpoint = require('azure-iot-common').endpoint;
  * @classdesc              Constructs a DeviceMethod object that provides APIs to trigger the execution of a device method.
  * @param {Object}         params              An object describing the method and shall have the following properties: 
  *                                             - methodName          The name of the method that shall be invoked.
- *                                             - payloadJson         [optional] The payload to use for the method call.
+ *                                             - payload             [optional] The payload to use for the method call.
  *                                             - timeoutInSeconds    [optional] The number of seconds IoT Hub shall wait for the device 
  *                                                                   to send a response before deeming the method execution a failure.
  * @param {RestApiClient}  restApiClient       The REST client used to execute API calls.
@@ -28,7 +28,7 @@ function DeviceMethod(params, restApiClient) {
   /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_006: [The `DeviceMethod` constructor shall set the `DeviceMethod.params.timeoutInSeconds` property value to the `timeoutInSeconds` argument value or to the default (`30`) if the `timeoutInSeconds` value is falsy.]*/
   this.params.timeoutInSeconds = this.params.timeoutInSeconds || DeviceMethod.defaultTimeout;
   /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_015: [The `DeviceMethod` constructor shall set the `DeviceMethod.params.payload` property value to the `payload` argument value or to the default (`null`) if the `payload` argument is `null` or `undefined`.]*/
-  this.params.payloadJson = (this.params.payloadJson === undefined || this.params.payloadJson === null) ? DeviceMethod.defaultPayload : this.params.payloadJson;
+  this.params.payload = (this.params.payload === undefined || this.params.payload === null) ? DeviceMethod.defaultPayload : this.params.payload;
 }
 
 DeviceMethod.defaultTimeout = 30;
@@ -65,7 +65,7 @@ DeviceMethod.prototype.invokeOn = function (deviceId, done) {
   {
     "methodName": <DeviceMethod.params.methodName>,
     "timeoutInSeconds": <DeviceMethod.params.timeoutInSeconds>,
-    "payloadJson": <DeviceMethod.params.payloadJson>
+    "payload": <DeviceMethod.params.payload>
   }
   ```]*/
   /*Codes_SRS_NODE_IOTHUB_DEVICE_METHOD_16_009: [The `invokeOn` method shall invoke the `done` callback with an standard javascript `Error` object if the method execution failed.]*/
