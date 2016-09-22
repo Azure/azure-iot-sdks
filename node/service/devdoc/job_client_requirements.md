@@ -17,7 +17,7 @@ var startTime = new Date(Date.now() + 3600000); // an hour from now
 var maxExecutionTimeInSeconds =  3600;
 var methodParams = {
   methodName: '<method name>',
-  payloadJson: null,
+  payload: null,
   timeoutInSeconds: 42
 };
 jobClient.scheduleDeviceMethod(jobId, // Job Unique Identifier
@@ -120,7 +120,7 @@ The `scheduleDeviceMethod` method schedules a device method call on a list of de
 
 **SRS_NODE_JOB_CLIENT_16_015: [** The `scheduleDeviceMethod` method shall throw a `ReferenceError` if `methodParams.methodName` is `null`, `undefined` or an empty string. **]**
 
-**SRS_NODE_JOB_CLIENT_16_030: [** The `scheduleDeviceMethod` method shall use the `DeviceMethod.defaultPayload` value if `methodParams.payloadJson` is `undefined`. **]**
+**SRS_NODE_JOB_CLIENT_16_030: [** The `scheduleDeviceMethod` method shall use the `DeviceMethod.defaultPayload` value if `methodParams.payload` is `undefined`. **]**
 
 **SRS_NODE_JOB_CLIENT_16_031: [** The `scheduleDeviceMethod` method shall use the `DeviceMethod.defaultTimeout` value if `methodParams.timeoutInSeconds` is falsy. **]**
 

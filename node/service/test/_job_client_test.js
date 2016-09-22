@@ -248,7 +248,7 @@ describe('JobClient', function() {
     var goodParams = {
       methodName: 'name',
       timeoutInSeconds: 42,
-      payloadJson: null
+      payload: null
     };
 
     /*Tests_SRS_NODE_JOB_CLIENT_16_013: [The `scheduleDeviceMethod` method shall throw a `ReferenceError` if `jobId` is `null`, `undefined` or an empty string.]*/
@@ -286,14 +286,14 @@ describe('JobClient', function() {
       }, TypeError);
     });
 
-    /*Tests_SRS_NODE_JOB_CLIENT_16_030: [The `scheduleDeviceMethod` method shall use the `DeviceMethod.defaultPayload` value if `methodParams.payloadJson` is `undefined`.]*/
+    /*Tests_SRS_NODE_JOB_CLIENT_16_030: [The `scheduleDeviceMethod` method shall use the `DeviceMethod.defaultPayload` value if `methodParams.payload` is `undefined`.]*/
     /*Tests_SRS_NODE_JOB_CLIENT_16_031: [The `scheduleDeviceMethod` method shall use the `DeviceMethod.defaultTimeout` value if `methodParams.timeoutInSeconds` is falsy.]*/
     it('uses the default payload and timeoutInSeconds if either of those methodParams properties are undefined', function() {
       var fakeRestApiClient = { executeApiCall: sinon.stub() };
 
       var client = new JobClient(fakeRestApiClient);
       client.scheduleDeviceMethod('id', 'SELECT * FROM devices', { methodName: 'name' }, new Date(), 86400, function() {});
-      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][3].cloudToDeviceMethod.payloadJson, DeviceMethod.defaultPayload);
+      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][3].cloudToDeviceMethod.payload, DeviceMethod.defaultPayload);
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][3].cloudToDeviceMethod.timeoutInSeconds, DeviceMethod.defaultTimeout);
     });
 
@@ -320,7 +320,7 @@ describe('JobClient', function() {
       var fakeQuery = 'SELECT * FROM devices';
       var fakeMethodParams = {
         methodName: 'name',
-        payloadJson: { foo: 'bar' },
+        payload: { foo: 'bar' },
         timeoutInSeconds: 42
       };
 

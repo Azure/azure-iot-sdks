@@ -9,7 +9,7 @@ var connectionString = '<Hub Connection String>';
 var targetDevice = '<Device Id>';
 var methodParams = {
   methodName: '<Method Name>', 
-  payloadJson: '[Method Payload]',
+  payload: '[Method Payload]',
   timeoutInSeconds: 42
 };
 

@@ -187,7 +187,7 @@ JobClient.prototype.cancelJob = function(jobId, done) {
  *                                      on which this job should be run.
  * @param {Object}    methodParams      An object describing the method and shall have the following properties: 
  *                                      - methodName          The name of the method that shall be invoked.
- *                                      - payloadJson         [optional] The payload to use for the method call.
+ *                                      - payload             [optional] The payload to use for the method call.
  *                                      - timeoutInSeconds    [optional] The number of seconds IoT Hub shall wait for the device 
  * @param {Date}      jobStartTime      Time time at which the job should start
  * @param {Number}    maxExecutionTimeInSeconds  The maximum time alloted for this job to run in seconds.
@@ -232,11 +232,11 @@ JobClient.prototype.scheduleDeviceMethod = function(jobId, queryOrDevices, metho
     }
   }
 
-  /*Codes_SRS_NODE_JOB_CLIENT_16_030: [The `scheduleDeviceMethod` method shall use the `DeviceMethod.defaultPayload` value if `methodParams.payloadJson` is `undefined`.]*/
+  /*Codes_SRS_NODE_JOB_CLIENT_16_030: [The `scheduleDeviceMethod` method shall use the `DeviceMethod.defaultPayload` value if `methodParams.payload` is `undefined`.]*/
   /*Codes_SRS_NODE_JOB_CLIENT_16_031: [The `scheduleDeviceMethod` method shall use the `DeviceMethod.defaultTimeout` value if `methodParams.timeoutInSeconds` is falsy.]*/
   var fullMethodParams = {
     methodName: methodParams.methodName,
-    payloadJson: methodParams.payloadJson || DeviceMethod.defaultPayload,
+    payload: methodParams.payload || DeviceMethod.defaultPayload,
     timeoutInSeconds: methodParams.timeoutInSeconds || DeviceMethod.defaultTimeout
   };
 
@@ -253,7 +253,7 @@ JobClient.prototype.scheduleDeviceMethod = function(jobId, queryOrDevices, metho
     type: 'scheduleDirectRequest', // TBC
     cloudToDeviceMethod: {
       methodName: '<methodName>',
-      payloadJson: <payload>,           // valid JSON object
+      payload: <payload>,           // valid JSON object
       timeoutInSeconds: methodTimeoutInSeconds // Number
     },
     queryCondition: '<queryOrDevices>', // if the queryOrDevices parameter is a string

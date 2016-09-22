@@ -218,7 +218,7 @@ Client.prototype.send = function send(deviceId, message, done) {
  * @param {String}    deviceId            The identifier of an existing device identity.
  * @param {Object}    params              An object describing the method and shall have the following properties: 
  *                                        - methodName          The name of the method that shall be invoked.
- *                                        - payloadJson         [optional] The payload to use for the method call.
+ *                                        - payload             [optional] The payload to use for the method call.
  *                                        - timeoutInSeconds    [optional] The number of seconds IoT Hub shall wait for the device 
  *                                                              to send a response before deeming the method execution a failure.
  * @param {Function}  done                The callback to call with the result of the method execution.
