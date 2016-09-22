@@ -21,7 +21,7 @@ client.open(function(err) {
     console.log('client opened');
 
     // Create device Twin
-    client.getDeviceTwin(function(err, twin) {
+    client.getTwin(function(err, twin) {
       if (err) {
         console.error('could not get twin');
       } else {

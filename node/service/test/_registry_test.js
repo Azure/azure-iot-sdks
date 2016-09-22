@@ -7,7 +7,7 @@ var assert = require('chai').assert;
 var endpoint = require('azure-iot-common').endpoint;
 var errors = require('azure-iot-common').errors;
 var Registry = require('../lib/registry.js');
-var DeviceTwin = require('../lib/twin.js');
+var Twin = require('../lib/twin.js');
 var Query = require('../lib/query.js');
 
 var fakeDevice = { deviceId: 'deviceId' };
@@ -324,8 +324,8 @@ describe('Registry', function() {
 
     testErrorCallback('getTwin', fakeDevice.deviceId);
 
-    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_036: [The `getTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub servce.]*/
-    it('calls the \'done\' callback with a \'DeviceTwin\' object', function(testCallback) {
+    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_036: [The `getTwin` method shall call the `done` callback with a `Twin` object updated with the latest property values stored in the IoT Hub servce.]*/
+    it('calls the \'done\' callback with a \'Twin\' object', function(testCallback) {
       var registry = new Registry({ host: 'host', sharedAccessSignature: 'sas' }, {
         executeApiCall: function (method, path, httpHeaders, body, done) {
           done(null, { deviceId: 'fakeTwin' }, { status: 200 });
@@ -333,7 +333,7 @@ describe('Registry', function() {
       });
 
       registry.getTwin('deviceId', function(err, twin) {
-        assert.instanceOf(twin, DeviceTwin);
+        assert.instanceOf(twin, Twin);
         testCallback();
       });
     });
@@ -397,7 +397,7 @@ describe('Registry', function() {
           assert.equal(httpHeaders['Content-Type'], 'application/json; charset=utf-8');
           assert.equal(httpHeaders['If-Match'], fakeEtag);
           assert.equal(body, fakeTwinPatch);
-          done(null, new DeviceTwin(fakeDeviceId, {}), fakeHttpResponse);
+          done(null, new Twin(fakeDeviceId, {}), fakeHttpResponse);
         }
       };
 
@@ -405,8 +405,8 @@ describe('Registry', function() {
       registry.updateTwin(fakeDeviceId, fakeTwinPatch, fakeEtag, testCallback);
     });
 
-    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_050: [The `updateTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub service.]*/
-    it('calls the \'done\' a \'DeviceTwin\' object', function(testCallback) {
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_050: [The `updateTwin` method shall call the `done` callback with a `Twin` object updated with the latest property values stored in the IoT Hub service.]*/
+    it('calls the \'done\' a \'Twin\' object', function(testCallback) {
       var registry = new Registry({ host: 'host', sharedAccessSignature: 'sas' }, {
         executeApiCall: function (method, path, httpHeaders, body, done) {
           done(null, JSON.stringify({ deviceId: 'fakeTwin' }), { status: 200 });
@@ -414,7 +414,7 @@ describe('Registry', function() {
       });
 
       registry.updateTwin('deviceId', {}, 'etag==', function(err, twin) {
-        assert.instanceOf(twin, DeviceTwin);
+        assert.instanceOf(twin, Twin);
         testCallback();
       });
     });

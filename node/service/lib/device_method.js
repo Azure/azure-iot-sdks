@@ -41,7 +41,7 @@ DeviceMethod.defaultPayload = null;
  * @param {Function}  done        The function to call when the operation is
  *                                complete. `done` will be called with three
  *                                arguments: an Error object (can be null), a
- *                                {@link module:azure-iothub.DeviceTwin|DeviceTwin}
+ *                                {@link module:azure-iothub.Twin|Twin}
  *                                object representing the created device
  *                                identity, and a transport-specific response
  *                                object useful for logging or debugging.

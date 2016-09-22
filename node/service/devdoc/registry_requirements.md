@@ -209,15 +209,15 @@ Request-Id: <guid>
 
 ## Device Twin operations
 
-### getDeviceTwin(deviceId, done)
-The `getDeviceTwin` method retrieves the latest Device Twin state in the device registry.
+### getTwin(deviceId, done)
+The `getTwin` method retrieves the latest Device Twin state in the device registry.
 
-**SRS_NODE_IOTHUB_REGISTRY_16_019: [** The `getDeviceTwin` method shall throw a `ReferenceError` if the `deviceId` parameter is falsy. **]**  
-**SRS_NODE_IOTHUB_REGISTRY_16_020: [** The `getDeviceTwin` method shall throw a `ReferenceError` if the `done` parameter is falsy. **]**  
-**SRS_NODE_IOTHUB_REGISTRY_16_036: [** The `getDeviceTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub service. **]**  
-**SRS_NODE_IOTHUB_REGISTRY_16_049: [** The `getDeviceTwin` method shall construct an HTTP request using information supplied by the caller, as follows:
+**SRS_NODE_IOTHUB_REGISTRY_16_019: [** The `getTwin` method shall throw a `ReferenceError` if the `deviceId` parameter is falsy. **]**  
+**SRS_NODE_IOTHUB_REGISTRY_16_020: [** The `getTwin` method shall throw a `ReferenceError` if the `done` parameter is falsy. **]**  
+**SRS_NODE_IOTHUB_REGISTRY_16_036: [** The `getTwin` method shall call the `done` callback with a `twin` object updated with the latest property values stored in the IoT Hub service. **]**  
+**SRS_NODE_IOTHUB_REGISTRY_16_049: [** The `getTwin` method shall construct an HTTP request using information supplied by the caller, as follows:
 ```
-GET /twins/<DeviceTwin.deviceId>?api-version=<version> HTTP/1.1
+GET /twins/<twin.deviceId>?api-version=<version> HTTP/1.1
 Authorization: <config.sharedAccessSignature>
 Request-Id: <guid>
 ``` **]**
@@ -228,7 +228,7 @@ The `updateDeviceTwin` method updates the device twin identified with the `devic
 **SRS_NODE_IOTHUB_REGISTRY_16_044: [** The `updateDeviceTwin` method shall throw a `ReferenceError` if the `deviceId` argument is `undefined`, `null` or an empty string. **]**  
 **SRS_NODE_IOTHUB_REGISTRY_16_045: [** The `updateDeviceTwin` method shall throw a `ReferenceError` if the `patch` argument is falsy. **]**  
 **SRS_NODE_IOTHUB_REGISTRY_16_046: [** The `updateDeviceTwin` method shall throw a `ReferenceError` if the `etag` argument is falsy. **]**  
-**SRS_NODE_IOTHUB_REGISTRY_16_050: [** The `updateDeviceTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub service. **]**  
+**SRS_NODE_IOTHUB_REGISTRY_16_050: [** The `updateDeviceTwin` method shall call the `done` callback with a `twin` object updated with the latest property values stored in the IoT Hub service. **]**  
 **SRS_NODE_IOTHUB_REGISTRY_16_048: [** The `updateDeviceTwin` method shall construct an HTTP request using information supplied by the caller, as follows:
 ```
 PATCH /twins/<deviceId>?api-version=<version> HTTP/1.1

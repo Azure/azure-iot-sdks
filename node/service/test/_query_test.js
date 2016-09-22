@@ -6,7 +6,7 @@
 var assert = require('chai').assert;
 var sinon = require('sinon');
 var Query = require('../lib/query.js');
-var DeviceTwin = require('../lib/twin.js');
+var Twin = require('../lib/twin.js');
 
 describe('Query', function() {
   describe('#constructor', function() {
@@ -199,7 +199,7 @@ describe('Query', function() {
         assert.isNull(err);
         assert.equal(response, fakeResponse);
         result.forEach(function(twin, index) {
-          assert.instanceOf(twin, DeviceTwin);
+          assert.instanceOf(twin, Twin);
           assert.equal(twin.deviceId, 'deviceId' + index);
         });
         testCallback();
