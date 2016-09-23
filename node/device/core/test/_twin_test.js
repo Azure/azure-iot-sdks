@@ -44,6 +44,7 @@ util.inherits(FakeReceiver, EventEmitter);
 var FakeTransport = function(receiver) {
   var self = this;
   this.status=200;
+  this.getResponse = '{}';
 
   if (receiver) {  
     this._receiver = receiver;
@@ -61,7 +62,7 @@ var FakeTransport = function(receiver) {
       var response = {
         'status' : self.status,
         '$rid' : self.responseId || properties.$rid,
-        'body' : '{}'
+        'body' : method === 'GET' ? self.getResponse : '{}'
       };
       self._receiver.emit('response', response);
     });
@@ -97,11 +98,12 @@ describe('Twin', function () {
     });
     
     /* Tests_SRS_NODE_DEVICE_TWIN_18_003: [** `fromDeviceClient` shall allocate a new `Twin` object **]**  */
-    it('Allocates a new twin object', function () {
+    it('Allocates a new twin object', function (done) {
       var client = new FakeClient();
       Twin.fromDeviceClient(client, function(err, obj) {
-        if (err) throw err;
-        assert.instanceof(obj, Twin);
+        if (err) return done(err);
+        assert.instanceOf(obj, Twin);
+        done();
       });
     });
 
@@ -112,7 +114,7 @@ describe('Twin', function () {
       sinon.spy(client._transport, "sendTwinRequest");
       Twin.fromDeviceClient(client, function(err, obj1) {
         assert(client._transport.sendTwinRequest.withArgs('GET').calledOnce);
-        if (err) throw err;
+        if (err) return done(err);
         Twin.fromDeviceClient(client, function(err, obj2) {
           assert(client._transport.sendTwinRequest.withArgs('GET').calledTwice);
           assert.equal(obj1, obj2);
@@ -126,7 +128,7 @@ describe('Twin', function () {
       var client1 = new FakeClient();
       var client2 = new FakeClient();
       Twin.fromDeviceClient(client1, function(err, obj1) {
-        if (err) throw err;
+        if (err) return done(err);
         Twin.fromDeviceClient(client2, function(err, obj2) {
           assert.notEqual(obj1, obj2);
           done();
@@ -139,7 +141,7 @@ describe('Twin', function () {
     it('calls getTwinReceiver', function (done) {
       var client = new FakeClient();
       Twin.fromDeviceClient(client, function(err, obj) {
-        if (err) throw err;
+        if (err) return done(err);
         assert.instanceOf(obj._receiver, FakeReceiver);
         done();
       });
@@ -163,7 +165,7 @@ describe('Twin', function () {
       var transport = new FakeTransport(receiver);
       var client = new FakeClient(transport);
       Twin.fromDeviceClient(client, function(err) {
-        if (err) throw err;
+        if (err) return done(err);
         assert(handleNewListener.withArgs('subscribed').calledOnce);
         assert(handleNewListener.withArgs('error').calledOnce);
         /* Tests_SRS_NODE_DEVICE_TWIN_18_031: [** `fromDeviceClient` shall subscribe to the response topic **]** */
@@ -203,7 +205,7 @@ describe('Twin', function () {
     it('cleans up handlers before calling done', function (done) {
       var client = new FakeClient();
       Twin.fromDeviceClient(client, function(err, obj) {
-        if (err) throw err;
+        if (err) return done(err);
         assert.equal(EventEmitter.listenerCount(obj,'subscribed'),0);
         assert.equal(EventEmitter.listenerCount(obj,'error'),0);
         done();
@@ -285,7 +287,7 @@ describe('Twin', function () {
       };
 
       Twin.fromDeviceClient(client, function(err, twin) {
-        if (err) throw err;
+        if (err) return done(err);
 
         var propArray = [
           'desired',
@@ -304,6 +306,21 @@ describe('Twin', function () {
       });
     });
 
+    /* Tests_SRS_NODE_DEVICE_TWIN_18_045: [** If a property is already set when a handler is added for that property, the `Twin` object shall fire a property changed event for the property. **]*  */
+    it ('fires events if the property is already set when the handler is added', function(done) {
+      var client = new FakeClient();
+      client._transport.getResponse = JSON.stringify({desired : { foo : 42 }});
+      Twin.fromDeviceClient(client, function(err, twin) {
+        if (err) return done(err);
+        twin.on('properties.desired.foo', function(delta) {
+          if (delta === 42) {
+            done();
+          }
+        });
+      });
+    });
+
+
   });
     
   describe('_sendTwinRequest', function () {
@@ -319,7 +336,7 @@ describe('Twin', function () {
       transport = new FakeTransport(receiver);
       client = new FakeClient(transport);
       Twin.fromDeviceClient(client, function(err, obj) {
-        if (err) throw err;
+        if (err) return done(err);
         twin = obj;
         done();
       });
@@ -330,7 +347,7 @@ describe('Twin', function () {
     it ('uses the right parameters', function(done) {
       var sendTwinRequest = sinon.spy(client._transport, 'sendTwinRequest');
       twin._sendTwinRequest('fake_method', 'fake_resource', {}, 'fake_body', function(err) {
-        if (err) throw err;
+        if (err) return done(err);
         assert(sendTwinRequest.calledOnce);
         assert.equal(sendTwinRequest.firstCall.args[0], 'fake_method');
         assert.equal(sendTwinRequest.firstCall.args[1], 'fake_resource');
@@ -352,7 +369,7 @@ describe('Twin', function () {
     it ('returns success on 204', function(done) {
       transport.status = 204;
       twin._sendTwinRequest('fake_method', 'fake_resource', {}, 'fake_body', function(err) {
-        if (err) throw err;
+        if (err) return done(err);
         done();
       });
     });
@@ -362,9 +379,9 @@ describe('Twin', function () {
     it ('uses and incriments request ID', function(done) {
       var sendTwinRequest = sinon.spy(client._transport, 'sendTwinRequest');
       twin._sendTwinRequest('fake_method', 'fake_resource', {}, 'fake_body', function(err) {
-        if (err) throw err;
+        if (err) return done(err);
         twin._sendTwinRequest('fake_method2', 'fake_resource2', {}, 'fake_body2', function(err) {
-          if (err) throw err;
+          if (err) return done(err);
           assert(sendTwinRequest.calledTwice);
           assert.isDefined(sendTwinRequest.firstCall.args[2].$rid);
           assert.equal(sendTwinRequest.firstCall.args[2].$rid + 1, sendTwinRequest.secondCall.args[2].$rid);
@@ -376,7 +393,7 @@ describe('Twin', function () {
     /* Tests_SRS_NODE_DEVICE_TWIN_18_015: [** `_sendTwinRequest` shall add a handler for the `response` event on the twinReceiver object.  **]** */
     it ('adds a response handler', function(done) {
         twin._sendTwinRequest('fake_method', 'fake_resource', {}, 'fake_body', function(err) {
-          if (err) throw err;
+          if (err) return done(err);
           assert(receiver.on.withArgs('response').calledThrice);   // once for the empty implementation, once for the GET handler, and once for our handler
           done();
         });
@@ -385,7 +402,7 @@ describe('Twin', function () {
     /* Tests_SRS_NODE_DEVICE_TWIN_18_021: [** Before calling `done`, `_sendTwinRequest` shall remove the handler for the `response` event **]**  */
     it ('removes the response handler', function(done) {
         twin._sendTwinRequest('fake_method', 'fake_resource', {}, 'fake_body', function(err) {
-          if (err) throw err;
+          if (err) return done(err);
           assert(receiver.removeListener.withArgs('response').calledTwice); // Once for the GET handler and once for our handler
           done();
         });
@@ -421,9 +438,9 @@ describe('Twin', function () {
       var client = new FakeClient();
       Twin.fromDeviceClient(client, function(err, twin) {
         var sendTwinRequest = sinon.spy(twin,'_sendTwinRequest');
-        if (err) throw err;
+        if (err) return done(err);
         twin.properties.reported.update( { 'phone_number' : '867-5309' }, function(err) {
-          if (err) throw err;
+          if (err) return done(err);
           assert(sendTwinRequest.calledOnce);
           assert.equal(sendTwinRequest.firstCall.args[0],'PATCH');
           assert.equal(sendTwinRequest.firstCall.args[1],'/properties/reported/');
@@ -439,9 +456,9 @@ describe('Twin', function () {
       var client = new FakeClient();
       Twin.fromDeviceClient(client, function(err, twin) {
         twin.properties.reported.update( { 'phone_number' : '867-5309', 'name' : 'Jennifer' }, function(err) {
-          if (err) done(err);
+          if (err) return done(err);
           twin.properties.reported.update( { 'name' : 'Jenny', 'age' : 42  }, function(err) {
-            if (err) done(err);
+            if (err) return done(err);
             assert.equal(twin.properties.reported.name, 'Jenny');
             assert.equal(twin.properties.reported.phone_number, '867-5309');
             assert.equal(twin.properties.reported.age, 42);
@@ -476,9 +493,9 @@ describe('Twin', function () {
       
       Twin.fromDeviceClient(client, function(err, twin) {
         twin.properties.reported.update( patchAddStuff, function(err) {
-          if (err) done(err);
+          if (err) return done(err);
           twin.properties.reported.update( patchRemoveE, function(err) {
-            if (err) done(err);
+            if (err) return done(err);
             assert.equal(twin.properties.reported.a.b.c, 'abc');
             assert.isDefined(twin.properties.reported.a.b.d);
             assert.isUndefined(twin.properties.reported.a.b.d.e);
@@ -501,6 +518,7 @@ describe('Twin', function () {
       });
     });
 
+
   });
 
   describe('PATCH operations', function() {
@@ -521,7 +539,7 @@ describe('Twin', function () {
       };
 
       Twin.fromDeviceClient(client, function(err, twin) {
-        if (err) throw err;
+        if (err) return done(err);
         var eventCount = 0;
 
         var propArray = [

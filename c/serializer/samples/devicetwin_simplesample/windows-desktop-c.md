@@ -4,7 +4,7 @@ device: desktop
 language: c
 ---
 
-Run a simple C sample on Windows
+Run a simple device twins C sample on Windows
 ===
 ---
 
@@ -21,8 +21,8 @@ Run a simple C sample on Windows
 **About this document**
 
 This document describes how to build and run sample applications on the Windows platform. This multi-step process includes:
--   Configuring Azure IoT Hub
--   Registering your IoT device
+-   Preparing your development environment
+-   Creating and configuring and instance of Azure IoT Hub
 -   Build and deploy Azure IoT SDK on device
 
 <a name="Step-1-Prerequisites"></a>
@@ -60,8 +60,6 @@ You should have the following items ready before beginning the process:
     
 6.  The console displays messages as the application sends device-to-cloud messages to IoT Hub and updates its twin reported states.
 
-7.   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the application and how to send cloud-to-device messages to the application.
-
 <a name="Step-3-Monitor"></a>
 # Step 3: Monitor Device Twin
 
@@ -72,7 +70,7 @@ To build and run the Device Explorer tool with the Device Twin support:
 1. Open the Nuget Package Manager Console and type the following command:
 
    ```
-   Install-Package \\RICHCIHP\Public2\DeviceTwinSDK_090216\Microsoft.Azure.Devices.1.0.0-dmpreview-034.nupkg
+   Install-Package \\RICHCIHP\Public2\Microsoft.Azure.Devices.1.0.0-dmpreview-045\Microsoft.Azure.Devices.1.0.0-dmpreview-045.nupkg
    ```
 
 1. Compile and run hitting F5
