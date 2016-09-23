@@ -62,7 +62,7 @@ typedef struct SCHEMA_MODEL_ELEMENT_TAG
     {
         SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle;
         SCHEMA_PROPERTY_HANDLE propertyHandle;
-        SCHEMA_REPORTED_PROPERTY_HANDLE reportedProperty;
+        SCHEMA_REPORTED_PROPERTY_HANDLE reportedPropertyHandle;
         SCHEMA_ACTION_HANDLE actionHandle;
         SCHEMA_MODEL_TYPE_HANDLE modelHandle;
     } elementHandle;

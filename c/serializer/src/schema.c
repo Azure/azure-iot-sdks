@@ -2612,38 +2612,40 @@ static bool modelInModelExists(const void* element, const void* value)
     return (strcmp(modelInModel->propertyName, value) == 0);
 }
 
-SCHEMA_ELEMENT_TYPE Schema_GetModelElementTypeByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* elementName)
+SCHEMA_MODEL_ELEMENT Schema_GetModelElementByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* elementName)
 {
-    SCHEMA_ELEMENT_TYPE result;
-    /*Codes_SRS_SCHEMA_02_068: [ If modelTypeHandle is NULL then Schema_GetModelElementTypeByName shall fail and return SCHEMA_SEARCH_INVALID_ARG. */
-    /*Codes_SRS_SCHEMA_02_069: [ If elementName is NULL then Schema_GetModelElementTypeByName shall fail and return SCHEMA_SEARCH_INVALID_ARG. ]*/
+    SCHEMA_MODEL_ELEMENT result;
+    /*Codes_SRS_SCHEMA_02_076: [ If modelTypeHandle is NULL then Schema_GetModelElementByName shall fail and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_SEARCH_INVALID_ARG. ]*/
+    /*Codes_SRS_SCHEMA_02_077: [ If elementName is NULL then Schema_GetModelElementByName shall fail and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_SEARCH_INVALID_ARG. ]*/
     if (
         (modelTypeHandle == NULL) ||
         (elementName == NULL)
         )
     {
         LogError("invalid argument SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, const char* elementName=%p", modelTypeHandle, elementName);
-        result = SCHEMA_SEARCH_INVALID_ARG;
+        result.elementType = SCHEMA_SEARCH_INVALID_ARG;
     }
     else
     {
         SCHEMA_MODEL_TYPE_HANDLE_DATA* handleData = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
 
-        /*Codes_SRS_SCHEMA_02_072: [ If elementName is a desired property then Schema_GetModelElementTypeByName shall return SCHEMA_DESIRED_PROPERTY. ]*/
-        if (VECTOR_find_if(handleData->desiredProperties, desiredPropertyExists, elementName) != NULL)
+        SCHEMA_DESIRED_PROPERTY_HANDLE* desiredPropertyHandle = VECTOR_find_if(handleData->desiredProperties, desiredPropertyExists, elementName);
+        if (desiredPropertyHandle != NULL)
         {
-            result = SCHEMA_DESIRED_PROPERTY;
+            /*Codes_SRS_SCHEMA_02_080: [ If elementName is a desired property then Schema_GetModelElementByName shall succeed and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_DESIRED_PROPERTY and SCHEMA_MODEL_ELEMENT.elementHandle.desiredPropertyHandle to the handle of the desired property. ]*/
+            result.elementType = SCHEMA_DESIRED_PROPERTY;
+            result.elementHandle.desiredPropertyHandle = *desiredPropertyHandle;
         }
         else
         {
-            /*Codes_SRS_SCHEMA_02_070: [ If elementName is a property then Schema_GetModelElementTypeByName shall return SCHEMA_PROPERTY. ]*/
             size_t nProcessedProperties = 0;
+            SCHEMA_PROPERTY_HANDLE_DATA* property = NULL;
             for (size_t i = 0; i < handleData->PropertyCount;i++)
             {
-                SCHEMA_PROPERTY_HANDLE_DATA* property = (SCHEMA_PROPERTY_HANDLE_DATA*)(handleData->Properties[i]);
+                property = (SCHEMA_PROPERTY_HANDLE_DATA*)(handleData->Properties[i]);
                 if (strcmp(property->PropertyName, elementName) == 0)
                 {
-                    i = handleData->PropertyCount; /*found its type, so get out*/
+                    i = handleData->PropertyCount; /*found it*/
                 }
                 else
                 {
@@ -2653,22 +2655,28 @@ SCHEMA_ELEMENT_TYPE Schema_GetModelElementTypeByName(SCHEMA_MODEL_TYPE_HANDLE mo
 
             if (nProcessedProperties < handleData->PropertyCount)
             {
-                result = SCHEMA_PROPERTY;
+                /*Codes_SRS_SCHEMA_02_078: [ If elementName is a property then Schema_GetModelElementByName shall succeed and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_PROPERTY and SCHEMA_MODEL_ELEMENT.elementHandle.propertyHandle to the handle of the property. ]*/
+                result.elementType = SCHEMA_PROPERTY;
+                result.elementHandle.propertyHandle = property;
             }
             else
             {
-                /*Codes_SRS_SCHEMA_02_071: [ If elementName is a reported property then Schema_GetModelElementTypeByName shall return SCHEMA_REPORTED_PROPERTY. ]*/
-                if (VECTOR_find_if(handleData->reportedProperties, reportedPropertyExists, elementName) != NULL)
+
+                SCHEMA_REPORTED_PROPERTY_HANDLE* reportedPropertyHandle = VECTOR_find_if(handleData->reportedProperties, reportedPropertyExists, elementName);
+                if (reportedPropertyHandle != NULL)
                 {
-                    result = SCHEMA_REPORTED_PROPERTY;
+                    /*Codes_SRS_SCHEMA_02_079: [ If elementName is a reported property then Schema_GetModelElementByName shall succeed and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_REPORTED_PROPERTY and SCHEMA_MODEL_ELEMENT.elementHandle.reportedPropertyHandle to the handle of the reported property. ]*/
+                    result.elementType = SCHEMA_REPORTED_PROPERTY;
+                    result.elementHandle.reportedPropertyHandle = *reportedPropertyHandle;
                 }
                 else
                 {
-                    /*Codes_SRS_SCHEMA_02_073: [ If elementName is a model action then Schema_GetModelElementTypeByName shall return SCHEMA_MODEL_ACTION. ]*/
+
                     size_t nProcessedActions = 0;
+                    SCHEMA_ACTION_HANDLE_DATA* actionHandleData = NULL;
                     for (size_t i = 0;i < handleData->ActionCount; i++)
                     {
-                        SCHEMA_ACTION_HANDLE_DATA* actionHandleData = (SCHEMA_ACTION_HANDLE_DATA*)(handleData->Actions[i]);
+                        actionHandleData = (SCHEMA_ACTION_HANDLE_DATA*)(handleData->Actions[i]);
                         if (strcmp(actionHandleData->ActionName, elementName) == 0)
                         {
                             i = handleData->ActionCount; /*get out quickly*/
@@ -2681,19 +2689,23 @@ SCHEMA_ELEMENT_TYPE Schema_GetModelElementTypeByName(SCHEMA_MODEL_TYPE_HANDLE mo
 
                     if (nProcessedActions < handleData->ActionCount)
                     {
-                        result = SCHEMA_MODEL_ACTION;
+                        /*Codes_SRS_SCHEMA_02_081: [ If elementName is a model action then Schema_GetModelElementByName shall succeed and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_MODEL_ACTION and SCHEMA_MODEL_ELEMENT.elementHandle.actionHandle to the handle of the action. ]*/
+                        result.elementType = SCHEMA_MODEL_ACTION;
+                        result.elementHandle.actionHandle = actionHandleData;
                     }
                     else
                     {
-                        /*Codes_SRS_SCHEMA_02_075: [ If elementName is a model in mode then Schema_GetModelElementTypeByName shall return SCHEMA_MODEL_IN_MODEL. ]*/
-                        if (VECTOR_find_if(handleData->models, modelInModelExists, elementName) != NULL)
+                        MODEL_IN_MODEL* modelInModel = VECTOR_find_if(handleData->models, modelInModelExists, elementName);
+                        if (modelInModel != NULL)
                         {
-                            result = SCHEMA_MODEL_IN_MODEL;
+                            /*Codes_SRS_SCHEMA_02_082: [ If elementName is a model in model then Schema_GetModelElementByName shall succeed and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_MODEL_IN_MODEL and SCHEMA_MODEL_ELEMENT.elementHandle.modelHandle to the handle of the model. ]*/
+                            result.elementType = SCHEMA_MODEL_IN_MODEL;
+                            result.elementHandle.modelHandle = modelInModel->modelHandle;
                         }
                         else
                         {
-                            /*Codes_SRS_SCHEMA_02_074: [ Otherwise Schema_GetModelElementTypeByName shall return SCHEMA_NOT_FOUND. ]*/
-                            result = SCHEMA_NOT_FOUND;
+                            /*Codes_SRS_SCHEMA_02_083: [ Otherwise Schema_GetModelElementByName shall fail and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_NOT_FOUND. ]*/
+                            result.elementType = SCHEMA_NOT_FOUND;
                         }
                     }
                 }

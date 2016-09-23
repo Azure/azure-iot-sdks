@@ -129,7 +129,7 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(AGENT_DATA_TYPES_RESULT, AGENT_DATA_TYPES_RESULT_VAL
 TEST_DEFINE_ENUM_TYPE(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
 
-
+DEFINE_ENUM_STRINGS(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
 
 #define TEST_STRING_HANDLE_CHILD_NAME (STRING_HANDLE) 0x3
 #define TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD (SCHEMA_DESIRED_PROPERTY_HANDLE)0x4
@@ -205,11 +205,81 @@ static AGENT_DATA_TYPES_RESULT my_Create_AGENT_DATA_TYPE_from_Members(AGENT_DATA
     return AGENT_DATA_TYPES_OK;
 }
 
+static SCHEMA_MODEL_ELEMENT Schema_GetModelElementByName_notFound; 
+static SCHEMA_MODEL_ELEMENT Schema_GetModelElementByName_desiredProperty_int_field;
+
+static SCHEMA_MODEL_ELEMENT Schema_GetModelElementByName_modelInModel;
+
+
+char* umockvalue_stringify_SCHEMA_MODEL_ELEMENT(const SCHEMA_MODEL_ELEMENT* value)
+{
+    char* result;
+    size_t needed = snprintf(NULL, 0, "{.elementType=%s, .elementHandle=%p}", ENUM_TO_STRING(SCHEMA_ELEMENT_TYPE, value->elementType), value->elementHandle.modelHandle);
+    result = (char*)malloc(needed + 1);
+    if (result == NULL)
+    {
+        ASSERT_FAIL("unable to malloc");
+    }
+    else
+    {
+        (void) snprintf(result, needed+1, "{.elementType=%s, .elementHandle=%p}", ENUM_TO_STRING(SCHEMA_ELEMENT_TYPE, value->elementType), value->elementHandle.modelHandle);
+    }
+    return result;
+}
+
+int umockvalue_are_equal_SCHEMA_MODEL_ELEMENT(const SCHEMA_MODEL_ELEMENT* left, const SCHEMA_MODEL_ELEMENT* right)
+{
+    int result;
+    if (left == NULL)
+    {
+        if (right == NULL)
+        {
+            result = 1;
+        }
+        else
+        {
+            result = 0;
+        }
+    }
+    else
+    {
+        if (right == NULL)
+        {
+            result = 0;
+        }
+        else
+        {
+            result = (memcmp(left , right, sizeof(*left)) == 0);
+        }
+    }
+    return result;
+}
+
+int umockvalue_copy_SCHEMA_MODEL_ELEMENT(SCHEMA_MODEL_ELEMENT* destination, const SCHEMA_MODEL_ELEMENT* source)
+{
+    memcpy(destination, source, sizeof(*destination));
+    return 0;
+}
+
+void umockvalue_free_SCHEMA_MODEL_ELEMENT(SCHEMA_MODEL_ELEMENT* value)
+{
+    (void)(value);
+    //my_gballoc_free(value);
+}
+
+
 BEGIN_TEST_SUITE(CommandDecoder_ut)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
     {
         TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
+
+        Schema_GetModelElementByName_notFound.elementType = SCHEMA_NOT_FOUND;
+
+        Schema_GetModelElementByName_desiredProperty_int_field.elementType = SCHEMA_DESIRED_PROPERTY;
+        Schema_GetModelElementByName_desiredProperty_int_field.elementHandle.desiredPropertyHandle = TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD;
+        Schema_GetModelElementByName_modelInModel.elementType = SCHEMA_MODEL_IN_MODEL;
+        Schema_GetModelElementByName_modelInModel.elementHandle.modelHandle = SCHEMA_MODEL_TYPE_HANDLE_MODEL_IN_MODEL;
 
         g_testByTest = TEST_MUTEX_CREATE();
         ASSERT_IS_NOT_NULL(g_testByTest);
@@ -244,6 +314,13 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         REGISTER_UMOCK_ALIAS_TYPE(EXECUTE_COMMAND_RESULT, int);
         REGISTER_UMOCK_ALIAS_TYPE(SCHEMA_ELEMENT_TYPE, int);
 
+        REGISTER_UMOCK_VALUE_TYPE(SCHEMA_MODEL_ELEMENT,
+            umockvalue_stringify_SCHEMA_MODEL_ELEMENT,
+            umockvalue_are_equal_SCHEMA_MODEL_ELEMENT,
+            umockvalue_copy_SCHEMA_MODEL_ELEMENT,
+            umockvalue_free_SCHEMA_MODEL_ELEMENT
+        );
+
         REGISTER_GLOBAL_MOCK_HOOK(JSONDecoder_JSON_To_MultiTree, my_JSONDecoder_JSON_To_MultiTree);
         REGISTER_GLOBAL_MOCK_HOOK(MultiTree_Destroy, my_MultiTree_Destroy);
         
@@ -262,7 +339,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(MultiTree_GetChild, MULTITREE_ERROR);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_new, NULL);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(MultiTree_GetName, MULTITREE_ERROR);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelElementTypeByName, SCHEMA_NOT_FOUND);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelElementByName, Schema_GetModelElementByName_notFound);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Schema_GetModelDesiredPropertyByName, NULL);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(MultiTree_GetValue, MULTITREE_ERROR);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(CreateAgentDataType_From_String, AGENT_DATA_TYPES_ERROR);
@@ -2886,7 +2963,7 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             .IgnoreArgument_json()
             .IgnoreArgument_multiTreeHandle();
 
-        STRICT_EXPECTED_CALL(MultiTree_GetChildCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(MultiTree_GetChildCount(IGNORED_PTR_ARG, IGNORED_PTR_ARG)) /*2*/
             .IgnoreArgument_treeHandle()
             .CopyOutArgumentBuffer_count(&one, sizeof(one));
 
@@ -2899,14 +2976,11 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
 
         STRICT_EXPECTED_CALL(MultiTree_GetName(childHandle, TEST_STRING_HANDLE_CHILD_NAME)); /*this fills in TEST_STRING_HANDLE_CHILD_NAME with "int_field"*/
 
-        STRICT_EXPECTED_CALL(STRING_c_str(TEST_STRING_HANDLE_CHILD_NAME))
+        STRICT_EXPECTED_CALL(STRING_c_str(TEST_STRING_HANDLE_CHILD_NAME)) /*6*/
             .SetReturn("int_field");
 
-        STRICT_EXPECTED_CALL(Schema_GetModelElementTypeByName(TEST_MODEL_HANDLE, "int_field"))
-            .SetReturn(SCHEMA_DESIRED_PROPERTY);
-
-        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyByName(TEST_MODEL_HANDLE, "int_field"))
-            .SetReturn(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD);
+        STRICT_EXPECTED_CALL(Schema_GetModelElementByName(TEST_MODEL_HANDLE, "int_field"))
+            .SetReturn(Schema_GetModelElementByName_desiredProperty_int_field);
 
         STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyType(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD))
             .SetReturn("int");
@@ -3001,15 +3075,16 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         {
             2,/*MultiTree_GetChildCount*/
             6, /*STRING_c_str*/
-            9, /*Schema_GetModelDesiredPropertyType*/
-            10, /*Schema_GetSchemaForModelType*/
-            11, /*CodeFirst_GetPrimitiveType*/
-            14, /*Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE*/
-            15, /*Schema_GetModelDesiredProperty_offset*/
-            17, /*Destroy_AGENT_DATA_TYPE*/
-            18, /*STRING_delete*/
-            19, /*MultiTree_Destroy*/
-            20 /*gballoc_free*/
+
+            8, /*Schema_GetModelDesiredPropertyType*/
+            9, /*Schema_GetSchemaForModelType*/
+            10, /*CodeFirst_GetPrimitiveType*/
+            13, /*Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE*/
+            14, /*Schema_GetModelDesiredProperty_offset*/
+            16, /*Destroy_AGENT_DATA_TYPE*/
+            17, /*STRING_delete*/
+            18, /*MultiTree_Destroy*/
+            19 /*gballoc_free*/
         };
 
         for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
@@ -3069,11 +3144,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         STRICT_EXPECTED_CALL(STRING_c_str(TEST_STRING_HANDLE_CHILD_NAME)) /*6*/
             .SetReturn("modelInModel");
 
-        STRICT_EXPECTED_CALL(Schema_GetModelElementTypeByName(TEST_MODEL_HANDLE, "modelInModel"))
-            .SetReturn(SCHEMA_MODEL_IN_MODEL);
-
-        STRICT_EXPECTED_CALL(Schema_GetModelModelByName(TEST_MODEL_HANDLE, "modelInModel"))
-            .SetReturn(SCHEMA_MODEL_TYPE_HANDLE_MODEL_IN_MODEL);
+        STRICT_EXPECTED_CALL(Schema_GetModelElementByName(TEST_MODEL_HANDLE, "modelInModel"))
+            .SetReturn(Schema_GetModelElementByName_modelInModel);
 
         STRICT_EXPECTED_CALL(Schema_GetModelModelByName_Offset(TEST_MODEL_HANDLE, "modelInModel")) /*9*/
             .SetReturn(10);
@@ -3097,11 +3169,8 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
             STRICT_EXPECTED_CALL(STRING_c_str(TEST_STRING_HANDLE_CHILD_NAME)) /*14*/
                 .SetReturn("int_field");
 
-            STRICT_EXPECTED_CALL(Schema_GetModelElementTypeByName(SCHEMA_MODEL_TYPE_HANDLE_MODEL_IN_MODEL, "int_field"))
-                .SetReturn(SCHEMA_DESIRED_PROPERTY);
-
-            STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyByName(SCHEMA_MODEL_TYPE_HANDLE_MODEL_IN_MODEL, "int_field"))
-                .SetReturn(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD);
+            STRICT_EXPECTED_CALL(Schema_GetModelElementByName(SCHEMA_MODEL_TYPE_HANDLE_MODEL_IN_MODEL, "int_field"))
+                .SetReturn(Schema_GetModelElementByName_desiredProperty_int_field);
 
             STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyType(TEST_DESIRED_PROPERTY_HANDLE_INT_FIELD)) /*17*/
                 .SetReturn("int");
@@ -3194,21 +3263,20 @@ BEGIN_TEST_SUITE(CommandDecoder_ut)
         {
             2, /*MultiTree_GetChildCount*/
             6, /*STRING_c_str*/
-            9, /*Schema_GetModelModelByName_Offset*/
-            10, /*MultiTree_GetChildCount*/
-            13, /*MultiTree_GetName*/
-            14, /*STRING_c_str*/
-            17, /*Schema_GetModelDesiredPropertyType*/
-            18, /*Schema_GetSchemaForModelType*/
-            19, /*CodeFirst_GetPrimitiveType*/
-            22, /*Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE*/
-            23, /*Schema_GetModelDesiredProperty_offset*/
-
-            25, /*Destroy_AGENT_DATA_TYPE*/
-            26, /*STRING_delete*/
-            27, /*STRING_delete*/
-            28, /*MultiTree_Destroy*/
-            29, /*gballoc_free*/
+            8, /*Schema_GetModelModelByName_Offset*/
+            9, /*MultiTree_GetChildCount*/
+            12, /*MultiTree_GetName*/
+            13, /*STRING_c_str*/
+            15, /*Schema_GetModelDesiredPropertyType*/
+            16, /*Schema_GetSchemaForModelType*/
+            17, /*CodeFirst_GetPrimitiveType*/
+            20, /*Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE*/
+            21, /*Schema_GetModelDesiredProperty_offset*/
+            23, /*Destroy_AGENT_DATA_TYPE*/
+            24, /*STRING_delete*/
+            25, /*STRING_delete*/
+            26, /*MultiTree_Destroy*/
+            27, /*gballoc_free*/
         };
 
         for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)

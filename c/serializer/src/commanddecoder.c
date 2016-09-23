@@ -562,8 +562,8 @@ static bool validateModel_vs_Multitree(void* startAddress, SCHEMA_MODEL_TYPE_HAN
                 else
                 {
                     const char *childName_str = STRING_c_str(childName);
-                    SCHEMA_ELEMENT_TYPE elementType = Schema_GetModelElementTypeByName(modelHandle, childName_str);
-                    switch (elementType)
+                    SCHEMA_MODEL_ELEMENT elementType = Schema_GetModelElementByName(modelHandle, childName_str);
+                    switch (elementType.elementType)
                     {
                         default:
                         {
@@ -586,60 +586,47 @@ static bool validateModel_vs_Multitree(void* startAddress, SCHEMA_MODEL_TYPE_HAN
                         case (SCHEMA_DESIRED_PROPERTY):
                         {
                             /*Codes_SRS_COMMAND_DECODER_02_007: [ If the child name corresponds to a desired property then an AGENT_DATA_TYPE shall be constructed from the MULTITREE node. ]*/
-                            SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle;
-                            desiredPropertyHandle = Schema_GetModelDesiredPropertyByName(modelHandle, childName_str);
-                            if (desiredPropertyHandle == NULL)
+                            SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle = elementType.elementHandle.desiredPropertyHandle;
+                            
+                            const char* desiredPropertyType = Schema_GetModelDesiredPropertyType(desiredPropertyHandle);
+                            AGENT_DATA_TYPE output;
+                            if (DecodeValueFromNode(Schema_GetSchemaForModelType(modelHandle), &output, child, desiredPropertyType) != 0)
                             {
-                                LogError("Failed to Schema_GetModelDesiredPropertyByName");
+                                LogError("failure in DecodeValueFromNode");
                                 i = nChildren;
                             }
                             else
                             {
-                                const char* desiredPropertyType = Schema_GetModelDesiredPropertyType(desiredPropertyHandle);
-                                AGENT_DATA_TYPE output;
-                                if (DecodeValueFromNode(Schema_GetSchemaForModelType(modelHandle), &output, child, desiredPropertyType) != 0)
+                                /*Codes_SRS_COMMAND_DECODER_02_008: [ The desired property shall be constructed in memory by calling pfDesiredPropertyFromAGENT_DATA_TYPE. ]*/
+                                pfDesiredPropertyFromAGENT_DATA_TYPE leFunction = Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE(desiredPropertyHandle);
+                                if (leFunction(&output, (char*)startAddress + offset + Schema_GetModelDesiredProperty_offset(desiredPropertyHandle)) != 0)
                                 {
-                                    LogError("failure in DecodeValueFromNode");
-                                    i = nChildren;
-                                }
-                                else
-                                {
-                                    /*Codes_SRS_COMMAND_DECODER_02_008: [ The desired property shall be constructed in memory by calling pfDesiredPropertyFromAGENT_DATA_TYPE. ]*/
-                                    pfDesiredPropertyFromAGENT_DATA_TYPE leFunction = Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE(desiredPropertyHandle);
-                                    if (leFunction(&output, (char*)startAddress + offset + Schema_GetModelDesiredProperty_offset(desiredPropertyHandle)) != 0)
-                                    {
-                                        LogError("failure in a function that converts from AGENT_DATA_TYPE to C data");
-                                    }
-                                    else
-                                    {
-                                        nProcessedChildren++;
-                                    }
-                                    Destroy_AGENT_DATA_TYPE(&output);
-                                }
-                            }
-                            break;
-                        }
-                        case(SCHEMA_MODEL_IN_MODEL):
-                        {
-                            SCHEMA_MODEL_TYPE_HANDLE modelModel = Schema_GetModelModelByName(modelHandle, childName_str);
-                            if (modelModel == NULL)
-                            {
-                                LogError("child %s does not exist in model\n", childName_str);
-                                i = nChildren;
-                            }
-                            else
-                            {
-                                /*Codes_SRS_COMMAND_DECODER_02_009: [ If the child name corresponds to a model in model then the function shall call itself recursively. ]*/
-                                if (!validateModel_vs_Multitree(startAddress, modelModel, child, offset + Schema_GetModelModelByName_Offset(modelHandle, childName_str)))
-                                {
-                                    LogError("failure in validateModel_vs_Multitree");
-                                    i = nChildren;
+                                    LogError("failure in a function that converts from AGENT_DATA_TYPE to C data");
                                 }
                                 else
                                 {
                                     nProcessedChildren++;
                                 }
+                                Destroy_AGENT_DATA_TYPE(&output);
                             }
+                            
+                            break;
+                        }
+                        case(SCHEMA_MODEL_IN_MODEL):
+                        {
+                            SCHEMA_MODEL_TYPE_HANDLE modelModel = elementType.elementHandle.modelHandle;
+                            
+                            /*Codes_SRS_COMMAND_DECODER_02_009: [ If the child name corresponds to a model in model then the function shall call itself recursively. ]*/
+                            if (!validateModel_vs_Multitree(startAddress, modelModel, child, offset + Schema_GetModelModelByName_Offset(modelHandle, childName_str)))
+                            {
+                                LogError("failure in validateModel_vs_Multitree");
+                                i = nChildren;
+                            }
+                            else
+                            {
+                                nProcessedChildren++;
+                            }
+                            
                             break;
                         }
 
