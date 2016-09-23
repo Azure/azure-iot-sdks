@@ -55,6 +55,18 @@ SCHEMA_MODEL_IN_MODEL
 
 DEFINE_ENUM(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
 
+typedef struct SCHEMA_MODEL_ELEMENT_TAG
+{
+    SCHEMA_ELEMENT_TYPE elementType;
+    union ELEMENT_HANDLE_UNION_TAG
+    {
+        SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle;
+        SCHEMA_PROPERTY_HANDLE propertyHandle;
+        SCHEMA_REPORTED_PROPERTY_HANDLE reportedProperty;
+        SCHEMA_ACTION_HANDLE actionHandle;
+        SCHEMA_MODEL_TYPE_HANDLE modelHandle;
+    } elementHandle;
+}SCHEMA_MODEL_ELEMENT;
 
 #include "azure_c_shared_utility/umock_c_prod.h"
 MOCKABLE_FUNCTION(, SCHEMA_HANDLE, Schema_Create, const char*, schemaNamespace);
@@ -90,7 +102,7 @@ MOCKABLE_FUNCTION(, const char*, Schema_GetModelDesiredPropertyType, SCHEMA_DESI
 MOCKABLE_FUNCTION(, pfDesiredPropertyDeinitialize, Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize, SCHEMA_DESIRED_PROPERTY_HANDLE, desiredPropertyHandle);
 MOCKABLE_FUNCTION(, pfDesiredPropertyInitialize, Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize, SCHEMA_DESIRED_PROPERTY_HANDLE, desiredPropertyHandle);
 
-MOCKABLE_FUNCTION(, SCHEMA_ELEMENT_TYPE, Schema_GetModelElementTypeByName, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, elementName);
+MOCKABLE_FUNCTION(, SCHEMA_MODEL_ELEMENT, Schema_GetModelElementByName, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, elementName);
 
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_GetModelCount, SCHEMA_HANDLE, schemaHandle, size_t*, modelCount);
 MOCKABLE_FUNCTION(, SCHEMA_MODEL_TYPE_HANDLE, Schema_GetModelByName, SCHEMA_HANDLE, schemaHandle, const char*, modelName);
