@@ -28,7 +28,7 @@ The `RestApiClient` constructor initializes a new instance of a `RestApiClient` 
 
 **SRS_NODE_IOTHUB_REST_API_CLIENT_16_004: [** The `RestApiClient` constructor shall use the value of the `httpBase` argument as the internal HTTP client if present. **]**
 
-### executeApiCall(method, path, headers, body, timeout, done)
+### executeApiCall(method, path, headers, requestBody, timeout, done)
 The `executeApiCall` method builds the HTTP request using the passed arguments and calls the `done` callback with the result of the API call.
 
 **SRS_NODE_IOTHUB_REST_API_CLIENT_16_005: [** The `executeApiCall` method shall throw a `ReferenceError` if the `method` argument is falsy. **]**
@@ -52,13 +52,15 @@ The `executeApiCall` method builds the HTTP request using the passed arguments a
 
 **SRS_NODE_IOTHUB_REST_API_CLIENT_16_011: [** If the HTTP request fails without an HTTP error code the `executeApiCall` shall call the `done` callback with the error itself as the only argument. **]**
 
-**SRS_NODE_IOTHUB_REST_API_CLIENT_16_031: [** If there's is a `Content-Type` header and its value is `application/json; charset=utf-8` and the `body` argument is not a `string`, the body of the request shall be stringified using `JSON.stringify()`. **]**
+**SRS_NODE_IOTHUB_REST_API_CLIENT_16_031: [** If there's is a `Content-Type` header and its value is `application/json; charset=utf-8` and the `requestBody` argument is not a `string`, the body of the request shall be stringified using `JSON.stringify()`. **]**
 
-**SRS_NODE_IOTHUB_REST_API_CLIENT_16_035: [** If there's is a `Content-Type` header and its value is `application/json; charset=utf-8` and the `body` argument is a `string` it shall be used as is as the body of the request. **]**
+**SRS_NODE_IOTHUB_REST_API_CLIENT_16_035: [** If there's is a `Content-Type` header and its value is `application/json; charset=utf-8` and the `requestBody` argument is a `string` it shall be used as is as the body of the request. **]**
 
-**SRS_NODE_IOTHUB_REST_API_CLIENT_16_032: [** If there's is a `Content-Type` header and its value is `text/plain; charset=utf-8`, the `body` argument shall be used as is. **]**
+**SRS_NODE_IOTHUB_REST_API_CLIENT_16_032: [** If there's is a `Content-Type` header and its value is `text/plain; charset=utf-8`, the `requestBody` argument shall be used as is. **]**
 
-**SRS_NODE_IOTHUB_REST_API_CLIENT_16_033: [** The `executeApiCall` shall throw a `TypeError` if there's is a `Content-Type` header and its value is `text/plain; charset=utf-8` and the `body` argument is not a string. **]**
+**SRS_NODE_IOTHUB_REST_API_CLIENT_16_033: [** The `executeApiCall` shall throw a `TypeError` if there's is a `Content-Type` header and its value is `text/plain; charset=utf-8` and the `requestBody` argument is not a string. **]**
+
+**SRS_NODE_IOTHUB_REST_API_CLIENT_16_036: [** The `executeApiCall` shall set the `Content-Length` header to the length of the serialized value of `requestBody` if it is truthy. **]**
 
 ### translateError(result, response)
 The `translateError` method translates HTTP errors into Azure IoT Hub errors, effectively abstracting the error that is returned to the SDK user from the transport layer.

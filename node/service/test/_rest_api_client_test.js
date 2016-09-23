@@ -351,6 +351,37 @@ describe('RestApiClient', function() {
         client.executeApiCall('GET', '/test/path', testHeaders, testRequestBody, function() {});
       }, TypeError);
     });
+
+    /*Tests_SRS_NODE_IOTHUB_REST_API_CLIENT_16_036: [The `executeApiCall` shall set the `Content-Length` header to the length of the serialized value of `requestBody` if it is truthy.]*/
+    [
+      { contentType: 'text/plain; charset=utf-8', content: 'foo' },
+      { contentType: 'application/json; charset=utf-8', content: 'foo' },
+      { contentType: 'application/json; charset=utf-8', content: { key: 'value' }}
+    ].forEach(function(testConfig) {
+      it('sets the Content-Length header when Content-Type is \'' + testConfig.contentType + '\' and content is ' + JSON.stringify(testConfig.content), function(testCallback) {
+        var testHeaders = {
+          'Content-Type': testConfig.contentType
+        };
+
+        var testRequestBody = testConfig.content;
+        var expectedContentLength = (typeof testRequestBody === 'string') ? testRequestBody.length : JSON.stringify(testRequestBody).length;
+
+        var fakeHttpHelper = {
+          buildRequest: function(method, path, headers, host, requestCallback) {
+            assert.equal(headers['Content-Length'], expectedContentLength);
+            return {
+              write: function() { },
+              end: function() {
+                requestCallback();
+              }
+            };
+          }
+        };
+
+        var client = new RestApiClient(fakeConfig, fakeHttpHelper);
+        client.executeApiCall('GET', '/test/path', testHeaders, testRequestBody, testCallback);
+      });
+    });
   });
 
   describe('#updateSharedAccessSignature', function() {
