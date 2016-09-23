@@ -60,6 +60,8 @@ Twin.fromDeviceClient = function(client, done) {
     /* Codes_SRS_NODE_DEVICE_TWIN_18_003: [** `fromDeviceClient` shall allocate a new `Twin` object **]**  */
     var twin = new Twin(client);
 
+    twin.on("newListener", twin._handleNewListener.bind(twin));
+
     /* Codes_SRS_NODE_DEVICE_TWIN_18_005: [** If the protocol does not contain a `getTwinReceiver` method, `fromDeviceClient` shall call the `done` callback with a `NotImplementedError` object **]**  */
     if (!client._transport.getTwinReceiver) {
       done(new errors.NotImplementedError('transport does not support Twin'));
@@ -289,7 +291,19 @@ Twin.prototype._onServicePost = function(body) {
   var patch = JSON.parse(body.toString('ascii'));
   this._mergePatch(this.properties.desired, patch);
   this._fireChangeEvents(patch);
-  
+};
+
+/* Codes_SRS_NODE_DEVICE_TWIN_18_045: [** If a property is already set when a handler is added for that property, the `Twin` object shall fire a property changed event for the property. **]*  */
+Twin.prototype._handleNewListener = function(eventName) {
+  var self = this;  
+  if (eventName.indexOf(Twin.desiredPath) === 0) {
+    var propertyValue = _.at(this, eventName)[0];
+    if (propertyValue) {
+      process.nextTick(function() {
+        self.emit(eventName, propertyValue);
+      });
+    }
+  }
 };
 
 module.exports = Twin;
