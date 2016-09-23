@@ -28,7 +28,6 @@ declare class Registry {
 
     // Queries
     createQuery(sqlQuery: string, pageSize: number) : Query;
-    executeQuery(query: Registry.QueryDescription, done: (err: Error, result: any, response: any) => void): void;
 
     // Factory methods
     static fromConnectionString(value: string): Registry;

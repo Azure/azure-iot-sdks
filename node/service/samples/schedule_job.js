@@ -6,39 +6,82 @@
 var uuid = require('uuid');
 var JobClient = require('azure-iothub').JobClient;
 
-var jobClient = JobClient.fromConnectionString(connectionString);
-
-var connectionString = "[IoT Hub Connection String]";
-var jobId = uuid.v4();
-var startTime = new Date(Date.now() + 3600000); // an hour from now
+var connectionString = '<IoT Hub Connection String>';
+var startTime = new Date();
 var maxExecutionTimeInSeconds =  3600;
 
+var jobClient = JobClient.fromConnectionString(connectionString);
+
+// // Schedule a device method call.
 var methodParams = {
-  methodName: '<method name>',
+  methodName: 'methodName',
   payload: null,
   timeoutInSeconds: 42
 };
 
-jobClient.scheduleDeviceMethod(jobId,
+var methodJobId = uuid.v4();
+console.log('scheduling Device Method job with id: ' + methodJobId);
+jobClient.scheduleDeviceMethod(methodJobId,
                                'SELECT * FROM devices',
                                methodParams,
                                startTime,
                                maxExecutionTimeInSeconds,
                                function(err) {
   if (err) {
-    console.error('Could not schedule job: ' + err.message);
+    console.error('Could not schedule device method job: ' + err.message);
   } else {
-    var jobMonitorInterval = setInterval(function() {
-      jobClient.getJob(jobId, function(err, result) {
-        if (err) {
-          console.error('Could not get job status: ' + err.message);
-        } else {
-          console.log('Job status: ' + result.status);
-          if (result.status === 'completed' || result.status === 'failed' || result.status === 'cancelled') {
-            clearInterval(jobMonitorInterval);
-          }
-        }
-      });
-    }, 5000);
+    monitorJob(methodJobId, function(err, result) {
+      if (err) {
+        console.error('Could not monitor device method job: ' + err.message);
+      } else {
+        console.log(JSON.stringify(result, null, 2));
+      }
+    });
   }
 });
+
+// Schedule a Twin update
+var twinPatch = {
+  etag: '*',
+  tags: {
+    state: 'WA'
+  }
+};
+
+var twinJobId = uuid.v4();
+
+console.log('scheduling Twin Update job with id: ' + twinJobId);
+jobClient.scheduleTwinUpdate(twinJobId,
+                             'SELECT * FROM devices',
+                             twinPatch,
+                             startTime,
+                             maxExecutionTimeInSeconds,
+                             function(err) {
+  if (err) {
+    console.error('Could not schedule twin update job: ' + err.message);
+  } else {
+    monitorJob(twinJobId, function(err, result) {
+      if (err) {
+        console.error('Could not monitor twin update job: ' + err.message);
+      } else {
+        console.log(JSON.stringify(result, null, 2));
+      }
+    });
+  }
+});
+
+function monitorJob (jobId, callback) {
+  var jobMonitorInterval = setInterval(function() {
+    jobClient.getJob(jobId, function(err, result) {
+      if (err) {
+        console.error('Could not get job status: ' + err.message);
+      } else {
+        console.log('Job: ' + jobId + ' - status: ' + result.status);
+        if (result.status === 'completed' || result.status === 'failed' || result.status === 'cancelled') {
+          clearInterval(jobMonitorInterval);
+          callback(null, result);
+        }
+      }
+    });
+  }, 5000);
+}

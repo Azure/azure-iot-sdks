@@ -108,7 +108,7 @@ JobClient.prototype.getJob = function(jobId, done) {
 
 /**
  * @method            module:azure-iothub.JobClient#createQuery
- * @description       Creates a query that can be used to return pages of existings job based on type and status.
+ * @description       Creates a query that can be used to return pages of existing job based on type and status.
  * 
  * @param {String}    jobType     The type that should be used to filter results.
  * @param {String}    jobStatus   The status that should be used to filter results.
@@ -354,7 +354,7 @@ JobClient.prototype.scheduleTwinUpdate = function (jobId, queryOrDevices, patch,
 
 
 JobClient.prototype._scheduleJob = function(jobDesc, done) {
-  var path = '/jobs/v2/create' + endpoint.versionQueryString();
+  var path = '/jobs/v2/' + encodeURIComponent(jobDesc.jobId) + endpoint.versionQueryString();
   var headers = {
     'Content-Type': 'application/json; charset=utf-8'
   };

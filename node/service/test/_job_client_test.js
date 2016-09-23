@@ -351,7 +351,7 @@ describe('JobClient', function() {
       var client = new JobClient(fakeRestApiClient);
       client.scheduleDeviceMethod(fakeJobId, fakeQuery, fakeMethodParams, fakeStartTime, fakeMaxExecutionTime, function() {});
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][0], 'PUT');
-      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/create' + endpoint.versionQueryString());
+      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/' + fakeJobId + endpoint.versionQueryString());
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][2]['Content-Type'], 'application/json; charset=utf-8');
       assert.deepEqual(fakeRestApiClient.executeApiCall.args[0][3].cloudToDeviceMethod, fakeMethodParams);
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][3].type, 'scheduleDeviceMethod');
@@ -450,7 +450,7 @@ describe('JobClient', function() {
       var client = new JobClient(fakeRestApiClient);
       client.scheduleTwinUpdate(fakeJobId, fakeQuery, fakePatch, fakeStartTime, fakeMaxExecutionTime, function() {});
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][0], 'PUT');
-      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/create' + endpoint.versionQueryString());
+      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/' + fakeJobId + endpoint.versionQueryString());
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][2]['Content-Type'], 'application/json; charset=utf-8');
       assert.deepEqual(fakeRestApiClient.executeApiCall.args[0][3].updateTwin, fakePatch);
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][3].type, 'scheduleUpdateTwin');
