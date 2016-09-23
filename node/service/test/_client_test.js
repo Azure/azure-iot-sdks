@@ -118,7 +118,7 @@ describe('Client', function () {
       it('throws if \'methodParams.methodName\' is \'' + badMethodName + '\'', function() {
         var client = new Client({}, {});
         assert.throws(function() {
-          client.invokeDeviceMethod('deviceId', { methodName: badMethodName, payloadJson: { foo: 'bar' }, timeoutInSeconds: 42 }, function() {});
+          client.invokeDeviceMethod('deviceId', { methodName: badMethodName, payload: { foo: 'bar' }, timeoutInSeconds: 42 }, function() {});
         }, ReferenceError);
       });
     });
@@ -128,7 +128,7 @@ describe('Client', function () {
       it('throws if \'methodParams.methodName\' is of type \'' + badMethodType + '\'', function() {
         var client = new Client({}, {});
         assert.throws(function() {
-          client.invokeDeviceMethod('deviceId', { methodName: badMethodType, payloadJson: { foo: 'bar' }, timeoutInSeconds: 42 }, function() {});
+          client.invokeDeviceMethod('deviceId', { methodName: badMethodType, payload: { foo: 'bar' }, timeoutInSeconds: 42 }, function() {});
         }, TypeError);
       });
     });
@@ -139,7 +139,7 @@ describe('Client', function () {
     it('uses the DeviceMethod client to invoke the method', function(testCallback) {
       var fakeMethodParams = {
         methodName: 'method',
-        payloadJson: null,
+        payload: null,
         timeoutInSeconds: 42
       };
 

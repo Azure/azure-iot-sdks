@@ -4,10 +4,11 @@
 "use strict";
 
 var assert = require('chai').assert;
+var sinon = require('sinon');
 var endpoint = require('azure-iot-common').endpoint;
 var errors = require('azure-iot-common').errors;
 var Registry = require('../lib/registry.js');
-var DeviceTwin = require('../lib/twin.js');
+var Twin = require('../lib/twin.js');
 var Query = require('../lib/query.js');
 
 var fakeDevice = { deviceId: 'deviceId' };
@@ -324,8 +325,8 @@ describe('Registry', function() {
 
     testErrorCallback('getTwin', fakeDevice.deviceId);
 
-    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_036: [The `getTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub servce.]*/
-    it('calls the \'done\' callback with a \'DeviceTwin\' object', function(testCallback) {
+    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_036: [The `getTwin` method shall call the `done` callback with a `Twin` object updated with the latest property values stored in the IoT Hub servce.]*/
+    it('calls the \'done\' callback with a \'Twin\' object', function(testCallback) {
       var registry = new Registry({ host: 'host', sharedAccessSignature: 'sas' }, {
         executeApiCall: function (method, path, httpHeaders, body, done) {
           done(null, { deviceId: 'fakeTwin' }, { status: 200 });
@@ -333,7 +334,7 @@ describe('Registry', function() {
       });
 
       registry.getTwin('deviceId', function(err, twin) {
-        assert.instanceOf(twin, DeviceTwin);
+        assert.instanceOf(twin, Twin);
         testCallback();
       });
     });
@@ -397,7 +398,7 @@ describe('Registry', function() {
           assert.equal(httpHeaders['Content-Type'], 'application/json; charset=utf-8');
           assert.equal(httpHeaders['If-Match'], fakeEtag);
           assert.equal(body, fakeTwinPatch);
-          done(null, new DeviceTwin(fakeDeviceId, {}), fakeHttpResponse);
+          done(null, new Twin(fakeDeviceId, {}), fakeHttpResponse);
         }
       };
 
@@ -405,8 +406,8 @@ describe('Registry', function() {
       registry.updateTwin(fakeDeviceId, fakeTwinPatch, fakeEtag, testCallback);
     });
 
-    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_050: [The `updateTwin` method shall call the `done` callback with a `DeviceTwin` object updated with the latest property values stored in the IoT Hub service.]*/
-    it('calls the \'done\' a \'DeviceTwin\' object', function(testCallback) {
+    /*Codes_SRS_NODE_IOTHUB_REGISTRY_16_050: [The `updateTwin` method shall call the `done` callback with a `Twin` object updated with the latest property values stored in the IoT Hub service.]*/
+    it('calls the \'done\' a \'Twin\' object', function(testCallback) {
       var registry = new Registry({ host: 'host', sharedAccessSignature: 'sas' }, {
         executeApiCall: function (method, path, httpHeaders, body, done) {
           done(null, JSON.stringify({ deviceId: 'fakeTwin' }), { status: 200 });
@@ -414,7 +415,7 @@ describe('Registry', function() {
       });
 
       registry.updateTwin('deviceId', {}, 'etag==', function(err, twin) {
-        assert.instanceOf(twin, DeviceTwin);
+        assert.instanceOf(twin, Twin);
         testCallback();
       });
     });
@@ -635,32 +636,12 @@ describe('Registry', function() {
     /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_054: [The `createQuery` method shall return a new `Query` instance initialized with the `sqlQuery` and the `pageSize` argument if specified.]*/
     it('returns a Query instance', function() {
       var registry = new Registry(fakeConfig, {});
-      var fakeSql = 'SELECT * FROM devices';
-      var fakePageSize = 42;
-      var query = registry.createQuery(fakeSql, fakePageSize);
+      var query = registry.createQuery('SELECT * FROM devices', 42);
       assert.instanceOf(query, Query);
-      assert.equal(query.toJSON().sql, fakeSql);
-      assert.equal(query.toJSON().pageSize, fakePageSize);
     });
   });
 
-  describe('#executeQuery', function() {
-    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_055: [The `executeQuery` method shall throw a `ReferenceError` if `query` is falsy.]*/
-    [undefined, null].forEach(function(badQuery) {
-      testFalsyArg('executeQuery', 'query', badQuery, ReferenceError);
-    });
-
-    /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_056: [The `executeQuery` method shall throw a `TypeError` if `query` is missing one of the following properties: `sql`, `pageSize`, `continuationToken`.]*/
-    [
-      { pageSize: 100, continuationToken: 'token' },
-      { sql: 'sql', continuationToken: 'token' },
-      { sql: 'sql', pageSize: 100 }
-    ].forEach(function(badQuery) {
-      testFalsyArg('executeQuery', 'query', badQuery, TypeError);
-    });
-
-    testErrorCallback('executeQuery', { sql: 'sql', pageSize: 42, continuationToken: null });
-
+  describe('#_executeQueryFunc', function() {
     /*Tests_SRS_NODE_IOTHUB_REGISTRY_16_057: [The `executeQuery` method shall construct an HTTP request as follows:
     ```
     POST /devices/query?api-version=<version> HTTP/1.1
@@ -670,25 +651,24 @@ describe('Registry', function() {
 
     <query>
     ```]*/
-    it('constructs a valid HTTP request', function(testCallback) {
+    it('constructs a valid HTTP request', function() {
+      var fakeSql = 'sql';
+      var fakePageSize = 42;
       var fakeQuery = {
-        sql: 'sql',
-        pageSize: 42,
+        sql: fakeSql,
+        pageSize: fakePageSize,
         continuationToken: null
       };
 
-      var fakeHttpHelper = {
-        executeApiCall: function (method, path, httpHeaders, body, done) {
-          assert.equal(method, 'POST');
-          assert.equal(path, '/devices/query' + endpoint.versionQueryString());
-          assert.equal(httpHeaders['Content-Type'], 'application/json; charset=utf-8');
-          assert.equal(body, fakeQuery);
-          done();
-        }
-      };
+      var fakeHttpHelper = { executeApiCall: sinon.stub() };
 
       var registry = new Registry(fakeConfig, fakeHttpHelper);
-      registry.executeQuery(fakeQuery, testCallback);
+      var query = registry.createQuery(fakeSql, fakePageSize);
+      query.next(function() {});
+      assert.strictEqual(fakeHttpHelper.executeApiCall.args[0][0], 'POST');
+      assert.strictEqual(fakeHttpHelper.executeApiCall.args[0][1], '/devices/query' + endpoint.versionQueryString());
+      assert.strictEqual(fakeHttpHelper.executeApiCall.args[0][2]['Content-Type'], 'application/json; charset=utf-8');
+      assert.deepEqual(fakeHttpHelper.executeApiCall.args[0][3], fakeQuery);
     });
   });
 });

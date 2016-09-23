@@ -1,7 +1,7 @@
 # MqttTwinReceiver Requirements
 
 ## Overview
-Object used to subscribe to the Cloud-to-Device messages for DeviceTwin
+Object used to subscribe to the Cloud-to-Device messages for Twin
 
 ## Example
 ```javascript

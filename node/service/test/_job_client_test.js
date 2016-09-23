@@ -9,6 +9,7 @@ var sinon = require('sinon');
 var endpoint = require('azure-iot-common').endpoint;
 var JobClient = require('../lib/job_client.js');
 var DeviceMethod = require('../lib/device_method.js');
+var Query = require('../lib/query.js');
 
 describe('JobClient', function() {
   function testFalsyArg (fn, badArgName, badArgValue, args) {
@@ -129,32 +130,15 @@ describe('JobClient', function() {
     testCallback('getJob', ['jobId']);
   });
 
-  describe('#getJobs', function() {
-    /*Tests_SRS_NODE_JOB_CLIENT_16_010: [If `jobType` is a function, `jobType` shall be considered the callback and a `TypeError` shall be thrown if `jobStatus` and/or `done` are not `undefined`.]*/
-    it('throws a TypeError if the jobType is a callback and the next parameters are not undefined', function() {
+  describe('#createQuery', function() {
+    it('returns a Query object', function() {
       var client = new JobClient({});
-      assert.throws(function() {
-        client.getJobs(function() {}, 'foo');
-      }, TypeError);
-
-      assert.throws(function() {
-        client.getJobs(function() {}, undefined, 'foo');
-      }, TypeError);
+      assert.instanceOf(client.createQuery(), Query);
     });
+  });
 
-    /*Tests_SRS_NODE_JOB_CLIENT_16_011: [If `jobStatus` is a function, `jobStatus` shall be considered the callback and a `TypeError` shall be thrown if `done` is not `undefined`.]*/
-    it('throws a TypeError if the jobStatus is a callback and the next parameters are not undefined', function() {
-      var client = new JobClient({});
-      assert.throws(function() {
-        client.getJobs('type', function() {}, 'foo');
-      }, TypeError);
-
-      assert.throws(function() {
-        client.getJobs('type', function() {}, function() {});
-      }, TypeError);
-    });
-
-    /*Tests_SRS_NODE_JOB_CLIENT_16_012: [The `getJobs` method shall construct the HTTP request as follows:
+  describe('#_getJobsFunc', function() {
+    /*Tests_SRS_NODE_JOB_CLIENT_16_012: [The `createQuery` method shall construct the HTTP request as follows:
     ```
     GET /jobs/v2/query?api-version=<version>&jobType=<jobType>&jobStatus=<jobStatus>
     Authorization: <config.sharedAccessSignature>
@@ -162,57 +146,92 @@ describe('JobClient', function() {
     Request-Id: <guid>
     User-Agent: <sdk-name>/<sdk-version>
     ```]*/
-    it('creates a valid HTTP request without jobType or jobStatus', function(testCallback) {
-      var fakeRestApiClient = { executeApiCall: sinon.stub().callsArg(4) };
+    it('creates a valid HTTP request when no arguments are given', function() {
+      var fakeRestApiClient = { executeApiCall: sinon.stub() };
 
       var client = new JobClient(fakeRestApiClient);
-      client.getJobs(testCallback);
+      var query = client.createQuery();
+      query.next(function() {});
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][0], 'GET');
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/query' + endpoint.versionQueryString());
       assert.isNull(fakeRestApiClient.executeApiCall.args[0][2]);
       assert.isNull(fakeRestApiClient.executeApiCall.args[0][3]);
     });
 
-    it('creates a valid HTTP request without jobStatus', function(testCallback) {
+    it('creates a valid HTTP request with jobType only', function() {
       var fakeJobType = 'type';
-      var fakeRestApiClient = { executeApiCall: sinon.stub().callsArg(4) };
+      var fakeRestApiClient = { executeApiCall: sinon.stub() };
 
       var client = new JobClient(fakeRestApiClient);
-      client.getJobs(fakeJobType, testCallback);
+      var query = client.createQuery(fakeJobType);
+      query.next(function() {});
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][0], 'GET');
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/query' + endpoint.versionQueryString() + '&jobType=' + fakeJobType);
       assert.isNull(fakeRestApiClient.executeApiCall.args[0][2]);
       assert.isNull(fakeRestApiClient.executeApiCall.args[0][3]);
     });
 
-    it('creates a valid HTTP request without jobType', function(testCallback) {
+    it('creates a valid HTTP request with jobStatus only', function() {
       var fakeJobStatus = 'status';
-      var fakeRestApiClient = { executeApiCall: sinon.stub().callsArg(4) };
+      var fakeRestApiClient = { executeApiCall: sinon.stub()};
 
       var client = new JobClient(fakeRestApiClient);
-      client.getJobs(null, fakeJobStatus, testCallback);
+      var query = client.createQuery(null, fakeJobStatus);
+      query.next(function() {});
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][0], 'GET');
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/query' + endpoint.versionQueryString() + '&jobStatus=' + fakeJobStatus);
       assert.isNull(fakeRestApiClient.executeApiCall.args[0][2]);
       assert.isNull(fakeRestApiClient.executeApiCall.args[0][3]);
     });
 
-    it('creates a valid HTTP request with both jobType and jobStatus', function(testCallback) {
-      var fakeJobType = 'type';
-      var fakeJobStatus = 'status';
-      var fakeRestApiClient = { executeApiCall: sinon.stub().callsArg(4) };
+    it('creates a valid HTTP request with pageSize only', function() {
+      var fakePageSize = 42;
+      var fakeRestApiClient = { executeApiCall: sinon.stub()};
 
       var client = new JobClient(fakeRestApiClient);
-      client.getJobs(fakeJobType, fakeJobStatus, testCallback);
+      var query = client.createQuery(null, null, fakePageSize);
+      query.next(function() {});
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][0], 'GET');
-      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/query' + endpoint.versionQueryString() + '&jobStatus=' + fakeJobStatus + '&jobType=' + fakeJobType);
+      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/query' + endpoint.versionQueryString() + '&pageSize=' + fakePageSize);
       assert.isNull(fakeRestApiClient.executeApiCall.args[0][2]);
       assert.isNull(fakeRestApiClient.executeApiCall.args[0][3]);
     });
 
-    testCallback('getJobs', []);
-    testCallback('getJobs', ['type']);
-    testCallback('getJobs', ['type', 'status']);
+    it('creates a valid HTTP request with all parameters', function() {
+      var fakeJobType = 'type';
+      var fakeJobStatus = 'status';
+      var fakePageSize = 42;
+      var fakeRestApiClient = { executeApiCall: sinon.stub()};
+
+      var client = new JobClient(fakeRestApiClient);
+      var query = client.createQuery(fakeJobType, fakeJobStatus, fakePageSize);
+      query.next(function() {});
+      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][0], 'GET');
+      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/query' + endpoint.versionQueryString() + '&jobStatus=' + fakeJobStatus + '&jobType=' + fakeJobType + '&pageSize=' + fakePageSize);
+      assert.isNull(fakeRestApiClient.executeApiCall.args[0][2]);
+      assert.isNull(fakeRestApiClient.executeApiCall.args[0][3]);
+    });
+    
+    it('creates a valid HTTP request with a continuationToken', function(testCallback) {
+      var fakeToken = 'testToken';
+      var fakeRestApiClient = { executeApiCall: sinon.stub().callsArgWith(4, null, { continuationToken: fakeToken})};
+
+      var client = new JobClient(fakeRestApiClient);
+      var query = client.createQuery();
+      query.next(function() {
+        assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][0], 'GET');
+        assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/query' + endpoint.versionQueryString());
+        assert.isNull(fakeRestApiClient.executeApiCall.args[0][2]);
+        assert.isNull(fakeRestApiClient.executeApiCall.args[0][3]);
+        query.next(function() {
+          assert.strictEqual(fakeRestApiClient.executeApiCall.args[1][0], 'GET');
+          assert.strictEqual(fakeRestApiClient.executeApiCall.args[1][1], '/jobs/v2/query' + endpoint.versionQueryString() + '&continuationToken=' + fakeToken);
+          assert.isNull(fakeRestApiClient.executeApiCall.args[1][2]);
+          assert.isNull(fakeRestApiClient.executeApiCall.args[1][3]);
+          testCallback();
+        });
+      });
+    });
   });
 
   describe('cancelJob', function() {
@@ -248,7 +267,7 @@ describe('JobClient', function() {
     var goodParams = {
       methodName: 'name',
       timeoutInSeconds: 42,
-      payloadJson: null
+      payload: null
     };
 
     /*Tests_SRS_NODE_JOB_CLIENT_16_013: [The `scheduleDeviceMethod` method shall throw a `ReferenceError` if `jobId` is `null`, `undefined` or an empty string.]*/
@@ -286,14 +305,14 @@ describe('JobClient', function() {
       }, TypeError);
     });
 
-    /*Tests_SRS_NODE_JOB_CLIENT_16_030: [The `scheduleDeviceMethod` method shall use the `DeviceMethod.defaultPayload` value if `methodParams.payloadJson` is `undefined`.]*/
+    /*Tests_SRS_NODE_JOB_CLIENT_16_030: [The `scheduleDeviceMethod` method shall use the `DeviceMethod.defaultPayload` value if `methodParams.payload` is `undefined`.]*/
     /*Tests_SRS_NODE_JOB_CLIENT_16_031: [The `scheduleDeviceMethod` method shall use the `DeviceMethod.defaultTimeout` value if `methodParams.timeoutInSeconds` is falsy.]*/
     it('uses the default payload and timeoutInSeconds if either of those methodParams properties are undefined', function() {
       var fakeRestApiClient = { executeApiCall: sinon.stub() };
 
       var client = new JobClient(fakeRestApiClient);
       client.scheduleDeviceMethod('id', 'SELECT * FROM devices', { methodName: 'name' }, new Date(), 86400, function() {});
-      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][3].cloudToDeviceMethod.payloadJson, DeviceMethod.defaultPayload);
+      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][3].cloudToDeviceMethod.payload, DeviceMethod.defaultPayload);
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][3].cloudToDeviceMethod.timeoutInSeconds, DeviceMethod.defaultTimeout);
     });
 
@@ -320,7 +339,7 @@ describe('JobClient', function() {
       var fakeQuery = 'SELECT * FROM devices';
       var fakeMethodParams = {
         methodName: 'name',
-        payloadJson: { foo: 'bar' },
+        payload: { foo: 'bar' },
         timeoutInSeconds: 42
       };
 
@@ -332,7 +351,7 @@ describe('JobClient', function() {
       var client = new JobClient(fakeRestApiClient);
       client.scheduleDeviceMethod(fakeJobId, fakeQuery, fakeMethodParams, fakeStartTime, fakeMaxExecutionTime, function() {});
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][0], 'PUT');
-      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/create' + endpoint.versionQueryString());
+      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/' + fakeJobId + endpoint.versionQueryString());
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][2]['Content-Type'], 'application/json; charset=utf-8');
       assert.deepEqual(fakeRestApiClient.executeApiCall.args[0][3].cloudToDeviceMethod, fakeMethodParams);
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][3].type, 'scheduleDeviceMethod');
@@ -431,7 +450,7 @@ describe('JobClient', function() {
       var client = new JobClient(fakeRestApiClient);
       client.scheduleTwinUpdate(fakeJobId, fakeQuery, fakePatch, fakeStartTime, fakeMaxExecutionTime, function() {});
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][0], 'PUT');
-      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/create' + endpoint.versionQueryString());
+      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/' + fakeJobId + endpoint.versionQueryString());
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][2]['Content-Type'], 'application/json; charset=utf-8');
       assert.deepEqual(fakeRestApiClient.executeApiCall.args[0][3].updateTwin, fakePatch);
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][3].type, 'scheduleUpdateTwin');

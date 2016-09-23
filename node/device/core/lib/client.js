@@ -557,17 +557,17 @@ Client.prototype.uploadToBlob = function (blobName, stream, streamLength, done) 
 };
 
 /**
- * @method           module:azure-iot-device.Client#getDeviceTwin
- * @description      The `getDeviceTwin` method creates a DeviceTwin object and establishes a connection with the Twin service.
+ * @method           module:azure-iot-device.Client#getTwin
+ * @description      The `getTwin` method creates a Twin object and establishes a connection with the Twin service.
  *
  * @param {Function} done             The callback to call when the connection is established.
  *
  */
-Client.prototype.getDeviceTwin = function(done, twin) {
+Client.prototype.getTwin = function(done, twin) {
 
-  /* Codes_SRS_NODE_DEVICE_CLIENT_18_001: [** The `getDeviceTwin` method shall call the `azure-iot-device-core!DeviceTwin.fromDeviceClient` method to create the device client object. **]** */
-  /* Codes_SRS_NODE_DEVICE_CLIENT_18_002: [** The `getDeviceTwin` method shall pass itself as the first parameter to `fromDeviceClient` and it shall pass the `done` method as the second parameter. **]**  */
-  /* Codes_SRS_NODE_DEVICE_CLIENT_18_003: [** The `getDeviceTwin` method shall use the second parameter (if it is not falsy) to call `fromDeviceClient` on. **]**    */
+  /* Codes_SRS_NODE_DEVICE_CLIENT_18_001: [** The `getTwin` method shall call the `azure-iot-device-core!Twin.fromDeviceClient` method to create the device client object. **]** */
+  /* Codes_SRS_NODE_DEVICE_CLIENT_18_002: [** The `getTwin` method shall pass itself as the first parameter to `fromDeviceClient` and it shall pass the `done` method as the second parameter. **]**  */
+  /* Codes_SRS_NODE_DEVICE_CLIENT_18_003: [** The `getTwin` method shall use the second parameter (if it is not falsy) to call `fromDeviceClient` on. **]**    */
   (twin || require('./twin.js')).fromDeviceClient(this, done);
 };
 

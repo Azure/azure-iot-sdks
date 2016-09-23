@@ -2,12 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 import RestApiClient = require('./rest_api_client');
 import DeviceMethodParams = require('./device_method_params');
+import Query = require('./query');
 
 declare class JobClient {
     constructor(restApiClient: RestApiClient);
 
     getJob(jobId: string, done: JobClient.JobCallback): void;
-    getJobs(jobType?: string | JobClient.JobCallback, jobStatus?: string | JobClient.JobCallback, done?: JobClient.JobCallback): void;
+    createQuery(jobType?: string, jobStatus?: string, pageSize?: Number): Query;
     cancelJob(jobId: string, done: JobClient.JobCallback): void;
     scheduleDeviceMethod(jobId: string,
                          queryOrDevices: string | string[],
