@@ -10,6 +10,7 @@ var ConnectionString = require('./connection_string.js');
 var SharedAccessSignature = require('./shared_access_signature.js');
 var RestApiClient = require('./rest_api_client.js');
 var DeviceMethod = require('./device_method.js');
+var Query = require('./query.js');
 
 /**
  * @class                     module:azure-iothub.JobClient
@@ -106,49 +107,36 @@ JobClient.prototype.getJob = function(jobId, done) {
 };
 
 /**
- * @method            module:azure-iothub.JobClient#getJobs
- * @description       Find existing job based on type and status.
+ * @method            module:azure-iothub.JobClient#createQuery
+ * @description       Creates a query that can be used to return pages of existing job based on type and status.
  * 
  * @param {String}    jobType     The type that should be used to filter results.
  * @param {String}    jobStatus   The status that should be used to filter results.
- * @param {Function}  done        The function to call when the operation is
- *                                complete. `done` will be called with three
- *                                arguments: an Error object (can be null), an array of
- *                                job object, and a transport-specific response
- *                                object useful for logging or debugging.
+ * @param {Number}    pageSize    The number of elements to return per page.
  */
-JobClient.prototype.getJobs = function(jobType, jobStatus, done) {
-  /*Codes_SRS_NODE_JOB_CLIENT_16_010: [If `jobType` is a function, `jobType` shall be considered the callback and a `TypeError` shall be thrown if `jobStatus` and/or `done` are not `undefined`.]*/
-  if (typeof jobType === 'function') {
-    if (jobStatus || done) {
-      throw new TypeError('The callback must be the last parameter');
-    } else {
-      done = jobType;
-      jobType = null;
-      jobStatus = null;
-    }
-  /*Codes_SRS_NODE_JOB_CLIENT_16_011: [If `jobStatus` is a function, `jobStatus` shall be considered the callback and a `TypeError` shall be thrown if `done` is not `undefined`.]*/
-  } else if (typeof jobStatus === 'function') {
-    if (done) {
-      throw new TypeError('The callback must be the last parameter');
-    } else {
-      done = jobStatus;
-      jobStatus = null;
-    }
-  }
+JobClient.prototype.createQuery = function(jobType, jobStatus, pageSize) {
+  return new Query(this._getJobsFunc(jobType, jobStatus, pageSize));
+};
 
-  /*Codes_SRS_NODE_JOB_CLIENT_16_012: [The `getJobs` method shall construct the HTTP request as follows:
-  ```
-  GET /jobs/v2/query?api-version=<version>&jobType=<jobType>&jobStatus=<jobStatus>
-  Authorization: <config.sharedAccessSignature>
-  Content-Type: application/json; charset=utf-8
-  Request-Id: <guid>
-  User-Agent: <sdk-name>/<sdk-version>
-  ```]*/
-  var jobStatusQueryParam = jobStatus ? '&jobStatus=' + encodeURIComponent(jobStatus) : '';
-  var jobTypeQueryParam = jobType ? '&jobType=' + encodeURIComponent(jobType) : '';
-  var path = '/jobs/v2/query' + endpoint.versionQueryString() + jobStatusQueryParam + jobTypeQueryParam;
-  this._restApiClient.executeApiCall('GET', path, null, null, done);
+JobClient.prototype._getJobsFunc = function(jobType, jobStatus, pageSize) {
+  var self = this;
+  /*Codes_SRS_NODE_JOB_CLIENT_16_035: [The `_getJobsFunc` function shall return a function that can be used by the `Query` object to get a new page of results]*/
+  return function(continuationToken, done) {
+    /*Codes_SRS_NODE_JOB_CLIENT_16_012: [The `_getJobsFunc` method shall construct the HTTP request as follows:
+    ```
+    GET /jobs/v2/query?api-version=<version>[&jobType=<jobType>][&jobStatus=<jobStatus>][&pageSize=<pageSize>][&continuationToken=<continuationToken>]
+    Authorization: <config.sharedAccessSignature>
+    Content-Type: application/json; charset=utf-8
+    Request-Id: <guid>
+    User-Agent: <sdk-name>/<sdk-version>
+    ```]*/
+    var jobStatusQueryParam = jobStatus ? '&jobStatus=' + encodeURIComponent(jobStatus) : '';
+    var jobTypeQueryParam = jobType ? '&jobType=' + encodeURIComponent(jobType) : '';
+    var continuationTokenParam = continuationToken ? '&continuationToken=' + encodeURIComponent(continuationToken) : '';
+    var pageSizeParam = pageSize ? '&pageSize=' + encodeURIComponent(pageSize) : '';
+    var path = '/jobs/v2/query' + endpoint.versionQueryString() + jobStatusQueryParam + jobTypeQueryParam + pageSizeParam + continuationTokenParam;
+    self._restApiClient.executeApiCall('GET', path, null, null, done);
+    };
 };
 
 /**
@@ -366,7 +354,7 @@ JobClient.prototype.scheduleTwinUpdate = function (jobId, queryOrDevices, patch,
 
 
 JobClient.prototype._scheduleJob = function(jobDesc, done) {
-  var path = '/jobs/v2/create' + endpoint.versionQueryString();
+  var path = '/jobs/v2/' + encodeURIComponent(jobDesc.jobId) + endpoint.versionQueryString();
   var headers = {
     'Content-Type': 'application/json; charset=utf-8'
   };

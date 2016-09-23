@@ -250,23 +250,23 @@ The `createQuery` method initializes a new instance of a `DeviceQuery` object wi
 
 **SRS_NODE_IOTHUB_REGISTRY_16_053: [** The `createQuery` method shall throw a `TypeError` if the `pageSize` argument is not `null`, `undefined` or a number. **]**
 
-**SRS_NODE_IOTHUB_REGISTRY_16_054: [** The `createQuery` method shall return a new `DeviceQuery` instance initialized with the `sqlQuery` and the `pageSize` argument if specified. **]**
+**SRS_NODE_IOTHUB_REGISTRY_16_054: [** The `createQuery` method shall return a new `Query` instance initialized with the `sqlQuery` and the `pageSize` argument if specified. **]**
 
-### executeQuery(query, done)
-The `executeQuery` method runs a SQL query against the device databases and calls the `done` callback with the results.
+### _executeQueryFunc(sqlQuery, pageSize)
+The `_executeQueryFunc` method runs a SQL query against the device databases and calls the `done` callback with the results.
 
-**SRS_NODE_IOTHUB_REGISTRY_16_055: [** The `executeQuery` method shall throw a `ReferenceError` if `query` is falsy. **]**
-
-**SRS_NODE_IOTHUB_REGISTRY_16_056: [** The `executeQuery` method shall throw a `TypeError` if `query` is missing one of the following properties: `sql`, `pageSize`, `continuationToken`. **]**
-
-**SRS_NODE_IOTHUB_REGISTRY_16_057: [** The `executeQuery` method shall construct an HTTP request as follows:
+**SRS_NODE_IOTHUB_REGISTRY_16_057: [** The `_executeQueryFunc` method shall construct an HTTP request as follows:
 ```
 POST /devices/query?api-version=<version> HTTP/1.1
 Authorization: <config.sharedAccessSignature>
 Content-Type: application/json; charset=utf-8
 Request-Id: <guid>
 
-<query>
+{
+  sql: <sqlQuery>,
+  pageSize: <pageSize>,
+  continuationToken: <continuationToken>
+}
 ```
 **]**
 
