@@ -4397,7 +4397,7 @@ TEST_FUNCTION(IoTHubTransportMqtt_Unsubscribe_DeviceMethod_negative_cases)
 
     g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
     umock_c_reset_all_calls();
-
+    umock_c_negative_tests_init();
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).IgnoreArgument(1);
     STRICT_EXPECTED_CALL(mqtt_client_unsubscribe(IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, 1))
         .IgnoreArgument(1)
