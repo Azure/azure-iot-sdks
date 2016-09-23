@@ -59,7 +59,7 @@ Request-Id: <guid>
 {
   "methodName": <DeviceMethod.params.name>,
   "timeoutInSeconds": <DeviceMethod.params.timeoutInSeconds>,
-  "payloadJson": <DeviceMethod.params.payload>
+  "payload": <DeviceMethod.params.payload>
 }
 ```
 **]**  

@@ -1,7 +1,7 @@
-# azure-iot-device.DeviceTwin Requirements
+# azure-iot-device.Twin Requirements
 
 ## Overview
-azure-iot-device.DeviceTwin provides access to the Device Twin functionaliy of IoTHub.
+azure-iot-device.Twin provides access to the Device Twin functionaliy of IoTHub.
 
 ## Example usage
 ```js
@@ -65,9 +65,9 @@ The `fromDeviceclient` method creates a device twin connection to the given hub 
 
 **SRS_NODE_DEVICE_TWIN_18_028: [** if `fromDeviceClient` has previously been called for this client, it shall perform a GET operation and return the same object **]**
 
-**SRS_NODE_DEVICE_TWIN_18_029: [** if `fromDeviceClient` is called with 2 different `client`s, it shall return 2 unique `DeviceTwin` objects **]**
+**SRS_NODE_DEVICE_TWIN_18_029: [** if `fromDeviceClient` is called with 2 different `client`s, it shall return 2 unique `Twin` objects **]**
 
-**SRS_NODE_DEVICE_TWIN_18_003: [** `fromDeviceClient` shall allocate a new `DeviceTwin` object **]** 
+**SRS_NODE_DEVICE_TWIN_18_003: [** `fromDeviceClient` shall allocate a new `Twin` object **]** 
 
 **SRS_NODE_DEVICE_TWIN_18_004: [** `fromDeviceClient` shall call `getTwinReceiver` on the protocol object to get a twin receiver. **]** 
 
@@ -79,7 +79,7 @@ The `fromDeviceclient` method creates a device twin connection to the given hub 
 
 **SRS_NODE_DEVICE_TWIN_18_032: [** `fromDeviceClient` shall subscribe to the desired property patch topic **]**
 
-**SRS_NODE_DEVICE_TWIN_18_009: [** `fromDeviceClient` shall call the `done` callback passing a `TimeoutError` if it has not received all necessary `subscribed` events within `DeviceTwin.timeout` milliseconds. **]** 
+**SRS_NODE_DEVICE_TWIN_18_009: [** `fromDeviceClient` shall call the `done` callback passing a `TimeoutError` if it has not received all necessary `subscribed` events within `Twin.timeout` milliseconds. **]** 
 
 **SRS_NODE_DEVICE_TWIN_18_010: [** `fromDeviceClient` shall call the `done` callback passing  the first error that is returned from `error` event on the twinReceiver. **]** 
 
@@ -111,7 +111,7 @@ The `fromDeviceclient` method creates a device twin connection to the given hub 
 
 **SRS_NODE_DEVICE_TWIN_18_021: [** Before calling `done`, `_sendTwinRequest` shall remove the handler for the `response` event **]** 
 
-**SRS_NODE_DEVICE_TWIN_18_022: [** If the response doesn't come within `DeviceTwin.timeout` milliseconds, `_sendTwinRequest` shall call `done` with `err`=`TimeoutError` **]**  
+**SRS_NODE_DEVICE_TWIN_18_022: [** If the response doesn't come within `Twin.timeout` milliseconds, `_sendTwinRequest` shall call `done` with `err`=`TimeoutError` **]**  
 
 
 ### properties.reported.update method
@@ -132,14 +132,14 @@ The `fromDeviceclient` method creates a device twin connection to the given hub 
 
 ### events for desired property changes
 
-**SRS_NODE_DEVICE_TWIN_18_035: [** When a the results of a GET operation is received, the `DeviceTwin` object shall merge the properties into `this.properties.desired`. **]**
+**SRS_NODE_DEVICE_TWIN_18_035: [** When a the results of a GET operation is received, the `Twin` object shall merge the properties into `this.properties.desired`. **]**
 
-**SRS_NODE_DEVICE_TWIN_18_036: [** When a PATCH operation is received, the `DeviceTwin` object shall merge the properties into `this.properties.desired`. **]**
+**SRS_NODE_DEVICE_TWIN_18_036: [** When a PATCH operation is received, the `Twin` object shall merge the properties into `this.properties.desired`. **]**
 
-**SRS_NODE_DEVICE_TWIN_18_039: [** After merging a GET result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]**
+**SRS_NODE_DEVICE_TWIN_18_039: [** After merging a GET result, the `Twin` object shall recursively fire property changed events for every changed property. **]**
 
-**SRS_NODE_DEVICE_TWIN_18_040: [** After merging a PATCH result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]**
+**SRS_NODE_DEVICE_TWIN_18_040: [** After merging a PATCH result, the `Twin` object shall recursively fire property changed events for every changed property. **]**
 
-**SRS_NODE_DEVICE_TWIN_18_041: [** When firing a property changed event, the `DeviceTwin` object shall name the event from the property using dot notation starting with 'properties.desired.' **]**
+**SRS_NODE_DEVICE_TWIN_18_041: [** When firing a property changed event, the `Twin` object shall name the event from the property using dot notation starting with 'properties.desired.' **]**
 
-**SRS_NODE_DEVICE_TWIN_18_042: [** When firing a property changed event, the `DeviceTwin` object shall pass the changed value of the property as the event parameter **]**
+**SRS_NODE_DEVICE_TWIN_18_042: [** When firing a property changed event, the `Twin` object shall pass the changed value of the property as the event parameter **]**

@@ -16,11 +16,14 @@ var file_upload_tests = require('./test/file_upload.js');
 var device_acknowledge_tests = require('./test/device_acknowledge_tests.js');
 var service_client = require('./test/service.js');
 var device_teardown = require('./test/device_teardown.js');
+var twin_e2e_tests = require('./test/twin_e2e_tests.js');
+var device_method = require('./test/device_method.js');
 
 var hubConnectionString = process.env.IOTHUB_CONNECTION_STRING;
 var storageConnectionString = process.env.STORAGE_CONNECTION_STRING;
 var generalProtocols = [deviceHttp.Http, deviceAmqp.Amqp, deviceAmqpWs.AmqpWs, deviceMqtt.Mqtt];
 var acknowledgementProtocols = [deviceHttp.Http, deviceAmqp.Amqp, deviceAmqpWs.AmqpWs];
+
 device_provision(hubConnectionString, function (err, provisionedDevices) {
   if (err) {
     console.log('Unable to create the devices needed.');
@@ -49,3 +52,6 @@ device_provision(hubConnectionString, function (err, provisionedDevices) {
   /* globals run */
   run();
 });
+
+twin_e2e_tests(hubConnectionString);
+device_method(hubConnectionString);

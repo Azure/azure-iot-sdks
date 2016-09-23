@@ -10,37 +10,37 @@ var _ = require('lodash');
 var traverse = require('traverse');
 require('es5-shim');
 
-var DeviceTwin = function(client) {
+var Twin = function(client) {
   EventEmitter.call(this);
 
   this._client = client;
   this._rid = 4200;   // arbitrary starting value.  
 };
 
-util.inherits(DeviceTwin, EventEmitter);
+util.inherits(Twin, EventEmitter);
 
-DeviceTwin.timeout = 1000;
+Twin.timeout = 1000;
 
-DeviceTwin.errorEvent = 'error';
-DeviceTwin.subscribedEvent = 'subscribed';
+Twin.errorEvent = 'error';
+Twin.subscribedEvent = 'subscribed';
 
-DeviceTwin.responseEvent = 'response';
-DeviceTwin.postEvent = 'post';
+Twin.responseEvent = 'response';
+Twin.postEvent = 'post';
 
-DeviceTwin.desiredPath = 'properties.desired';
+Twin.desiredPath = 'properties.desired';
 
 /**
- * @method          module:azure-iot-device.DeviceTwin#fromDeviceClient
- * @description     Get a DeviceTwin object for the given client connection
+ * @method          module:azure-iot-device.Twin#fromDeviceClient
+ * @description     Get a Twin object for the given client connection
  *
- * @param {Object}      client  The [client]{@link module:azure-iot-device.Client} object that this DeviceTwin object is associated with.
+ * @param {Object}      client  The [client]{@link module:azure-iot-device.Client} object that this Twin object is associated with.
  *
  * @param {Function}      done  the callback to be invoked when this function completes.
  *
  * @throws {ReferenceError}   One of the required parameters is falsy
  */
 
-DeviceTwin.fromDeviceClient = function(client, done) {
+Twin.fromDeviceClient = function(client, done) {
   /* Codes_SRS_NODE_DEVICE_TWIN_18_002: [** `fromDeviceclient` shall throw `ReferenceError` if the `client` object is falsy **]** */
   if (!client) {
     throw new ReferenceError('client parameter is required');
@@ -56,13 +56,13 @@ DeviceTwin.fromDeviceClient = function(client, done) {
         done(err,client._twin);
       });
   } else {
-    /* Codes_SRS_NODE_DEVICE_TWIN_18_029: [** if `fromDeviceClient` is called with 2 different `client`s, it shall return 2 unique `DeviceTwin` objects **]** */
-    /* Codes_SRS_NODE_DEVICE_TWIN_18_003: [** `fromDeviceClient` shall allocate a new `DeviceTwin` object **]**  */
-    var twin = new DeviceTwin(client);
+    /* Codes_SRS_NODE_DEVICE_TWIN_18_029: [** if `fromDeviceClient` is called with 2 different `client`s, it shall return 2 unique `Twin` objects **]** */
+    /* Codes_SRS_NODE_DEVICE_TWIN_18_003: [** `fromDeviceClient` shall allocate a new `Twin` object **]**  */
+    var twin = new Twin(client);
 
     /* Codes_SRS_NODE_DEVICE_TWIN_18_005: [** If the protocol does not contain a `getTwinReceiver` method, `fromDeviceClient` shall call the `done` callback with a `NotImplementedError` object **]**  */
     if (!client._transport.getTwinReceiver) {
-      done(new errors.NotImplementedError('transport does not support DeviceTwin'));
+      done(new errors.NotImplementedError('transport does not support Twin'));
     } else {
       /* Codes_SRS_NODE_DEVICE_TWIN_18_004: [** `fromDeviceClient` shall call `getTwinReceiver` on the protocol object to get a twin receiver. **]**  */
       client._transport.getTwinReceiver(function(err, receiver) {
@@ -91,18 +91,18 @@ DeviceTwin.fromDeviceClient = function(client, done) {
 
 /* Codes_SRS_NODE_DEVICE_TWIN_18_031: [** `fromDeviceClient` shall subscribe to the response topic **]** */
 /* Codes_SRS_NODE_DEVICE_TWIN_18_032: [** `fromDeviceClient` shall subscribe to the desired property patch topic **]** */
-DeviceTwin.prototype._subscribe = function(done) {
+Twin.prototype._subscribe = function(done) {
 
   var twin = this;
   var receiver = twin._receiver;
   var topics = [
     {
-      topicName : DeviceTwin.responseEvent,
+      topicName : Twin.responseEvent,
       subscribed : false,
       handler : twin._onServiceResponse.bind(this)
     },
     {
-      topicName : DeviceTwin.postEvent,
+      topicName : Twin.postEvent,
       subscribed : false,
       handler : twin._onServicePost.bind(this)
     }
@@ -139,19 +139,19 @@ DeviceTwin.prototype._subscribe = function(done) {
     clearTimeout(timeout);
     timeout = null;
     /* Codes_SRS_NODE_DEVICE_TWIN_18_012: [** `fromDeviceClient` shall remove the handlers for both the `subscribed` and `error` events before calling the `done` callback. **]**   */
-    receiver.removeListener(DeviceTwin.subscribedEvent, handleSubscribed);
-    receiver.removeListener(DeviceTwin.errorEvent, handleError);
+    receiver.removeListener(Twin.subscribedEvent, handleSubscribed);
+    receiver.removeListener(Twin.errorEvent, handleError);
     done(err);
   };
 
   /* Codes_SRS_NODE_DEVICE_TWIN_18_007: [** `fromDeviceClient` shall add handlers for the both the `subscribed` and `error` events on the twinReceiver **]**  */
-  receiver.on(DeviceTwin.subscribedEvent, handleSubscribed);
-  receiver.on(DeviceTwin.errorEvent, handleError);
+  receiver.on(Twin.subscribedEvent, handleSubscribed);
+  receiver.on(Twin.errorEvent, handleError);
 
-  /* Codes_SRS_NODE_DEVICE_TWIN_18_009: [** `fromDeviceClient` shall call the `done` callback passing a `TimeoutError` if it has not received all necessary `subscribed` events within `DeviceTwin.timeout` milliseconds. **]** */
+  /* Codes_SRS_NODE_DEVICE_TWIN_18_009: [** `fromDeviceClient` shall call the `done` callback passing a `TimeoutError` if it has not received all necessary `subscribed` events within `Twin.timeout` milliseconds. **]** */
   timeout = setTimeout(function() {
     cleanupAndReturn(new errors.TimeoutError('subscription to twin messages timed out'), null);
-  }, DeviceTwin.timeout);
+  }, Twin.timeout);
 
   topics.forEach(function(topic) {
     receiver.on(topic.topicName, topic.handler);
@@ -159,7 +159,7 @@ DeviceTwin.prototype._subscribe = function(done) {
   
 };
 
-DeviceTwin.prototype._sendTwinRequest = function(method, resource, properties, body, done) {
+Twin.prototype._sendTwinRequest = function(method, resource, properties, body, done) {
 
   /* Codes_SRS_NODE_DEVICE_TWIN_18_014: [** `_sendTwinRequest` shall use an arbitrary starting `rid` and increment it by one for every call to `_sendTwinRequest` **]**  */
   /* Codes_SRS_NODE_DEVICE_TWIN_18_017: [** `_sendTwinRequest` shall put the `rid` value into the `properties` object that gets passed to `sendTwinRequest` on the transport **]**  */
@@ -196,17 +196,17 @@ DeviceTwin.prototype._sendTwinRequest = function(method, resource, properties, b
   /* Codes_SRS_NODE_DEVICE_TWIN_18_015: [** `_sendTwinRequest` shall add a handler for the `response` event on the twinReceiver object.  **]** */
   this._receiver.on('response', handleResponse);
 
-  /* Codes_SRS_NODE_DEVICE_TWIN_18_022: [** If the response doesnt come within `DeviceTwin.timeout` milliseconds, `_sendTwinRequest` shall call `done` with `err`=`TimeoutError` **]**   */
+  /* Codes_SRS_NODE_DEVICE_TWIN_18_022: [** If the response doesnt come within `Twin.timeout` milliseconds, `_sendTwinRequest` shall call `done` with `err`=`TimeoutError` **]**   */
   timeout = setTimeout(function() {
     cleanupAndReturn(new errors.TimeoutError('message timed out'), null);
-  }, DeviceTwin.timeout);
+  }, Twin.timeout);
 
   /* Codes_SRS_NODE_DEVICE_TWIN_18_016: [** `_sendTwinRequest` shall use the `sendTwinRequest` method on the transport to send the request **]**  */
   this._client._transport.sendTwinRequest(method, resource, propCopy, body);
 };
 
 
-DeviceTwin.prototype._updateReportedProperties = function (state, done) {
+Twin.prototype._updateReportedProperties = function (state, done) {
   /* Codes_SRS_NODE_DEVICE_TWIN_18_025: [** `properties.reported.update` shall use _sendTwinRequest to send the patch object to the service. **]**  */
   /* Codes_SRS_NODE_DEVICE_TWIN_18_026: [** When calling `_sendTwinRequest`, `properties.reported.update` shall pass `method`='PATCH', `resource`='/properties/reported/', `properties`={}, and `body`=the `body` parameter passed in to `reportState` as a string. **]**    */
   /* Codes_SRS_NODE_DEVICE_TWIN_18_027: [** `properties.reported.update` shall call `done` with the results from `_sendTwinRequest` **]**  */
@@ -223,7 +223,7 @@ DeviceTwin.prototype._updateReportedProperties = function (state, done) {
 };
 
 /* Codes_SRS_NODE_DEVICE_TWIN_18_031: [** `properties.reported.update` shall merge the contents of the patch object into `properties.reported` **]** */
-DeviceTwin.prototype._mergePatch = function(dest, patch) {
+Twin.prototype._mergePatch = function(dest, patch) {
   _.merge(dest, patch);
 
   /* Codes_SRS_NODE_DEVICE_TWIN_18_032: [** When merging the patch, if any properties are set to `null`, `properties.reported.update` shall delete that property from `properties.reported`. **]** */
@@ -234,10 +234,10 @@ DeviceTwin.prototype._mergePatch = function(dest, patch) {
   });
 };
 
-DeviceTwin.prototype._onServiceResponse = function() {
+Twin.prototype._onServiceResponse = function() {
 };
 
-DeviceTwin.prototype._clearCachedProperties = function () {
+Twin.prototype._clearCachedProperties = function () {
   var self = this;
   this.properties = { 
     reported : {
@@ -251,7 +251,7 @@ DeviceTwin.prototype._clearCachedProperties = function () {
 };
 
 /* Codes_SRS_NODE_DEVICE_TWIN_18_044: [** `fromDeviceClient` shall do a GET call to retrieve desired properties from the service. **]** */
-DeviceTwin.prototype._getPropertiesFromService = function(done) {
+Twin.prototype._getPropertiesFromService = function(done) {
   var self = this;
   /* Codes_SRS_NODE_DEVICE_TWIN_18_034: [** `fromDeviceClient` shall ignore any PATCH operations that arrive before the GET returns **]** */
   this._clearCachedProperties();
@@ -259,7 +259,7 @@ DeviceTwin.prototype._getPropertiesFromService = function(done) {
     if(err) {
       done(err);
     } else {
-      /* Codes_SRS_NODE_DEVICE_TWIN_18_035: [** When a the results of a GET operation is received, the `DeviceTwin` object shall merge the properties into `this.properties.desired`. **]** */
+      /* Codes_SRS_NODE_DEVICE_TWIN_18_035: [** When a the results of a GET operation is received, the `Twin` object shall merge the properties into `this.properties.desired`. **]** */
       var props = JSON.parse(body.toString('ascii'));
       self._mergePatch(self.properties.desired, props.desired);
       self._mergePatch(self.properties.reported, props.reported);
@@ -269,28 +269,28 @@ DeviceTwin.prototype._getPropertiesFromService = function(done) {
   });
 };
 
-/* Codes_SRS_NODE_DEVICE_TWIN_18_039: [** After merging a GET result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]** */
-/* Codes_SRS_NODE_DEVICE_TWIN_18_040: [** After merging a PATCH result, the `DeviceTwin` object shall recursively fire property changed events for every changed property. **]** */
-DeviceTwin.prototype._fireChangeEvents = function(desiredProperties) {
+/* Codes_SRS_NODE_DEVICE_TWIN_18_039: [** After merging a GET result, the `Twin` object shall recursively fire property changed events for every changed property. **]** */
+/* Codes_SRS_NODE_DEVICE_TWIN_18_040: [** After merging a PATCH result, the `Twin` object shall recursively fire property changed events for every changed property. **]** */
+Twin.prototype._fireChangeEvents = function(desiredProperties) {
   var self = this;
-  this.emit(DeviceTwin.desiredPath, desiredProperties);
+  this.emit(Twin.desiredPath, desiredProperties);
   traverse(desiredProperties).forEach(function() {
     var path = this.path.join('.');
     if (path) {
-      /* Codes_SRS_NODE_DEVICE_TWIN_18_041: [** When firing a property changed event, the `DeviceTwin` object shall name the event from the property using dot notation starting with 'properties.desired.' **]** */
-      /* Codes_SRS_NODE_DEVICE_TWIN_18_042: [** When firing a property changed event, the `DeviceTwin` object shall pass the changed value of the property as the event parameter **]** */
-      self.emit(DeviceTwin.desiredPath + '.' + path, _.at(desiredProperties,path)[0]);
+      /* Codes_SRS_NODE_DEVICE_TWIN_18_041: [** When firing a property changed event, the `Twin` object shall name the event from the property using dot notation starting with 'properties.desired.' **]** */
+      /* Codes_SRS_NODE_DEVICE_TWIN_18_042: [** When firing a property changed event, the `Twin` object shall pass the changed value of the property as the event parameter **]** */
+      self.emit(Twin.desiredPath + '.' + path, _.at(desiredProperties,path)[0]);
     }
   });
 };
 
-/* Codes_SRS_NODE_DEVICE_TWIN_18_036: [** When a PATCH operation is received, the `DeviceTwin` object shall merge the properties into `this.properties.desired`. **]** */
-DeviceTwin.prototype._onServicePost = function(body) {
+/* Codes_SRS_NODE_DEVICE_TWIN_18_036: [** When a PATCH operation is received, the `Twin` object shall merge the properties into `this.properties.desired`. **]** */
+Twin.prototype._onServicePost = function(body) {
   var patch = JSON.parse(body.toString('ascii'));
   this._mergePatch(this.properties.desired, patch);
   this._fireChangeEvents(patch);
   
 };
 
-module.exports = DeviceTwin;
+module.exports = Twin;
 

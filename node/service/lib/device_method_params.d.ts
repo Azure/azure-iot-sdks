@@ -3,7 +3,7 @@
 
 declare interface DeviceMethodParams {
     name: string;
-    payloadJson?: any;
+    payload?: any;
     timeoutInSeconds?: number;
 }
 

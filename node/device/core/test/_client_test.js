@@ -958,22 +958,22 @@ describe('Client', function () {
     });
   });
 
-  describe('getDeviceTwin', function() {
+  describe('getTwin', function() {
     it('creates the device twin correctly', function(done) {
       var client = new Client({});
       
-      /* Tests_SRS_NODE_DEVICE_CLIENT_18_001: [** The `getDeviceTwin` method shall call the `azure-iot-device-core!Twin.fromDeviceClient` method to create the device client object. **]** */
+      /* Tests_SRS_NODE_DEVICE_CLIENT_18_001: [** The `getTwin` method shall call the `azure-iot-device-core!Twin.fromDeviceClient` method to create the device client object. **]** */
       var fakeTwin = {
         fromDeviceClient: function(obj, innerDone) {
-          /* Tests_SRS_NODE_DEVICE_CLIENT_18_002: [** The `getDeviceTwin` method shall pass itself as the first parameter to `fromDeviceClient` and it shall pass the `done` method as the second parameter. **]**  */
+          /* Tests_SRS_NODE_DEVICE_CLIENT_18_002: [** The `getTwin` method shall pass itself as the first parameter to `fromDeviceClient` and it shall pass the `done` method as the second parameter. **]**  */
           assert.equal(obj, client);
           assert.equal(innerDone, done);
           done();
         }
       };
 
-      /* Tests_SRS_NODE_DEVICE_CLIENT_18_003: [** The `getDeviceTwin` method shall use the second parameter (if it is not falsy) to call `fromDeviceClient` on. **]**    */
-     client.getDeviceTwin(done, fakeTwin);
+      /* Tests_SRS_NODE_DEVICE_CLIENT_18_003: [** The `getTwin` method shall use the second parameter (if it is not falsy) to call `fromDeviceClient` on. **]**    */
+     client.getTwin(done, fakeTwin);
     });
   });
 });
