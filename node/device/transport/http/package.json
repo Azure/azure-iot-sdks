@@ -1,15 +1,15 @@
 {
   "name": "azure-iot-device-http",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "HTTP transport for Azure IoT device SDK",
   "author": "Microsoft Corporation",
   "license": "MIT",
   "main": "index.js",
   "typings": "index.d.ts",
   "dependencies": {
-    "azure-iot-http-base": "1.0.15",
-    "azure-iot-common": "1.0.14",
-    "azure-iot-device": "1.0.14",
+    "azure-iot-http-base": "1.0.16",
+    "azure-iot-common": "1.0.15",
+    "azure-iot-device": "1.0.15",
     "node-crontab": "^0.0.8"
   },
   "devDependencies": {
