@@ -280,6 +280,7 @@ extern "C" void e2e_init(bool isMQTT)
         ten_31_2016.tm_hour = 0;
         ten_31_2016.tm_min = 0;
         ten_31_2016.tm_sec = 0;
+        ten_31_2016.tm_isdst = 0;
         time_t deadline = mktime(&ten_31_2016);
         if (deadline == (time_t)-1)
         {
