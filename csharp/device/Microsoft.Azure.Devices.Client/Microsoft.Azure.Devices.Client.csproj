@@ -239,6 +239,7 @@
     <Compile Include="Transport\FileUploadRequest.cs" />
     <Compile Include="Transport\FileUploadResponse.cs" />
     <Compile Include="Transport\Mqtt\ChannelMessageProcessingException.cs" />
+    <Compile Include="Transport\Mqtt\ClientWebSocketChannel.cs" />
     <Compile Include="Transport\Mqtt\ConcurrentObjectPool.cs" />
     <Compile Include="Transport\Mqtt\ICancellable.cs" />
     <Compile Include="Transport\Mqtt\ISessionContextProvider.cs" />

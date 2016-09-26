@@ -187,7 +187,7 @@ namespace Microsoft.Azure.Devices.Client.Test
 
             var deviceClient = DeviceClient.Create(hostName, authMethod, new ITransportSettings[]
             {
-                new MqttTransportSettings(TransportType.Mqtt)
+                new MqttTransportSettings(TransportType.Mqtt_Tcp_Only)
                 {
                     ClientCertificate = cert,
                     RemoteCertificateValidationCallback = (a, b, c, d) => true
