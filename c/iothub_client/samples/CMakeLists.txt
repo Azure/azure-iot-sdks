@@ -26,9 +26,11 @@ endif()
 
 if(${use_amqp})
 	add_sample_directory(iothub_client_sample_amqp)
+	add_sample_directory(iothub_client_sample_amqp_shared)
 	
 	if (${use_wsio})
 		add_sample_directory(iothub_client_sample_amqp_websockets)
+		add_sample_directory(iothub_client_sample_amqp_websockets_shared)
 	endif()
 endif()
 
