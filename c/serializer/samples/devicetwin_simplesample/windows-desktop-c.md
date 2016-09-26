@@ -70,7 +70,7 @@ To build and run the Device Explorer tool with the Device Twin support:
 1. Open the Nuget Package Manager Console and type the following command:
 
    ```
-   Install-Package \\RICHCIHP\Public2\Microsoft.Azure.Devices.1.0.0-dmpreview-045\Microsoft.Azure.Devices.1.0.0-dmpreview-045.nupkg
+   Install-Package \\richcihp\public\Microsoft.Azure.Devices.1.0.0-dmpreview-046
    ```
 
 1. Compile and run hitting F5
