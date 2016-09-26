@@ -20,7 +20,7 @@ function createError() {
 function SimulatedHttp(config) {
   this.fakeFailure = false;
   this.handleRequest = function (done, body) {
-    var sig = SharedAccessSignature.parse(config.sharedAccessSignature);
+    var sig = (typeof(config.sharedAccessSignature) === 'string') ? SharedAccessSignature.parse(config.sharedAccessSignature) : config.sharedAccessSignature;
 
     if (config.host === 'bad') {                      // bad host
       done(new Error('getaddrinfo ENOTFOUND bad'));
@@ -30,7 +30,7 @@ function SimulatedHttp(config) {
     }
     else {
       var cmpSig = SharedAccessSignature.create(sig.sr, sig.skn, 'bad', sig.se).toString();
-      if (config.sharedAccessSignature === cmpSig) {  // bad key
+      if (((typeof(config.sharedAccessSignature) === 'string') ? config.sharedAccessSignature : config.sharedAccessSignature.toString()) === cmpSig) {  // bad key
         done(createError());
       }
       else {                                          // ok
