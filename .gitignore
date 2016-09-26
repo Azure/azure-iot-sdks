@@ -146,9 +146,11 @@ GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
 
-# CPython
+# CPython & Wheels
 *.pyc
 *.pyd
+*.whl
+*.egg-info
 
 # =========================
 # Windows detritus

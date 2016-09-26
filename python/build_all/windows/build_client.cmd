@@ -68,6 +68,8 @@ cd %build-root%
 
 copy %USERPROFILE%\%cmake-output%\python\src\%build-config%\iothub_client.pyd ..\..\device\samples
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+copy %USERPROFILE%\%cmake-output%\python\src\%build-config%\iothub_client.pyd ..\..\build_all\windows\iothub_client
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 copy %USERPROFILE%\%cmake-output%\python\test\%build-config%\iothub_client_mock.pyd ..\..\device\tests
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
