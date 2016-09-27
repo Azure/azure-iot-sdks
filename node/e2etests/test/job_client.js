@@ -120,14 +120,13 @@ var runTests = function(hubConnectionString) {
             reported: {}
           }
         };
-        jobClient.scheduleTwinUpdate(testJobId, [testDeviceId], fakePatch, new Date(Date.now() + 60000), 120, continueWith(testCallback, function() {
-          waitForJobStatus(jobClient, testJobId, 'scheduled', continueWith(testCallback, function(job) {
-            assert.strictEqual(job.jobId, testJobId);
-            debug('cancelling job ' + testJobId);
-            jobClient.cancelJob(testJobId, continueWith(testCallback, function() {
-              waitForJobStatus(jobClient, testJobId, 'cancelled', continueWith(testCallback, function() {
-                testCallback();
-              }));
+        jobClient.scheduleTwinUpdate(testJobId, [testDeviceId], fakePatch, new Date(Date.now() + 3600000), 120, continueWith(testCallback, function(job) {
+          assert.strictEqual(job.jobId, testJobId);
+          assert.strictEqual(job.status, 'queued');
+          debug('cancelling job ' + testJobId);
+          jobClient.cancelJob(testJobId, continueWith(testCallback, function() {
+            waitForJobStatus(jobClient, testJobId, 'cancelled', continueWith(testCallback, function() {
+              testCallback();
             }));
           }));
         }));
@@ -181,14 +180,13 @@ var runTests = function(hubConnectionString) {
       it('schedules a device method job and cancels it', function(testCallback) {
         var jobClient = JobClient.fromConnectionString(hubConnectionString);
         var testJobId = uuid.v4();
-        jobClient.scheduleDeviceMethod(testJobId, [testDeviceId], testDeviceMethod, new Date(Date.now() + 60000), 120, continueWith(testCallback, function() {
-          waitForJobStatus(jobClient, testJobId, 'scheduled', continueWith(testCallback, function(job) {
-            assert.strictEqual(job.jobId, testJobId);
-            debug('cancelling job ' + testJobId);
-            jobClient.cancelJob(testJobId, continueWith(testCallback, function() {
-              waitForJobStatus(jobClient, testJobId, 'cancelled', continueWith(testCallback, function() {
-                testCallback();
-              }));
+        jobClient.scheduleDeviceMethod(testJobId, [testDeviceId], testDeviceMethod, new Date(Date.now() + 3600000), 120, continueWith(testCallback, function(job) {
+          assert.strictEqual(job.jobId, testJobId);
+          assert.strictEqual(job.status, 'queued');
+          debug('cancelling job ' + testJobId);
+          jobClient.cancelJob(testJobId, continueWith(testCallback, function() {
+            waitForJobStatus(jobClient, testJobId, 'cancelled', continueWith(testCallback, function() {
+              testCallback();
             }));
           }));
         }));
