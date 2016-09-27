@@ -18,6 +18,7 @@
 #include "iothub_client_sample_mqtt_dm.h"
 DEFINE_ENUM_STRINGS(FIRMWARE_UPDATE_STATUS, FIRMWARE_UPDATE_STATUS_VALUES)
 
+
 BEGIN_NAMESPACE(Contoso);
 
 DECLARE_STRUCT(firmwareUpdate_t,
