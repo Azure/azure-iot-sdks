@@ -20,7 +20,7 @@ module.exports = function(hubConnectionString) {
         deviceId:  '0000e2etest-delete-me-node-device-method-' + uuid.v4(),
         status: 'enabled',
           authentication: {
-          SymmetricKey: {
+          symmetricKey: {
             primaryKey: new Buffer(uuid.v4()).toString('base64'),
             secondaryKey: new Buffer(uuid.v4()).toString('base64')
           }
@@ -39,7 +39,7 @@ module.exports = function(hubConnectionString) {
         deviceClient = deviceSdk.Client.fromConnectionString(
           util.format('HostName=%s;DeviceId=%s;SharedAccessKey=%s',
             host, deviceDescription.deviceId,
-            deviceDescription.authentication.SymmetricKey.primaryKey
+            deviceDescription.authentication.symmetricKey.primaryKey
           ),
           deviceMqtt
         );
