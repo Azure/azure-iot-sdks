@@ -9,6 +9,7 @@ var results = require('azure-iot-common').results;
 var errors = require('azure-iot-common').errors;
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
+var debug = require('debug')('device:mqtt');
 var translateError = require('../lib/mqtt-translate-error.js');
 var MqttTwinReceiver = require('../lib/mqtt-twin-receiver.js');
 var QueryString = require('querystring');
@@ -337,7 +338,7 @@ Mqtt.prototype._sendResponse = function(responseType, status, requestId, propert
     requestId,
     QueryString.stringify(properties)
   );
-
+  debug('sending response using topic: ' + topicName);
   // publish the response message
   this._mqtt.client.publish(topicName, body, { qos: 0, retain: false }, function(err) {
     if(!!done && typeof(done) === 'function') {

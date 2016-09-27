@@ -357,20 +357,25 @@ else if (command === 'query-twin') {
         query.nextAsTwin(onNewResults);
       }
     }
-  }
+  };
   query.nextAsTwin(onNewResults);
-} else if (command === 'query-job') {
+} 
+else if (command === 'query-job') {
   var jobClient =  connString ? JobClient.fromConnectionString(connString) : JobClient.fromSharedAccessSignature(sas.toString());
   var query = jobClient.createQuery(arg1, arg2);
   var onNewResults = function(err, results) {
-    results.forEach(function(job) {
-      console.log(JSON.stringify(job, null, 2));
-    });
+    if (err) {
+      serviceError(err);
+    } else {
+      results.forEach(function(job) {
+        console.log(JSON.stringify(job, null, 2));
+      });
 
-    if(query.hasMoreResults) {
-      query.next(onNewResults);
+      if(query.hasMoreResults) {
+        query.next(onNewResults);
+      }
     }
-  }
+  };
   query.next(onNewResults);
 }
 else {

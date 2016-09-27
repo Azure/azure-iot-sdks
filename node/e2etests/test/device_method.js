@@ -11,6 +11,7 @@ var util = require('util');
 var deviceMqtt = require('azure-iot-device-mqtt').Mqtt;
 var uuid = require('uuid');
 var assert = require('chai').assert;
+var debug = require('debug')('e2etests:devicemethod');
 
 module.exports = function(hubConnectionString) {
   describe('Device Method', function() {
@@ -34,7 +35,7 @@ module.exports = function(hubConnectionString) {
       var registry = Registry.fromConnectionString(hubConnectionString);
       registry.create(deviceDescription, function (err) {
         if (err) return done(err);
-
+        debug('created test device: ' + deviceDescription.deviceId);
         var host = ConnectionString.parse(hubConnectionString).HostName;
         deviceClient = deviceSdk.Client.fromConnectionString(
           util.format('HostName=%s;DeviceId=%s;SharedAccessKey=%s',
@@ -58,6 +59,7 @@ module.exports = function(hubConnectionString) {
             );
           }
 
+          debug('deleting test device: ' + deviceDescription.deviceId);
           Registry
             .fromConnectionString(hubConnectionString)
             .delete(deviceDescription.deviceId, done);
@@ -89,13 +91,15 @@ module.exports = function(hubConnectionString) {
         assert.isNotNull(request);
         assert.strictEqual(request.methodName, methodName);
         assert.deepEqual(JSON.parse(request.body), methodPayload);
-
+        debug('device: received method request');
+        debug(JSON.stringify(request, null, 2));
         // validate response
         assert.isNotNull(response);
 
         // send the response
         response.write(JSON.stringify(responsePayload));
         response.end(methodResult, function(err) {
+          debug('send method response with statusCode: ' + methodResult);
           if(!!err) {
             console.error('An error ocurred when sending a method response:\n' +
                 err.toString());
@@ -116,6 +120,8 @@ module.exports = function(hubConnectionString) {
               methodParams,
               function(err, result) {
                 if(!err) {
+                  debug('got method results');
+                  debug(JSON.stringify(result, null, 2));
                   assert.strictEqual(result.status, methodResult);
                   assert.deepEqual(result.payload, responsePayload);
                 }
