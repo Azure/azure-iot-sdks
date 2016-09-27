@@ -22,9 +22,9 @@ declare class Registry {
     getJob(jobId: string, done: Registry.JobCallback): void;
     cancelJob(jobId: string, done: Registry.JobCallback): void;
 
-    // Device Twin
-    getDeviceTwin(deviceId: string, done: Registry.ResponseCallback): void;
-    updateDeviceTwin(deviceId: string, patch: any, etag: string, done: Registry.ResponseCallback): void;
+    // Twin
+    getTwin(deviceId: string, done: Registry.ResponseCallback): void;
+    updateTwin(deviceId: string, patch: any, etag: string, done: Registry.ResponseCallback): void;
 
     // Queries
     createQuery(sqlQuery: string, pageSize: number) : Query;
