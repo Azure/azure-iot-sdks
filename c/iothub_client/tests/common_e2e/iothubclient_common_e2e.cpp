@@ -53,11 +53,39 @@ typedef struct EXPECTED_RECEIVE_DATA_TAG
     LOCK_HANDLE lock; /*needed to protect this structure*/
 } EXPECTED_RECEIVE_DATA;
 
+/*this function wait for 30 seconds only before 31.10.2016*/
+static void wait30seconds(void)
+{
+    struct tm ten_31_2016;
+    ten_31_2016.tm_year = 2016 - 1900;
+    ten_31_2016.tm_mon = 9;
+    ten_31_2016.tm_mday = 31;
+    ten_31_2016.tm_hour = 0;
+    ten_31_2016.tm_min = 0;
+    ten_31_2016.tm_sec = 0;
+    ten_31_2016.tm_isdst = -1;
+    time_t deadline = mktime(&ten_31_2016);
+    if (deadline == (time_t)-1)
+    {
+        LogError("mktime failed");
+    }
+    else
+    {
+        time_t now = time(NULL);
+        if (difftime(deadline, now) > 0)
+        {
+            /*sleep 30 seconds*/
+            LogInfo("sleeping for 30 seconds");
+            ThreadAPI_Sleep(30 * 1000);
+            LogInfo("done sleeping!!!");
+        }
+    }
+}
+
 static int IoTHubCallback(void* context, const char* data, size_t size)
 {
     size;
     int result = 0; // 0 means "keep processing"
-
     EXPECTED_SEND_DATA* expectedData = (EXPECTED_SEND_DATA*)context;
     if (expectedData != NULL)
     {
@@ -264,40 +292,12 @@ static void EventData_Destroy(EXPECTED_SEND_DATA* data)
     }
 }
 
-extern "C" void e2e_init(bool isMQTT)
+extern "C" void e2e_init(void)
 {
     int result = platform_init();
     ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "Platform init failed");
     g_iothubAcctInfo = IoTHubAccount_Init(true);
     ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo, "Could not initialize IoTHubAccount");
-    if (isMQTT)
-    {
-        /*after creating a device, wait 30 seconds if the date is before 10.31.2016 to account for a service glitch*/
-        struct tm ten_31_2016;
-        ten_31_2016.tm_year = 2016 - 1900;
-        ten_31_2016.tm_mon = 9;
-        ten_31_2016.tm_mday = 31;
-        ten_31_2016.tm_hour = 0;
-        ten_31_2016.tm_min = 0;
-        ten_31_2016.tm_sec = 0;
-        ten_31_2016.tm_isdst = 0;
-        time_t deadline = mktime(&ten_31_2016);
-        if (deadline == (time_t)-1)
-        {
-            LogError("mktime failed");
-        }
-        else
-        {
-            time_t now = time(NULL);
-            if (difftime(deadline, now) > 0)
-            {
-                /*sleep 30 seconds*/
-                LogInfo("sleeping for 30 seconds");
-                ThreadAPI_Sleep(30 * 1000);
-                LogInfo("done sleeping!!!");
-            }
-        }
-    }
     platform_init();
 }
 
@@ -434,6 +434,8 @@ extern "C" void e2e_recv_message_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 
     result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, notifyData);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result, "Setting message callback failed");
+
+    wait30seconds();
 
     // act
     testResult = IoTHubTest_SendMessage(iotHubTestHandle, (const unsigned char*)notifyData->toBeSend, notifyData->toBeSendSize);
