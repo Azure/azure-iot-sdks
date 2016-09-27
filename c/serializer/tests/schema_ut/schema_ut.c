@@ -117,8 +117,6 @@ static void g_pfDesiredPropertyDeinitialize(void* destination)
     (void)(destination);
 }
 
-
-
 BEGIN_TEST_SUITE(Schema_ut)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
@@ -5580,12 +5578,12 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
-    /*Tests_SRS_SCHEMA_02_070: [ If elementName is a property then Schema_GetModelElementTypeByName shall return SCHEMA_PROPERTY. ]*/
-    /*Tests_SRS_SCHEMA_02_071: [ If elementName is a reported property then Schema_GetModelElementTypeByName shall return SCHEMA_REPORTED_PROPERTY. ]*/
-    /*Tests_SRS_SCHEMA_02_072: [ If elementName is a desired property then Schema_GetModelElementTypeByName shall return SCHEMA_DESIRED_PROPERTY. ]*/
-    /*Tests_SRS_SCHEMA_02_073: [ If elementName is a model action then Schema_GetModelElementTypeByName shall return SCHEMA_MODEL_ACTION. ]*/
-    /*Tests_SRS_SCHEMA_02_075: [ If elementName is a model in mode then Schema_GetModelElementTypeByName shall return SCHEMA_MODEL_IN_MODEL. ]*/
-    /*Tests_SRS_SCHEMA_02_074: [ Otherwise Schema_GetModelElementTypeByName shall return SCHEMA_NOT_FOUND. ]*/
+    /*Tests_SRS_SCHEMA_02_078: [ If elementName is a property then Schema_GetModelElementByName shall succeed and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_PROPERTY and SCHEMA_MODEL_ELEMENT.elementHandle.propertyHandle to the handle of the property. ]*/
+    /*Tests_SRS_SCHEMA_02_079: [ If elementName is a reported property then Schema_GetModelElementByName shall succeed and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_REPORTED_PROPERTY and SCHEMA_MODEL_ELEMENT.elementHandle.reportedPropertyHandle to the handle of the reported property. ]*/
+    /*Tests_SRS_SCHEMA_02_080: [ If elementName is a desired property then Schema_GetModelElementByName shall succeed and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_DESIRED_PROPERTY and SCHEMA_MODEL_ELEMENT.elementHandle.desiredPropertyHandle to the handle of the desired property. ]*/
+    /*Tests_SRS_SCHEMA_02_081: [ If elementName is a model action then Schema_GetModelElementByName shall succeed and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_MODEL_ACTION and SCHEMA_MODEL_ELEMENT.elementHandle.actionHandle to the handle of the action. ]*/
+    /*Tests_SRS_SCHEMA_02_082: [ If elementName is a model in model then Schema_GetModelElementByName shall succeed and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_MODEL_IN_MODEL and SCHEMA_MODEL_ELEMENT.elementHandle.modelHandle to the handle of the model. ]*/
+    /*Tests_SRS_SCHEMA_02_083: [ Otherwise Schema_GetModelElementByName shall fail and set SCHEMA_MODEL_ELEMENT.elementType to SCHEMA_NOT_FOUND. ]*/
     TEST_FUNCTION(Schema_GetModelElementTypeByName_succeeds)
     {
         ///arrange
@@ -5599,20 +5597,30 @@ BEGIN_TEST_SUITE(Schema_ut)
         (void)Schema_AddModelModel(modelType, "ManicMiner", minerModel, 5); 
 
         ///act
-        SCHEMA_ELEMENT_TYPE shouldBeModelInModel = Schema_GetModelElementTypeByName(modelType, "ManicMiner");
-        SCHEMA_ELEMENT_TYPE shouldBeAction = Schema_GetModelElementTypeByName(modelType, "action");
-        SCHEMA_ELEMENT_TYPE shouldBeProperty = Schema_GetModelElementTypeByName(modelType, "regularProperty");
-        SCHEMA_ELEMENT_TYPE shouldBeReportedProperty = Schema_GetModelElementTypeByName(modelType, "reported");
-        SCHEMA_ELEMENT_TYPE shouldBeDesiredProperty = Schema_GetModelElementTypeByName(modelType, "desired");
-        SCHEMA_ELEMENT_TYPE shouldBeNotFound = Schema_GetModelElementTypeByName(modelType, "a");
+        SCHEMA_MODEL_ELEMENT shouldBeModelInModel = Schema_GetModelElementByName(modelType, "ManicMiner");
+        SCHEMA_MODEL_ELEMENT shouldBeAction = Schema_GetModelElementByName(modelType, "action");
+        SCHEMA_MODEL_ELEMENT shouldBeProperty = Schema_GetModelElementByName(modelType, "regularProperty");
+        SCHEMA_MODEL_ELEMENT shouldBeReportedProperty = Schema_GetModelElementByName(modelType, "reported");
+        SCHEMA_MODEL_ELEMENT shouldBeDesiredProperty = Schema_GetModelElementByName(modelType, "desired");
+        SCHEMA_MODEL_ELEMENT shouldBeNotFound = Schema_GetModelElementByName(modelType, "a");
 
         ///assert
-        ASSERT_ARE_EQUAL(SCHEMA_ELEMENT_TYPE, SCHEMA_MODEL_IN_MODEL, shouldBeModelInModel);
-        ASSERT_ARE_EQUAL(SCHEMA_ELEMENT_TYPE, SCHEMA_MODEL_ACTION, shouldBeAction);
-        ASSERT_ARE_EQUAL(SCHEMA_ELEMENT_TYPE, SCHEMA_DESIRED_PROPERTY, shouldBeDesiredProperty);
-        ASSERT_ARE_EQUAL(SCHEMA_ELEMENT_TYPE, SCHEMA_REPORTED_PROPERTY, shouldBeReportedProperty);
-        ASSERT_ARE_EQUAL(SCHEMA_ELEMENT_TYPE, SCHEMA_PROPERTY, shouldBeProperty);
-        ASSERT_ARE_EQUAL(SCHEMA_ELEMENT_TYPE, SCHEMA_NOT_FOUND, shouldBeNotFound);
+        ASSERT_ARE_EQUAL(SCHEMA_ELEMENT_TYPE, SCHEMA_MODEL_IN_MODEL, shouldBeModelInModel.elementType);
+        ASSERT_IS_NOT_NULL(shouldBeModelInModel.elementHandle.modelHandle);
+
+        ASSERT_ARE_EQUAL(SCHEMA_ELEMENT_TYPE, SCHEMA_MODEL_ACTION, shouldBeAction.elementType);
+        ASSERT_IS_NOT_NULL(shouldBeModelInModel.elementHandle.actionHandle);
+
+        ASSERT_ARE_EQUAL(SCHEMA_ELEMENT_TYPE, SCHEMA_DESIRED_PROPERTY, shouldBeDesiredProperty.elementType);
+        ASSERT_IS_NOT_NULL(shouldBeModelInModel.elementHandle.desiredPropertyHandle);
+
+        ASSERT_ARE_EQUAL(SCHEMA_ELEMENT_TYPE, SCHEMA_REPORTED_PROPERTY, shouldBeReportedProperty.elementType);
+        ASSERT_IS_NOT_NULL(shouldBeModelInModel.elementHandle.reportedPropertyHandle);
+
+        ASSERT_ARE_EQUAL(SCHEMA_ELEMENT_TYPE, SCHEMA_PROPERTY, shouldBeProperty.elementType);
+        ASSERT_IS_NOT_NULL(shouldBeModelInModel.elementHandle.propertyHandle);
+
+        ASSERT_ARE_EQUAL(SCHEMA_ELEMENT_TYPE, SCHEMA_NOT_FOUND, shouldBeNotFound.elementType);
 
 
         ///clean

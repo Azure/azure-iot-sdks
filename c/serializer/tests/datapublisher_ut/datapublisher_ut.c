@@ -1299,6 +1299,8 @@ BEGIN_TEST_SUITE(DataPublisher_ut)
 next_fail:;
         }
         ///clean
+
+        umock_c_negative_tests_deinit();
         DataPublisher_DestroyTransaction_ReportedProperties(handle);
         DataPublisher_Destroy(dataPublisherHandle);
     }
@@ -1395,7 +1397,9 @@ next_fail:;
             ASSERT_ARE_NOT_EQUAL_WITH_MSG(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_OK, result, temp_str);
         next_fail:;
         }
+
         ///clean
+        umock_c_negative_tests_deinit();
         DataPublisher_DestroyTransaction_ReportedProperties(handle);
         DataPublisher_Destroy(dataPublisherHandle);
     }
@@ -1501,6 +1505,7 @@ next_fail:;
         }
 
         ///clean
+        umock_c_negative_tests_deinit();
         DataPublisher_DestroyTransaction_ReportedProperties(handle);
         DataPublisher_Destroy(dataPublisherHandle);
     }

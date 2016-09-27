@@ -70,6 +70,19 @@ SCHEMA_MODEL_IN_MODEL
 
 DEFINE_ENUM(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
 
+typedef struct SCHEMA_MODEL_ELEMENT_TAG
+{
+    SCHEMA_ELEMENT_TYPE elementType;
+    union ELEMENT_HANDLE_UNION_TAG
+    {
+        SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle;
+        SCHEMA_PROPERTY_HANDLE propertyHandle;
+        SCHEMA_REPORTED_PROPERTY_HANDLE reportedPropertyHandle;
+        SCHEMA_ACTION_HANDLE actionHandle;
+        SCHEMA_MODEL_TYPE_HANDLE modelHandle;
+    } elementHandle;
+}SCHEMA_MODEL_ELEMENT;
+
 #include "azure_c_shared_utility/umock_c_prod.h"
 extern SCHEMA_HANDLE Schema_Create(const char* schemaNamespace);
 extern size_t Schema_GetSchemaCount(void);
@@ -105,7 +118,7 @@ extern const char* Schema_GetModelDesiredPropertyType(SCHEMA_DESIRED_PROPERTY_HA
 extern pfDesiredPropertyDeinitialize Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle);
 extern pfDesiredPropertyInitialize Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle);
 
-extern SCHEMA_ELEMENT_TYPE Schema_GetModelElementTypeByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* elementName);
+extern SCHEMA_MODEL_ELEMENT Schema_GetModelElementByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* elementName);
 
 extern SCHEMA_RESULT Schema_GetModelCount(SCHEMA_HANDLE schemaHandle, size_t* modelCount);
 extern SCHEMA_MODEL_TYPE_HANDLE Schema_GetModelByName(SCHEMA_HANDLE schemaHandle, const char* modelName);
@@ -817,25 +830,31 @@ pfDesiredPropertyInitialize Schema_GetModelDesiredProperty_pfDesiredPropertyInit
 
 **SRS_SCHEMA_02_067: [** Otherwise `Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize` shall return a non-`NULL` function pointer. **]**
 
-### Schema_GetModelElementTypeByName
+### Schema_GetModelElementByName
 ```c
-SCHEMA_ELEMENT_TYPE Schema_GetModelElementTypeByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* elementName);
+extern SCHEMA_MODEL_ELEMENT Schema_GetModelElementByName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* elementName);
 ```
 
-`Schema_GetModelElementTypeByName` returns the type of a model element by its name.
+`Schema_GetModelElementByName` returns the handle of a model element by name.
 
-**SRS_SCHEMA_02_068: [** If `modelTypeHandle` is `NULL` then `Schema_GetModelElementTypeByName` shall fail and return `SCHEMA_SEARCH_INVALID_ARG`. **]**
+**SRS_SCHEMA_02_076: [** If `modelTypeHandle` is `NULL` then `Schema_GetModelElementByName` shall fail and set `SCHEMA_MODEL_ELEMENT.elementType` to `SCHEMA_SEARCH_INVALID_ARG`. **]**
 
-**SRS_SCHEMA_02_069: [** If `elementName` is `NULL` then `Schema_GetModelElementTypeByName` shall fail and return `SCHEMA_SEARCH_INVALID_ARG`. **]**
+**SRS_SCHEMA_02_077: [** If `elementName` is `NULL` then `Schema_GetModelElementByName` shall fail and set `SCHEMA_MODEL_ELEMENT.elementType` to `SCHEMA_SEARCH_INVALID_ARG`. **]**
 
-**SRS_SCHEMA_02_070: [** If `elementName` is a property then `Schema_GetModelElementTypeByName` shall return `SCHEMA_PROPERTY`. **]**
+**SRS_SCHEMA_02_078: [** If `elementName` is a property then `Schema_GetModelElementByName` shall succeed and set `SCHEMA_MODEL_ELEMENT.elementType` to 
+`SCHEMA_PROPERTY` and `SCHEMA_MODEL_ELEMENT.elementHandle.propertyHandle` to the handle of the property. **]**
 
-**SRS_SCHEMA_02_071: [** If `elementName` is a reported property then `Schema_GetModelElementTypeByName` shall return `SCHEMA_REPORTED_PROPERTY`. **]**
+**SRS_SCHEMA_02_079: [** If `elementName` is a reported property then `Schema_GetModelElementByName` shall succeed and set `SCHEMA_MODEL_ELEMENT.elementType` to 
+`SCHEMA_REPORTED_PROPERTY` and `SCHEMA_MODEL_ELEMENT.elementHandle.reportedPropertyHandle` to the handle of the reported property. **]**
 
-**SRS_SCHEMA_02_072: [** If `elementName` is a desired property then `Schema_GetModelElementTypeByName` shall return `SCHEMA_DESIRED_PROPERTY`. **]**
+**SRS_SCHEMA_02_080: [** If `elementName` is a desired property then `Schema_GetModelElementByName` shall succeed and set `SCHEMA_MODEL_ELEMENT.elementType` to 
+`SCHEMA_DESIRED_PROPERTY` and `SCHEMA_MODEL_ELEMENT.elementHandle.desiredPropertyHandle` to the handle of the desired property. **]**
 
-**SRS_SCHEMA_02_073: [** If `elementName` is a model action then `Schema_GetModelElementTypeByName` shall return `SCHEMA_MODEL_ACTION`. **]**
+**SRS_SCHEMA_02_081: [** If `elementName` is a model action then `Schema_GetModelElementByName` shall succeed and set `SCHEMA_MODEL_ELEMENT.elementType` to 
+`SCHEMA_MODEL_ACTION` and `SCHEMA_MODEL_ELEMENT.elementHandle.actionHandle` to the handle of the action. **]**
 
-**SRS_SCHEMA_02_075: [** If `elementName` is a model in mode then `Schema_GetModelElementTypeByName` shall return `SCHEMA_MODEL_IN_MODEL`. **]**
+**SRS_SCHEMA_02_082: [** If `elementName` is a model in model then `Schema_GetModelElementByName` shall succeed and set `SCHEMA_MODEL_ELEMENT.elementType` to 
+`SCHEMA_MODEL_IN_MODEL` and `SCHEMA_MODEL_ELEMENT.elementHandle.modelHandle` to the handle of the model. **]**
 
-**SRS_SCHEMA_02_074: [** Otherwise `Schema_GetModelElementTypeByName` shall return `SCHEMA_NOT_FOUND`. **]**
+**SRS_SCHEMA_02_083: [** Otherwise  `Schema_GetModelElementByName` shall fail and set `SCHEMA_MODEL_ELEMENT.elementType` to `SCHEMA_NOT_FOUND`. **]**
+
