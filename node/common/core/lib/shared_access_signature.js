@@ -28,7 +28,7 @@ function SharedAccessSignature() {
  * @param {String}  resourceUri     the resource URI to encode into the token.
  * @param {String}  keyName         an identifier associated with the key.
  * @param {String}  key             a base64-encoded key value.
- * @param {String}  expiry          an integer value representing the number of seconds since the epoch 00:00:00 UTC on 1 January 1970.
+ * @param {Integer} expiry          an integer value representing the number of seconds since the epoch 00:00:00 UTC on 1 January 1970.
  *
  * @throws {ReferenceError}         Will be thrown if one of the arguments is falsy.
  *
@@ -52,21 +52,38 @@ SharedAccessSignature.create = function create(resourceUri, keyName, key, expiry
 
   /*Codes_SRS_NODE_COMMON_SAS_05_010: [The create method shall create a new instance of SharedAccessSignature with properties: sr, sig, se, and optionally skn.]*/
   var sas = new SharedAccessSignature();
+  sas._key = key;
   /*Codes_SRS_NODE_COMMON_SAS_05_011: [The sr property shall have the value of resourceUri.]*/
   sas.sr = resourceUri;
-  /*Codes_SRS_NODE_COMMON_SAS_05_013: [<signature> shall be an HMAC-SHA256 hash of the value <stringToSign>, which is then base64-encoded.]*/
-  /*Codes_SRS_NODE_COMMON_SAS_05_014: [<stringToSign> shall be a concatenation of resourceUri + '\n' + expiry.]*/
-  var hash = authorization.hmacHash(key, authorization.stringToSign(resourceUri, expiry));
-  /*Codes_SRS_NODE_COMMON_SAS_05_012: [The sig property shall be the result of URL-encoding the value <signature>.]*/
-  sas.sig = authorization.encodeUriComponentStrict(hash);
   /*Codes_SRS_NODE_COMMON_SAS_05_018: [If the keyName argument to the create method was falsy, skn shall not be defined.]*/
   /*Codes_SRS_NODE_COMMON_SAS_05_017: [<urlEncodedKeyName> shall be the URL-encoded value of keyName.]*/
   /*Codes_SRS_NODE_COMMON_SAS_05_016: [The skn property shall be the value <urlEncodedKeyName>.]*/
   if (keyName) sas.skn = authorization.encodeUriComponentStrict(keyName);
   /*Codes_SRS_NODE_COMMON_SAS_05_015: [The se property shall have the value of expiry.]*/
   sas.se = expiry;
-
+  /*Codes_SRS_NODE_COMMON_SAS_05_013: [<signature> shall be an HMAC-SHA256 hash of the value <stringToSign>, which is then base64-encoded.]*/
+  /*Codes_SRS_NODE_COMMON_SAS_05_014: [<stringToSign> shall be a concatenation of resourceUri + '\n' + expiry.]*/
+  /*Codes_SRS_NODE_COMMON_SAS_05_012: [The sig property shall be the result of URL-encoding the value <signature>.]*/
+  sas.sig = authorization.encodeUriComponentStrict(authorization.hmacHash(sas._key, authorization.stringToSign(sas.sr, sas.se)));
   return sas;
+};
+
+/**
+ * @method          module:azure-iot-common.SharedAccessSignature.extend
+ * @description     Extend the Sas and return the string form of it.
+ *
+ * @param {Integer} expiry          an integer value representing the number of seconds since the epoch 00:00:00 UTC on 1 January 1970.
+ *
+ * @throws {ReferenceError}         Will be thrown if the argument is falsy.
+ *
+ * @returns {string} The string form of the shared access signature.
+ *
+ */
+SharedAccessSignature.prototype.extend = function extend(expiry) {
+  if (!expiry) throw new ReferenceError('expiry' + ' is ' + expiry);
+  this.se = expiry;
+  this.sig = authorization.encodeUriComponentStrict(authorization.hmacHash(this._key, authorization.stringToSign(this.sr, this.se)));
+  return this.toString();
 };
 
 /**
