@@ -140,7 +140,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             }
 
             localOpenTaskCompletionSource?.TrySetCanceled();
-            return true;
+            return this.open;
         }
 
         Task EnsureOpenedAsync(bool explicitOpen)
