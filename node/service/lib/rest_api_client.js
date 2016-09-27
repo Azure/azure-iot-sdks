@@ -3,6 +3,7 @@
 
 'use strict';
 
+var anHourFromNow = require('azure-iot-common').anHourFromNow;
 var HttpBase = require('azure-iot-http-base').Http;
 var errors = require('azure-iot-common').errors;
 var uuid = require('uuid');
@@ -63,7 +64,7 @@ RestApiClient.prototype.executeApiCall = function (method, path, headers, reques
   - Request-Id: <guid>
   - User-Agent: <version string>]*/
   var httpHeaders = headers || {};
-  httpHeaders.Authorization = this._config.sharedAccessSignature;
+  httpHeaders.Authorization = (typeof(this._config.sharedAccessSignature) === 'string') ? this._config.sharedAccessSignature : this._config.sharedAccessSignature.extend(anHourFromNow());
   httpHeaders['Request-Id'] = uuid.v4();
   httpHeaders['User-Agent'] = PackageJson.name + '/' + PackageJson.version;
 
