@@ -47,7 +47,7 @@ You should have the following items ready before beginning the process:
 
 If you have successfully [prepared your development environment][devbox-setup] the IoT device SDK and all samples should be built and ready to use.
 
-1. Start a new instance of the [Device Explorer][device-explorer], select or create a new device, obtain and note the connection string for the device, and begin moitoring under the Data tab.
+1. Start a new instance of the [Device Explorer][device-explorer], select or create a new device, obtain and note the connection string for the device, and begin monitoring under the Data tab.
 
 2. Build the client library along with the **samples** :
 	```
