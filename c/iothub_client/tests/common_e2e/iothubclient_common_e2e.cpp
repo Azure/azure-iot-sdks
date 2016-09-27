@@ -292,7 +292,7 @@ static void EventData_Destroy(EXPECTED_SEND_DATA* data)
     }
 }
 
-extern "C" void e2e_init(bool isMQTT)
+extern "C" void e2e_init(void)
 {
     int result = platform_init();
     ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "Platform init failed");
