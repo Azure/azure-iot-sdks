@@ -1,15 +1,15 @@
 {
   "name": "azure-iothub",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "Azure IoT SDK - IoT Hub",
   "author": "Microsoft Corporation",
   "license": "MIT",
   "main": "iothub.js",
   "typings": "iothub.d.ts",
   "dependencies": {
-    "azure-iot-amqp-base": "1.0.15",
-    "azure-iot-common": "1.0.14",
-    "azure-iot-http-base": "1.0.15",
+    "azure-iot-amqp-base": "1.0.16",
+    "azure-iot-common": "1.0.15",
+    "azure-iot-http-base": "1.0.16",
     "uuid": "^2.0.1"
   },
   "devDependencies": {
