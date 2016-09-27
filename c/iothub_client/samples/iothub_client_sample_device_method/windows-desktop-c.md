@@ -4,7 +4,7 @@ device: desktop
 language: c
 ---
 
-Run a simple device twins C sample on Windows
+Run a simple device Methods C sample on Windows
 ===
 ---
 
@@ -13,7 +13,6 @@ Run a simple device twins C sample on Windows
 -   [Introduction](#Introduction)
 -   [Step 1: Prerequisites](#Step-1-Prerequisites)
 -   [Step 2: Build and Run the Sample](#Step-2-Build)
--   [Step 3: Monitor Device Twin](#Step-3-Monitor)
 
 <a name="Introduction"></a>
 # Introduction
@@ -41,7 +40,7 @@ You should have the following items ready before beginning the process:
 
 2.  In Visual Studio, in **Solution Explorer**, navigate to and open the following file:
 
-    Serializer_Samples\\devicetwin_simplesample\Source Files\devicetwin_simplesample.c
+    IoTHub_Samples\iothub_client_sample_device_method\Source Files\iothub_client_sample_device_method.c
     
 
 3.  Locate the following code in the file:
@@ -56,25 +55,10 @@ You should have the following items ready before beginning the process:
        static const char* connectionString = "HostName=..."
        ```
        
-5.  In **Solution Explorer**, right-click the project Serializer_Samples\\devicetwin_simplesample, click **Debug**, and then click **Start new instance** to build and run the sample. 
+5.  In **Solution Explorer**, right-click the project IoTHub_Samples\iothub_client_sample_device_method, click **Debug**, and then click **Start new instance** to build and run the sample. 
     
-6.  The console displays messages as the application sends device-to-cloud messages to IoT Hub and updates its twin reported states.
+6.  As the client is running it will respond with a '200' message to any device method invoked. If you want to try and test different types of methods, you can adapt the function DeviceMethodCallback.
 
-<a name="Step-3-Monitor"></a>
-# Step 3: Monitor Device Twin
-
-In order to monitor the device twin in the cloud, you can use the Device Explorer tool on a Windows machine.
-To build and run the Device Explorer tool with the Device Twin support:
-
-1. In your local clone of the azure-iot-dt-sdks repository, open the solution tools\\DeviceExplorer\\DeviceExplorer.sln in Visual Studio 2015
-1. Open the Nuget Package Manager Console and type the following command:
-
-   ```
-   Install-Package \\richcihp\public\Microsoft.Azure.Devices.1.0.0-dmpreview-046
-   ```
-
-1. Compile and run hitting F5
-1. Enter the owner Connection String to setup the tool, then you are all set to use the tool!
 
 [lnk-setup-iot-hub]: ../../../doc/setup_iothub.md
 [lnk-manage-iot-hub]: ../../../doc/manage_iot_hub.md

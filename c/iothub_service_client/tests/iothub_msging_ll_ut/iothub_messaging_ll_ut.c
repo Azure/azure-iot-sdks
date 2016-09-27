@@ -473,6 +473,8 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         REGISTER_UMOCK_ALIAS_TYPE(JSON_Status, int);
         REGISTER_UMOCK_ALIAS_TYPE(LIST_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(LIST_ITEM_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(receiver_settle_mode, uint8_t);
+        
 
         REGISTER_GLOBAL_MOCK_HOOK(STRING_construct, my_STRING_construct);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_construct, NULL);
