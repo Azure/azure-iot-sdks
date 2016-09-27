@@ -10,5 +10,6 @@ function(add_sample_directory whatIsBuilding)
 endfunction()
 
 add_sample_directory(iothub_messaging_ll_sample)
+add_sample_directory(iothub_devicetwin_sample)
 add_sample_directory(iothub_registrymanager_sample)
 add_sample_directory(iothub_service_client_sample)

@@ -20,47 +20,25 @@ extern "C"
 
 #include "azure_c_shared_utility/umock_c_prod.h"
 
+#define IOTHUB_DEVICE_STATUS_VALUES       \
+    IOTHUB_DEVICE_STATUS_ENABLED,         \
+    IOTHUB_DEVICE_STATUS_DISABLED         \
+
+DEFINE_ENUM(IOTHUB_DEVICE_STATUS, IOTHUB_DEVICE_STATUS_VALUES);
+
+#define IOTHUB_DEVICE_CONNECTION_STATE_VALUES         \
+    IOTHUB_DEVICE_CONNECTION_STATE_CONNECTED,         \
+    IOTHUB_DEVICE_CONNECTION_STATE_DISCONNECTED       \
+
+DEFINE_ENUM(IOTHUB_DEVICE_CONNECTION_STATE, IOTHUB_DEVICE_CONNECTION_STATE_VALUES);
+
 #define IOTHUB_DEVICE_TWIN_RESULT_VALUES     \
     IOTHUB_DEVICE_TWIN_OK,                   \
     IOTHUB_DEVICE_TWIN_INVALID_ARG,          \
     IOTHUB_DEVICE_TWIN_ERROR,                \
-    IOTHUB_DEVICE_TWIN_HTTPAPI_ERROR,        \
-    IOTHUB_DEVICE_TWIN_JSON_EMPTY,           \
-    IOTHUB_DEVICE_TWIN_JSON_ERROR            \
+    IOTHUB_DEVICE_TWIN_HTTPAPI_ERROR         \
 
 DEFINE_ENUM(IOTHUB_DEVICE_TWIN_RESULT, IOTHUB_DEVICE_TWIN_RESULT_VALUES);
-
-typedef struct IOTHUB_DEVICE_TWIN_PROPERTY_TAG
-{
-    const char* key;
-    const char* value;
-} IOTHUB_DEVICE_TWIN_PROPERTY;
-
-typedef struct IOTHUB_DEVICE_TWIN_PROPERTIES_TAG
-{
-    size_t size;
-    IOTHUB_DEVICE_TWIN_PROPERTY* properties;
-} IOTHUB_DEVICE_TWIN_PROPERTIES;
-
-typedef struct IOTHUB_DEVICE_TWIN_TAG_TAG
-{
-    const char* name;
-    const char* value;
-} IOTHUB_DEVICE_TWIN_TAG;
-
-typedef struct IOTHUB_DEVICE_TWIN_TAGS_TAG
-{
-    size_t size;
-    IOTHUB_DEVICE_TWIN_TAG* tags;
-} IOTHUB_DEVICE_TWIN_TAGS;
-
-typedef struct IOTHUB_DEVICE_TWIN_TAG
-{
-    const char* deviceId;
-    IOTHUB_DEVICE_TWIN_TAGS tags;
-    IOTHUB_DEVICE_TWIN_PROPERTIES reportedProperties;
-    IOTHUB_DEVICE_TWIN_PROPERTIES desiredProperties;
-} IOTHUB_DEVICE_TWIN;
 
 /** @brief Handle to hide struct and use it in consequent APIs
 */
@@ -86,65 +64,22 @@ MOCKABLE_FUNCTION(, void,  IoTHubDeviceTwin_Destroy, IOTHUB_SERVICE_CLIENT_DEVIC
 *
 * @param	serviceClientDeviceTwinHandle	The handle created by a call to the create function.
 * @param    deviceId      The device name (id) to retrieve twin info for.
-* @param    deviceTwin    Input parameter, if it is not NULL will contain the requested device twin info.
 *
-* @return	IOTHUB_DEVICE_TWIN_OK upon success or an error code upon failure.
+* @return	A non-NULL char* containing device twin info upon success or NULL upon failure.
 */
-MOCKABLE_FUNCTION(, IOTHUB_DEVICE_TWIN_RESULT,  IoTHubDeviceTwin_GetTwin, IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, serviceClientDeviceTwinHandle, const char*, deviceId, IOTHUB_DEVICE_TWIN*, deviceTwin);
+MOCKABLE_FUNCTION(, char*,  IoTHubDeviceTwin_GetTwin, IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, serviceClientDeviceTwinHandle, const char*, deviceId);
 
 /** @brief	Updates (partial update) the given device's twin info.
 *
 * @param	serviceClientDeviceTwinHandle	The handle created by a call to the create function.
-* @param    deviceTwin    DeviceTwin data structure containing the info (tags, desired properties) to update.
-*                         All well-known read-only members are ignored.
-*                         Properties provided with value of null are removed from twin's document.
+* @param    deviceId                        The device name (id) to retrieve twin info for.
+* @param    deviceTwinJson                  DeviceTwin JSon string containing the info (tags, desired properties) to update.
+*                                           All well-known read-only members are ignored.
+*                                           Properties provided with value of null are removed from twin's document.
 *
-* @return	IOTHUB_DEVICE_TWIN_OK upon success or an error code upon failure.
+* @return	A non-NULL char* containing updated device twin info upon success or NULL upon failure.
 */
-MOCKABLE_FUNCTION(, IOTHUB_DEVICE_TWIN_RESULT,  IoTHubDeviceTwin_UpdateTwin, IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, serviceClientDeviceTwinHandle, const IOTHUB_DEVICE_TWIN*, deviceTwin);
-
-/** @brief	Updates (partial update) the given device's desired properties info.
-*
-* @param	serviceClientDeviceTwinHandle	The handle created by a call to the create function.
-* @param    deviceTwin    DeviceTwin data structure containing the info (desired properties) to update.
-*                         All well-known read-only members are ignored.
-*                         Properties provided with value of null are removed from desired properties document.
-*
-* @return	IOTHUB_DEVICE_TWIN_OK upon success or an error code upon failure.
-*/
-MOCKABLE_FUNCTION(, IOTHUB_DEVICE_TWIN_RESULT,  IoTHubDeviceTwin_UpdateDesiredProperties, IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, serviceClientDeviceTwinHandle, const char*, deviceId, const IOTHUB_DEVICE_TWIN_PROPERTIES*, deviceTwinProperties);
-
-/** @brief	Converts DeviceTwin info to formatted JSon string.
-*
-* @param    deviceTwin    DeviceTwin data structure containing the info.
-*
-* @return	Formatted JSon string containing all the device info upon success or an error code upon failure.
-*/
-MOCKABLE_FUNCTION(, const char*,  IoTHubDeviceTwin_ToJson, const IOTHUB_DEVICE_TWIN*, deviceTwin);
-
-/** @brief	Converts DeviceTwin info to formatted JSon string.
-*
-* @param    deviceTwin    DeviceTwin data structure containing the info.
-*
-* @return	Formatted JSon string containing only the tag info upon success or an error code upon failure.
-*/
-MOCKABLE_FUNCTION(, const char*,  IoTHubDeviceTwin_TagsToJson, const IOTHUB_DEVICE_TWIN*, deviceTwin);
-
-/** @brief	Converts DeviceTwin info to formatted JSon string.
-*
-* @param    deviceTwin    DeviceTwin data structure containing the info.
-*
-* @return	Formatted JSon string containing only the reported properties upon success or an error code upon failure.
-*/
-MOCKABLE_FUNCTION(, const char*,  IoTHubDeviceTwin_ReportedPropertiesToJson, const IOTHUB_DEVICE_TWIN*, deviceTwin);
-
-/** @brief	Converts DeviceTwin info to formatted JSon string.
-*
-* @param    deviceTwin    DeviceTwin data structure containing the info.
-*
-* @return	Formatted JSon string containing only the desired properties upon success or an error code upon failure.
-*/
-MOCKABLE_FUNCTION(, const char*,  IoTHubDeviceTwin_DesiredPropertiesToJson, const IOTHUB_DEVICE_TWIN*, deviceTwin);
+MOCKABLE_FUNCTION(, char*,  IoTHubDeviceTwin_UpdateTwin, IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE, serviceClientDeviceTwinHandle, const char*, deviceId, const char*, deviceTwinJson);
 
 #ifdef __cplusplus
 }
