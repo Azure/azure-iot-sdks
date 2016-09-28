@@ -7,14 +7,12 @@ declare class DeviceMethodRequest implements Client.DeviceMethodRequest {
   constructor(
     requestId: string,
     methodName: string,
-    properties?: { [key: string]: string; },
     body?: Buffer
   );
 
   requestId: string;
   methodName: string;
-  properties: { [key: string]: string; };
-  body: Buffer;
+  payload: any;
 }
 
 export = DeviceMethodRequest;

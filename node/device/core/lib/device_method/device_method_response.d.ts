@@ -10,13 +10,11 @@ declare class DeviceMethodResponse implements Client.DeviceMethodResponse {
   );
 
   requestId: string;
-  properties: { [key: string]: string; };
-  bodyParts: Buffer[];
   isResponseComplete: boolean;
   status: number;
+  payload: any;
 
-  write(data: string | Buffer): void;
-  end(status: number, done: (err?: Error) => void): void;
+  send(status: number, payload?: any, done?: (err?: Error) => void): void;
 }
 
 export = DeviceMethodResponse;

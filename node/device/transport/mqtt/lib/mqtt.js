@@ -12,9 +12,8 @@ var util = require('util');
 var debug = require('debug')('device:mqtt');
 var translateError = require('../lib/mqtt-translate-error.js');
 var MqttTwinReceiver = require('../lib/mqtt-twin-receiver.js');
-var QueryString = require('querystring');
 
-var TOPIC_RESPONSE_PUBLISH_FORMAT = "$iothub/%s/res/%d/?$rid=%s&%s";
+var TOPIC_RESPONSE_PUBLISH_FORMAT = "$iothub/%s/res/%d/?$rid=%s";
 
 /**
  * @class        module:azure-iot-device-mqtt.Mqtt
@@ -248,23 +247,6 @@ Mqtt.prototype.sendTwinRequest = function(method, resource, properties, body, do
   }.bind(this));
 };
 
-function validateProperties(properties) {
-  Object.keys(properties).forEach(function(key) {
-    if(typeof(key) === 'string' && key.length === 0) {
-      throw new Error('Property "' + key + '" is an empty string');
-    }
-    if(typeof(key) !== 'string') {
-      throw new Error('Property "' + key + '" is not a string');
-    }
-    if(typeof(properties[key]) === 'string' && properties[key].length === 0) {
-      throw new Error('Property \'response.properties["' + key + '"]\' is an empty string');
-    }
-    if(typeof(properties[key]) !== 'string') {
-      throw new Error('Property \'response.properties["' + key + '"]\' is not a string');
-    }
-  });
-}
-
 function validateResponse(response) {
   if(!response) {
     throw new Error('Parameter \'response\' is falsy');
@@ -278,26 +260,12 @@ function validateResponse(response) {
   if(typeof(response.requestId) !== 'string') {
     throw new Error('Parameter \'response.requestId\' is not a string.');
   }
-  if(!(response.properties)) {
-    throw new Error('Parameter \'response.properties\' is falsy');
-  }
-  if(typeof(response.properties) !== 'object') {
-    throw new Error('Parameter \'response.properties\' is not an object');
-  }
   if(!(response.status)) {
     throw new Error('Parameter \'response.status\' is falsy');
   }
   if(typeof(response.status) !== 'number') {
     throw new Error('Parameter \'response.status\' is not a number');
   }
-  if(!(response.bodyParts)) {
-    throw new Error('Parameter \'response.bodyParts\' is falsy');
-  }
-  if(!(Array.isArray(response.bodyParts))) {
-    throw new Error('Parameter \'response.bodyParts\' is not an array');
-  }
-
-  validateProperties(response.properties);
 }
 
 /**
@@ -320,27 +288,17 @@ Mqtt.prototype.sendMethodResponse = function(response, done) {
   // Codes_SRS_NODE_DEVICE_MQTT_13_002: [ sendMethodResponse shall build an MQTT topic name in the format: $iothub/methods/res/<STATUS>/?$rid=<REQUEST ID>&<PROPERTIES> where <STATUS> is response.status. ]
   // Codes_SRS_NODE_DEVICE_MQTT_13_003: [ sendMethodResponse shall build an MQTT topic name in the format: $iothub/methods/res/<STATUS>/?$rid=<REQUEST ID>&<PROPERTIES> where <REQUEST ID> is response.requestId. ]
   // Codes_SRS_NODE_DEVICE_MQTT_13_004: [ sendMethodResponse shall build an MQTT topic name in the format: $iothub/methods/res/<STATUS>/?$rid=<REQUEST ID>&<PROPERTIES> where <PROPERTIES> is URL encoded. ]
-  this._sendResponse(
-    'methods',
-    response.status,
-    response.requestId,
-    response.properties,
-    Buffer.concat(response.bodyParts),
-    done
-  );
-};
 
-Mqtt.prototype._sendResponse = function(responseType, status, requestId, properties, body, done ) {
   var topicName = util.format(
     TOPIC_RESPONSE_PUBLISH_FORMAT,
-    responseType,
-    status,
-    requestId,
-    QueryString.stringify(properties)
+    'methods',
+    response.status,
+    response.requestId
   );
+
   debug('sending response using topic: ' + topicName);
   // publish the response message
-  this._mqtt.client.publish(topicName, body, { qos: 0, retain: false }, function(err) {
+  this._mqtt.client.publish(topicName, JSON.stringify(response.payload), { qos: 0, retain: false }, function(err) {
     if(!!done && typeof(done) === 'function') {
       // Codes_SRS_NODE_DEVICE_MQTT_13_006: [ If the MQTT publish fails then an error shall be returned via the done callback's first parameter. ]
       // Codes_SRS_NODE_DEVICE_MQTT_13_007: [ If the MQTT publish is successful then the done callback shall be invoked passing null for the first parameter. ]
