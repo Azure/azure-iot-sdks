@@ -6,17 +6,14 @@ cmake_minimum_required(VERSION 2.8.11)
 
 compileAsC99()
 
-if(WIN32)
-    message(FATAL_ERROR "This CMake file only supports Linux builds!")
-endif()
 
 set(AZUREIOT_INC_FOLDER ".." ${SERIALIZER_INC_FOLDER} ${SHARED_UTIL_INC_FOLDER})
 
 include_directories(${AZUREIOT_INC_FOLDER})
 
 set(iothub_client_sample_mqtt_dm_c_files
-    ../iothub_client_sample_mqtt_dm.cpp
-    edison.cpp
+    ../iothub_client_sample_mqtt_dm.c
+    pi.c
 )
 
 set(iothub_client_sample_mqtt_dm_h_files
@@ -31,8 +28,4 @@ target_link_libraries(iothub_client_sample_mqtt_dm
     aziotsharedutil
     serializer
     umqtt
-    pthread
-    curl
-    ssl
-    crypto
 )

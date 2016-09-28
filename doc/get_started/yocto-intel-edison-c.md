@@ -24,9 +24,9 @@ Before you begin you will need to create and configure an IoT hub to connect to.
 - Make sure you have run the "configure_edison —setup" command to set up your board
 - Make sure your Intel Edison is online via your local Wi-Fi network (should occur during configure_edison setup)
 
-## Installing Git on your Intel Edison
+## Installing nodejs on your Intel Edison
 
-Git is a widely used distributed version control tool, we will need to install Git on the Intel Edison in order to clone the Azure IoT SDK and build it locally. To do that, we must first add extended packages to Intel Edison which include Git. Intel Edison's build of [Yocto Linux][yocto] uses the "opkg" manager which doesn't, by default, include Git support.
+Intel Edison's build of [Yocto Linux][yocto] uses the "opkg" manager which doesn't, by default, include nodejs support. We must first add extended packages to Intel Edison which include node.js support.
 
 - First, on your Intel Edison command line, use vi to add the following to your base-feeds:
 
@@ -58,21 +58,44 @@ You should see the following:
 
 ## Downloading the Azure IoT SDK to your Intel Edison
 
-- On your Intel Edison, use Git and clone the Azure SDK repository directly to your Edison using the following commands. We recommend using the default folder located in /home/root:
+The Azure IoT SDK relies on Git submodules, which is not built into the default Git package.  We recommend cloning the repository to your PC / Mac / Linux desktop and then transfer the files over the network to your Intel Edison using [FileZilla][filezilla], SCP, or rsync. 
+
+We recommend using the default folder located in /home/root to keep the repository.
+
+- First, run "wpa_cli status" on your Intel Edison to find your IP address.
+
+  - For rsync, the Intel Edison needs rsync to be installed.
+  
+    ```
+    opkg install rsync
+    ```
+    
+    Then, on the desktop, cd to the folder containing the repository and run rsync:
+
+    ```
+    rsync -azP --exclude=.vscode --exclude=.git ./azure-iot-sdks/ root@<<edison ip>>:/home/root/azure-iot-sdks
+    ```
+
+  - For scp, cd to the folder containing the repository and run scp:
+
+    ```
+    scp -Cvr ./azure-iot-sdks/ root@<<edison ip>>:/home/root/azure-iot-sdks/
+    ```
+
+  - For FileZilla, run "wpa_cli status" on your Intel Edison to find your IP address, then use "sftp://your.ip.address", use password "root" and your Intel Edison password to establish an SFTP connection via FileZilla. Once you have done that, you can drag and drop files over the network directly.
+
+	![][img2]
+
+### Using Git to download Azure IoT SDK
+
+The default installation of git does not support submodules, but if you install a submodule enabled version of git, or [build git from source][gitIntallFromSource], you may use Git and clone the Azure SDK repository directly to your Edison using the following commands. :
 
   ```
-  $ opkg install git
   $ git clone --recursive https://github.com/Azure/azure-iot-sdks.git
   ```
 
 - You may be prompted to add an RSA key to your device, respond with "yes".
 
-- Alternate Deploy Method
-
-  - If for any reason you are unable to clone the Azure IoT SDK directly to Edison, you can clone the repository to your PC / Mac / Linux desktop and then transfer the files over the network to your Intel  Edison using [FileZilla][filezilla] or SCP.
-  - For FileZilla, run "wpa_cli status" on your Intel Edison to find your IP address, then use "sftp://your.ip.address", use password "root" and your Intel Edison password to establish an SFTP connection via FileZilla. Once you have done that, you can drag and drop files over the network directly.
-
-	![][img2]
 
 ## Building the Azure IoT SDK and running a simple sample on Intel Edison
 

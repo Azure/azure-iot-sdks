@@ -1,6 +1,6 @@
 {
   "name": "iothub-diagnostics",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -10,13 +10,13 @@
   "dependencies": {
     "async": "^2.0.0",
     "azure-event-hubs": "^0.0.3",
-    "azure-iot-common": "1.0.14",
-    "azure-iot-device": "1.0.14",
-    "azure-iot-device-amqp": "1.0.14",
-    "azure-iot-device-amqp-ws": "1.0.15",
-    "azure-iot-device-http": "1.0.15",
-    "azure-iot-device-mqtt": "1.0.14",
-    "azure-iothub": "1.0.16",
+    "azure-iot-common": "1.0.15",
+    "azure-iot-device": "1.0.15",
+    "azure-iot-device-amqp": "1.0.15",
+    "azure-iot-device-amqp-ws": "1.0.16",
+    "azure-iot-device-http": "1.0.16",
+    "azure-iot-device-mqtt": "1.0.15",
+    "azure-iothub": "1.0.17",
     "net-ping": "^1.2.0",
     "node-uuid": "^1.4.7",
     "winston": "^2.2.0"

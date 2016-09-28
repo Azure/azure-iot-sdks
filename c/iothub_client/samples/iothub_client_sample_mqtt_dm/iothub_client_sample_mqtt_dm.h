@@ -6,29 +6,30 @@
 
 #include "iothub_client.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
-#define FIRMWARE_UPDATE_STATE_VALUES \
-    FIRMWARE_UPDATE_STATE_NONE = 1, \
-    FIRMWARE_UPDATE_STATE_DOWNLOADING_IMAGE = 2, \
-    FIRMWARE_UPDATE_STATE_IMAGE_DOWNLOADED = 3, \
-    FIRMWARE_UPDATE_STATE_IMAGE_APPLYING = 4
-DEFINE_ENUM(FIRMWARE_UPDATE_STATE, FIRMWARE_UPDATE_STATE_VALUES)
+    #define FIRMWARE_UPDATE_STATUS_VALUES \
+        waiting, \
+        downloading, \
+        downloadComplete, \
+        applying
+    DEFINE_ENUM(FIRMWARE_UPDATE_STATUS, FIRMWARE_UPDATE_STATUS_VALUES)
 
+    char* device_get_firmware_version(void);
+    char* device_read_string_from_file(const char *fileName);
 
-void device_get_name(char *&name);
-void device_get_time(time_t &time);
-void device_get_tz(char *&tz);
+    FIRMWARE_UPDATE_STATUS device_get_firmware_update_status(void);
+    bool device_download_firmware(const char *uri);
+    bool device_update_firmware(void);
 
-void device_get_serial_number(char *&out);
-void device_get_firmware_version(char *&out);
+    bool device_run_service(void);
 
-bool device_reboot(void);
-bool device_factoryreset(void);
-FIRMWARE_UPDATE_STATE device_get_firmware_update_state();
-bool device_download_firmware(const char *uri);
-bool device_update_firmware(void);
-
-bool device_run_service(void);
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif /* IOTHUB_CLIENT_SAMPLE_MQTT_DM_H */

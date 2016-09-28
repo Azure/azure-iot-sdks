@@ -1,7 +1,7 @@
 <?xml version="1.0"?><package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>Microsoft.Azure.IoTHub.AmqpTransport</id>
-    <version>1.0.17</version>
+    <version>1.0.18</version>
     <title>Microsoft Azure IoTHub AMQP transport</title>
     <authors>Apache Software Foundation, Microsoft Corp</authors>
     <owners>Azure-IoT</owners>
@@ -16,7 +16,7 @@
     <tags>AMQP Microsoft Azure IoT Native x86 x64 arm native package</tags>
     <dependencies>
       <dependency id="Microsoft.Azure.Uamqp" version="1.0.19"/>
-      <dependency id="Microsoft.Azure.IoTHub.IoTHubClient" version="1.0.17"/>
+      <dependency id="Microsoft.Azure.IoTHub.IoTHubClient" version="1.0.18"/>
       <dependency id="Microsoft.Azure.C.SharedUtility" version="1.0.18"/>
     </dependencies>
   </metadata>
