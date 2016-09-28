@@ -138,6 +138,7 @@ Amqp.prototype.disconnect = function disconnect(done) {
   this._amqp.disconnect()
     .then(function (result) {
       this._connected = false;
+      this._sender = null;
       /*Codes_SRS_NODE_COMMON_AMQP_16_004: [The disconnect method shall call the done callback when the application/service has been successfully disconnected from the service] */
       if (done) done(null, result);
       return null;
@@ -160,11 +161,11 @@ Amqp.prototype.disconnect = function disconnect(done) {
 Amqp.prototype.send = function send(message, endpoint, to, done) {
   if (!this._connected && done) {
     done(new errors.NotConnectedError('Cannot send while disconnected.'));
-  } else {  
+  } else {
     /*Codes_SRS_NODE_COMMON_AMQP_16_006: [The send method shall construct an AMQP message using information supplied by the caller, as follows:
     The ‘to’ field of the message should be set to the ‘to’ argument.
     The ‘body’ of the message should be built using the message argument.] */
-  
+
     var amqpMessage = AmqpMessage.fromMessage(message);
     amqpMessage.properties.to = to;
     var sendAction = function (sender, msg, done) {
