@@ -983,7 +983,7 @@ void IoTHubClient_LL_SendComplete(IOTHUB_CLIENT_LL_HANDLE handle, PDLIST_ENTRY c
 static int wrap_data_in_json(const unsigned char* data, size_t length, BUFFER_HANDLE response)
 {
     int result;
-    unsigned char* wrapper = malloc(length+2);
+    unsigned char* wrapper = (unsigned char*)malloc(length+2);
     if (wrapper == NULL)
     {
         LogError("allocation failure");
