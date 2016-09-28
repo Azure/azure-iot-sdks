@@ -416,8 +416,7 @@ describe('Client', function () {
       this.emitMethodCall = function(methodName) {
         this.emit('method_' + methodName, {
           methods: { methodName: methodName },
-          properties: {},
-          body: '',
+          body: JSON.stringify(''),
           requestId: '42'
         });
       };

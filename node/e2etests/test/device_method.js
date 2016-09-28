@@ -69,64 +69,53 @@ module.exports = function(hubConnectionString) {
       }
     });
 
-    it('makes and receives a method call', function(done) {
-      var methodName = 'method1';
-      var methodResult = 200;
-      var methodPayload = {
-        'k1': 'v1',
-        'k2': {
-          'k3': 'v3'
-        }
-      };
-      var responsePayload = {
-        'k4': 'v4',
-        'k5': {
-          'k6': 'v6'
-        }
-      };
+    [null, '', 'foo', { k1: 'v1' }, {}].forEach(function(testPayload) {
+      it('makes and receives a method call', function(done) {
+        var methodName = 'method1';
+        var methodResult = 200;
 
-      // setup device to handle the method call
-      deviceClient.onDeviceMethod(methodName, function(request, response) {
-        // validate request
-        assert.isNotNull(request);
-        assert.strictEqual(request.methodName, methodName);
-        assert.deepEqual(JSON.parse(request.body), methodPayload);
-        debug('device: received method request');
-        debug(JSON.stringify(request, null, 2));
-        // validate response
-        assert.isNotNull(response);
+        // setup device to handle the method call
+        deviceClient.onDeviceMethod(methodName, function(request, response) {
+          // validate request
+          assert.isNotNull(request);
+          assert.strictEqual(request.methodName, methodName);
+          assert.deepEqual(request.payload, testPayload);
+          debug('device: received method request');
+          debug(JSON.stringify(request, null, 2));
+          // validate response
+          assert.isNotNull(response);
 
-        // send the response
-        response.write(JSON.stringify(responsePayload));
-        response.end(methodResult, function(err) {
-          debug('send method response with statusCode: ' + methodResult);
-          if(!!err) {
-            console.error('An error ocurred when sending a method response:\n' +
-                err.toString());
-          }
+          // send the response
+          response.send(methodResult, testPayload, function(err) {
+            debug('send method response with statusCode: ' + methodResult);
+            if(!!err) {
+              console.error('An error ocurred when sending a method response:\n' +
+                  err.toString());
+            }
+          });
         });
-      });
 
-      // make the method call via the service
-      var methodParams = {
-        methodName: methodName, 
-        payload: methodPayload,
-        timeoutInSeconds: 20
-      };
-      ServiceClient
-          .fromConnectionString(hubConnectionString)
-          .invokeDeviceMethod(
-              deviceDescription.deviceId,
-              methodParams,
-              function(err, result) {
-                if(!err) {
-                  debug('got method results');
-                  debug(JSON.stringify(result, null, 2));
-                  assert.strictEqual(result.status, methodResult);
-                  assert.deepEqual(result.payload, responsePayload);
-                }
-                done(err);
-              });
+        // make the method call via the service
+        var methodParams = {
+          methodName: methodName, 
+          payload: testPayload,
+          timeoutInSeconds: 20
+        };
+        ServiceClient
+            .fromConnectionString(hubConnectionString)
+            .invokeDeviceMethod(
+                deviceDescription.deviceId,
+                methodParams,
+                function(err, result) {
+                  if(!err) {
+                    debug('got method results');
+                    debug(JSON.stringify(result, null, 2));
+                    assert.strictEqual(result.status, methodResult);
+                    assert.deepEqual(result.payload, testPayload);
+                  }
+                  done(err);
+                });
+      });
     });
   });
 };

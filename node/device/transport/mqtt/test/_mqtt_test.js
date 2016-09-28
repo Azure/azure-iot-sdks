@@ -134,16 +134,13 @@ describe('Mqtt', function () {
       // test
       mqtt.sendMethodResponse({
         requestId: 'req1',
-        properties: {
-          'k1': 'value has spaces'
-        },
         status: 200,
-        bodyParts: []
+        payload: null
       });
 
       // assert
       assert.isTrue(spy.calledOnce);
-      assert.strictEqual(spy.args[0][0], '$iothub/methods/res/200/?$rid=req1&k1=value%20has%20spaces');
+      assert.strictEqual(spy.args[0][0], '$iothub/methods/res/200/?$rid=req1');
 
       // cleanup
       MockMqttBase.client.publish.restore();
@@ -161,11 +158,8 @@ describe('Mqtt', function () {
       // test
       mqtt.sendMethodResponse({
         requestId: 'req1',
-        properties: {
-          'k1': 'value has spaces'
-        },
         status: 200,
-        bodyParts: []
+        payload: null
       }, callback);
 
       // assert
@@ -189,11 +183,8 @@ describe('Mqtt', function () {
       // test
       mqtt.sendMethodResponse({
         requestId: 'req1',
-        properties: {
-          'k1': 'value has spaces'
-        },
         status: 200,
-        bodyParts: []
+        payload: null
       }, callback);
 
       // assert

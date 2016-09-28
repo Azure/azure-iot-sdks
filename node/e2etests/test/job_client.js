@@ -157,7 +157,7 @@ var runTests = function(hubConnectionString) {
           var deviceClient = DeviceClient.fromConnectionString(testDeviceConnectionString, DeviceMqtt);
           deviceClient.open(continueWith(testCallback, function() {
             deviceClient.onDeviceMethod(testDeviceMethod.methodName, function(request, response) {
-              response.end(200, continueWith(testCallback, function() {
+              response.send(200, continueWith(testCallback, function() {
                 methodResponseWasSent = true;
               }));
             });
