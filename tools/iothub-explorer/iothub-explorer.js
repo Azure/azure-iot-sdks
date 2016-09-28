@@ -57,18 +57,22 @@ if (!parsed.argv.remain.length) {
   process.exit(1);
 }
 
-var connString, sas, command, arg1, arg2;
+var connString, sas, command, arg1, arg2, arg3, arg4;
 
 if ('HostName=' !== parsed.argv.remain[0].substr(0, 'HostName='.length)) {
   command = parsed.argv.remain[0];
   arg1 = parsed.argv.remain[1];
   arg2 = parsed.argv.remain[2];
+  arg3 = parsed.argv.remain[3];
+  arg4 = parsed.argv.remain[4];
 }
 else {
   connString = parsed.argv.remain[0];
   command = parsed.argv.remain[1];
   arg1 = parsed.argv.remain[2];
   arg2 = parsed.argv.remain[3];
+  arg3 = parsed.argv.remain[4];
+  arg4 = parsed.argv.remain[5];
 }
 
 if (command === 'help') {
@@ -378,6 +382,24 @@ else if (command === 'query-job') {
   };
   query.next(onNewResults);
 }
+else if (command === 'device-method') {
+  if(!arg1) inputError('Please provide a valid device id');
+  if(!arg2) inputError('Please provide a valid method name');
+  var client = connString ? Client.fromConnectionString(connString) : Client.fromSharedAccessSignature(sas.toString());
+  var methodParams = {
+    methodName: arg2,
+    payload: arg3 || null,
+    timeoutInSeconds: !!arg4 ? parseInt(arg4) : null
+  };
+
+  client.invokeDeviceMethod(arg1, methodParams, function(err, methodResult) {
+    if (err) {
+      serviceError(err);
+    } else {
+      console.log(JSON.stringify(methodResult, null, 2));
+    }
+  });
+}
 else {
   inputError('\'' + command + '\' is not a valid command');
   usage();
@@ -526,6 +548,8 @@ function usage() {
     '    {grey}Get device twins matching the query given as argument.{/grey}',
     '  {green}iothub-explorer{/green} {white}[<connection-string>] query-job [job type] [job status]{/white}',
     '    {grey}Get jobs matching the type and status given as arguments (optional).{/grey}',
+    '  {green}iothub-explorer{/green} {white}[<connection-string>] device-method <device-id> <method-name> [payload] [timeout-in-seconds]{/white}',
+    '    {grey}Calls a device method on the specified device. payload and timeout-in-seconds are optional.{/grey}',
     '  {green}iothub-explorer{/green} {white}help{/white}',
     '    {grey}Displays this help message.{/grey}',
     '',
