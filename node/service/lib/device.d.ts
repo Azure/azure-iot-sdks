@@ -24,9 +24,14 @@ declare namespace Device {
         secondaryKey: string;
     }
 
+    interface _X509Thumbprint {
+        primaryThumbprint: string;
+        secondaryThumbprint: string;
+    }
+
     interface Authentication {
         SymmetricKey?: _SymmetricKey;
-        x509Thumbprint?: string;
+        x509Thumbprint?: _X509Thumbprint;
     }
 }
 
