@@ -417,6 +417,16 @@ static void my_Map_Destroy(MAP_HANDLE handle)
     free(handle);
 }
 
+BUFFER_HANDLE my_BUFFER_new(void)
+{
+    return (BUFFER_HANDLE)malloc(1);
+}
+
+void my_BUFFER_delete(BUFFER_HANDLE handle)
+{
+    free(handle);
+}
+
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
@@ -464,6 +474,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_CONFIRMATION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBMESSAGE_DISPOSITION_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(CONSTBUFFER_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -598,6 +609,11 @@ TEST_SUITE_INITIALIZE(suite_init)
 
     REGISTER_GLOBAL_MOCK_HOOK(CONSTBUFFER_GetContent, (const CONSTBUFFER* (*) (CONSTBUFFER_HANDLE constbufferHandle)) real_CONSTBUFFER_GetContent);
     REGISTER_GLOBAL_MOCK_HOOK(CONSTBUFFER_Destroy, real_CONSTBUFFER_Destroy);
+
+    //REGISTER_GLOBAL_MOCK_HOOK(BUFFER_new, my_BUFFER_new);
+    //REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_new, NULL);
+
+    //REGISTER_GLOBAL_MOCK_HOOK(BUFFER_delete, my_BUFFER_delete);
 
     REGISTER_GLOBAL_MOCK_HOOK(DList_InitializeListHead, real_DList_InitializeListHead);
     REGISTER_GLOBAL_MOCK_HOOK(DList_IsListEmpty, real_DList_IsListEmpty);
@@ -908,13 +924,16 @@ static void setup_message_recv_device_method_mocks()
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(STRING_TOKENIZER_destroy(IGNORED_PTR_ARG))
         .IgnoreArgument_t();
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument_size();
     STRICT_EXPECTED_CALL(mqttmessage_getApplicationMsg(TEST_MQTT_MESSAGE_HANDLE));
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
-    STRICT_EXPECTED_CALL(IoTHubClient_LL_DeviceMethodComplete(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    STRICT_EXPECTED_CALL(IoTHubClient_LL_DeviceMethodComplete(TEST_IOTHUB_CLIENT_LL_HANDLE, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument_method_name()
         .IgnoreArgument_payLoad()
-        .IgnoreArgument_size();
+        .IgnoreArgument_size()
+        .IgnoreArgument_result_payload();
     STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(mqttmessage_create(IGNORED_NUM_ARG, IGNORED_PTR_ARG, DELIVER_AT_MOST_ONCE, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
@@ -925,8 +944,11 @@ static void setup_message_recv_device_method_mocks()
     STRICT_EXPECTED_CALL(mqtt_client_publish(TEST_MQTT_CLIENT_HANDLE, TEST_MQTT_MESSAGE_HANDLE))
         .IgnoreArgument_handle();
     STRICT_EXPECTED_CALL(mqttmessage_destroy(TEST_MQTT_MESSAGE_HANDLE));
+
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument_ptr();
     STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
         .IgnoreArgument_handle();
 }

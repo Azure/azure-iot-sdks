@@ -7,12 +7,13 @@ var uuid = require('uuid');
 var JobClient = require('azure-iothub').JobClient;
 
 var connectionString = '<IoT Hub Connection String>';
+var deviceArray = ['<Device Id>', '<Device Id>'];
 var startTime = new Date();
 var maxExecutionTimeInSeconds =  3600;
 
 var jobClient = JobClient.fromConnectionString(connectionString);
 
-// // Schedule a device method call.
+// Schedule a device method call.
 var methodParams = {
   methodName: 'methodName',
   payload: null,
@@ -22,7 +23,7 @@ var methodParams = {
 var methodJobId = uuid.v4();
 console.log('scheduling Device Method job with id: ' + methodJobId);
 jobClient.scheduleDeviceMethod(methodJobId,
-                               'SELECT * FROM devices',
+                               deviceArray,
                                methodParams,
                                startTime,
                                maxExecutionTimeInSeconds,
@@ -45,14 +46,15 @@ var twinPatch = {
   etag: '*',
   tags: {
     state: 'WA'
-  }
+  },
+  properties: {desired: {}, reported: {}}
 };
 
 var twinJobId = uuid.v4();
 
 console.log('scheduling Twin Update job with id: ' + twinJobId);
 jobClient.scheduleTwinUpdate(twinJobId,
-                             'SELECT * FROM devices',
+                             deviceArray,
                              twinPatch,
                              startTime,
                              maxExecutionTimeInSeconds,

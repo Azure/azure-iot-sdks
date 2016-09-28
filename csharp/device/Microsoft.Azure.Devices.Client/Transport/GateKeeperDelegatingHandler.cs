@@ -113,7 +113,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         /// <returns></returns>
         public override async Task CloseAsync()
         {
-            if (!this.TryCloseGate())
+            if (this.TryCloseGate())
             {
                 await base.CloseAsync();
             }
@@ -140,7 +140,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             }
 
             localOpenTaskCompletionSource?.TrySetCanceled();
-            return true;
+            return this.open;
         }
 
         Task EnsureOpenedAsync(bool explicitOpen)

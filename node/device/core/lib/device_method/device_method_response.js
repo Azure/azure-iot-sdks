@@ -33,48 +33,22 @@ function DeviceMethodResponse(requestId, transport) {
   if (!transport) throw new ReferenceError('transport is \'' + transport + '\'');
 
   this.requestId = requestId;
-  this.properties = {};
-  this.bodyParts = [];
   this.isResponseComplete = false;
   this.status = null;
+  this.payload = null;
   this._transport = transport;
 }
 
 /**
- * @method            module:azure-iot-device.deviceMethod.DeviceMethodResponse#write
- * @description       Appends the data that's supplied to the output buffer to
- *                    be sent as the payload for the method's response.
- *
- * @param {String|Buffer}   methodName   The data to be appended to the output
- *                                        buffer.
- *
- * @throws {ReferenceError}       If the `data` parameter is falsy.
- * @throws {Error}                If the response was previously completed via a
- *                                a call to {@link module:azure-iot-device.deviceMethod.DeviceMethodResponse#end}.
- */
-DeviceMethodResponse.prototype.write = function(data) {
-  // Codes_SRS_NODE_DEVICE_METHOD_RESPONSE_13_005: [ DeviceMethodResponse.write shall throw an Error object if it is invoked after DeviceMethodResponse.end has been called ].
-  if(this.isResponseComplete) {
-    throw new Error('This response has already ended. Cannot write to it anymore.');
-  }
-  if(!!data) {
-    // Codes_SRS_NODE_DEVICE_METHOD_RESPONSE_13_004: [ The DeviceMethodResponse.write method shall accumulate the data passed to it as internal state. ]
-    this.bodyParts.push(Buffer.isBuffer(data) ? data : new Buffer(data));
-  } else {
-    // Codes_SRS_NODE_DEVICE_METHOD_RESPONSE_13_003: [ DeviceMethodResponse.write shall throw a ReferenceError if data is falsy. ]
-    throw new ReferenceError('"data" is "' + data + '"');
-  }
-};
-
-/**
- * @method            module:azure-iot-device.deviceMethod.DeviceMethodResponse#end
+ * @method            module:azure-iot-device.deviceMethod.DeviceMethodResponse#send
  * @description       Sends the device method's response back to the service via
  *                    the underlying transport object using the status parameter
  *                    as the status of the method call.
  *
  * @param {Number}    status      A numeric status code to be sent back to the
  *                                service.
- * @param {Function}  done        An optional callback function which will be
+ * @param {Object}    payload     [optional] The payload of the method response.
+ * @param {Function}  done        [optional] A callback function which will be
  *                                called once the response has been sent back to
  *                                the service. An error object is passed as an
  *                                argument to the function in case an error
@@ -85,23 +59,34 @@ DeviceMethodResponse.prototype.write = function(data) {
  *                                service in a previous call to it. This method
  *                                should be called only once.
  */
-DeviceMethodResponse.prototype.end = function(status, done) {
-  // Codes_SRS_NODE_DEVICE_METHOD_RESPONSE_13_009: [ DeviceMethodResponse.end shall throw an Error object if it is called more than once for the same request. ]
+DeviceMethodResponse.prototype.send = function(status, payload, done) {
+  // Codes_SRS_NODE_DEVICE_METHOD_RESPONSE_13_009: [ DeviceMethodResponse.send shall throw an Error object if it is called more than once for the same request. ]
   if(this.isResponseComplete) {
     throw new Error('This response has already ended. Cannot end the same response more than once.');
   }
 
-  if(typeof(status) === 'number') {
-    this.status = status;
-    this.isResponseComplete = true;
-    // Codes_SRS_NODE_DEVICE_METHOD_RESPONSE_13_008: [ DeviceMethodResponse.end shall notify the service and supply the response for the request along with the status by calling sendMethodResponse on the underlying transport object. ]
-    // Codes_SRS_NODE_DEVICE_METHOD_RESPONSE_13_010: [ DeviceMethodResponse.end shall invoke the callback specified by done if it is not falsy. ]
-    // Codes_SRS_NODE_DEVICE_METHOD_RESPONSE_13_011: [ DeviceMethodResponse.end shall pass the status of sending the response to the service to done. ]
-    this._transport.sendMethodResponse(this, done);
-  } else {
+  if(typeof(status) !== 'number') {
     // Codes_SRS_NODE_DEVICE_METHOD_RESPONSE_13_007: [ DeviceMethodResponse.end shall throw a ReferenceError if status is undefined or not a number. ]
     throw new ReferenceError('"status" is "' + status + '". Expected a number.');
   }
+
+  if (typeof(payload) === 'function') {
+    if (done !== undefined) {
+      throw new Error('Callback must be the last argument');
+    } else {
+      done = payload;
+      payload = null;
+    }
+  }
+
+  this.status = status;
+  this.payload = payload;
+
+  this.isResponseComplete = true;
+  // Codes_SRS_NODE_DEVICE_METHOD_RESPONSE_13_008: [ DeviceMethodResponse.send shall notify the service and supply the response for the request along with the status by calling sendMethodResponse on the underlying transport object. ]
+  // Codes_SRS_NODE_DEVICE_METHOD_RESPONSE_13_010: [ DeviceMethodResponse.send shall invoke the callback specified by done if it is not falsy. ]
+  // Codes_SRS_NODE_DEVICE_METHOD_RESPONSE_13_011: [ DeviceMethodResponse.send shall pass the status of sending the response to the service to done. ]
+  this._transport.sendMethodResponse(this, done);
 };
 
 module.exports = DeviceMethodResponse;

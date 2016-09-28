@@ -14,6 +14,7 @@ var colorsTmpl = require('colors-tmpl');
 var Https = require('azure-iothub').Https;
 var Client = require('azure-iothub').Client;
 var Registry = require('azure-iothub').Registry;
+var JobClient = require('azure-iothub').JobClient;
 var Message = require('azure-iot-common').Message;
 var EventHubClient = require('azure-event-hubs').Client;
 var ConnectionString = require('azure-iothub').ConnectionString;
@@ -339,6 +340,43 @@ else if (command === 'update-twin') {
       });
     }
   });
+} 
+else if (command === 'query-twin') {
+  if(!arg1) inputError('Please provide a valid SQL query');
+  var registry = connString ? Registry.fromConnectionString(connString) : Registry.fromSharedAccessSignature(sas.toString());
+  var query = registry.createQuery(arg1);
+  var onNewResults = function(err, results) {
+    if (err) {
+      serviceError(err);
+    } else {
+      results.forEach(function(twin) {
+        console.log(JSON.stringify(twin, null, 2));
+      });
+
+      if(query.hasMoreResults) {
+        query.nextAsTwin(onNewResults);
+      }
+    }
+  };
+  query.nextAsTwin(onNewResults);
+} 
+else if (command === 'query-job') {
+  var jobClient =  connString ? JobClient.fromConnectionString(connString) : JobClient.fromSharedAccessSignature(sas.toString());
+  var query = jobClient.createQuery(arg1, arg2);
+  var onNewResults = function(err, results) {
+    if (err) {
+      serviceError(err);
+    } else {
+      results.forEach(function(job) {
+        console.log(JSON.stringify(job, null, 2));
+      });
+
+      if(query.hasMoreResults) {
+        query.next(onNewResults);
+      }
+    }
+  };
+  query.next(onNewResults);
 }
 else {
   inputError('\'' + command + '\' is not a valid command');
@@ -480,10 +518,14 @@ function usage() {
     '  {green}iothub-explorer{/green} {white}[<connection-string>] sas-token <device-id> [--duration=<num-seconds>]{/white}',
     '    {grey}Generates a SAS Token for the given device with an expiry time <num-seconds> from now',
     '    Default duration is 3600 (one hour).{/grey}',
-    '  {green}iothub-explorer{/green} {white}[<connection-string>] get-twin <device-id> []{/white}',
+    '  {green}iothub-explorer{/green} {white}[<connection-string>] get-twin <device-id>{/white}',
     '    {grey}Get device twin information.{/grey}',
     '  {green}iothub-explorer{/green} {white}[<connection-string>] update-twin <device-id> <device-json>{/white}',
     '    {grey}Updates device twin info and returns twin information about the updated device.{/grey}',
+    '  {green}iothub-explorer{/green} {white}[<connection-string>] query-twin "<SQL query>"{/white}',
+    '    {grey}Get device twins matching the query given as argument.{/grey}',
+    '  {green}iothub-explorer{/green} {white}[<connection-string>] query-job [job type] [job status]{/white}',
+    '    {grey}Get jobs matching the type and status given as arguments (optional).{/grey}',
     '  {green}iothub-explorer{/green} {white}help{/white}',
     '    {grey}Displays this help message.{/grey}',
     '',

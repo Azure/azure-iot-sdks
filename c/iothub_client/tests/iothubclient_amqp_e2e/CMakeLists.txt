@@ -19,6 +19,7 @@ set(${theseTestsName}_cpp_files
 set(${theseTestsName}_nuget_cpp_files
        ${theseTestsName}.cpp
         ../common_e2e/iothubclient_common_e2e.cpp
+		../../../certs/certs.c
 )
 
 set(${theseTestsName}_c_files

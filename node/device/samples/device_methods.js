@@ -39,17 +39,8 @@ function onGetDeviceLog(request, response) {
 
     // Implement actual logic here.
 
-    // add some properties to the response
-    response.properties = {
-        'logDate': Date.now().toISOString(),
-    };
-
-    // add a payload to the response
-    response.write('log line 1');
-    response.write('log line 2');
-
     // complete the response
-    response.end(200, function(err) {
+    response.send(200, 'example payload', function(err) {
         if(!!err) {
             console.error('An error ocurred when sending a method response:\n' +
                 err.toString());
@@ -65,13 +56,8 @@ function onDoorLock(request, response) {
 
     // Implement actual logic here.
 
-    // add some properties to the response
-    response.properties = {
-        'doorState': 'locked'
-    };
-
     // complete the response
-    response.end(200, function(err) {
+    response.send(200, function(err) {
         if(!!err) {
             console.error('An error ocurred when sending a method response:\n' +
                 err.toString());
@@ -86,17 +72,9 @@ function printDeviceMethodRequest(request) {
     // print method name
     console.log('Received method call for method \'' + request.methodName + '\'');
 
-    // print method properties received
-    console.log('Request properties:');
-    for (var key in request.properties) {
-        if (request.properties.hasOwnProperty(key)) {
-            console.log('  ' + key + ' = ' + request.properties[key]);
-        }
-    }
-
     // if there's a payload just do a default console log on it
-    if(!!(request.body)) {
-        console.log('Body:\n' + request.body);
+    if(!!(request.payload)) {
+        console.log('Payload:\n' + request.payload);
     }
 }
 

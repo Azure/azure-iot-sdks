@@ -57,7 +57,7 @@ describe('SharedAccessSignature', function () {
     it('returns a SharedAccessSignature', function () {
       var sas = SharedAccessSignature.create('uri', 'name', 'key', 123);
       assert.instanceOf(sas, SharedAccessSignature);
-      assert.sameMembers(Object.keys(sas), ['sr', 'sig', 'se', 'skn']);
+      assert.includeMembers(Object.keys(sas), ['sr', 'sig', 'se', 'skn']);
     });
 
     /*Tests_SRS_NODE_COMMON_SAS_05_011: [The sr property shall have the value of resourceUri.]*/
@@ -95,6 +95,25 @@ describe('SharedAccessSignature', function () {
       });
     });
   });
+
+  describe('#extend', function () {
+
+    it('throws when \'expiry\' is falsy', function () {
+      var sas = SharedAccessSignature.create('uri', 'n', 'key', 12345);
+      ['', null, undefined].forEach(function (expiry) {
+        assert.throws(function () {
+          sas.extend(expiry);
+        }, ReferenceError, 'expiry is ' + expiry);
+      });
+    });
+
+    it('extends when \'expiry\' is an integer', function () {
+      var sas = SharedAccessSignature.create('uri', 'n', 'key', 12345);
+      sas.extend(12345);
+      assert.propertyVal(sas,'se',12345);
+    });
+  });
+
 
   describe('#parse', function () {
     /*Tests_SRS_NODE_COMMON_SAS_05_005: [The parse method shall throw FormatError if the shared access signature string does not start with 'SharedAccessSignature<space>'.]*/

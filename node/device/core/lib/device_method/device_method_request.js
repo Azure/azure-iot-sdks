@@ -13,13 +13,10 @@
  * @param {String}  requestId         The request identifier supplied by the
  *                                    service for this device method call.
  * @param {String}  methodName        The name of the method to be called.
- * @param {Object}  properties        A string key/value map containing 
- *                                    properties associated with this method
- *                                    call.
  * @param {Buffer}  body              A Node `Buffer` representing the payload
  *                                    of the method call request.
  */
-function DeviceMethodRequest(requestId, methodName, properties, body) {
+function DeviceMethodRequest(requestId, methodName, body) {
   // Codes_SRS_NODE_DEVICE_METHOD_REQUEST_13_002: [ DeviceMethodRequest shall throw an Error if requestId is an empty string. ]
   if(typeof(requestId) === 'string' && requestId.length === 0) {
     throw new Error('requestId must not be an empty string');
@@ -40,8 +37,7 @@ function DeviceMethodRequest(requestId, methodName, properties, body) {
 
   this.requestId = requestId;
   this.methodName = methodName;
-  this.properties = properties || {};
-  this.body = body;
+  this.payload = JSON.parse(body.toString());
 }
 
 module.exports = DeviceMethodRequest;

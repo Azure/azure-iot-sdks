@@ -3,7 +3,6 @@
 
 'use strict';
 
-var anHourFromNow = require('azure-iot-common').anHourFromNow;
 var ArgumentError = require('azure-iot-common').errors.ArgumentError;
 var endpoint = require('azure-iot-common').endpoint;
 var RestApiClient = require('./rest_api_client.js');
@@ -59,11 +58,10 @@ Registry.fromConnectionString = function fromConnectionString(value) {
 
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_009: [The `fromConnectionString` method shall derive and transform the needed parts from the connection string in order to create a `config` object for the constructor (see `SRS_NODE_IOTHUB_REGISTRY_05_001`).]*/
   var cn = ConnectionString.parse(value);
-  var sas = SharedAccessSignature.create(cn.HostName, cn.SharedAccessKeyName, cn.SharedAccessKey, anHourFromNow());
 
   var config = {
     host: cn.HostName,
-    sharedAccessSignature: sas.toString()
+    sharedAccessSignature: SharedAccessSignature.create(cn.HostName, cn.SharedAccessKeyName, cn.SharedAccessKey, Date.now())
   };
 
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_010: [The `fromConnectionString` method shall return a new instance of the `Registry` object.]*/

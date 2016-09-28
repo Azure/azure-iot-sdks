@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import { Http } from 'azure-iot-http-base';
 import Query = require('./query');
 import RestApiClient = require('./rest_api_client');
 
@@ -22,12 +21,12 @@ declare class Registry {
     getJob(jobId: string, done: Registry.JobCallback): void;
     cancelJob(jobId: string, done: Registry.JobCallback): void;
 
-    // Device Twin
-    getDeviceTwin(deviceId: string, done: Registry.ResponseCallback): void;
-    updateDeviceTwin(deviceId: string, patch: any, etag: string, done: Registry.ResponseCallback): void;
+    // Twin
+    getTwin(deviceId: string, done: Registry.ResponseCallback): void;
+    updateTwin(deviceId: string, patch: any, etag: string, done: Registry.ResponseCallback): void;
 
     // Queries
-    createQuery(sqlQuery: string, pageSize: number) : Query;
+    createQuery(sqlQuery: string, pageSize: number): Query;
 
     // Factory methods
     static fromConnectionString(value: string): Registry;

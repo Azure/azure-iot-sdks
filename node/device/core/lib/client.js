@@ -128,7 +128,6 @@ Client.prototype._addMethodCallback = function(methodName, callback) {
     var request = new DeviceMethodRequest(
       message.requestId,
       message.methods.methodName,
-      message.properties,
       message.body
     );
 

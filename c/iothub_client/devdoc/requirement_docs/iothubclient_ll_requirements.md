@@ -39,9 +39,9 @@ typedef void(*IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK)(IOTHUB_CLIENT_CONFIRMAT
 typedef int(*IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC)(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback);
 typedef void*(*IOTHUB_CLIENT_TRANSPORT_PROVIDER)(void);
 
-typedef void(*IOTHUB_CLIENT_GET_DESIRED_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, const unsigned char* desiredState, size_t size, uint32 desiredVersion, uint32 lastSeenReportedVersion, void* userContextCallback);
-typedef void(*IOTHUB_CLIENT_PATCH_DESIRED_CALLBACK)(const unsigned char* payLoad, size_t size, uint32 desiredVersion, uint32 lastSeenReportedVersion, void* userContextCallback);
-typedef void(*IOTHUB_CLIENT_PATCH_REPORTED_CALLBACK)(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback);
+typedef void(*IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK)(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback);
+typedef void(*IOTHUB_CLIENT_REPORTED_STATE_CALLBACK)(int status_code, void* userContextCallback);
+typedef int(*IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC)(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback);
 
 typedef struct IOTHUB_CLIENT_CONFIG_TAG
 {
@@ -70,7 +70,7 @@ extern IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG
 extern  IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(IOTHUB_CLIENT_DEVICE_CONFIG * config);
 
 extern void IoTHubClient_LL_Destroy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
- 
+
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendEventAsync(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback);
 extern void IoTHubClient_LL_DoWork(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetMessageCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC messageCallback, void* userContextCallback);
@@ -83,8 +83,6 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob(IOTHUB_CLIENT_LL_HANDLE
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceTwinCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SendReportedState(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size, uint32_t reportedVersion, uint32_t lastSeenDesiredVersion, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback);
 ```
-
-
 
 ## IoTHubClient_LL_CreateFromConnectionString
 
@@ -344,7 +342,7 @@ IoTHubClient_LL_SetOption sets the runtime option "optionName" to the value poin
 
 **SRS_IOTHUBCLIENT_LL_02_036: [** If `value` is `NULL` then `IoTHubClient_LL_SetOption` shall return `IOTHUB_CLIENT_INVALID_ARG`.** ]**  
 
-#### Options that shall be handled by IoTHubClient_LL: 
+### Options that shall be handled by IoTHubClient_LL:
 
 -**SRS_IOTHUBCLIENT_LL_02_039: [** "messageTimeout" - once `IoTHubClient_LL_SendEventAsync` is called the message shall timeout after `*value` miliseconds. value is a pointer to a uint64.** ]**
 
@@ -375,7 +373,7 @@ IoTHubClient_LL_SetOption sets the runtime option "optionName" to the value poin
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_UploadToBlob(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size);
 ```
 
-#### `IoTHubClient_LL_UploadToBlob` calls `IoTHubClient_LL_UploadToBlob_Impl` to synchronously uploads the data pointed to by `source` having the size `size` to a blob called `destinationFileName` in Azure Blob Storage.
+### `IoTHubClient_LL_UploadToBlob` calls `IoTHubClient_LL_UploadToBlob_Impl` to synchronously uploads the data pointed to by `source` having the size `size` to a blob called `destinationFileName` in Azure Blob Storage.
 
 **SRS_IOTHUBCLIENT_LL_02_061: [** If `iotHubClientHandle` is `NULL` then `IoTHubClient_LL_UploadToBlob` shall fail and return `IOTHUB_CLIENT_INVALID_ARG`.** ]**
 
@@ -414,7 +412,8 @@ step 3: inform IoTHub that the upload has finished.
 **SRS_IOTHUBCLIENT_LL_02_073: [** If the credentials used to create `iotHubClientHandle` have "sasToken" then `IoTHubClient_LL_UploadToBlob` shall add 
 the following HTTP request headers:  ]**
 
-#### "Authorization": original SAS token
+### "Authorization": original SAS token
+
 **SRS_IOTHUBCLIENT_LL_02_074: [** If adding "Authorization" fails then `IoTHubClient_LL_UploadToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.  ]**
 
 **SRS_IOTHUBCLIENT_LL_02_075: [** `IoTHubClient_LL_UploadToBlob` shall execute `HTTPAPIEX_ExecuteRequest` passing the following information for arguments:  ]**
@@ -476,12 +475,14 @@ If the credentials used to create `iotHubClientHandle` do not have "deviceKey" o
 
 **SRS_IOTHUBCLIENT_LL_02_082: [** If extracting and saving the correlationId or SasUri fails then `IoTHubClient_LL_UploadToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 
-### step 2: upload using the SasUri.
+### step 2: upload using the SasUri
+
 **SRS_IOTHUBCLIENT_LL_02_083: [** `IoTHubClient_LL_UploadToBlob` shall call `Blob_UploadFromSasUri` and capture the HTTP return code and HTTP body.** ]**
 
 **SRS_IOTHUBCLIENT_LL_02_084: [** If `Blob_UploadFromSasUri` fails then `IoTHubClient_LL_UploadToBlob` shall fail and return `IOTHUB_CLIENT_ERROR`.** ]**
 
-### step 3: inform IoTHub that the upload has finished.
+### step 3: inform IoTHub that the upload has finished
+
 **SRS_IOTHUBCLIENT_LL_02_085: [** `IoTHubClient_LL_UploadToBlob` shall use the same authorization as step 1. to prepare and perform a HTTP request with the following parameters:  ]**
 
 - HTTPAPI_REQUEST_TYPE requestType - HTTPAPI_REQUEST_POST
@@ -633,12 +634,13 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetDeviceMethodCallback(IOTHUB_CLIEN
 ## IoTHubClient_LL_DeviceMethodComplete
 
 ```c
-int IoTHubClient_LL_DeviceMethodComplete(IOTHUB_CLIENT_LL_HANDLE handle, const unsigned char* payLoad, size_t size)
+int IoTHubClient_LL_DeviceMethodComplete(IOTHUB_CLIENT_LL_HANDLE handle, const unsigned char* payLoad, size_t size, BUFFER_HANDLE response)
 ```
 
-**SRS_IOTHUBCLIENT_LL_07_017: [** If `handle` is NULL then `IoTHubClient_LL_DeviceMethodComplete` shall return 500. **]**
+**SRS_IOTHUBCLIENT_LL_07_017: [** If `handle` or response is NULL then `IoTHubClient_LL_DeviceMethodComplete` shall return 500. **]**
 
 **SRS_IOTHUBCLIENT_LL_07_018: [** If `deviceMethodCallback` is not NULL `IoTHubClient_LL_DeviceMethodComplete` shall execute `deviceMethodCallback` and return the status. **]**
 
 **SRS_IOTHUBCLIENT_LL_07_019: [** If `deviceMethodCallback` is NULL `IoTHubClient_LL_DeviceMethodComplete` shall return 404. **]**
 
+**SRS_IOTHUBCLIENT_LL_07_020: [** `deviceMethodCallback` shall buil the BUFFER_HANDLE with the response payload from the `IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC` callback. **]**

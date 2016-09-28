@@ -5,7 +5,7 @@
 
 # Public API
 
-## DeviceMethodRequest(requestId, methodName, properties, body) [constructor]
+## DeviceMethodRequest(requestId, methodName, body) [constructor]
 Initializes a new instance of the `DeviceMethodRequest` class.
 
 **SRS_NODE_DEVICE_METHOD_REQUEST_13_001: [** `DeviceMethodRequest` shall throw a `ReferenceError` if `requestId` is falsy or is not a string. **]**
