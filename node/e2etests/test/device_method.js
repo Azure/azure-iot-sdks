@@ -28,7 +28,7 @@ module.exports = function(hubConnectionString) {
         }
       };
 
-    // create a new device for every tests
+    // create a new device for every test
     beforeEach(function (done) {
       this.timeout(20000);
 
@@ -48,7 +48,7 @@ module.exports = function(hubConnectionString) {
       });
     });
 
-    // nuke the test device after every tests
+    // nuke the test device after every test
     afterEach(function (done) {
       this.timeout(20000);
       if (!!deviceClient) {
@@ -119,5 +119,3 @@ module.exports = function(hubConnectionString) {
     });
   });
 };
-
-module.exports(process.env.IOTHUB_CONNECTION_STRING);

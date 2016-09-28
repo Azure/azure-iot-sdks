@@ -43,7 +43,7 @@ Query.prototype.next = function(done) {
       self.hasMoreResults = self._continuationToken !== null;
 
       /*Codes_SRS_NODE_SERVICE_QUERY_16_007: [The `next` method shall call the `done` callback with a `null` error object, the results of the query and the response of the underlying transport if the request was successful.]*/
-      done(null, result.content, response);
+      done(null, result.items, response);
     }
   });
 };
