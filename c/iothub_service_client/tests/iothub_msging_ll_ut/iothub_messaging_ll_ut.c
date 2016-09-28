@@ -40,8 +40,6 @@
 TEST_DEFINE_ENUM_TYPE(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES);
 
-MOCKABLE_FUNCTION(, const IO_INTERFACE_DESCRIPTION*, saslclientio_get_interface_description);
-
 MOCKABLE_FUNCTION(, JSON_Array*, json_array_get_array, const JSON_Array*, array, size_t, index);
 MOCKABLE_FUNCTION(, JSON_Value*, json_parse_string, const char *, string);
 MOCKABLE_FUNCTION(, const char*, json_object_get_string, const JSON_Object *, object, const char *, name);
@@ -473,6 +471,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         REGISTER_UMOCK_ALIAS_TYPE(JSON_Status, int);
         REGISTER_UMOCK_ALIAS_TYPE(LIST_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(LIST_ITEM_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(receiver_settle_mode, uint8_t);
 
         REGISTER_GLOBAL_MOCK_HOOK(STRING_construct, my_STRING_construct);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_construct, NULL);
