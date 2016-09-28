@@ -126,7 +126,7 @@ public:
     MOCK_STATIC_METHOD_3(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetDeviceTwinCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK, deviceTwinCallback, void*, userContextCallback)
     MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK);
 
-    MOCK_STATIC_METHOD_4(, int, deviceMethodCallback, const char*, method_name, const unsigned char*, payLoad, size_t, size, void*, userContextCallback)
+    MOCK_STATIC_METHOD_6(, int, deviceMethodCallback, const char*, method_name, const unsigned char*, payLoad, size_t, size, unsigned char**, response, size_t*, resp_size, void*, userContextCallback)
     MOCK_METHOD_END(int, 200);
 
     MOCK_STATIC_METHOD_3(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetDeviceMethodCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, deviceMethodCallback, void*, userContextCallback);
@@ -368,7 +368,7 @@ DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubC
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , void, sendReportedCallback, int, status_code, void*, userContextCallback);
 DECLARE_GLOBAL_MOCK_METHOD_5(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SendReportedState, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, const unsigned char*, reportedState, size_t, size, IOTHUB_CLIENT_REPORTED_STATE_CALLBACK, reportedStateCallback, void*, userContextCallback);
 
-DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubClientMocks, , int, deviceMethodCallback, const char*, method_name, const unsigned char*, payLoad, size_t, size, void*, userContextCallback)
+DECLARE_GLOBAL_MOCK_METHOD_6(CIoTHubClientMocks, , int, deviceMethodCallback, const char*, method_name, const unsigned char*, payLoad, size_t, size, unsigned char**, response, size_t*, resp_size, void*, userContextCallback)
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetDeviceMethodCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC, deviceMethodCallback, void*, userContextCallback);
 
 #ifndef DONT_USE_UPLOADTOBLOB

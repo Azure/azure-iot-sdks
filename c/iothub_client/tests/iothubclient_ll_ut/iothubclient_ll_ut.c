@@ -59,7 +59,7 @@ MOCKABLE_FUNCTION(, void, test_event_confirmation_callback, IOTHUB_CLIENT_CONFIR
 MOCKABLE_FUNCTION(, IOTHUBMESSAGE_DISPOSITION_RESULT, test_message_callback_async, IOTHUB_MESSAGE_HANDLE, message, void*, userContextCallback);
 MOCKABLE_FUNCTION(, void, iothub_reported_state_callback, int, status_code, void*, userContextCallback);
 MOCKABLE_FUNCTION(, void, iothub_device_twin_callback, DEVICE_TWIN_UPDATE_STATE, update_state, const unsigned char*, payLoad, size_t, size, void*, userContextCallback);
-MOCKABLE_FUNCTION(, int, deviceMethodCallback, const char*, method_name, const unsigned char*, payload, size_t, size, void*, userContextCallback);
+MOCKABLE_FUNCTION(, int, deviceMethodCallback, const char*, method_name, const unsigned char*, payload, size_t, size, unsigned char**, response, size_t*, resp_size, void*, userContextCallback);
 
 MOCKABLE_FUNCTION(, STRING_HANDLE, FAKE_IoTHubTransport_GetHostname, TRANSPORT_LL_HANDLE, handle);
 MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_SetOption, TRANSPORT_LL_HANDLE, handle, const char*, optionName, const void*, value);
@@ -137,6 +137,8 @@ static const char* TEST_STRING_VALUE = "Test string value";
 #define TEST_IOTHUB_DEVICE_HANDLE           (IOTHUB_DEVICE_HANDLE)0x50
 #define TEST_MESSAGE_HANDLE                 (IOTHUB_MESSAGE_HANDLE)0x51
 #define TEST_TIME_VALUE                     (time_t)123456
+
+#define TEST_BUFFER_HANDLE                  (BUFFER_HANDLE)0x52
 
 static const char* TEST_METHOD_NAME = "method_name";
 static const char* TEST_CHAR = "TestChar";
@@ -388,6 +390,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_DEVICE_TWIN_STATE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(CONSTBUFFER_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_IDENTITY_TYPE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
 
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_RESULT, int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_PROCESS_ITEM_RESULT, int);
@@ -449,6 +452,9 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(STRING_c_str, TEST_STRING_VALUE);
     REGISTER_GLOBAL_MOCK_HOOK(STRING_clone, my_STRING_clone);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_clone, NULL);
+
+    REGISTER_GLOBAL_MOCK_RETURN(BUFFER_build, 0);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(BUFFER_build, __LINE__);
 
     REGISTER_GLOBAL_MOCK_HOOK(CONSTBUFFER_Create, my_CONSTBUFFER_Create);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(CONSTBUFFER_Create, NULL);
@@ -3176,14 +3182,24 @@ TEST_FUNCTION(IoTHubClient_LL_DeviceMethodComplete_succeed)
 
     umock_c_reset_all_calls();
 
-    STRICT_EXPECTED_CALL(deviceMethodCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG))
+    STRICT_EXPECTED_CALL(deviceMethodCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument_method_name()
         .IgnoreArgument_payload()
         .IgnoreArgument_size()
-        .IgnoreArgument_userContextCallback();
+        .IgnoreArgument_userContextCallback()
+        .IgnoreArgument_response()
+        .IgnoreArgument_resp_size();
+
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        .IgnoreArgument_size();
+    STRICT_EXPECTED_CALL(BUFFER_build(TEST_BUFFER_HANDLE, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument_source()
+        .IgnoreArgument_size();
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument_ptr();
 
     //act
-    int status = IoTHubClient_LL_DeviceMethodComplete(h, TEST_METHOD_NAME, (const unsigned char*)TEST_STRING_VALUE, strlen(TEST_STRING_VALUE) );
+    int status = IoTHubClient_LL_DeviceMethodComplete(h, TEST_METHOD_NAME, (const unsigned char*)TEST_STRING_VALUE, strlen(TEST_STRING_VALUE), TEST_BUFFER_HANDLE);
 
     //assert
     ASSERT_ARE_EQUAL(int, 200, status);
@@ -3201,7 +3217,7 @@ TEST_FUNCTION(IoTHubClient_LL_DeviceMethodComplete_No_callback_succeed)
     umock_c_reset_all_calls();
 
     //act
-    int status = IoTHubClient_LL_DeviceMethodComplete(h, TEST_METHOD_NAME, (const unsigned char*)TEST_STRING_VALUE, strlen(TEST_STRING_VALUE) );
+    int status = IoTHubClient_LL_DeviceMethodComplete(h, TEST_METHOD_NAME, (const unsigned char*)TEST_STRING_VALUE, strlen(TEST_STRING_VALUE), TEST_BUFFER_HANDLE);
 
     //assert
     ASSERT_ARE_EQUAL(int, 404, status);
@@ -3211,19 +3227,37 @@ TEST_FUNCTION(IoTHubClient_LL_DeviceMethodComplete_No_callback_succeed)
     IoTHubClient_LL_Destroy(h);
 }
 
-/* Tests_SRS_IOTHUBCLIENT_LL_07_017: [ If handle is NULL then IoTHubClient_LL_DeviceMethodComplete shall return 500. ] */
+/* Tests_SRS_IOTHUBCLIENT_LL_07_017: [ If `handle` or response is NULL then `IoTHubClient_LL_DeviceMethodComplete` shall return 500. ] */
 TEST_FUNCTION(IoTHubClient_LL_DeviceMethodComplete_handle_NULL_succeed)
 {
     //arrange
 
     //act
-    int status = IoTHubClient_LL_DeviceMethodComplete(NULL, TEST_METHOD_NAME, (const unsigned char*)TEST_STRING_VALUE, strlen(TEST_STRING_VALUE) );
+    int status = IoTHubClient_LL_DeviceMethodComplete(NULL, TEST_METHOD_NAME, (const unsigned char*)TEST_STRING_VALUE, strlen(TEST_STRING_VALUE), TEST_BUFFER_HANDLE);
 
     //assert
     ASSERT_ARE_EQUAL(int, 500, status);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
+}
+
+/* Tests_SRS_IOTHUBCLIENT_LL_07_017: [ If `handle` or response is NULL then `IoTHubClient_LL_DeviceMethodComplete` shall return 500. ] */
+TEST_FUNCTION(IoTHubClient_LL_DeviceMethodComplete_BUFFER_NULL_succeed)
+{
+    //arrange
+    IOTHUB_CLIENT_LL_HANDLE h = IoTHubClient_LL_Create(&TEST_CONFIG);
+    umock_c_reset_all_calls();
+
+    //act
+    int status = IoTHubClient_LL_DeviceMethodComplete(h, TEST_METHOD_NAME, (const unsigned char*)TEST_STRING_VALUE, strlen(TEST_STRING_VALUE), NULL);
+
+    //assert
+    ASSERT_ARE_EQUAL(int, 500, status);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubClient_LL_Destroy(h);
 }
 
 /*Tests_SRS_IOTHUBCLIENT_LL_10_001: [ IoTHubClient_LL_SetDeviceTwinCallback shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter iotHubClientHandle is NULL.] */

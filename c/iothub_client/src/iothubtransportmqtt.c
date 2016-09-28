@@ -519,7 +519,7 @@ static int publish_mqtt_telemetry_msg(PMQTTTRANSPORT_HANDLE_DATA transport_data,
     return result;
 }
 
-static int publish_device_method_message(MQTTTRANSPORT_HANDLE_DATA* transport_data, int status_code, uint16_t request_id)
+static int publish_device_method_message(MQTTTRANSPORT_HANDLE_DATA* transport_data, int status_code, uint16_t request_id, BUFFER_HANDLE response)
 {
     int result;
     uint16_t packet_id = get_next_packet_id(transport_data);
@@ -532,7 +532,7 @@ static int publish_device_method_message(MQTTTRANSPORT_HANDLE_DATA* transport_da
     }
     else
     {
-        MQTT_MESSAGE_HANDLE mqtt_get_msg = mqttmessage_create(packet_id, STRING_c_str(msg_topic), DELIVER_AT_MOST_ONCE, NULL, 0);
+        MQTT_MESSAGE_HANDLE mqtt_get_msg = mqttmessage_create(packet_id, STRING_c_str(msg_topic), DELIVER_AT_MOST_ONCE, BUFFER_u_char(response), BUFFER_length(response));
         if (mqtt_get_msg == NULL)
         {
             LogError("Failed constructing mqtt message.");
@@ -837,18 +837,24 @@ static void mqtt_notification_callback(MQTT_MESSAGE_HANDLE msgHandle, void* call
                 }
                 else
                 {
+                    BUFFER_HANDLE result_buffer;
                     if (retrieve_device_method_rid_info(topic_resp, method_name, &request_id) != 0)
+                    {
+                        LogError("Failure: retrieve device topic info");
+                    }
+                    else if ((result_buffer = BUFFER_new()) == NULL)
                     {
                         LogError("Failure: retrieve device topic info");
                     }
                     else
                     {
                         const APP_PAYLOAD* payload = mqttmessage_getApplicationMsg(msgHandle);
-                        int status_code = IoTHubClient_LL_DeviceMethodComplete(transportData->llClientHandle, STRING_c_str(method_name), payload->message, payload->length);
-                        if (publish_device_method_message(transportData, status_code, request_id) != 0)
+                        int status_code = IoTHubClient_LL_DeviceMethodComplete(transportData->llClientHandle, STRING_c_str(method_name), payload->message, payload->length, result_buffer);
+                        if (publish_device_method_message(transportData, status_code, request_id, result_buffer) != 0)
                         {
                             LogError("Failure: publishing device method response");
                         }
+                        BUFFER_delete(result_buffer);
                     }
                     STRING_delete(method_name);
                 }
