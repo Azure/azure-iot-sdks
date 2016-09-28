@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabCallDeviceMethod = new System.Windows.Forms.TabControl();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.targetTextBox = new System.Windows.Forms.TextBox();
@@ -101,8 +101,26 @@
             this.label5 = new System.Windows.Forms.Label();
             this.sendMessageToDeviceButton = new System.Windows.Forms.Button();
             this.textBoxMessage = new System.Windows.Forms.TextBox();
+            this.tabDeviceMethod = new System.Windows.Forms.TabPage();
+            this.callDeviceMethodCancelButton = new System.Windows.Forms.Button();
+            this.label22 = new System.Windows.Forms.Label();
+            this.callDeviceMethodNumericUpDown = new System.Windows.Forms.NumericUpDown();
+            this.label21 = new System.Windows.Forms.Label();
+            this.returnPayloadTextBox = new System.Windows.Forms.TextBox();
+            this.returnStatusTextBox = new System.Windows.Forms.TextBox();
+            this.label20 = new System.Windows.Forms.Label();
+            this.callDeviceMethodButton = new System.Windows.Forms.Button();
+            this.deviceIDsComboBoxForDeviceMethod = new System.Windows.Forms.ComboBox();
+            this.methodPayloadTextBox = new System.Windows.Forms.TextBox();
+            this.methodNameTextBox = new System.Windows.Forms.TextBox();
+            this.iotHubNameTextBoxForDeviceMethod = new System.Windows.Forms.TextBox();
+            this.label19 = new System.Windows.Forms.Label();
+            this.label18 = new System.Windows.Forms.Label();
+            this.label17 = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
+            this.label13 = new System.Windows.Forms.Label();
             this.ehStringToolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.tabControl1.SuspendLayout();
+            this.tabCallDeviceMethod.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.groupBox5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDownTTL)).BeginInit();
@@ -118,24 +136,27 @@
             this.tabMessagesToDevice.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.messagePropertiesGrid)).BeginInit();
             this.groupBox4.SuspendLayout();
+            this.tabDeviceMethod.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.callDeviceMethodNumericUpDown)).BeginInit();
             this.SuspendLayout();
             // 
-            // tabControl1
+            // tabCallDeviceMethod
             // 
-            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.tabCallDeviceMethod.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Controls.Add(this.tabManagement);
-            this.tabControl1.Controls.Add(this.tabData);
-            this.tabControl1.Controls.Add(this.tabMessagesToDevice);
-            this.tabControl1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tabControl1.Location = new System.Drawing.Point(12, 12);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(759, 630);
-            this.tabControl1.TabIndex = 0;
-            this.tabControl1.Selected += new System.Windows.Forms.TabControlEventHandler(this.tabControl1_Selected);
+            this.tabCallDeviceMethod.Controls.Add(this.tabPage2);
+            this.tabCallDeviceMethod.Controls.Add(this.tabManagement);
+            this.tabCallDeviceMethod.Controls.Add(this.tabData);
+            this.tabCallDeviceMethod.Controls.Add(this.tabMessagesToDevice);
+            this.tabCallDeviceMethod.Controls.Add(this.tabDeviceMethod);
+            this.tabCallDeviceMethod.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tabCallDeviceMethod.Location = new System.Drawing.Point(12, 12);
+            this.tabCallDeviceMethod.Name = "tabCallDeviceMethod";
+            this.tabCallDeviceMethod.SelectedIndex = 0;
+            this.tabCallDeviceMethod.Size = new System.Drawing.Size(759, 630);
+            this.tabCallDeviceMethod.TabIndex = 0;
+            this.tabCallDeviceMethod.Selected += new System.Windows.Forms.TabControlEventHandler(this.tabControl1_Selected);
             // 
             // tabPage2
             // 
@@ -577,7 +598,7 @@
             this.groupBox3.Controls.Add(this.dateTimePicker);
             this.groupBox3.Location = new System.Drawing.Point(6, 24);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(620, 247);
+            this.groupBox3.Size = new System.Drawing.Size(739, 247);
             this.groupBox3.TabIndex = 26;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Monitoring";
@@ -674,7 +695,7 @@
             this.eventHubNameTextBoxForDataTab.Location = new System.Drawing.Point(101, 34);
             this.eventHubNameTextBoxForDataTab.Name = "eventHubNameTextBoxForDataTab";
             this.eventHubNameTextBoxForDataTab.ReadOnly = true;
-            this.eventHubNameTextBoxForDataTab.Size = new System.Drawing.Size(503, 22);
+            this.eventHubNameTextBoxForDataTab.Size = new System.Drawing.Size(622, 22);
             this.eventHubNameTextBoxForDataTab.TabIndex = 17;
             // 
             // deviceIDsComboBoxForEvent
@@ -685,7 +706,7 @@
             this.deviceIDsComboBoxForEvent.FormattingEnabled = true;
             this.deviceIDsComboBoxForEvent.Location = new System.Drawing.Point(101, 73);
             this.deviceIDsComboBoxForEvent.Name = "deviceIDsComboBoxForEvent";
-            this.deviceIDsComboBoxForEvent.Size = new System.Drawing.Size(503, 24);
+            this.deviceIDsComboBoxForEvent.Size = new System.Drawing.Size(622, 24);
             this.deviceIDsComboBoxForEvent.TabIndex = 18;
             this.deviceIDsComboBoxForEvent.SelectionChangeCommitted += new System.EventHandler(this.deviceIDsComboBoxForEvent_SelectionChangeCommitted);
             // 
@@ -699,7 +720,7 @@
             this.dateTimePicker.Location = new System.Drawing.Point(101, 115);
             this.dateTimePicker.Name = "dateTimePicker";
             this.dateTimePicker.ShowCheckBox = true;
-            this.dateTimePicker.Size = new System.Drawing.Size(503, 22);
+            this.dateTimePicker.Size = new System.Drawing.Size(622, 22);
             this.dateTimePicker.TabIndex = 22;
             // 
             // groupBox1
@@ -710,7 +731,7 @@
             this.groupBox1.Controls.Add(this.eventHubTextBox);
             this.groupBox1.Location = new System.Drawing.Point(6, 292);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(620, 303);
+            this.groupBox1.Size = new System.Drawing.Size(739, 303);
             this.groupBox1.TabIndex = 14;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Event Hub Data";
@@ -723,7 +744,7 @@
             this.eventHubTextBox.Location = new System.Drawing.Point(8, 21);
             this.eventHubTextBox.Name = "eventHubTextBox";
             this.eventHubTextBox.ReadOnly = true;
-            this.eventHubTextBox.Size = new System.Drawing.Size(606, 276);
+            this.eventHubTextBox.Size = new System.Drawing.Size(725, 276);
             this.eventHubTextBox.TabIndex = 5;
             this.eventHubTextBox.Text = "";
             // 
@@ -764,6 +785,8 @@
             // 
             this.messagePropertiesGrid.AllowUserToResizeColumns = false;
             this.messagePropertiesGrid.AllowUserToResizeRows = false;
+            this.messagePropertiesGrid.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.messagePropertiesGrid.BackgroundColor = System.Drawing.Color.White;
             this.messagePropertiesGrid.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.messagePropertiesGrid.ColumnHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.Single;
@@ -776,24 +799,24 @@
             this.messagePropertiesGrid.RowHeadersBorderStyle = System.Windows.Forms.DataGridViewHeaderBorderStyle.None;
             this.messagePropertiesGrid.RowTemplate.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             this.messagePropertiesGrid.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.messagePropertiesGrid.Size = new System.Drawing.Size(561, 112);
+            this.messagePropertiesGrid.Size = new System.Drawing.Size(710, 112);
             this.messagePropertiesGrid.TabIndex = 13;
             // 
             // KeyColumn
             // 
+            this.KeyColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
             this.KeyColumn.HeaderText = "Key";
             this.KeyColumn.Name = "KeyColumn";
             this.KeyColumn.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             this.KeyColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.KeyColumn.Width = 250;
             // 
             // ValueColumn
             // 
+            this.ValueColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
             this.ValueColumn.HeaderText = "Value";
             this.ValueColumn.Name = "ValueColumn";
             this.ValueColumn.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             this.ValueColumn.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.ValueColumn.Width = 250;
             // 
             // checkBoxMonitorFeedbackEndpoint
             // 
@@ -827,7 +850,7 @@
             this.deviceIDsComboBoxForCloudToDeviceMessage.FormattingEnabled = true;
             this.deviceIDsComboBoxForCloudToDeviceMessage.Location = new System.Drawing.Point(104, 81);
             this.deviceIDsComboBoxForCloudToDeviceMessage.Name = "deviceIDsComboBoxForCloudToDeviceMessage";
-            this.deviceIDsComboBoxForCloudToDeviceMessage.Size = new System.Drawing.Size(516, 24);
+            this.deviceIDsComboBoxForCloudToDeviceMessage.Size = new System.Drawing.Size(630, 24);
             this.deviceIDsComboBoxForCloudToDeviceMessage.TabIndex = 10;
             this.deviceIDsComboBoxForCloudToDeviceMessage.SelectionChangeCommitted += new System.EventHandler(this.deviceIDsComboBoxForMessage_SelectionChangeCommitted);
             // 
@@ -838,7 +861,7 @@
             this.iotHubNameTextBox.Location = new System.Drawing.Point(104, 53);
             this.iotHubNameTextBox.Name = "iotHubNameTextBox";
             this.iotHubNameTextBox.ReadOnly = true;
-            this.iotHubNameTextBox.Size = new System.Drawing.Size(516, 22);
+            this.iotHubNameTextBox.Size = new System.Drawing.Size(630, 22);
             this.iotHubNameTextBox.TabIndex = 9;
             // 
             // label2
@@ -870,7 +893,7 @@
             this.groupBox4.Controls.Add(this.messagesTextBox);
             this.groupBox4.Location = new System.Drawing.Point(6, 378);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(622, 218);
+            this.groupBox4.Size = new System.Drawing.Size(728, 218);
             this.groupBox4.TabIndex = 7;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Output";
@@ -883,7 +906,7 @@
             this.messagesTextBox.Location = new System.Drawing.Point(6, 21);
             this.messagesTextBox.Name = "messagesTextBox";
             this.messagesTextBox.ReadOnly = true;
-            this.messagesTextBox.Size = new System.Drawing.Size(610, 191);
+            this.messagesTextBox.Size = new System.Drawing.Size(716, 191);
             this.messagesTextBox.TabIndex = 7;
             this.messagesTextBox.Text = "";
             // 
@@ -931,21 +954,220 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxMessage.Location = new System.Drawing.Point(104, 111);
             this.textBoxMessage.Name = "textBoxMessage";
-            this.textBoxMessage.Size = new System.Drawing.Size(516, 22);
+            this.textBoxMessage.Size = new System.Drawing.Size(630, 22);
             this.textBoxMessage.TabIndex = 4;
+            // 
+            // tabDeviceMethod
+            // 
+            this.tabDeviceMethod.Controls.Add(this.callDeviceMethodCancelButton);
+            this.tabDeviceMethod.Controls.Add(this.label22);
+            this.tabDeviceMethod.Controls.Add(this.callDeviceMethodNumericUpDown);
+            this.tabDeviceMethod.Controls.Add(this.label21);
+            this.tabDeviceMethod.Controls.Add(this.returnPayloadTextBox);
+            this.tabDeviceMethod.Controls.Add(this.returnStatusTextBox);
+            this.tabDeviceMethod.Controls.Add(this.label20);
+            this.tabDeviceMethod.Controls.Add(this.callDeviceMethodButton);
+            this.tabDeviceMethod.Controls.Add(this.deviceIDsComboBoxForDeviceMethod);
+            this.tabDeviceMethod.Controls.Add(this.methodPayloadTextBox);
+            this.tabDeviceMethod.Controls.Add(this.methodNameTextBox);
+            this.tabDeviceMethod.Controls.Add(this.iotHubNameTextBoxForDeviceMethod);
+            this.tabDeviceMethod.Controls.Add(this.label19);
+            this.tabDeviceMethod.Controls.Add(this.label18);
+            this.tabDeviceMethod.Controls.Add(this.label17);
+            this.tabDeviceMethod.Controls.Add(this.label14);
+            this.tabDeviceMethod.Controls.Add(this.label13);
+            this.tabDeviceMethod.Location = new System.Drawing.Point(4, 25);
+            this.tabDeviceMethod.Name = "tabDeviceMethod";
+            this.tabDeviceMethod.Padding = new System.Windows.Forms.Padding(3);
+            this.tabDeviceMethod.Size = new System.Drawing.Size(751, 601);
+            this.tabDeviceMethod.TabIndex = 4;
+            this.tabDeviceMethod.Text = "Call Method on Device";
+            this.tabDeviceMethod.UseVisualStyleBackColor = true;
+            // 
+            // callDeviceMethodCancelButton
+            // 
+            this.callDeviceMethodCancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.callDeviceMethodCancelButton.Enabled = false;
+            this.callDeviceMethodCancelButton.Location = new System.Drawing.Point(577, 328);
+            this.callDeviceMethodCancelButton.Name = "callDeviceMethodCancelButton";
+            this.callDeviceMethodCancelButton.Size = new System.Drawing.Size(155, 30);
+            this.callDeviceMethodCancelButton.TabIndex = 18;
+            this.callDeviceMethodCancelButton.Text = "Cancel";
+            this.callDeviceMethodCancelButton.UseVisualStyleBackColor = true;
+            this.callDeviceMethodCancelButton.Click += new System.EventHandler(this.callDeviceMethodCancelButton_Click);
+            // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.Location = new System.Drawing.Point(137, 335);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(123, 16);
+            this.label22.TabIndex = 16;
+            this.label22.Text = "Timeout (seconds):";
+            // 
+            // callDeviceMethodNumericUpDown
+            // 
+            this.callDeviceMethodNumericUpDown.Location = new System.Drawing.Point(266, 333);
+            this.callDeviceMethodNumericUpDown.Name = "callDeviceMethodNumericUpDown";
+            this.callDeviceMethodNumericUpDown.Size = new System.Drawing.Size(53, 22);
+            this.callDeviceMethodNumericUpDown.TabIndex = 15;
+            this.callDeviceMethodNumericUpDown.Value = new decimal(new int[] {
+            60,
+            0,
+            0,
+            0});
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Location = new System.Drawing.Point(24, 417);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(103, 16);
+            this.label21.TabIndex = 14;
+            this.label21.Text = "Return payload:";
+            // 
+            // returnPayloadTextBox
+            // 
+            this.returnPayloadTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.returnPayloadTextBox.Location = new System.Drawing.Point(140, 414);
+            this.returnPayloadTextBox.Multiline = true;
+            this.returnPayloadTextBox.Name = "returnPayloadTextBox";
+            this.returnPayloadTextBox.ReadOnly = true;
+            this.returnPayloadTextBox.Size = new System.Drawing.Size(592, 180);
+            this.returnPayloadTextBox.TabIndex = 13;
+            // 
+            // returnStatusTextBox
+            // 
+            this.returnStatusTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.returnStatusTextBox.Location = new System.Drawing.Point(140, 386);
+            this.returnStatusTextBox.Name = "returnStatusTextBox";
+            this.returnStatusTextBox.ReadOnly = true;
+            this.returnStatusTextBox.Size = new System.Drawing.Size(592, 22);
+            this.returnStatusTextBox.TabIndex = 12;
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Location = new System.Drawing.Point(24, 389);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(88, 16);
+            this.label20.TabIndex = 11;
+            this.label20.Text = "Return status:";
+            // 
+            // callDeviceMethodButton
+            // 
+            this.callDeviceMethodButton.Location = new System.Drawing.Point(362, 328);
+            this.callDeviceMethodButton.Name = "callDeviceMethodButton";
+            this.callDeviceMethodButton.Size = new System.Drawing.Size(149, 30);
+            this.callDeviceMethodButton.TabIndex = 10;
+            this.callDeviceMethodButton.Text = "Call Method";
+            this.callDeviceMethodButton.UseVisualStyleBackColor = true;
+            this.callDeviceMethodButton.Click += new System.EventHandler(this.callDeviceMethodButton_Click);
+            // 
+            // deviceIDsComboBoxForDeviceMethod
+            // 
+            this.deviceIDsComboBoxForDeviceMethod.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.deviceIDsComboBoxForDeviceMethod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.deviceIDsComboBoxForDeviceMethod.FormattingEnabled = true;
+            this.deviceIDsComboBoxForDeviceMethod.Location = new System.Drawing.Point(140, 81);
+            this.deviceIDsComboBoxForDeviceMethod.Name = "deviceIDsComboBoxForDeviceMethod";
+            this.deviceIDsComboBoxForDeviceMethod.Size = new System.Drawing.Size(592, 24);
+            this.deviceIDsComboBoxForDeviceMethod.TabIndex = 9;
+            this.deviceIDsComboBoxForDeviceMethod.SelectionChangeCommitted += new System.EventHandler(this.deviceIDsComboBoxForDeviceMethod_SelectionChangeCommitted);
+            // 
+            // methodPayloadTextBox
+            // 
+            this.methodPayloadTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.methodPayloadTextBox.Location = new System.Drawing.Point(140, 141);
+            this.methodPayloadTextBox.Multiline = true;
+            this.methodPayloadTextBox.Name = "methodPayloadTextBox";
+            this.methodPayloadTextBox.Size = new System.Drawing.Size(592, 180);
+            this.methodPayloadTextBox.TabIndex = 8;
+            this.methodPayloadTextBox.Text = "MethodPayload";
+            // 
+            // methodNameTextBox
+            // 
+            this.methodNameTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.methodNameTextBox.Location = new System.Drawing.Point(140, 112);
+            this.methodNameTextBox.Name = "methodNameTextBox";
+            this.methodNameTextBox.Size = new System.Drawing.Size(592, 22);
+            this.methodNameTextBox.TabIndex = 7;
+            this.methodNameTextBox.Text = "MethodName";
+            // 
+            // iotHubNameTextBoxForDeviceMethod
+            // 
+            this.iotHubNameTextBoxForDeviceMethod.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.iotHubNameTextBoxForDeviceMethod.Location = new System.Drawing.Point(140, 52);
+            this.iotHubNameTextBoxForDeviceMethod.Name = "iotHubNameTextBoxForDeviceMethod";
+            this.iotHubNameTextBoxForDeviceMethod.ReadOnly = true;
+            this.iotHubNameTextBoxForDeviceMethod.Size = new System.Drawing.Size(592, 22);
+            this.iotHubNameTextBoxForDeviceMethod.TabIndex = 5;
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Location = new System.Drawing.Point(21, 140);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(109, 16);
+            this.label19.TabIndex = 4;
+            this.label19.Text = "Method payload:";
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(21, 112);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(93, 16);
+            this.label18.TabIndex = 3;
+            this.label18.Text = "Method name:";
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(21, 84);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(70, 16);
+            this.label17.TabIndex = 2;
+            this.label17.Text = "Device ID:";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(21, 56);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(59, 16);
+            this.label14.TabIndex = 1;
+            this.label14.Text = "IoT Hub:";
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(13, 19);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(143, 16);
+            this.label13.TabIndex = 0;
+            this.label13.Text = "Call Method on Device";
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(783, 646);
-            this.Controls.Add(this.tabControl1);
+            this.Controls.Add(this.tabCallDeviceMethod);
             this.MinimumSize = new System.Drawing.Size(680, 605);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Device Explorer Twin";
             this.Shown += new System.EventHandler(this.MainForm_Shown);
-            this.tabControl1.ResumeLayout(false);
+            this.tabCallDeviceMethod.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
@@ -966,13 +1188,16 @@
             this.tabMessagesToDevice.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.messagePropertiesGrid)).EndInit();
             this.groupBox4.ResumeLayout(false);
+            this.tabDeviceMethod.ResumeLayout(false);
+            this.tabDeviceMethod.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.callDeviceMethodNumericUpDown)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabControl tabCallDeviceMethod;
         private System.Windows.Forms.TabPage tabManagement;
         private System.Windows.Forms.TabPage tabData;
         private System.Windows.Forms.TabPage tabMessagesToDevice;
@@ -1039,12 +1264,30 @@
         private System.Windows.Forms.Label totalLabel;
         private System.Windows.Forms.Button sasTokenButton;
         private System.Windows.Forms.DataGridView messagePropertiesGrid;
-        private System.Windows.Forms.DataGridViewTextBoxColumn KeyColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ValueColumn;
         private System.Windows.Forms.Label messagePropertiesLabel;
         private System.Windows.Forms.ToolStripMenuItem showDevicePropertiesToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.Button deviceTwinPropertiesBtn;
+        private System.Windows.Forms.TabPage tabDeviceMethod;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.TextBox iotHubNameTextBoxForDeviceMethod;
+        private System.Windows.Forms.DataGridViewTextBoxColumn KeyColumn;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ValueColumn;
+        private System.Windows.Forms.ComboBox deviceIDsComboBoxForDeviceMethod;
+        private System.Windows.Forms.TextBox methodPayloadTextBox;
+        private System.Windows.Forms.TextBox methodNameTextBox;
+        private System.Windows.Forms.Button callDeviceMethodButton;
+        private System.Windows.Forms.TextBox returnPayloadTextBox;
+        private System.Windows.Forms.TextBox returnStatusTextBox;
+        private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.Label label22;
+        private System.Windows.Forms.NumericUpDown callDeviceMethodNumericUpDown;
+        private System.Windows.Forms.Button callDeviceMethodCancelButton;
     }
 }
 

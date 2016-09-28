@@ -17,8 +17,8 @@ namespace DeviceExplorer
         private String iotHubConnectionString;
         private String deviceName;
         private List<string> deviceList;
-        private DeviceTwinProperties reportedProperties;
-        private DeviceTwinProperties desiredProperties;
+        private String deviceJson;
+        private String tagsJson;
         private String reportedPropertiesJson;
         private String desiredPropertiesJson;
         private bool initialIndexSet;
@@ -28,90 +28,41 @@ namespace DeviceExplorer
         public DeviceTwinPropertiesForm()
         {
             InitializeComponent();
-
         }
 
         public async Task<bool> GetDeviceTwinData()
         {
-            bool isOK = false;
-            string exStr = "";
+            DeviceTwinAndMethod deviceMethod = new DeviceTwinAndMethod(iotHubConnectionString, deviceName);
+            DeviceTwinData deviceTwinData = await deviceMethod.GetDeviceTwinData();
 
-            registryManager = RegistryManager.CreateFromConnectionString(iotHubConnectionString);
-            dynamic repProps = null;
-            dynamic desProps = null;
-            dynamic tags = null;
+            deviceJson = deviceTwinData.deviceJson;
+            tagsJson = deviceTwinData.tagsJson;
+            reportedPropertiesJson = deviceTwinData.reportedPropertiesJson;
+            desiredPropertiesJson = deviceTwinData.desiredPropertiesJson;
 
-            try
+            if (deviceJson == null)
             {
-                var deviceTwin = await registryManager.GetTwinAsync(deviceName);
-                if (deviceTwin != null)
-                {
-                    tags = deviceTwin.Tags;
-                    repProps = deviceTwin.Properties.Reported;
-                    desProps = deviceTwin.Properties.Desired;
-
-                    Console.WriteLine(repProps.ToJson());
-
-                    if (repProps != null)
-                    {
-                        reportedProperties = new DeviceTwinProperties();
-
-                        foreach (var property in repProps)
-                        {
-                            reportedProperties.Add(new DeviceTwinProperty(property.Key, property.Value, typeof(string), true));
-                        }
-                    }
-
-                    if (desProps != null)
-                    {
-                        desiredProperties = new DeviceTwinProperties();
-                        foreach (var property in desProps)
-                        {
-                            desiredProperties.Add(new DeviceTwinProperty(property.Key, property.Value, typeof(string), true));
-                        }
-                    }
-
-                    reportedPropertiesJson = repProps.ToJson();
-                    desiredPropertiesJson = desProps.ToJson();
-
-                    isOK = true;
-                }
+                return false;
             }
-            catch (Exception)
+            else
             {
-                exStr = "Device Twin functionality is not found." + Environment.NewLine +
-                    "Make sure you are using the latest Microsoft.Azure.Devices package.";
+                return true;
             }
-
-            if (!isOK)
-            {
-                reportedProperties = null;
-                desiredProperties = null;
-                reportedPropertiesJson = null;
-                desiredPropertiesJson = null;
-
-                MessageBox.Show(exStr, "Device Twin Properties", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-            return isOK;
         }
 
         public async Task<bool> UpdateDialogData()
         {
             bool isOK = await GetDeviceTwinData();
 
-            reportedPropertiesGrid.SelectedObject = reportedProperties;
-            reportedPropertiesGrid.Refresh();
-            jsonRichTextBox1.Text = reportedPropertiesJson;
-
-            desiredPropertiesGrid.SelectedObject = desiredProperties;
-            desiredPropertiesGrid.Refresh();
-            jsonRichTextBox2.Text = desiredPropertiesJson;
+            jsonRichTextBox0.Text = deviceJson;
+            jsonRichTextBox1.Text = tagsJson;
+            jsonRichTextBox2.Text = reportedPropertiesJson;
+            jsonRichTextBox3.Text = desiredPropertiesJson;
 
             if (runOnce)
             {
                 runOnce = false;
-                jsonRichTextBox3.Text = "{ \"properties\": { \"desired\": { " + Environment.NewLine + Environment.NewLine + Environment.NewLine + Environment.NewLine + "}}}";
+                jsonEditRichTextBox.Text = "{ \"properties\": { \"desired\": { " + Environment.NewLine + Environment.NewLine + Environment.NewLine + Environment.NewLine + "}}}";
             }
 
             return isOK;
@@ -158,45 +109,14 @@ namespace DeviceExplorer
 
         private async void sendBtn_Click(object sender, EventArgs e)
         {
+            jsonRichTextBox0.Text = "";
             jsonRichTextBox1.Text = "";
             jsonRichTextBox2.Text = "";
-            if (registryManager != null)
-            {
-                try
-                {
-                    string assemblyClassName = "Twin";
-                    Type typeFound = (from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                                from assemblyType in assembly.GetTypes()
-                                where assemblyType.Name == assemblyClassName
-                                select assemblyType).FirstOrDefault();
+            jsonRichTextBox3.Text = "";
 
-                    if (typeFound != null)
-                    {
-                        string typeName = typeFound.GetType().Name;
-                        var deviceTwin = await registryManager.GetTwinAsync(deviceName);
-                        dynamic dp = JsonConvert.DeserializeObject(jsonRichTextBox3.Text, typeFound);
-                        dp.Id = deviceName;
-                        dp.ETag = deviceTwin.ETag;
-                        registryManager.UpdateTwinAsync(dp);
-                    }
-                    else
-                    {
-                        string exStr = "Device Twin functionality is not found." + Environment.NewLine +
-                            "Make sure you are using the latest Microsoft.Azure.Devices package.";
-                        MessageBox.Show(exStr, "Device Twin Properties", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    string errMess = "Update Twin failed. Exception: " + ex.ToString();
-                    MessageBox.Show(errMess, "Device Twin Desired Properties Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            else
-            {
-                MessageBox.Show("Registry Manager is no initialized!", "Device Twin Desired Properties Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            await Task.Delay(1000);
+            DeviceTwinAndMethod deviceMethod = new DeviceTwinAndMethod(iotHubConnectionString, deviceName);
+            await deviceMethod.UpdateTwinData(jsonEditRichTextBox.Text);
+
             refreshBtn_Click(this, null);
         }
     }
