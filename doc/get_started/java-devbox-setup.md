@@ -7,6 +7,7 @@ This document describes how to prepare your development environment to use the *
 - [Azure IoT device SDK for Java](#installiot)
 	- [Build from source](#installiotsource)
 	- [Include using Maven](#installiotmaven)
+ -  [Build for Android device](#installiotandroid)
 - [Application Samples](#samplecode)
 
 <a name="installjava"/>
@@ -142,6 +143,12 @@ In your main pom.xml file, add the Azure IoT Device SDK as a dependency using yo
 	<!--This is the current version number as of the writing of this document. Yours may be different.-->
 </dependency>
 ```
+<a name="installiotandroid"> 
+## Building for Android Device
+- Download and install [Android Studio][android-studio]
+- Load and build **sample** located at java\device\samples\android-sample
+- Sample has dependence on remote library `iothub-java-device-client`. It is currently set to use `iothub-java-device-client:1.0.7`. If you want to point it to the later version, please update `java\device\samples\android-sample\app\build.gradle` file to point to the version you want to use. For list of available versions search [Maven Repository] [maven-repository]
+
 
 <a name="samplecode">
 ## Sample applications
@@ -150,5 +157,12 @@ This repository contains various .Net sample applications that illustrate how to
 
 To learn how to run a simple *Getting started* Java application that sends messages to an IoT hub, see [Getting started - running a Java sample][lnk-getstarted].
 
+For testing the **Android sample** on Android device follow [certify IoT device running Android] [certify-iot-device-android] documentation
+
 [readme]: ../../java/device/readme.md
 [lnk-getstarted]: java-run-sample.md
+[android-studio]: https://developer.android.com/studio/index.html
+[certify-iot-device-android]:https://github.com/Azure/azure-iot-sdks/blob/master/doc/iotcertification/iot_certification_android_java/iot_certification_android_java.md
+[maven-repository]:http://search.maven.org/#search%7Cga%7C1%7Ciothub-java-device-client
+
+

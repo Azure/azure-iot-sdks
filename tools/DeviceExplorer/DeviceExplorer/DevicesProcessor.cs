@@ -113,7 +113,7 @@ namespace DeviceExplorer
                     }
                     else
                     {
-                        deviceConnectionString.AppendFormat(";X509=true");
+                        deviceConnectionString.AppendFormat(";x509=true");
                     }
                 }
 

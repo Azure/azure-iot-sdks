@@ -8,10 +8,9 @@ var sinon = require('sinon');
 var stream = require('stream');
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
-
 var Client = require('../lib/client.js');
 var SimulatedHttp = require('./http_simulated.js');
-var runTests = require('./_client_common_testrun.js');
+var clientTests = require('./_client_common_testrun.js');
 var results = require('azure-iot-common').results;
 var errors = require('azure-iot-common').errors;
 var Message = require('azure-iot-common').Message;
@@ -804,17 +803,21 @@ describe('Client', function () {
   });
 });
 
-function makeConnectionString(host, device, key) {
-  return 'HostName=' + host + ';DeviceId=' + device + ';SharedAccessKey=' + key;
-}
-
-var connectionString = makeConnectionString('host', 'device', 'key');
-var badConnStrings = [
-  makeConnectionString('bad', 'device', 'key'),
-  makeConnectionString('host', 'bad', 'key'),
-  makeConnectionString('host', 'device', 'bad')
-];
-
 describe('Over simulated HTTPS', function () {
-  runTests(SimulatedHttp, connectionString, badConnStrings);
+  var registry = {
+    create: function(deviceId, done) { 
+      done(null, {
+        deviceId: deviceId,
+        authentication: {
+          SymmetricKey: {
+            primaryKey: 'key=='
+          }
+        }
+      });
+    },
+    delete: function(deviceId, done) { done(); }
+  };
+
+  clientTests.sendEventTests(SimulatedHttp, registry);
+  clientTests.sendEventBatchTests(SimulatedHttp, registry);
 });

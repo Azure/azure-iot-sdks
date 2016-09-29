@@ -52,7 +52,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     private Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
 
     /** Messages whose callbacks that are waiting to be invoked. */
-    private final Queue<IotHubCallbackPacket> callbackList = new LinkedList<>();
+    private final Queue<IotHubCallbackPacket> callbackList = new LinkedBlockingDeque<>();
 
     private final DeviceClientConfig config;
 

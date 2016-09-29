@@ -914,10 +914,14 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
             }
             else
             {
-                /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [The hostname shall be constructed using the iothubname and iothubSuffix.] */
+                /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [If the upperConfig contains a valid protocolGatewayHostName value the this shall be used for the hostname, otherwise the hostname shall be constructed using the iothubname and iothubSuffix.] */
                 char tempAddress[DEFAULT_TEMP_STRING_LEN];
-                (void)snprintf(tempAddress, DEFAULT_TEMP_STRING_LEN, "%s.%s", upperConfig->iotHubName, upperConfig->iotHubSuffix);
-                if ((state->hostAddress = STRING_construct(tempAddress)) == NULL)
+                if (upperConfig->protocolGatewayHostName == NULL)
+                {
+                    (void)snprintf(tempAddress, DEFAULT_TEMP_STRING_LEN, "%s.%s", upperConfig->iotHubName, upperConfig->iotHubSuffix);
+                }
+                
+                if ((state->hostAddress = STRING_construct(upperConfig->protocolGatewayHostName == NULL ? tempAddress : upperConfig->protocolGatewayHostName)) == NULL)
                 {
                     LogError("failure constructing host address.");
                     STRING_delete(state->devicesPath);

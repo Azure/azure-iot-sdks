@@ -1,14 +1,14 @@
 {
   "name": "azure-iot-device",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "Azure IoT device SDK",
   "author": "Microsoft Corporation",
   "license": "MIT",
   "main": "device.js",
   "typings": "device.d.ts",
   "dependencies": {
-    "azure-iot-common": "1.0.14",
-    "azure-iot-http-base": "1.0.15",
+    "azure-iot-common": "1.0.15",
+    "azure-iot-http-base": "1.0.16",
     "azure-storage": "^1.2.0",
     "debug": "^2.2.0"
   },
@@ -29,7 +29,7 @@
     "alltest": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter spec test/**/_*_test*.js",
     "ci": "npm -s run lint && npm -s run alltest-min && npm -s run check-cover",
     "test": "npm -s run lint && npm -s run unittest",
-    "check-cover": "istanbul check-coverage --statements 95 --branches 89 --functions 96 --lines 95"
+    "check-cover": "istanbul check-coverage --statements 96 --branches 91 --functions 96 --lines 96"
   },
   "engines": {
     "node": ">= 0.10"

@@ -62,7 +62,9 @@ This function creates all the inner components required by the IoT Hub client to
  
 **SRS_IOTHUBTRANSPORTAMQP_09_009: [**IoTHubTransportAMQP_Create shall fail and return NULL if memory allocation of the transport's internal state structure fails.**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_09_010: [**IoTHubTransportAMQP_Create shall create an immutable string, referred to as iotHubHostFqdn, from the following pieces: config->iotHubName + "." + config->iotHubSuffix.**]**
+**SRS_IOTHUBTRANSPORTAMQP_09_010: [**If config->upperConfig->protocolGatewayHostName is NULL, IoTHubTransportAMQP_Create shall create an immutable string, referred to as iotHubHostFqdn, from the following pieces: config->iotHubName + "." + config->iotHubSuffix.**]**
+
+**SRS_IOTHUBTRANSPORTAMQP_20_001: [**If config->upperConfig->protocolGatewayHostName is not NULL, IoTHubTransportAMQP_Create shall use it as iotHubHostFqdn**]
 
 **SRS_IOTHUBTRANSPORTAMQP_09_012: [**IoTHubTransportAMQP_Create shall create an immutable string, referred to as devicesPath, from the following parts: host_fqdn + “/devices/” + deviceId.**]**
 

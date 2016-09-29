@@ -192,7 +192,7 @@ Client.prototype.send = function send(deviceId, message, done) {
     throw new ReferenceError('message is \'' + message + '\'');
   }
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_014: [The send method shall convert the message object to type azure-iot-common.Message if necessary.]*/
-  if (!(message instanceof Message)) {
+  if (message.constructor.name !== 'Message') {
     message = new Message(message);
   }
 
