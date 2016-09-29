@@ -18,7 +18,7 @@
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
-static const char* connectionString = "";
+static const char* connectionString = "HostName=dm-preview1-14.private.azure-devices-int.net;DeviceId=001-z;SharedAccessKey=5i1Ggm+sbZSUYDuOCKlZvLZKPxLWw9qW5IqMYJPGh9I=";
 
 static int callbackCounter;
 static char msgText[1024];
@@ -40,13 +40,14 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
     (void)size;
     (void)userContextCallback;
 
-    printf("Method %s:\r\n", method_name);
-    printf("%.*s\r\n", (int)size, (const char*)payload);
+    printf("\r\nDevice Method called\r\n");
+    printf("Device Method name:    %s:\r\n", method_name);
+    printf("Device Method payload: %.*s\r\n", (int)size, (const char*)payload);
 
     int status = 200;
-    char* RESPONSE_STRING = "Method Response";
-    printf("Response status: %d", status);
-    printf("Response payload: %s", RESPONSE_STRING);
+    char* RESPONSE_STRING = "This is the response from the device";
+    printf("\r\nResponse status: %d\r\n", status);
+    printf("Response payload: %s\r\n\r\n", RESPONSE_STRING);
 
     *resp_size = strlen(RESPONSE_STRING);
     *response = malloc(*resp_size);
