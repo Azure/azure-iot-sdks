@@ -67,6 +67,7 @@ static const char* FEEDBACK_RECORD_KEY_DEVICE_ID = "deviceId";
 static const char* FEEDBACK_RECORD_KEY_DEVICE_GENERATION_ID = "deviceGenerationId";
 static const char* FEEDBACK_RECORD_KEY_DESCRIPTION = "description";
 static const char* FEEDBACK_RECORD_KEY_ENQUED_TIME_UTC = "enqueuedTimeUtc";
+static const char* FEEDBACK_RECORD_KEY_ORIGINAL_MESSAGE_ID = "originalMessageId";
 
 static char* createSasToken(IOTHUB_MESSAGING_HANDLE messagingHandle)
 {
@@ -443,6 +444,7 @@ static AMQP_VALUE IoTHubMessaging_LL_FeedbackMessageReceived(const void* context
                                 feedbackRecord->generationId = (char*)json_object_get_string(feedback_object, FEEDBACK_RECORD_KEY_DEVICE_GENERATION_ID);
                                 feedbackRecord->description = (char*)json_object_get_string(feedback_object, FEEDBACK_RECORD_KEY_DESCRIPTION);
                                 feedbackRecord->enqueuedTimeUtc = (char*)json_object_get_string(feedback_object, FEEDBACK_RECORD_KEY_ENQUED_TIME_UTC);
+                                feedbackRecord->originalMessageId = (char*)json_object_get_string(feedback_object, FEEDBACK_RECORD_KEY_ORIGINAL_MESSAGE_ID);
                                 feedbackRecord->correlationId = "";
 
                                 if (feedbackRecord->description == NULL)
