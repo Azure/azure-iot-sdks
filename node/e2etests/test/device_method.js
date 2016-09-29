@@ -71,6 +71,7 @@ module.exports = function(hubConnectionString) {
 
     [null, '', 'foo', { k1: 'v1' }, {}].forEach(function(testPayload) {
       it('makes and receives a method call', function(done) {
+        debug('---------- new method test ------------');
         var methodName = 'method1';
         var methodResult = 200;
 
@@ -101,6 +102,8 @@ module.exports = function(hubConnectionString) {
           payload: testPayload,
           timeoutInSeconds: 20
         };
+        debug('service sending method call:')
+        debug(JSON.stringify(methodParams, null, 2));
         ServiceClient
             .fromConnectionString(hubConnectionString)
             .invokeDeviceMethod(
@@ -113,6 +116,7 @@ module.exports = function(hubConnectionString) {
                     assert.strictEqual(result.status, methodResult);
                     assert.deepEqual(result.payload, testPayload);
                   }
+                  debug('---------- end method test ------------');
                   done(err);
                 });
       });
