@@ -102,7 +102,7 @@ module.exports = function(hubConnectionString) {
           payload: testPayload,
           timeoutInSeconds: 20
         };
-        debug('service sending method call:')
+        debug('service sending method call:');
         debug(JSON.stringify(methodParams, null, 2));
         ServiceClient
             .fromConnectionString(hubConnectionString)
