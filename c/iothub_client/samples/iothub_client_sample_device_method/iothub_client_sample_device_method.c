@@ -39,11 +39,22 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
     (void)payload;
     (void)size;
     (void)userContextCallback;
-    (void)response;
-    (void)resp_size;
+
+    printf("Method %s:\r\n", method_name);
+    printf("%.*s\r\n", (int)size, (const char*)payload);
+
+    int status = 200;
+    char* RESPONSE_STRING = "Method Response";
+    printf("Response status: %d", status);
+    printf("Response payload: %s", RESPONSE_STRING);
+
+    *resp_size = strlen(RESPONSE_STRING);
+    *response = malloc(*resp_size);
+    memcpy(*response, RESPONSE_STRING, *resp_size);
+
     callbackCounter++;
     g_continueRunning = false;
-    return 200;
+    return status;
 }
 
 void iothub_client_sample_device_method_run(void)
