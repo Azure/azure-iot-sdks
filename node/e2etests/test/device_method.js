@@ -96,29 +96,31 @@ module.exports = function(hubConnectionString) {
           });
         });
 
-        // make the method call via the service
-        var methodParams = {
-          methodName: methodName, 
-          payload: testPayload,
-          timeoutInSeconds: 20
-        };
-        debug('service sending method call:');
-        debug(JSON.stringify(methodParams, null, 2));
-        ServiceClient
-            .fromConnectionString(hubConnectionString)
-            .invokeDeviceMethod(
-                deviceDescription.deviceId,
-                methodParams,
-                function(err, result) {
-                  if(!err) {
-                    debug('got method results');
-                    debug(JSON.stringify(result, null, 2));
-                    assert.strictEqual(result.status, methodResult);
-                    assert.deepEqual(result.payload, testPayload);
-                  }
-                  debug('---------- end method test ------------');
-                  done(err);
-                });
+        setTimeout(function() {
+          // make the method call via the service
+          var methodParams = {
+            methodName: methodName, 
+            payload: testPayload,
+            timeoutInSeconds: 20
+          };
+          debug('service sending method call:');
+          debug(JSON.stringify(methodParams, null, 2));
+          ServiceClient
+              .fromConnectionString(hubConnectionString)
+              .invokeDeviceMethod(
+                  deviceDescription.deviceId,
+                  methodParams,
+                  function(err, result) {
+                    if(!err) {
+                      debug('got method results');
+                      debug(JSON.stringify(result, null, 2));
+                      assert.strictEqual(result.status, methodResult);
+                      assert.deepEqual(result.payload, testPayload);
+                    }
+                    debug('---------- end method test ------------');
+                    done(err);
+                  });
+        }, 1000);
       });
     });
   });
