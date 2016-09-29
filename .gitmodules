@@ -21,4 +21,5 @@
 	url = https://github.com/kgabis/parson
 [submodule "tools/device-discovery-cli"]
 	path = tools/device-discovery-cli
-	url = git@github.com:Azure/device-discovery-cli.git
+	url = https://github.com/Azure/device-discovery-cli.git
+	branch = develop
