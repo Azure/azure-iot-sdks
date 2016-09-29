@@ -100,15 +100,15 @@ extern AMQP_TRANSPORT_CREDENTIAL* authentication_get_credential(AUTHENTICATION_S
 *   @returns 0 if it succeeds, non-zero if it fails. 
 */ 
 extern int authentication_refresh(AUTHENTICATION_STATE_HANDLE authentication_state); 
- 
-/** @brief Sets the common options related to certificates and cbs. 
-* 
-* @details The new options are only applied effectively to the transport on the next call to authenticate() or refresh(). 
-* 
-*   @returns 0 if it succeeds, non-zero if it fails. 
-*/ 
-extern int authentication_set_option(AUTHENTICATION_STATE_HANDLE authentication_state, const char* name, const void* value); 
- 
+
+/** @brief Resets the state of the authentication.
+*
+* @details Causes the status of the authentication state to be reset to IDLE (similar to when the state is created).
+*
+*   @returns 0 if it succeeds, non-zero if it fails.
+*/
+extern int authentication_reset(AUTHENTICATION_STATE_HANDLE authentication_state);
+
 /** @brief De-authenticates the device and destroy the state instance. 
 * 
 * @details Closes the subscription to cbs if in use, destroys the cbs instance if it is the last device registered. 

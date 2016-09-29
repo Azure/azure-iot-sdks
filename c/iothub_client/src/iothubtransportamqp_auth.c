@@ -66,7 +66,27 @@ static void on_put_token_complete(void* context, CBS_OPERATION_RESULT operation_
 	else
 	{
 		auth_state->status = AUTHENTICATION_STATUS_FAILURE;
-		LogError("CBS reported status code %u, error: %s", status_code, status_description);
+		LogError("CBS reported status code %u, error: %s for put token operation", status_code, status_description);
+	}
+}
+
+static void on_delete_token_complete(void* context, CBS_OPERATION_RESULT operation_result, unsigned int status_code, const char* status_description)
+{
+#ifdef NO_LOGGING
+	UNUSED(status_code);
+	UNUSED(status_description);
+#endif
+
+	AUTHENTICATION_STATE* auth_state = (AUTHENTICATION_STATE*)context;
+
+	if (operation_result == CBS_OPERATION_RESULT_OK)
+	{
+		auth_state->status = AUTHENTICATION_STATUS_IDLE;
+	}
+	else
+	{
+		auth_state->status = AUTHENTICATION_STATUS_FAILURE;
+		LogError("CBS reported status code %u, error: %s for delete token operation", status_code, status_description);
 	}
 }
 
@@ -128,7 +148,7 @@ static bool isSasTokenRefreshRequired(AUTHENTICATION_STATE* auth_state)
 	}
 
 	return result;
-}
+} 
 
 AUTHENTICATION_STATE_HANDLE authentication_create(const IOTHUB_DEVICE_CONFIG* device_config, STRING_HANDLE devices_path, AMQP_TRANSPORT_CBS_CONNECTION* cbs_connection)
 {
@@ -341,6 +361,20 @@ AUTHENTICATION_STATUS authentication_get_status(AUTHENTICATION_STATE_HANDLE auth
 	{
 		AUTHENTICATION_STATE* auth_state = (AUTHENTICATION_STATE*)authentication_state_handle;
 
+		if (auth_state->status == AUTHENTICATION_STATUS_OK)
+		{
+			bool timeout_reached;
+			if (verifyAuthenticationTimeout(auth_state, &timeout_reached) != RESULT_OK)
+			{
+				LogError("Failed retrieving the status of the authentication (failed verifying if the authentication is expired)");
+				auth_state->status = AUTHENTICATION_STATUS_FAILURE;
+			}
+			else if (timeout_reached)
+			{
+				auth_state->status = AUTHENTICATION_STATUS_EXPIRED;
+			}
+		}
+
 		auth_status = auth_state->status;
 	}
 
@@ -361,18 +395,59 @@ AMQP_TRANSPORT_CREDENTIAL* authentication_get_credential(AUTHENTICATION_STATE_HA
 	return credential;
 }
 
-int authentication_refresh(AUTHENTICATION_STATE_HANDLE authentication_state)
+int authentication_refresh(AUTHENTICATION_STATE_HANDLE authentication_state_handle)
 {
-	(void)authentication_state;
-	return 0;
+	int result;
+
+	if ((result = authentication_authenticate(authentication_state_handle)) != RESULT_OK)
+	{
+		LogError("Failed refreshing authentication (%d).", result);
+		result = __LINE__;
+	}
+
+	return result;
 }
 
-int authentication_set_option(AUTHENTICATION_STATE_HANDLE authentication_state, const char* name, const void* value)
+int authentication_reset(AUTHENTICATION_STATE_HANDLE authentication_state_handle)
 {
-	(void)authentication_state;
-	(void)name;
-	(void)value;
-	return 0;
+	int result;
+
+	if (authentication_state_handle == NULL)
+	{
+		LogError("Failed to reset the authentication state (authentication_state is NULL)");
+		result = __LINE__;
+	}
+	else
+	{
+		AUTHENTICATION_STATE* auth_state = (AUTHENTICATION_STATE*)authentication_state_handle;
+
+		if (auth_state->status == AUTHENTICATION_STATUS_FAILURE || auth_state->status == AUTHENTICATION_STATUS_EXPIRED)
+		{
+			auth_state->status = AUTHENTICATION_STATUS_IDLE;
+			result = RESULT_OK;
+		}
+		else
+		{
+			if (auth_state->status != AUTHENTICATION_STATUS_OK && auth_state->status != AUTHENTICATION_STATUS_IN_PROGRESS)
+			{
+				LogError("Failed to reset the authentication state (authentication status is invalid: %i)", auth_state->status);
+				result = __LINE__;
+			}
+			else if (cbs_delete_token(auth_state->cbs_connection->cbs_handle, STRING_c_str(auth_state->devices_path), CBS_AUDIENCE, on_delete_token_complete, auth_state) != RESULT_OK)
+			{
+				LogError("Failed to reset the authentication state (failed deleting the current SAS token from CBS)");
+				result = __LINE__;
+			}
+			else
+			{
+				auth_state->status = AUTHENTICATION_STATUS_IDLE;
+				auth_state->cbs_state.current_sas_token_create_time = 0;
+				result = RESULT_OK;
+			}
+		}
+	}
+
+	return result;
 }
 
 int authentication_destroy(AUTHENTICATION_STATE_HANDLE authentication_state_handle)
