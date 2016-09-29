@@ -1036,9 +1036,12 @@ int IoTHubClient_LL_DeviceMethodComplete(IOTHUB_CLIENT_LL_HANDLE handle, const c
             size_t resp_size = 0;
             result = handleData->deviceMethodCallback(method_name, payLoad, size, &payload_resp, &resp_size, handleData->deviceMethodUserContextCallback);
             /* Codes_SRS_IOTHUBCLIENT_LL_07_020: [ deviceMethodCallback shall buil the BUFFER_HANDLE with the response payload from the IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC callback. ] */
-            if (wrap_data_in_json(payload_resp, resp_size, response) != 0)
+            if (payload_resp != NULL && resp_size > 0)
             {
-                result = 500;
+                if (wrap_data_in_json(payload_resp, resp_size, response) != 0)
+                {
+                    result = 500;
+                }
             }
             if (payload_resp != NULL)
             {

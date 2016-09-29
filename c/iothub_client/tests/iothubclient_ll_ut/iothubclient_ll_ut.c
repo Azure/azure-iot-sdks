@@ -3182,19 +3182,27 @@ TEST_FUNCTION(IoTHubClient_LL_DeviceMethodComplete_succeed)
 
     umock_c_reset_all_calls();
 
+    size_t len = 1;
+    unsigned char* resp = (unsigned char*)my_gballoc_malloc(len);
+    resp[0] = 0xa;
+
     STRICT_EXPECTED_CALL(deviceMethodCallback(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument_method_name()
         .IgnoreArgument_payload()
         .IgnoreArgument_size()
         .IgnoreArgument_userContextCallback()
-        .IgnoreArgument_response()
-        .IgnoreArgument_resp_size();
+        .CopyOutArgumentBuffer_response(&resp, sizeof(unsigned char**) )
+        .CopyOutArgumentBuffer_resp_size(&len, sizeof(size_t) );
+        //.IgnoreArgument_response()
+        //.IgnoreArgument_resp_size();
 
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
         .IgnoreArgument_size();
     STRICT_EXPECTED_CALL(BUFFER_build(TEST_BUFFER_HANDLE, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument_source()
         .IgnoreArgument_size();
+    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
+        .IgnoreArgument_ptr();
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
         .IgnoreArgument_ptr();
 
