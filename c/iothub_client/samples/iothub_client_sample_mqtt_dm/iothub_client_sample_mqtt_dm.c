@@ -6,7 +6,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-
 #include "serializer.h"
 #include "iothub_client.h"
 
@@ -39,10 +38,113 @@ END_NAMESPACE(Contoso);
 
 #define CONNECTION_STRING_FILE_NAME ".device_connection_string"
 
-static void deviceTwinCallback(int status_code, void* userContextCallback)
+static int do_firmware_update(void *param)
+{
+    int   retValue;
+    char *uri = (char *) param;
+    
+    LogInfo("do_firmware_update('%s')", uri);
+    bool result = device_download_firmware(uri);
+    free(uri);
+    if (result)
+    {
+        LogInfo("starting fw update");
+        result = device_update_firmware();
+        if (result)
+        {
+            retValue = 0;
+        }
+        else
+        {
+            LogError("frimware update failed during apply");
+            retValue = -1;
+        }
+    }
+    else
+    {
+        LogError("failed to download new firmware image from", uri);
+        retValue = -1;
+    }
+    return retValue;
+}
+
+static void DeviceTwinCallback(int status_code, void* userContextCallback)
 {
     (void)(userContextCallback);
-    LogInfo("DT CallBack: Status_code = %u", status_code);
+    LogInfo("DeviceTwin CallBack: Status_code = %u", status_code);
+}
+
+#define FIRMWARE_UPDATE_METHOD_NAME "firmwareUpdate"
+
+#define SERVER_ERROR 500
+#define NOT_IMPLEMENTED 501
+#define NOT_VALID 400
+#define SERVER_SUCCESS 200
+
+
+static int DeviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
+{
+    (void)userContextCallback;
+
+    int retValue;
+    if (strcmp(method_name, FIRMWARE_UPDATE_METHOD_NAME) == 0)
+    {
+        if (device_get_firmware_update_status() != waiting)
+        {
+            LogError("attempting to initiate a firmware update out of order");
+            retValue = NOT_VALID;
+        }
+        else
+        {
+            if (payload == NULL)
+            {
+                LogError("passing invalid parameters payload");
+                retValue = NOT_VALID;
+            }
+            else if (size == 0)
+            {
+                LogError("passing invalid parameters size");
+                retValue = NOT_VALID;
+            }
+            else
+            {
+                char *uri = malloc(size - 1);
+                if (uri == NULL)
+                {
+                    LogError("failed to allocate memory for URI parameter");
+                    retValue = SERVER_ERROR;
+                }
+                else
+                {
+                    /* remove the quotation around the argument */
+                    memcpy(uri, payload + 1, size - 2);
+                    uri[size - 2] = '\0';
+
+                    THREAD_HANDLE thread_apply;
+                    THREADAPI_RESULT t_result = ThreadAPI_Create(&thread_apply, do_firmware_update, uri);
+                    if ( t_result == THREADAPI_OK)
+                    {
+                        retValue = SERVER_SUCCESS;
+                    }
+                    else
+                    {
+                        LogError("failed to start firmware update thread");
+                        retValue = SERVER_ERROR;
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        LogError("invalid method '%s'", ((method_name == NULL) ? "NULL" : method_name));
+        retValue = NOT_VALID;
+    }
+ 
+    *response = NULL;
+    resp_size = 0;
+
+    return retValue;
 }
 
 static bool initGlobalProperties(int argc, char *argv[], char **connectionString, bool *isService, bool *traceOn)
@@ -115,6 +217,52 @@ static bool initGlobalProperties(int argc, char *argv[], char **connectionString
     return retValue;
 }
 
+static bool send_reported(thingie_t *iot_device, IOTHUB_CLIENT_HANDLE iotHubClientHandle, int *exitCode)
+{
+    unsigned char *buffer;
+    size_t         bufferSize;
+    bool           retValue;
+
+    iot_device->iothubDM.firmwareVersion = device_get_firmware_version();
+    if (iot_device->iothubDM.firmwareVersion == NULL)
+    {
+        retValue = false;
+        LogError("Failed to retrieve the firmware version for device.");
+        *exitCode = -6;
+    }
+    else
+    {
+        iot_device->iothubDM.firmwareUpdate.status = (char *) ENUM_TO_STRING(FIRMWARE_UPDATE_STATUS, device_get_firmware_update_status());
+
+        /*serialize the model using SERIALIZE_REPORTED_PROPERTIES */
+        if (SERIALIZE_REPORTED_PROPERTIES(&buffer, &bufferSize, *iot_device) != CODEFIRST_OK)
+        {
+            retValue = false;
+            LogError("Failed serializing reported state.");
+            *exitCode = -7;
+        }
+        else
+        {
+            /* send the data up stream*/
+            IOTHUB_CLIENT_RESULT result = IoTHubClient_SendReportedState(iotHubClientHandle, buffer, bufferSize, DeviceTwinCallback, NULL);
+            if (result != IOTHUB_CLIENT_OK)
+            {
+                retValue = false;
+                LogError("Failure sending data!!!");
+                *exitCode = -15;
+            }
+            else
+            {
+                exitCode = 0;
+                retValue = true;
+            }
+            free(buffer);
+        }
+        free(iot_device->iothubDM.firmwareVersion);
+    }
+    return retValue;
+}
+
 static int iothub_client_sample_mqtt_dm_run(const char *connectionString, bool asService, bool traceOn)
 {
     LogInfo("Initialize Platform");
@@ -168,51 +316,22 @@ static int iothub_client_sample_mqtt_dm_run(const char *connectionString, bool a
                                 LogError("failed to set logtrace option");
                             }
                         }
-                    
-                        unsigned char *buffer;
-                        size_t         bufferSize;
 
-                        bool keepRunning = true;
-                        while (keepRunning)
+                        if (IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle, DeviceMethodCallback, iot_device) != IOTHUB_CLIENT_OK)
                         {
-                            iot_device->iothubDM.firmwareVersion = device_get_firmware_version();
-                            if (iot_device->iothubDM.firmwareVersion == NULL)
+                            LogError("failed to associate a callback for device methods");
+                            exitCode = -14;
+                        }
+                        else
+                        {
+                            bool keepRunning = send_reported(iot_device, iotHubClientHandle, &exitCode);
+                            while (keepRunning)
                             {
-                                keepRunning = false;
-                                LogError("Failed to retrieve the firmware version for device.");
-                                exitCode = -6;
-                            }
-                            else
-                            {
-                                iot_device->iothubDM.firmwareUpdate.status = (char *) ENUM_TO_STRING(FIRMWARE_UPDATE_STATUS, device_get_firmware_update_status());
-
-                                /*serialize the model using SERIALIZE_REPORTED_PROPERTIES */
-                                if (SERIALIZE_REPORTED_PROPERTIES(&buffer, &bufferSize, *iot_device) != CODEFIRST_OK)
+                                if (device_get_firmware_update_status() != waiting)
                                 {
-                                    keepRunning = false;
-                                    LogError("Failed serializing reported state.");
-                                    exitCode = -7;
+                                    keepRunning = send_reported(iot_device, iotHubClientHandle, &exitCode);
                                 }
-                                else
-                                {
-                                    LogInfo("Serialized = %*.*s", (int)bufferSize, (int)bufferSize, buffer);
-
-                                    /* send the data up stream*/
-                                    IOTHUB_CLIENT_RESULT result = IoTHubClient_SendReportedState(iotHubClientHandle, buffer, bufferSize, deviceTwinCallback, NULL);
-                                    if (result != IOTHUB_CLIENT_OK)
-                                    {
-                                        keepRunning = false;
-                                        LogError("Failure sending data!!!");
-                                        exitCode = -15;
-                                    }
-
-                                    else
-                                    {
-                                        ThreadAPI_Sleep(6000 /* six seconds */);
-                                    }
-                                    free(buffer);
-                                }
-                                free(iot_device->iothubDM.firmwareVersion);
+                                ThreadAPI_Sleep(1000);
                             }
                         }
                         IoTHubClient_Destroy(iotHubClientHandle);
@@ -241,7 +360,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        exitCode = -14;
+        exitCode = -12;
     }
 
     LogInfo("Exit Code: %d", exitCode);

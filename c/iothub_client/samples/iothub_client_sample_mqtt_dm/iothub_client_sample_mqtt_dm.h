@@ -11,6 +11,7 @@ extern "C"
 {
 #endif
 
+    /* enum values are in lower case per PM design */
     #define FIRMWARE_UPDATE_STATUS_VALUES \
         waiting, \
         downloading, \
@@ -22,7 +23,7 @@ extern "C"
     char* device_read_string_from_file(const char *fileName);
 
     FIRMWARE_UPDATE_STATUS device_get_firmware_update_status(void);
-    bool device_download_firmware(const char *uri);
+    bool device_download_firmware(const char *param);
     bool device_update_firmware(void);
 
     bool device_run_service(void);

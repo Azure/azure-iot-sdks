@@ -225,8 +225,6 @@ FIRMWARE_UPDATE_STATUS device_get_firmware_update_status(void)
 
 bool device_download_firmware(const char *uri)
 {
-    LogInfo("Downloading [%s]", uri);
-
     unlink(TEMP_ZIP_LOCATION);
     unlink(NEW_FW_ARCHIVE);
 
@@ -242,11 +240,16 @@ bool device_download_firmware(const char *uri)
     else
     {
         sprintf(buffer, "/usr/bin/wget \"%s\" -O %s", uri, TEMP_ZIP_LOCATION);
+        LogInfo("Downloading [%s]", uri);
         result = _system(buffer);
         free(buffer);
 
         if (result != 0)
         {
+            if (unlink(TEMP_ZIP_LOCATION) == -1)
+            {
+                LogInfo("unlink(TEMP_ZIP_LOCATION) == -1");
+            }
             LogError("failed to download from '%s'", uri);
         }
         else
@@ -319,7 +322,10 @@ bool device_run_service(void)
         {
             /* exit the parent process */
             exit(EXIT_SUCCESS);
-
+        }
+        else
+        {
+            /* child process segment */
             /* Change the file mode mask */
             umask(0);       
 
@@ -348,11 +354,6 @@ bool device_run_service(void)
                     retValue = true;
                 }
             }
-        }
-        else
-        {
-            LogError("Failed to fork with a good process ID");
-            retValue = false;
         }
     }
     return retValue;
