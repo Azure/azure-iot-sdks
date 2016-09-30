@@ -129,7 +129,7 @@ then
   CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
   
   # Make sure there is enough virtual memory on the device to handle more than one job  
-  MINVSPACE="1000000"
+  MINVSPACE="1500000"
   
   # Acquire total memory and total swap space setting them to zero in the event the command fails
   MEMAR=( $(sed -n -e 's/^MemTotal:[^0-9]*\([0-9][0-9]*\).*/\1/p' -e 's/^SwapTotal:[^0-9]*\([0-9][0-9]*\).*/\1/p' /proc/meminfo) )

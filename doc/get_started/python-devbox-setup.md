@@ -37,8 +37,8 @@ The Python iothub_client supports python versions 2.7.x, 3.4.x or 3.5.x. Know th
 5. After a successful build, the `iothub_client.so` Python extension module is copied to the **python/device/samples** folder. Please follow instructions in [Sample applications](#samplecode) to run the Python samples.
 
 ###Known build issues: 
-1. On some small footprint Linux devices, like a *Raspberry Pi* using Raspbian OS, the following build error may occur: `virtual memory exhausted: Cannot allocate memory`. In such a case please try to increase the swap file size on your platform and retry the build.
-2. CentOS7: Only Python 2.7 is supported due to a missing boost-python3 library package.
+1. On some small footprint Linux devices, like a *Raspberry Pi* using Raspbian OS, the following build error may occur: `virtual memory exhausted: Cannot allocate memory`. In such a case please try to increase the swap file size on your platform and retry the build. (If swap increase did not work consider running build.sh using --skip-unittests --use-websockets parameters)
+2. CentOS7: Only Python 2.7 is supported due to a missing boost-python3 library package
 
 <a name="windows"/>
 ## Build the Python iothub_client module on Windows using Nuget packages (recommended)

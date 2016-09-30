@@ -6,7 +6,7 @@
   "author": "Microsoft Corp.",
   "license": "MIT",
   "dependencies": {
-    "azure-iothub": "1.0.16",
+    "azure-iothub": "1.0.17",
     "azure-storage": "^1.2.0"
   }
 }

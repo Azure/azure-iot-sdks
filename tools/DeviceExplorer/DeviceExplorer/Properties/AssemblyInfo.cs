@@ -36,4 +36,4 @@ using System.Runtime.InteropServices;
 
 // Version information for an assembly follows semantic versioning 1.0.0. See
 // semver.org for details.
-[assembly: AssemblyInformationalVersion("1.0.12")]
+[assembly: AssemblyInformationalVersion("1.0.13")]

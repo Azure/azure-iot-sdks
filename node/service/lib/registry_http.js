@@ -3,10 +3,12 @@
 
 'use strict';
 
+var anHourFromNow = require('azure-iot-common').anHourFromNow;
 var Base = require('azure-iot-http-base').Http;
 var uuid = require('uuid');
 var PackageJson = require('../package.json');
 var translateError = require('./registry_http_errors.js');
+
 
 /*Codes_SRS_NODE_IOTHUB_HTTP_05_001: [The Http constructor shall accept an object with three properties:
 host - (string) the fully-qualified DNS hostname of an IoT hub
@@ -17,10 +19,13 @@ function Http(config) {
   this._http = new Base();
 }
 
+function getSharedAccessSignature(sas) {
+  return (typeof(sas) === 'string') ? sas : sas.extend(anHourFromNow());
+}
 Http.prototype.createDevice = function (path, deviceInfo, done) {
   var config = this._config;
   var httpHeaders = {
-    'Authorization': config.sharedAccessSignature,
+    'Authorization': getSharedAccessSignature(config.sharedAccessSignature),
     'iothub-name': config.hubName,
     'Content-Type': 'application/json; charset=utf-8',
     'User-Agent': 'azure-iothub/' + PackageJson.version
@@ -59,7 +64,7 @@ Http.prototype.createDevice = function (path, deviceInfo, done) {
 Http.prototype.updateDevice = function (path, deviceInfo, done) {
   var config = this._config;
   var httpHeaders = {
-    'Authorization': config.sharedAccessSignature,
+    'Authorization': getSharedAccessSignature(config.sharedAccessSignature),
     'iothub-name': config.hubName,
     'Content-Type': 'application/json; charset=utf-8',
     'If-Match': '*',
@@ -98,7 +103,7 @@ Http.prototype.updateDevice = function (path, deviceInfo, done) {
 Http.prototype.getDevice = function (path, done) {
   var config = this._config;
   var httpHeaders = {
-    'Authorization': config.sharedAccessSignature,
+    'Authorization': getSharedAccessSignature(config.sharedAccessSignature),
     'iothub-name': config.hubName,
     'User-Agent': 'azure-iothub/' + PackageJson.version
   };
@@ -131,7 +136,7 @@ Http.prototype.getDevice = function (path, done) {
 Http.prototype.listDevices = function (path, done) {
   var config = this._config;
   var httpHeaders = {
-    'Authorization': config.sharedAccessSignature,
+    'Authorization': getSharedAccessSignature(config.sharedAccessSignature),
     'iothub-name': config.hubName,
     'User-Agent': 'azure-iothub/' + PackageJson.version
   };
@@ -164,7 +169,7 @@ Http.prototype.listDevices = function (path, done) {
 Http.prototype.deleteDevice = function (path, done) {
   var config = this._config;
   var httpHeaders = {
-    'Authorization': config.sharedAccessSignature,
+    'Authorization': getSharedAccessSignature(config.sharedAccessSignature),
     'iothub-name': config.hubName,
     'If-Match': '*',
     'User-Agent': 'azure-iothub/' + PackageJson.version
@@ -200,7 +205,7 @@ Http.prototype.importDevicesFromBlob = function (path, importRequest, done) {
   var config = this._config;
   var requestId = uuid.v4();
   var httpHeaders = {
-    'Authorization': config.sharedAccessSignature,
+    'Authorization': getSharedAccessSignature(config.sharedAccessSignature),
     'Content-Type': 'application/json; charset=utf-8',
     'Request-Id': requestId,
     'User-Agent': 'azure-iothub/' + PackageJson.version
@@ -239,7 +244,7 @@ Http.prototype.exportDevicesToBlob = function (path, exportRequest, done) {
   var config = this._config;
   var requestId = uuid.v4();
   var httpHeaders = {
-    'Authorization': config.sharedAccessSignature,
+    'Authorization': getSharedAccessSignature(config.sharedAccessSignature),
     'Content-Type': 'application/json; charset=utf-8',
     'Request-Id': requestId,
     'User-Agent': 'azure-iothub/' + PackageJson.version
@@ -278,7 +283,7 @@ Http.prototype.listJobs = function (path, done) {
   var config = this._config;
   var requestId = uuid.v4();
   var httpHeaders = {
-    'Authorization': config.sharedAccessSignature,
+    'Authorization': getSharedAccessSignature(config.sharedAccessSignature),
     'Request-Id': requestId,
     'User-Agent': 'azure-iothub/' + PackageJson.version
   };
@@ -312,7 +317,7 @@ Http.prototype.getJob = function (path, done) {
   var config = this._config;
   var requestId = uuid.v4();
   var httpHeaders = {
-    'Authorization': config.sharedAccessSignature,
+    'Authorization': getSharedAccessSignature(config.sharedAccessSignature),
     'Request-Id': requestId,
     'User-Agent': 'azure-iothub/' + PackageJson.version
   };
@@ -346,7 +351,7 @@ Http.prototype.cancelJob = function (path, done) {
   var config = this._config;
   var requestId = uuid.v4();
   var httpHeaders = {
-    'Authorization': config.sharedAccessSignature,
+    'Authorization': getSharedAccessSignature(config.sharedAccessSignature),
     'Request-Id': requestId,
     'User-Agent': 'azure-iothub/' + PackageJson.version
   };

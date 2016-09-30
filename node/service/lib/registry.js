@@ -3,7 +3,6 @@
 
 'use strict';
 
-var anHourFromNow = require('azure-iot-common').anHourFromNow;
 var ArgumentError = require('azure-iot-common').errors.ArgumentError;
 var ConnectionString = require('./connection_string.js');
 var DefaultTransport = require('./registry_http.js');
@@ -51,12 +50,11 @@ Registry.fromConnectionString = function fromConnectionString(value, Transport) 
 
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_009: [Otherwise, it shall derive and transform the needed parts from the connection string in order to create a new instance of the default transport (azure-iothub.Http).]*/
   var cn = ConnectionString.parse(value);
-  var sas = SharedAccessSignature.create(cn.HostName, cn.SharedAccessKeyName, cn.SharedAccessKey, anHourFromNow());
 
   var config = {
     host: cn.HostName,
     hubName: cn.HostName.split('.', 1)[0],
-    sharedAccessSignature: sas.toString()
+    sharedAccessSignature: SharedAccessSignature.create(cn.HostName, cn.SharedAccessKeyName, cn.SharedAccessKey, Date.now())
   };
 
   /*Codes_SRS_NODE_IOTHUB_REGISTRY_05_010: [The fromConnectionString method shall return a new instance of the Registry object, as by a call to new Registry(transport).]*/

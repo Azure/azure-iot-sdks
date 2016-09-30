@@ -1,6 +1,6 @@
 {
   "name": "azure-iot-amqp-base",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "AMQP operations used by Azure IoT device and service SDKs",
   "author": "Microsoft Corporation",
   "license": "MIT",
@@ -9,7 +9,7 @@
   "dependencies": {
     "amqp10": "^3.2.1",
     "amqp10-transport-ws": "^0.0.5",
-    "azure-iot-common": "1.0.14",
+    "azure-iot-common": "1.0.15",
     "debug": "^2.2.0"
   },
   "devDependencies": {
