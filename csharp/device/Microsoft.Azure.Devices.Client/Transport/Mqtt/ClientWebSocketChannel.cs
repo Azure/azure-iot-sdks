@@ -16,20 +16,20 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
     public class ClientWebSocketChannel : AbstractChannel
     {
         readonly ClientWebSocket webSocket;
+        readonly CancellationTokenSource writeCancellationTokenSource;
         bool active;
-        volatile CancellationTokenSource writeCancellationTokenSource;
 
         internal bool ReadPending { get; set; }
-   
+
         internal bool WriteInProgress { get; set; }
 
         public ClientWebSocketChannel(IChannel parent, ClientWebSocket webSocket)
             : base(parent)
         {
             this.webSocket = webSocket;
-            this.Metadata = new ChannelMetadata(false, 1);
-            this.Configuration = new ClientWebSocketChannelConfig();
             this.active = true;
+            this.Metadata = new ChannelMetadata(false, 16);
+            this.Configuration = new ClientWebSocketChannelConfig();
             this.writeCancellationTokenSource = new CancellationTokenSource();
         }
 
@@ -58,20 +58,13 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
         protected class WebSocketChannelUnsafe : AbstractUnsafe
         {
             public WebSocketChannelUnsafe(AbstractChannel channel)
-                :base(channel)
+                : base(channel)
             {
             }
 
-            public override async Task ConnectAsync(EndPoint remoteAddress, EndPoint localAddress)
+            public override Task ConnectAsync(EndPoint remoteAddress, EndPoint localAddress)
             {
-                 throw new NotImplementedException();
-
-                //this.webSocket = new ClientWebSocket();
-                //this.webSocket.Options.AddSubProtocol(this.subProtocol);
-                //// Uri uri = new Uri("ws://" + IotHubName + ":" + Port + "/$iothub/websocket");
-                //var uri = new Uri("ws://" + ((IPEndPoint)remoteAddress).Address + ":" + ((IPEndPoint)remoteAddress).Port + "/$iothub/websocket");
-                //await ((ClientWebSocketChannel)this.channel).webSocket.ConnectAsync(uri, CancellationToken.None);
-                //((ClientWebSocketChannel)this.channel).Configuration.AutoRead = true;
+                throw new NotSupportedException("ClientWebSocketChannel does not support BindAsync()");
             }
 
             protected override void Flush0()
@@ -90,38 +83,34 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
 
         protected override bool IsCompatible(IEventLoop eventLoop) => true;
 
-
         protected override void DoBind(EndPoint localAddress)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException("ClientWebSocketChannel does not support DoBind()");
         }
 
         protected override void DoDisconnect()
         {
-            if (this.Metadata.HasDisconnect)
-            {
-                this.DoClose();
-            }
-            else
-            {
-                throw new NotSupportedException("ClientWebSocketChannel does not support DoDisconnect()");
-            }
+            throw new NotSupportedException("ClientWebSocketChannel does not support DoDisconnect()");
         }
 
         protected override async void DoClose()
         {
             try
             {
-                // Cancel any pending write
-                this.CancelPendingWrite();
-                this.active = false;
-
-                using (var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
+                WebSocketState webSocketState = this.webSocket.State;
+                if (webSocketState != WebSocketState.Closed && webSocketState != WebSocketState.Aborted)
                 {
-                    await this.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, cancellationTokenSource.Token);
+                    // Cancel any pending write
+                    this.CancelPendingWrite();
+                    this.active = false;
+
+                    using (var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
+                    {
+                        await this.webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, string.Empty, cancellationTokenSource.Token);
+                    }
                 }
             }
-            catch (Exception e)  when (!e.IsFatal())
+            catch (Exception e) when (!e.IsFatal())
             {
                 this.Abort();
             }
@@ -129,129 +118,117 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
 
         protected override async void DoBeginRead()
         {
-            if (!this.Open)
+            IByteBuffer byteBuffer = null;
+            IRecvByteBufAllocatorHandle allocHandle = null;
+            bool close = false;
+            try
             {
-                return;
-            }
-
-            if (this.ReadPending)
-            {
-                return;
-            }
-
-            this.ReadPending = true;
-            IByteBufferAllocator allocator = this.Configuration.Allocator;
-            IRecvByteBufAllocatorHandle allocHandle = this.Configuration.RecvByteBufAllocator.NewHandle();
-            allocHandle.Reset(this.Configuration);
-            do
-            {
-                IByteBuffer byteBuf = allocHandle.Allocate(allocator);
-                allocHandle.LastBytesRead = await this.DoReadBytes(byteBuf, allocHandle);
-                if (allocHandle.LastBytesRead <= 0)
+                if (!this.Open || this.ReadPending)
                 {
-                    // nothing was read -> release the buffer.
-                    byteBuf.Release();
-                    break;
+                    return;
                 }
 
-                this.Pipeline.FireChannelRead(byteBuf);
+                this.ReadPending = true;
+                IByteBufferAllocator allocator = this.Configuration.Allocator;
+                allocHandle = this.Configuration.RecvByteBufAllocator.NewHandle();
+                allocHandle.Reset(this.Configuration);
+                do
+                {
+                    byteBuffer = allocHandle.Allocate(allocator);
+                    allocHandle.LastBytesRead = await this.DoReadBytes(byteBuffer);
+                    if (allocHandle.LastBytesRead <= 0)
+                    {
+                        // nothing was read -> release the buffer.
+                        byteBuffer.Release();
+                        byteBuffer = null;
+                        close = allocHandle.LastBytesRead < 0;
+                        break;
+                    }
 
-                allocHandle.IncMessagesRead(1);
+                    this.Pipeline.FireChannelRead(byteBuffer);
+                    allocHandle.IncMessagesRead(1);
+                }
+                while (allocHandle.ContinueReading());
+
+                allocHandle.ReadComplete();
                 this.ReadPending = false;
+                this.Pipeline.FireChannelReadComplete();
             }
-            while (allocHandle.ContinueReading());
+            catch (Exception e) when (!e.IsFatal())
+            {
+                // Since this method returns void, all exceptions must be handled here.
+                byteBuffer?.Release();
+                allocHandle?.ReadComplete();
+                this.ReadPending = false;
+                this.Pipeline.FireChannelReadComplete();
+                this.Pipeline.FireExceptionCaught(e);
+                close = true;
+            }
 
-            allocHandle.ReadComplete();
-            this.Pipeline.FireChannelReadComplete();
+            if (close)
+            {
+                if (this.Active)
+                {
+                    await this.HandleCloseAsync();
+                }
+            }
         }
 
-        protected override async void DoWrite(ChannelOutboundBuffer input)
+        protected override async void DoWrite(ChannelOutboundBuffer channelOutboundBuffer)
         {
-            this.ThrowIfNotOpen();
-
-            this.WriteInProgress = true;
-
-            while (true)
+            try
             {
-                object msg = input.Current;
-                if (msg == null)
+                this.WriteInProgress = true;
+                while (true)
                 {
-                    // Wrote all messages.
-                    break;
-                }
-
-                var buf = msg as IByteBuffer;
-                if (buf != null)
-                {
-                    int readableBytes = buf.ReadableBytes;
-                    if (readableBytes == 0)
+                    object currentMessage = channelOutboundBuffer.Current;
+                    if (currentMessage == null)
                     {
-                        input.Remove();
+                        // Wrote all messages.
+                        break;
+                    }
+
+                    var byteBuffer = currentMessage as IByteBuffer;
+                    Fx.AssertAndThrow(byteBuffer != null, "channelOutBoundBuffer contents must be of type IByteBuffer");
+
+                    if (byteBuffer.ReadableBytes == 0)
+                    {
+                        channelOutboundBuffer.Remove();
                         continue;
                     }
 
-                    await this.DoWriteBytes(buf, input);
+                    await this.webSocket.SendAsync(byteBuffer.GetIoBuffer(), WebSocketMessageType.Binary, true, this.writeCancellationTokenSource.Token);
+                    channelOutboundBuffer.Remove();
                 }
-                else
-                {
-                    // TODO: throw exception?
-                }
-            }
 
-            this.WriteInProgress = false;
-        }
-
-        /// <returns>the amount of written bytes</returns>
-        async Task DoWriteBytes(IByteBuffer buf, ChannelOutboundBuffer outboundBuffer)
-        {
-            bool success = false;
-            try
-            {
-                await this.webSocket.SendAsync(buf.GetIoBuffer(), WebSocketMessageType.Binary, true, this.writeCancellationTokenSource.Token);
-                outboundBuffer.Remove();
-                success = true;
+                this.WriteInProgress = false;
             }
-            catch (Exception e)  when (!e.IsFatal())
+            catch (Exception e) when (!e.IsFatal())
             {
+                // Since this method returns void, all exceptions must be handled here.
+
+                this.WriteInProgress = false;
                 this.Pipeline.FireExceptionCaught(e);
-                throw;
-            }
-            finally
-            {
-                if (!success)
-                {
-                    this.Abort();
-                }
+                await this.HandleCloseAsync();
             }
         }
 
-        async Task<int> DoReadBytes(IByteBuffer buf, IRecvByteBufAllocatorHandle allocHandle)
+        async Task<int> DoReadBytes(IByteBuffer byteBuffer)
         {
-            int readBytes = 0;
-            try
+            WebSocketReceiveResult receiveResult = await this.webSocket.ReceiveAsync(new ArraySegment<byte>(byteBuffer.Array, byteBuffer.ArrayOffset + byteBuffer.WriterIndex, byteBuffer.WritableBytes), CancellationToken.None);
+            if (receiveResult.MessageType == WebSocketMessageType.Text)
             {
-                WebSocketReceiveResult receiveResult = await this.webSocket.ReceiveAsync(new ArraySegment<byte>(buf.Array, buf.ArrayOffset + buf.WriterIndex, buf.WritableBytes), CancellationToken.None);
-                if (receiveResult.MessageType == WebSocketMessageType.Text)
-                {
-                    throw new ProtocolViolationException("Mqtt over WS message cannot be in text");
-                }
-
-                buf.SetWriterIndex(buf.WriterIndex + receiveResult.Count);
-                readBytes = receiveResult.Count;
-            }
-            catch (Exception e)  when (!e.IsFatal())
-            {
-                this.HandleReadException(buf, allocHandle, e);
-            }
-            finally
-            {
-                if (readBytes == 0)
-                {
-                    this.Abort();
-                }
+                throw new ProtocolViolationException("Mqtt over WS message cannot be in text");
             }
 
-            return readBytes;
+            // Check if client closed WebSocket
+            if (receiveResult.MessageType == WebSocketMessageType.Close)
+            {
+                return -1;
+            }
+
+            byteBuffer.SetWriterIndex(byteBuffer.WriterIndex + receiveResult.Count);
+            return receiveResult.Count;
         }
 
         void CancelPendingWrite()
@@ -266,162 +243,23 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
             }
         }
 
-        void HandleReadException(IByteBuffer byteBuf, IRecvByteBufAllocatorHandle allocHandle, Exception cause)
+        async Task HandleCloseAsync()
         {
-            if (byteBuf != null)
+            try
             {
-                if (byteBuf.IsReadable())
-                {
-                    this.ReadPending = false;
-                    this.Pipeline.FireChannelRead(byteBuf);
-                }
-                else
-                {
-                    byteBuf.Release();
-                }
+                await this.CloseAsync();
             }
-
-            allocHandle.ReadComplete();
-            this.Pipeline.FireChannelReadComplete();
-            this.Pipeline.FireExceptionCaught(cause);
-            //if (close || cause is SocketException)
-            //{
-            //    this.CloseOnRead();
-            //}
-        }
-
-        void ThrowIfNotOpen()
-        {
-            var webSocketState = this.webSocket.State;
-            if (webSocketState == WebSocketState.Open)
+            catch (Exception ex) when (!ex.IsFatal())
             {
-                return;
+                this.Abort();
             }
-
-            if (webSocketState == WebSocketState.Aborted)
-            {
-                throw new ObjectDisposedException(this.GetType().Name);
-            }
-
-            if (webSocketState == WebSocketState.Closed ||
-                webSocketState == WebSocketState.CloseReceived ||
-                webSocketState == WebSocketState.CloseSent)
-            {
-                throw new ObjectDisposedException(this.GetType().Name);
-            }
-
-            throw new ProtocolViolationException("ClientWebSocketChannel websocket in invalid state");
         }
 
         void Abort()
         {
-            this.active = false;
             this.webSocket.Abort();
             this.webSocket.Dispose();
-        }
-
-        public class ClientWebSocketChannelConfig : IChannelConfiguration
-        {
-            public T GetOption<T>(ChannelOption<T> option)
-            {
-                Contract.Requires(option != null);
-
-                if (ChannelOption.ConnectTimeout.Equals(option))
-                {
-                    return (T)(object)this.ConnectTimeout; // no boxing will happen, compiler optimizes away such casts
-                }
-                if (ChannelOption.WriteSpinCount.Equals(option))
-                {
-                    return (T)(object)this.WriteSpinCount;
-                }
-                if (ChannelOption.Allocator.Equals(option))
-                {
-                    return (T)this.Allocator;
-                }
-                if (ChannelOption.RcvbufAllocator.Equals(option))
-                {
-                    return (T)this.RecvByteBufAllocator;
-                }
-                if (ChannelOption.AutoRead.Equals(option))
-                {
-                    return (T)(object)this.AutoRead;
-                }
-                if (ChannelOption.WriteBufferHighWaterMark.Equals(option))
-                {
-                    return (T)(object)this.WriteBufferHighWaterMark;
-                }
-                if (ChannelOption.WriteBufferLowWaterMark.Equals(option))
-                {
-                    return (T)(object)this.WriteBufferLowWaterMark;
-                }
-                if (ChannelOption.MessageSizeEstimator.Equals(option))
-                {
-                    return (T)this.MessageSizeEstimator;
-                }
-                return default(T);
-            }
-
-            public bool SetOption(ChannelOption option, object value) => option.Set(this, value);
-
-            public bool SetOption<T>(ChannelOption<T> option, T value)
-            {
-                // this.Validate(option, value);
-
-                if (ChannelOption.ConnectTimeout.Equals(option))
-                {
-                    this.ConnectTimeout = (TimeSpan)(object)value;
-                }
-                else if (ChannelOption.WriteSpinCount.Equals(option))
-                {
-                    this.WriteSpinCount = (int)(object)value;
-                }
-                else if (ChannelOption.Allocator.Equals(option))
-                {
-                    this.Allocator = (IByteBufferAllocator)value;
-                }
-                else if (ChannelOption.RcvbufAllocator.Equals(option))
-                {
-                    this.RecvByteBufAllocator = (IRecvByteBufAllocator)value;
-                }
-                else if (ChannelOption.AutoRead.Equals(option))
-                {
-                    this.AutoRead = (bool)(object)value;
-                }
-                else if (ChannelOption.WriteBufferHighWaterMark.Equals(option))
-                {
-                    this.WriteBufferHighWaterMark = (int)(object)value;
-                }
-                else if (ChannelOption.WriteBufferLowWaterMark.Equals(option))
-                {
-                    this.WriteBufferLowWaterMark = (int)(object)value;
-                }
-                else if (ChannelOption.MessageSizeEstimator.Equals(option))
-                {
-                    this.MessageSizeEstimator = (IMessageSizeEstimator)value;
-                }
-                else
-                {
-                    return false;
-                }
-
-                return true;
-            }
-
-            public TimeSpan ConnectTimeout { get; set; }
-
-            public int WriteSpinCount { get; set; }
-
-            public IByteBufferAllocator Allocator { get; set; }
-
-            public IRecvByteBufAllocator RecvByteBufAllocator { get; set; }
-
-            public bool AutoRead { get; set; }
-
-            public int WriteBufferHighWaterMark { get; set; }
-
-            public int WriteBufferLowWaterMark { get; set; }
-
-            public IMessageSizeEstimator MessageSizeEstimator { get; set; }
+            this.writeCancellationTokenSource.Dispose();
         }
     }
 }
