@@ -983,7 +983,7 @@ describe('Over simulated HTTPS', function () {
       done(null, {
         deviceId: deviceId,
         authentication: {
-          SymmetricKey: {
+          symmetricKey: {
             primaryKey: 'key=='
           }
         }

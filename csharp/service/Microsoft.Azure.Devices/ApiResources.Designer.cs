@@ -115,6 +115,24 @@ namespace Microsoft.Azure.Devices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to null or empty deviceIds.
+        /// </summary>
+        internal static string DeviceJobParametersNullOrEmptyDeviceList {
+            get {
+                return ResourceManager.GetString("DeviceJobParametersNullOrEmptyDeviceList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to null or empty deviceId entries specified.
+        /// </summary>
+        internal static string DeviceJobParametersNullOrEmptyDeviceListEntries {
+            get {
+                return ResourceManager.GetString("DeviceJobParametersNullOrEmptyDeviceListEntries", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Either both primary and secondary keys must be specified or neither one to auto generate on service side..
         /// </summary>
         internal static string DeviceKeysInvalid {
@@ -205,6 +223,15 @@ namespace Microsoft.Azure.Devices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The JobClient instance was already closed..
+        /// </summary>
+        internal static string JobClientInstanceAlreadyClosed {
+            get {
+                return ResourceManager.GetString("JobClientInstanceAlreadyClosed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The message body cannot be read multiple times. To reuse it store the value after reading..
         /// </summary>
         internal static string MessageBodyConsumed {
@@ -237,6 +264,15 @@ namespace Microsoft.Azure.Devices {
         internal static string OffsetExceedsBufferSize {
             get {
                 return ResourceManager.GetString("OffsetExceedsBufferSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The parameter {0} cannot be null or empty..
+        /// </summary>
+        internal static string ParameterCannotBeNullOrEmpty {
+            get {
+                return ResourceManager.GetString("ParameterCannotBeNullOrEmpty", resourceCulture);
             }
         }
         

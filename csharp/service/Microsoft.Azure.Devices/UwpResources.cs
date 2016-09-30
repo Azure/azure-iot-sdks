@@ -349,6 +349,50 @@ namespace Microsoft.Azure.Devices
                 return ResourceManager.GetString("StringIsNotThumbprint", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The parameter {0} cannot be null or empty..
+        /// </summary>
+        internal static string ParameterCannotBeNullOrEmpty
+        {
+            get
+            {
+                return ResourceManager.GetString("ParameterCannotBeNullOrEmpty", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The JobClient instance was already closed..
+        /// </summary>
+        internal static string JobClientInstanceAlreadyClosed
+        {
+            get
+            {
+                return ResourceManager.GetString("JobClientInstanceAlreadyClosed", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to null or empty deviceIds.
+        /// </summary>
+        internal static string DeviceJobParametersNullOrEmptyDeviceList
+        {
+            get
+            {
+                return ResourceManager.GetString("DeviceJobParametersNullOrEmptyDeviceList", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to null or empty deviceId entries specified.
+        /// </summary>
+        internal static string DeviceJobParametersNullOrEmptyDeviceListEntries
+        {
+            get
+            {
+                return ResourceManager.GetString("DeviceJobParametersNullOrEmptyDeviceListEntries", resourceCulture);
+            }
+        }
     }
 }
 

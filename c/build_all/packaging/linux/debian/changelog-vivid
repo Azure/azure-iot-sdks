@@ -1,4 +1,4 @@
-azure-iot-sdk-c (0.1.0-25) vivid; urgency=low
+azure-iot-sdk-c (0.1.0-26) vivid; urgency=low
 
   * Initial release
 
@@ -48,4 +48,7 @@ azure-iot-sdk-c (0.1.0-25) vivid; urgency=low
 
   * Add messageId and correlationId to uAMQP messages on D2C messages
 
- -- AzureIoT User <aziotsdklinux@outlook.com>  Sat, 27 Aug 2016 11:00:00 +0000
+  * Remove extra trusted_ca field from the wsio config for AMQP over WS
+
+ -- AzureIoT User <aziotsdklinux@outlook.com>  Tue, 27 Sep 2016 17:00:00 +0000
+

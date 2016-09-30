@@ -43,12 +43,21 @@ call npm link azure-iot-http-base
 call npm link azure-iot-common
 call npm link
 
+cd %node-root%\service
+echo.
+echo -- Creating links for %cd% --
+call npm link azure-iot-common
+call npm link azure-iot-amqp-base
+call npm link azure-iot-http-base
+call npm link
+
 cd %node-root%\device\transport\amqp
 echo.
 echo -- Creating links for %cd% --
 call npm link azure-iot-amqp-base
 call npm link azure-iot-common
 call npm link azure-iot-device
+call npm link azure-iothub
 call npm link
 
 cd %node-root%\device\transport\amqp-ws
@@ -58,6 +67,7 @@ call npm link azure-iot-amqp-base
 call npm link azure-iot-common
 call npm link azure-iot-device
 call npm link azure-iot-device-amqp
+call npm link azure-iothub
 call npm link
 
 cd %node-root%\device\transport\http
@@ -66,6 +76,7 @@ echo -- Creating links for %cd% --
 call npm link azure-iot-http-base
 call npm link azure-iot-common
 call npm link azure-iot-device
+call npm link azure-iothub
 call npm link
 
 cd %node-root%\device\transport\mqtt
@@ -73,14 +84,7 @@ echo.
 echo -- Creating links for %cd% --
 call npm link azure-iot-mqtt-base
 call npm link azure-iot-device
-call npm link
-
-cd %node-root%\service
-echo.
-echo -- Creating links for %cd% --
-call npm link azure-iot-common
-call npm link azure-iot-amqp-base
-call npm link azure-iot-http-base
+call npm link azure-iothub
 call npm link
 
 cd %node-root%\e2etests

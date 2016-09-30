@@ -18,7 +18,7 @@
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
-static const char* connectionString = "";
+static const char* connectionString = "HostName=dm-preview1-14.private.azure-devices-int.net;DeviceId=001-z;SharedAccessKey=5i1Ggm+sbZSUYDuOCKlZvLZKPxLWw9qW5IqMYJPGh9I=";
 
 static int callbackCounter;
 static char msgText[1024];

@@ -77,9 +77,9 @@ namespace DeviceExplorer
                     {
                         var deviceTwin = await registryManager.GetTwinAsync(deviceName);
                         dynamic dp = JsonConvert.DeserializeObject(updateJson, typeFound);
-                        dp.Id = deviceName;
+                        dp.DeviceId = deviceName;
                         dp.ETag = deviceTwin.ETag;
-                        registryManager.UpdateTwinAsync(dp.Id, dp, dp.ETag);
+                        registryManager.UpdateTwinAsync(dp.DeviceId, dp, dp.ETag);
                     }
                     else
                     {

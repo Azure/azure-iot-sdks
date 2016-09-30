@@ -8,7 +8,14 @@ namespace Microsoft.Azure.Devices
     /// </summary>
     public enum DeviceConnectionState
     {
+        /// <summary>
+        /// Represents a <see cref="Device"/> in the Disconnected state
+        /// </summary>
         Disconnected = 0,
+
+        /// <summary>
+        /// Represents a <see cref="Device"/> in the Connected state
+        /// </summary>
         Connected = 1
     }
 }

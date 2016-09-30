@@ -39,6 +39,22 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
+        "filePath": "c/build_all/arduino_cc/base-libraries/AzureIoTHub/library.properties",
+        "search": "(version\\=)(.*)",
+        "replaceString": function (versions) {
+            return '$1' + versions.c_arduino.device;
+        }
+    },
+    {
+        "taskType": "regexReplaceTask",
+        "filePath": "c/build_all/arduino_cc/base-libraries/AzureIoTHub/src/AzureIoTHub.h",
+        "search": "(AzureIoTHubVersion\\=)([ ]+)(\".*\")",
+        "replaceString": function (versions) {
+            return '$1' + '$2' + '"' + versions.c_arduino.device + '"';
+        }
+    },
+    {
+        "taskType": "regexReplaceTask",
         "filePath": "c/iothub_client/tests/version_ut/version_ut.cpp",
         "search": "(\\\".*\\\")([ \t]*\\,[ \t]*IOTHUB\\_SDK\\_VERSION)",
         "replaceString": function(versions) {
@@ -1270,6 +1286,11 @@ module.exports = [
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-device",
                 "replaceString": "node.device"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "devDependencies.azure-iothub",
+                "replaceString": "node.service"
             }
         ]
     },
@@ -1301,6 +1322,11 @@ module.exports = [
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-common",
                 "replaceString": "node.common"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "devDependencies.azure-iothub",
+                "replaceString": "node.service"
             }
         ]
     },
@@ -1327,6 +1353,11 @@ module.exports = [
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-device",
                 "replaceString": "node.device"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "devDependencies.azure-iothub",
+                "replaceString": "node.service"
             }
         ]
     },

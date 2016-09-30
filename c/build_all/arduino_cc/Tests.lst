@@ -1,0 +1,48 @@
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+[huzzah_remote_monitoring]
+RelativePath=\iot-hub-c-huzzah-getstartedkit\remote_monitoring\remote_monitoring.ino
+RelativeWorkingDir=\Work\Results\huzzah_remote_monitoring
+MaxAllowedDurationSeconds=100
+Categories=IoTHub
+Hardware=Adafruit_Huzzah
+CPUParameters=-fqbn=esp8266:esp8266:huzzah:CpuFrequency=80,UploadSpeed=115200,FlashSize=4M3M -ide-version=10609
+Build=Enable
+Installation=Disable
+Execution=Disable
+
+[huzzah_simplesample_http]
+RelativePath=\Work\arduino\libraries\AzureIoTHub\examples\simplesample_http\simplesample_http.ino
+RelativeWorkingDir=\Work\Results\huzzah_simplesample_http
+MaxAllowedDurationSeconds=100
+Categories=IoTHub
+Hardware=Adafruit_Huzzah
+CPUParameters=-fqbn=esp8266:esp8266:huzzah:CpuFrequency=80,UploadSpeed=115200,FlashSize=4M3M -ide-version=10609
+Build=Enable
+Installation=Disable
+Execution=Disable
+
+[m0wifi_remote_monitoring]
+RelativePath=\iot-hub-c-m0wifi-getstartedkit\remote_monitoring\remote_monitoring.ino
+RelativeWorkingDir=\Work\Results\m0wifi_remote_monitoring
+MaxAllowedDurationSeconds=100
+Categories=IoTHub
+Hardware=Adafruit_FeatherM0
+CPUParameters=-fqbn=adafruit:samd:adafruit_feather_m0 -vid-pid=0X239A_0X800B -ide-version=10609
+Build=Enable
+Installation=Disable
+Execution=Disable
+
+[m0wifi_simplesample_http]
+RelativePath=\Work\arduino\libraries\AzureIoTHub\examples\simplesample_http\simplesample_http.ino
+RelativeWorkingDir=\Work\Results\m0wifi_simplesample_http
+MaxAllowedDurationSeconds=100
+Categories=IoTHub
+Hardware=Adafruit_FeatherM0
+CPUParameters=-fqbn=adafruit:samd:adafruit_feather_m0 -vid-pid=0X239A_0X800B -ide-version=10609
+Build=Disable
+Installation=Disable
+Execution=Disable
+
+[End]
