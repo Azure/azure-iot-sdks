@@ -5,6 +5,7 @@ namespace Microsoft.Azure.Devices.Api.Test
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Net;
     using System.Net.Http;
     using System.Threading;
@@ -64,6 +65,26 @@ namespace Microsoft.Azure.Devices.Api.Test
             var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
             await registryManager.GetDeviceAsync(null);
             Assert.Fail("Calling GetDeviceAsync with null device id did not throw an exception.");
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("API")]
+        public async Task GetDevicesAsyncTest()
+        {
+            List<Device> devicesToReturn = new List<Device>();
+            devicesToReturn.Add(new Device("a") { ConnectionState = DeviceConnectionState.Connected });
+
+            var restOpMock = new Mock<IHttpClientHelper>();
+            restOpMock.Setup(restOp => restOp.GetAsync<IEnumerable<Device>>(It.IsAny<Uri>(), It.IsAny<IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(), null, It.IsAny<CancellationToken>())).ReturnsAsync(devicesToReturn);
+
+            var registryManager = new HttpRegistryManager(restOpMock.Object, IotHubName);
+
+            var returnedDevices = await registryManager.GetDevicesAsync(1);
+
+            Assert.AreSame(devicesToReturn, returnedDevices);
+            Assert.AreSame(devicesToReturn[0], returnedDevices.First());
+            restOpMock.VerifyAll();
         }
 
         [TestMethod]
@@ -282,6 +303,19 @@ namespace Microsoft.Azure.Devices.Api.Test
             var returnedDevice = await registryManager.UpdateDeviceAsync(deviceToReturn);
             Assert.AreSame(deviceToReturn, returnedDevice);
             restOpMock.VerifyAll();
+        }
+
+        private Device PrepareTestDevice(int batteryLevel, string firmwareVersion)
+        {
+            Device deviceToReturn = new Device("Device123");
+            return deviceToReturn;
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("API")]
+        public async Task UpdateManagedDeviceTagsAsyncTest()
+        {
         }
 
         [ExpectedException(typeof(ArgumentNullException))]

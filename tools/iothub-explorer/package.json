@@ -1,6 +1,6 @@
 {
   "name": "iothub-explorer",
-  "version": "1.0.14",
+  "version": "1.1.0-dtpreview",
   "description": "Azure IoT Hub Explorer",
   "author": "Microsoft Corporation",
   "license": "MIT",
@@ -8,9 +8,9 @@
   "bin": "iothub-explorer.js",
   "dependencies": {
     "azure-event-hubs": "0.0.3",
-    "azure-iot-common": "1.0.15",
-    "azure-iot-device": "1.0.15",
-    "azure-iothub": "1.0.17",
+    "azure-iot-common": "1.1.0-dtpreview",
+    "azure-iot-device": "1.1.0-dtpreview",
+    "azure-iothub": "2.0.0-dtpreview",
     "bluebird": "^3.0.1",
     "colors-tmpl": "^1.0.0",
     "nopt": "^3.0.4",

@@ -7,6 +7,7 @@ namespace Microsoft.Azure.Devices
     using System.Collections.Generic;
     using System.Net;
     using System.Net.Http;
+    using System.Net.Http.Headers;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -34,6 +35,43 @@ namespace Microsoft.Azure.Devices
             IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
             CancellationToken cancellationToken) where T: IETagHolder;
 
+        Task<T2> PutAsync<T, T2>(
+            Uri requestUri,
+            T entity,
+            IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
+            CancellationToken cancellationToken);
+
+        Task PutAsync<T>(
+            Uri requestUri,
+            T entity,
+            string etag,
+            PutOperationType operationType,
+            IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
+            CancellationToken cancellationToken);
+
+        Task<T2> PutAsync<T, T2>(
+            Uri requestUri,
+            T entity,
+            string etag,
+            PutOperationType operationType,
+            IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
+            CancellationToken cancellationToken);
+
+        Task PatchAsync<T>(
+            Uri requestUri,
+            T entity,
+            string etag,
+            IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
+            CancellationToken cancellationToken);
+
+        Task<T2> PatchAsync<T, T2>(
+            Uri requestUri,
+            T entity,
+            string etag,
+            PutOperationType operationType,
+            IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
+            CancellationToken cancellationToken);
+
         Task PostAsync<T>(
             Uri requestUri, 
             T entity, 
@@ -46,6 +84,24 @@ namespace Microsoft.Azure.Devices
             T entity,
             IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
             IDictionary<string, string> customHeaders,
+            CancellationToken cancellationToken);
+
+        Task<T2> PostAsync<T, T2>(
+            Uri requestUri,
+            T entity,
+            IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
+            IDictionary<string, string> customHeaders,
+            MediaTypeHeaderValue customContentType,
+            ICollection<string> customContentEncoding,
+            CancellationToken cancellationToken);
+
+        Task<HttpResponseMessage> PostAsync<T>(
+            Uri requestUri,
+            T entity,
+            IDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> errorMappingOverrides,
+            IDictionary<string, string> customHeaders,
+            MediaTypeHeaderValue customContentType,
+            ICollection<string> customContentEncoding,
             CancellationToken cancellationToken);
 
         Task DeleteAsync<T>(

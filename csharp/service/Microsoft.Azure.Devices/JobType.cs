@@ -13,13 +13,34 @@ namespace Microsoft.Azure.Devices
     [JsonConverter(typeof(StringEnumConverter))]
     public enum JobType
     {
+        /// <summary>
+        /// Unknown
+        /// </summary>
         [EnumMember(Value = "unknown")]
         Unknown = 0,
 
+        /// <summary>
+        /// Indicates an ExportDevices job
+        /// </summary>
         [EnumMember(Value = "export")]
         ExportDevices,
 
+        /// <summary>
+        /// Indicates an ImportDevices job
+        /// </summary>
         [EnumMember(Value = "import")]
         ImportDevices,
+
+        /// <summary>
+        /// Indicates a Device method job
+        /// </summary>
+        [EnumMember(Value = "scheduleDeviceMethod")]
+        ScheduleDeviceMethod,
+
+        /// <summary>
+        /// Indicates a Twin update job
+        /// </summary>
+        [EnumMember(Value = "scheduleUpdateTwin")]
+        ScheduleUpdateTwin
     }
 }

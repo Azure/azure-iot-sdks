@@ -20,6 +20,7 @@ namespace Microsoft.Azure.Devices
         static readonly TimeSpan DefaultOperationTimeout = TimeSpan.FromSeconds(100);
         const string StatisticsUriFormat = "/statistics/service?" + ClientApiVersionHelper.ApiVersionQueryString;
         const string PurgeMessageQueueFormat = "/devices/{0}/commands?" + ClientApiVersionHelper.ApiVersionQueryString;
+        const string DeviceMethodUriFormat = "/twins/{0}/methods?" + ClientApiVersionHelper.ApiVersionQueryString;
 
         readonly IotHubConnection iotHubConnection;
         readonly TimeSpan openTimeout;
@@ -176,6 +177,25 @@ namespace Microsoft.Azure.Devices
             return this.httpClientHelper.GetAsync<ServiceStatistics>(GetStatisticsUri(), errorMappingOverrides, null, cancellationToken);
         }
 
+        public override Task<CloudToDeviceMethodResult> InvokeDeviceMethodAsync(string deviceId, CloudToDeviceMethod cloudToDeviceMethod)
+        {
+            return this.InvokeDeviceMethodAsync(deviceId, cloudToDeviceMethod, CancellationToken.None);
+        }
+
+        public override Task<CloudToDeviceMethodResult> InvokeDeviceMethodAsync(string deviceId,
+            CloudToDeviceMethod cloudToDeviceMethod,
+            CancellationToken cancellationToken)
+        {
+            return this.httpClientHelper.PostAsync<CloudToDeviceMethod, CloudToDeviceMethodResult>(
+                GetDeviceMethodUri(deviceId),
+                cloudToDeviceMethod,
+                null,
+                null,
+                null,
+                null,
+                cancellationToken);
+        }
+
         async Task<SendingAmqpLink> GetSendingLinkAsync()
         {
             SendingAmqpLink sendingLink;
@@ -208,6 +228,12 @@ namespace Microsoft.Azure.Devices
         static Uri GetPurgeMessageQueueAsyncUri(string deviceId)
         {
             return new Uri(PurgeMessageQueueFormat.FormatInvariant(deviceId), UriKind.Relative);
+        }
+
+        static Uri GetDeviceMethodUri(string deviceId)
+        {
+            deviceId = WebUtility.UrlEncode(deviceId);
+            return new Uri(DeviceMethodUriFormat.FormatInvariant(deviceId), UriKind.Relative);
         }
     }
 }
