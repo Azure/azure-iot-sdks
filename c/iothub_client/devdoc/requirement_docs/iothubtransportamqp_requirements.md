@@ -224,7 +224,7 @@ Summary of internal AMQP parameters:
 
 **SRS_IOTHUBTRANSPORTAMQP_09_146: [**If authentication_authenticate() fails, IoTHubTransportAMQP_DoWork shall fail and and process the next device**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_09_081: [**If the device authentication status is AUTHENTICATION_STATUS_EXPIRED, IoTHubTransportAMQP_DoWork shall refresh it using authentication_refresh()**]**
+**SRS_IOTHUBTRANSPORTAMQP_09_081: [**If the device authentication status is AUTHENTICATION_STATUS_REFRESH_REQUIRED, IoTHubTransportAMQP_DoWork shall refresh it using authentication_refresh()**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_09_082: [**If authentication_refresh() fails, IoTHubTransportAMQP_DoWork shall fail and process the next device**]**
 

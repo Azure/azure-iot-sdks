@@ -1144,8 +1144,8 @@ static RESULT device_DoWork(AMQP_TRANSPORT_DEVICE_STATE* device_state)
 				result = RESULT_RETRYABLE_ERROR;
 			}
 			break;
-		case AUTHENTICATION_STATUS_EXPIRED:
-			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_081: [If the device authentication status is AUTHENTICATION_STATUS_EXPIRED, IoTHubTransportAMQP_DoWork shall refresh it using authentication_refresh()]
+		case AUTHENTICATION_STATUS_REFRESH_REQUIRED:
+			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_081: [If the device authentication status is AUTHENTICATION_STATUS_REFRESH_REQUIRED, IoTHubTransportAMQP_DoWork shall refresh it using authentication_refresh()]
 			if (authentication_refresh(device_state->authentication) != RESULT_OK)
 			{
 				// Codes_SRS_IOTHUBTRANSPORTAMQP_09_082: [**If authentication_refresh() fails, IoTHubTransportAMQP_DoWork shall fail and process the next device]

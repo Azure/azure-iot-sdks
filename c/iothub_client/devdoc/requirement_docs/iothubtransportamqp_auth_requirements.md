@@ -135,8 +135,6 @@ int authentication_authenticate(AUTHENTICATION_STATE_HANDLE authentication_state
 
 **SRS_IOTHUBTRANSPORTAMQP_AUTH_09_038: [**If cbs_put_token() succeeds, authentication_authenticate() shall set `current_sas_token_put_time` with the current time**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_039: [**If cbs_put_token() fails, authentication_authenticate() shall fail and return an error code**]**
-
 **SRS_IOTHUBTRANSPORTAMQP_AUTH_09_040: [**If cbs_put_token() succeeds, authentication_authenticate() shall return success code 0**]**
 
 
@@ -168,11 +166,11 @@ AUTHENTICATION_STATUS authentication_get_status(AUTHENTICATION_STATE_HANDLE auth
 
 **SRS_IOTHUBTRANSPORTAMQP_AUTH_09_047: [**If authentication has timed out, authentication_get_status() shall set the status of the state to AUTHENTICATION_STATUS_TIMEOUT**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_048: [**If the credential type is DEVICE_KEY and current status is AUTHENTICATION_STATUS_OK, authentication_get_status() shall check for SAS token expiration**]**
+**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_048: [**If the credential type is DEVICE_KEY and current status is AUTHENTICATION_STATUS_OK, authentication_get_status() shall check if SAS token must be refreshed**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_049: [**The SAS token expiration shall be computed comparing its expiration time to `sas_token_refresh_time`**]**
+**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_049: [**The SAS token expiration shall be computed comparing its create time to `sas_token_refresh_time`**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_050: [**If the SAS token has expired, authentication_get_status() shall set the status of the state to AUTHENTICATION_STATUS_EXPIRED**]**
+**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_050: [**If the SAS token must be refreshed, authentication_get_status() shall set the status of the state to AUTHENTICATION_STATUS_REFRESH_REQUIRED**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_AUTH_09_051: [**If the credential type is DEVICE_SAS_TOKEN and current status is AUTHENTICATION_STATUS_IN_PROGRESS, authentication_get_status() shall check for authentication timeout**]**
 
@@ -222,7 +220,7 @@ int authentication_reset(AUTHENTICATION_STATE_HANDLE authentication_state)
 
 The following apply if the credential type is DEVICE_KEY or DEVICE_SAS_TOKEN:
 
-**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_063: [**If the authentication_state status is AUTHENTICATION_STATUS_FAILURE or AUTHENTICATION_STATUS_EXPIRED, authentication_reset() shall set the status to AUTHENTICATION_STATUS_IDLE**]**
+**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_063: [**If the authentication_state status is AUTHENTICATION_STATUS_FAILURE or AUTHENTICATION_STATUS_REFRESH_REQUIRED, authentication_reset() shall set the status to AUTHENTICATION_STATUS_IDLE**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_AUTH_09_064: [**If the authentication_state status is AUTHENTICATION_STATUS_OK or AUTHENTICATION_STATUS_IN_PROGRESS, authentication_reset() delete the previous token using cbs_delete_token()**]**
 
