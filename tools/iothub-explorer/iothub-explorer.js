@@ -462,7 +462,7 @@ function usage() {
     '    {grey}Receives feedback about the delivery of cloud-to-device messages; optionally exits after receiving {white}n{/white} messages.{/grey}',
     '  {green}iothub-explorer{/green} {white}[<connection-string>] sas-token <device-id> [--duration=<num-seconds>]{/white}',
     '    {grey}Generates a SAS Token for the given device with an expiry time <num-seconds> from now',
-    '    Default duration is 3600 (one hour).{/grey}',,
+    '    Default duration is 3600 (one hour).{/grey}',
     '  {green}iothub-explorer{/green} {white} <connection-string> monitor-ops {/white}',
     '    {grey}Starts listening on the operations monitoring endpoint of the IoT Hub (has to be enabled in the portal){/grey}',
     '  {green}iothub-explorer{/green} {white}help{/white}',
