@@ -40,13 +40,14 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
     (void)size;
     (void)userContextCallback;
 
-    printf("Method %s:\r\n", method_name);
-    printf("%.*s\r\n", (int)size, (const char*)payload);
+    printf("\r\nDevice Method called\r\n");
+    printf("Device Method name:    %s:\r\n", method_name);
+    printf("Device Method payload: %.*s\r\n", (int)size, (const char*)payload);
 
     int status = 200;
-    char* RESPONSE_STRING = "Method Response";
-    printf("Response status: %d", status);
-    printf("Response payload: %s", RESPONSE_STRING);
+    char* RESPONSE_STRING = "This is the response from the device";
+    printf("\r\nResponse status: %d\r\n", status);
+    printf("Response payload: %s\r\n\r\n", RESPONSE_STRING);
 
     *resp_size = strlen(RESPONSE_STRING);
     *response = malloc(*resp_size);

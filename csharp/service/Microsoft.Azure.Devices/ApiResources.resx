@@ -192,4 +192,16 @@
   <data name="StringIsNotThumbprint" xml:space="preserve">
     <value>'{0}' is not a valid X.509 thumbprint</value>
   </data>
+  <data name="ParameterCannotBeNullOrEmpty" xml:space="preserve">
+    <value>The parameter {0} cannot be null or empty.</value>
+  </data>
+  <data name="JobClientInstanceAlreadyClosed" xml:space="preserve">
+    <value>The JobClient instance was already closed.</value>
+  </data>
+  <data name="DeviceJobParametersNullOrEmptyDeviceList" xml:space="preserve">
+    <value>null or empty deviceIds</value>
+  </data>
+  <data name="DeviceJobParametersNullOrEmptyDeviceListEntries" xml:space="preserve">
+    <value>null or empty deviceId entries specified</value>
+  </data>
 </root>

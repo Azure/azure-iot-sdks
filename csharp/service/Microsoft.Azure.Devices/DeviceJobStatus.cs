@@ -8,39 +8,45 @@ namespace Microsoft.Azure.Devices
     using Newtonsoft.Json.Converters;
 
     /// <summary>
-    /// Used to delineate job actions.
+    /// DeviceJob Status enumeration
     /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum JobType
+    public enum DeviceJobStatus
     {
         /// <summary>
-        /// Unknown
+        /// Pending
         /// </summary>
-        [EnumMember(Value = "unknown")]
-        Unknown = 0,
+        [EnumMember(Value = "pending")]
+        Pending,
 
         /// <summary>
-        /// Indicates an ExportDevices job
+        /// Scheduled
         /// </summary>
-        [EnumMember(Value = "export")]
-        ExportDevices,
+        [EnumMember(Value = "scheduled")]
+        Scheduled,
 
         /// <summary>
-        /// Indicates an ImportDevices job
+        /// Running
         /// </summary>
-        [EnumMember(Value = "import")]
-        ImportDevices,
+        [EnumMember(Value = "running")]
+        Running,
 
         /// <summary>
-        /// Indicates a Device method job
+        /// Completed
         /// </summary>
-        [EnumMember(Value = "scheduleDeviceMethod")]
-        ScheduleDeviceMethod,
+        [EnumMember(Value = "completed")]
+        Completed,
 
         /// <summary>
-        /// Indicates a Twin update job
+        /// Failed
         /// </summary>
-        [EnumMember(Value = "scheduleUpdateTwin")]
-        ScheduleUpdateTwin
+        [EnumMember(Value = "failed")]
+        Failed,
+
+        /// <summary>
+        /// Canceled
+        /// </summary>
+        [EnumMember(Value = "canceled")]
+        Canceled
     }
 }

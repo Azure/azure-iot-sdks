@@ -63,6 +63,7 @@
       <HintPath>$(SolutionDir)\packages\Microsoft.Azure.Amqp.1.1.5\lib\net451\Microsoft.Azure.Amqp.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Owin, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>$(SolutionDir)\packages\Microsoft.Owin.3.0.1\lib\net45\Microsoft.Owin.dll</HintPath>
       <Private>True</Private>
@@ -199,11 +200,35 @@
     <Compile Include="Common\WaitCallbackActionItem.cs" />
     <Compile Include="Common\WebApi\CustomHeaderConstants.cs" />
     <Compile Include="Common\WebApi\ResourceRequest.cs" />
+    <Compile Include="Converters\TwinCollectionJsonConverter.cs" />
+    <Compile Include="Converters\TwinJsonConverter.cs" />
     <Compile Include="DeliveryAcknowledgement.cs" />
     <Compile Include="DeliveryFailureReason.cs" />
     <Compile Include="Device.cs" />
     <Compile Include="DeviceConnectionState.cs" />
+    <Compile Include="CloudToDeviceMethodResult.cs" />
+    <Compile Include="DeviceJob.cs" />
+    <Compile Include="DeviceJobError.cs" />
+    <Compile Include="DeviceJobOutcome.cs" />
+    <Compile Include="DeviceJobStatus.cs" />
+    <Compile Include="DeviceJobType.cs" />
+    <Compile Include="QueryResultType.cs" />
+    <Compile Include="TwinCollection.cs" />
     <Compile Include="BulkRegistryOperationResult.cs" />
+    <Compile Include="Twin.cs" />
+    <Compile Include="TwinCollectionValue.cs" />
+    <Compile Include="IQuery.cs" />
+    <Compile Include="Query.cs" />
+    <Compile Include="JobClient\CloudToDeviceMethod.cs" />
+    <Compile Include="JobClient\DeviceJobParameters.cs" />
+    <Compile Include="JobClient\HttpJobClient.cs" />
+    <Compile Include="JobClient\JobClient.cs" />
+    <Compile Include="JobClient\JobParameters.cs" />
+    <Compile Include="JobClient\JobRequest.cs" />
+    <Compile Include="JobClient\JobResponse.cs" />
+    <Compile Include="QueryResult.cs" />
+    <Compile Include="Metadata.cs" />
+    <Compile Include="QuerySpecification.cs" />
     <Compile Include="DeviceStatus.cs" />
     <Compile Include="EndpointKind.cs" />
     <Compile Include="ETagHolder.cs" />
@@ -248,12 +273,11 @@
     <Compile Include="ServiceClient.cs" />
     <Compile Include="ServiceStatistics.cs" />
     <Compile Include="SymmetricKey.cs" />
+    <Compile Include="TwinProperties.cs" />
     <Compile Include="X509Thumbprint.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="NuGet\make_nuget_package.ps1" />
-    <None Include="NuGet\Microsoft.Azure.Devices.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

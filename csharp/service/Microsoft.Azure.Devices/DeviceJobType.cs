@@ -8,21 +8,24 @@ namespace Microsoft.Azure.Devices
     using Newtonsoft.Json.Converters;
 
     /// <summary>
-    /// Specifies the different states of a device.
+    /// DeviceJob type
     /// </summary>
     [JsonConverter(typeof(StringEnumConverter))]
-    public enum DeviceStatus
+    public enum DeviceJobType
     {
-        /// <summary>
-        /// Indicates that a Device is enabled
-        /// </summary>
-        [EnumMember(Value = "enabled")]
-        Enabled = 0,
+        [EnumMember(Value = "unknown")]
+        Unknown = 0,
 
         /// <summary>
-        /// Indicates that a Device is disabled
+        /// Schedule direct request job type
         /// </summary>
-        [EnumMember(Value = "disabled")]
-        Disabled,
+        [EnumMember(Value = "scheduleDeviceMethod")]
+        ScheduleDeviceMethod = 1,
+
+        /// <summary>
+        /// Schedule update twin job type
+        /// </summary>
+        [EnumMember(Value = "scheduleUpdateTwin")]
+        ScheduleUpdateTwin = 2
     }
 }
