@@ -3,7 +3,7 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 project(azure_iot_sdks)
-
+#
 #making a nice global variable to know if we are on linux or not.
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(LINUX TRUE)
