@@ -47,7 +47,7 @@ var runTests = function (hubConnectionString) {
         deviceId:  '0000e2etest-delete-me-twin-e2e-' + uuid.v4(),
         status: 'enabled',
           authentication: {
-          SymmetricKey: {
+          symmetricKey: {
             primaryKey: new Buffer(uuid.v4()).toString('base64'),
             secondaryKey: new Buffer(uuid.v4()).toString('base64')
           }
@@ -60,7 +60,7 @@ var runTests = function (hubConnectionString) {
         if (err) return done(err);
 
         var host = ConnectionString.parse(hubConnectionString).HostName;
-        var deviceAccessSignature = deviceSas.create(host, deviceDescription.deviceId, deviceDescription.authentication.SymmetricKey.primaryKey, anHourFromNow()).toString();
+        var deviceAccessSignature = deviceSas.create(host, deviceDescription.deviceId, deviceDescription.authentication.symmetricKey.primaryKey, anHourFromNow()).toString();
 
         deviceClient = deviceSdk.Client.fromSharedAccessSignature(deviceAccessSignature, deviceMqtt);
 

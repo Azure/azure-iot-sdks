@@ -71,7 +71,7 @@ function sendEventTests(Transport, registry) {
       var sakConnectionString;
       before(function(done) {
         registry.create({ deviceId: deviceId, status: "enabled" }, function(err, device) {
-          sakConnectionString = makeConnectionString(host, deviceId, device.authentication.SymmetricKey.primaryKey);
+          sakConnectionString = makeConnectionString(host, deviceId, device.authentication.symmetricKey.primaryKey);
           done();
         });
       });
@@ -157,7 +157,7 @@ function sendEventBatchTests(Transport, registry) {
       var sakConnectionString;
       before(function(done) {
         registry.create({ deviceId: deviceId, status: "enabled" }, function(err, device) {
-          sakConnectionString = makeConnectionString(host, deviceId, device.authentication.SymmetricKey.primaryKey);
+          sakConnectionString = makeConnectionString(host, deviceId, device.authentication.symmetricKey.primaryKey);
           done();
         });
       });

@@ -12,7 +12,7 @@ let registry = Registry.fromConnectionString(connectionString);
 console.log('**listing devices..');
 registry.list((err, deviceList) => {
     deviceList.forEach((device) => {
-        let key = device.authentication ? device.authentication.SymmetricKey.primaryKey : '<no primary key>';
+        let key = device.authentication ? device.authentication.symmetricKey.primaryKey : '<no primary key>';
         console.log(device.deviceId + ': ' + key);
     });
 });

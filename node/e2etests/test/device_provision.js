@@ -79,7 +79,7 @@ var device_provision = function (hubConnectionString, done) {
         deviceId: deviceId,
         status: 'enabled',
         authentication: {
-          SymmetricKey: {
+          symmetricKey: {
             primaryKey: pkey,
             secondaryKey: new Buffer(uuid.v4()).toString('base64')
           }
@@ -102,7 +102,7 @@ var device_provision = function (hubConnectionString, done) {
         deviceId: deviceId,
         status: 'enabled',
         authentication: {
-          SymmetricKey: {
+          symmetricKey: {
             primaryKey: pkey,
             secondaryKey: new Buffer(uuid.v4()).toString('base64')
           }
