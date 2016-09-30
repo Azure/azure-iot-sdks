@@ -58,7 +58,7 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
     else
     {
         (void)printf("Received Message [%d] with Data: <<<%.*s>>> & Size=%d\r\n", *counter, (int)size, buffer, (int)size);
-        if (memcmp(buffer, "quit", size) == 0)
+		if (size == (strlen("quit") * sizeof(char)) && memcmp(buffer, "quit", size) == 0)
         {
             g_continueRunning = false;
         }

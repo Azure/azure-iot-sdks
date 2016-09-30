@@ -1,15 +1,15 @@
 {
   "name": "azure-iot-device-mqtt",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "MQTT transport for Azure IoT device SDK",
   "author": "Microsoft Corporation",
   "license": "MIT",
   "main": "index.js",
   "typings": "index.d.ts",
   "dependencies": {
-    "azure-iot-common": "1.0.14",
-    "azure-iot-device": "1.0.14",
-    "azure-iot-mqtt-base": "1.0.14"
+    "azure-iot-common": "1.0.15",
+    "azure-iot-device": "1.0.15",
+    "azure-iot-mqtt-base": "1.0.15"
   },
   "devDependencies": {
     "chai": "^3.5.0",

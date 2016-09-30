@@ -1,15 +1,15 @@
 {
   "name": "node-red-contrib-azureiothubnode",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "An Azure IoT Hub node for node-red",
   "author": "Microsoft Corp.",
   "license": "MIT",
   "dependencies": {
-    "azure-iot-device": "1.0.14",
-    "azure-iot-device-amqp": "1.0.14",
-    "azure-iot-device-amqp-ws": "1.0.15",
-    "azure-iot-device-http": "1.0.15",
-    "azure-iot-device-mqtt": "1.0.14"
+    "azure-iot-device": "1.0.15",
+    "azure-iot-device-amqp": "1.0.15",
+    "azure-iot-device-amqp-ws": "1.0.16",
+    "azure-iot-device-http": "1.0.16",
+    "azure-iot-device-mqtt": "1.0.15"
   },
   "node-red": {
     "nodes": {
