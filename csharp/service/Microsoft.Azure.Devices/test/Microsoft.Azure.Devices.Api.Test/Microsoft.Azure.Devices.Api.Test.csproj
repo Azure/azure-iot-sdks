@@ -71,7 +71,10 @@
     <Compile Include="ConnectionString\ServiceClientConnectionStringTests.cs" />
     <Compile Include="DeviceAuthenticationTests.cs" />
     <Compile Include="ExportImportDeviceTests.cs" />
+    <Compile Include="QueryTests.cs" />
     <Compile Include="ServiceClientTests.cs" />
+    <Compile Include="JobClient\DeviceJobParametersTest.cs" />
+    <Compile Include="JobClient\HttpJobClientTests.cs" />
     <Compile Include="RegistryManagerTests.cs" />
     <Compile Include="MessageTests.cs" />
     <Compile Include="TestAssert.cs" />
