@@ -621,6 +621,38 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHub
     return result;
 }
 
+IOTHUB_CLIENT_RESULT IoTHubClient_SetConnectionStatusCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void * userContextCallback)
+{
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
+    (void)iotHubClientHandle;
+    (void)connectionStatusCallback;
+    (void)userContextCallback;
+
+
+    return result;
+    
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_SetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitinSeconds)
+{
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
+    (void)iotHubClientHandle;
+    (void)retryPolicy;
+    (void)retryTimeoutLimitinSeconds;
+
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_GetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY * retryPolicy, size_t * retryTimeoutLimitinSeconds)
+{
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
+    (void)iotHubClientHandle;
+    (void)retryPolicy;
+    (void)retryTimeoutLimitinSeconds;
+
+    return result;
+}
+
 IOTHUB_CLIENT_RESULT IoTHubClient_GetLastMessageReceiveTime(IOTHUB_CLIENT_HANDLE iotHubClientHandle, time_t* lastMessageReceiveTime)
 {
     IOTHUB_CLIENT_RESULT result;

@@ -24,6 +24,10 @@ extern void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SendEventAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_MESSAGE_HANDLE eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK eventConfirmationCallback, void* userContextCallback);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC messageCallback, void* userContextCallback);
 
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SetConnectionStatusCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void* userContextCallback);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitinSeconds);
+extern IOTHUB_CLIENT_RESULT IoTHubClient_GetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY* retryPolicy, size_t* retryTimeoutLimitinSeconds);
+
 extern IOTHUB_CLIENT_RESULT IoTHubClient_GetLastMessageReceiveTime(IOTHUB_CLIENT_HANDLE iotHubClientHandle, time_t* lastMessageReceiveTime);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* optionName, const void* value);
 extern IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const char* destinationFileName, const unsigned char* source, size_t size, IOTHUB_CLIENT_FILE_UPLOAD_CALLBACK iotHubClientFileUploadCallback, void* context);
@@ -189,6 +193,31 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE
 **SRS_IOTHUBCLIENT_01_027: [** IoTHubClient_SetMessageCallback shall be made thread-safe by using the lock created in IoTHubClient_Create. **]**
 
 **SRS_IOTHUBCLIENT_01_028: [** If acquiring the lock fails, IoTHubClient_SetMessageCallback shall return IOTHUB_CLIENT_ERROR. **]**
+
+###IoTHubClient_SetConnectionStatusCallback
+```c
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SetConnectionStatusCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void* userContextCallback);
+```
+**SRS_IOTHUBCLIENT_25_71: [**IoTHubClient_SetConnectionStatusCallback shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter iotHubClientHandle**]**
+**SRS_IOTHUBCLIENT_25_72: [**IoTHubClient_SetConnectionStatusCallback shall return IOTHUB_CLIENT_OK and save the callback and userContext as a member of the handle.**]**
+
+###IoTHubClient_SetRetryPolicy
+```c
+extern IOTHUB_CLIENT_RESULT IoTHubClient_SetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitinSeconds);
+```
+**SRS_IOTHUBCLIENT_25_73: [**IoTHubClient_SetRetryPolicy shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL iotHubClientHandle**]**
+**SRS_IOTHUBCLIENT_25_74: [**For any policy other then IOTHUB_CLIENT_RETRY_NONE if retryTimeoutLimitinSeconds is zero then IoTHubClient_SetRetryPolicy shall return IOTHUB_CLIENT_INVALID_ARG**]**
+**SRS_IOTHUBCLIENT_25_75: [**IoTHubClient_SetRetryPolicy shall save connection retry policies specified by the user to retryPolicy in struct IOTHUB_CLIENT_LL_HANDLE_DATA**]**
+**SRS_IOTHUBCLIENT_25_76: [**IoTHubClient_SetRetryPolicy shall save retryTimeoutLimitinSeconds to retryTimeoutinSeconds in struct IOTHUB_CLIENT_LL_HANDLE_DATA**]**
+
+###IoTHubClient_GetRetryPolicy
+```c
+extern IOTHUB_CLIENT_RESULT IoTHubClient_GetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY* retryPolicy, size_t* retryTimeoutLimitinSeconds);
+```
+**SRS_IOTHUBCLIENT_25_77: [**IoTHubClient_GetRetryPolicy shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL iotHubClientHandle or retryPolicy or retryTimeoutLimitinSeconds parameters**]**
+**SRS_IOTHUBCLIENT_25_78: [**IoTHubClient_GetRetryPolicy shall retrieve connection retry policy from retryPolicy in struct IOTHUB_CLIENT_LL_HANDLE_DATA**]**
+**SRS_IOTHUBCLIENT_25_79: [**IoTHubClient_GetRetryPolicy shall retrieve retryTimeoutLimitinSeconds in seconds from retryTimeout in struct IOTHUB_CLIENT_LL_HANDLE_DATA**]**
+**SRS_IOTHUBCLIENT_25_80: [**If user did not set the policy and timeout values by calling IoTHubClient_SetRetryPolicy then IoTHubClient_GetRetryPolicy shall return default values**]**
 
 
 
