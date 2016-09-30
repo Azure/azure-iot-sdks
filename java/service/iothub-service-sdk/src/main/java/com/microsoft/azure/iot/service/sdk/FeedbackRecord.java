@@ -25,6 +25,18 @@ public class FeedbackRecord
         this.enqueuedTimeUtc = enqueuedTimeUtc;
     }
 
+    private String originalMessageId;
+
+    public String getOriginalMessageId()
+    {
+        return originalMessageId;
+    }
+
+    public void setOriginalMessageId(String originalMessageId)
+    {
+        this.originalMessageId = originalMessageId;
+    }
+
     private String correlationId;
 
     public String getCorrelationId()

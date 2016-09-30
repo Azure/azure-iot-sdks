@@ -54,7 +54,11 @@ public class FeedbackBatchMessage
                         FeedbackRecord feedbackRecord = new FeedbackRecord();
 
                         feedbackRecord.setEnqueuedTimeUtc(Instant.parse(Tools.getValueFromJsonObject(jsonObject, "enqueuedTimeUtc")));
+
+                        String originalMessageId = Tools.getValueFromJsonObject(jsonObject, "originalMessageId");
+                        feedbackRecord.setOriginalMessageId(originalMessageId);
                         feedbackRecord.setCorrelationId("");
+
                         String description = Tools.getValueFromJsonObject(jsonObject, "description");
                         feedbackRecord.setDescription(description);
                         if (description.toLowerCase().equals("success"))

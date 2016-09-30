@@ -334,6 +334,7 @@ static const char* TEST_FEEDBACK_RECORD_KEY_DEVICE_ID = "deviceId";
 static const char* TEST_FEEDBACK_RECORD_KEY_DEVICE_GENERATION_ID = "deviceGenerationId";
 static const char* TEST_FEEDBACK_RECORD_KEY_DESCRIPTION = "description";
 static const char* TEST_FEEDBACK_RECORD_KEY_ENQUED_TIME_UTC = "enqueuedTimeUtc";
+static const char* TEST_FEEDBACK_RECORD_KEY_ORIGINAL_MESSAGE_ID = "originalMessageId";
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
@@ -1952,6 +1953,9 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             .SetReturn("SuCcEsS");
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_FEEDBACK_RECORD_KEY_ENQUED_TIME_UTC))
             .SetReturn("time");
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_FEEDBACK_RECORD_KEY_ORIGINAL_MESSAGE_ID))
+            .SetReturn("originalMessageId");
+
 
         STRICT_EXPECTED_CALL(list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
@@ -2048,6 +2052,9 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             .SetReturn("ExPiReD");
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_FEEDBACK_RECORD_KEY_ENQUED_TIME_UTC))
             .SetReturn("time");
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_FEEDBACK_RECORD_KEY_ORIGINAL_MESSAGE_ID))
+            .SetReturn("originalMessageId");
+
 
         STRICT_EXPECTED_CALL(list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
@@ -2144,6 +2151,8 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             .SetReturn("DeLiVeRyCoUnTeXcEeDeD");
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_FEEDBACK_RECORD_KEY_ENQUED_TIME_UTC))
             .SetReturn("time");
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_FEEDBACK_RECORD_KEY_ORIGINAL_MESSAGE_ID))
+            .SetReturn("originalMessageId");
 
         STRICT_EXPECTED_CALL(list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
@@ -2240,6 +2249,9 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             .SetReturn("ReJeCtEd");
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_FEEDBACK_RECORD_KEY_ENQUED_TIME_UTC))
             .SetReturn("time");
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_FEEDBACK_RECORD_KEY_ORIGINAL_MESSAGE_ID))
+            .SetReturn("originalMessageId");
+
 
         STRICT_EXPECTED_CALL(list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
@@ -2336,6 +2348,9 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             .SetReturn("XxX");
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_FEEDBACK_RECORD_KEY_ENQUED_TIME_UTC))
             .SetReturn("time");
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_FEEDBACK_RECORD_KEY_ORIGINAL_MESSAGE_ID))
+            .SetReturn("originalMessageId");
+
 
         STRICT_EXPECTED_CALL(list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
@@ -2432,6 +2447,9 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             .SetReturn(NULL);
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_FEEDBACK_RECORD_KEY_ENQUED_TIME_UTC))
             .SetReturn("time");
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_FEEDBACK_RECORD_KEY_ORIGINAL_MESSAGE_ID))
+            .SetReturn("originalMessageId");
+
 
         STRICT_EXPECTED_CALL(list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
@@ -2526,6 +2544,9 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             .SetReturn("success");
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_FEEDBACK_RECORD_KEY_ENQUED_TIME_UTC))
             .SetReturn("time");
+        STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_FEEDBACK_RECORD_KEY_ORIGINAL_MESSAGE_ID))
+            .SetReturn("originalMessageId");
+
 
         STRICT_EXPECTED_CALL(list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
