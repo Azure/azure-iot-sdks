@@ -13,6 +13,8 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/platform.h"
 
+#include "forrester.h"
+
 #ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
 #endif // MBED_BUILD_TIMESTAMP
@@ -70,6 +72,22 @@ EXECUTE_COMMAND_RESULT firmwareupdate(Thermostat* thermostat, ascii_char_ptr URI
 {
     (void)thermostat;
     (void)printf("Received firmware URI %s\r\n", URI);
+    bool device_update_firmware(void);
+
+    bool result = device_download_firmware(URI);
+    if (result)
+    {
+        result = device_update_firmware();
+        if (!result)
+        {
+            LogError("failed to apply new firmware image");
+        }
+    }
+    else
+    {
+        LogError("failed to download new firmware image");
+    }
+
     return EXECUTE_COMMAND_SUCCESS;
 }
 
@@ -268,6 +286,11 @@ void remote_monitoring_run(void)
 
 int main(void)
 {
+    if(!device_run_service())
+    {
+        LogError("failed to run in service mode");
+    }
+
     remote_monitoring_run();
     return 0;
 }
