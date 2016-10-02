@@ -10,22 +10,23 @@ This document describes how to prepare your development environment to use the *
 <a name="windows"/>
 ## Setting up a Windows development environment
 
-- Install [Visual Studio 2015][visual-studio]. You can use the free Community Edition if you meet the licensing requirements.
+- Install [Visual Studio 2015][visual-studio]. You can use the **Visual Studio Community** Free download if you meet the licensing requirements.
+
 Be sure to include Visual C++ and NuGet Package Manager.
 - Install [git](http://www.git-scm.com) making sure git.exe can be run from a command line.
 
-- Clone the latest available version of this repository (**master branch**) to your local machine with the **recursive** parameter
+- Clone the **latest** available version of this repository (**master** branch) to your local machine with the **recursive** parameter to include submodules.
 ```
 git clone --recursive https://github.com/Azure/azure-iot-sdks.git
 ```
---recursive parameter will include sub-projects [azure-shared-c-utility],[azure-uamqp-c], [azure-umqtt-c] that **azure-iot-sdks** project has dependence on.
+--recursive parameter will include other projects (submodules) [azure-shared-c-utility],[azure-uamqp-c], [azure-umqtt-c] that **azure-iot-sdks** project has dependence on.
 
-C SDK is located under **c** folder azure-iot-sdks\c
+C SDK is located under **c** folder **azure-iot-sdks\\c**
 
 For list of available **releases** check: [List of releases of azure-iot-sdks]
 
 ### Building the sample applications only
-For quickly testing the sample application of your choice open the corresponding [solution(.sln) file] in VS 2015
+For **quickly** testing the sample application of your choice open the corresponding [solution(.sln) file] in VS 2015 IDE.
 For example, to build **MQTT sample**, go to c\iothub_client\samples\iothub_client_sample_mqtt\windows and open **iothub_client_sample_mqtt.sln** file in VS 2015.
 
 Build and run the application after replacing `connectionString = "[device connection string]"` with the actual valid device connection string.
@@ -34,7 +35,7 @@ Build and run the application after replacing `connectionString = "[device conne
 
 ### Building the C libraries locally along with sample applications
 In some cases, you may want to build the **C libraries** locally for development and testing purpose.
-For example, you may want to build the latest code on the **develop** branch which has not yet merged into the master branch from which the releases are taken.
+For example, you may want to build the latest code available on the **develop** branch which follows Continuous Integration (CI) approach.
 
 To pull latest code on **develop** branch you can use following command
 
@@ -44,14 +45,12 @@ The following instructions outline how you can build the C SDK (along with sampl
 
 1. Install [CMake] tool.Make sure it is installed in your path by typing `cmake -version` to verify. [CMake] tool will be used to create VS 2015 solution files which will then be subsequently used by [MSBuild] to build libraries and samples.
 
-2. Ensure that the git.exe application is in your system path.
-
-3. Open a Developer Command Prompt for VS2015.
+2. Open a Developer Command Prompt for VS2015.
 
 4. Go to scripts folder located at **c\\build_all\\windows**. Run the build script **build_client.cmd** or **build.cmd** which will invoke cmake to create solution files which will then be used by msbuild to build the projects
 
 After successful running of the script, you should see cmake folder created under c folder.
-You should see **c\\cmake\\iotsdk_win32** folder for buiding for Win32 (default configuration). For x64, you should see c\cmake\iotsdk_x64.
+For Win32 ((default configuration) you should see **c\\cmake\\iotsdk_win32**. For x64, you should see c\cmake\iotsdk_x64.
 
 **azure_iot_sdks.sln** created under cmake folder will contain all sub-projects that you can directly open in VS 2015 IDE to build libraries or samples in IDE.
 
@@ -61,13 +60,13 @@ For example, if you want to build for x64 and skip unit tests, you can run follo
 `build --platform x64 --skip-unittests` 
 
 ### Building sample that uses WebSocket on Windows 
-**iothub_client_sample_amqp_websockets** (AMQP over WebSocket) has dependence on [OpenSSL] libraries **ssleay32** and **libeay32**. So you need to build and install these libraries and DLL's first before you enable building of sample that uses WebSockets. 
+**iothub_client_sample_amqp_websockets** (AMQP over WebSocket) has dependence on [OpenSSL] libraries **ssleay32** and **libeay32**. So you need to build and install these libraries and DLL's first before you enable building of the sample that uses WebSockets. 
 
 Below are steps to build and install OpenSSL libraries and corresponding DLL's. These steps were tested with **openssl-1.0.2j.tar.gz**
 
 1. Download and extract the available tar.gz file from [OpenSSL Downloads] section locally on your Windows machine that has VS 2015 installed. 
 
-2. Go over [OpenSSL Installation] and [Compilation_and_Installation] and for  **additional** details on supported configurations, pre-requisites and build steps that you may want to look at.
+2. Go over [OpenSSL Installation] and [Compilation_and_Installation] and for **additional** details and references on supported configurations, pre-requisites and build steps that you may want to look at.
 
 3. For x86 configuration, follow below steps
 Open VS 2015 x86 Native Tools Command Prompt and enter following commands
@@ -178,7 +177,7 @@ You can use one of the sample applications as a template to get started when you
 
 This repository contains various C sample applications that illustrate how to use the Azure IoT device SDK for C. For more information, see the [Read Me][readme].
 
-[visual-studio]: https://www.visualstudio.com/
+[visual-studio]: https://www.visualstudio.com/downloads/
 [readme]: ../readme.md
 [device-explorer]: ../../tools/DeviceExplorer/readme.md
 [toradex-CE8-sdk]:http://docs.toradex.com/102578
@@ -194,5 +193,5 @@ This repository contains various C sample applications that illustrate how to us
 [OpenSSL]:https://www.openssl.org/
 [OpenSSL Downloads]: https://www.openssl.org/source/
 [OpenSSL Installation]:https://github.com/openssl/openssl/blob/master/INSTALL
-[Compilation_and_Installation]:https://wiki.openssl.org/index.php/Compilation_and_Installation
+[Compilation_and_Installation]:https://wiki.openssl.org/index.php/Compilation_and_Installation#Windows
 
