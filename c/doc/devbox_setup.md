@@ -18,71 +18,47 @@ Be sure to include Visual C++ and NuGet Package Manager.
 ```
 git clone --recursive https://github.com/Azure/azure-iot-sdks.git
 ```
-recursive parameter will include projects like [azure-shared-c-utility] that **azure-iot-sdks** project has dependence on
+-recursive parameter will include sub-projects [azure-shared-c-utility],[azure-uamqp-c], [azure-umqtt-c] that **azure-iot-sdks** project has dependence on.
 
-### Preparing Azure Shared Utility
+C SDK is located under **c** folder azure-iot-sdks\c
 
- 1. Cloning the repository will bring in the Azure-C-Shared-Utility dependency and give you the following directory structure: 
+For list of available **releases** check: [List of releases of azure-iot-sdks]
 
-	\| ...
+### Building the sample applications only
+For quickly testing the sample application of your choice open the corresponding [solution(.sln) file] in VS 2015
+For example, to build **MQTT sample**, go to c\iothub_client\samples\iothub_client_sample_mqtt\windows and open **iothub_client_sample_mqtt.sln** file in VS 2015.
 
-	\|\-\-\- azure-iot-sdk
+Build and run the application after replacing `connectionString = "[device connection string]"` with the actual valid device connection string.
 
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\\-\-\-\-\-\- c
-  
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|\-\-\-\-\-\- azure-c-shared-utility
-	
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|\-\-\-\-\-\- azure-uamqp-c
-	
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|\-\-\-\-\-\- azure-c-shared-utility
-	
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\\-\-\-\-\-\- libwebsockets
-	
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\\-\-\-\-\-\- azure-umqtt-c
-	
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\\-\-\-\-\-\- azure-c-shared-utility
- 
- 2.  If you have a previous version of the repository you will need to run the following commands (under each submodule):
-```
-    git submodule init
-    git submodule update
-```   
+**packages.config** file will have list of libraries (packages) that sample has dependence on and these will be pulled in by [NuGet] package manager while building the sample application.
 
-### Running the Windows sample applications
+### Building the C libraries locally along with sample applications
+In some cases, you may want to build the **C libraries** locally for development and testing purpose.
+For example, you may want to build the latest code on the **develop** branch which has not yet merged into the master branch from which the releases are taken.
 
-You can now run the Windows sample applications included in the repository. All the samples use the NuGet package manager to download any required dependencies such as the **Microsoft.Azure.C.SharedUtility**, **Microsoft.Azure.IoTHubClient**, and **Microsoft.Azure.IoTHubSerializer** libraries.
+To pull latest code on **develop** branch you can use following command
 
-The following is a list of the Visual Studio solution files for the Windows samples in the repository:
+`git clone -b develop --recursive https://github.com/Azure/azure-iot-sdks.git azure-iot-develop`
 
-- c\\iothub\_client\\samples\\iothub\_client\_sample\_amqp\\windows\\iothub\_client\_sample\_amqp.sln
-- c\\iothub\_client\\samples\\iothub\_client\_sample\_http\\windows\\iothub\_client\_sample\_http.sln
+The following instructions outline how you can build the C SDK (along with samples):
 
-- c\\serializer\\samples\\remote\_monitoring\\windows\\remote\_monitoring.sln
+1. Install [CMake] tool.Make sure it is installed in your path by typing `cmake -version` to verify. [CMake] tool will be used to create VS 2015 solution files which will then be subsequently used by [MSBuild] to build libraries and samples.
 
-- c\\serializer\\samples\\simplesample\_amqp\\windows\\simplesample\_amqp.sln
+2. Ensure that the git.exe application is in your system path.
 
-- c\\serializer\\samples\\simplesample\_http\\windows\\simplesample\_http.sln
+3. Open a Developer Command Prompt for VS2015.
 
-- c\\serializer\\samples\\simplesample\_mqtt\\windows\\simplesample\_mqtt.sln
+4. Go to scripts folder located at **c\\build_all\\windows**. Run the build script **build_client.cmd** or **build.cmd** which will invoke cmake to create solution files which will then be used by msbuild to build the projects
 
-- c\\serializer\\samples\\temp\_sensor\_anomaly\\windows\\temp\_sensor\_anomaly.sln
- 
+After successful running of the script, you should see cmake folder created under c folder.
+You should see **c\\cmake\\iotsdk_win32** folder for buiding for Win32 (default configuration). For x64, you should see c\cmake\iotsdk_x64.
 
-### Building the libraries in Windows
+**azure_iot_sdks.sln** created under cmake folder will contain all sub-projects that you can directly open in VS 2015 IDE to build libraries or samples in IDE.
 
-You do *not* need to build the libraries in order to run the sample applications because the samples install all their dependencies using the NuGet package manager.
+You can check various configuration options the script provides by entering `build –options`
+For example, if you want to build for x64 and skip unit tests, you can run following command
 
-The following instructions outline how you can build the libraries in Windows:
-
-1. Create the folder **C:\\OpenSSL** on your development machine in which to download OpenSSL.
-
-2. Install [cmake](http://www.cmake.org/) (make sure it is installed in your path, type "cmake -version" to verify).
-
-3. Ensure that the git.exe application is in your system path.
-
-4. Open a Developer Command Prompt for VS2015.
-
-5. Run the script **build_client.cmd** in the **c\\build_all\\windows** directory.
+`build.cmd --platform x64 --skip-unittests` 
 
 
 > Note: To enable support to AMQP over WebSockets, 
@@ -169,3 +145,10 @@ This repository contains various C sample applications that illustrate how to us
 [toradex-CE8-sdk]:http://docs.toradex.com/102578
 [application-builder]:http://www.microsoft.com/download/details.aspx?id=38819
 [azure-shared-c-utility]:https://github.com/Azure/azure-c-shared-utility
+[azure-uamqp-c]:https://github.com/Azure/azure-uamqp-c
+[azure-umqtt-c]:https://github.com/Azure/azure-umqtt-c
+[List of releases of azure-iot-sdks]:https://github.com/Azure/azure-iot-sdks/releases
+[solution(.sln) file]:https://msdn.microsoft.com/en-us/library/bb165951.aspx
+[NuGet]:https://www.nuget.org/
+[CMake]:https://cmake.org/
+[MSBuild]:https://msdn.microsoft.com/en-us/library/0k6kkbsd.aspx
