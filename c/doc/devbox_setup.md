@@ -68,15 +68,13 @@ Below are steps to build and install OpenSSL libraries and corresponding DLL's. 
 
 2. Go over [OpenSSL Installation] and [Compilation_and_Installation] and for **additional** details and references on supported configurations, pre-requisites and build steps that you may want to look at.
 
-3. For x86 configuration, follow below steps
-Open VS 2015 x86 Native Tools Command Prompt and enter following commands
+3. For x86 configuration, open VS 2015 x86 **Native** Tools Command Prompt and enter below commands to set build configuration
 
  `perl Configure VC-WIN32 no-asm`
 
  `ms\do_ms`
 
-4. For x64 configuration, follow below steps
-Open VS 2015 x64 Native Tools Command Prompt
+4. For x64 configuration, open VS 2015 x64 **Native** Tools Command Prompt and enter below commands to set build configuration
 
  `perl Configure VC-WIN64A no-asm`
 
@@ -84,9 +82,9 @@ Open VS 2015 x64 Native Tools Command Prompt
 
 5. Build and then install the libraries at your install location by using following commands
 
- `nmake -f ms\ntdll.mak` 
+ `nmake -f ms\ntdll.mak` : This command will build OpenSSL libraries
 
- `nmake -f ms\nt.mak install`
+ `nmake -f ms\nt.mak install` : This command will copy OpenSSL libraries in OpenSSL install location
 
 After completing the above steps make sure OpenSSL libraries and DLL's are in your OpenSSL install location. Now follow below steps to build library and sample using WebSocket
 
