@@ -14,11 +14,11 @@ This document describes how to prepare your development environment to use the *
 Be sure to include Visual C++ and NuGet Package Manager.
 - Install [git](http://www.git-scm.com) making sure git.exe can be run from a command line.
 
-- Clone the latest version of this repository to your local machine with the recursive parameter
+- Clone the latest available version of this repository (**master branch**) to your local machine with the **recursive** parameter
 ```
 git clone --recursive https://github.com/Azure/azure-iot-sdks.git
 ```
-Use the **master** branch to ensure you fetch the latest release version.
+recursive parameter will include projects like [azure-shared-c-utility] that **azure-iot-sdks** project has dependence on
 
 ### Preparing Azure Shared Utility
 
@@ -168,3 +168,4 @@ This repository contains various C sample applications that illustrate how to us
 [device-explorer]: ../../tools/DeviceExplorer/readme.md
 [toradex-CE8-sdk]:http://docs.toradex.com/102578
 [application-builder]:http://www.microsoft.com/download/details.aspx?id=38819
+[azure-shared-c-utility]:https://github.com/Azure/azure-c-shared-utility
