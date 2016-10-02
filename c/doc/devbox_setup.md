@@ -88,21 +88,24 @@ Open VS 2015 x64 Native Tools Command Prompt
 
  `nmake -f ms\nt.mak install`
 
-After completing the above steps make sure OpenSSL libraries and DLL's are in your OpenSSL install location.
+After completing the above steps make sure OpenSSL libraries and DLL's are in your OpenSSL install location. Now follow below steps to build library and sample using WebSocket
 
-Open VS 2015 Developer Command Prompt and go to **\\c\\build_all\\windows**
+1. Open VS 2015 Developer Command Prompt and go to **\\c\\build_all\\windows**
 
-set **OPENSSL_ROOT_DIR** environment variable to OpenSSL install location. For example, if your install location for OpenSSL is C:\usr\local\ssl, you will set **OPENSSL_ROOT_DIR = C:\\usr\\local\\ssl**
+2. Set OpenSSLDir and OPENSSL_ROOT_DIR **environment variables** to OpenSSL install location. For example, if your OpenSSL install location is **C:\usr\\local\\ssl**, you will set following
 
-Now enter following command
+- set OpenSSLDir=C:\usr\local\ssl
+- set OPENSSL_ROOT_DIR=C:\usr\local\ssl
+
+Now enter following command to build sample using websocket
 
 `build --use-websockets`
  
- **OR**
+  **OR**
 
 `build --skip-unittests --use-websockets` (in case you want to skip unit tests)
 
-This will build C SDK libraries along with iothub_client_sample_amqp_websockets sample.
+This will build C SDK libraries along with **iothub_client_sample_amqp_websockets** sample.
 
 <a name="linux"/>
 ## Set up a Linux development environment
