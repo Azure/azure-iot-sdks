@@ -1,6 +1,6 @@
 # Prepare your development environment
 
-This document describes how to prepare your development environment to use the *Microsoft Azure IoT device SDK for C*. It describes preparing a development environment in Windows using Visual Studio and in Linux.
+This document describes how to prepare your development environment to use the **Microsoft Azure IoT device SDK for C**. It describes preparing a development environment in Windows using Visual Studio and in Linux.
 
 - [Setting up a Windows development environment](#windows)
 - [Setting up a Linux development environment](#linux)
@@ -19,14 +19,14 @@ Be sure to include Visual C++ and NuGet Package Manager.
 ```
 git clone --recursive https://github.com/Azure/azure-iot-sdks.git
 ```
---recursive parameter will include other projects (submodules) [azure-shared-c-utility],[azure-uamqp-c], [azure-umqtt-c] that **azure-iot-sdks** project has dependence on.
+--recursive parameter will include other projects (submodules) [azure-shared-c-utility], [azure-uamqp-c], [azure-umqtt-c] that **azure-iot-sdks** project has dependence on.
 
 C SDK is located under **c** folder **azure-iot-sdks\\c**
 
-For list of available **releases** check: [List of releases of azure-iot-sdks]
+[Releases of azure-iot-sdks] has list of available **releases**.
 
 ### Building the sample applications only
-For **quickly** testing the sample application of your choice open the corresponding [solution(.sln) file] in VS 2015 IDE.
+For **quickly** testing the sample application of your choice open the corresponding [solution (.sln) file] in VS 2015 IDE.
 For example, to build **MQTT sample**, go to c\iothub_client\samples\iothub_client_sample_mqtt\windows and open **iothub_client_sample_mqtt.sln** file in VS 2015.
 
 Build and run the application after replacing `connectionString = "[device connection string]"` with the actual valid device connection string.
@@ -186,7 +186,7 @@ This repository contains various C sample applications that illustrate how to us
 [azure-shared-c-utility]:https://github.com/Azure/azure-c-shared-utility
 [azure-uamqp-c]:https://github.com/Azure/azure-uamqp-c
 [azure-umqtt-c]:https://github.com/Azure/azure-umqtt-c
-[List of releases of azure-iot-sdks]:https://github.com/Azure/azure-iot-sdks/releases
+[Releases of azure-iot-sdks]:https://github.com/Azure/azure-iot-sdks/releases
 [solution(.sln) file]:https://msdn.microsoft.com/en-us/library/bb165951.aspx
 [NuGet]:https://www.nuget.org/
 [CMake]:https://cmake.org/
