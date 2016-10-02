@@ -50,7 +50,7 @@ The following instructions outline how you can build the C SDK (along with sampl
 4. Go to scripts folder located at **c\\build_all\\windows**. Run the build script **build_client.cmd** or **build.cmd** which will invoke cmake to create solution files which will then be used by msbuild to build the projects
 
 After successful running of the script, you should see cmake folder created under c folder.
-For Win32 ((default configuration) you should see **c\\cmake\\iotsdk_win32**. For x64, you should see c\cmake\iotsdk_x64.
+For Win32 (default configuration) you should see **c\\cmake\\iotsdk_win32**. For x64, you should see c\cmake\iotsdk_x64.
 
 **azure_iot_sdks.sln** created under cmake folder will contain all sub-projects that you can directly open in VS 2015 IDE to build libraries or samples in IDE.
 
@@ -164,7 +164,7 @@ You can build the Windows samples to verify that your environment is set up corr
 3. Run the following command:
 
 ```
-build.cmd
+build 
 ```
 
 This script uses cmake to make a folder called "cmake_ce8" in your home directory and generates in that folder a Visual Studio solution called azure_iot_sdks.sln. The script will then proceed to build the HTTP sample.
