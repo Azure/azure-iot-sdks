@@ -18,7 +18,7 @@ Be sure to include Visual C++ and NuGet Package Manager.
 ```
 git clone --recursive https://github.com/Azure/azure-iot-sdks.git
 ```
--recursive parameter will include sub-projects [azure-shared-c-utility],[azure-uamqp-c], [azure-umqtt-c] that **azure-iot-sdks** project has dependence on.
+--recursive parameter will include sub-projects [azure-shared-c-utility],[azure-uamqp-c], [azure-umqtt-c] that **azure-iot-sdks** project has dependence on.
 
 C SDK is located under **c** folder azure-iot-sdks\c
 
@@ -58,13 +58,52 @@ You should see **c\\cmake\\iotsdk_win32** folder for buiding for Win32 (default 
 You can check various configuration options the script provides by entering `build –options`
 For example, if you want to build for x64 and skip unit tests, you can run following command
 
-`build.cmd --platform x64 --skip-unittests` 
+`build --platform x64 --skip-unittests` 
 
+### Building sample that uses WebSocket on Windows 
+**iothub_client_sample_amqp_websockets** (AMQP over WebSocket) has dependence on [OpenSSL] libraries **ssleay32** and **libeay32**. So you need to build and install these libraries and DLL's first before you enable building of sample that uses WebSockets. 
 
-> Note: To enable support to AMQP over WebSockets, 
-  1. Install [OpenSSL 1.0.1 (x86)](https://github.com/openssl/openssl) (tip: build the dll prior to running the following steps); 
-  2. Additionally to instructions on **step 1 above**, create the environment variable **OPENSSL_ROOT_DIR=C:\\OpenSSL** and  **OpenSSLDir=C:\\OpenSSL**
-  3. Run the **build\_client.cmd** script with the option ```--use-websockets```.
+Below are steps to build and install OpenSSL libraries and corresponding DLL's. These steps were tested with **openssl-1.0.2j.tar.gz**
+
+1. Download and extract the available tar.gz file from [OpenSSL Downloads] section locally on your Windows machine that has VS 2015 installed. 
+
+2. Go over [OpenSSL Installation] and [Compilation_and_Installation] and for  **additional** details on supported configurations, pre-requisites and build steps that you may want to look at.
+
+3. For x86 configuration, follow below steps
+Open VS 2015 x86 Native Tools Command Prompt and enter following commands
+
+ `perl Configure VC-WIN32 no-asm`
+
+ `ms\do_ms`
+
+4. For x64 configuration, follow below steps
+Open VS 2015 x64 Native Tools Command Prompt
+
+ `perl Configure VC-WIN64A no-asm`
+
+ `ms\do_win64a`
+
+5. Build and then install the libraries at your install location by using following commands
+
+ `nmake -f ms\ntdll.mak` 
+
+ `nmake -f ms\nt.mak install`
+
+After completing the above steps make sure OpenSSL libraries and DLL's are in your OpenSSL install location.
+
+Open VS 2015 Developer Command Prompt and go to **\\c\\build_all\\windows**
+
+set **OPENSSL_ROOT_DIR** environment variable to OpenSSL install location. For example, if your install location for OpenSSL is C:\usr\local\ssl, you will set **OPENSSL_ROOT_DIR = C:\\usr\\local\\ssl**
+
+Now enter following command
+
+`build --use-websockets`
+ 
+ **OR**
+
+`build --skip-unittests --use-websockets` (in case you want to skip unit tests)
+
+This will build C SDK libraries along with iothub_client_sample_amqp_websockets sample.
 
 <a name="linux"/>
 ## Set up a Linux development environment
@@ -152,3 +191,8 @@ This repository contains various C sample applications that illustrate how to us
 [NuGet]:https://www.nuget.org/
 [CMake]:https://cmake.org/
 [MSBuild]:https://msdn.microsoft.com/en-us/library/0k6kkbsd.aspx
+[OpenSSL]:https://www.openssl.org/
+[OpenSSL Downloads]: https://www.openssl.org/source/
+[OpenSSL Installation]:https://github.com/openssl/openssl/blob/master/INSTALL
+[Compilation_and_Installation]:https://wiki.openssl.org/index.php/Compilation_and_Installation
+
