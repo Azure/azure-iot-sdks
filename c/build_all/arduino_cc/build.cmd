@@ -137,7 +137,22 @@ rem if %run_test%==ON (
 rem )
 
 popd
-goto :eof
+
+echo.
+echo.
+echo Build results:
+
+set finalResult=0
+for /F "tokens=2* delims=.=" %%A in ('set __errolevel_build.') do (
+    if not "%%B"=="0" (
+        set finalResult=1
+        @echo Build %%A !!!FAILED!!!
+    ) else (
+        @echo Build %%A SUCCEED
+    )
+)
+
+exit /B %finalResult%
 
 
 rem -----------------------------------------------------------------------------
@@ -189,7 +204,7 @@ REM Execute each test in the Tests.lst
 :BuildTest
 if not "!projectName!"=="" (
     echo.
-    echo Execute !projectName!
+    echo Build !projectName!
     echo   RelativePath=!RelativePath!
     echo   RelativeWorkingDir=!RelativeWorkingDir!
     echo   MaxAllowedDurationSeconds=!MaxAllowedDurationSeconds!
@@ -261,6 +276,8 @@ rem                     "F:\Azure\IoT\SDKs\iot-hub-c-huzzah-getstartedkit-master
     echo Build !RelativePath!:
     echo  !compiler_name! -compile !parameters!
     call !compiler_name! -compile !parameters!
+
+    set __errolevel_build.!projectName!=%errorlevel%
 
 )
 goto :eof
