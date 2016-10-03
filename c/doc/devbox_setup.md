@@ -19,9 +19,9 @@ Be sure to include Visual C++ and NuGet Package Manager.
 ```
 git clone --recursive https://github.com/Azure/azure-iot-sdks.git
 ```
---recursive parameter will include other projects (submodules) [azure-shared-c-utility], [azure-uamqp-c], [azure-umqtt-c] that **azure-iot-sdks** project has dependence on.
+**recursive** parameter will include other projects (**submodules**) [azure-shared-c-utility], [azure-uamqp-c], [azure-umqtt-c] that **azure-iot-sdks** project has dependence on.
 
-C SDK is located under **c** folder **azure-iot-sdks\\c**
+C SDK source is located under **c** folder **azure-iot-sdks\\c**
 
 [Releases of azure-iot-sdks] has list of available **releases**.
 
@@ -108,13 +108,13 @@ This will build C SDK libraries along with **iothub_client_sample_amqp_websocket
 <a name="linux"/>
 ## Set up a Linux development environment
 
-This section shows you how to set up a development environment for the Azure IoT device SDK for C on [Ubuntu].
+This section shows you how to set up a development environment for the Azure IoT device SDK for C on [Ubuntu]. [CMake] will create makefiles and [make] tool will use these makefiles to compile the C SDK source code using [gcc] compiler.
 
 **Note:** This setup process requires **cmake** version **3.x** or higher and **gcc** version **4.9** or higher. 
 
-You can verify the current version installed in your environment using the `cmake --version` command. For information about how to upgrade your version of cmake to 3.x on Ubuntu 14.04, see http://askubuntu.com/questions/610291/how-to-install-cmake-3-2-on-ubuntu-14-04.
+For [CMake], verify the current version installed in your environment using the `cmake --version` command. For information about how to upgrade your version of cmake to 3.x on Ubuntu 14.04, see http://askubuntu.com/questions/610291/how-to-install-cmake-3-2-on-ubuntu-14-04.
 
-You can verify the current version installed in your environment using the `gcc --version` command. For information about how to upgrade your version of gcc on Ubuntu 14.04, see http://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-4-9-on-ubuntu-14-04.
+For [gcc], verify the current version installed in your environment using the `gcc --version` command. For information about how to upgrade your version of gcc on Ubuntu 14.04, see http://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-4-9-on-ubuntu-14-04.
 
 Older **gcc** version **4.4.7** support has also been added and tested on 14.04.1-Ubuntu SMP. It is tested with `./build.sh --skip-unittests --use-websockets` build option.
 
@@ -131,9 +131,9 @@ In case, you want to pull latest code on **develop** branch you can use followin
 
 4. Run the `./build.sh` script.
 
-This script uses **cmake** to make a folder called "c/cmake/iotsdk_linux" and generates necessary makefiles. The script then builds the solution and runs the unit tests.
+This script uses **cmake** to make a folder called "cmake/iotsdk_linux" under c folder and generates necessary makefiles.The script then builds the solution and runs the unit tests.
 
-Below are some of the build options you can use
+Below are some of the build **options** you can use
 
 `./build.sh --options` : List available options
 
@@ -214,4 +214,5 @@ This repository contains various C sample applications that illustrate how to us
 [OpenSSL Installation]:https://github.com/openssl/openssl/blob/master/INSTALL
 [Compilation_and_Installation]:https://wiki.openssl.org/index.php/Compilation_and_Installation#Windows
 [Ubuntu]:http://www.ubuntu.com/desktop
-
+[gcc]:https://gcc.gnu.org/
+[make]:https://www.gnu.org/software/make/
