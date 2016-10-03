@@ -111,9 +111,12 @@ This will build C SDK libraries along with **iothub_client_sample_amqp_websocket
 This section shows you how to set up a development environment for the Azure IoT device SDK for C on Ubuntu.
 
 **Note:** This setup process requires **cmake** version 3.x or higher and **gcc** version 4.9 or higher. You can verify the current version installed in your environment using the `cmake --version` command. For information about how to upgrade your version of cmake to 3.x on Ubuntu 14.04, see http://askubuntu.com/questions/610291/how-to-install-cmake-3-2-on-ubuntu-14-04.
+
 This library requires **gcc** version 4.9. You can verify the current version installed in your environment using the `gcc --version` command. For information about how to upgrade your version of gcc on Ubuntu 14.04, see http://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-4-9-on-ubuntu-14-04.
 
-** Older **gcc** version 4.4.7 support has been added and tested on 14.04.1-Ubuntu SMP. It is tested with ```--skip-unittests --use-websockets``` build option.
+Older **gcc** version 4.4.7 support has also been added and tested on 14.04.1-Ubuntu SMP. It is tested with
+
+`./build.sh --skip-unittests --use-websockets` build option.
 
 1. Clone the latest version of this repository to your Ubuntu machine with the recursive parameter
 ```
@@ -121,15 +124,32 @@ git clone --recursive https://github.com/Azure/azure-iot-sdks.git
 ```
 Use the **master** branch to ensure you fetch the latest release version.
 
+If case, you want to pull latest code on **develop** branch you can use following command
+
+`git clone -b develop --recursive https://github.com/Azure/azure-iot-sdks.git azure-iot-develop`
+
+
 2. Open a shell and navigate to the folder **c/build_all/linux** in your local copy of the repository.
 
 3. Run the `./setup.sh` script to install the prerequisite packages and the dependent libraries.
 
 4. Run the `./build.sh` script.
 
-This script uses **cmake** to make a folder called "cmake" in your home directory and generates a makefile. The script then builds the solution and runs the tests.
+This script uses **cmake** to make a folder called "c/cmake/iotsdk_linux" and generates necessary makefiles. The script then builds the solution and runs the unit tests
 
-> Note: Every time you run `build.sh`, it deletes and then recreates the "cmake" folder in your home directory.
+Below are some of the build options you can use
+
+`./build.sh --options` : List available options
+
+`./build.sh --skip-unittests`: Skip unit test in case you want just quickly build samples
+
+ `./build.sh --use-websockets`:  Enables the support for AMQP over WebSockets
+ 
+ `./build.sh --use-websockets --skip-unittests` : Skip unit tests and include AMQP over WebSockets sample
+ 
+ `./build.sh -cl -g`: Build debug build
+
+> Note: Every time you run `build.sh`, it deletes and then recreates the "cmake" folder under c folder.
 
 > Note: You will not be able to run the samples until you configure them with a valid IoT Hub device connection string. For more information, see [Run sample on Linux](../../doc/get_started/linux-desktop-c.md).
 
