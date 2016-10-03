@@ -27,6 +27,8 @@ namespace Microsoft.Azure.Devices.Client.Test.Mqtt
         static ClientWebSocketChannel clientWebSocketChannel;
         static ServerWebSocketChannel serverWebSocketChannel;
         static ReadListeningHandler serverListener;
+        static volatile bool done;
+        static Task serverTask;
 
         const string ClientId = "scenarioClient1";
         const string SubscribeTopicFilter1 = "test/+";
@@ -47,12 +49,13 @@ namespace Microsoft.Azure.Devices.Client.Test.Mqtt
             listener.Prefixes.Add("http://+:" + Port + WebSocketConstants.UriSuffix + "/");
             listener.Start();
 
-            RunWebSocketServer().ContinueWith(t => t, TaskContinuationOptions.OnlyOnFaulted);
+            serverTask = RunWebSocketServer().ContinueWith(t => t, TaskContinuationOptions.OnlyOnFaulted);
         }
 
         [ClassCleanup()]
         public static void AssemblyCleanup()
         {
+
             listener.Stop();
         }
 
@@ -67,6 +70,7 @@ namespace Microsoft.Azure.Devices.Client.Test.Mqtt
             var threadLoop = new SingleThreadEventLoop("MQTTExecutionThread", TimeSpan.FromSeconds(1));
             await threadLoop.RegisterAsync(clientWebSocketChannel);
             await clientWebSocketChannel.WriteAndFlushAsync(new ConnectPacket());
+            done = true;
         }
 
         [ExpectedException(typeof(ClosedChannelException))]
@@ -80,6 +84,8 @@ namespace Microsoft.Azure.Devices.Client.Test.Mqtt
             var threadLoop = new SingleThreadEventLoop("MQTTExecutionThread", TimeSpan.FromSeconds(1));
             await threadLoop.RegisterAsync(clientWebSocketChannel);
             clientWebSocketChannel.Read();
+
+            done = true;
         }
 
         // The following tests can only be run in Administrator mode
@@ -114,12 +120,12 @@ namespace Microsoft.Azure.Devices.Client.Test.Mqtt
                 await clientReadListener.ReceiveAsync(DefaultTimeout);
                 Assert.Fail("Should have thrown InvalidOperationException");
             }
-            catch (AggregateException e)
+            catch (InvalidOperationException e)
             {
-                var innerException = e.InnerException as InvalidOperationException;
-                Assert.IsNotNull(innerException);
-                Assert.IsTrue(e.InnerException.Message.Contains("Channel is closed"));
+                Assert.IsTrue(e.Message.Contains("Channel is closed"));
             }
+
+            done = true;
         }
 
         [TestMethod]
@@ -148,6 +154,8 @@ namespace Microsoft.Azure.Devices.Client.Test.Mqtt
                 var innerException = e.InnerException as ClosedChannelException;
                 Assert.IsNotNull(innerException);
             }
+
+            done = true;
         }
 
         [TestMethod]
@@ -155,12 +163,9 @@ namespace Microsoft.Azure.Devices.Client.Test.Mqtt
         [TestCategory("WebSocket")]
         public async Task MqttWebSocketClientAndServerScenario()
         {
-            // Wait for Server to be up and running
-            await Task.Delay(TimeSpan.FromSeconds(2));
-
             var websocket = new ClientWebSocket();
-            websocket.Options.AddSubProtocol("mqtt");
-            Uri uri = new Uri("ws://" + IotHubName + ":" + Port + "/$iothub/websocket");
+            websocket.Options.AddSubProtocol(WebSocketConstants.SubProtocols.Mqtt);
+            Uri uri = new Uri("ws://" + IotHubName + ":" + Port + WebSocketConstants.UriSuffix);
             await websocket.ConnectAsync(uri, CancellationToken.None);
 
             var clientReadListener = new ReadListeningHandler();
@@ -179,6 +184,7 @@ namespace Microsoft.Azure.Devices.Client.Test.Mqtt
             await clientWorkerGroup.GetNext().RegisterAsync(clientChannel);
 
             await Task.WhenAll(RunMqttClientScenarioAsync(clientChannel, clientReadListener), RunMqttServerScenarioAsync(serverWebSocketChannel, serverListener));
+            done = true;
         }
 
         static async Task RunMqttClientScenarioAsync(IChannel channel, ReadListeningHandler readListener)
@@ -247,7 +253,7 @@ namespace Microsoft.Azure.Devices.Client.Test.Mqtt
                 DisconnectPacket.Instance);
         }
 
-       static  async Task RunMqttServerScenarioAsync(IChannel channel, ReadListeningHandler readListener)
+       static async Task RunMqttServerScenarioAsync(IChannel channel, ReadListeningHandler readListener)
         {
             var connectPacket = await readListener.ReceiveAsync(DefaultTimeout) as ConnectPacket;
             Assert.IsNotNull(connectPacket, "Must be a Connect pkt");
@@ -307,7 +313,7 @@ namespace Microsoft.Azure.Devices.Client.Test.Mqtt
                 context.Response.Close();
             }
 
-            HttpListenerWebSocketContext webSocketContext = await context.AcceptWebSocketAsync("mqtt", 8 * 1024, TimeSpan.FromMinutes(5));
+            HttpListenerWebSocketContext webSocketContext = await context.AcceptWebSocketAsync(WebSocketConstants.SubProtocols.Mqtt, 8 * 1024, TimeSpan.FromMinutes(5));
 
             serverListener = new ReadListeningHandler();
             serverWebSocketChannel = new ServerWebSocketChannel(null, webSocketContext.WebSocket, context.Request.RemoteEndPoint);
@@ -324,8 +330,15 @@ namespace Microsoft.Azure.Devices.Client.Test.Mqtt
             var workerGroup = new MultithreadEventLoopGroup();
             await workerGroup.GetNext().RegisterAsync(serverWebSocketChannel);
 
-            await Task.Delay(TimeSpan.FromSeconds(30));
-            await serverWebSocketChannel.CloseAsync();
+           while (true)
+           {
+               if (done)
+               {
+                   break;
+               }
+
+               await Task.Delay(TimeSpan.FromSeconds(2));
+           }
         }
     }
 }
