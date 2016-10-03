@@ -51,11 +51,11 @@ You should have the following items ready before beginning the process:
 7.   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the **simplesample_amqp** application and how to send cloud-to-device messages to the **simplesample_amqp** application.
 
 # TLS handshake
-If you are **not** able to connect because certification validation issue, you can use folllowing steps for debugging.
+If you are **not** able to connect because certification validation issue, you can use following steps for debugging.
 
 Connection to Azure IoT Hub is secured through [TLS]. As part of [TLS] handshake, client has to validate server side **Root CA** [Step 3] of TLS handshake.
 
-Quick way to test to make sure underlying platform has Root CA as trusted, you can using following [curl] command with [verbose] -v option
+Quick way to test to make sure underlying platform has Root CA as **trusted**, you can using following [curl] command with [verbose] -v option
 
 `curl -v -H "Authorization:SharedAccessSignature sr={My SAS}” https://{MyTestHub}.azure-devices.net/devices/{My Device}/messages/events?api-version=2016-02-03 -H "Content-Type:application/json" -d "{ \"My Key\": \"My Value\" }"`
 
