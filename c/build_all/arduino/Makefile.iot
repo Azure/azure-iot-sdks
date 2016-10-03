@@ -51,11 +51,11 @@ endef
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(STAGING_DIR)/usr/include/azure-iot-sdks
-	$(CP) $(PKG_BUILD_DIR)/azure-c-shared-utility/inc/* $(STAGING_DIR)/usr/include/
+	$(CP) $(PKG_BUILD_DIR)/c-utility/inc/* $(STAGING_DIR)/usr/include/
 	$(CP) $(PKG_BUILD_DIR)/iothub_client/inc/* $(STAGING_DIR)/usr/include/
 	$(CP) $(PKG_BUILD_DIR)/serializer/inc/* $(STAGING_DIR)/usr/include/
 	$(INSTALL_DIR) $(STAGING_DIR)/usr/lib
-	$(CP) $(PKG_BUILD_DIR)/azure-c-shared-utility/*.a $(STAGING_DIR)/usr/lib/
+	$(CP) $(PKG_BUILD_DIR)/c-utility/*.a $(STAGING_DIR)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/iothub_client/*.a $(STAGING_DIR)/usr/lib/
 	$(CP) $(PKG_BUILD_DIR)/serializer/*.a $(STAGING_DIR)/usr/lib/
 endef
@@ -68,7 +68,7 @@ endef
 
 define Build/Compile
 	$(MAKE) -C $(PKG_BUILD_DIR)
-#	$(STRIP) $(PKG_BUILD_DIR)/azure-c-shared-utility/*.a
+#	$(STRIP) $(PKG_BUILD_DIR)/c-utility/*.a
 #	$(STRIP) $(PKG_BUILD_DIR)/iothub_client/*.a
 #	$(STRIP) $(PKG_BUILD_DIR)/serializer/*.a
 #	$(STRING) $(PKG_BUILD_DIR)/serializer/samples/simplesample_http/simplesample_http
@@ -76,7 +76,7 @@ endef
 
 define Package/azure-iot-sdks/install
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/azure-c-shared-utility/*.a $(1)/usr/lib/
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/c-utility/*.a $(1)/usr/lib/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/iothub_client/*.a $(1)/usr/lib/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/serializer/*.a $(1)/usr/lib/
 	$(INSTALL_DIR) $(1)/usr/share/azure-iot-sdk/samples

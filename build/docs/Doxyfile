@@ -766,15 +766,15 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = mainpage.dox \
-                         ../../c/azure-c-shared-utility/inc/azure_c_shared_utility/agenttime.h \
-                         ../../c/azure-c-shared-utility/inc/azure_c_shared_utility/base64.h \
-                         ../../c/azure-c-shared-utility/inc/azure_c_shared_utility/httpapi.h \
-                         ../../c/azure-c-shared-utility/inc/azure_c_shared_utility/httpapi.h \
-                         ../../c/azure-c-shared-utility/inc/azure_c_shared_utility/httpapiex.h \
-                         ../../c/azure-c-shared-utility/inc/azure_c_shared_utility/httpheaders.h \
-                         ../../c/azure-c-shared-utility/inc/azure_c_shared_utility/threadapi.h \
-                         ../../c/azure-c-shared-utility/inc/azure_c_shared_utility/lock.h \
-                         ../../c/azure-c-shared-utility/inc/azure_c_shared_utility/map.h \
+                         ../../c/c-utility/inc/azure_c_shared_utility/agenttime.h \
+                         ../../c/c-utility/inc/azure_c_shared_utility/base64.h \
+                         ../../c/c-utility/inc/azure_c_shared_utility/httpapi.h \
+                         ../../c/c-utility/inc/azure_c_shared_utility/httpapi.h \
+                         ../../c/c-utility/inc/azure_c_shared_utility/httpapiex.h \
+                         ../../c/c-utility/inc/azure_c_shared_utility/httpheaders.h \
+                         ../../c/c-utility/inc/azure_c_shared_utility/threadapi.h \
+                         ../../c/c-utility/inc/azure_c_shared_utility/lock.h \
+                         ../../c/c-utility/inc/azure_c_shared_utility/map.h \
                          ../../c/iothub_client/inc/iothub_client_version.h \
                          ../../c/iothub_client/inc/iothub_message.h \
                          ../../c/iothub_client/inc/iothub_client_ll.h \
@@ -2043,7 +2043,7 @@ SEARCH_INCLUDES        = YES
 # preprocessor.
 # This tag requires that the tag SEARCH_INCLUDES is set to YES.
 
-INCLUDE_PATH           = ../../c/azure-c-shared-utility/inc
+INCLUDE_PATH           = ../../c/c-utility/inc
 
 # You can use the INCLUDE_FILE_PATTERNS tag to specify one or more wildcard
 # patterns (like *.h and *.hpp) to filter out the header-files in the

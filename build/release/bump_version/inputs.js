@@ -875,7 +875,7 @@ module.exports = [
     ///////////////////////////////////////////////////
     {
         "taskType": "multiTask",
-        "filePath": "c/azure-uamqp-c/build_all/Packaging/windows/Microsoft.Azure.uamqp.nuspec",
+        "filePath": "c/uamqp/build_all/Packaging/windows/Microsoft.Azure.uamqp.nuspec",
         "search": [
             {
                 "taskType": "xmlAttributeReplaceTask",
@@ -900,7 +900,7 @@ module.exports = [
     ///////////////////////////////////////////////////
     {
         "taskType": "multiTask",
-        "filePath": "c/azure-c-shared-utility/build_all/Packaging/windows/Microsoft.Azure.C.SharedUtility.nuspec",
+        "filePath": "c/c-utility/build_all/Packaging/windows/Microsoft.Azure.C.SharedUtility.nuspec",
         "search": [
             {
                 "taskType": "xmlReplaceTask",
@@ -917,7 +917,7 @@ module.exports = [
     ///////////////////////////////////////////////////
     {
         "taskType": "multiTask",
-        "filePath": "c/azure-umqtt-c/build_all/Packaging/windows/Microsoft.Azure.umqtt.nuspec",
+        "filePath": "c/umqtt/build_all/Packaging/windows/Microsoft.Azure.umqtt.nuspec",
         "search": [
             {
                 "taskType": "xmlAttributeReplaceTask",
