@@ -152,7 +152,9 @@ for /F "tokens=2* delims=.=" %%A in ('set __errolevel_build.') do (
     )
 )
 
-exit /B %finalResult%
+if not !finalResult!==0 exit /b !finalResult!
+
+goto :eof
 
 
 rem -----------------------------------------------------------------------------
