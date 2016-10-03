@@ -110,24 +110,20 @@ This will build C SDK libraries along with **iothub_client_sample_amqp_websocket
 
 This section shows you how to set up a development environment for the Azure IoT device SDK for C on Ubuntu.
 
-**Note:** This setup process requires **cmake** version 3.x or higher and **gcc** version 4.9 or higher. You can verify the current version installed in your environment using the `cmake --version` command. For information about how to upgrade your version of cmake to 3.x on Ubuntu 14.04, see http://askubuntu.com/questions/610291/how-to-install-cmake-3-2-on-ubuntu-14-04.
+**Note:** This setup process requires **cmake** version **3.x** or higher and **gcc** version **4.9** or higher. 
 
-This library requires **gcc** version 4.9. You can verify the current version installed in your environment using the `gcc --version` command. For information about how to upgrade your version of gcc on Ubuntu 14.04, see http://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-4-9-on-ubuntu-14-04.
+You can verify the current version installed in your environment using the `cmake --version` command. For information about how to upgrade your version of cmake to 3.x on Ubuntu 14.04, see http://askubuntu.com/questions/610291/how-to-install-cmake-3-2-on-ubuntu-14-04.
 
-Older **gcc** version 4.4.7 support has also been added and tested on 14.04.1-Ubuntu SMP. It is tested with
+You can verify the current version installed in your environment using the `gcc --version` command. For information about how to upgrade your version of gcc on Ubuntu 14.04, see http://askubuntu.com/questions/466651/how-do-i-use-the-latest-gcc-4-9-on-ubuntu-14-04.
 
-`./build.sh --skip-unittests --use-websockets` build option.
+Older **gcc** version 4.4.7 support has also been added and tested on 14.04.1-Ubuntu SMP. It is tested with `./build.sh --skip-unittests --use-websockets` build option.
 
-1. Clone the latest version of this repository to your Ubuntu machine with the recursive parameter
-```
-git clone --recursive https://github.com/Azure/azure-iot-sdks.git
-```
-Use the **master** branch to ensure you fetch the latest release version.
+1. Clone the latest version of this repository to your Ubuntu machine with the recursive parameter to fetch latest code from **master** branch
 
-If case, you want to pull latest code on **develop** branch you can use following command
+`git clone --recursive https://github.com/Azure/azure-iot-sdks.git`
 
+In case, you want to pull latest code on **develop** branch you can use following command
 `git clone -b develop --recursive https://github.com/Azure/azure-iot-sdks.git azure-iot-develop`
-
 
 2. Open a shell and navigate to the folder **c/build_all/linux** in your local copy of the repository.
 
