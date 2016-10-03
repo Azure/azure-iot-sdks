@@ -12,7 +12,7 @@ set build_root=%current_path%\..\..\..\..
 rem // resolve to fully qualified path
 for %%i in ("%build_root%") do set build_root=%%~fi
 
-set work_root=%build_root%\Work
+set work_root=%build_root%\arduino_cc_Work
 set compiler_path=%build_root%\%IOTHUB_ARDUINO_VERSION%
 
 set compiler_hardware_path=%compiler_path%\hardware
@@ -23,8 +23,6 @@ set compiler_libraries_path=%compiler_path%\libraries
 set user_hardware_path=%work_root%\arduino\hardware
 set user_libraries_path=%work_root%\arduino\libraries
 set user_packages_path=%build_root%\arduino15\packages
-
-set test_path=%build_root%\iot-hub-c-huzzah-getstartedkit\remote_monitoring\remote_monitoring.ino
 
 rem -----------------------------------------------------------------------------
 rem -- parse script arguments
@@ -81,6 +79,14 @@ rem ----------------------------------------------------------------------------
 mkdir %work_root%
 
 rem -----------------------------------------------------------------------------
+rem -- download arduino samples
+rem -----------------------------------------------------------------------------
+pushd %work_root%
+git clone https://github.com/Azure-Samples/iot-hub-c-huzzah-getstartedkit
+git clone https://github.com/Azure-Samples/iot-hub-c-m0wifi-getstartedkit
+popd
+
+rem -----------------------------------------------------------------------------
 rem -- download arduino libraries
 rem -----------------------------------------------------------------------------
 mkdir %user_libraries_path%
@@ -115,7 +121,7 @@ rem -- build solution
 rem -----------------------------------------------------------------------------
 
 if %build_test%==ON (
-    call :ParserTestLst
+    call :BuildAllTests
 )
 
 rem -----------------------------------------------------------------------------
@@ -131,6 +137,23 @@ rem if %run_test%==ON (
 rem )
 
 popd
+
+echo.
+echo.
+echo Build results:
+
+set finalResult=0
+for /F "tokens=2* delims=.=" %%A in ('set __errolevel_build.') do (
+    if not "%%B"=="0" (
+        set finalResult=1
+        @echo Build %%A !!!FAILED!!!
+    ) else (
+        @echo Build %%A SUCCEED
+    )
+)
+
+if not !finalResult!==0 exit /b !finalResult!
+
 goto :eof
 
 
@@ -152,7 +175,7 @@ rem -- helper subroutines
 rem -----------------------------------------------------------------------------
 
 REM Parser tests.lst
-:ParserTestLst
+:BuildAllTests
 set buildlog=tests.lst
 set testName=false
 set projectName=
@@ -165,7 +188,7 @@ for /F "tokens=*" %%F in (%buildlog%) do (
         if /i "!command:~0,1!"=="#" (
             echo Comment=!command:~1!
         ) else ( if /i "!command:~0,1!"=="[" (
-            call :ExecuteTest
+            call :BuildTest
             set projectName=!command:~1,-1!
             if /i "!projectName!"=="End" goto :eof
         ) else (
@@ -180,10 +203,10 @@ goto :eof
 
 
 REM Execute each test in the Tests.lst
-:ExecuteTest
+:BuildTest
 if not "!projectName!"=="" (
     echo.
-    echo Execute !projectName!
+    echo Build !projectName!
     echo   RelativePath=!RelativePath!
     echo   RelativeWorkingDir=!RelativeWorkingDir!
     echo   MaxAllowedDurationSeconds=!MaxAllowedDurationSeconds!
@@ -255,6 +278,8 @@ rem                     "F:\Azure\IoT\SDKs\iot-hub-c-huzzah-getstartedkit-master
     echo Build !RelativePath!:
     echo  !compiler_name! -compile !parameters!
     call !compiler_name! -compile !parameters!
+
+    set __errolevel_build.!projectName!=%errorlevel%
 
 )
 goto :eof
