@@ -33,8 +33,8 @@ Build and run the application after replacing `connectionString = "[device conne
 
 **packages.config** file will have list of libraries (packages) that sample has dependence on and these will be pulled in by [NuGet] package manager while building the sample application.
 
-### Building the C libraries locally along with sample applications
-In some cases, you may want to build the **C libraries** locally for development and testing purpose.
+### Building the C SDK libraries locally along with sample applications
+In some cases, you may want to build the **C SDK libraries** locally for development and testing purpose.
 For example, you may want to build the latest code available on the **develop** branch which follows Continuous Integration (CI) approach.
 
 To pull latest code on **develop** branch you can use following command
@@ -97,11 +97,7 @@ After completing the above steps make sure OpenSSL libraries and DLL's are in yo
 
 Now enter following command to build sample using websocket
 
-`build --use-websockets`
- 
-  **OR**
-
-`build --skip-unittests --use-websockets` (in case you want to skip unit tests)
+`build --use-websockets`  **OR** `build --skip-unittests --use-websockets` (in case you want to skip unit tests)
 
 This will build C SDK libraries along with **iothub_client_sample_amqp_websockets** sample.
 
@@ -144,6 +140,9 @@ Below are some of the build **options** you can use
  `./build.sh --use-websockets --skip-unittests` : Skip unit tests and include AMQP over **WebSockets** sample
  
  `./build.sh -cl -g`: Build **debug** build
+
+> Tip: After running `./build.sh` if you want to just build a **particular sample** or library after making changes, you can directly go the corresponding cmake directory and run the [make] command.
+For example, to build **mqtt** sample after making changes in it you can directly go to c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_mqtt directory and run `make` command from that directory.
 
 
 > Note: Every time you run `build.sh`, it deletes and then recreates the "cmake" folder under c folder.
