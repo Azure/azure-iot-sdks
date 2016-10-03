@@ -306,6 +306,27 @@ else if (command === 'sas-token') {
       console.log(sas.toString());
     }
   });
+} else if (command === 'monitor-ops') {
+  if (!connString) inputError('\'monitor-ops\' requires your connection string');
+  var ehClient = EventHubClient.fromConnectionString(connString, '/messages/operationsMonitoringEvents/*');
+  var startTime = Date.now();
+  ehClient.open()
+        .then(ehClient.getPartitionIds.bind(ehClient))
+        .then(function (partitionIds) {
+          return partitionIds.map(function (partitionId) {
+            return ehClient.createReceiver('$Default', partitionId, { 'startAfterTime' : startTime}).then(function(receiver) {
+              receiver.on('errorReceived', function (error) {
+                serviceError(error.message);
+              });
+              receiver.on('message', function (eventData) {
+                console.log(prettyjson.render(eventData));
+              });
+            });
+          });
+        })
+        .catch(function (error) {
+          serviceError(error.message);
+        });
 }
 else if (command === 'get-twin') {
   if (!arg1) inputError('No device ID given');
@@ -544,12 +565,8 @@ function usage() {
     '    {grey}Get device twin information.{/grey}',
     '  {green}iothub-explorer{/green} {white}[<connection-string>] update-twin <device-id> <device-json>{/white}',
     '    {grey}Updates device twin info and returns twin information about the updated device.{/grey}',
-    '  {green}iothub-explorer{/green} {white}[<connection-string>] query-twin "<SQL query>"{/white}',
-    '    {grey}Get device twins matching the query given as argument.{/grey}',
-    '  {green}iothub-explorer{/green} {white}[<connection-string>] query-job [job type] [job status]{/white}',
-    '    {grey}Get jobs matching the type and status given as arguments (optional).{/grey}',
-    '  {green}iothub-explorer{/green} {white}[<connection-string>] device-method <device-id> <method-name> [payload] [timeout-in-seconds]{/white}',
-    '    {grey}Calls a device method on the specified device. payload and timeout-in-seconds are optional.{/grey}',
+    '  {green}iothub-explorer{/green} {white} <connection-string> monitor-ops {/white}',
+    '    {grey}Starts listening on the operations monitoring endpoint of the IoT Hub (has to be enabled in the portal){/grey}',
     '  {green}iothub-explorer{/green} {white}help{/white}',
     '    {grey}Displays this help message.{/grey}',
     '',
