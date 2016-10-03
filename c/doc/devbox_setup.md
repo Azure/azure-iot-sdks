@@ -118,18 +118,18 @@ For [gcc], verify the current version installed in your environment using the `g
 
 Older **gcc** version **4.4.7** support has also been added and tested on 14.04.1-Ubuntu SMP. It is tested with `./build.sh --skip-unittests --use-websockets` build option.
 
-1. Clone the latest version of this repository to your Ubuntu machine with the recursive parameter to fetch latest code from **master** branch
+Clone the latest version of this repository to your Ubuntu machine with the recursive parameter to fetch latest code from **master** branch
 
 `git clone --recursive https://github.com/Azure/azure-iot-sdks.git`
 
-In case, you want to pull latest code on **develop** branch you can use following command
+> In case, you want to pull latest code on **develop** branch you can use following command
 `git clone -b develop --recursive https://github.com/Azure/azure-iot-sdks.git azure-iot-develop`
 
-2. Open a shell and navigate to the folder **c/build_all/linux** in your local copy of the repository.
+1. Open a shell and navigate to the folder **c/build_all/linux** in your local copy of the repository.
 
-3. Run the `./setup.sh` script to install the prerequisite packages and the dependent libraries.
+2. Run the `./setup.sh` script to install the prerequisite packages and the dependent libraries.
 
-4. Run the `./build.sh` script.
+3. Run the `./build.sh` script.
 
 This script uses **cmake** to make a folder called "cmake/iotsdk_linux" under c folder and generates necessary makefiles.The script then builds the solution and runs the unit tests.
 
@@ -183,7 +183,7 @@ You can build the Windows samples to verify that your environment is set up corr
 build 
 ```
 
-This script uses cmake to make a folder called "cmake_ce8" in your home directory and generates in that folder a Visual Studio solution called azure_iot_sdks.sln. The script will then proceed to build the HTTP sample.
+This script uses cmake to make a folder called "cmake_ce8" in your home directory and generates in that folder a Visual Studio solution called azure_iot_sdks.sln. The script will then proceed to build the **HTTP** sample.
 
 > Note: you will not be able to run the samples until you configure them with a valid IoT hub device connection string. For more information, see [running a C sample application on Windows Embedded Compact 2013 on a Toradex module](../../doc/get_started/wince2013-toradex-module-c.md).
 
