@@ -1,10 +1,10 @@
 ---
 platform: windows 10
-device: msc q7-bt
+device: baytrail family
 language: csharp
 ---
 
-Run a simple csharp sample on MSC Q7-BT device running Windows 10
+Run a simple csharp sample on MSC Baytrail Family device running Windows 10
 ===
 ---
 
@@ -20,7 +20,7 @@ Run a simple csharp sample on MSC Q7-BT device running Windows 10
 
 **About this document**
 
-This document describes how to connect MSC Q7-BT device running Windows 10 with Azure IoT SDK. This multi-step process includes:
+This document describes how to connect MSC Baytrail Family device running Windows 10 with Azure IoT SDK. This multi-step process includes:
 -   Configuring Azure IoT Hub
 -   Registering your IoT device
 -   Build and deploy Azure IoT SDK on device
@@ -33,14 +33,14 @@ You should have the following items ready before beginning the process:
 -   [Prepare your development environment][setup-devbox-windows]
 -   [Setup your IoT hub][lnk-setup-iot-hub]
 -   [Provision your device and get its credentials][lnk-manage-iot-hub]
--   MSC Q7-BT device.
+-   MSC Baytrail Family device.
 
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
 
 -   We recommend to use the starter kit [MSC Q7-SK-BT-EP6][lnk-msc-q7-sk-bt-ep6]
--   For detailed information please see [MSC Q7-BT][lnk-support-msc-q7-bt]
--   Install Windows 10 and Visual Studio 2015 (any version, including Community edition) on the MSC Q7-BT device.
+-   For detailed information please see [MSC Baytrail Family][lnk-support-msc-q7-bt]
+-   Install Windows 10 and Visual Studio 2015 (any version, including Community edition) on the MSC Baytrail Family device.
 
 <a name="Build"></a>
 # Step 3: Build and Run the sample
