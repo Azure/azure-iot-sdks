@@ -32,7 +32,6 @@
 #include "iothub_client_ll.h"
 #include "iothub_client_options.h"
 #include "iothub_client_private.h"
-#include "iothubtransportamqp_common.h"
 #include "iothubtransportamqp_auth.h"
 #include "iothubtransportamqp.h"
 #include "iothub_client_version.h"
@@ -1571,13 +1570,6 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE han
 					LogError("IoTHubTransportAMQP_Register failed to construct the devicesPath.");
 					cleanup_required = true;
 				}
-				// Codes_SRS_IOTHUBTRANSPORTAMQP_09_229: [IoTHubTransportAMQP_Register shall create an authentication state for the device using authentication_create() and store it on the device state.]
-				else if ((device_state->authentication = authentication_create(device, device_state->devicesPath, &device_state->transport_state->cbs_connection)) == NULL)
-				{
-					// Codes_SRS_IOTHUBTRANSPORTAMQP_09_230: [If authentication_create() fails, IoTHubTransportAMQP_Register shall fail and return NULL.]
-					LogError("IoTHubTransportAMQP_Register failed to create an authentication state for the device.");
-					cleanup_required = true;
-				}
 				// Codes_SRS_IOTHUBTRANSPORTAMQP_09_014: [IoTHubTransportAMQP_Register shall create an immutable string, referred to as targetAddress, from the following parts: "amqps://" + devicesPath + "/messages/events".]
 				else if ((device_state->targetAddress = concat3Params("amqps://", STRING_c_str(device_state->devicesPath), "/messages/events")) == NULL)
 				{
@@ -1601,15 +1593,32 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE han
 				}
 				else
 				{
-					// Codes_SRS_IOTHUBTRANSPORTAMQP_09_234: [If the device is the first being registered on the transport, IoTHubTransportAMQP_Register shall save its authentication mode as the transport preferred authentication mode.]
-					if (VECTOR_size(transport_state->registered_devices) == 1)
-					{
-						transport_state->preferred_credential_type = authentication_get_credential(device_state->authentication)->type;
-					}
+					AUTHENTICATION_CONFIG auth_config;
+					auth_config.device_id = STRING_c_str(device_state->deviceId);
+					auth_config.device_key = device->deviceKey;
+					auth_config.device_sas_token = device->deviceSasToken;
+					auth_config.cbs_connection = &device_state->transport_state->cbs_connection;
+					auth_config.iot_hub_host_fqdn = STRING_c_str(device_state->transport_state->iotHubHostFqdn);
 
-					// Codes_SRS_IOTHUBTRANSPORTAMQP_09_233: [IoTHubTransportAMQP_Register shall return its internal device representation as a IOTHUB_DEVICE_HANDLE.]
-					result = (IOTHUB_DEVICE_HANDLE)device_state;
-					cleanup_required = false;
+					// Codes_SRS_IOTHUBTRANSPORTAMQP_09_229: [IoTHubTransportAMQP_Register shall create an authentication state for the device using authentication_create() and store it on the device state.]
+					if ((device_state->authentication = authentication_create(&auth_config)) == NULL)
+					{
+						// Codes_SRS_IOTHUBTRANSPORTAMQP_09_230: [If authentication_create() fails, IoTHubTransportAMQP_Register shall fail and return NULL.]
+						LogError("IoTHubTransportAMQP_Register failed to create an authentication state for the device.");
+						cleanup_required = true;
+					}
+					else
+					{
+						// Codes_SRS_IOTHUBTRANSPORTAMQP_09_234: [If the device is the first being registered on the transport, IoTHubTransportAMQP_Register shall save its authentication mode as the transport preferred authentication mode.]
+						if (VECTOR_size(transport_state->registered_devices) == 1)
+						{
+							transport_state->preferred_credential_type = authentication_get_credential(device_state->authentication)->type;
+						}
+
+						// Codes_SRS_IOTHUBTRANSPORTAMQP_09_233: [IoTHubTransportAMQP_Register shall return its internal device representation as a IOTHUB_DEVICE_HANDLE.]
+						result = (IOTHUB_DEVICE_HANDLE)device_state;
+						cleanup_required = false;
+					}
 				}
 
 				// Codes_SRS_IOTHUBTRANSPORTAMQP_09_233: [If IoTHubTransportAMQP_Register fails, it shall free all memory it alloacated (destroy deviceId, authentication state, targetAddress, messageReceiveAddress, devicesPath, device state).]

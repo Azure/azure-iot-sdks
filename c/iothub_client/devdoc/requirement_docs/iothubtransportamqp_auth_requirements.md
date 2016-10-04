@@ -5,14 +5,13 @@
 ## Overview
 
 This module provides APIs for authenticating devices registered on the IoT Hub C client AMQP protocol.  
-This is an internal module and shall be used only by the above mentioned module.
    
    
 ## Exposed API
 
 
 ```c
-extern AUTHENTICATION_STATE_HANDLE authentication_create(const IOTHUB_DEVICE_CONFIG* device_config, STRING_HANDLE devices_path, AMQP_TRANSPORT_CBS_CONNECTION* cbs_connection);
+extern AUTHENTICATION_STATE_HANDLE authentication_create(const AUTHENTICATION_CONFIG* config);
 
 extern int authentication_authenticate(AUTHENTICATION_STATE_HANDLE authentication_state);
 
@@ -31,10 +30,10 @@ extern int authentication_destroy(AUTHENTICATION_STATE_HANDLE authentication_sta
 ### authentication_create
 
 ```c
-AUTHENTICATION_STATE_HANDLE authentication_create(const IOTHUB_DEVICE_CONFIG* device_config, STRING_HANDLE devices_path, AMQP_TRANSPORT_CBS_CONNECTION* cbs_connection)
+AUTHENTICATION_STATE_HANDLE authentication_create(const AUTHENTICATION_CONFIG* config)
 ```
 
-**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_001: [**If parameter device_config or devices_path are NULL, authentication_create() shall fail and return NULL.**]**
+**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_001: [**If parameter config, config->device_id, config->iot_hub_host_fqdn or config->cbs_connection are NULL, authentication_create() shall fail and return NULL.**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_AUTH_09_002: [**authentication_create() shall allocate memory for a new authenticate state structure AUTHENTICATION_STATE.**]**
 
@@ -48,9 +47,9 @@ AUTHENTICATION_STATE_HANDLE authentication_create(const IOTHUB_DEVICE_CONFIG* de
 
 **SRS_IOTHUBTRANSPORTAMQP_AUTH_09_007: [**If STRING_construct() fails to copy `device_config->deviceId`, authentication_create() shall fail and return NULL**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_008: [**authentication_create() shall save a copy of `devices_path` into the AUTHENTICATION_STATE instance.**]**
+**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_008: [**authentication_create() shall save a copy of `iot_hub_host_fqdn` into the AUTHENTICATION_STATE instance.**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_009: [**If STRING_clone() fails to copy `devices_path`, authentication_create() shall fail and return NULL**]**
+**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_009: [**If STRING_clone() fails to copy `iot_hub_host_fqdn`, authentication_create() shall fail and return NULL**]**
 
 
 #### DEVICE_SAS_TOKEN authentication
@@ -104,13 +103,17 @@ int authentication_authenticate(AUTHENTICATION_STATE_HANDLE authentication_state
 
 **SRS_IOTHUBTRANSPORTAMQP_AUTH_09_024: [**If the credential type is DEVICE_KEY, authentication_authenticate() shall create a SAS token and put it to CBS**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_025: [**The SAS token shall be created using SASToken_Create(), passing the deviceKey, device_path, sasTokenKeyName and expiration time as arguments**]**
-
 **SRS_IOTHUBTRANSPORTAMQP_AUTH_09_026: [**The SAS token expiration time shall be calculated adding `sas_token_lifetime` to the current number of seconds since epoch time UTC**]**
+
+**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_076: [**A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iot_hub_host_fqdn + "/devices/" + device_id**]**
+
+**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_077: [**If `devices_path` failed to be created, authentication_authenticate() shall fail and return an error code**]**
+
+**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_025: [**The SAS token shall be created using SASToken_Create(), passing the deviceKey, device_path, sasTokenKeyName and expiration time as arguments**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_AUTH_09_027: [**If SASToken_Create() fails, authentication_authenticate() shall fail and return an error code**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_028: [**The SAS token shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as audience parameter**]**
+**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_028: [**The SAS token shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type and `devices_path` as audience**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_AUTH_09_029: [**If cbs_put_token() succeeds, authentication_authenticate() shall set the state status to AUTHENTICATION_STATUS_IN_PROGRESS**]**
 
@@ -127,7 +130,11 @@ int authentication_authenticate(AUTHENTICATION_STATE_HANDLE authentication_state
 
 **SRS_IOTHUBTRANSPORTAMQP_AUTH_09_034: [**If the credential type is DEVICE_SAS_TOKEN, authentication_authenticate() shall put the SAS token provided to CBS**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_035: [**The SAS token provided shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as audience parameter**]**
+**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_078: [**A STRING_HANDLE, referred to as `devices_path`, shall be created from the following parts: iot_hub_host_fqdn + "/devices/" + device_id**]**
+
+**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_079: [**If `devices_path` failed to be created, authentication_authenticate() shall fail and return an error code**]**
+
+**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_035: [**The SAS token provided shall be sent to CBS using cbs_put_token(), using `servicebus.windows.net:sastoken` as token type and `devices_path` as audience**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_AUTH_09_036: [**If cbs_put_token() fails, authentication_authenticate() shall fail and return an error code**]**
 
@@ -237,11 +244,11 @@ The following apply if the credential type is DEVICE_KEY or DEVICE_SAS_TOKEN:
 int authentication_destroy(AUTHENTICATION_STATE_HANDLE authentication_state)
 ```
 
-**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_068: [**If authentication_state is NULL, authentication_destroy() shall fail and return an error code**]**
+**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_068: [**If authentication_state is NULL, authentication_destroy() shall fail and return**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_AUTH_09_069: [**authentication_destroy() shall destroy the AUTHENTICATION_STATE->device_id using STRING_delete()**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_070: [**authentication_destroy() shall destroy the AUTHENTICATION_STATE->devices_path using STRING_delete()**]**
+**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_070: [**authentication_destroy() shall destroy the AUTHENTICATION_STATE->iot_hub_host_fqdn using STRING_delete()**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_AUTH_09_071: [**If the credential type is DEVICE_KEY, authentication_destroy() shall destroy `deviceKey` in AUTHENTICATION_STATE using STRING_delete()**]**
 
@@ -252,5 +259,3 @@ int authentication_destroy(AUTHENTICATION_STATE_HANDLE authentication_state)
 **SRS_IOTHUBTRANSPORTAMQP_AUTH_09_074: [**If the credential type is DEVICE_SAS_TOKEN, authentication_destroy() shall destroy `sasTokenKeyName` in AUTHENTICATION_STATE using STRING_delete()**]**
 
 **SRS_IOTHUBTRANSPORTAMQP_AUTH_09_075: [**authentication_destroy() shall free the AUTHENTICATION_STATE**]**
-
-**SRS_IOTHUBTRANSPORTAMQP_AUTH_09_076: [**If no errors occurr, authentication_destroy() shall return success code 0**]**

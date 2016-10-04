@@ -11,15 +11,42 @@
 #include <stdint.h>
 #include "azure_c_shared_utility/strings.h" 
 #include "azure_c_shared_utility/sastoken.h"
+#include "azure_c_shared_utility/xio.h"
 #include "azure_uamqp_c/cbs.h"
 #include "azure_uamqp_c/sasl_mechanism.h"
 #include "iothub_transport_ll.h" 
-#include "iothubtransportamqp_common.h"
 
 #ifdef __cplusplus 
 extern "C" 
 { 
 #endif 
+
+typedef struct AMQP_TRANSPORT_CBS_CONNECTION_TAG
+{
+	// How long a SAS token created by the transport is valid, in milliseconds.
+	size_t sas_token_lifetime;
+	// Maximum period of time for the transport to wait before refreshing the SAS token it created previously, in milliseconds.
+	size_t sas_token_refresh_time;
+	// Maximum time the transport waits for  uAMQP cbs_put_token() to complete before marking it a failure, in milliseconds.
+	size_t cbs_request_timeout;
+
+	// AMQP SASL I/O transport created on top of the TLS I/O layer.
+	XIO_HANDLE sasl_io;
+	// AMQP SASL I/O mechanism to be used.
+	SASL_MECHANISM_HANDLE sasl_mechanism;
+	// Connection instance with the Azure IoT CBS.
+	CBS_HANDLE cbs_handle;
+} AMQP_TRANSPORT_CBS_CONNECTION;
+
+typedef struct AUTHENTICATION_CONFIG_TAG
+{
+	const char* device_id;
+	const char* device_key;
+	const char* device_sas_token;
+	const char* iot_hub_host_fqdn;
+	const AMQP_TRANSPORT_CBS_CONNECTION* cbs_connection;
+
+} AUTHENTICATION_CONFIG;
 
 typedef enum AUTHENTICATION_STATUS_TAG 
 {
@@ -64,13 +91,14 @@ typedef struct AMQP_TRANSPORT_CREDENTIAL_TAG
 	AMQP_TRANSPORT_CREDENTIAL_DATA data; 
 } AMQP_TRANSPORT_CREDENTIAL; 
 
-typedef void* AUTHENTICATION_STATE_HANDLE;
+struct AUTHENTICATION_STATE;
+typedef struct AUTHENTICATION_STATE* AUTHENTICATION_STATE_HANDLE;
  
 /** @brief Creates a state holder for all authentication-related information and connections. 
 * 
 *   @returns an instance of the AUTHENTICATION_STATE_HANDLE if succeeds, NULL if any failure occurs. 
 */ 
-extern AUTHENTICATION_STATE_HANDLE authentication_create(const IOTHUB_DEVICE_CONFIG* device_config, STRING_HANDLE devices_path, AMQP_TRANSPORT_CBS_CONNECTION* cbs_connection);
+extern AUTHENTICATION_STATE_HANDLE authentication_create(const AUTHENTICATION_CONFIG* config);
  
 /** @brief Establishes the first authentication for the device in the transport it is registered to. 
 * 
@@ -115,9 +143,9 @@ extern int authentication_reset(AUTHENTICATION_STATE_HANDLE authentication_state
 * @details Closes the subscription to cbs if in use, destroys the cbs instance if it is the last device registered. 
 *            No action is taken if certificate-based authentication if used. 
 * 
-*   @returns 0 if it succeeds, non-zero if it fails. 
+*   @returns Nothing. 
 */ 
-extern int authentication_destroy(AUTHENTICATION_STATE_HANDLE authentication_state); 
+extern void authentication_destroy(AUTHENTICATION_STATE_HANDLE authentication_state); 
  
 #ifdef __cplusplus 
 } 

@@ -94,7 +94,6 @@ if(${use_amqp})
         
         set(iothub_client_amqp_transport_h_files
             ${iothub_client_ll_transport_h_files}
-			./inc/iothubtransportamqp_common.h
             ./inc/iothubtransportamqp_websockets.h
 			./inc/iothubtransportamqp_auth.h
 			./inc/uamqp_messaging.h
@@ -109,7 +108,6 @@ if(${use_amqp})
 
         set(iothub_client_amqp_transport_h_files
             ${iothub_client_ll_transport_h_files}
-			./inc/iothubtransportamqp_common.h
 			./inc/iothubtransportamqp.h
 			./inc/iothubtransportamqp_auth.h
             ./inc/uamqp_messaging.h
