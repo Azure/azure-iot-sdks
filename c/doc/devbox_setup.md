@@ -13,60 +13,20 @@ This document describes how to prepare your development environment to use the *
 - Install [Visual Studio 2015][visual-studio]. You can use the free Community Edition if you meet the licensing requirements.
 Be sure to include Visual C++ and NuGet Package Manager.
 - Install [git](http://www.git-scm.com) making sure git.exe can be run from a command line.
-
 - Clone the latest version of this repository to your local machine with the recursive parameter
 ```
-git clone --recursive https://github.com/Azure/azure-iot-sdks.git
+git clone --recursive https://github.com/Azure/azure-iot-sdks-preview.git
 ```
-Use the **master** branch to ensure you fetch the latest release version.
-
-### Preparing Azure Shared Utility
-
- 1. Cloning the repository will bring in the Azure-C-Shared-Utility dependency and give you the following directory structure: 
-
-	\| ...
-
-	\|\-\-\- azure-iot-sdk
-
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\\-\-\-\-\-\- c
-  
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|\-\-\-\-\-\- azure-c-shared-utility
-	
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|\-\-\-\-\-\- azure-uamqp-c
-	
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|\-\-\-\-\-\- azure-c-shared-utility
-	
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\\-\-\-\-\-\- libwebsockets
-	
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\\-\-\-\-\-\- azure-umqtt-c
-	
-	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\\\-\-\-\-\-\- azure-c-shared-utility
- 
- 2.  If you have a previous version of the repository you will need to run the following commands (under each submodule):
-```
-    git submodule init
-    git submodule update
-```   
+Use the **master** branch to ensure you fetch the latest release version, and use the **develop** branch if you want to fetch the latest and greatest code.
 
 ### Running the Windows sample applications
 
 You can now run the Windows sample applications included in the repository. All the samples use the NuGet package manager to download any required dependencies such as the **Microsoft.Azure.C.SharedUtility**, **Microsoft.Azure.IoTHubClient**, and **Microsoft.Azure.IoTHubSerializer** libraries.
 
-The following is a list of the Visual Studio solution files for the Windows samples in the repository:
+You will find the various samples in The following folders:
 
-- c\\iothub\_client\\samples\\iothub\_client\_sample\_amqp\\windows\\iothub\_client\_sample\_amqp.sln
-- c\\iothub\_client\\samples\\iothub\_client\_sample\_http\\windows\\iothub\_client\_sample\_http.sln
-
-- c\\serializer\\samples\\remote\_monitoring\\windows\\remote\_monitoring.sln
-
-- c\\serializer\\samples\\simplesample\_amqp\\windows\\simplesample\_amqp.sln
-
-- c\\serializer\\samples\\simplesample\_http\\windows\\simplesample\_http.sln
-
-- c\\serializer\\samples\\simplesample\_mqtt\\windows\\simplesample\_mqtt.sln
-
-- c\\serializer\\samples\\temp\_sensor\_anomaly\\windows\\temp\_sensor\_anomaly.sln
- 
+- c\\iothub\_client\\samples
+- c\\serializer\\samples
 
 ### Building the libraries in Windows
 
@@ -75,15 +35,10 @@ You do *not* need to build the libraries in order to run the sample applications
 The following instructions outline how you can build the libraries in Windows:
 
 1. Create the folder **C:\\OpenSSL** on your development machine in which to download OpenSSL.
-
-2. Install [cmake](http://www.cmake.org/) (make sure it is installed in your path, type "cmake -version" to verify).
-
-3. Ensure that the git.exe application is in your system path.
-
-4. Open a Developer Command Prompt for VS2015.
-
-5. Run the script **build_client.cmd** in the **c\\build_all\\windows** directory.
-
+1. Install [cmake](http://www.cmake.org/) (make sure it is installed in your path, type "cmake -version" to verify).
+1. Ensure that the git.exe application is in your system path.
+1. Open a Developer Command Prompt for VS2015.
+1. Run the script **build_client.cmd** in the **c\\build_all\\windows** directory.
 
 > Note: To enable support to AMQP over WebSockets, 
   1. Install [OpenSSL 1.0.1 (x86)](https://github.com/openssl/openssl) (tip: build the dll prior to running the following steps); 
@@ -102,9 +57,9 @@ This library requires **gcc** version 4.9. You can verify the current version in
 
 1. Clone the latest version of this repository to your Ubuntu machine with the recursive parameter
 ```
-git clone --recursive https://github.com/Azure/azure-iot-sdks.git
+git clone --recursive https://github.com/Azure/azure-iot-sdks-preview.git
 ```
-Use the **master** branch to ensure you fetch the latest release version.
+Use the **master** branch to ensure you fetch the latest release version. Use the **develop** branch to fetch the latest and greatest code.
 
 2. Open a shell and navigate to the folder **c/build_all/linux** in your local copy of the repository.
 
