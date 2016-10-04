@@ -23,6 +23,15 @@
 #define TEMP_ZIP_LOCATION "/root/nf.zip"
 #define NEW_FW_ARCHIVE "/root/newfirmware.zip"
 
+/* the following files will be placed by the 'installer'
+   o- /usr/share/iothub_client_sample_mqtt_dm/iothub_client_sample_mqtt_dm - this is the executable
+   o- /usr/share/iothub_client_sample_mqtt_dm/iothub_client_sample_mqtt_dm.service - this is the service controller
+   o- /usr/share/iothub_client_sample_mqtt_dm/.device_connection_string - file containing one line only, the device connection string
+   o- /lib/systemd/system/iothub_client_sample_mqtt_dm.service - symbolic link to /usr/share/iothub_client_sample_mqtt_dm/iothub_client_sample_mqtt_dm.service
+   o- /usr/share/iothub_client_sample_mqtt_dm/iothub_client_sample_mqtt_dm.service - symbolic link to /usr/share/iothub_client_sample_mqtt_dm/iothub_client_sample_mqtt_dm.service
+*/
+#define CONNECTION_STRING_FILE_NAME "/usr/share/iothub_client_sample_mqtt_dm/.device_connection_string"
+
 
 static int _system(const char *command)
 {
@@ -36,7 +45,7 @@ static int install_zip_package(void)
     int retValue = _system("/usr/bin/apt-get update");
     if (retValue != 0)
     {
-        LogError("failed to update the package cahce");
+        LogError("failed to update the package cache");
     }
     else
     {
@@ -130,33 +139,7 @@ static int prepare_to_flash(const char *fileName)
     return retValue;
 }
 
-//----------------------------------------------------------------------------------------------------------------------------
-char *device_get_firmware_version(void)
-{
-    char *retValue;
-    struct utsname data;
-    if (uname(&data) != 0)
-    {
-        LogError("failed to 'uname'");
-        retValue = NULL;
-    }
-    else
-    {
-        size_t size = strlen(data.release) + 1;
-        retValue = malloc(size * sizeof(char));
-        if (retValue == NULL)
-        {
-            LogError("failed to allocate string for firmware version");
-        }
-        else
-        {
-            memcpy(retValue, data.release, size);
-        }
-    }
-    return retValue;
-}
-
-char* device_read_string_from_file(const char *fileName)
+static char* read_string_from_file(const char *fileName)
 {
     char *retValue;
     FILE *fd = fopen(fileName, "rx");
@@ -197,6 +180,32 @@ char* device_read_string_from_file(const char *fileName)
         fclose(fd);
     }
     return retValue;
+}
+
+//----------------------------------------------------------------------------------------------------------------------------
+char *device_get_firmware_version(void)
+{
+    char *retValue;
+    struct utsname data;
+    if (uname(&data) != 0)
+    {
+        LogError("failed to 'uname'");
+        retValue = NULL;
+    }
+    else
+    {
+        if (mallocAndStrcpy_s(retValue, data.release) != 0)
+        {
+            LogError("failed to allocate string for firmware version");
+            retValue = NULL;
+        }
+    }
+    return retValue;
+}
+
+char* device_get_connection_string(void)
+{
+    return read_string_from_file(CONNECTION_STRING_FILE_NAME);
 }
 
 FIRMWARE_UPDATE_STATUS device_get_firmware_update_status(void)

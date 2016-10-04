@@ -36,12 +36,10 @@ DECLARE_MODEL(thingie_t,
 END_NAMESPACE(Contoso);
 
 
-#define CONNECTION_STRING_FILE_NAME ".device_connection_string"
-
 static int do_firmware_update(void *param)
 {
     int   retValue;
-    char *uri = (char *) param;
+    char *uri = param;
     
     LogInfo("do_firmware_update('%s')", uri);
     bool result = device_download_firmware(uri);
@@ -56,7 +54,7 @@ static int do_firmware_update(void *param)
         }
         else
         {
-            LogError("frimware update failed during apply");
+            LogError("fiRmware update failed during apply");
             retValue = -1;
         }
     }
@@ -82,6 +80,19 @@ static void DeviceTwinCallback(int status_code, void* userContextCallback)
 #define SERVER_SUCCESS 200
 
 
+/*
+    Description:
+        This function will be called by the framework when a method call is received from the service.
+
+    Parameters:
+        <param>method_name</param>, <param>response</param> and <param>resp_size</param> are guaranteed by the frmaework to be valid.
+        <param>payload</param> and <param>size</param> will be valid based on the method (given in method_name). If a method does not
+            require any parameters, payload and size maybe NULL and zero respectively.
+
+    Return:
+        an HTTP return code as appropriate.
+        contents of <param>response</param> and <param>resp_size</param> are application dependent and can be NULL and zero respectively.
+*/
 static int DeviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
 {
     (void)userContextCallback;
@@ -122,13 +133,16 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
 
                     THREAD_HANDLE thread_apply;
                     THREADAPI_RESULT t_result = ThreadAPI_Create(&thread_apply, do_firmware_update, uri);
-                    if ( t_result == THREADAPI_OK)
+                    if (t_result == THREADAPI_OK)
                     {
                         retValue = SERVER_SUCCESS;
+                        *response = NULL;
+                        resp_size = 0;
                     }
                     else
                     {
                         LogError("failed to start firmware update thread");
+                        free(uri);
                         retValue = SERVER_ERROR;
                     }
                 }
@@ -137,83 +151,10 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
     }
     else
     {
-        LogError("invalid method '%s'", ((method_name == NULL) ? "NULL" : method_name));
+        LogError("invalid method '%s'", method_name);
         retValue = NOT_VALID;
     }
  
-    *response = NULL;
-    resp_size = 0;
-
-    return retValue;
-}
-
-static bool initGlobalProperties(int argc, char *argv[], char **connectionString, bool *isService, bool *traceOn)
-{
-    bool retValue;
-    for (int ii = 1; ii < argc; ++ii)
-    {
-        if (0 == strcmp(argv[ii], "-console"))
-        {
-            *isService = false;
-        }
-        else if (0 == strcmp(argv[ii], "-cs"))
-        {
-            ++ii;
-            if (ii < argc)
-            {
-                size_t length = strlen(argv[ii]) + 1;
-                *connectionString = malloc(length);
-                if (*connectionString == NULL)
-                {
-                    LogError("failed to allocate memory for connection string");
-                    retValue = false;
-                }
-                else
-                {
-                    memcpy(*connectionString, argv[ii], length);
-                }
-            }
-        }
-        else if (0 == strcmp(argv[ii], "-logging"))
-        {
-            *traceOn = true;
-        }
-    }
-    if (*isService)
-    {
-        if (*connectionString != NULL)
-        {
-            LogError("running as a service may not specify the -cs argument");
-            free(*connectionString);
-            *connectionString = NULL;
-            retValue = false;
-        }
-        else
-        {
-            *connectionString = device_read_string_from_file(CONNECTION_STRING_FILE_NAME);
-            if (*connectionString == NULL)
-            {
-                LogError("failed to fetch the connection string for the service");
-                retValue = false;
-            }
-            else
-            {
-                retValue = true;
-            }
-        }
-    }
-    else
-    {
-        if (*connectionString == NULL)
-        {
-            LogError("missing parameter connection string");
-            retValue = false;
-        }
-        else
-        {
-            retValue = true;
-        }
-    }
     return retValue;
 }
 
@@ -263,7 +204,7 @@ static bool send_reported(thingie_t *iot_device, IOTHUB_CLIENT_HANDLE iotHubClie
     return retValue;
 }
 
-static int iothub_client_sample_mqtt_dm_run(const char *connectionString, bool asService, bool traceOn)
+static int iothub_client_sample_mqtt_dm_run(const char *connectionString, bool traceOn)
 {
     LogInfo("Initialize Platform");
 
@@ -292,12 +233,6 @@ static int iothub_client_sample_mqtt_dm_run(const char *connectionString, bool a
 
             else
             {
-                if (asService && (device_run_service() == false))
-                {
-                    LogError("Failed to run as a service.");
-                    exitCode = -4;
-                }
-                else
                 {
                     LogInfo("Initialize From Connection String.");
                     IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, MQTT_Protocol);
@@ -309,18 +244,15 @@ static int iothub_client_sample_mqtt_dm_run(const char *connectionString, bool a
                     else
                     {
                         LogInfo("Device successfully connected.");
-                        if (!asService)
+                        if (IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &traceOn) != IOTHUB_CLIENT_OK)
                         {
-                            if (IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &traceOn) != IOTHUB_CLIENT_OK)
-                            {
-                                LogError("failed to set logtrace option");
-                            }
+                            LogError("failed to set logtrace option");
                         }
 
                         if (IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle, DeviceMethodCallback, iot_device) != IOTHUB_CLIENT_OK)
                         {
                             LogError("failed to associate a callback for device methods");
-                            exitCode = -14;
+                            exitCode = -6;
                         }
                         else
                         {
@@ -350,17 +282,67 @@ static int iothub_client_sample_mqtt_dm_run(const char *connectionString, bool a
 int main(int argc, char *argv[])
 {
     int   exitCode;
-    bool  isService = false;
+    bool  isService = true;
     bool  traceOn = false;
     char *connectionString;
-    if (initGlobalProperties(argc, argv, &connectionString, &isService, &traceOn))
+
+    exitCode = 0;
+    for (int ii = 1; ii < argc; ++ii)
     {
-        exitCode = iothub_client_sample_mqtt_dm_run(connectionString, isService, traceOn);
-        free(connectionString);
+        if (0 == strcmp(argv[ii], "-console"))
+        {
+            isService = false;
+        }
+        else if (0 == strcmp(argv[ii], "-cs"))
+        {
+            ++ii;
+            if (ii < argc)
+            {
+                if (mallocAndStrcpy_s(connectionString, argv[ii]) != 0)
+                {
+                    LogError("failed to allocate memory for connection string");
+                    exitCode = -12;
+                }
+            }
+        }
+        else if (0 == strcmp(argv[ii], "-logging"))
+        {
+            traceOn = true;
+        }
     }
-    else
+
+    if (exitCode == 0)
     {
-        exitCode = -12;
+        if (connectionString == NULL)
+        {
+            connectionString = device_get_connection_string();
+        }
+
+        if (connectionString == NULL)
+        {
+            LogError("connection string is NULL");
+            exitCode = -14;
+        }
+        else
+        {
+            exitCode = 0;
+            if (isService)
+            {
+                traceOn = false;
+                if (device_run_service() == false)
+                {
+                    LogError("Failed to run as a service.");
+                    exitCode = -4;
+                }
+            }
+
+            if (exitCode == 0)
+            {
+                exitCode = iothub_client_sample_mqtt_dm_run(connectionString, traceOn);
+            }
+
+            free(connectionString);
+        }
     }
 
     LogInfo("Exit Code: %d", exitCode);
