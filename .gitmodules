@@ -1,12 +1,12 @@
 [submodule "c/azure-c-shared-utility"]
-	path = c/azure-c-shared-utility
+	path = c/c-utility
 	url = https://github.com/Azure/azure-c-shared-utility.git
 [submodule "c/azure-umqtt-c"]
-	path = c/azure-umqtt-c
+	path = c/umqtt
 	url = https://github.com/Azure/azure-umqtt-c.git
 	branch = develop
 [submodule "c/azure-uamqp-c"]
-	path = c/azure-uamqp-c
+	path = c/uamqp
 	url = https://github.com/Azure/azure-uamqp-c.git
 	branch = master
 [submodule "c/parson"]

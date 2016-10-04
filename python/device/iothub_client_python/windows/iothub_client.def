@@ -45,7 +45,7 @@ EXPORTS
     AMQP_Protocol
 ;   iothubtransportmqtt.h
     MQTT_Protocol
-;   map.h (azure-c-shared-utility)
+;   map.h (c-utility)
     Map_Create
     Map_Destroy
     Map_Clone
