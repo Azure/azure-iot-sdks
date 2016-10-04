@@ -14,8 +14,9 @@
 #include <sys/wait.h>
 #include <sys/utsname.h>
 
-#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/threadapi.h"
 
 #include "iothub_client_sample_mqtt_dm.h"
 
@@ -194,7 +195,7 @@ char *device_get_firmware_version(void)
     }
     else
     {
-        if (mallocAndStrcpy_s(retValue, data.release) != 0)
+        if (mallocAndStrcpy_s(&retValue, data.release) != 0)
         {
             LogError("failed to allocate string for firmware version");
             retValue = NULL;

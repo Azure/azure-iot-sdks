@@ -9,8 +9,9 @@
 #include "serializer.h"
 #include "iothub_client.h"
 
-#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/threadapi.h"
 
 #include "iothubtransportmqtt.h"
 
@@ -80,9 +81,24 @@ static void DeviceTwinCallback(int status_code, void* userContextCallback)
 #define SERVER_SUCCESS 200
 
 
-/*
+/**
+ * @brief     This function will be called by the framework when a method call is received from the service.
+ *
+ *
+ * @param
+ * @param
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ * @return
+ *
+
     Description:
-        This function will be called by the framework when a method call is received from the service.
+            
 
     Parameters:
         <param>method_name</param>, <param>response</param> and <param>resp_size</param> are guaranteed by the frmaework to be valid.
@@ -137,7 +153,7 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
                     {
                         retValue = SERVER_SUCCESS;
                         *response = NULL;
-                        resp_size = 0;
+                        *resp_size = 0;
                     }
                     else
                     {
@@ -298,7 +314,7 @@ int main(int argc, char *argv[])
             ++ii;
             if (ii < argc)
             {
-                if (mallocAndStrcpy_s(connectionString, argv[ii]) != 0)
+                if (mallocAndStrcpy_s(&connectionString, argv[ii]) != 0)
                 {
                     LogError("failed to allocate memory for connection string");
                     exitCode = -12;
