@@ -551,7 +551,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
             ASSERT_IS_NOT_NULL(devModel);
 
             devModel->property1 = sztimeText;
-            devModel->UniqueId = g_uniqueTestId;
+            devModel->UniqueId = (int)g_uniqueTestId;
             unsigned char* destination;
             size_t destinationSize;
             IOT_AGENT_RESULT nResult = SERIALIZE(&destination, &destinationSize, *devModel);
@@ -735,7 +735,7 @@ BEGIN_TEST_SUITE(serializer_e2e)
             ASSERT_IS_NOT_NULL(devModel);
 
             devModel->property1 = sztimeText;
-            devModel->UniqueId = g_uniqueTestId;
+            devModel->UniqueId = (int)g_uniqueTestId;
             unsigned char* destination;
             size_t destinationSize;
             IOT_AGENT_RESULT nResult = SERIALIZE(&destination, &destinationSize, *devModel);
