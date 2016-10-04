@@ -13,6 +13,7 @@ rem // resolve to fully qualified path
 for %%i in ("%build_root%") do set build_root=%%~fi
 
 set work_root=%build_root%\arduino_cc_Work
+set test_root=%build_root%\arduino_cc_Work
 set compiler_path=%build_root%\%IOTHUB_ARDUINO_VERSION%
 
 set compiler_hardware_path=%compiler_path%\hardware
@@ -30,11 +31,13 @@ rem ----------------------------------------------------------------------------
 set build_clean=OFF
 set build_test=OFF
 set run_test=OFF
+set clone_test=ON
 
 :args_loop
 if "%1" equ "" goto args_done
 if "%1" equ "-c" goto arg_build_clean
 if "%1" equ "--clean" goto arg_build_clean
+if "%1" equ "--root" goto arg_test_root
 if "%1" equ "-b" goto arg_build_only
 if "%1" equ "--build-only" goto arg_build_only
 if "%1" equ "-r" goto arg_run_e2e_tests
@@ -43,6 +46,12 @@ call :usage && exit /b 1
 
 :arg_build_clean
 set build_clean=ON
+goto args_continue
+
+:arg_test_root
+set clone_test=OFF
+set test_root=%2
+shift
 goto args_continue
 
 :arg_build_only
@@ -59,6 +68,31 @@ shift
 goto args_loop
 
 :args_done
+
+echo.
+echo Start compilation for Arduino with the follow parameters:
+echo.
+echo   build_clean = %build_clean%
+echo   build_test  = %build_test%
+echo   run_test    = %run_test%
+echo   clone_test  = %clone_test%
+echo.
+echo   current_path = %current_path%
+echo   build_root   = %build_root%
+echo   work_root    = %work_root%
+echo   test_root    = %test_root%
+echo.
+echo   compiler_path                 = %compiler_path%
+echo   compiler_hardware_path        = %compiler_hardware_path%
+echo   compiler_tools_builder_path   = %compiler_tools_builder_path%
+echo   compiler_tools_processor_path = %compiler_tools_processor_path%
+echo   compiler_libraries_path       = %compiler_libraries_path%
+echo.
+echo   user_hardware_path  = %user_hardware_path%
+echo   user_libraries_path = %user_libraries_path%
+echo   user_packages_path  = %user_packages_path%
+echo.
+echo.
 
 rem -----------------------------------------------------------------------------
 rem -- clean solutions
@@ -81,10 +115,12 @@ mkdir %work_root%
 rem -----------------------------------------------------------------------------
 rem -- download arduino samples
 rem -----------------------------------------------------------------------------
-pushd %work_root%
-git clone https://github.com/Azure-Samples/iot-hub-c-huzzah-getstartedkit
-git clone https://github.com/Azure-Samples/iot-hub-c-m0wifi-getstartedkit
-popd
+if %clone_test%==ON (
+    pushd %work_root%
+    git clone https://github.com/Azure-Samples/iot-hub-c-huzzah-getstartedkit
+    git clone https://github.com/Azure-Samples/iot-hub-c-m0wifi-getstartedkit
+    popd
+)
 
 rem -----------------------------------------------------------------------------
 rem -- download arduino libraries
@@ -124,18 +160,6 @@ if %build_test%==ON (
     call :BuildAllTests
 )
 
-rem -----------------------------------------------------------------------------
-rem -- upload and execute solution
-rem -----------------------------------------------------------------------------
-
-rem Step 3, upload to the test tool (not implemented):
-rem Ex: C:\Users\iottestuser\AppData\Local\Arduino15\packages\esp8266\tools\esptool\0.4.8/esptool.exe -vv -cd nodemcu -cb 115200 -cp COM4 -ca 0x00000 -cf C:\Users\iottestuser\AppData\Local\Temp\build505ec6e3f4000475ae6da076f93e5ffe.tmp/remote_monitoring.ino.bin
-rem
-rem Step 4, execute the test invoking features in the test tool (not defined and implemented):
-
-rem if %run_test%==ON (
-rem )
-
 popd
 
 echo.
@@ -167,6 +191,7 @@ echo options:
 echo  -c, --clean           delete artifacts from previous build before building
 echo  -b, --build-only      only build the project
 echo  -r, --run-test        run end-to-end test
+echo  --root <test_path>    determine the root of the test tree
 goto :eof
 
 
@@ -269,7 +294,7 @@ rem                     "F:\Azure\IoT\SDKs\iot-hub-c-huzzah-getstartedkit-master
     set hardware_parameters=-hardware "%compiler_hardware_path%" -hardware "%user_hardware_path%" -hardware "%user_packages_path%" -hardware "%user_libraries_path%"
     set tools_parameters=-tools "%compiler_tools_builder_path%" -tools "%compiler_tools_processor_path%" -tools "%user_packages_path%"
     set libraries_parameters=-built-in-libraries "%compiler_libraries_path%" -libraries "%user_libraries_path%"
-    set parameters=-logger=machine !hardware_parameters! !tools_parameters! !libraries_parameters! !CPUParameters! -build-path "%build_root%!RelativeWorkingDir!" -warnings=none -prefs=build.warn_data_percentage=75 -verbose %build_root%!RelativePath!
+    set parameters=-logger=machine !hardware_parameters! !tools_parameters! !libraries_parameters! !CPUParameters! -build-path "%build_root%!RelativeWorkingDir!" -warnings=none -prefs=build.warn_data_percentage=75 -verbose %test_root%!RelativePath!
 
     echo Dump Arduino preferences:
     echo  !compiler_name! -dump-prefs !parameters!
