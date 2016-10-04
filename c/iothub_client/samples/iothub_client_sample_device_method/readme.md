@@ -1,21 +1,13 @@
----
-platform: windows
-device: desktop
-language: c
----
+# Run a simple device Methods C sample on Windows
 
-Run a simple device Methods C sample on Windows
-===
----
-
-# Table of Contents
+## Table of Contents
 
 -   [Introduction](#Introduction)
 -   [Step 1: Prerequisites](#Step-1-Prerequisites)
 -   [Step 2: Build and Run the Sample](#Step-2-Build)
 
 <a name="Introduction"></a>
-# Introduction
+## Introduction
 
 **About this document**
 
@@ -25,7 +17,7 @@ This document describes how to build and run sample applications on the Windows 
 -   Build and deploy Azure IoT SDK on device
 
 <a name="Step-1-Prerequisites"></a>
-# Step 1: Prerequisites
+## Step 1: Prerequisites
 
 You should have the following items ready before beginning the process:
 
@@ -34,7 +26,7 @@ You should have the following items ready before beginning the process:
 -   [Provision your device and get its credentials][lnk-manage-iot-hub]
 
 <a name="Step-2-Build"></a>
-# Step 2: Build and Run the sample
+## Step 2: Build and Run the sample
 
 1.  Start a new instance of Visual Studio 2015. Open the **azure_iot_sdks.sln** solution in the **cmake_win32** folder in your home directory (usually C:\\\\users\\username\\).
 
@@ -62,4 +54,4 @@ You should have the following items ready before beginning the process:
 
 [lnk-setup-iot-hub]: ../../../doc/setup_iothub.md
 [lnk-manage-iot-hub]: ../../../doc/manage_iot_hub.md
-[devbox-setup]: ./devbox_setup.md
+[devbox-setup]: ../../../doc/devbox_setup.md
