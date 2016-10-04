@@ -10,7 +10,9 @@
     "amqp10": "^3.2.1",
     "amqp10-transport-ws": "^0.0.5",
     "azure-iot-common": "1.0.15",
-    "debug": "^2.2.0"
+    "debug": "^2.2.0",
+    "sinon": "^1.17.6",
+    "sinon-as-promised": "^4.0.2"
   },
   "devDependencies": {
     "chai": "^3.5.0",
@@ -28,7 +30,7 @@
     "alltest": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter spec test/_*_test*.js",
     "ci": "npm -s run lint && npm -s run alltest-min && npm -s run check-cover",
     "test": "npm -s run lint && npm -s run unittest",
-    "check-cover": "istanbul check-coverage --statements 63 --branches 47 --functions 37 --lines 64"
+    "check-cover": "istanbul check-coverage --statements 90 --branches 66 --functions 85 --lines 90"
   },
   "engines": {
     "node": ">= 0.10"

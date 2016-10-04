@@ -103,5 +103,7 @@
     <Compile Include="$(DeviceClientDir)\Transport\HttpTransportHandler.cs"> <Link>HttpTransportHandler.cs</Link> </Compile>
     <Compile Include="$(DeviceClientDir)\Transport\IHttpClientHelper.cs"> <Link>IHttpClientHelper.cs</Link> </Compile>
     <Compile Include="$(DeviceClientDir)\Transport\TransportHandlerBase.cs"> <Link>TransportHandlerBase.cs</Link> </Compile>
+    <Compile Include="$(DeviceClientDir)\TransportType.cs"> <Link>TransportType.cs</Link> </Compile>
+    <Compile Include="$(DeviceClientDir)\RetryStrategyType.cs"> <Link>RetryStrategyType.cs</Link> </Compile>
   </ItemGroup>
 </Project>
