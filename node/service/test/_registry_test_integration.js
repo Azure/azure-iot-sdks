@@ -3,6 +3,7 @@
 
 'use strict';
 
+var uuid = require('uuid');
 var ConnectionString = require('../lib/connection_string.js');
 var runTests = require('./_registry_common_testrun.js');
 
@@ -14,9 +15,9 @@ var connectionString = process.env.IOTHUB_CONNECTION_STRING;
 var cn = ConnectionString.parse(connectionString);
 
 var badConnStrings = [
-  makeConnectionString('bad', cn.SharedAccessKeyName, cn.SharedAccessKey),
-  makeConnectionString(cn.HostName, 'bad', cn.SharedAccessKey),
-  makeConnectionString(cn.HostName, cn.SharedAccessKeyName, 'bad'),
+  makeConnectionString('bad-' + uuid.v4(), cn.SharedAccessKeyName, cn.SharedAccessKey),
+  makeConnectionString(cn.HostName, 'bad' + uuid.v4(), cn.SharedAccessKey),
+  makeConnectionString(cn.HostName, cn.SharedAccessKeyName, 'bad' + uuid.v4()),
 ];
 
 describe('Over real HTTPS', function () {
