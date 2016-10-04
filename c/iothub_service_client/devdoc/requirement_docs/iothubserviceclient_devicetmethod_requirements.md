@@ -63,7 +63,7 @@ void IoTHubDeviceMethod_Destroy(IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE servi
 ```c
 extern IOTHUB_DEVICE_METHOD_RESULT IoTHubDeviceMethod_Invoke(IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE serviceClientDeviceMethodHandle, const char* deviceId, const char* methodName, const char* methodPayload, unsigned int timeout, int* responseStatus, unsigned char** responsePayload, size_t* responsePayloadSize)
 ```
-**SRS_IOTHUBDEVICEMETHOD_12_031: [** `IoTHubDeviceMethod_Invoke` shall verify the input parameters and if any of them are `NULL` then return `IOTHUB_DEVICE_METHOD_INVALID_ARG` **]**
+**SRS_IOTHUBDEVICEMETHOD_12_031: [** `IoTHubDeviceMethod_Invoke` shall verify the input parameters and if any of them (except the timeout) are `NULL` then return `IOTHUB_DEVICE_METHOD_INVALID_ARG` **]**
 
 **SRS_IOTHUBDEVICEMETHOD_12_032: [** `IoTHubDeviceMethod_Invoke` shall create a BUFFER_HANDLE from `methodName`, `timeout` and `methodPayload` by calling `BUFFER_create` **]**
 
@@ -83,11 +83,11 @@ extern IOTHUB_DEVICE_METHOD_RESULT IoTHubDeviceMethod_Invoke(IOTHUB_SERVICE_CLIE
 
 **SRS_IOTHUBDEVICEMETHOD_12_043: [** `IoTHubDeviceMethod_Invoke` shall execute the HTTP POST request by calling `HTTPAPIEX_ExecuteRequest` **]**
 
-**SRS_IOTHUBDEVICEMETHOD_12_044: [** If any of the call fails during the HTTP creation `IoTHubDeviceMethod_Invoke` shall fail and return `IOTHUB_DEVICE_METHOD_HTTPAPI_ERROR` **]**
+**SRS_IOTHUBDEVICEMETHOD_12_044: [** If any of the call fails during the HTTP creation `IoTHubDeviceMethod_Invoke` shall fail and return `IOTHUB_DEVICE_METHOD_ERROR` **]**
 
-**SRS_IOTHUBDEVICEMETHOD_12_045: [** If any of the HTTPAPI call fails `IoTHubDeviceMethod_Invoke` shall fail and return `IOTHUB_DEVICE_METHOD_HTTPAPI_ERROR` **]**
+**SRS_IOTHUBDEVICEMETHOD_12_045: [** If any of the HTTPAPI call fails `IoTHubDeviceMethod_Invoke` shall fail and return `IOTHUB_DEVICE_METHOD_ERROR` **]**
 
-**SRS_IOTHUBDEVICEMETHOD_12_046: [** `IoTHubDeviceMethod_Invoke` shall verify the received HTTP status code and if it is not equal to 200 then return `NULL` **]**
+**SRS_IOTHUBDEVICEMETHOD_12_046: [** `IoTHubDeviceMethod_Invoke` shall verify the received HTTP status code and if it is not equal to 200 then return `IOTHUB_DEVICE_METHOD_ERROR` **]**
 
 **SRS_IOTHUBDEVICEMETHOD_12_047: [** If parsing the response fails `IoTHubDeviceMethod_Invoke` shall return `IOTHUB_DEVICE_METHOD_ERROR` **]**
 
