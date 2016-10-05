@@ -25,12 +25,6 @@ echo -- Creating links for %cd% --
 call npm link azure-iot-common
 call npm link
 
-cd %node-root%\common\transport\mqtt
-echo.
-echo -- Creating links for %cd% --
-call npm link azure-iot-common
-call npm link
-
 cd %node-root%\device\core
 echo.
 echo -- Creating links for %cd% --
@@ -66,7 +60,6 @@ call npm link
 cd %node-root%\device\transport\mqtt
 echo.
 echo -- Creating links for %cd% --
-call npm link azure-iot-mqtt-base
 call npm link azure-iot-device
 call npm link
 

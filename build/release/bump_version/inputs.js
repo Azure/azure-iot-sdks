@@ -1193,22 +1193,6 @@ module.exports = [
         ]
     },
     {
-        "taskType": "multiTask",
-        "filePath": "node/common/transport/mqtt/package.json",
-        "search": [
-            {
-                "taskType": "jsonReplaceTask",
-                "search": "version",
-                "replaceString": "node.mqtt-base"
-            },
-            {
-                "taskType": "jsonReplaceTask",
-                "search": "dependencies.azure-iot-common",
-                "replaceString": "node.common"
-            }
-        ]
-    },
-    {
         "taskType": "regexReplaceTask",
         "filePath": "node/device/readme.md",
         "search": "(http\\:\\/\\/azure.github.io\\/azure-iot-sdks\\/node\\/api_reference\\/azure-iot-device\\/).*(\\/index.html)",
@@ -1359,11 +1343,6 @@ module.exports = [
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-common",
                 "replaceString": "node.common"
-            },
-            {
-                "taskType": "jsonReplaceTask",
-                "search": "dependencies.azure-iot-mqtt-base",
-                "replaceString": "node.mqtt-base"
             },
             {
                 "taskType": "jsonReplaceTask",

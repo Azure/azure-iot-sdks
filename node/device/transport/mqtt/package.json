@@ -9,7 +9,8 @@
   "dependencies": {
     "azure-iot-common": "1.0.15",
     "azure-iot-device": "1.0.15",
-    "azure-iot-mqtt-base": "1.0.15"
+    "debug": "^2.2.0",
+    "mqtt": "^1.14.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",
@@ -28,7 +29,7 @@
     "alltest": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter spec test/_*_test*.js",
     "ci": "npm -s run lint && npm -s run alltest-min && npm -s run check-cover",
     "test": "npm -s run lint && npm -s run unittest",
-    "check-cover": "istanbul check-coverage --statements 54 --branches 40 --functions 14 --lines 55"
+    "check-cover": "istanbul check-coverage --statements 79 --branches 72 --functions 48 --lines 81"
   },
   "engines": {
     "node": ">= 0.10"

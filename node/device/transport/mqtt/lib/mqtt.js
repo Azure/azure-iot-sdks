@@ -3,7 +3,7 @@
 
 'use strict';
 
-var Base = require('azure-iot-mqtt-base').Mqtt;
+var Base = require('./mqtt_base.js');
 var results = require('azure-iot-common').results;
 var errors = require('azure-iot-common').errors;
 var EventEmitter = require('events').EventEmitter;
