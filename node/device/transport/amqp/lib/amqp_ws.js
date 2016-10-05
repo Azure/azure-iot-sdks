@@ -4,8 +4,7 @@
 'use strict';
 
 var util = require('util');
-// var Base = require('azure-iot-amqp-base').Amqp;
-var Amqp = require('azure-iot-device-amqp').Amqp;
+var Amqp = require('./amqp.js');
 var errors = require('azure-iot-common').errors;
 var translateCommonError = require('azure-iot-amqp-base').translateError;
 
@@ -36,7 +35,7 @@ var handleResult = function (errorMessage, done) {
 };
 
 /**
- * @class module:azure-iot-device-amqp-ws.AmqpWs
+ * @class module:azure-iot-device-amqp.AmqpWs
  * @classdesc Constructs an {@linkcode AmqpWs} object that can be used on a device to send
  *            and receive messages to and from an IoT Hub instance, using the AMQP protocol over secure websockets.
  *            This class overloads the constructor of the base {@link module:azure-iot-device-amqp:Amqp} class from the AMQP transport, and inherits all methods from it.

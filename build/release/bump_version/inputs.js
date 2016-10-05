@@ -1275,37 +1275,6 @@ module.exports = [
     },
     {
         "taskType": "multiTask",
-        "filePath": "node/device/transport/amqp-ws/package.json",
-        "search": [
-            {
-                "taskType": "jsonReplaceTask",
-                "search": "version",
-                "replaceString": "node.device-amqp-ws"
-            },
-            {
-                "taskType": "jsonReplaceTask",
-                "search": "dependencies.azure-iot-amqp-base",
-                "replaceString": "node.amqp-base"
-            },
-            {
-                "taskType": "jsonReplaceTask",
-                "search": "dependencies.azure-iot-device",
-                "replaceString": "node.device"
-            },
-            {
-                "taskType": "jsonReplaceTask",
-                "search": "dependencies.azure-iot-device-amqp",
-                "replaceString": "node.device-amqp"
-            },
-            {
-                "taskType": "jsonReplaceTask",
-                "search": "dependencies.azure-iot-common",
-                "replaceString": "node.common"
-            }
-        ]
-    },
-    {
-        "taskType": "multiTask",
         "filePath": "node/device/transport/http/package.json",
         "search": [
             {
@@ -1372,11 +1341,6 @@ module.exports = [
             },
             {
                 "taskType": "jsonReplaceTask",
-                "search": "dependencies.azure-iot-device-amqp-ws",
-                "replaceString": "node.device-amqp-ws"
-            },
-            {
-                "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-device-http",
                 "replaceString": "node.device-http"
             },
@@ -1410,11 +1374,6 @@ module.exports = [
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-device-amqp",
                 "replaceString": "node.device-amqp"
-            },
-            {
-                "taskType": "jsonReplaceTask",
-                "search": "dependencies.azure-iot-device-amqp-ws",
-                "replaceString": "node.device-amqp-ws"
             },
             {
                 "taskType": "jsonReplaceTask",
@@ -1514,11 +1473,6 @@ module.exports = [
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-device-amqp",
                 "replaceString": "node.device-amqp"
-            },
-            {
-                "taskType": "jsonReplaceTask",
-                "search": "dependencies.azure-iot-device-amqp-ws",
-                "replaceString": "node.device-amqp-ws"
             },
             {
                 "taskType": "jsonReplaceTask",

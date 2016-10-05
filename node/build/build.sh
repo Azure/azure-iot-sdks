@@ -107,9 +107,6 @@ lint_and_test $node_root/device/core
 lint_and_test $node_root/device/transport/amqp
 [ $? -eq 0 ] || cleanup_and_exit $?
 
-lint_and_test $node_root/device/transport/amqp-ws
-[ $? -eq 0 ] || cleanup_and_exit $?
-
 lint_and_test $node_root/device/transport/http
 [ $? -eq 0 ] || cleanup_and_exit $?
 

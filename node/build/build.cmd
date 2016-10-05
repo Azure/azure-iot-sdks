@@ -87,9 +87,6 @@ if errorlevel 1 goto :cleanup
 call :lint-and-test %node-root%\device\transport\amqp
 if errorlevel 1 goto :cleanup
 
-call :lint-and-test %node-root%\device\transport\amqp-ws
-if errorlevel 1 goto :cleanup
-
 call :lint-and-test %node-root%\device\transport\http
 if errorlevel 1 goto :cleanup
 

@@ -37,15 +37,6 @@ npm link azure-iot-device
 npm link
 [ $? -eq 0 ] || exit $?
 
-cd $node_root/device/transport/amqp-ws
-echo "\n-- Creating links for `pwd` --"
-npm link azure-iot-amqp-base
-npm link azure-iot-common
-npm link azure-iot-device
-npm link azure-iot-device-amqp
-npm link
-[ $? -eq 0 ] || exit $?
-
 cd $node_root/device/transport/http
 echo "\n-- Creating links for `pwd` --"
 npm link azure-iot-http-base
@@ -73,7 +64,6 @@ echo "\n-- Creating links for `pwd` --"
 npm link azure-iot-common
 npm link azure-iot-device
 npm link azure-iot-device-amqp
-npm link azure-iot-device-amqp-ws
 npm link azure-iot-device-http
 npm link azure-iot-device-mqtt
 npm link azure-iothub

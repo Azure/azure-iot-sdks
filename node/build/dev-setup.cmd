@@ -40,15 +40,6 @@ call npm link azure-iot-common
 call npm link azure-iot-device
 call npm link
 
-cd %node-root%\device\transport\amqp-ws
-echo.
-echo -- Creating links for %cd% --
-call npm link azure-iot-amqp-base
-call npm link azure-iot-common
-call npm link azure-iot-device
-call npm link azure-iot-device-amqp
-call npm link
-
 cd %node-root%\device\transport\http
 echo.
 echo -- Creating links for %cd% --
@@ -77,7 +68,6 @@ echo -- Creating links for %cd% --
 call npm link azure-iot-common
 call npm link azure-iot-device
 call npm link azure-iot-device-amqp
-call npm link azure-iot-device-amqp-ws
 call npm link azure-iot-device-http
 call npm link azure-iot-device-mqtt
 call npm link azure-iothub

@@ -23,7 +23,6 @@
         "http-base": "1.0.16",
         "device": "1.0.15",
         "device-amqp": "1.0.15",
-        "device-amqp-ws": "1.0.16",
         "device-http": "1.0.16",
         "device-mqtt": "1.0.15",
         "service": "1.0.17",
