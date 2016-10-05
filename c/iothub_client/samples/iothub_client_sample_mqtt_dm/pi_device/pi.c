@@ -68,7 +68,8 @@ static int prepare_to_flash(const char *fileName)
     }
     else
     {
-        if (_system("mkdir /update") != 0)
+        retValue = _system("mkdir /update");
+        if (retValue != 0)
         {
             LogError("failed to create the update directory");
         }
@@ -100,6 +101,7 @@ static int prepare_to_flash(const char *fileName)
                         if (buffer == NULL)
                         {
                             LogError("failed to allocate memory for system command");
+                            retValue = -1;
                         }
                         else
                         {
