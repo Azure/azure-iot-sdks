@@ -1,4 +1,4 @@
-﻿# Cross Compiling the Azure IoT Hub SDK
+# Cross Compiling the Azure IoT Hub SDK
 ## Background
 
 The SDK for the Azure IoT Hub was written to use the C99 standard in order to retain a high level of compatibility with hardware platforms that have not yet seen an official release of the SDK. This should ease the burden of porting the SDK code to those platforms.
@@ -7,9 +7,9 @@ One of the challenges that might be encountered though is that the platform in q
 
 ## Purpose of this document
 
-This document presents an example of how to cross compile the Azure IoT Hub SDK using the make system, [cmake](https://cmake.org), that is employed by the project. In this example it will demonstrate the process of cross compiling the SDK on a Debian 64-bit system targeting a Raspberry Pi. It demonstrates how one must set up the file system and the cmake options to achieve this which should assist developers attempting to cross compile for other targets.
+This document presents two examples of how to cross compile the Azure IoT Hub SDK using the make system, [cmake](https://cmake.org), that is employed by the project. The first example it will demonstrate the process of cross compiling the SDK on a Debian 64-bit system targeting a Raspberry Pi. It demonstrates how one must set up the file system and the cmake options to achieve this which should assist developers attempting to cross compile for other targets. The second example it concerns the cross compiling with the Android target architecture.
 
-## Procedure
+## Procedure to target Raspberry Pi
 
 ### Version Information
 
@@ -109,6 +109,9 @@ These instructions have been tested on both the Raspberry Pi 2 and 3.
 ### Known Issues and Circumventions
 
 If you encounter the error _error adding symbols: DSO missing from command line_ try adding a reference to libdl with  _-cl -ldl_ added to your build script command line.
+
+## Procedure to target Android
+
 
 ## Summary
 
