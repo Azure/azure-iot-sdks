@@ -14,14 +14,24 @@
 #include <sys/wait.h>
 #include <sys/utsname.h>
 
-#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/threadapi.h"
 
 #include "iothub_client_sample_mqtt_dm.h"
 
 
-#define TEMP_ZIP_LOCATION "/root/nf.zip"
 #define NEW_FW_ARCHIVE "/root/newfirmware.zip"
+
+
+/* the following files will be placed by the 'installer'
+   o- /usr/share/iothub_client_sample_mqtt_dm/iothub_client_sample_mqtt_dm - this is the executable
+   o- /usr/share/iothub_client_sample_mqtt_dm/iothub_client_sample_mqtt_dm.service - this is the service controller
+   o- /usr/share/iothub_client_sample_mqtt_dm/.device_connection_string - file containing one line only, the device connection string
+   o- /lib/systemd/system/iothub_client_sample_mqtt_dm.service - symbolic link to /usr/share/iothub_client_sample_mqtt_dm/iothub_client_sample_mqtt_dm.service
+   o- /etc/systemd/system/multi-user.target.wants/iothub_client_sample_mqtt_dm.service - symbolic link to /usr/share/iothub_client_sample_mqtt_dm/iothub_client_sample_mqtt_dm.service
+*/
+#define CONNECTION_STRING_FILE_NAME "/usr/share/iothub_client_sample_mqtt_dm/.device_connection_string"
 
 
 static int _system(const char *command)
@@ -36,7 +46,7 @@ static int install_zip_package(void)
     int retValue = _system("/usr/bin/apt-get update");
     if (retValue != 0)
     {
-        LogError("failed to update the package cahce");
+        LogError("failed to update the package cache");
     }
     else
     {
@@ -58,7 +68,8 @@ static int prepare_to_flash(const char *fileName)
     }
     else
     {
-        if (_system("mkdir /update") != 0)
+        retValue = _system("mkdir /update");
+        if (retValue != 0)
         {
             LogError("failed to create the update directory");
         }
@@ -90,6 +101,7 @@ static int prepare_to_flash(const char *fileName)
                         if (buffer == NULL)
                         {
                             LogError("failed to allocate memory for system command");
+                            retValue = -1;
                         }
                         else
                         {
@@ -112,14 +124,6 @@ static int prepare_to_flash(const char *fileName)
                                 {
                                     LogError("failed to prepare the command file for auto-flash");
                                 }
-                                else
-                                {
-                                    retValue = reboot(RB_AUTOBOOT);
-                                    if (retValue != 0)
-                                    {
-                                        LogError("failed to reboot the device");
-                                    }
-                                }
                             }
                         }
                     }
@@ -130,33 +134,7 @@ static int prepare_to_flash(const char *fileName)
     return retValue;
 }
 
-//----------------------------------------------------------------------------------------------------------------------------
-char *device_get_firmware_version(void)
-{
-    char *retValue;
-    struct utsname data;
-    if (uname(&data) != 0)
-    {
-        LogError("failed to 'uname'");
-        retValue = NULL;
-    }
-    else
-    {
-        size_t size = strlen(data.release) + 1;
-        retValue = malloc(size * sizeof(char));
-        if (retValue == NULL)
-        {
-            LogError("failed to allocate string for firmware version");
-        }
-        else
-        {
-            memcpy(retValue, data.release, size);
-        }
-    }
-    return retValue;
-}
-
-char* device_read_string_from_file(const char *fileName)
+static char* read_string_from_file(const char *fileName)
 {
     char *retValue;
     FILE *fd = fopen(fileName, "rx");
@@ -190,7 +168,17 @@ char* device_read_string_from_file(const char *fileName)
                 }
                 else
                 {
-                    retValue = fgets(retValue, size, fd);
+                    char *result = fgets(retValue, size, fd);
+                    if (result == NULL)
+                    {
+                        LogError("fgets failed");
+                        free(retValue);
+                        retValue = NULL;
+                    }
+                    else
+                    {
+                        retValue = result;
+                    }
                 }
             }
         }
@@ -199,40 +187,39 @@ char* device_read_string_from_file(const char *fileName)
     return retValue;
 }
 
-FIRMWARE_UPDATE_STATUS device_get_firmware_update_status(void)
+//----------------------------------------------------------------------------------------------------------------------------
+char *device_get_firmware_version(void)
 {
-    FIRMWARE_UPDATE_STATUS retValue;
-    struct stat s;
-    int    status = stat(TEMP_ZIP_LOCATION, &s);
-    if (status == 0)
+    char *retValue;
+    struct utsname data;
+    if (uname(&data) != 0)
     {
-        retValue = downloading;
+        LogError("failed to 'uname'");
+        retValue = NULL;
     }
     else
     {
-        status = stat(NEW_FW_ARCHIVE, &s);
-        if (status == 0)
+        if (mallocAndStrcpy_s(&retValue, data.release) != 0)
         {
-            retValue = downloadComplete;
-        }
-        else
-        {
-            retValue = waiting;
+            LogError("failed to allocate string for firmware version");
+            retValue = NULL;
         }
     }
     return retValue;
 }
 
+char* device_get_connection_string(void)
+{
+    return read_string_from_file(CONNECTION_STRING_FILE_NAME);
+}
+
 bool device_download_firmware(const char *uri)
 {
-    LogInfo("Downloading [%s]", uri);
-
-    unlink(TEMP_ZIP_LOCATION);
     unlink(NEW_FW_ARCHIVE);
 
     int result;
 
-    size_t  length = snprintf(NULL, 0, "/usr/bin/wget \"%s\" -O %s", uri, TEMP_ZIP_LOCATION);
+    size_t  length = snprintf(NULL, 0, "/usr/bin/wget \"%s\" -O %s", uri, NEW_FW_ARCHIVE);
     char   *buffer = malloc(length + 1);
     if (buffer == NULL)
     {
@@ -241,7 +228,8 @@ bool device_download_firmware(const char *uri)
     }
     else
     {
-        sprintf(buffer, "/usr/bin/wget \"%s\" -O %s", uri, TEMP_ZIP_LOCATION);
+        sprintf(buffer, "/usr/bin/wget \"%s\" -O %s", uri, NEW_FW_ARCHIVE);
+        LogInfo("Downloading [%s]", uri);
         result = _system(buffer);
         free(buffer);
 
@@ -249,28 +237,16 @@ bool device_download_firmware(const char *uri)
         {
             LogError("failed to download from '%s'", uri);
         }
-        else
-        {
-            length = snprintf(NULL, 0, "mv %s \"%s\"", TEMP_ZIP_LOCATION, NEW_FW_ARCHIVE);
-            buffer = malloc(length + 1);
-            if (buffer == NULL)
-            {
-                result = -1;
-                LogError("failed to allocate memory for the move file command");
-            }
-            else
-            {
-                sprintf(buffer, "mv %s \"%s\"", TEMP_ZIP_LOCATION, NEW_FW_ARCHIVE);
-                result = _system(buffer);
-                free(buffer);
-                if (result != 0)
-                {
-                    LogError("failed to stage the firmware package");
-                }
-            }
-        }
     }
     return (result == 0);
+}
+
+void device_reboot(void)
+{
+    if (reboot(RB_AUTOBOOT) != 0)
+    {
+        LogError("failed to reboot the device");
+    }
 }
 
 bool device_update_firmware(void)
@@ -288,14 +264,6 @@ bool device_update_firmware(void)
         if (result != 0)
         {
             LogError("failed to prepare the flash device");
-        }
-        else
-        {
-            result = reboot(RB_AUTOBOOT);
-            if (result != 0)
-            {
-                LogError("failed to reboot the device");
-            }
         }
     }
     return (result == 0);
@@ -319,7 +287,10 @@ bool device_run_service(void)
         {
             /* exit the parent process */
             exit(EXIT_SUCCESS);
-
+        }
+        else
+        {
+            /* child process segment */
             /* Change the file mode mask */
             umask(0);       
 
@@ -341,18 +312,22 @@ bool device_run_service(void)
                 else
                 {
                     /* Close out the standard file descriptors */
-                    close(STDIN_FILENO);
-                    close(STDOUT_FILENO);
-                    close(STDERR_FILENO);
+                    if (close(STDIN_FILENO) != 0)
+                    {
+                        LogError("failed to close standard input");
+                    }
+                    if (close(STDOUT_FILENO) != 0)
+                    {
+                        LogError("failed to close standard output");
+                    }
+                    if (close(STDERR_FILENO) != 0)
+                    {
+                        LogError("failed to close standard error");
+                    }
 
                     retValue = true;
                 }
             }
-        }
-        else
-        {
-            LogError("Failed to fork with a good process ID");
-            retValue = false;
         }
     }
     return retValue;
