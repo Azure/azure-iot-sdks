@@ -9,8 +9,9 @@
 #include "serializer.h"
 #include "iothub_client.h"
 
-#include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility/threadapi.h"
 
 #include "iothubtransportmqtt.h"
 
@@ -80,25 +81,22 @@ static void DeviceTwinCallback(int status_code, void* userContextCallback)
 #define SERVER_SUCCESS 200
 
 
-/*
-    Description:
-        This function will be called by the framework when a method call is received from the service.
-
-    Parameters:
-        <param>method_name</param>, <param>response</param> and <param>resp_size</param> are guaranteed by the frmaework to be valid.
-        <param>payload</param> and <param>size</param> will be valid based on the method (given in method_name). If a method does not
-            require any parameters, payload and size maybe NULL and zero respectively.
-
-    Return:
-        an HTTP return code as appropriate.
-        contents of <param>response</param> and <param>resp_size</param> are application dependent and can be NULL and zero respectively.
-*/
 static int DeviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
 {
     (void)userContextCallback;
 
     int retValue;
-    if (strcmp(method_name, FIRMWARE_UPDATE_METHOD_NAME) == 0)
+    if (method_name == NULL)
+    {
+        LogError("invalid method name");
+        retValue = NOT_VALID;
+    }
+    else if ((response == NULL) || (resp_size == NULL))
+    {
+        LogError("invalid response parameters");
+        retValue = NOT_VALID;
+    }
+    else if (strcmp(method_name, FIRMWARE_UPDATE_METHOD_NAME) == 0)
     {
         if (device_get_firmware_update_status() != waiting)
         {
@@ -137,7 +135,7 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
                     {
                         retValue = SERVER_SUCCESS;
                         *response = NULL;
-                        resp_size = 0;
+                        *resp_size = 0;
                     }
                     else
                     {
@@ -257,10 +255,13 @@ static int iothub_client_sample_mqtt_dm_run(const char *connectionString, bool t
                         else
                         {
                             bool keepRunning = send_reported(iot_device, iotHubClientHandle, &exitCode);
+                            FIRMWARE_UPDATE_STATUS oldStatus = device_get_firmware_update_status();
                             while (keepRunning)
                             {
-                                if (device_get_firmware_update_status() != waiting)
+                                FIRMWARE_UPDATE_STATUS newStatus = device_get_firmware_update_status();
+                                if (newStatus != oldStatus)
                                 {
+                                    /* send reported only if the status changes */
                                     keepRunning = send_reported(iot_device, iotHubClientHandle, &exitCode);
                                 }
                                 ThreadAPI_Sleep(1000);
@@ -298,7 +299,7 @@ int main(int argc, char *argv[])
             ++ii;
             if (ii < argc)
             {
-                if (mallocAndStrcpy_s(connectionString, argv[ii]) != 0)
+                if (mallocAndStrcpy_s(&connectionString, argv[ii]) != 0)
                 {
                     LogError("failed to allocate memory for connection string");
                     exitCode = -12;
