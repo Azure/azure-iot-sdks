@@ -2,8 +2,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include "testrunnerswitcher.h"
 #include "serializer.h"
+#include "macro_utils.h"
+#include "testrunnerswitcher.h"
+
 #include "parson.h"
 
 static TEST_MUTEX_HANDLE g_testByTest;
