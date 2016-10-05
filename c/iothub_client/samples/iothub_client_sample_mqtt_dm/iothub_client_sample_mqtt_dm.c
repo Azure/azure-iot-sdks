@@ -16,6 +16,17 @@
 #include "iothubtransportmqtt.h"
 
 #include "iothub_client_sample_mqtt_dm.h"
+
+/* enum values are in lower case per design */
+#define FIRMWARE_UPDATE_STATUS_VALUES \
+        waiting, \
+        downloading, \
+        downloadFailed, \
+        downloadComplete, \
+        applying, \
+        applyFailed, \
+        applyComplete
+DEFINE_ENUM(FIRMWARE_UPDATE_STATUS, FIRMWARE_UPDATE_STATUS_VALUES)
 DEFINE_ENUM_STRINGS(FIRMWARE_UPDATE_STATUS, FIRMWARE_UPDATE_STATUS_VALUES)
 
 
@@ -36,33 +47,112 @@ DECLARE_MODEL(thingie_t,
 
 END_NAMESPACE(Contoso);
 
+typedef struct PHYSICAL_DEVICE_TAG
+{
+    thingie_t   *iot_device;
+    LOCK_HANDLE  status_lock;
+    char *new_firmware_URI;
+    FIRMWARE_UPDATE_STATUS status;
+} PHYSICAL_DEVICE;
+
+static bool set_physical_device_fwupdate_status(PHYSICAL_DEVICE *physical_device, FIRMWARE_UPDATE_STATUS newStatus)
+{
+    bool retValue;
+    if (Lock(physical_device->status_lock) != LOCK_OK)
+    {
+        LogError("failed to acquire lock");
+        retValue = false;
+    }
+    else
+    {
+        physical_device->status = newStatus;
+        retValue = true;
+        if (Unlock(physical_device->status_lock) != LOCK_OK)
+        {
+            LogError("failed to release lock");
+        }
+    }
+    return retValue;
+}
+
+static FIRMWARE_UPDATE_STATUS get_physical_device_fwupdate_status(const PHYSICAL_DEVICE *physical_device)
+{
+    FIRMWARE_UPDATE_STATUS retValue;
+
+    if (Lock(physical_device->status_lock) != LOCK_OK)
+    {
+        LogError("failed to acquire lock");
+        retValue = waiting;
+    }
+    else
+    {
+        retValue = physical_device->status;
+        if (Unlock(physical_device->status_lock) != LOCK_OK)
+        {
+            LogError("failed to release lock");
+        }
+    }
+    return retValue;
+}
 
 static int do_firmware_update(void *param)
 {
     int   retValue;
-    char *uri = param;
+    PHYSICAL_DEVICE *physical_device = (PHYSICAL_DEVICE *) param;
     
-    LogInfo("do_firmware_update('%s')", uri);
-    bool result = device_download_firmware(uri);
-    free(uri);
-    if (result)
+    LogInfo("do_firmware_update('%s')", physical_device->new_firmware_URI);
+    if (!set_physical_device_fwupdate_status(physical_device, downloading))
     {
-        LogInfo("starting fw update");
-        result = device_update_firmware();
-        if (result)
-        {
-            retValue = 0;
-        }
-        else
-        {
-            LogError("fiRmware update failed during apply");
-            retValue = -1;
-        }
+        LogError("failed to update device status");
+        retValue = -1;
     }
     else
     {
-        LogError("failed to download new firmware image from", uri);
-        retValue = -1;
+        bool result = device_download_firmware(physical_device->new_firmware_URI);
+        if (result)
+        {
+            if (!set_physical_device_fwupdate_status(physical_device, downloadComplete))
+            {
+                LogError("failed to update device status");
+                retValue = -1;
+            }
+            else
+            {
+                LogInfo("starting fw update");
+                if (!set_physical_device_fwupdate_status(physical_device, applying))
+                {
+                    LogError("failed to update device status");
+                    retValue = -1;
+                }
+                else
+                {
+                    result = device_update_firmware();
+                    if (result)
+                    {
+                        device_reboot();
+                        retValue = 0;
+                    }
+                    else
+                    {
+                        if (!set_physical_device_fwupdate_status(physical_device, applyFailed))
+                        {
+                            LogError("failed to update device status");
+                        }
+                        LogError("firmware update failed during apply");
+                        retValue = -1;
+                    }
+                }
+            }
+        }
+        else
+        {
+            LogError("failed to download new firmware image from '%s'", physical_device->new_firmware_URI);
+            if (!set_physical_device_fwupdate_status(physical_device, downloadFailed))
+            {
+                LogError("failed to update device status");
+            }
+            retValue = -1;
+        }
     }
     return retValue;
 }
@@ -83,7 +173,7 @@ static void DeviceTwinCallback(int status_code, void* userContextCallback)
 
 static int DeviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
 {
-    (void)userContextCallback;
+    PHYSICAL_DEVICE *physical_device = (PHYSICAL_DEVICE *) userContextCallback;
 
     int retValue;
     if (method_name == NULL)
@@ -96,9 +186,14 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
         LogError("invalid response parameters");
         retValue = NOT_VALID;
     }
+    else if (physical_device == NULL)
+    {
+        LogError("invalid user context callback data");
+        retValue = NOT_VALID;
+    }
     else if (strcmp(method_name, FIRMWARE_UPDATE_METHOD_NAME) == 0)
     {
-        if (device_get_firmware_update_status() != waiting)
+        if (get_physical_device_fwupdate_status(physical_device) != waiting)
         {
             LogError("attempting to initiate a firmware update out of order");
             retValue = NOT_VALID;
@@ -117,8 +212,8 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
             }
             else
             {
-                char *uri = malloc(size - 1);
-                if (uri == NULL)
+                physical_device->new_firmware_URI = malloc(size - 1);
+                if (physical_device->new_firmware_URI == NULL)
                 {
                     LogError("failed to allocate memory for URI parameter");
                     retValue = SERVER_ERROR;
@@ -126,11 +221,11 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
                 else
                 {
                     /* remove the quotation around the argument */
-                    memcpy(uri, payload + 1, size - 2);
-                    uri[size - 2] = '\0';
+                    memcpy(physical_device->new_firmware_URI, payload + 1, size - 2);
+                    physical_device->new_firmware_URI[size - 2] = '\0';
 
                     THREAD_HANDLE thread_apply;
-                    THREADAPI_RESULT t_result = ThreadAPI_Create(&thread_apply, do_firmware_update, uri);
+                    THREADAPI_RESULT t_result = ThreadAPI_Create(&thread_apply, do_firmware_update, physical_device);
                     if (t_result == THREADAPI_OK)
                     {
                         retValue = SERVER_SUCCESS;
@@ -140,7 +235,6 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
                     else
                     {
                         LogError("failed to start firmware update thread");
-                        free(uri);
                         retValue = SERVER_ERROR;
                     }
                 }
@@ -156,29 +250,30 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
     return retValue;
 }
 
-static bool send_reported(thingie_t *iot_device, IOTHUB_CLIENT_HANDLE iotHubClientHandle, int *exitCode)
+static bool send_reported(const PHYSICAL_DEVICE *physical_device, IOTHUB_CLIENT_HANDLE iotHubClientHandle)
 {
     unsigned char *buffer;
     size_t         bufferSize;
     bool           retValue;
 
+    thingie_t *iot_device = physical_device->iot_device;
     iot_device->iothubDM.firmwareVersion = device_get_firmware_version();
     if (iot_device->iothubDM.firmwareVersion == NULL)
     {
         retValue = false;
         LogError("Failed to retrieve the firmware version for device.");
-        *exitCode = -6;
+        retValue = false;
     }
     else
     {
-        iot_device->iothubDM.firmwareUpdate.status = (char *) ENUM_TO_STRING(FIRMWARE_UPDATE_STATUS, device_get_firmware_update_status());
+        iot_device->iothubDM.firmwareUpdate.status = (char *) ENUM_TO_STRING(FIRMWARE_UPDATE_STATUS, get_physical_device_fwupdate_status(physical_device));
 
         /*serialize the model using SERIALIZE_REPORTED_PROPERTIES */
         if (SERIALIZE_REPORTED_PROPERTIES(&buffer, &bufferSize, *iot_device) != CODEFIRST_OK)
         {
             retValue = false;
             LogError("Failed serializing reported state.");
-            *exitCode = -7;
+            retValue = false;
         }
         else
         {
@@ -188,11 +283,10 @@ static bool send_reported(thingie_t *iot_device, IOTHUB_CLIENT_HANDLE iotHubClie
             {
                 retValue = false;
                 LogError("Failure sending data!!!");
-                *exitCode = -15;
+                retValue = false;
             }
             else
             {
-                exitCode = 0;
                 retValue = true;
             }
             free(buffer);
@@ -202,22 +296,62 @@ static bool send_reported(thingie_t *iot_device, IOTHUB_CLIENT_HANDLE iotHubClie
     return retValue;
 }
 
+static PHYSICAL_DEVICE* physical_device_new(thingie_t *iot_device)
+{
+    PHYSICAL_DEVICE *retValue = malloc(sizeof(PHYSICAL_DEVICE));
+    if (retValue == NULL)
+    {
+        LogError("failed to allocate memory for physical device structure");
+    }
+    else
+    {
+        retValue->status_lock = Lock_Init();
+        if (retValue->status_lock == NULL)
+        {
+            LogError("failed to create a lock");
+            free(retValue);
+            retValue = NULL;
+        }
+        else
+        {
+            retValue->iot_device = iot_device;
+            retValue->status = waiting;
+            retValue->new_firmware_URI = NULL;
+        }
+    }
+
+    return retValue;
+}
+
+static void physical_device_delete(PHYSICAL_DEVICE *physical_device)
+{
+    if (physical_device->new_firmware_URI != NULL)
+    {
+        free(physical_device->new_firmware_URI);
+    }
+    if (Lock_Deinit(physical_device->status_lock) == LOCK_ERROR)
+    {
+        LogError("failed to release lock handle");
+    }
+    free(physical_device);
+}
+
 static int iothub_client_sample_mqtt_dm_run(const char *connectionString, bool traceOn)
 {
     LogInfo("Initialize Platform");
 
-    int exitCode;
+    int retValue;
     if (platform_init() != 0)
     {
         LogError("Failed to initialize the platform.");
-        exitCode = -1;
+        retValue = -4;
     }
     else
     {
         if (serializer_init(NULL) != SERIALIZER_OK)
         {
             LogError("Failed in serializer_init.");
-            exitCode = -2;
+            retValue = -5;
         }
         else
         {
@@ -226,49 +360,68 @@ static int iothub_client_sample_mqtt_dm_run(const char *connectionString, bool t
             if (iot_device == NULL)
             {
                 LogError("Failed on CREATE_MODEL_INSTANCE.");
-                exitCode = -3;
+                retValue = -6;
             }
 
             else
             {
+                LogInfo("Initialize From Connection String.");
+                IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, MQTT_Protocol);
+                if (iotHubClientHandle == NULL)
                 {
-                    LogInfo("Initialize From Connection String.");
-                    IOTHUB_CLIENT_HANDLE iotHubClientHandle = IoTHubClient_CreateFromConnectionString(connectionString, MQTT_Protocol);
-                    if (iotHubClientHandle == NULL)
+                    LogError("iotHubClientHandle is NULL!");
+                    retValue = -7;
+                }
+                else
+                {
+                    LogInfo("Device successfully connected.");
+                    if (IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &traceOn) != IOTHUB_CLIENT_OK)
                     {
-                        LogError("iotHubClientHandle is NULL!");
-                        exitCode = -5;
+                        LogError("failed to set logtrace option");
+                    }
+
+                    PHYSICAL_DEVICE *physical_device = physical_device_new(iot_device);
+                    if (physical_device == NULL)
+                    {
+                        LogError("failed to make an iot device callback structure");
+                        retValue = -8;
                     }
                     else
                     {
-                        LogInfo("Device successfully connected.");
-                        if (IoTHubClient_SetOption(iotHubClientHandle, "logtrace", &traceOn) != IOTHUB_CLIENT_OK)
-                        {
-                            LogError("failed to set logtrace option");
-                        }
-
-                        if (IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle, DeviceMethodCallback, iot_device) != IOTHUB_CLIENT_OK)
+                        if (IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle, DeviceMethodCallback, physical_device) != IOTHUB_CLIENT_OK)
                         {
                             LogError("failed to associate a callback for device methods");
-                            exitCode = -6;
+                            retValue = -9;
                         }
                         else
                         {
-                            bool keepRunning = send_reported(iot_device, iotHubClientHandle, &exitCode);
-                            FIRMWARE_UPDATE_STATUS oldStatus = device_get_firmware_update_status();
-                            while (keepRunning)
+                            bool keepRunning = send_reported(physical_device, iotHubClientHandle);
+                            if (!keepRunning)
                             {
-                                FIRMWARE_UPDATE_STATUS newStatus = device_get_firmware_update_status();
-                                if (newStatus != oldStatus)
+                                LogError("Failed to send initia device reported");
+                                retValue = -10;
+                            }
+                            else
+                            {
+                                FIRMWARE_UPDATE_STATUS oldStatus = get_physical_device_fwupdate_status(physical_device);
+                                while (keepRunning)
                                 {
+                                    FIRMWARE_UPDATE_STATUS newStatus = get_physical_device_fwupdate_status(physical_device);
+
                                     /* send reported only if the status changes */
-                                    keepRunning = send_reported(iot_device, iotHubClientHandle, &exitCode);
+                                    if (newStatus != oldStatus)
+                                    {
+                                        oldStatus = newStatus;
+                                        keepRunning = send_reported(physical_device, iotHubClientHandle);
+                                    }
+                                    ThreadAPI_Sleep(1000);
                                 }
-                                ThreadAPI_Sleep(1000);
+                                retValue = 0;
                             }
                         }
-                        IoTHubClient_Destroy(iotHubClientHandle);
+                        physical_device_delete(physical_device);
                     }
+                    IoTHubClient_Destroy(iotHubClientHandle);
                 }
                 DESTROY_MODEL_INSTANCE(iot_device);
             }
@@ -276,18 +429,17 @@ static int iothub_client_sample_mqtt_dm_run(const char *connectionString, bool t
         }
         platform_deinit();
     }
-    LogInfo("Exiting.");
-    return exitCode;
+
+    return retValue;
 }
 
 int main(int argc, char *argv[])
 {
-    int   exitCode;
+    int   exitCode = 0;
     bool  isService = true;
     bool  traceOn = false;
-    char *connectionString;
+    char *connectionString = NULL;
 
-    exitCode = 0;
     for (int ii = 1; ii < argc; ++ii)
     {
         if (0 == strcmp(argv[ii], "-console"))
@@ -302,7 +454,7 @@ int main(int argc, char *argv[])
                 if (mallocAndStrcpy_s(&connectionString, argv[ii]) != 0)
                 {
                     LogError("failed to allocate memory for connection string");
-                    exitCode = -12;
+                    exitCode = -1;
                 }
             }
         }
@@ -322,18 +474,17 @@ int main(int argc, char *argv[])
         if (connectionString == NULL)
         {
             LogError("connection string is NULL");
-            exitCode = -14;
+            exitCode = -2;
         }
         else
         {
-            exitCode = 0;
             if (isService)
             {
                 traceOn = false;
                 if (device_run_service() == false)
                 {
                     LogError("Failed to run as a service.");
-                    exitCode = -4;
+                    exitCode = -3;
                 }
             }
 

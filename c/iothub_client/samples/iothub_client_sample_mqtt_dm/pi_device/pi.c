@@ -21,15 +21,15 @@
 #include "iothub_client_sample_mqtt_dm.h"
 
 
-#define TEMP_ZIP_LOCATION "/root/nf.zip"
 #define NEW_FW_ARCHIVE "/root/newfirmware.zip"
+
 
 /* the following files will be placed by the 'installer'
    o- /usr/share/iothub_client_sample_mqtt_dm/iothub_client_sample_mqtt_dm - this is the executable
    o- /usr/share/iothub_client_sample_mqtt_dm/iothub_client_sample_mqtt_dm.service - this is the service controller
    o- /usr/share/iothub_client_sample_mqtt_dm/.device_connection_string - file containing one line only, the device connection string
    o- /lib/systemd/system/iothub_client_sample_mqtt_dm.service - symbolic link to /usr/share/iothub_client_sample_mqtt_dm/iothub_client_sample_mqtt_dm.service
-   o- /usr/share/iothub_client_sample_mqtt_dm/iothub_client_sample_mqtt_dm.service - symbolic link to /usr/share/iothub_client_sample_mqtt_dm/iothub_client_sample_mqtt_dm.service
+   o- /etc/systemd/system/multi-user.target.wants/iothub_client_sample_mqtt_dm.service - symbolic link to /usr/share/iothub_client_sample_mqtt_dm/iothub_client_sample_mqtt_dm.service
 */
 #define CONNECTION_STRING_FILE_NAME "/usr/share/iothub_client_sample_mqtt_dm/.device_connection_string"
 
@@ -124,14 +124,6 @@ static int prepare_to_flash(const char *fileName)
                                 {
                                     LogError("failed to prepare the command file for auto-flash");
                                 }
-                                else
-                                {
-                                    retValue = reboot(RB_AUTOBOOT);
-                                    if (retValue != 0)
-                                    {
-                                        LogError("failed to reboot the device");
-                                    }
-                                }
                             }
                         }
                     }
@@ -176,7 +168,17 @@ static char* read_string_from_file(const char *fileName)
                 }
                 else
                 {
-                    retValue = fgets(retValue, size, fd);
+                    char *result = fgets(retValue, size, fd);
+                    if (result == NULL)
+                    {
+                        LogError("fgets failed");
+                        free(retValue);
+                        retValue = NULL;
+                    }
+                    else
+                    {
+                        retValue = result;
+                    }
                 }
             }
         }
@@ -211,38 +213,13 @@ char* device_get_connection_string(void)
     return read_string_from_file(CONNECTION_STRING_FILE_NAME);
 }
 
-FIRMWARE_UPDATE_STATUS device_get_firmware_update_status(void)
-{
-    FIRMWARE_UPDATE_STATUS retValue;
-    struct stat s;
-    int    status = stat(TEMP_ZIP_LOCATION, &s);
-    if (status == 0)
-    {
-        retValue = downloading;
-    }
-    else
-    {
-        status = stat(NEW_FW_ARCHIVE, &s);
-        if (status == 0)
-        {
-            retValue = downloadComplete;
-        }
-        else
-        {
-            retValue = waiting;
-        }
-    }
-    return retValue;
-}
-
 bool device_download_firmware(const char *uri)
 {
-    unlink(TEMP_ZIP_LOCATION);
     unlink(NEW_FW_ARCHIVE);
 
     int result;
 
-    size_t  length = snprintf(NULL, 0, "/usr/bin/wget \"%s\" -O %s", uri, TEMP_ZIP_LOCATION);
+    size_t  length = snprintf(NULL, 0, "/usr/bin/wget \"%s\" -O %s", uri, NEW_FW_ARCHIVE);
     char   *buffer = malloc(length + 1);
     if (buffer == NULL)
     {
@@ -251,41 +228,25 @@ bool device_download_firmware(const char *uri)
     }
     else
     {
-        sprintf(buffer, "/usr/bin/wget \"%s\" -O %s", uri, TEMP_ZIP_LOCATION);
+        sprintf(buffer, "/usr/bin/wget \"%s\" -O %s", uri, NEW_FW_ARCHIVE);
         LogInfo("Downloading [%s]", uri);
         result = _system(buffer);
         free(buffer);
 
         if (result != 0)
         {
-            if (unlink(TEMP_ZIP_LOCATION) == -1)
-            {
-                LogInfo("unlink(TEMP_ZIP_LOCATION) == -1");
-            }
             LogError("failed to download from '%s'", uri);
-        }
-        else
-        {
-            length = snprintf(NULL, 0, "mv %s \"%s\"", TEMP_ZIP_LOCATION, NEW_FW_ARCHIVE);
-            buffer = malloc(length + 1);
-            if (buffer == NULL)
-            {
-                result = -1;
-                LogError("failed to allocate memory for the move file command");
-            }
-            else
-            {
-                sprintf(buffer, "mv %s \"%s\"", TEMP_ZIP_LOCATION, NEW_FW_ARCHIVE);
-                result = _system(buffer);
-                free(buffer);
-                if (result != 0)
-                {
-                    LogError("failed to stage the firmware package");
-                }
-            }
         }
     }
     return (result == 0);
+}
+
+void device_reboot(void)
+{
+    if (reboot(RB_AUTOBOOT) != 0)
+    {
+        LogError("failed to reboot the device");
+    }
 }
 
 bool device_update_firmware(void)
@@ -303,14 +264,6 @@ bool device_update_firmware(void)
         if (result != 0)
         {
             LogError("failed to prepare the flash device");
-        }
-        else
-        {
-            result = reboot(RB_AUTOBOOT);
-            if (result != 0)
-            {
-                LogError("failed to reboot the device");
-            }
         }
     }
     return (result == 0);
