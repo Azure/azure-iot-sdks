@@ -4,11 +4,6 @@
 @setlocal
 @echo off
 
-if "%OPENSSL_CONF%"=="" (
-  echo The OPENSSL_CONF environment variable must be defined.
-  goto :eof
-)
-
 set node-root=%~dp0..
 REM // resolve to fully qualified path
 for %%i in ("%node-root%") do set node-root=%%~fi
