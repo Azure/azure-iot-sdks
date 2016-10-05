@@ -115,18 +115,30 @@ Reported properties have the same type as properties declared by `WITH_DATA` mac
 
 ## WITH_DESIRED_PROPERTY
 ```c
-WITH_DESIRED_PROPERTY(propertyType, propertyname)
+WITH_DESIRED_PROPERTY(propertyType, propertyname [,onDesiredProperty])
 ```
 
-`WITH_DESIRED_PROPERTY` macro declares a desired property. This is a DeviceTwin notion.
-Desired properties have the same types as regulat properties declared using `WITH_DATA` macro. 
+`WITH_DESIRED_PROPERTY` macro declares a desired property. This is a DeviceTwin notion. 
+Desired properties have the same types as regular properties declared using `WITH_DATA` macro.
+Additionally, desired properties can have an optional 3rd argument, which is a function name. 
+The function will be called when the desired property is received. The function receives a pointer to
+the encompassing model where the desired property is declared.
 
 __Example__
+```c
 DECLARE_MODEL(Car,
     WITH_DESIRED_PROPERTY(int, softwareVersion),
-    WITH_DESIRED_PROPERTY(ascii_char_ptr, firmwareVersionAsString)
+    WITH_DESIRED_PROPERTY(ascii_char_ptr, firmwareVersionAsString),
+    WITH_DESIRED_PROPERTY(int, maxSpeed, OnMaxSpeed)
     ...
     );
+
+void OnMaxSpeed(void* v)
+{
+    Car* car = v;
+    printf("maxSpeed has been received and it is %d\n", car->maxSpeed);
+}
+```
 
 ## WITH_ACTION(actionName, arg1Type, arg1Name, ...)
 The `WITH_ACTION` macro allows declaring a model action.
