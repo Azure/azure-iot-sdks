@@ -605,6 +605,12 @@ static bool validateModel_vs_Multitree(void* startAddress, SCHEMA_MODEL_TYPE_HAN
                                 }
                                 else
                                 {
+                                    /*Codes_SRS_COMMAND_DECODER_02_013: [ If the desired property has a non-NULL pfOnDesiredProperty then it shall be called. ]*/
+                                    pfOnDesiredProperty onDesiredProperty = Schema_GetModelDesiredProperty_pfOnDesiredProperty(desiredPropertyHandle);
+                                    if (onDesiredProperty != NULL)
+                                    {
+                                        onDesiredProperty((char*)startAddress + offset);
+                                    }
                                     nProcessedChildren++;
                                 }
                                 Destroy_AGENT_DATA_TYPE(&output);
@@ -624,6 +630,14 @@ static bool validateModel_vs_Multitree(void* startAddress, SCHEMA_MODEL_TYPE_HAN
                             }
                             else
                             {
+                                /*if the model in model so happened to be a WITH_DESIRED_PROPERTY... (only those has non_NULL pfOnDesiredProperty) */
+                                /*Codes_SRS_COMMAND_DECODER_02_012: [ If the child model in model has a non-NULL pfOnDesiredProperty then pfOnDesiredProperty shall be called. ]*/
+                                pfOnDesiredProperty onDesiredProperty = Schema_GetModelModelByName_OnDesiredProperty(modelHandle, childName_str);
+                                if (onDesiredProperty != NULL)
+                                {
+                                    onDesiredProperty((char*)startAddress + offset);
+                                }
+                                
                                 nProcessedChildren++;
                             }
                             

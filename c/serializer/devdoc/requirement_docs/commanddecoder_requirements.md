@@ -160,7 +160,11 @@ extern EXECUTE_COMMAND_RESULT CommandDecoder_IngestDesiredProperties( void* star
 
 **SRS_COMMAND_DECODER_02_008: [** The desired property shall be constructed in memory by calling pfDesiredPropertyFromAGENT_DATA_TYPE. **]**
 
+**SRS_COMMAND_DECODER_02_013: [** If the desired property has a non-`NULL` `pfOnDesiredProperty` then it shall be called. **]**
+
 **SRS_COMMAND_DECODER_02_009: [** If the child name corresponds to a model in model then the function shall call itself recursively. **]**
+
+**SRS_COMMAND_DECODER_02_012: [** If the child model in model has a non-`NULL` `pfOnDesiredProperty` then `pfOnDesiredProperty` shall be called. **]** 
 
 **SRS_COMMAND_DECODER_02_010: [** If the complete MULTITREE has been parsed then `CommandDecoder_IngestDesiredProperties` shall succeed and return `EXECUTE_COMMAND_SUCCESS`. **]**
 
