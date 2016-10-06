@@ -148,7 +148,8 @@ export PATH
 ```
 Following commands will make standalone toolchain binaries in the `/tmp/my-android-toolchain` location.
 ```
-${ANDROID_NDK_ROOT}/build/tools/make-standalone-toolchain.sh --platform=android-8 --install-dir=/tmp/my-android-toolchain
+cd ${ANDROID_NDK_ROOT}/build/tools
+./make_standalone_toolchain.py --arch arm --install-dir /tmp/my-android-toolchain
 cd /tmp/my-android-toolchain
 export MY_TOOLCHAIN=$(pwd)
 export PATH=${MY_TOOLCHAIN}/bin:$PATH
