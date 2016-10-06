@@ -132,7 +132,51 @@ git clone --recursive https://github.com/Azure/azure-iot-sdks.git
 
 You might consider building the SDK for your local platform at this point simply to ensure you have all the required components. At the very least, you must ensure that the SDK's prerequisite libraries are installed on your Raspberry Pi. You can achieve this by running the script _setup.sh_ found in _azure-iot-sdks/c/build\_all/linux_.
 
-In order to cross compile for a different target the first requirement is to set up an environment containing the required toolchain, system libraries and system headers that may be required to build the code. You have to download and install the Android NDK package from https://developer.android.com/ndk/downloads/index.html. Choose and download the Linux package, e.g. _android-ndk-rxx-linux-x86_64.zip_.
+The Android NDK package available at https://developer.android.com/ndk/downloads/index.html contains the toolchain needed to target Android devices. Download the Linux package, e.g. _android-ndk-rxx-linux-x86_64.zip_, and extract the archive content into your home folder. You will have a directory _android-ndk-rxx_ in your home folder.
+
+### Setting up cmake to cross compile
+
+To allow access in next steps to the cross compiler for Android, enter your just created ndk root directory, and save :
+```
+cd ~/android-ndk-rxx
+export ANDROID_NDK_ROOT=$(pwd)
+```
+You can use *export -p* to verify ANDROID\_NDK\_ROOT has been added to the environment.
+
+Now we need to switch to the SDK directory tree. Enter this command
+```
+cd ~/Source/azure-iot-sdks/c/build_all/linux
+```
+Using the text editor of your choice, create a new file in this directory and call it toolchain-android.cmake. Into this file place the following lines
+
+```cmake
+INCLUDE(CMakeForceCompiler)
+
+SET(CMAKE_SYSTEM_NAME Android)
+
+# this is the location of the amd64 toolchain targeting the Raspberry Pi
+SET(CMAKE_C_COMPILER $ENV{ANDROID_NDK_ROOT}/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/arm-linux-androideabi-gcc)
+
+# this is the file system root of the target
+SET(CMAKE_FIND_ROOT_PATH $ENV{ANDROID_NDK_ROOT})
+
+# search for programs in the build host directories
+SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+
+# for libraries and headers in the target directories
+SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+```
+and save the toolchain file. Your cross compilation environment is now complete.
+
+### Building the SDK
+
+The final step in the process is to run the actual build. For this you will need to be in the Linux build directory as shown above. Enter the following commands
+```
+cd ~/Source/azure-iot-sdks/c/build_all/linux
+./build.sh --toolchain-file toolchain-android.cmake --skip-unittests -cl --sysroot=$ANDROID_NDK_ROOT
+```
+This will tell cmake to build the SDK using the toolchain file toolchain-android.cmake and skip running all tests which is important since the executables will (probably) not run successfully on the host anyway. Finally, and absolutely critical is the use of the *--sysroot* option. Without this the compiler will fail to find required headers and libraries.
 
 ## Summary
 
