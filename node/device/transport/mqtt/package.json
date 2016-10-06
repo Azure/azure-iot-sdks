@@ -10,6 +10,7 @@
     "azure-iot-common": "1.1.0-dtpreview",
     "azure-iot-device": "1.1.0-dtpreview",
     "debug": "^2.2.0",
+    "mqtt": "^1.14.1",
     "es5-shim": "^4.5.9"
   },
   "devDependencies": {

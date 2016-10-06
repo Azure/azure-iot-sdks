@@ -5,7 +5,7 @@
 
 var assert = require('chai').assert;
 
-var MqttProvider = require('../../../../common/transport/mqtt/test/_fake_mqtt.js');
+var MqttProvider = require('./_fake_mqtt.js');
 var Mqtt = require('../lib/mqtt');
 var errors = require('azure-iot-common').errors;
 var sinon = require('sinon');
