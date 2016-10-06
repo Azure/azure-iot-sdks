@@ -2,47 +2,55 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 [huzzah_remote_monitoring]
-RelativePath=\iot-hub-c-huzzah-getstartedkit\remote_monitoring\remote_monitoring.ino
+Target=remote_monitoring.ino
+RelativePath=\iot-hub-c-huzzah-getstartedkit\remote_monitoring
 RelativeWorkingDir=\arduino_cc_Work\Results\huzzah_remote_monitoring
 MaxAllowedDurationSeconds=100
+LogLines=300
+MinimumHeap=22000
 Categories=IoTHub
 Hardware=Adafruit_Huzzah
 CPUParameters=-fqbn=esp8266:esp8266:huzzah:CpuFrequency=80,UploadSpeed=115200,FlashSize=4M3M -ide-version=10609
 Build=Enable
-Installation=Disable
-Execution=Disable
+Execution=Enable
 
 [huzzah_simplesample_http]
-RelativePath=\arduino\libraries\AzureIoTHub\examples\simplesample_http\simplesample_http.ino
+Target=simplesample_http.ino
+RelativePath=\arduino\libraries\AzureIoTHub\examples\simplesample_http
 RelativeWorkingDir=\arduino_cc_Work\Results\huzzah_simplesample_http
 MaxAllowedDurationSeconds=100
+LogLines=300
+MinimumHeap=22000
 Categories=IoTHub
 Hardware=Adafruit_Huzzah
 CPUParameters=-fqbn=esp8266:esp8266:huzzah:CpuFrequency=80,UploadSpeed=115200,FlashSize=4M3M -ide-version=10609
 Build=Enable
-Installation=Disable
 Execution=Disable
 
 [m0wifi_remote_monitoring]
-RelativePath=\iot-hub-c-m0wifi-getstartedkit\remote_monitoring\remote_monitoring.ino
+Target=remote_monitoring.ino
+RelativePath=\iot-hub-c-m0wifi-getstartedkit\remote_monitoring
 RelativeWorkingDir=\arduino_cc_Work\Results\m0wifi_remote_monitoring
 MaxAllowedDurationSeconds=100
+LogLines=300
+MinimumHeap=22000
 Categories=IoTHub
 Hardware=Adafruit_FeatherM0
 CPUParameters=-fqbn=adafruit:samd:adafruit_feather_m0 -vid-pid=0X239A_0X800B -ide-version=10609
 Build=Enable
-Installation=Disable
 Execution=Disable
 
 [m0wifi_simplesample_http]
-RelativePath=\arduino\libraries\AzureIoTHub\examples\simplesample_http\simplesample_http.ino
+Target=simplesample_http.ino
+RelativePath=\arduino\libraries\AzureIoTHub\examples\simplesample_http
 RelativeWorkingDir=\arduino_cc_Work\Results\m0wifi_simplesample_http
 MaxAllowedDurationSeconds=100
+LogLines=300
+MinimumHeap=22000
 Categories=IoTHub
 Hardware=Adafruit_FeatherM0
 CPUParameters=-fqbn=adafruit:samd:adafruit_feather_m0 -vid-pid=0X239A_0X800B -ide-version=10609
 Build=Disable
-Installation=Disable
 Execution=Disable
 
 [End]
