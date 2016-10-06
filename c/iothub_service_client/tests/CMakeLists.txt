@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 2.8.11)
 #this is CMakeLists for service tests folder
 
 add_subdirectory(connectionstringparser_ut)
+add_subdirectory(iothub_devicemethod_ut)
 add_subdirectory(iothub_devicetwin_ut)
 add_subdirectory(iothub_msging_ll_ut)
 add_subdirectory(iothub_rm_ut)

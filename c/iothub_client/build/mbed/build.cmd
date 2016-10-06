@@ -47,28 +47,28 @@ rem ----------------------------------------------------------------------------
 rem -- "Release" all the libraries that are used by the clients
 rem -----------------------------------------------------------------------------
 
-call %build-root%\..\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd %build-root%\build\iothub_amqp_transport
+call %build-root%\..\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd %build-root%\build\iothub_amqp_transport
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-call %build-root%\..\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd %build-root%\build\iothub_http_transport
+call %build-root%\..\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd %build-root%\build\iothub_http_transport
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-call %build-root%\..\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd %build-root%\build\iothub_mqtt_transport
+call %build-root%\..\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd %build-root%\build\iothub_mqtt_transport
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-call %build-root%\..\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd %build-root%\build\iothub_client
+call %build-root%\..\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd %build-root%\build\iothub_client
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-call %build-root%\..\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd %build-root%\..\azure-uamqp-c\build_all
+call %build-root%\..\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd %build-root%\..\uamqp\build_all
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-call %build-root%\..\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd %build-root%\..\azure-umqtt-c\build_all
+call %build-root%\..\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd %build-root%\..\umqtt\build_all
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-call %build-root%\..\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd %build-root%\..\azure-c-shared-utility\build_all
+call %build-root%\..\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd %build-root%\..\c-utility\build_all
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-call %build-root%\..\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd %build-root%\..\serializer\build
+call %build-root%\..\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd %build-root%\..\serializer\build
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 if %skip_samples%==0 (

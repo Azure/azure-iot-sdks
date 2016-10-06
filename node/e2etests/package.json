@@ -11,7 +11,6 @@
     "azure-iot-common": "1.1.0-dtpreview",
     "azure-iot-device": "1.1.0-dtpreview",
     "azure-iot-device-amqp": "1.1.0-dtpreview",
-    "azure-iot-device-amqp-ws": "1.1.0-dtpreview",
     "azure-iot-device-http": "1.1.0-dtpreview",
     "azure-iot-device-mqtt": "1.1.0-dtpreview",
     "azure-iothub": "2.0.0-dtpreview",

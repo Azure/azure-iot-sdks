@@ -6,7 +6,7 @@
 var fs = require('fs');
 // var Protocol = require('azure-iot-device-amqp').Amqp;
 // Uncomment one of these transports and then change it in fromConnectionString to test other transports
-var Protocol = require('azure-iot-device-amqp-ws').AmqpWs;
+var Protocol = require('azure-iot-device-amqp').AmqpWs;
 // var Protocol = require('azure-iot-device-http').Http;
 // var Protocol = require('azure-iot-device-mqtt').Mqtt;
 var Client = require('azure-iot-device').Client;

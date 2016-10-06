@@ -48,27 +48,21 @@ copy %AzureIoTSDKs_path%c\serializer\samples\simplesample_http\simplesample_http
 
 mkdir %SharedUtility_path%
 mkdir %Adapters_path%
-copy %AzureIoTSDKs_path%c\azure-c-shared-utility\inc\azure_c_shared_utility %SharedUtility_path%
-copy %AzureIoTSDKs_path%c\azure-c-shared-utility\src\ %SharedUtility_path%
+copy %AzureIoTSDKs_path%c\c-utility\inc\azure_c_shared_utility %SharedUtility_path%
+copy %AzureIoTSDKs_path%c\c-utility\src\ %SharedUtility_path%
 del %SharedUtility_path%\constbuffer.*
 del %SharedUtility_path%\constmap.*
 
-copy %AzureIoTSDKs_path%c\azure-c-shared-utility\adapters\agenttime.c %Adapters_path%
-copy %AzureIoTSDKs_path%c\azure-c-shared-utility\adapters\tickcounter_tirtos.c %Adapters_path%
-copy %AzureIoTSDKs_path%c\azure-c-shared-utility\adapters\*arduino.* %Adapters_path%
-copy %AzureIoTSDKs_path%c\azure-c-shared-utility\adapters\httpapi_compact.c %Adapters_path%
+copy %AzureIoTSDKs_path%c\c-utility\adapters\agenttime.c %Adapters_path%
+copy %AzureIoTSDKs_path%c\c-utility\adapters\tickcounter_tirtos.c %Adapters_path%
+copy %AzureIoTSDKs_path%c\c-utility\adapters\*arduino.* %Adapters_path%
+copy %AzureIoTSDKs_path%c\c-utility\adapters\httpapi_compact.c %Adapters_path%
 
-del %sdk_path%iot_logging.h
 del %sdk_path%iothubtransportamqp.*
 del %sdk_path%iothubtransportamqp_websockets.*
 del %sdk_path%iothubtransportmqtt.*
-del %sdk_path%tickcounter.*
-del %sdk_path%tlsio*.*
 del %sdk_path%uamqp*.*
 
-del %SharedUtility_path%iothubtransportamqp.*
-del %SharedUtility_path%iothubtransportamqp_websockets.*
-del %SharedUtility_path%iothubtransportmqtt.*
 del %SharedUtility_path%tlsio_*.*
 del %SharedUtility_path%wsio*.*
 del %SharedUtility_path%x509_*.*

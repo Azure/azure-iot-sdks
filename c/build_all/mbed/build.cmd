@@ -16,7 +16,7 @@ rem ----------------------------------------------------------------------------
 rem -- build (clean) compilembed tool
 rem -----------------------------------------------------------------------------
 
-call "%repo-build-root%\azure-c-shared-utility\tools\compilembed\build.cmd" --clean
+call "%repo-build-root%\c-utility\tools\compilembed\build.cmd" --clean
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 rem -----------------------------------------------------------------------------

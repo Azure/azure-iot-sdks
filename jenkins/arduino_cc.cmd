@@ -8,7 +8,7 @@ rem // resolve to fully qualified path
 for %%i in ("%build-root%") do set build-root=%%~fi
 
 REM -- C --
-pushd %build-root%\c\build_all\arduino_cc
+cd %build-root%\c\build_all\arduino_cc
 call build.cmd -r %*
 if errorlevel 1 goto :eof
-popd
+cd %build-root%

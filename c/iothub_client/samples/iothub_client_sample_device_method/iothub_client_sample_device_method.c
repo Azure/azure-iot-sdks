@@ -18,9 +18,8 @@
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
-static const char* connectionString = "HostName=dm-preview1-14.private.azure-devices-int.net;DeviceId=001-z;SharedAccessKey=5i1Ggm+sbZSUYDuOCKlZvLZKPxLWw9qW5IqMYJPGh9I=";
+static const char* connectionString = "";
 
-static int callbackCounter;
 static char msgText[1024];
 static char propText[1024];
 static bool g_continueRunning;
@@ -35,13 +34,10 @@ typedef struct EVENT_INSTANCE_TAG
 
 static int DeviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
 {
-    (void)method_name;
-    (void)payload;
-    (void)size;
     (void)userContextCallback;
 
     printf("\r\nDevice Method called\r\n");
-    printf("Device Method name:    %s:\r\n", method_name);
+    printf("Device Method name:    %s\r\n", method_name);
     printf("Device Method payload: %.*s\r\n", (int)size, (const char*)payload);
 
     int status = 200;
@@ -50,10 +46,14 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
     printf("Response payload: %s\r\n\r\n", RESPONSE_STRING);
 
     *resp_size = strlen(RESPONSE_STRING);
-    *response = malloc(*resp_size);
-    memcpy(*response, RESPONSE_STRING, *resp_size);
-
-    callbackCounter++;
+    if ((*response = malloc(*resp_size)) == NULL)
+    {
+        status = -1;
+    }
+    else
+    {
+        memcpy(*response, RESPONSE_STRING, *resp_size);
+    }
     g_continueRunning = false;
     return status;
 }
@@ -64,7 +64,6 @@ void iothub_client_sample_device_method_run(void)
 
     g_continueRunning = true;
     
-    callbackCounter = 0;
     int receiveContext = 0;
 
     if (platform_init() != 0)
@@ -98,13 +97,10 @@ void iothub_client_sample_device_method_run(void)
             {
                 (void)printf("IoTHubClient_LL_SetDeviceMethodCallback...successful.\r\n");
 
-                size_t iterator = 0;
                 do
                 {
                     IoTHubClient_LL_DoWork(iotHubClientHandle);
                     ThreadAPI_Sleep(1);
-
-                    iterator++;
                 } while (g_continueRunning);
 
                 (void)printf("iothub_client_sample_device_method exited, call DoWork %d more time to complete final sending...\r\n", DOWORK_LOOP_NUM);

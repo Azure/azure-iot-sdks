@@ -4,7 +4,7 @@
 'use strict';
 
 require('es5-shim');
-var Base = require('azure-iot-mqtt-base').Mqtt;
+var Base = require('./mqtt_base.js');
 var results = require('azure-iot-common').results;
 var errors = require('azure-iot-common').errors;
 var EventEmitter = require('events').EventEmitter;
@@ -32,8 +32,8 @@ function Mqtt(config, provider) {
   if (provider) {
     this._mqtt = new Base(provider);
   } else {
-    this._mqtt = new Base();
-  }
+  this._mqtt = new Base();
+}
 }
 
 util.inherits(Mqtt, EventEmitter);
@@ -143,7 +143,7 @@ Mqtt.prototype.updateSharedAccessSignature = function (sharedAccessSignature, do
     } else {
       /*Codes_SRS_NODE_DEVICE_MQTT_16_007: [The updateSharedAccessSignature method shall save the new shared access signature given as a parameter to its configuration.]*/
       this._config.sharedAccessSignature = sharedAccessSignature;
-      this._mqtt = new Base(this._config);
+      this._mqtt = new Base();
       /*Codes_SRS_NODE_DEVICE_MQTT_16_010: [The updateSharedAccessSignature method shall call the `done` callback with a null error object and a SharedAccessSignatureUpdated object as a result, indicating hat the client needs to reestablish the transport connection when ready.]*/
       done(null, new results.SharedAccessSignatureUpdated(true));
     }

@@ -23,39 +23,6 @@ namespace Microsoft.Azure.Devices.Client
     using AsyncTaskOfMessage = System.Threading.Tasks.Task<Message>;
 #endif
 
-    /// <summary>
-    /// Transport types supported by DeviceClient - Amqp and HTTP 1.1
-    /// </summary>
-    public enum TransportType
-    {
-        /// <summary>
-        /// Advanced Message Queuing Protocol transport.
-        /// Try Amqp over TCP first and fallback to Amqp over WebSocket if that fails
-        /// </summary>
-        Amqp = 0,
-
-        /// <summary>
-        /// HyperText Transfer Protocol version 1 transport.
-        /// </summary>
-        Http1 = 1,
-
-        /// <summary>
-        /// Advanced Message Queuing Protocol transport over WebSocket only.
-        /// </summary>
-        Amqp_WebSocket_Only = 2,
-
-        /// <summary>
-        /// Advanced Message Queuing Protocol transport over native TCP only
-        /// </summary>
-        Amqp_Tcp_Only = 3,
-
-        /// <summary>
-        /// Message Queuing Telemetry Transport.
-        /// </summary>
-        Mqtt = 4
-    }
-
-
     /*
      * Class Diagramm and Chain of Responsibility in Device Client 
                              +--------------------+
@@ -112,7 +79,6 @@ namespace Microsoft.Azure.Devices.Client
                                                                                |  everything |
                                                                                |             |
                                                                                +-------------+
-
 */
     /// <summary>
     /// Contains methods that a device can use to send messages to and receive from the service.
@@ -134,6 +100,16 @@ namespace Microsoft.Azure.Devices.Client
         IotHubConnectionString iotHubConnectionString = null;
 
         internal IDelegatingHandler InnerHandler { get; set; }
+
+        /// <summary>
+        /// Stores the timeout used in the operation retries.
+        /// </summary>
+        public int OperationTimeoutInMilliseconds { get; set; }
+
+        /// <summary>
+        /// Stores the retry strategy used in the operation retries.
+        /// </summary>
+        public RetryStrategyType RetryStrategy { get; set; }
 
 #if !PCL
         DeviceClient(IotHubConnectionString iotHubConnectionString, ITransportSettings[] transportSettings)

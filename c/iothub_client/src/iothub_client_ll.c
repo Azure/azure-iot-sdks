@@ -992,7 +992,7 @@ static int wrap_data_in_json(const unsigned char* data, size_t length, BUFFER_HA
     else
     {
         unsigned char* iterator = wrapper;
-        *iterator = '\'';
+        *iterator = '\"';
         iterator++;
         if (memcpy(iterator, data, length) == NULL)
         {
@@ -1002,7 +1002,7 @@ static int wrap_data_in_json(const unsigned char* data, size_t length, BUFFER_HA
         else
         {
             iterator += length;
-            *iterator = '\'';
+            *iterator = '\"';
             if (BUFFER_build(response, wrapper, length+2) != 0)
             {
                 result = __LINE__;

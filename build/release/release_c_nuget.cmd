@@ -29,13 +29,13 @@ rem ----------------------------------------------------------------------------
 echo Y | call %build-root%\c\build_all\packaging\windows\rebuild_nugets.cmd
 if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-echo Y | call %build-root%\c\azure-c-shared-utility\build_all\packaging\windows\rebuild_nugets.cmd
+echo Y | call %build-root%\c\c-utility\build_all\packaging\windows\rebuild_nugets.cmd
 if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-echo Y | call %build-root%\c\azure-uamqp-c\build_all\packaging\windows\rebuild_nugets.cmd
+echo Y | call %build-root%\c\uamqp\build_all\packaging\windows\rebuild_nugets.cmd
 if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-echo Y | call %build-root%\c\azure-umqtt-c\build_all\packaging\windows\rebuild_nugets.cmd
+echo Y | call %build-root%\c\umqtt\build_all\packaging\windows\rebuild_nugets.cmd
 if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 
@@ -43,20 +43,20 @@ rem ----------------------------------------------------------------------------
 rem -- Publish C NuGet Packages
 rem -----------------------------------------------------------------------------
 if not defined nuget_feed (
-	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\c\azure-c-shared-utility\build_all\packaging\windows
+	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\c\c-utility\build_all\packaging\windows
 	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\c\azure-uamqp-c\build_all\packaging\windows
+	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\c\uamqp\build_all\packaging\windows
 	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\c\azure-umqtt-c\build_all\packaging\windows
+	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\c\umqtt\build_all\packaging\windows
 	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 	echo Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\c\build_all\packaging\windows
 	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 ) else (
-	echo Y Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\c\azure-c-shared-utility\build_all\packaging\windows --feed %nuget_feed%
+	echo Y Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\c\c-utility\build_all\packaging\windows --feed %nuget_feed%
 	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-	echo Y Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\c\azure-uamqp-c\build_all\packaging\windows --feed %nuget_feed%
+	echo Y Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\c\uamqp\build_all\packaging\windows --feed %nuget_feed%
 	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-	echo Y Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\c\azure-umqtt-c\build_all\packaging\windows --feed %nuget_feed%
+	echo Y Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\c\umqtt\build_all\packaging\windows --feed %nuget_feed%
 	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 	echo Y Y | call %build-root%\build\release\push_nugets.cmd --path %build-root%\c\build_all\packaging\windows --feed %nuget_feed%
 	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
