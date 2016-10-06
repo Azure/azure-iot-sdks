@@ -24,7 +24,8 @@ var SRCS = [
     "multitree.c",
     "schema.c",
     "schemalib.c",
-    "schemaserializer.c"
+    "schemaserializer.c",
+    "parson.c"
 ];
 
 /* Paths to external source libraries */
@@ -34,7 +35,7 @@ var slIncs = "";
 var ndkIncs = "";
 var wolfsslIncs = "";
 var serializerIncs = "-I../../inc -I../../../c-utility/inc -I../../../c-utility/inc/azure_c_shared_utility "
-    + "-I../../../iothub_client/inc ";
+    + "-I../../../iothub_client/inc -I../../../parson ";
 var pthreadIncs = "";
 
 /* Parse out the XDCARGS options for the library source paths */
