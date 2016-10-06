@@ -13,6 +13,7 @@ var device_service_tests = require('./test/device_service.js');
 var registry_tests = require('./test/registry.js');
 var file_upload_tests = require('./test/file_upload.js');
 var device_acknowledge_tests = require('./test/device_acknowledge_tests.js');
+var sas_token_tests = require('./test/sas_token_tests.js');
 var service_client = require('./test/service.js');
 var device_teardown = require('./test/device_teardown.js');
 var twin_e2e_tests = require('./test/twin_e2e_tests.js');
@@ -34,6 +35,9 @@ device_provision(hubConnectionString, function (err, provisionedDevices) {
       generalProtocols.forEach(function(protocolToTest) {
         device_service_tests(hubConnectionString, protocolToTest, deviceToTest);
       });
+    });
+    generalProtocols.forEach(function(protocolToTest) {
+      sas_token_tests(hubConnectionString, protocolToTest, provisionedDevices[1]);
     });
     file_upload_tests(hubConnectionString, deviceHttp.Http, provisionedDevices[1]);
     service_client(hubConnectionString);

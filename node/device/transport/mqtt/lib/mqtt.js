@@ -143,7 +143,7 @@ Mqtt.prototype.updateSharedAccessSignature = function (sharedAccessSignature, do
     } else {
       /*Codes_SRS_NODE_DEVICE_MQTT_16_007: [The updateSharedAccessSignature method shall save the new shared access signature given as a parameter to its configuration.]*/
       this._config.sharedAccessSignature = sharedAccessSignature;
-      this._mqtt = new Base(this._config);
+      this._mqtt = new Base();
       /*Codes_SRS_NODE_DEVICE_MQTT_16_010: [The updateSharedAccessSignature method shall call the `done` callback with a null error object and a SharedAccessSignatureUpdated object as a result, indicating hat the client needs to reestablish the transport connection when ready.]*/
       done(null, new results.SharedAccessSignatureUpdated(true));
     }
