@@ -38,7 +38,7 @@ MqttBase.prototype.connect = function (config, done) {
   }
 
   this._receiver = null;
-  this._hostName = 'mqtts://' + config.host;
+  var uri = config.uri || 'mqtts://' + config.host;
   this._topic_publish = "devices/" + config.deviceId + "/messages/events/";
   this._topic_subscribe = "devices/" + config.deviceId + "/messages/devicebound/#";
   debug('topic publish: ' + this._topic_publish);
@@ -68,7 +68,7 @@ MqttBase.prototype.connect = function (config, done) {
     this._options.passphrase = config.x509.passphrase;
   }
 
-  this.client = this.mqttprovider.connect(this._hostName, this._options);
+  this.client = this.mqttprovider.connect(uri, this._options);
   /*Codes_SRS_NODE_COMMON_MQTT_BASE_16_007: [The `connect` method shall not throw if the `done` argument has not been passed.]*/
   if (done) {
     var errCallback = function (error) {
