@@ -15,10 +15,10 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "sinon": "^1.17.5",
     "istanbul": "^0.4.4",
     "jshint": "^2.9.2",
     "mocha": "^3.0.1",
-    "sinon": "^1.17.5",
     "tslint": "^3.14.0",
     "typescript": "^1.8.10"
   },

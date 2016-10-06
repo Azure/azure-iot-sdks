@@ -4,7 +4,7 @@
 'use strict';
 
 require('es5-shim');
-var Base = require('azure-iot-mqtt-base').Mqtt;
+var Base = require('./mqtt_base.js');
 var results = require('azure-iot-common').results;
 var errors = require('azure-iot-common').errors;
 var EventEmitter = require('events').EventEmitter;
@@ -32,8 +32,8 @@ function Mqtt(config, provider) {
   if (provider) {
     this._mqtt = new Base(provider);
   } else {
-    this._mqtt = new Base();
-  }
+  this._mqtt = new Base();
+}
 }
 
 util.inherits(Mqtt, EventEmitter);

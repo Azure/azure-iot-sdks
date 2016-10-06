@@ -5,9 +5,10 @@
 
 var device = require('azure-iot-device');
 var Amqp = require('./lib/amqp.js');
+var AmqpWs = require('./lib/amqp_ws.js');
 
 /**
- * The `azure-iot-device-amqp-ws` module provides support for the AMQP protocol over secure 
+ * The `azure-iot-device-amqp` module provides support for the AMQP protocol over secure 
  * sockets to the device [client]{@link module:azure-iot-device.Client}.
  *
  * @module azure-iot-device-amqp
@@ -16,6 +17,7 @@ var Amqp = require('./lib/amqp.js');
 
 module.exports = {
   Amqp: Amqp,
+  AmqpWs: AmqpWs,
   clientFromConnectionString: function (connectionString) {
     return device.Client.fromConnectionString(connectionString, Amqp);
   }

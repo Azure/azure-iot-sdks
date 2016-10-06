@@ -2,8 +2,8 @@
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 [huzzah_remote_monitoring]
-RelativePath=\iot-hub-c-huzzah-getstartedkit\remote_monitoring\remote_monitoring.ino
-RelativeWorkingDir=\Work\Results\huzzah_remote_monitoring
+RelativePath=\arduino_cc_Work\iot-hub-c-huzzah-getstartedkit\remote_monitoring\remote_monitoring.ino
+RelativeWorkingDir=\arduino_cc_Work\Results\huzzah_remote_monitoring
 MaxAllowedDurationSeconds=100
 Categories=IoTHub
 Hardware=Adafruit_Huzzah
@@ -13,8 +13,8 @@ Installation=Disable
 Execution=Disable
 
 [huzzah_simplesample_http]
-RelativePath=\Work\arduino\libraries\AzureIoTHub\examples\simplesample_http\simplesample_http.ino
-RelativeWorkingDir=\Work\Results\huzzah_simplesample_http
+RelativePath=\arduino_cc_Work\arduino\libraries\AzureIoTHub\examples\simplesample_http\simplesample_http.ino
+RelativeWorkingDir=\arduino_cc_Work\Results\huzzah_simplesample_http
 MaxAllowedDurationSeconds=100
 Categories=IoTHub
 Hardware=Adafruit_Huzzah
@@ -24,8 +24,8 @@ Installation=Disable
 Execution=Disable
 
 [m0wifi_remote_monitoring]
-RelativePath=\iot-hub-c-m0wifi-getstartedkit\remote_monitoring\remote_monitoring.ino
-RelativeWorkingDir=\Work\Results\m0wifi_remote_monitoring
+RelativePath=\arduino_cc_Work\iot-hub-c-m0wifi-getstartedkit\remote_monitoring\remote_monitoring.ino
+RelativeWorkingDir=\arduino_cc_Work\Results\m0wifi_remote_monitoring
 MaxAllowedDurationSeconds=100
 Categories=IoTHub
 Hardware=Adafruit_FeatherM0
@@ -35,8 +35,8 @@ Installation=Disable
 Execution=Disable
 
 [m0wifi_simplesample_http]
-RelativePath=\Work\arduino\libraries\AzureIoTHub\examples\simplesample_http\simplesample_http.ino
-RelativeWorkingDir=\Work\Results\m0wifi_simplesample_http
+RelativePath=\arduino_cc_Work\arduino\libraries\AzureIoTHub\examples\simplesample_http\simplesample_http.ino
+RelativeWorkingDir=\arduino_cc_Work\Results\m0wifi_simplesample_http
 MaxAllowedDurationSeconds=100
 Categories=IoTHub
 Hardware=Adafruit_FeatherM0

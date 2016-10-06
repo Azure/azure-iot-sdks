@@ -7,9 +7,9 @@ repo_dir="apt-get-wily"
 
 # Clean up shared-Util
 echo "Preparing to remove azure-c-shared-utility vivid files"
-rm ~/$repo_dir/azure-c-shared-utility/azure-c-shared-util*0.1.0.0.*
-rm ~/$repo_dir/azure-c-shared-utility/azure-c-shared-util*0.1.0.0-*
-rm -r ~/$repo_dir/azure-c-shared-utility/azure-c-shared-util-0.1.0.0/debian
+rm ~/$repo_dir/c-utility/azure-c-shared-util*0.1.0.0.*
+rm ~/$repo_dir/c-utility/azure-c-shared-util*0.1.0.0-*
+rm -r ~/$repo_dir/c-utility/azure-c-shared-util-0.1.0.0/debian
 
 
 # Release Iot-Sdk
@@ -21,14 +21,14 @@ rm -r ~/$repo_dir/azure-iot-sdks/azure-iot-sdks-0.1.0.0/debian
 
 # Release uAmqp
 echo "Preparing azure-uamqp-c vivid package"
-rm ~/$repo_dir/azure-uamqp-c_repo/azure-uamqp-c*0.1.0.0.*
-rm ~/$repo_dir/azure-uamqp-c_repo/azure-uamqp-c*0.1.0.0-*
-rm -r ~/$repo_dir/azure-uamqp-c_repo/azure-uamqp-c-0.1.0.0/debian
+rm ~/$repo_dir/uamqp_repo/azure-uamqp-c*0.1.0.0.*
+rm ~/$repo_dir/uamqp_repo/azure-uamqp-c*0.1.0.0-*
+rm -r ~/$repo_dir/uamqp_repo/azure-uamqp-c-0.1.0.0/debian
 
 
 # Release uMqtt
 echo "Preparing to remove azure-umqtt-c vivid files"
-rm ~/$repo_dir/azure-umqtt-c_repo/azure-umqtt-c*0.1.0.0.*
-rm ~/$repo_dir/azure-umqtt-c_repo/azure-umqtt-c*0.1.0.1-*
-rm -r ~/$repo_dir/azure-umqtt-c_repo/azure-umqtt-c-0.1.0.0/debian
+rm ~/$repo_dir/umqtt_repo/azure-umqtt-c*0.1.0.0.*
+rm ~/$repo_dir/umqtt_repo/azure-umqtt-c*0.1.0.1-*
+rm -r ~/$repo_dir/umqtt_repo/azure-umqtt-c-0.1.0.0/debian
 

@@ -24,8 +24,7 @@ var SRCS = [
     "multitree.c",
     "schema.c",
     "schemalib.c",
-    "schemaserializer.c",
-	"parson.c"
+    "schemaserializer.c"
 ];
 
 /* Paths to external source libraries */
@@ -34,8 +33,8 @@ xdcargs = java.lang.System.getenv("XDCARGS").split(" ");
 var slIncs = "";
 var ndkIncs = "";
 var wolfsslIncs = "";
-var serializerIncs = "-I../../inc -I../../../azure-c-shared-utility/inc -I../../../azure-c-shared-utility/inc/azure_c_shared_utility "
-    + "-I../../../iothub_client/inc -I../../../parson ";
+var serializerIncs = "-I../../inc -I../../../c-utility/inc -I../../../c-utility/inc/azure_c_shared_utility "
+    + "-I../../../iothub_client/inc ";
 var pthreadIncs = "";
 
 /* Parse out the XDCARGS options for the library source paths */
