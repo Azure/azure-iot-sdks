@@ -98,9 +98,6 @@ lint_and_test $node_root/common/transport/amqp
 lint_and_test $node_root/common/transport/http
 [ $? -eq 0 ] || cleanup_and_exit $?
 
-lint_and_test $node_root/common/transport/mqtt
-[ $? -eq 0 ] || cleanup_and_exit $?
-
 lint_and_test $node_root/device/core
 [ $? -eq 0 ] || cleanup_and_exit $?
 
