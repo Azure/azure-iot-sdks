@@ -85,11 +85,13 @@ void my_gballoc_free(void * t)
 #include "azure_c_shared_utility/strings.h"
 #undef ENABLE_MOCKS
 
+#include "serializer.h"
+#include "macro_utils.h"
+
 #include "testrunnerswitcher.h"
 #include "codefirst.h"
-#include "macro_utils.h"
 #include "c_bool_size.h"
-#include "serializer.h"
+
 
 TEST_DEFINE_ENUM_TYPE(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_RESULT_VALUES);
@@ -578,7 +580,6 @@ DECLARE_MODEL(OuterType,
 
 END_NAMESPACE(testModelInModelReflected)
 
-
 void* OuterType_reset_device;
 EXECUTE_COMMAND_RESULT OuterType_reset_Action(OuterType* device)
 {
@@ -592,6 +593,50 @@ EXECUTE_COMMAND_RESULT InnerType_reset_Action(InnerType* device)
     InnerType_reset_device = device;
     return EXECUTE_COMMAND_SUCCESS;
 }
+
+
+/*this model is nothing different than the one above (structurally), except it has a onDesiredProperty callback*/
+BEGIN_NAMESPACE(testModelInModelReflected_with_onDesiredProperty)
+    DECLARE_MODEL(InnerType_onDesiredProperty,
+        WITH_DATA(int, this_is_int2_onDesiredProperty),
+        WITH_DATA(double, this_is_double2_onDesiredProperty),
+        WITH_ACTION(InnerType_reset_Action_onDesiredProperty),
+        WITH_REPORTED_PROPERTY(int, this_is_reported_int_Property_2_onDesiredProperty),
+        WITH_DESIRED_PROPERTY(int, this_is_desired_int_Property_2_onDesiredProperty, onthis_is_desired_int_Property_2_onDesiredProperty)
+    );
+
+    DECLARE_MODEL(OuterType_onDesiredProperty,
+        WITH_DESIRED_PROPERTY(InnerType_onDesiredProperty, Inner_onDesiredProperty, onInner_onDesiredProperty),
+        WITH_ACTION(OuterType_reset_Action_onDesiredProperty)
+    );
+
+END_NAMESPACE(testModelInModelReflected_with_onDesiredProperty)
+
+static void* OuterType_reset_device_onDesiredProperty;
+EXECUTE_COMMAND_RESULT OuterType_reset_Action_onDesiredProperty(OuterType_onDesiredProperty* device)
+{
+    OuterType_reset_device_onDesiredProperty = device;
+    return EXECUTE_COMMAND_SUCCESS;
+}
+
+static void* InnerType_reset_device_onDesiredProperty;
+EXECUTE_COMMAND_RESULT InnerType_reset_Action_onDesiredProperty(InnerType_onDesiredProperty* device)
+{
+    InnerType_reset_device_onDesiredProperty = device;
+    return EXECUTE_COMMAND_SUCCESS;
+}
+
+void onthis_is_desired_int_Property_2_onDesiredProperty(void* m)
+{
+    (void)m;
+}
+
+void onInner_onDesiredProperty(void* m)
+{
+    (void)m;
+}
+
+
 static unsigned char edmBinarySource[] = { 1, 42, 43, 44, 1 };
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
@@ -666,8 +711,10 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(REPORTED_PROPERTIES_TRANSACTION_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(pfDesiredPropertyInitialize, void*);
-        REGISTER_UMOCK_ALIAS_TYPE(pfDesiredPropertyFromAGENT_DATA_TYPE   , void*);
-        REGISTER_UMOCK_ALIAS_TYPE(    pfDesiredPropertyDeinitialize      , void*);
+        REGISTER_UMOCK_ALIAS_TYPE(pfDesiredPropertyFromAGENT_DATA_TYPE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(pfDesiredPropertyDeinitialize, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(pfOnDesiredProperty, void*);
+        
         
 
         REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelName, TEST_MODEL_NAME);
@@ -2847,11 +2894,11 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_OUTERTYPE_MODEL_HANDLE, "OuterType_reset_Action"));
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "InnerType"))
             .SetReturn(TEST_INNERTYPE_MODEL_HANDLE);
-        STRICT_EXPECTED_CALL(Schema_AddModelModel(TEST_OUTERTYPE_MODEL_HANDLE, "Inner", TEST_INNERTYPE_MODEL_HANDLE, 8));
+        STRICT_EXPECTED_CALL(Schema_AddModelModel(TEST_OUTERTYPE_MODEL_HANDLE, "Inner", TEST_INNERTYPE_MODEL_HANDLE, 8, NULL));
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "InnerType"))
             .SetReturn(TEST_INNERTYPE_MODEL_HANDLE);
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "int"));
-        STRICT_EXPECTED_CALL(Schema_AddModelDesiredProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_desired_int_Property_2", "int", IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(Schema_AddModelDesiredProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_desired_int_Property_2", "int", IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, NULL))
             .IgnoreArgument_desiredPropertyDeinitialize()
             .IgnoreArgument_desiredPropertyInitialize()
             .IgnoreArgument_desiredPropertyFromAGENT_DATA_TYPE()
@@ -3654,6 +3701,51 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///clean
         CodeFirst_DestroyDevice(device);
+    }
+
+    /* Tests_SRS_CODEFIRST_99_002:[ CodeFirst_RegisterSchema shall create the schema information and give it to the Schema module for one schema, identified by the metadata argument. On success, it shall return a handle to the model.] */
+    TEST_FUNCTION(CodeFirst_CreateDevice_passes_onDesiredProperty_callbacks)
+    {
+        ///arrange
+        static const SCHEMA_STRUCT_TYPE_HANDLE TEST_CAR_BEHIND_VAN_HANDLE = (SCHEMA_STRUCT_TYPE_HANDLE)0x7001;
+
+        ///arrange
+        STRICT_EXPECTED_CALL(Schema_GetSchemaByNamespace("TestSchema"));
+        STRICT_EXPECTED_CALL(Schema_Create("TestSchema"));
+        STRICT_EXPECTED_CALL(Schema_CreateModelType(TEST_SCHEMA_HANDLE, "OuterType_onDesiredProperty"))
+            .SetReturn(TEST_OUTERTYPE_MODEL_HANDLE);
+        STRICT_EXPECTED_CALL(Schema_CreateModelType(TEST_SCHEMA_HANDLE, "InnerType_onDesiredProperty"))
+            .SetReturn(TEST_INNERTYPE_MODEL_HANDLE);
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "OuterType_onDesiredProperty"))
+            .SetReturn(TEST_OUTERTYPE_MODEL_HANDLE);
+        STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_OUTERTYPE_MODEL_HANDLE, "OuterType_reset_Action_onDesiredProperty"));
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "InnerType_onDesiredProperty"))
+            .SetReturn(TEST_INNERTYPE_MODEL_HANDLE);
+        STRICT_EXPECTED_CALL(Schema_AddModelModel(TEST_OUTERTYPE_MODEL_HANDLE, "Inner_onDesiredProperty", TEST_INNERTYPE_MODEL_HANDLE, 8, onInner_onDesiredProperty));
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "InnerType_onDesiredProperty"))
+            .SetReturn(TEST_INNERTYPE_MODEL_HANDLE);
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "int"));
+        STRICT_EXPECTED_CALL(Schema_AddModelDesiredProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_desired_int_Property_2_onDesiredProperty", "int", IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, onthis_is_desired_int_Property_2_onDesiredProperty))
+            .IgnoreArgument_desiredPropertyDeinitialize()
+            .IgnoreArgument_desiredPropertyInitialize()
+            .IgnoreArgument_desiredPropertyFromAGENT_DATA_TYPE()
+            .IgnoreArgument_offset();
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "int"));
+        STRICT_EXPECTED_CALL(Schema_AddModelReportedProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_reported_int_Property_2_onDesiredProperty", "int"));
+        STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_INNERTYPE_MODEL_HANDLE, "InnerType_reset_Action_onDesiredProperty"));
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "double"));
+        STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_double2_onDesiredProperty", "double"));
+        STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "int"));
+        STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_INNERTYPE_MODEL_HANDLE, "this_is_int2_onDesiredProperty", "int"));
+
+        ///act
+        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("TestSchema", &ALL_REFLECTED(testModelInModelReflected_with_onDesiredProperty));
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+        ASSERT_ARE_EQUAL(void_ptr, TEST_SCHEMA_HANDLE, result);
+
+        /// cleanup
     }
 
 END_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider);
