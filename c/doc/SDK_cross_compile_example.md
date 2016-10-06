@@ -143,7 +143,7 @@ export ANDROID_NDK_ROOT=$(pwd)
 ```
 You can use *export -p* to verify ANDROID\_NDK\_ROOT has been added to the environment. Next, add the ANDROID\_NDK\_ROOT content to PATH environment variable:
 ```
-PATH=${ANDROID_NDK_ROOT}:${PATH}"
+PATH=${ANDROID_NDK_ROOT}:${PATH}
 export PATH
 ```
 Following commands will make standalone toolchain binaries in the `/tmp/my-android-toolchain` location.
@@ -153,6 +153,9 @@ cd ${ANDROID_NDK_ROOT}/build/tools
 cd /tmp/my-android-toolchain
 export MY_TOOLCHAIN=$(pwd)
 export PATH=${MY_TOOLCHAIN}/bin:$PATH
+export PATH=/tmp/my-android-toolchain/bin:$PATH
+export CC=arm-linux-androideabi-gcc
+export CXX=arm-linux-androideabi-g++
 ```
 
 ### Setting up cmake to cross compile
@@ -209,5 +212,7 @@ This document has demonstrated how to cross compile the Azure IoT SDK on a 64-bi
 https://www.raspberrypi.org
 
 <http://stackoverflow.com/questions/19162072/installing-raspberry-pi-cross-compiler> (See answer)
+
+<https://developer.android.com/ndk/guides/standalone_toolchain.html>
 
 <https://kvurd.com/blog/compiling-a-cpp-library-for-android-with-android-studio/>
