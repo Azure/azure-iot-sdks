@@ -22,7 +22,7 @@ var TOPIC_METHODS_SUBSCRIBE = "$iothub/methods/POST/#";
  * @emits  message                 When a message is received
  */
 /**
- * @event module:azure-iot-mqtt-base.MqttReceiver#message
+ * @event module:azure-iot-device-mqtt.MqttReceiver#message
  * @type {Message}
  */
 function MqttReceiver(mqttClient, topicMessage) {

@@ -16,7 +16,7 @@ ${theseTestsName}.c
 )
 
 set(${theseTestsName}_c_files
-../../../azure-c-shared-utility/src/buffer.c
+../../../c-utility/src/buffer.c
 ../../src/iothubtransportmqtt.c
 real_constbuffer.c
 real_doublylinkedlist.c

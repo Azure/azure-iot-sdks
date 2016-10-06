@@ -23,9 +23,9 @@ cd "$repo_dir"
 
 git clone -b $release_branch https://github.com/Azure/azure-iot-sdks.git --recursive
 
-#cp -r azure-iot-sdks/c/azure-c-shared-utility ./
-#cp -r azure-iot-sdks/c/azure-uamqp-c ./
-#cp -r azure-iot-sdks/c/azure-umqtt-c ./
+#cp -r azure-iot-sdks/c/c-utility ./
+#cp -r azure-iot-sdks/c/uamqp ./
+#cp -r azure-iot-sdks/c/umqtt ./
 #git clone -b develop https://github.com/Azure/azure-c-shared-utility.git --recursive
 #git clone -b develop https://github.com/Azure/azure-uamqp-c.git --recursive
 #git clone -b develop https://github.com/Azure/azure-umqtt-c.git --recursive

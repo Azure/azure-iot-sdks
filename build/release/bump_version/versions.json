@@ -24,7 +24,6 @@
         "mqtt-base": "1.1.0-dtpreview",
         "device": "1.1.0-dtpreview",
         "device-amqp": "1.1.0-dtpreview",
-        "device-amqp-ws": "1.1.0-dtpreview",
         "device-http": "1.1.0-dtpreview",
         "device-mqtt": "1.1.0-dtpreview",
         "service": "2.0.0-dtpreview",
