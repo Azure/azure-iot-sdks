@@ -114,9 +114,9 @@ If you encounter the error _error adding symbols: DSO missing from command line_
 
 ### Version Information
 
-The host machine is running Ubuntu 16.04 LTS i386
+The host machine is running Ubuntu 16.04.1 amd64
 
-The target machine is running Android
+The target machine is running Android on arm architecture (32 bit)
 
 ### Setting up the Build Environment
 
