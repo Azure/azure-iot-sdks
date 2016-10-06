@@ -9,7 +9,7 @@ One of the challenges that might be encountered though is that the platform in q
 
 This document presents two examples of how to cross compile the Azure IoT Hub SDK using the make system, [cmake](https://cmake.org), that is employed by the project. The first example it will demonstrate the process of cross compiling the SDK on a Debian 64-bit system targeting a Raspberry Pi. It demonstrates how one must set up the file system and the cmake options to achieve this which should assist developers attempting to cross compile for other targets. The second example it concerns the cross compiling with the Android target architecture.
 
-## Procedure to target Raspberry Pi
+## Procedure to target Raspberry Pi architecture
 
 ### Version Information
 
@@ -110,8 +110,29 @@ These instructions have been tested on both the Raspberry Pi 2 and 3.
 
 If you encounter the error _error adding symbols: DSO missing from command line_ try adding a reference to libdl with  _-cl -ldl_ added to your build script command line.
 
-## Procedure to target Android
+## Procedure to target Android architecture
 
+### Version Information
+
+The host machine is running Ubuntu 16.04 LTS i386
+
+The target machine is running Android
+
+### Setting up the Build Environment
+
+Open a terminal prompt on your host machine in the manner you prefer.
+
+We need to acquire the SDK source code. This is available in a GitHub repository at https://github.com/Azure/azure-iot-sdks.git. We clone this too our host machine as follows:
+```
+cd ~
+mkdir Source
+cd Source
+git clone --recursive https://github.com/Azure/azure-iot-sdks.git
+```
+
+You might consider building the SDK for your local platform at this point simply to ensure you have all the required components. At the very least, you must ensure that the SDK's prerequisite libraries are installed on your Raspberry Pi. You can achieve this by running the script _setup.sh_ found in _azure-iot-sdks/c/build\_all/linux_.
+
+In order to cross compile for a different target the first requirement is to set up an environment containing the required toolchain, system libraries and system headers that may be required to build the code. You have to download and install the Android NDK package from https://developer.android.com/ndk/downloads/index.html. Choose and download the Linux package, e.g. _android-ndk-rxx-linux-x86_64.zip_.
 
 ## Summary
 
@@ -130,3 +151,5 @@ This document has demonstrated how to cross compile the Azure IoT SDK on a 64-bi
 https://www.raspberrypi.org
 
 <http://stackoverflow.com/questions/19162072/installing-raspberry-pi-cross-compiler> (See answer)
+
+<https://kvurd.com/blog/compiling-a-cpp-library-for-android-with-android-studio/>
