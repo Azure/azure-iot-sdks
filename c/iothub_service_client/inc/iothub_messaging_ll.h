@@ -6,17 +6,17 @@
 #ifndef IOTHUB_MESSAGING_LL_H
 #define IOTHUB_MESSAGING_LL_H
 
-#ifdef __cplusplus
-extern "C"
-{
-#else
-#endif
-
 #include "crt_abstractions.h"
 #include "list.h"
 #include "map.h"
 #include "iothub_message.h"
 #include "iothub_service_client_auth.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#else
+#endif
 
 #define IOTHUB_FEEDBACK_STATUS_CODE_VALUES               \
     IOTHUB_FEEDBACK_STATUS_CODE_SUCCESS,                 \

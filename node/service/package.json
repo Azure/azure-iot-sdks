@@ -14,19 +14,22 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
+    "sinon": "^1.17.5",
     "istanbul": "^0.4.4",
     "jshint": "^2.9.2",
-    "mocha": "^3.0.1"
+    "mocha": "^3.0.1",
+    "tslint": "^3.14.0",
+    "typescript": "^1.8.10"
   },
   "scripts": {
-    "lint": "jshint --show-non-errors .",
+    "lint": "jshint --show-non-errors . && tslint -c ../tslint.json \"{lib,.}/*.ts\"",
     "unittest-min": "istanbul cover --report none node_modules/mocha/bin/_mocha -- --reporter dot test/_*_test.js",
     "alltest-min": "istanbul cover --report none node_modules/mocha/bin/_mocha -- --reporter dot test/_*_test*.js",
     "unittest": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter spec test/_*_test.js",
     "alltest": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter spec test/_*_test*.js",
     "ci": "npm -s run lint && npm -s run alltest-min && npm -s run check-cover",
     "test": "npm -s run lint && npm -s run unittest",
-    "check-cover": "istanbul check-coverage --statements 85 --branches 78 --functions 86 --lines 84"
+    "check-cover": "istanbul check-coverage --statements 84 --branches 75 --functions 86 --lines 84"
   },
   "engines": {
     "node": ">= 0.10"

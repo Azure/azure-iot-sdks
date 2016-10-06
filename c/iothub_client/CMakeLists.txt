@@ -89,6 +89,7 @@ if(${use_amqp})
             ${iothub_client_ll_transport_c_files}
             ./src/iothubtransportamqp_websockets.c
 			./src/iothubtransportamqp_auth.c
+			./src/iothubtransportamqp.c
 			./src/uamqp_messaging.c
         )
         
@@ -96,6 +97,7 @@ if(${use_amqp})
             ${iothub_client_ll_transport_h_files}
             ./inc/iothubtransportamqp_websockets.h
 			./inc/iothubtransportamqp_auth.h
+			./inc/iothubtransportamqp.h
 			./inc/uamqp_messaging.h
         )
     else()

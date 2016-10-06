@@ -5,7 +5,6 @@
 
 var errors = require('azure-iot-common').errors;
 var deviceAmqp = require('azure-iot-device-amqp');
-var deviceAmqpWs = require('azure-iot-device-amqp-ws');
 var deviceHttp = require('azure-iot-device-http');
 var deviceMqtt = require('azure-iot-device-mqtt');
 
@@ -19,8 +18,8 @@ var device_teardown = require('./test/device_teardown.js');
 
 var hubConnectionString = process.env.IOTHUB_CONNECTION_STRING;
 var storageConnectionString = process.env.STORAGE_CONNECTION_STRING;
-var generalProtocols = [deviceHttp.Http, deviceAmqp.Amqp, deviceAmqpWs.AmqpWs, deviceMqtt.Mqtt];
-var acknowledgementProtocols = [deviceHttp.Http, deviceAmqp.Amqp, deviceAmqpWs.AmqpWs];
+var generalProtocols = [deviceHttp.Http, deviceAmqp.Amqp, deviceAmqp.AmqpWs, deviceMqtt.Mqtt];
+var acknowledgementProtocols = [deviceHttp.Http, deviceAmqp.Amqp, deviceAmqp.AmqpWs];
 device_provision(hubConnectionString, function (err, provisionedDevices) {
   if (err) {
     console.log('Unable to create the devices needed.');
