@@ -25,13 +25,13 @@
 
 
 /* the following files will be placed by the 'installer'
-   o- /usr/share/iothub_client_sample_mqtt_dm/iothub_client_sample_mqtt_dm - this is the executable
-   o- /usr/share/iothub_client_sample_mqtt_dm/iothub_client_sample_mqtt_dm.service - this is the service controller
-   o- /usr/share/iothub_client_sample_mqtt_dm/.device_connection_string - file containing one line only, the device connection string
-   o- /lib/systemd/system/iothub_client_sample_mqtt_dm.service - symbolic link to /usr/share/iothub_client_sample_mqtt_dm/iothub_client_sample_mqtt_dm.service
-   o- /etc/systemd/system/multi-user.target.wants/iothub_client_sample_mqtt_dm.service - symbolic link to /usr/share/iothub_client_sample_mqtt_dm/iothub_client_sample_mqtt_dm.service
+   o- /usr/share/iothub_client_sample/firmware_update - this is the executable
+   o- /usr/share/iothub_client_sample/iothub_client_sample_firmware_update.service - this is the service controller
+   o- /usr/share/iothub_client_sample/.device_connection_string - file containing one line only, the device connection string
+   o- /lib/systemd/system/iothub_client_sample_firmware_update.service - symbolic link to /usr/share/iothub_client_sample/iothub_client_sample_firmware_update.service
+   o- /etc/systemd/system/multi-user.target.wants/iothub_client_sample_firmware_update.service - symbolic link to /usr/share/iothub_client_sample/iothub_client_samplefirmware_update.service
 */
-#define CONNECTION_STRING_FILE_NAME "/usr/share/iothub_client_sample_mqtt_dm/.device_connection_string"
+#define CONNECTION_STRING_FILE_NAME "/usr/share/iothub_client_sample/.device_connection_string"
 
 
 static int _system(const char *command)
