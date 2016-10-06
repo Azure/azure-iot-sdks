@@ -240,12 +240,8 @@ Client.prototype.open = function (done) {
       } else {
         debug('Open transport successful');
         /*Codes_SRS_NODE_DEVICE_CLIENT_16_045: [If the transport successfully establishes a connection the `open` method shall subscribe to the `disconnect` event of the transport.]*/
-        if (self._boundDisconnectHandler) {
-          self._transport.removeListener('disconnect', self._boundDisconnectHandler); // remove the old one before adding a new -- this can happen when renewing SAS tokens
-        } else {
-          self._boundDisconnectHandler = self._disconnectHandler.bind(self); 
-        }
-        self._transport.on('disconnect', self._boundDisconnectHandler);
+        self._transport.removeAllListeners('disconnect'); // remove the old one before adding a new -- this can happen when renewing SAS tokens
+        self._transport.on('disconnect', self._disconnectHandler.bind(self));
         connectReceiverIfListening();
         done(null, res);
       }
@@ -313,9 +309,7 @@ Client.prototype.close = function (done) {
         done(err);
       } else {
         /*Codes_SRS_NODE_DEVICE_CLIENT_16_046: [The `close` method shall remove the listener that has been attached to the transport `disconnect` event.]*/
-        if (self._boundDisconnectHandler) {
-          self._transport.removeListener('disconnect', self._boundDisconnectHandler);
-        }
+        self._transport.removeAllListeners('disconnect');
         done(null, result);
       }
     }.bind(this));
