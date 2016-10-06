@@ -313,7 +313,9 @@ Client.prototype.close = function (done) {
         done(err);
       } else {
         /*Codes_SRS_NODE_DEVICE_CLIENT_16_046: [The `close` method shall remove the listener that has been attached to the transport `disconnect` event.]*/
-        self._transport.removeListener('disconnect', self._boundDisconnectHandler);
+        if (self._boundDisconnectHandler) {
+          self._transport.removeListener('disconnect', self._boundDisconnectHandler);
+        }
         done(null, result);
       }
     }.bind(this));
