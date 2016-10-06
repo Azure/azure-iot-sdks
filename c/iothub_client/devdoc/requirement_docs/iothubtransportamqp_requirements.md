@@ -131,8 +131,6 @@ void IoTHubTransportAMQP_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HAN
 
 **SRS_IOTHUBTRANSPORTAMQP_09_051: [**IoTHubTransportAMQP_DoWork shall fail and return immediately if the transport handle parameter is NULL**]**
 
-**SRS_IOTHUBTRANSPORTAMQP_09_052: [**IoTHubTransportAMQP_DoWork shall fail and return immediately if the client handle parameter is NULL**]**
-
 #### General
 
 **SRS_IOTHUBTRANSPORTAMQP_09_237: [**IoTHubTransportAMQP_DoWork shall return immediately if there are no devices registered on the transport**]**

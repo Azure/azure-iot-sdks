@@ -1205,16 +1205,12 @@ static RESULT device_DoWork(AMQP_TRANSPORT_DEVICE_STATE* device_state)
 
 static void IoTHubTransportAMQP_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
 {
+	(void)iotHubClientHandle;
     // Codes_SRS_IOTHUBTRANSPORTAMQP_09_051: [IoTHubTransportAMQP_DoWork shall fail and return immediately if the transport handle parameter is NULL] 
     if (handle == NULL)
     {
         LogError("IoTHubClient DoWork failed: transport handle parameter is NULL.");
-    }
-    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_052: [IoTHubTransportAMQP_DoWork shall fail and return immediately if the client handle parameter is NULL] 
-    else if (iotHubClientHandle == NULL)
-    {
-        LogError("IoTHubClient DoWork failed: client handle parameter is NULL.");
-    }
+    } 
     else
     {
         bool trigger_connection_retry = false;

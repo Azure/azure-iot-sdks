@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C64545E6-8CA6-49B2-8301-72525D65DF35}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>iothub_client_sample_amqp</RootNamespace>
+    <RootNamespace>iothub_client_sample_amqp_shared</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
