@@ -42,7 +42,7 @@ function waitForEventHubMessages(ehClient, deviceId, callback) {
  
 
 var runTests = function (hubConnectionString, deviceTransport, provisionedDevice) {
-  describe.skip('Device utilizing ' + provisionedDevice.authenticationDescription + ' authentication and ' + deviceTransport.name, function () {
+  describe('Device utilizing ' + provisionedDevice.authenticationDescription + ' authentication and ' + deviceTransport.name, function () {
 
     var serviceClient, deviceClient, ehClient;
     var oldSasRenewalInterval;
@@ -50,8 +50,16 @@ var runTests = function (hubConnectionString, deviceTransport, provisionedDevice
     before(function() {
       this.timeout(500);
       
-      // Amqp-ws is broken for this scenario.
+      // Amqp-ws is broken for this scenario.  It just doesn't work.
       if (deviceTransport.name === 'AmqpWs') this.skip();
+
+      // Amqp is broken.  It works mostly, but fails intermittently.
+      // Mocha reports "Uncaught Error: AMQP Transport: Could not connect", but 
+      // sometimes, this exception fires during another test, so you see spurious 
+      // failures in other tests because of Amqp exceptions lingering about from
+      // previous tests.
+      if (deviceTransport.name === 'Amqp') this.skip();
+      
       oldSasRenewalInterval = Client.sasRenewalInterval;
       Client.sasRenewalInterval = 1000;
     });
