@@ -10,7 +10,7 @@
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/string_tokenizer.h"
-#include "azure_c_shared_utility/list.h"
+#include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/httpapiex.h"
@@ -451,7 +451,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceJson(BUFFER_HANDLE jsonBuffer, I
     return result;
 }
 
-static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceListJson(BUFFER_HANDLE jsonBuffer, LIST_HANDLE deviceList)
+static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceListJson(BUFFER_HANDLE jsonBuffer, SINGLYLINKEDLIST_HANDLE deviceList)
 {
     IOTHUB_REGISTRYMANAGER_RESULT result;
 
@@ -718,10 +718,10 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceListJson(BUFFER_HANDLE jsonBuffe
                             iothubDevice->isManaged = true;
                         }
 
-                        if ((list_add(deviceList, iothubDevice)) == NULL)
+                        if ((singlylinkedlist_add(deviceList, iothubDevice)) == NULL)
                         {
                             /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_072: [** If populating the deviceList parameter fails IoTHubRegistryManager_GetDeviceList shall return IOTHUB_REGISTRYMANAGER_ERROR **] */
-                            LogError("list_add failed");
+                            LogError("singlylinkedlist_add failed");
                             free((char*)iothubDevice->deviceId);
                             free((char*)iothubDevice->primaryKey);
                             free((char*)iothubDevice->secondaryKey);
@@ -772,12 +772,12 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceListJson(BUFFER_HANDLE jsonBuffe
     {
         if (deviceList != NULL)
         {
-            LIST_ITEM_HANDLE itemHandle = list_get_head_item(deviceList);
+            LIST_ITEM_HANDLE itemHandle = singlylinkedlist_get_head_item(deviceList);
             while (itemHandle != NULL)
             {
-                IOTHUB_DEVICE* deviceInfo = (IOTHUB_DEVICE*)list_item_get_value(itemHandle);
+                IOTHUB_DEVICE* deviceInfo = (IOTHUB_DEVICE*)singlylinkedlist_item_get_value(itemHandle);
                 LIST_ITEM_HANDLE lastHandle = itemHandle;
-                itemHandle = list_get_next_item(itemHandle);
+                itemHandle = singlylinkedlist_get_next_item(itemHandle);
 
                 if (deviceInfo->deviceId != NULL)
                     free((char*)deviceInfo->deviceId);
@@ -805,7 +805,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT parseDeviceListJson(BUFFER_HANDLE jsonBuffe
                     free((char*)deviceInfo->serviceProperties);
                 free(deviceInfo);
 
-                list_remove(deviceList, lastHandle);
+                singlylinkedlist_remove(deviceList, lastHandle);
             }
         }
     }
@@ -1523,7 +1523,7 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_DeleteDevice(IOTHUB_REGISTRY
     return result;
 }
 
-IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDeviceList(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, size_t numberOfDevices, LIST_HANDLE deviceList)
+IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDeviceList(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, size_t numberOfDevices, SINGLYLINKEDLIST_HANDLE deviceList)
 {
     IOTHUB_REGISTRYMANAGER_RESULT result;
 

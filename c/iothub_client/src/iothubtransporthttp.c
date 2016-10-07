@@ -580,7 +580,7 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE han
             }
             else
             {
-                /*Codes_SRS_TRANSPORTMULTITHTTP_17_042: [ If the list_add fails then IoTHubTransportHttp_Register shall fail and return NULL. ]*/
+                /*Codes_SRS_TRANSPORTMULTITHTTP_17_042: [ If the singlylinkedlist_add fails then IoTHubTransportHttp_Register shall fail and return NULL. ]*/
                 if (was_sasObject_ok) destroy_SASObject(result);
                 if (was_abandonHTTPrelativePathBegin_ok) destroy_abandonHTTPrelativePathBegin(result);
                 if (was_messageHTTPrelativePath_ok) destroy_messageHTTPrelativePath(result);
@@ -659,7 +659,7 @@ static void IoTHubTransportHttp_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
 
             /*Codes_SRS_TRANSPORTMULTITHTTP_17_047: [ IoTHubTransportHttp_Unregister shall free all the resources used in the device structure. ]*/
             destroy_perDeviceData(perDeviceItem);
-            /*Codes_SRS_TRANSPORTMULTITHTTP_17_048: [ IoTHubTransportHttp_Unregister shall call list_remove to remove device from devices list. ]*/
+            /*Codes_SRS_TRANSPORTMULTITHTTP_17_048: [ IoTHubTransportHttp_Unregister shall call singlylinkedlist_remove to remove device from devices list. ]*/
             VECTOR_erase(handleData->perDeviceList, listItem, 1);
             free(deviceHandleData);
         }
@@ -743,7 +743,7 @@ static void destroy_perDeviceList(HTTPTRANSPORT_HANDLE_DATA* handleData)
     handleData->perDeviceList = NULL;
 }
 
-/*Codes_SRS_TRANSPORTMULTITHTTP_17_009: [ IoTHubTransportHttp_Create shall call list_create to create a list of registered devices. ]*/
+/*Codes_SRS_TRANSPORTMULTITHTTP_17_009: [ IoTHubTransportHttp_Create shall call singlylinkedlist_create to create a list of registered devices. ]*/
 static bool create_perDeviceList(HTTPTRANSPORT_HANDLE_DATA* handleData)
 {
     bool result;

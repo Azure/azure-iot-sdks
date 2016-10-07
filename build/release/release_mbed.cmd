@@ -5,35 +5,35 @@
 
 echo Releasing mbed bits ...
 
-call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\iothub_client\build\iothub_amqp_transport
+call ..\..\c\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\iothub_client\build\iothub_amqp_transport
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\iothub_client\build\iothub_http_transport
+call ..\..\c\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\iothub_client\build\iothub_http_transport
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\iothub_client\build\iothub_mqtt_transport
+call ..\..\c\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\iothub_client\build\iothub_mqtt_transport
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\iothub_client\build\iothub_client
+call ..\..\c\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\iothub_client\build\iothub_client
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\azure-uamqp-c\build_all
+call ..\..\c\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\uamqp\build_all
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\azure-umqtt-c\build_all
+call ..\..\c\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\umqtt\build_all
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\serializer\build
+call ..\..\c\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\serializer\build
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\azure-c-shared-utility\build_all
+call ..\..\c\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\c-utility\build_all
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\iothub_client\samples\iothub_client_sample_amqp
+call ..\..\c\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\iothub_client\samples\iothub_client_sample_amqp
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\iothub_client\samples\iothub_client_sample_http
+call ..\..\c\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\iothub_client\samples\iothub_client_sample_http
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\iothub_client\samples\iothub_client_sample_mqtt
+call ..\..\c\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\iothub_client\samples\iothub_client_sample_mqtt
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\serializer\samples\remote_monitoring
+call ..\..\c\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\serializer\samples\remote_monitoring
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\serializer\samples\simplesample_amqp
+call ..\..\c\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\serializer\samples\simplesample_amqp
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\serializer\samples\simplesample_http
+call ..\..\c\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\serializer\samples\simplesample_http
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\serializer\samples\simplesample_mqtt
+call ..\..\c\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\serializer\samples\simplesample_mqtt
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-call ..\..\c\azure-c-shared-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\serializer\samples\temp_sensor_anomaly
+call ..\..\c\c-utility\tools\mbed_build_scripts\release_mbed_project.cmd ..\..\..\c\serializer\samples\temp_sensor_anomaly
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!

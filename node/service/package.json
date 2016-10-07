@@ -17,10 +17,12 @@
     "sinon": "^1.17.5",
     "istanbul": "^0.4.4",
     "jshint": "^2.9.2",
-    "mocha": "^3.0.1"
+    "mocha": "^3.0.1",
+    "tslint": "^3.14.0",
+    "typescript": "^1.8.10"
   },
   "scripts": {
-    "lint": "jshint --show-non-errors .",
+    "lint": "jshint --show-non-errors . && tslint -c ../tslint.json \"{lib,.}/*.ts\"",
     "unittest-min": "istanbul cover --report none node_modules/mocha/bin/_mocha -- --reporter dot test/_*_test.js",
     "alltest-min": "istanbul cover --report none node_modules/mocha/bin/_mocha -- --reporter dot test/_*_test*.js",
     "unittest": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter spec test/_*_test.js",

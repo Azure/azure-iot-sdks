@@ -119,7 +119,7 @@ See the setting details below.
 
 -   Edit the following file using vi editor:
 
-        azure-iot-sdks/c/azure-c-shared-utility/tests/condition_unittests/CMakeLists.txt
+        azure-iot-sdks/c/c-utility/tests/condition_unittests/CMakeLists.txt
 
 -   Add, and then save the changes:
 

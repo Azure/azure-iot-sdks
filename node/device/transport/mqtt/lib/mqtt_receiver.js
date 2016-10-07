@@ -17,7 +17,7 @@ var Message = require('azure-iot-common').Message;
  * @emits  message  When a message is received
  */
 /**
- * @event module:azure-iot-mqtt-base.MqttReceiver#message
+ * @event module:azure-iot-device-mqtt.MqttReceiver#message
  * @type {Message}
  */
 function MqttReceiver(mqttClient, topic_subscribe) {

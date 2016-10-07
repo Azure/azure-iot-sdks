@@ -4,6 +4,9 @@
 #ifndef IOTHUBACCOUNT_H
 #define IOTHUBACCOUNT_H
 
+#include "iothub_messaging_ll.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
+
 #ifdef __cplusplus
 #include <cstddef>
 extern "C"
@@ -11,9 +14,6 @@ extern "C"
 #else
 #include <stddef.h>
 #endif
-
-#include "iothub_messaging_ll.h"
-#include "azure_c_shared_utility/crt_abstractions.h"
 
 typedef struct IOTHUB_ACCOUNT_INFO_TAG* IOTHUB_ACCOUNT_INFO_HANDLE;
 

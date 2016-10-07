@@ -51,7 +51,7 @@ typedef struct IOTHUB_SERVICE_FEEDBACK_BATCH_TAG
 {
     const char* userId;
     const char* lockToken;
-    LIST_HANDLE feedbackRecordList;
+    SINGLYLINKEDLIST_HANDLE feedbackRecordList;
 } IOTHUB_SERVICE_FEEDBACK_BATCH;
 
 typedef struct IOTHUB_MESSAGING_TAG* IOTHUB_MESSAGING_HANDLE;

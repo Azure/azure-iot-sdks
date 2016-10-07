@@ -16,7 +16,7 @@
 #include "azure_c_shared_utility/httpapiex.h"
 #include "azure_c_shared_utility/httpapiexsas.h"
 #include "azure_c_shared_utility/strings.h"
-#include "azure_c_shared_utility/list.h"
+#include "azure_c_shared_utility/singlylinkedlist.h"
 #include "parson.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 
@@ -126,12 +126,12 @@ typedef struct LIST_ITEM_INSTANCE_TAG
     void* next;
 } LIST_ITEM_INSTANCE;
 
-typedef struct LIST_INSTANCE_TAG
+typedef struct SINGLYLINKEDLIST_INSTANCE_TAG
 {
     LIST_ITEM_INSTANCE* head;
 } LIST_INSTANCE;
 
-static LIST_HANDLE my_list_create(void)
+static SINGLYLINKEDLIST_HANDLE my_list_create(void)
 {
     LIST_INSTANCE* result;
 
@@ -144,7 +144,7 @@ static LIST_HANDLE my_list_create(void)
     return result;
 }
 
-static void my_list_destroy(LIST_HANDLE list)
+static void my_list_destroy(SINGLYLINKEDLIST_HANDLE list)
 {
     if (list != NULL)
     {
@@ -161,7 +161,7 @@ static void my_list_destroy(LIST_HANDLE list)
     }
 }
 
-static LIST_ITEM_HANDLE my_list_add(LIST_HANDLE list, const void* item)
+static LIST_ITEM_HANDLE my_list_add(SINGLYLINKEDLIST_HANDLE list, const void* item)
 {
     LIST_ITEM_INSTANCE* result;
 
@@ -204,7 +204,7 @@ static LIST_ITEM_HANDLE my_list_add(LIST_HANDLE list, const void* item)
     return result;
 }
 
-static int my_list_remove(LIST_HANDLE list, LIST_ITEM_HANDLE item)
+static int my_list_remove(SINGLYLINKEDLIST_HANDLE list, LIST_ITEM_HANDLE item)
 {
     int result;
 
@@ -253,7 +253,7 @@ static int my_list_remove(LIST_HANDLE list, LIST_ITEM_HANDLE item)
     return result;
 }
 
-static LIST_ITEM_HANDLE my_list_get_head_item(LIST_HANDLE list)
+static LIST_ITEM_HANDLE my_list_get_head_item(SINGLYLINKEDLIST_HANDLE list)
 {
     LIST_ITEM_HANDLE result;
 
@@ -303,7 +303,7 @@ static const void* my_list_item_get_value(LIST_ITEM_HANDLE item_handle)
     return result;
 }
 
-static LIST_ITEM_HANDLE my_list_find(LIST_HANDLE list, LIST_MATCH_FUNCTION match_function, const void* match_context)
+static LIST_ITEM_HANDLE my_list_find(SINGLYLINKEDLIST_HANDLE list, LIST_MATCH_FUNCTION match_function, const void* match_context)
 {
     LIST_ITEM_HANDLE result;
 
@@ -394,7 +394,7 @@ static const char* TEST_CONST_CHAR_PTR = "TestConstChar";
 
 static STRING_HANDLE TEST_STRING_HANDLE = (STRING_HANDLE)0x4242;
 static BUFFER_HANDLE TEST_BUFFER_HANDLE = (BUFFER_HANDLE)0x4242;
-static const LIST_HANDLE TEST_LIST_HANDLE = (LIST_HANDLE)0x4242;
+static const SINGLYLINKEDLIST_HANDLE TEST_LIST_HANDLE = (SINGLYLINKEDLIST_HANDLE)0x4242;
 static const LIST_ITEM_HANDLE TEST_LIST_ITEM_HANDLE = (LIST_ITEM_HANDLE)0x3434;
 
 static const unsigned int httpStatusCodeOk = 200;
@@ -491,7 +491,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         REGISTER_UMOCK_ALIAS_TYPE(JSON_Value, void*);
         REGISTER_UMOCK_ALIAS_TYPE(JSON_Object, void*);
         REGISTER_UMOCK_ALIAS_TYPE(JSON_Status, int);
-        REGISTER_UMOCK_ALIAS_TYPE(LIST_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(SINGLYLINKEDLIST_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(LIST_ITEM_HANDLE, void*);
 
         REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
@@ -515,27 +515,27 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         
         REGISTER_GLOBAL_MOCK_HOOK(BUFFER_delete, my_BUFFER_delete);
 
-        REGISTER_GLOBAL_MOCK_HOOK(list_create, my_list_create);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(list_create, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_create, my_list_create);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_create, NULL);
 
-        REGISTER_GLOBAL_MOCK_HOOK(list_add, my_list_add);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(list_add, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_add, my_list_add);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_add, NULL);
 
-        REGISTER_GLOBAL_MOCK_HOOK(list_get_head_item, my_list_get_head_item);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(list_get_head_item, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_get_head_item, my_list_get_head_item);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_get_head_item, NULL);
 
-        REGISTER_GLOBAL_MOCK_HOOK(list_remove, my_list_remove);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(list_remove, __LINE__);
+        REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_remove, my_list_remove);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_remove, __LINE__);
 
-        REGISTER_GLOBAL_MOCK_HOOK(list_get_next_item, my_list_get_next_item);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(list_get_next_item, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_get_next_item, my_list_get_next_item);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_get_next_item, NULL);
         
-        REGISTER_GLOBAL_MOCK_HOOK(list_find, my_list_find);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(list_find, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_find, my_list_find);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_find, NULL);
 
-        REGISTER_GLOBAL_MOCK_HOOK(list_item_get_value, my_list_item_get_value);
+        REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_item_get_value, my_list_item_get_value);
 
-        REGISTER_GLOBAL_MOCK_HOOK(list_destroy, my_list_destroy);
+        REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_destroy, my_list_destroy);
         
         REGISTER_GLOBAL_MOCK_HOOK(HTTPHeaders_Alloc, my_HTTPHeaders_Alloc);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPHeaders_Alloc, NULL);
@@ -2287,7 +2287,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
     TEST_FUNCTION(IoTHubRegistryManager_GetDeviceList_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_registryManagerHandle_is_NULL)
     {
         ///arrange
-        LIST_HANDLE deviceList = list_create();
+        SINGLYLINKEDLIST_HANDLE deviceList = singlylinkedlist_create();
         umock_c_reset_all_calls();
 
         ///act
@@ -2298,7 +2298,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         ///cleanup
-        list_destroy(deviceList);
+        singlylinkedlist_destroy(deviceList);
     }
 
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_060: [ IoTHubRegistryManager_GetDeviceList shall verify the input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
@@ -2318,7 +2318,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
     TEST_FUNCTION(IoTHubRegistryManager_GetDeviceList_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_numberOfDevices_is_zero)
     {
         ///arrange
-        LIST_HANDLE deviceList = list_create();
+        SINGLYLINKEDLIST_HANDLE deviceList = singlylinkedlist_create();
         umock_c_reset_all_calls();
 
         ///act
@@ -2329,14 +2329,14 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         ///cleanup
-        list_destroy(deviceList);
+        singlylinkedlist_destroy(deviceList);
     }
 
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_061: [ IoTHubRegistryManager_GetDeviceList shall verify if the numberOfDevices input parameter is between 1 and 1000 and if it is not then return IOTHUB_REGISTRYMANAGER_INVALID_ARG ]*/
     TEST_FUNCTION(IoTHubRegistryManager_GetDeviceList_return_IOTHUB_REGISTRYMANAGER_INVALID_ARG_if_input_parameter_numberOfDevices_is_1001)
     {
         ///arrange
-        LIST_HANDLE deviceList = list_create();
+        SINGLYLINKEDLIST_HANDLE deviceList = singlylinkedlist_create();
         umock_c_reset_all_calls();
 
         ///act
@@ -2347,7 +2347,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         ///cleanup
-        list_destroy(deviceList);
+        singlylinkedlist_destroy(deviceList);
     }
 
     /* Tests_SRS_IOTHUBREGISTRYMANAGER_12_062: [ IoTHubRegistryManager_GetDeviceList shall create HTTP GET request for numberOfDevices using the follwoing format: url/devices/?top=[numberOfDevices]&api-version ]*/
@@ -2366,7 +2366,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
     TEST_FUNCTION(IoTHubRegistryManager_GetDeviceList_happy_path)
     {
         ///arrange
-        LIST_HANDLE deviceList = list_create();
+        SINGLYLINKEDLIST_HANDLE deviceList = singlylinkedlist_create();
         ASSERT_IS_NOT_NULL(deviceList);
         umock_c_reset_all_calls();
 
@@ -2493,7 +2493,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
-        STRICT_EXPECTED_CALL(list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
@@ -2518,11 +2518,11 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         ///cleanup
         if (deviceList != NULL)
         {
-            LIST_ITEM_HANDLE itemHandle = list_get_head_item(deviceList);
+            LIST_ITEM_HANDLE itemHandle = singlylinkedlist_get_head_item(deviceList);
             while (itemHandle != NULL)
             {
                 IOTHUB_DEVICE* deviceInfo = (IOTHUB_DEVICE*)itemHandle->item;
-                itemHandle = list_get_next_item(itemHandle);
+                itemHandle = singlylinkedlist_get_next_item(itemHandle);
 
                 if (deviceInfo->deviceId != NULL)
                     free((char*)deviceInfo->deviceId);
@@ -2550,7 +2550,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                     free((char*)deviceInfo->serviceProperties);
                 free(deviceInfo);
             }
-            list_destroy(deviceList);
+            singlylinkedlist_destroy(deviceList);
         }
     }
 
@@ -2687,7 +2687,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
-        STRICT_EXPECTED_CALL(list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
@@ -2710,7 +2710,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
         for (size_t i = 0; i < negative_call_count; i++)
         {
             /// arrange
-            LIST_HANDLE deviceList = list_create();
+            SINGLYLINKEDLIST_HANDLE deviceList = singlylinkedlist_create();
             umock_c_reset_all_calls();
 
             umock_c_negative_tests_reset();
@@ -2754,11 +2754,11 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
             ///cleanup
             if (deviceList != NULL)
             {
-                LIST_ITEM_HANDLE itemHandle = list_get_head_item(deviceList);
+                LIST_ITEM_HANDLE itemHandle = singlylinkedlist_get_head_item(deviceList);
                 while (itemHandle != NULL)
                 {
                     IOTHUB_DEVICE* deviceInfo = (IOTHUB_DEVICE*)itemHandle->item;
-                    itemHandle = list_get_next_item(itemHandle);
+                    itemHandle = singlylinkedlist_get_next_item(itemHandle);
 
                     if (deviceInfo->deviceId != NULL)
                         free((char*)deviceInfo->deviceId);
@@ -2786,7 +2786,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
                         free((char*)deviceInfo->serviceProperties);
                     free(deviceInfo);
                 }
-                list_destroy(deviceList);
+                singlylinkedlist_destroy(deviceList);
             }
 
 
@@ -2802,9 +2802,9 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
             //        IOTHUB_DEVICE* deviceInfo = (IOTHUB_DEVICE*)current_item;
             //        if (deviceInfo != NULL)
 
-            //        //if (list_item_get_value(current_item) != NULL)
+            //        //if (singlylinkedlist_item_get_value(current_item) != NULL)
             //        {
-            //        //    IOTHUB_DEVICE* deviceInfo = (IOTHUB_DEVICE*)(list_item_get_value(current_item));
+            //        //    IOTHUB_DEVICE* deviceInfo = (IOTHUB_DEVICE*)(singlylinkedlist_item_get_value(current_item));
             //            if (deviceInfo->deviceId != NULL)
             //                free((char*)deviceInfo->deviceId);
             //            if (deviceInfo->primaryKey != NULL)
@@ -2830,7 +2830,7 @@ BEGIN_TEST_SUITE(iothub_registrymanager_ut)
             //            if (deviceInfo->serviceProperties != NULL)
             //                free((char*)deviceInfo->serviceProperties);
 
-            //        //    free((void*)list_item_get_value(current_item));
+            //        //    free((void*)singlylinkedlist_item_get_value(current_item));
             //        }
             //        free(current_item);
             //    }
