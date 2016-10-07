@@ -51,9 +51,9 @@ extern IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* 
 
 **SRS_IOTHUBCLIENT_12_004: [** IoTHubClient_CreateFromConnectionString shall allocate a new IoTHubClient instance.  **]**
 
-**SRS_IOTHUBCLIENT_02_059: [** `IoTHubClient_CreateFromConnectionString` shall create a `LIST_HANDLE` containing informations saved by `IoTHubClient_UploadToBlobAsync`. **]** 
+**SRS_IOTHUBCLIENT_02_059: [** `IoTHubClient_CreateFromConnectionString` shall create a `SINGLYLINKEDLIST_HANDLE` containing informations saved by `IoTHubClient_UploadToBlobAsync`. **]** 
 
-**SRS_IOTHUBCLIENT_02_070: [** If creating the `LIST_HANDLE` fails then `IoTHubClient_CreateFromConnectionString` shall fail and return NULL**]**
+**SRS_IOTHUBCLIENT_02_070: [** If creating the `SINGLYLINKEDLIST_HANDLE` fails then `IoTHubClient_CreateFromConnectionString` shall fail and return NULL**]**
 
 **SRS_IOTHUBCLIENT_12_011: [** If the allocation failed, IoTHubClient_CreateFromConnectionString returns NULL  **]**
 
@@ -74,9 +74,9 @@ extern IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* conf
 
 **SRS_IOTHUBCLIENT_01_001: [** IoTHubClient_Create shall allocate a new IoTHubClient instance and return a non-NULL handle to it. **]**
 
-**SRS_IOTHUBCLIENT_02_060: [** `IoTHubClient_Create` shall create a `LIST_HANDLE` that shall be used by `IoTHubClient_UploadToBlobAsync`. **]**  
+**SRS_IOTHUBCLIENT_02_060: [** `IoTHubClient_Create` shall create a `SINGLYLINKEDLIST_HANDLE` that shall be used by `IoTHubClient_UploadToBlobAsync`. **]**  
 
-**SRS_IOTHUBCLIENT_02_061: [** If creating the `LIST_HANDLE` fails then `IoTHubClient_Create` shall fail and return NULL. **]**
+**SRS_IOTHUBCLIENT_02_061: [** If creating the `SINGLYLINKEDLIST_HANDLE` fails then `IoTHubClient_Create` shall fail and return NULL. **]**
 
 **SRS_IOTHUBCLIENT_01_002: [** IoTHubClient_Create shall instantiate a new IoTHubClient_LL instance by calling IoTHubClient_LL_Create and passing the config argument. **]**
 
@@ -103,9 +103,9 @@ Create an IoTHubClient using an existing connection.
 
 **SRS_IOTHUBCLIENT_17_001: [** IoTHubClient_CreateWithTransport shall allocate a new IoTHubClient instance and return a non-NULL handle to it.**]**
 
-**SRS_IOTHUBCLIENT_02_073: [** `IoTHubClient_CreateWithTransport` shall create a `LIST_HANDLE` that shall be used by `IoTHubClient_UploadToBlobAsync`. **]**  
+**SRS_IOTHUBCLIENT_02_073: [** `IoTHubClient_CreateWithTransport` shall create a `SINGLYLINKEDLIST_HANDLE` that shall be used by `IoTHubClient_UploadToBlobAsync`. **]**  
 
-**SRS_IOTHUBCLIENT_02_074: [** If creating the `LIST_HANDLE` fails then `IoTHubClient_CreateWithTransport` shall fail and return NULL. **]**
+**SRS_IOTHUBCLIENT_02_074: [** If creating the `SINGLYLINKEDLIST_HANDLE` fails then `IoTHubClient_CreateWithTransport` shall fail and return NULL. **]**
  
 **SRS_IOTHUBCLIENT_17_002: [** If allocating memory for the new IoTHubClient instance fails, then IoTHubClient_CreateWithTransport shall return NULL. **]**
  
