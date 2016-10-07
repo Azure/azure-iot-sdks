@@ -143,17 +143,15 @@ export ANDROID_NDK_ROOT=$(pwd)
 ```
 You can use *export -p* to verify ANDROID\_NDK\_ROOT has been added to the environment. Next, add the ANDROID\_NDK\_ROOT content to PATH environment variable:
 ```
-PATH=${ANDROID_NDK_ROOT}:${PATH}
-export PATH
+export PATH=${ANDROID_NDK_ROOT}:${PATH}
 ```
 Following commands will make standalone toolchain binaries in the `/tmp/my-android-toolchain` location.
 ```
-cd ${ANDROID_NDK_ROOT}/build/tools
+cd build/tools
 ./make_standalone_toolchain.py --arch arm --install-dir /tmp/my-android-toolchain
 cd /tmp/my-android-toolchain
 export MY_TOOLCHAIN=$(pwd)
 export PATH=${MY_TOOLCHAIN}/bin:$PATH
-export PATH=/tmp/my-android-toolchain/bin:$PATH
 export CC=arm-linux-androideabi-gcc
 export CXX=arm-linux-androideabi-g++
 ```
