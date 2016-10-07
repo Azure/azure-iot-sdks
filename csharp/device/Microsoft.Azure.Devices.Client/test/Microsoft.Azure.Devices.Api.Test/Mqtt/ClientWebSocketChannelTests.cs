@@ -14,7 +14,6 @@ namespace Microsoft.Azure.Devices.Client.Test.Mqtt
     using DotNetty.Codecs.Mqtt.Packets;
     using DotNetty.Handlers.Logging;
     using DotNetty.Transport.Channels;
-    using Microsoft.Azure.Amqp.Transport;
     using Microsoft.Azure.Devices.Client.Transport.Mqtt;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -28,7 +27,6 @@ namespace Microsoft.Azure.Devices.Client.Test.Mqtt
         static ServerWebSocketChannel serverWebSocketChannel;
         static ReadListeningHandler serverListener;
         static volatile bool done;
-        static Task serverTask;
 
         const string ClientId = "scenarioClient1";
         const string SubscribeTopicFilter1 = "test/+";
@@ -49,13 +47,12 @@ namespace Microsoft.Azure.Devices.Client.Test.Mqtt
             listener.Prefixes.Add("http://+:" + Port + WebSocketConstants.UriSuffix + "/");
             listener.Start();
 
-            serverTask = RunWebSocketServer().ContinueWith(t => t, TaskContinuationOptions.OnlyOnFaulted);
+            RunWebSocketServer().ContinueWith(t => t, TaskContinuationOptions.OnlyOnFaulted);
         }
 
         [ClassCleanup()]
         public static void AssemblyCleanup()
         {
-
             listener.Stop();
         }
 
@@ -70,7 +67,6 @@ namespace Microsoft.Azure.Devices.Client.Test.Mqtt
             var threadLoop = new SingleThreadEventLoop("MQTTExecutionThread", TimeSpan.FromSeconds(1));
             await threadLoop.RegisterAsync(clientWebSocketChannel);
             await clientWebSocketChannel.WriteAndFlushAsync(new ConnectPacket());
-            done = true;
         }
 
         [ExpectedException(typeof(ClosedChannelException))]
@@ -84,8 +80,6 @@ namespace Microsoft.Azure.Devices.Client.Test.Mqtt
             var threadLoop = new SingleThreadEventLoop("MQTTExecutionThread", TimeSpan.FromSeconds(1));
             await threadLoop.RegisterAsync(clientWebSocketChannel);
             clientWebSocketChannel.Read();
-
-            done = true;
         }
 
         // The following tests can only be run in Administrator mode

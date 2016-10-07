@@ -209,7 +209,6 @@
     <Compile Include="Common\ActionItem.cs" />
     <Compile Include="Common\Amqp\ClientWebSocketTransport.cs" />
     <Compile Include="Common\Amqp\LegacyClientWebSocketTransport.cs" />
-    <Compile Include="Common\Amqp\WebSocketConstants.cs" />
     <Compile Include="Common\Api\IotHubApiResources.cs" />
     <Compile Include="Common\Client\IotHubAmqpProperty.cs" />
     <Compile Include="Common\Data\AmqpErrorMapper.cs" />
@@ -262,6 +261,7 @@
     <Compile Include="Transport\RetryDelegatingHandler.cs" />
     <Compile Include="Transport\RoutingDelegatingHandler.cs" />
     <Compile Include="Transport\TransportHandler.cs" />
+    <Compile Include="Transport\WebSocketConstants.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="35MSSharedLib1024.snk" />
