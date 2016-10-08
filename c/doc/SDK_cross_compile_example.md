@@ -156,6 +156,20 @@ export CC=arm-linux-androideabi-gcc
 export CXX=arm-linux-androideabi-g++
 ```
 
+### Cross/compiling libuuid
+
+UNfortunately, the Azure sdk libraries need the presence of a library not included in the android toolchain support binaries. So, you have to download it from <https://sourceforge.net/projects/libuuid/>.
+
+Untar the libuuid archive in your home directory, obtaining a new folder similar to `~/libuuid-x.x.x`. Then type following commands>
+
+```
+cd ~/libuuid-x.x.x
+./configure CC=arm-linux-androideabi-gcc --prefix=/tmp/my-toolchain-deps --host=arm-linux-androideabi
+make
+make install
+
+```
+
 ### Setting up cmake to cross compile
 
 Now we need to switch to the SDK directory tree. Enter this command
@@ -215,3 +229,5 @@ https://www.raspberrypi.org
 <https://developer.android.com/ndk/guides/standalone_toolchain.html>
 
 <https://kvurd.com/blog/compiling-a-cpp-library-for-android-with-android-studio/>
+
+<http://www.fabriziodini.eu/posts/cross_compile_tutorial/>
