@@ -169,7 +169,7 @@ INCLUDE(CMakeForceCompiler)
 
 SET(CMAKE_SYSTEM_NAME Android)
 
-# this is the location of the amd64 toolchain targeting the Raspberry Pi
+# this is the location of the toolchain targeting the arm architecture
 SET(CMAKE_C_COMPILER $ENV{MY_TOOLCHAIN}/bin/arm-linux-androideabi-gcc)
 
 # this is the file system root of the target
@@ -190,7 +190,7 @@ The final step in the process is to run the actual build. For this you will need
 ```
 cd ~/Source/azure-iot-sdks/c/build_all/linux
 ./setup.sh
-./build.sh --toolchain-file toolchain-android.cmake --skip-unittests -cl --sysroot=$MY_TOOLCHAIN
+./build.sh --toolchain-file toolchain-android.cmake --skip-unittests -cl --sysroot=${MY_TOOLCHAIN}/sysroot
 ```
 This will tell cmake to build the SDK using the toolchain file toolchain-android.cmake and skip running all tests which is important since the executables will (probably) not run successfully on the host anyway. Finally, and absolutely critical is the use of the *--sysroot* option. Without this the compiler will fail to find required headers and libraries.
 
