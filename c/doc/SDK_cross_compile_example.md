@@ -164,7 +164,7 @@ Untar the libuuid archive in your home directory, obtaining a new folder similar
 
 ```
 cd ~/libuuid-x.x.x
-./configure CC=arm-linux-androideabi-gcc --prefix=/tmp/my-toolchain-deps --host=arm-linux-androideabi
+./configure CC=arm-linux-androideabi-gcc --prefix=/tmp/my-android-toolchain-deps --host=arm-linux-androideabi --with-sysroot=${MY_TOOLCHAIN}/sysroot
 make
 make install
 
