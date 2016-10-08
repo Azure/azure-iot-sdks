@@ -134,9 +134,6 @@ rem ----------------------------------------------------------------------------
 @echo Copy iothub_client.pyd to %build-root%\device\samples
 copy /Y %PYTHON_SOLUTION_PATH%\%build-config%\iothub_client.pyd  %build-root%\device\samples\ 
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-@echo Copy iothub_client.pyd to %build-root%\build_all\windows\iothub_client for Python wheel generation
-copy /Y %PYTHON_SOLUTION_PATH%\%build-config%\iothub_client.pyd  %build-root%\build_all\windows\iothub_client
-if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 @echo Copy iothub_client_mock.pyd to %build-root%\device\tests
 copy /Y %PYTHON_SOLUTION_PATH%\%build-config%\iothub_client_mock.pyd  %build-root%\device\tests\ 
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
@@ -155,18 +152,22 @@ if %run-ut%==1 (
 )
 
 rem -----------------------------------------------------------------------------
-rem -- create PyPy wheel
+rem -- create PyPi wheel
 rem -----------------------------------------------------------------------------
 
 if %wheel%==1 (
+    @echo Copy iothub_client.pyd to %build-root%\build_all\windows\iothub_client for Python wheel generation
+    copy /Y %PYTHON_SOLUTION_PATH%\%build-config%\iothub_client.pyd  %build-root%\build_all\windows\iothub_client
+    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
     cd %build-root%\build_all\windows
     echo update Python packages
     python -m pip install -U pip setuptools wheel twine
-    python -m pip install wheel twine
     echo create Python wheel: 
     echo "python setup.py bdist_wheel --plat-name %platname%"
     python setup.py bdist_wheel --plat-name "%platname%"
-    echo Python wheel done
+    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    dir dist
+    echo Yet another Python wheel done
 )
 
 rem -----------------------------------------------------------------------------
@@ -202,7 +203,6 @@ rem ----------------------------------------------------------------------------
 
 :_run-msbuild
 rem // optionally override configuration|platform
-setlocal EnableExtensions
 set build-target=
 if "%~1" neq "Build" set "build-target=/t:%~1"
 if "%~3" neq "" set build-config=%~3

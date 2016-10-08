@@ -29,7 +29,7 @@ except Exception as e:
 
 setup(
     name='iothub_client',
-    version=_version+'.dev4', # todo: remov devX once moving from testpypy to pypy
+    version=_version+'.0', # using version of actual c client release
     description='IoT Hub Client Library',
     license='Apache Software License',
     url='https://github.com/Azure/azure-iot-sdks/tree/master/python/device',

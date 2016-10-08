@@ -1,7 +1,7 @@
 @REM Copyright (c) Microsoft. All rights reserved.
 @REM Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-@setlocal
+@setlocal EnableExtensions EnableDelayedExpansion
 @echo off
 
 set build-root=%~dp0
@@ -25,6 +25,8 @@ REM target may be set to 64 bit build if a Python x64 detected
 set build-platform=Win32
 set build-config=Release
 set build-python=2.7
+set wheel=0
+set platname=win32
 
 python python_version_check.py >pyenv.bat
 if errorlevel 1 goto :NeedPython
@@ -40,12 +42,17 @@ exit /b 1
 :args-loop
 if "%1" equ "" goto args-done
 if "%1" equ "--config" goto arg-build-config
+if "%1" equ "--wheel" goto arg-build-wheel
 call :usage && exit /b 1
 
 :arg-build-config
 shift
 if "%1" equ "" call :usage && exit /b 1
 set build-config=%1
+goto args-continue
+
+:arg-build-wheel
+set wheel=1
 goto args-continue
 
 :args-continue
@@ -61,14 +68,12 @@ set cmake-output=cmake_%build-platform%
 REM -- C --
 cd %build-root%..\..\..\c\build_all\windows
 call build_client.cmd --platform %build-platform% --buildpython %build-python% --config %build-config%
-if errorlevel 1 exit /b 1
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 cd %build-root%
 
 @Echo CMAKE Output Path: %USERPROFILE%\%cmake-output%\python
 
 copy %USERPROFILE%\%cmake-output%\python\src\%build-config%\iothub_client.pyd ..\..\device\samples
-if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
-copy %USERPROFILE%\%cmake-output%\python\src\%build-config%\iothub_client.pyd ..\..\build_all\windows\iothub_client
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 copy %USERPROFILE%\%cmake-output%\python\test\%build-config%\iothub_client_mock.pyd ..\..\device\tests
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
@@ -76,9 +81,32 @@ if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 cd ..\..\device\tests
 @Echo python iothub_client_ut.py
 python iothub_client_ut.py
-if ERRORLEVEL 1 exit /b 1
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 @Echo python iothub_client_map_test.py
 python iothub_client_map_test.py
-if ERRORLEVEL 1 exit /b 1
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 echo Python unit test PASSED
 cd %build-root%
+
+rem -----------------------------------------------------------------------------
+rem -- create PyPi wheel
+rem -----------------------------------------------------------------------------
+
+if "%build-platform%"=="x64" (
+    set platname=win-amd64
+)
+
+if %wheel%==1 (
+    echo Copy iothub_client.pyd to %build-root%\build_all\windows\iothub_client for Python wheel generation
+    copy %USERPROFILE%\%cmake-output%\python\src\%build-config%\iothub_client.pyd ..\..\build_all\windows\iothub_client
+    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    cd %build-root%\build_all\windows
+    echo update Python packages
+    python -m pip install -U pip setuptools wheel twine
+    echo create Python wheel: 
+    echo "python setup.py bdist_wheel --plat-name %platname%"
+    python setup.py bdist_wheel --plat-name "%platname%"
+    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+    dir dist
+    echo Yet another Python wheel done
+)
