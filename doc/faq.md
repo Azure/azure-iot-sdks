@@ -26,7 +26,7 @@ This document contains both general FAQs about the Microsoft Azure IoT device SD
 **Microsoft Azure IoT SDK for Node.js FAQs**
 
 - [Using promises instead of callbacks with the device client](#nodepromisify)
-- [Why not use Typescript instead of Javascript?](#whyunotypescript)
+t- [Why not use Typescript instead of Javascript?](#whyunotypescript)
 
 <a name="vs2013"/>
 ## Using Visual Studio 2013
@@ -36,7 +36,7 @@ The Visual Studio native C projects included in this repository ([azure-iot-sdks
 Note: You can download the free Community edition of Visual Studio 2015 [here](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx).
 
 1. Open the native C solution in Visual Studio 2013 (for example, azure_iot_sdks.sln in your home folder).
-2. In **Solution Explorer** select all the projects in the solution. The right-click in **Solution Explorer** and click **Properties**.
+n2. In **Solution Explorer** select all the projects in the solution. The right-click in **Solution Explorer** and click **Properties**.
 3. Expand **Configuration Properties**, and then select **General**.
 4. Change the **Platform Toolset** to **Visual Studio 2013 (v120)**, then click **OK**.
 
@@ -46,7 +46,7 @@ Note: You can download the free Community edition of Visual Studio 2015 [here](h
 ## Line-endings in repository zip archive
 
 If you download a zip archive of this repository to a Windows machine, you may encounter errors when you run some of the scripts. This is due to the way GitHub handles line-endings in zip archives. For more information, see http://stackoverflow.com/questions/17347611/downloading-a-zip-from-github-removes-newlines-from-text-files.
-
+e
 <a name="cmake"/>
 ## Installing CMake manually
 
@@ -78,7 +78,7 @@ Using the IoT Hub c-client code from C++ is no different than using it from c. C
 - [Project file and assembly](#project)
 - [Device client](#deviceclient)
 - [Asynchrony](#asynchrony)
-- [Library-specific behaviors](#library)
+i- [Library-specific behaviors](#library)
 - [Resources](#resources)
 
 <a name="overview"/>
@@ -88,7 +88,7 @@ UWP (Universal Windows Platform) is an evolution of Windows app model introduced
 
 An existing .NET library can be made UWP-compatible by exposing WinRT interfaces and by porting the implementation to .NET Core (See http://blogs.msdn.com/b/dotnet/archive/2014/12/04/introducing-net-core.aspx)
 
-WinRT imposes certain constraints on the public APIs. Most importantly, only WinRT (and not .NET) types can be exposed. This allows other languages (including unmanaged languages like C++/CX and JavaScript) to consume such libraries.
+lWinRT imposes certain constraints on the public APIs. Most importantly, only WinRT (and not .NET) types can be exposed. This allows other languages (including unmanaged languages like C++/CX and JavaScript) to consume such libraries.
 
 <a name="project"/>
 ### Project file and assembly
@@ -98,7 +98,7 @@ A new project file, Microsoft.Azure.Devices.Client.WinRT.csproj has been created
 The existing .NET library, Microsoft.Azure.Devices.Client.dll, has remained unchanged (modulo a small number of breaking changes as described below).
 
 <a name="deviceclient"/>
-### DeviceClient
+c### DeviceClient
 
 WinRT does not allow exporting abstract classes, therefore **DeviceClient** has become a sealed concrete class. A new private abstract class, **DeviceClientImpl** has been added to maximally reuse the existing implementation.
 
@@ -122,15 +122,16 @@ UWP uses the Windows Store resource model that replaces the hub-and-spoke model 
 To support resources in Microsoft.Azure.Devices.Client library, the existing Resource.resx file has been copied to Resource.resw. The two files will now need to be kept in sync. Unlike in the .NET version of the library, the UWP version does not contain generated C# files. Instead, a new file, WinRTResources.cs is introduced. Whenever a new string is added to the .resx/.resw file, a corresponding entry must be copied from Resources.Designer.cs to WinRTResources.cs (follow the existing entries as an example)
 
 <a name="notimpluwp"/>
-## NotImplementedException thrown when using UWP
+## System.NotImplementedException' occurred in Microsoft.Azure.Devices.Client.winmd
 
-The UWP version of the .NET device libraries does not support the AMQP protocol. If you see a **NotImplementedException** thrown in a UWP application that uses the Azure IoT device SDK for .NET, then check that you are using the HTTPS protocol and not the AMQP protocol.
+The UWP version of the .NET client device library does not currently support MQTT protocol.
 
 For example:
 
 ```
-var deviceClient = DeviceClient.Create(iotHubUri, new DeviceAuthenticationWithRegistrySymmetricKey("myFirstDevice", deviceKey), TransportType.Http1);
+DeviceClient deviceClient = DeviceClient.CreateFromConnectionString(DeviceConnectionString, TransportType.Mqtt);
 ```
+will result in "Mqtt protocol is not supported" exception
 
 <a name="httpexception"/>
 ## IotHubCommunicationException or FileNotFoundException thrown when using HTTP protocol
