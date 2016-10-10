@@ -28,7 +28,7 @@ describe('Mqtt', function () {
     /* Tests_SRS_NODE_DEVICE_MQTT_18_025: [** If the `Mqtt` constructor receives a second parameter, it shall be used as a provider in place of mqtt. **]**   */
     it ('accepts an mqttProvider for testing', function() {
       var provider = {};
-      var mqtt = new Mqtt(null, provider);
+      var mqtt = new Mqtt(fakeConfig, provider);
       assert.equal(mqtt._mqtt.mqttprovider, provider);
     });
   });
@@ -194,6 +194,12 @@ describe('Mqtt', function () {
 
       // cleanup
       MockMqttBase.client.publish.restore();
+    });
+    
+    /*Tests_SRS_NODE_DEVICE_MQTT_16_016: [The `Mqtt` constructor shall initialize the `uri` property of the `config` object to `mqtts://<host>`.]*/
+    it('sets the uri property to \'mqtts://<host>\'', function () {
+      var mqtt = new Mqtt(fakeConfig);
+      assert.strictEqual(mqtt._config.uri, 'mqtts://' + fakeConfig.host);
     });
   });
 

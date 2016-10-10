@@ -58,10 +58,10 @@ void feedbackReceivedCallback(void* context, IOTHUB_SERVICE_FEEDBACK_BATCH* feed
         (void)printf("Batch lockToken    : %s\r\n", feedbackBatch->lockToken);
         if (feedbackBatch->feedbackRecordList != NULL)
         {
-            LIST_ITEM_HANDLE feedbackRecord = list_get_head_item(feedbackBatch->feedbackRecordList);
+            LIST_ITEM_HANDLE feedbackRecord = singlylinkedlist_get_head_item(feedbackBatch->feedbackRecordList);
             while (feedbackRecord != NULL)
             {
-                IOTHUB_SERVICE_FEEDBACK_RECORD* feedback = (IOTHUB_SERVICE_FEEDBACK_RECORD*)list_item_get_value(feedbackRecord);
+                IOTHUB_SERVICE_FEEDBACK_RECORD* feedback = (IOTHUB_SERVICE_FEEDBACK_RECORD*)singlylinkedlist_item_get_value(feedbackRecord);
                 if (feedback != NULL)
                 {
                     (void)printf("Feedback\r\n");
@@ -71,7 +71,7 @@ void feedbackReceivedCallback(void* context, IOTHUB_SERVICE_FEEDBACK_BATCH* feed
                     (void)printf("    description     : %s\r\n", feedback->description);
                     (void)printf("    enqueuedTimeUtc : %s\r\n", feedback->enqueuedTimeUtc);
 
-                    feedbackRecord = list_get_next_item(feedbackRecord);
+                    feedbackRecord = singlylinkedlist_get_next_item(feedbackRecord);
                 }
             }
         }

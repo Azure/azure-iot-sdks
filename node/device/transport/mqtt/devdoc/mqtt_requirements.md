@@ -1,12 +1,13 @@
-# azure-iot-device-mqtt.Mqtt Requirements
+# azure-iot-device-mqtt.Mqtt/MqttWs Requirements
 
 ## Overview
-Mqtt provides a middle layer between the generic device Client and the specific MQTT transport implementation.
+`Mqtt` and `MqttWs` provide a standard transport interface between the generic device Client and the specific MQTT transport implementation. 
+`MqttWs` will connect over secure websockets whereas `Mqtt` connects over secure TCP sockets.
 
 ## Example usage
 ```js
 'use strict';
-var Mqtt = require('azure-iot-device-mqtt').Mqtt;
+var Mqtt = require('azure-iot-device-mqtt').Mqtt; // Or require('azure-iot-device-mqtt').MqttWs
 var Message = require('azure-iot-device-mqtt').Message;
 
 var config = {
@@ -48,13 +49,17 @@ client.connect(function (err) {
 
 ## Public Interface
 ### Mqtt constructor
-The `Mqtt` constructor initializes a new instance of the MQTT transport.
+The `Mqtt` and `MqttWs` constructors initialize a new instance of the MQTT transport.
 
-**SRS_NODE_DEVICE_MQTT_12_001: [** The `Mqtt` constructor shall accept the transport configuration structure.**]**
+**SRS_NODE_DEVICE_MQTT_12_001: [** The constructor shall accept the transport configuration structure.**]**
 
-**SRS_NODE_DEVICE_MQTT_12_002: [** The `Mqtt` constructor shall store the configuration structure in a member variable.**]**
+**SRS_NODE_DEVICE_MQTT_12_002: [** The constructor shall store the configuration structure in a member variable.**]**
 
-**SRS_NODE_DEVICE_MQTT_12_003: [** The `Mqtt` constructor shall create an MqttTransport object and store it in a member variable.**]**
+**SRS_NODE_DEVICE_MQTT_12_003: [** The constructor shall create an MqttTransport object and store it in a member variable.**]**
+
+**SRS_NODE_DEVICE_MQTT_16_016: [** The `Mqtt` constructor shall initialize the `uri` property of the `config` object to `mqtts://<host>`. **]**
+
+**SRS_NODE_DEVICE_MQTT_16_017: [** The `MqttWs` constructor shall initialize the `uri` property of the `config` object to `wss://<host>:443/$iothub/websocket`. **]**
 
 **SRS_NODE_DEVICE_MQTT_18_025: [** If the `Mqtt` constructor receives a second parameter, it shall be used as a provider in place of mqtt.js **]**  
 
