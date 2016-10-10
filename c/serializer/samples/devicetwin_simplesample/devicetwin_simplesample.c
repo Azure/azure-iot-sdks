@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include <stdio.h>
+#include <inttypes.h>
 
 #include "serializer.h"
 #include "iothub_client.h"
@@ -35,7 +36,7 @@ DECLARE_MODEL(CarState,
 );
 
 DECLARE_MODEL(CarSettings,
-    WITH_DESIRED_PROPERTY(uint8_t, desired_maxSpeed),
+    WITH_DESIRED_PROPERTY(uint8_t, desired_maxSpeed, onDesiredMaxSpeed),
     WITH_DESIRED_PROPERTY(Geo, location)
 );
 
@@ -58,6 +59,16 @@ void deviceTwinCallback(int status_code, void* userContextCallback)
     printf("IoTHub: reported properties delivered with status_code = %u\n", status_code);
 }
 
+
+void onDesiredMaxSpeed(void* argument)
+{
+    /*by convention 'argument' is of the type of the MODEL encompassing the desired property*/
+    /*in this case, it is 'CarSettings'*/
+
+    CarSettings* car = argument;
+    printf("received a new desired_maxSpeed = %" PRIu8 "\n", car->desired_maxSpeed);
+
+}
 void onDesiredProperties(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
 {
     Car* car = userContextCallback;
