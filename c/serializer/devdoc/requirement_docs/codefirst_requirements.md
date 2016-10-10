@@ -197,10 +197,6 @@ For the above example CodeFirst_SendAsync shall pass “ChildModel/InnerProperty
 IOTHUBMESSAGE_DISPOSITION_RESULT CodeFirst_InvokeAction(void* deviceHandle, const char* relativeActionPath, const char* actionName, size_t parameterCount, const AGENT_DATA_TYPE* parameterValues);
 ```
 
-**SRS_CODEFIRST_02_042: [** `CodeFirst_InvokeAction` shall call `CodeFirst_Init`, passing `NULL` for `overrideSchemaNamespace`. **]**
-
-**SRS_CODEFIRST_02_043: [** If `CodeFirst_Init` returns `CODEFIRST_ERROR` then `CodeFirst_InvokeAction` shall fail and return `IOTHUBMESSAGE_ABANDONED`. **]**
-
 **SRS_CODEFIRST_99_062: [**  When CodeFirst_InvokeAction is called it shall look through the codefirst metadata associated with a specific device for a previously declared action (function) named actionName. **]**
 
 **SRS_CODEFIRST_99_078: [** If such a function is not found then the function shall return IOTHUBMESSAGE_ABANDONED. **]**
@@ -239,10 +235,6 @@ extern EXECUTE_COMMAND_RESULT CodeFirst_ExecuteCommand(void* device, const char*
 ```
 
 `CodeFirst_ExecuteCommand` executes a command.
-
-**SRS_CODEFIRST_02_044: [** `CodeFirst_ExecuteCommand` shall call `CodeFirst_Init`, passing `NULL` for `overrideSchemaNamespace`. **]**
-
-**SRS_CODEFIRST_02_045: [** If `CodeFirst_Init` returns `CODEFIRST_ERROR` then `CodeFirst_ExecuteCommand` shall fail and return `EXECUTE_COMMAND_ERROR`. **]**
 
 **SRS_CODEFIRST_02_014: [** If parameter device or command is NULL then CodeFirst_ExecuteCommand shall return EXECUTE_COMMAND_ERROR. **]**
 
@@ -293,10 +285,6 @@ extern CODEFIRST_RESULT CodeFirst_IngestDesiredProperties(void* device, const ch
 ```
 
 `CodeFirst_IngestDesiredProperties` applies desired properties to a device.
-
-**SRS_CODEFIRST_02_048: [** `CodeFirst_IngestDesiredProperties` shall call `CodeFirst_Init`, passing `NULL` for `overrideSchemaNamespace`. **]**
-
-**SRS_CODEFIRST_02_049: [** If `CodeFirst_Init` returns `CODEFIRST_ERROR` then `CodeFirst_IngestDesiredProperties` shall fail and return `CODEFIRST_ERROR`. **]**
 
 **SRS_CODEFIRST_02_030: [** If argument `device` is `NULL` then `CodeFirst_IngestDesiredProperties` shall fail and return `CODEFIRST_INVALID_ARG`. **]**
 
