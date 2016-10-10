@@ -122,15 +122,11 @@ UWP uses the Windows Store resource model that replaces the hub-and-spoke model 
 To support resources in Microsoft.Azure.Devices.Client library, the existing Resource.resx file has been copied to Resource.resw. The two files will now need to be kept in sync. Unlike in the .NET version of the library, the UWP version does not contain generated C# files. Instead, a new file, WinRTResources.cs is introduced. Whenever a new string is added to the .resx/.resw file, a corresponding entry must be copied from Resources.Designer.cs to WinRTResources.cs (follow the existing entries as an example)
 
 <a name="notimpluwp"/>
-## NotImplementedException thrown when using UWP
+## System.NotImplementedException occurred in Microsoft.Azure.Devices.Client.winmd
+The Universal Windows Platform (UWP) version of the .NET client device library does **not** currently support **MQTT** protocol.
 
-The UWP version of the .NET device libraries does not support the AMQP protocol. If you see a **NotImplementedException** thrown in a UWP application that uses the Azure IoT device SDK for .NET, then check that you are using the HTTPS protocol and not the AMQP protocol.
-
-For example:
-
-```
-var deviceClient = DeviceClient.Create(iotHubUri, new DeviceAuthenticationWithRegistrySymmetricKey("myFirstDevice", deviceKey), TransportType.Http1);
-```
+For example, calling `DeviceClient deviceClient = DeviceClient.CreateFromConnectionString(DeviceConnectionString, TransportType.Mqtt);`
+will result in "Mqtt protocol is not supported" exception.
 
 <a name="httpexception"/>
 ## IotHubCommunicationException or FileNotFoundException thrown when using HTTP protocol
