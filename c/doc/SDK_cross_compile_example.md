@@ -167,7 +167,6 @@ cd ~/libuuid-x.x.x
 ./configure CC=arm-linux-androideabi-gcc --prefix=/tmp/my-android-toolchain-deps --host=arm-linux-androideabi --with-sysroot=${MY_TOOLCHAIN}/sysroot
 make
 make install
-
 ```
 
 ### Setting up cmake to cross compile
@@ -204,9 +203,9 @@ The final step in the process is to run the actual build. For this you will need
 ```
 cd ~/Source/azure-iot-sdks/c/build_all/linux
 ./setup.sh
-./build.sh --toolchain-file toolchain-android.cmake --skip-unittests -cl --sysroot=${MY_TOOLCHAIN}/sysroot
+./build.sh --toolchain-file toolchain-android.cmake --skip-unittests -cl --sysroot=${MY_TOOLCHAIN}/sysroot -cl -L/tmp/my-android-toolchain-deps -cl -llibuuid 
 ```
-This will tell cmake to build the SDK using the toolchain file toolchain-android.cmake and skip running all tests which is important since the executables will (probably) not run successfully on the host anyway. Finally, and absolutely critical is the use of the *--sysroot* option. Without this the compiler will fail to find required headers and libraries.
+This will tell cmake to build the SDK using the toolchain file toolchain-android.cmake and skip running all tests which is important since the executables will (probably) not run successfully on the host anyway. Absolutely critical is the use of the *--sysroot* option. Without this the compiler will fail to find required headers and libraries. Note the *-cl* option, used to pass a single custom option to the compiler. With the *-L* option the cross-compiler is set to search libreries also in `/tmp/my-android-toolchain-deps`. With the *-l* option the cross-compiler will search the shared library `linuuid`. 
 
 ## Summary
 
