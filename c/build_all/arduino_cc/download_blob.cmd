@@ -95,7 +95,7 @@ if exist %directory%\%zip_file_name%\%check_path% (
 if exist %compiler_fullZipName% ( 
     echo ***do not download %zip_file_name% because it already exist, only unzip it.*** 
 ) else (
-    echo Downloading %containerUrl%/%zip_file_name%.zip%sasToken% to %compiler_fullZipName%
+    echo Downloading %containerUrl%/%zip_file_name%.zip to %compiler_fullZipName%
     powershell.exe -nologo -noprofile -command "& { iwr '%containerUrl%/%zip_file_name%.zip%sasToken%' -OutFile '%compiler_fullZipName%'; }"
 )
 

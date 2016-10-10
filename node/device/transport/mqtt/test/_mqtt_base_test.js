@@ -12,9 +12,6 @@ var Message = require('azure-iot-common').Message;
 var endpoint = require('azure-iot-common').endpoint;
 
 describe('MqttBase', function () {
-  describe('#constructor', function () {
-  });
-
   describe('#connect', function() {
     /*Tests_SRS_NODE_COMMON_MQTT_BASE_16_006: [The `connect` method shall throw a ReferenceError if the config argument is falsy, or if one of the following properties of the config argument is falsy: deviceId, host, and one of sharedAccessSignature or x509.cert and x509.key.]*/
     it('throws if config structure is falsy', function () {
@@ -144,6 +141,41 @@ describe('MqttBase', function () {
         assert.equal(options.protocolVersion, '4');
         assert.equal(options.clean, false);
         assert.equal(options.rejectUnauthorized, true);
+      };
+
+      transport.connect(config);
+    });
+
+    it('uses mqtts as a protocol by default', function () {
+      var config = {
+        host: "host.name",
+        deviceId: "deviceId",
+        sharedAccessSignature: "sasToken"
+      };
+
+      var fakemqtt = new FakeMqtt();
+      var transport = new MqttBase(fakemqtt);
+
+      fakemqtt.connect = function(host) {
+        assert.strictEqual(host, 'mqtts://' + config.host);
+      };
+
+      transport.connect(config);
+    });
+
+    it('uses the uri specified by the config object', function () {
+      var config = {
+        host: "host.name",
+        deviceId: "deviceId",
+        sharedAccessSignature: "sasToken",
+        uri: 'wss://host.name:443/$iothub/websocket'
+      };
+
+      var fakemqtt = new FakeMqtt();
+      var transport = new MqttBase(fakemqtt);
+
+      fakemqtt.connect = function(host) {
+        assert.strictEqual(host, config.uri);
       };
 
       transport.connect(config);

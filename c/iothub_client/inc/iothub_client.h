@@ -145,6 +145,56 @@ extern "C"
     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_SetMessageCallback, IOTHUB_CLIENT_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC, messageCallback, void*, userContextCallback);
 
     /**
+    * @brief	Sets up the connection status callback to be invoked representing the status of
+    * the connection to IOT Hub. This is a blocking call.
+    *
+    * @param	iotHubClientHandle		   	        The handle created by a call to the create function.
+    * @param	connectionStatusCallback     	   	The callback specified by the device for receiving
+    * 										        updates about the status of the connection to IoT Hub.
+    * @param	userContextCallback			        User specified context that will be provided to the
+    * 										        callback. This can be @c NULL.
+    *
+    *			@b NOTE: The application behavior is undefined if the user calls
+    *			the ::IoTHubClient_LL_Destroy function from within any callback.
+    *
+    * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
+    */
+    extern IOTHUB_CLIENT_RESULT IoTHubClient_SetConnectionStatusCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void* userContextCallback);
+
+    /**
+    * @brief	Sets up the connection status callback to be invoked representing the status of
+    * the connection to IOT Hub. This is a blocking call.
+    *
+    * @param	iotHubClientHandle		   	        The handle created by a call to the create function.
+    * @param	retryPolicy                  	   	The policy to use to reconnect to IoT Hub when a
+    *                                               connection drops.
+    * @param	retryTimeoutLimitinSeconds			Maximum amount of time(seconds) to attempt reconnection when a
+    *                                               connection drops to IOT Hub.
+    *
+    *			@b NOTE: The application behavior is undefined if the user calls
+    *			the ::IoTHubClient_LL_Destroy function from within any callback.
+    *
+    * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
+    */
+    extern IOTHUB_CLIENT_RESULT IoTHubClient_SetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitinSeconds);
+
+    /**
+    * @brief	Sets up the connection status callback to be invoked representing the status of
+    * the connection to IOT Hub. This is a blocking call.
+    *
+    * @param	iotHubClientHandle		   	        The handle created by a call to the create function.
+    * @param	retryPolicy                  	   	Out parameter containing the policy to use to reconnect to IoT Hub.
+    * @param	retryTimeoutLimitinSeconds			Out parameter containing maximum amount of time in seconds to attempt reconnection
+    to IOT Hub.
+    *
+    *			@b NOTE: The application behavior is undefined if the user calls
+    *			the ::IoTHubClient_LL_Destroy function from within any callback.
+    *
+    * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
+    */
+    extern IOTHUB_CLIENT_RESULT IoTHubClient_GetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY* retryPolicy, size_t* retryTimeoutLimitinSeconds);
+
+    /**
     * @brief	This function returns in the out parameter @p lastMessageReceiveTime
     * 			what was the value of the @c time function when the last message was
     * 			received at the client.
