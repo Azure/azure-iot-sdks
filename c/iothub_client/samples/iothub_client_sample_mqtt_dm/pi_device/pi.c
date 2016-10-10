@@ -68,7 +68,7 @@ static int prepare_to_flash(const char *fileName)
     }
     else
     {
-        retValue = _system("mkdir /update");
+        retValue = _system("mkdir -p /update");
         if (retValue != 0)
         {
             LogError("failed to create the update directory");
@@ -112,7 +112,6 @@ static int prepare_to_flash(const char *fileName)
                             {
                                 LogError("failed to delete flash file '%s'", fileName);
                             }
-
                             if (retValue != 0)
                             {
                                 LogError("failed to inflate the firmware package '%s'", fileName);
@@ -125,6 +124,7 @@ static int prepare_to_flash(const char *fileName)
                                     LogError("failed to prepare the command file for auto-flash");
                                 }
                             }
+                            _system("sync");
                         }
                     }
                 }
@@ -219,7 +219,7 @@ bool device_download_firmware(const char *uri)
 
     int result;
 
-    size_t  length = snprintf(NULL, 0, "/usr/bin/wget \"%s\" -O %s", uri, NEW_FW_ARCHIVE);
+    size_t  length = snprintf(NULL, 0, "/usr/bin/wget -O - \"%s\" > %s", uri, NEW_FW_ARCHIVE);
     char   *buffer = malloc(length + 1);
     if (buffer == NULL)
     {
@@ -228,7 +228,7 @@ bool device_download_firmware(const char *uri)
     }
     else
     {
-        sprintf(buffer, "/usr/bin/wget \"%s\" -O %s", uri, NEW_FW_ARCHIVE);
+        sprintf(buffer, "/usr/bin/wget -O - \"%s\" > %s", uri, NEW_FW_ARCHIVE);
         LogInfo("Downloading [%s]", uri);
         result = _system(buffer);
         free(buffer);
@@ -243,6 +243,7 @@ bool device_download_firmware(const char *uri)
 
 void device_reboot(void)
 {
+    _system("sync");
     if (reboot(RB_AUTOBOOT) != 0)
     {
         LogError("failed to reboot the device");
@@ -327,6 +328,8 @@ bool device_run_service(void)
 
                     retValue = true;
                 }
+                /* Allow time for all needed system services to initialize */
+                ThreadAPI_Sleep(30000);
             }
         }
     }
