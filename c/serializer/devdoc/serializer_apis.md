@@ -296,7 +296,6 @@ DECLARE_MODEL(Car,
 
 int main(void)
 {
-    (int)serializer_init(NULL);
 
 	Car* car = CREATE_MODEL_INSTANCE(MyFunkyCarNamespace, Car);
     ...
@@ -314,7 +313,8 @@ int main(void)
 SERIALIZER_RESULT serializer_init(const char* overrideSchemaNamespace)
 ```
 
-Initializes the library.
+An optional API used to pass `overrideSchemaNamespace`. If `serializer_init` is not called then `overrideSchemaNamespace`
+shall be assumed to be `NULL`.
 
 __Arguments:__
 -	`overrideSchemaNamespace` – An override schema namespace to use for all models. Optional, can be `NULL`. 
@@ -343,10 +343,10 @@ int main(int argc, char** argv)
 
 ### serializer_deinit
 ```c
-void serializer_deinit()
+void serializer_deinit(void)
 ```
 
-Deinitializes the serializer library. The library will track all created devices and upon a call to serializer_deinit it will de-initialize all devices.
+Deinitializes the serializer library. An empty function preserved for compatibility purposes.
 Example:
 
 ```c
@@ -383,8 +383,6 @@ DECLARE_MODEL(MyFunkyTV,
     );
 int main(int argc, char** argv)
 {
-
-    (int)serializer_init(NULL);
 
 	FunkyTV* funkyTV = CREATE_MODEL_INSTANCE(MyFunkyTV, FunkyTV);
     ...
