@@ -242,3 +242,5 @@ https://www.raspberrypi.org
 <https://kvurd.com/blog/compiling-a-cpp-library-for-android-with-android-studio/>
 
 <http://www.fabriziodini.eu/posts/cross_compile_tutorial/>
+
+<https://wiki.openssl.org/index.php/Android>
