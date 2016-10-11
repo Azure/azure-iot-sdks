@@ -13,7 +13,7 @@ You should have the following items ready before beginning the process:
 	-   [Raspberry Pi 3](https://www.raspberrypi.org/products/raspberry-pi-3-model-b/)
 	-   8GB or larger MicroSD Card
 	-   USB keyboard
-	-   USB mouse (optional; you can navigate NOOBS with a keyboard)
+	-   USB mouse
 	-   USB Mini cable
 	-   HDMI cable
 	-   TV/ Monitor that supports HDMI
@@ -27,36 +27,20 @@ Make a copy of the device's connection string.
 ## Download or compile the device application
 In order to simplify the experience with the Raspberry Pi, we have compiled and published the sample application in a package.
 
-If you want to compile the application along with the rest of the SDK directly on the Pi, you can do so following these [instructions](../../../../../doc/get_started/raspbian-3gpi-c.md), but the below  instructions assume that you are downloading the app package.
-
-To download the package:
--   Open a bash prompt
--   Navigate to ~
-	```
-	cd ~
-	```
--   Download and unzip the application package
-	```
-	wget https://github.com/Azure/azure-iot-sdks-preview/releases/download/2016-09-30/iothub_client_sample_mqtt_dm.zip
-	unzip iothub_client_sample_mqtt_dm.zip
-	```
--   Edit the application configuration file and input the device connection string you retrieved in previous step
-   
-   *TODO* add details
+If you want to compile the application along with the rest of the SDK directly on the Pi, you can do so following these [instructions](../../../../../doc/get_started/raspbian-3gpi-c.md), but the below instructions assume that you are downloading the app package.
 
 ## Prepare the firmware images
 We will prepare 2 separate firmware images.
 -   One will be considered the "old" firmware image based on Raspbian 4.1: [NOOBS_1.8.0](https://downloads.raspberrypi.org/NOOBS/images/NOOBS-2016-02-29/NOOBS_1_8_0.zip)
 -   One will be considered the "new" firmware image based on a more recent version of Raspbian: [NOOBS_Latest](https://downloads.raspberrypi.org/NOOBS_latest)
 
-We will need to prepare the 2 images the same way, so you will have to run through the following process for each of the 2 packages.
-The process consists in downloading the zip package, unzipping it, patching the image adding the sample application, then zipping the package back again.
-
+## Prepare and Install an "old" firmware image
 -   Open a bash prompt
 -   Navigate to ~
 	```
 	cd ~
 	```
+	
 -   Download and unzip the image package
 	```
 	wget https://downloads.raspberrypi.org/NOOBS/images/NOOBS-2016-02-29/NOOBS_1_8_0.zip
@@ -64,41 +48,84 @@ The process consists in downloading the zip package, unzipping it, patching the 
 	unzip NOOBS_1_8_0.zip -d NOOBS_1_8_0_image 
 	cd NOOBS_1_8_0_image
 	```
-	or 
+	
+-   Prepare the image to install the included 4.1 firmware
+    ```
+	Open the recovery.cmdline file in your favorite editor and insert 'silentinstall lang=en keyboard=us' at the beginning of the single line. Without this step, NOOBS will automatically download and install the latest Raspbian image. 	
+	```
+
+-   Flash the device by following the instructions in the [NOOBS setup guide](http://www.raspberrypi.org/help/noobs-setup/).
+
+-   Install the sample firmware_update package
+	After the "old" image is flashed on the device, open a terminal window and install the demo
+	```
+	sudo apt-get install -y iothub_client_sample_firmware_update
+	insert the device's connection string into file /usr/share/iothub_client_sample/.device_connection_string
+	```
+
+-   Start the firmware_update service
+	```
+	sudo systemctl start iothub_client_sample_firmware_update
+	```
+
+-   Save the contents from the /usr/share/iothub_client_sample directory on your build machine for the next step.
+	```
+	scp -r pi@[pi machine ip]:/usr/share/iothub_client_sample iothub_client_sample
+	```
+
+## Prepare the "new" firmware image
     ```
 	wget https://downloads.raspberrypi.org/NOOBS_latest
 	mkdir NOOBS_latest_image
 	unzip NOOBS_latest -d NOOBS_latest_image 
 	cd NOOBS_latest_image
 	```
--   Change directory to os/Raspbian
-	```
-	cd os/Raspbian
-	```
--   patch the os image with the demo application
+	
+-   Prepare the os image for sideloading the demo app
     ```
-	TODO copy app and config file into usr/sbin
-	TODO copy app script in etc/init.d
-	ln -s  usr/sbin/iothub_client_sample_mqtt_dm etc/rc5.d/iothub_client_sample_mqtt_dm
+	cd os/Raspbian
+	xz --decompress root.tar.xz
+    ```
+
+-   prepare a temporary staging location
+    ```
+	cd ~
+	mkdir temp_root
+	cd temp_root
+	mkdir -p usr/share/iothub_client_sample
+	mkdir -p lib/systemd/system
+	mkdir -p etc/systemd/system/multi-user.target.wants
+    ```
+
+-   stage the demo app by copying the files which you had saved from the last step of "Prepare and Install an old firmware image" into the ~/temp_root/usr/share/iothub_client_sample directory.
+
+-   set up the support files for the demo service app
+    ```
+	cd ~/temp_root/lib/systemd/system
+	ln -sf ../../../usr/share/iothub_client_sample/iothub_client_sample_firmware_update.service iothub_client_sample_firmware_update.service
+	cd ~/temp_root/etc/systemd/system/multi-user.target.wants
+	ln -sf ../../../../usr/share/iothub_client_sample/iothub_client_sample_firmware_update.service iothub_client_sample_firmware_update.service
+    ```
+
+-   append the demo app to the root.tar
 	```
+	cd ~/temp_root
+	tar -rf ~/NOOBS_latest_image/os/Raspbian/root.tar ./*
+	cd ~/NOOBS_latest_image/os/Raspbian
+	make a note of the new root.tar file size and update the "uncompressed_tarball_size" property in the partitions.json file.
+	``` 
+
+-   compress the root.tar image
+	``` 
+	cd ~/NOOBS_latest_image/os/Raspbian
+	xz -9 -e --verbose root.tar
+    ```
+
 -   Reassemble the image with the zip utility:
     ```
 	cd ~
-	zip -r patched_NOOBS_1_8_0.zip NOOBS_1_8_0_image
+	zip -r patched_NOOBS_latest.zip NOOBS_latest_image/*
 	```
-	or
-	```
-	cd ~
-	zip -r patched_NOOBS_latest.zip NOOBS_latest_image
-	```
-
--   Place the new firmware package on Azure store and use it with the firmware_update method.
-
-
-## Prepare your Device and run the application
-Install the Raspbian operating system using the patched_NOOBS_1_8_0.zip image created during the previous step on your Raspberry Pi by following the instructions in the [NOOBS setup guide](http://www.raspberrypi.org/help/noobs-setup/).
-
-When booting the first time, NOOBS will prompt the user (need keyboard and display attached to the Pi) for installing the Raspbian image. Once the image is installed and the Pi reboots, the sample application will start automatically and establish communication with Aure IoT Hub, waiting for a Firmware update command.
 
 ## Stage the new firmware and send the firmware update command 
 In order for testing an actual firmware update, you will need to stage the new firmware image created earlier on some public storage. You can use your favorite online storage service or use an Azure Storage account.
