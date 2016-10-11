@@ -33,14 +33,54 @@ typedef struct DEVICE_HEADER_DATA_TAG
 
 #define COUNT_OF(A) (sizeof(A) / sizeof((A)[0]))
 
-typedef enum CODEFIRST_STATE_TAG
-{
-    CODEFIRST_STATE_NOT_INIT,
-    CODEFIRST_STATE_INIT
-}CODEFIRST_STATE;
+/*design considerations for lazy init of CodeFirst:
+    There are 2 main states: either CodeFirst is in an initialized state, either it is not initialized.
+    The initialized state means thre's a g_OverrideSchemaNamespace set (even when it is set to NULL).
+    The uninitialized state means g_OverrideSchemaNamespace is not set.
+
+    To switch to Init state, either call CodeFirst_Init (that sets g_OverrideSchemaNamespace to something)
+    or call directly an API (that will set automatically g_OverrideSchemaNamespace to NULL).
+
+    To switch to NOT INIT state, depending on the method used to initialize:
+        - if CodeFirst_Init was called, then only by a call to CodeFirst_Deinit the switch will take place 
+            (note how in this case g_OverrideSchemaNamespace survives destruction of all devices).
+        - if the init has been done "lazily" by an API call then the module returns to uninitialized state 
+            when the number of devices reaches zero.
+
+                              +-----------------------------+
+     Start  +---------------->|                             |
+                              |  NOT INIT                   |
+            +---------------->|                             |
+            |                 +------------+----------------+
+            |                              |
+            |                              |
+            |                              |_Init/OtherAPIs
+            |                              |
+            |                              v
+            |     +---------------------------------------------------+
+            |     | Init State                                        |
+            |     | +-----------------+       +-----------------+     |
+            |     | |                 |       |                 |     |
+            |     | |  init by _Init  |       |   init by API   |     |
+            |     | +------+----------+       +---------+-------+     |
+            |     |        |                            |             |
+            |     |        |_DeInit                     | nDevices==0 |
+            |     |        |                            |             |
+            |     +--------v----------------+-----------v-------------+
+            |                               |
+            +-------------------------------+
+
+*/
+
+
+#define CODEFIRST_STATE_VALUES \
+    CODEFIRST_STATE_NOT_INIT, \
+    CODEFIRST_STATE_INIT_BY_INIT, \
+    CODEFIRST_STATE_INIT_BY_API  
+
+DEFINE_ENUM(CODEFIRST_STATE, CODEFIRST_STATE_VALUES)
 
 static CODEFIRST_STATE g_state = CODEFIRST_STATE_NOT_INIT;
-
 static const char* g_OverrideSchemaNamespace;
 static size_t g_DeviceCount = 0;
 static DEVICE_HEADER_DATA** g_Devices = NULL;
@@ -348,8 +388,7 @@ out:
     return result;
 }
 
-/*Codes_SRS_CODEFIRST_99_002:[ CodeFirst_Init shall initialize the CodeFirst module. If initialization is successful, it shall return CODEFIRST_OK.]*/
-CODEFIRST_RESULT CodeFirst_Init(const char* overrideSchemaNamespace)
+static CODEFIRST_RESULT CodeFirst_Init_impl(const char*overrideSchemaNamespace, bool calledFromCodeFirst_Init)
 {
     /*shall build the default EntityContainer*/
     CODEFIRST_RESULT result;
@@ -358,7 +397,10 @@ CODEFIRST_RESULT CodeFirst_Init(const char* overrideSchemaNamespace)
     {
         /*Codes_SRS_CODEFIRST_99_003:[ If the module is already initialized, the initialization shall fail and the return value shall be CODEFIRST_ALREADY_INIT.]*/
         result = CODEFIRST_ALREADY_INIT;
-        LogError("CodeFirst was already init %s", ENUM_TO_STRING(CODEFIRST_RESULT, result));
+        if(calledFromCodeFirst_Init) /*do not log this error when APIs attempt lazy init*/
+        {
+             LogError("CodeFirst was already init %s", ENUM_TO_STRING(CODEFIRST_RESULT, result));
+        }
     }
     else
     {
@@ -367,19 +409,24 @@ CODEFIRST_RESULT CodeFirst_Init(const char* overrideSchemaNamespace)
         g_Devices = NULL;
 
         /*Codes_SRS_CODEFIRST_99_002:[ CodeFirst_Init shall initialize the CodeFirst module. If initialization is successful, it shall return CODEFIRST_OK.]*/
-        g_state = CODEFIRST_STATE_INIT;
+        g_state = calledFromCodeFirst_Init? CODEFIRST_STATE_INIT_BY_INIT: CODEFIRST_STATE_INIT_BY_API;
         result = CODEFIRST_OK;
     }
-
     return result;
+}
+
+/*Codes_SRS_CODEFIRST_99_002:[ CodeFirst_Init shall initialize the CodeFirst module. If initialization is successful, it shall return CODEFIRST_OK.]*/
+CODEFIRST_RESULT CodeFirst_Init(const char* overrideSchemaNamespace)
+{
+    return CodeFirst_Init_impl(overrideSchemaNamespace, true);
 }
 
 void CodeFirst_Deinit(void)
 {
     /*Codes_SRS_CODEFIRST_99_006:[If the module is not previously initialed, CodeFirst_Deinit shall do nothing.]*/
-    if (g_state != CODEFIRST_STATE_INIT)
+    if (g_state != CODEFIRST_STATE_INIT_BY_INIT)
     {
-        LogError("CodeFirst_Deinit called when CodeFirst was not INIT");
+        LogError("CodeFirst_Deinit called when CodeFirst was not initialized by CodeFirst_Init");
     }
     else
     {
@@ -471,7 +518,7 @@ EXECUTE_COMMAND_RESULT CodeFirst_InvokeAction(DEVICE_HANDLE deviceHandle, void* 
     DEVICE_HEADER_DATA* deviceHeader = (DEVICE_HEADER_DATA*)callbackUserContext;
 
     /*Codes_SRS_CODEFIRST_99_068:[ If the function is called before CodeFirst is initialized then EXECUTE_COMMAND_ERROR shall be returned.] */
-    if (g_state != CODEFIRST_STATE_INIT)
+    if (g_state == CODEFIRST_STATE_NOT_INIT)
     {
         result = EXECUTE_COMMAND_ERROR;
         LogError("CodeFirst_InvokeAction called before init has an error %s ", ENUM_TO_STRING(EXECUTE_COMMAND_RESULT, result));
@@ -542,32 +589,42 @@ SCHEMA_HANDLE CodeFirst_RegisterSchema(const char* schemaNamespace, const REFLEC
 {
     SCHEMA_HANDLE result;
 
-    if (g_OverrideSchemaNamespace != NULL)
+    /*Codes_SRS_CODEFIRST_02_050: [ CodeFirst_RegisterSchema shall call CodeFirst_Init, passing NULL for overrideSchemaNamespace. ]*/
+    if (CodeFirst_Init_impl(NULL, false) == CODEFIRST_ERROR)
     {
-        schemaNamespace = g_OverrideSchemaNamespace;
+        /*Codes_SRS_CODEFIRST_02_051: [ If CodeFirst_Init returns CODEFIRST_ERROR then CodeFirst_RegisterSchema shall fail and return NULL. ]*/
+        LogError("CodeFirst_Init_impl returned CODEFIRST_ERROR!");
+        result = NULL;
     }
-
-    /* Codes_SRS_CODEFIRST_99_121:[If the schema has already been registered, CodeFirst_RegisterSchema shall return its handle.] */
-    result = Schema_GetSchemaByNamespace(schemaNamespace);
-    if (result == NULL)
+    else
     {
-        if ((result = Schema_Create(schemaNamespace)) == NULL)
+        if (g_OverrideSchemaNamespace != NULL)
         {
-            /* Codes_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
-            result = NULL;
-            LogError("schema init failed %s", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_SCHEMA_ERROR));
+            schemaNamespace = g_OverrideSchemaNamespace;
         }
-        else
+
+        /* Codes_SRS_CODEFIRST_99_121:[If the schema has already been registered, CodeFirst_RegisterSchema shall return its handle.] */
+        result = Schema_GetSchemaByNamespace(schemaNamespace);
+        if (result == NULL)
         {
-            if ((buildStructTypes(result, metadata) != CODEFIRST_OK) ||
-                (buildModelTypes(result, metadata) != CODEFIRST_OK))
+            if ((result = Schema_Create(schemaNamespace)) == NULL)
             {
-                Schema_Destroy(result);
+                /* Codes_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
                 result = NULL;
+                LogError("schema init failed %s", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_SCHEMA_ERROR));
             }
             else
             {
-                /* do nothing, everything is OK */
+                if ((buildStructTypes(result, metadata) != CODEFIRST_OK) ||
+                    (buildModelTypes(result, metadata) != CODEFIRST_OK))
+                {
+                    Schema_Destroy(result);
+                    result = NULL;
+                }
+                else
+                {
+                    /* do nothing, everything is OK */
+                }
             }
         }
     }
@@ -737,79 +794,87 @@ void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DAT
         result = NULL;
         LogError(" %s ", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_INVALID_ARG));
     }
-    /* Codes_SRS_CODEFIRST_99_106:[If CodeFirst_CreateDevice is called when the modules is not initialized is shall return NULL.] */
-    else if (g_state != CODEFIRST_STATE_INIT)
-    {
-        result = NULL;
-        LogError(" %s ", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_NOT_INIT));
-    }
-    else if ((deviceHeader = (DEVICE_HEADER_DATA*)malloc(sizeof(DEVICE_HEADER_DATA))) == NULL)
-    {
-        /* Codes_SRS_CODEFIRST_99_102:[On any other errors, Device_Create shall return NULL.] */
-        result = NULL;
-        LogError(" %s ", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_ERROR));
-    }
-    /* Codes_SRS_CODEFIRST_99_081:[CodeFirst_CreateDevice shall use Device_Create to create a device handle.] */
-    /* Codes_SRS_CODEFIRST_99_082:[CodeFirst_CreateDevice shall pass to Device_Create the function CodeFirst_InvokeAction as action callback argument.] */
     else
     {
-        if ((deviceHeader->data = malloc(dataSize))==NULL)
+        /*Codes_SRS_CODEFIRST_02_037: [ CodeFirst_CreateDevice shall call CodeFirst_Init, passing NULL for overrideSchemaNamespace. ]*/
+        if (CodeFirst_Init_impl(NULL, false) == CODEFIRST_ERROR)
         {
-            free(deviceHeader);
-            deviceHeader = NULL;
+            /*Codes_SRS_CODEFIRST_02_038: [ If CodeFirst_Init returns CODEFIRST_ERROR then CodeFirst_CreateDevice shall fail and return NULL. ]*/
+            LogError("CodeFirst_Init_impl returned CODEFIRST_ERROR!");
             result = NULL;
-            LogError(" %s ", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_ERROR));
         }
+        /* Codes_SRS_CODEFIRST_99_106:[If CodeFirst_CreateDevice is called when the modules is not initialized is shall return NULL.] */
         else
         {
-            DEVICE_HEADER_DATA** newDevices;
-
-            initializeDesiredProperties(model, deviceHeader->data);
-
-            if (Device_Create(model, CodeFirst_InvokeAction, deviceHeader,
-                includePropertyPath, &deviceHeader->DeviceHandle) != DEVICE_OK)
+            if ((deviceHeader = (DEVICE_HEADER_DATA*)malloc(sizeof(DEVICE_HEADER_DATA))) == NULL)
             {
-                free(deviceHeader->data);
-                free(deviceHeader);
-
-                /* Codes_SRS_CODEFIRST_99_084:[If Device_Create fails, CodeFirst_CreateDevice shall return NULL.] */
-                result = NULL;
-                LogError(" %s ", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_DEVICE_FAILED));
-            }
-            else if ((newDevices = (DEVICE_HEADER_DATA**)realloc(g_Devices, sizeof(DEVICE_HEADER_DATA*) * (g_DeviceCount + 1))) == NULL)
-            {
-                Device_Destroy(deviceHeader->DeviceHandle);
-                free(deviceHeader->data);
-                free(deviceHeader);
-
                 /* Codes_SRS_CODEFIRST_99_102:[On any other errors, Device_Create shall return NULL.] */
                 result = NULL;
                 LogError(" %s ", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_ERROR));
             }
+            /* Codes_SRS_CODEFIRST_99_081:[CodeFirst_CreateDevice shall use Device_Create to create a device handle.] */
+            /* Codes_SRS_CODEFIRST_99_082:[CodeFirst_CreateDevice shall pass to Device_Create the function CodeFirst_InvokeAction as action callback argument.] */
             else
             {
-                SCHEMA_RESULT schemaResult;
-                deviceHeader->ReflectedData = metadata;
-                deviceHeader->DataSize = dataSize;
-                deviceHeader->ModelHandle = model;
-                schemaResult = Schema_AddDeviceRef(model);
-                if (schemaResult != SCHEMA_OK)
+                if ((deviceHeader->data = malloc(dataSize)) == NULL)
                 {
-                    Device_Destroy(deviceHeader->DeviceHandle);
-                    free(deviceHeader->data);
                     free(deviceHeader);
-
-                    /* Codes_SRS_CODEFIRST_99_102:[On any other errors, Device_Create shall return NULL.] */
+                    deviceHeader = NULL;
                     result = NULL;
+                    LogError(" %s ", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_ERROR));
                 }
                 else
                 {
-                    g_Devices = newDevices;
-                    g_Devices[g_DeviceCount] = deviceHeader;
-                    g_DeviceCount++;
+                    DEVICE_HEADER_DATA** newDevices;
 
-                    /* Codes_SRS_CODEFIRST_99_101:[On success, CodeFirst_CreateDevice shall return a non NULL pointer to the device data.] */
-                    result = deviceHeader->data;
+                    initializeDesiredProperties(model, deviceHeader->data);
+
+                    if (Device_Create(model, CodeFirst_InvokeAction, deviceHeader,
+                        includePropertyPath, &deviceHeader->DeviceHandle) != DEVICE_OK)
+                    {
+                        free(deviceHeader->data);
+                        free(deviceHeader);
+
+                        /* Codes_SRS_CODEFIRST_99_084:[If Device_Create fails, CodeFirst_CreateDevice shall return NULL.] */
+                        result = NULL;
+                        LogError(" %s ", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_DEVICE_FAILED));
+                    }
+                    else if ((newDevices = (DEVICE_HEADER_DATA**)realloc(g_Devices, sizeof(DEVICE_HEADER_DATA*) * (g_DeviceCount + 1))) == NULL)
+                    {
+                        Device_Destroy(deviceHeader->DeviceHandle);
+                        free(deviceHeader->data);
+                        free(deviceHeader);
+
+                        /* Codes_SRS_CODEFIRST_99_102:[On any other errors, Device_Create shall return NULL.] */
+                        result = NULL;
+                        LogError(" %s ", ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_ERROR));
+                    }
+                    else
+                    {
+                        SCHEMA_RESULT schemaResult;
+                        deviceHeader->ReflectedData = metadata;
+                        deviceHeader->DataSize = dataSize;
+                        deviceHeader->ModelHandle = model;
+                        schemaResult = Schema_AddDeviceRef(model);
+                        if (schemaResult != SCHEMA_OK)
+                        {
+                            Device_Destroy(deviceHeader->DeviceHandle);
+                            free(deviceHeader->data);
+                            free(deviceHeader);
+
+                            /* Codes_SRS_CODEFIRST_99_102:[On any other errors, Device_Create shall return NULL.] */
+                            result = NULL;
+                        }
+                        else
+                        {
+                            g_Devices = newDevices;
+                            g_Devices[g_DeviceCount] = deviceHeader;
+                            g_DeviceCount++;
+
+                            /* Codes_SRS_CODEFIRST_99_101:[On success, CodeFirst_CreateDevice shall return a non NULL pointer to the device data.] */
+                            result = deviceHeader->data;
+                        }
+                    }
                 }
             }
         }
@@ -840,6 +905,13 @@ void CodeFirst_DestroyDevice(void* device)
                 g_DeviceCount--;
                 break;
             }
+        }
+
+        if ((g_state == CODEFIRST_STATE_INIT_BY_API) && (g_DeviceCount == 0))
+        {
+            free(g_Devices);
+            g_Devices = NULL;
+            g_state = CODEFIRST_STATE_NOT_INIT;
         }
     }
 }
@@ -1046,153 +1118,163 @@ CODEFIRST_RESULT CodeFirst_SendAsync(unsigned char** destination, size_t* destin
     }
     else
     {
-        DEVICE_HEADER_DATA* deviceHeader = NULL;
-        size_t i;
-        TRANSACTION_HANDLE transaction = NULL;
-        result = CODEFIRST_OK;
-
-        /* Codes_SRS_CODEFIRST_99_105:[The properties are passed as pointers to the memory locations where the data exists in the device block allocated by CodeFirst_CreateDevice.] */
-        va_start(ap, numProperties);
-
-        /* Codes_SRS_CODEFIRST_99_089:[The numProperties argument shall indicate how many properties are to be sent.] */
-        for (i = 0; i < numProperties; i++)
+        /*Codes_SRS_CODEFIRST_02_040: [ CodeFirst_SendAsync shall call CodeFirst_Init, passing NULL for overrideSchemaNamespace. ]*/
+        if (CodeFirst_Init_impl(NULL, false) == CODEFIRST_ERROR)
         {
-            void* value = (void*)va_arg(ap, void*);
+            /*Codes_SRS_CODEFIRST_02_041: [ If CodeFirst_Init returns CODEFIRST_ERROR then CodeFirst_SendAsync shall fail and return CODEFIRST_ERROR. ]*/
+            LogError("CodeFirst_Init_impl returned CODEFIRST_ERROR");
+            result = CODEFIRST_ERROR;
+        }
+        else
+        {
+            DEVICE_HEADER_DATA* deviceHeader = NULL;
+            size_t i;
+            TRANSACTION_HANDLE transaction = NULL;
+            result = CODEFIRST_OK;
 
-            /* Codes_SRS_CODEFIRST_99_095:[For each value passed to it, CodeFirst_SendAsync shall look up to which device the value belongs.] */
-            DEVICE_HEADER_DATA* currentValueDeviceHeader = FindDevice(value);
-            if (currentValueDeviceHeader == NULL)
-            {
-                /* Codes_SRS_CODEFIRST_99_104:[If a property cannot be associated with a device, CodeFirst_SendAsync shall return CODEFIRST_INVALID_ARG.] */
-                result = CODEFIRST_INVALID_ARG;
-                LOG_CODEFIRST_ERROR;
-                break;
-            }
-            else if ((deviceHeader != NULL) &&
-                (currentValueDeviceHeader != deviceHeader))
-            {
-                /* Codes_SRS_CODEFIRST_99_096:[All values have to belong to the same device, otherwise CodeFirst_SendAsync shall return CODEFIRST_VALUES_FROM_DIFFERENT_DEVICES_ERROR.] */
-                result = CODEFIRST_VALUES_FROM_DIFFERENT_DEVICES_ERROR;
-                LOG_CODEFIRST_ERROR;
-                break;
-            }
-            /* Codes_SRS_CODEFIRST_99_090:[All the properties shall be sent together by using the transacted APIs of the device.] */
-            /* Codes_SRS_CODEFIRST_99_091:[CodeFirst_SendAsync shall start a transaction by calling Device_StartTransaction.] */
-            else if ((deviceHeader == NULL) &&
-                ((transaction = Device_StartTransaction(currentValueDeviceHeader->DeviceHandle)) == NULL))
-            {
-                /* Codes_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
-                result = CODEFIRST_DEVICE_PUBLISH_FAILED;
-                LOG_CODEFIRST_ERROR;
-                break;
-            }
-            else
-            {
-                deviceHeader = currentValueDeviceHeader;
+            /* Codes_SRS_CODEFIRST_99_105:[The properties are passed as pointers to the memory locations where the data exists in the device block allocated by CodeFirst_CreateDevice.] */
+            va_start(ap, numProperties);
 
-                if (value == ((unsigned char*)deviceHeader->data))
+            /* Codes_SRS_CODEFIRST_99_089:[The numProperties argument shall indicate how many properties are to be sent.] */
+            for (i = 0; i < numProperties; i++)
+            {
+                void* value = (void*)va_arg(ap, void*);
+
+                /* Codes_SRS_CODEFIRST_99_095:[For each value passed to it, CodeFirst_SendAsync shall look up to which device the value belongs.] */
+                DEVICE_HEADER_DATA* currentValueDeviceHeader = FindDevice(value);
+                if (currentValueDeviceHeader == NULL)
                 {
-                    /* we got a full device, send all its state data */
-                    result = SendAllDeviceProperties(deviceHeader, transaction);
-                    if (result != CODEFIRST_OK)
-                    {
-                        LOG_CODEFIRST_ERROR;
-                        break;
-                    }
+                    /* Codes_SRS_CODEFIRST_99_104:[If a property cannot be associated with a device, CodeFirst_SendAsync shall return CODEFIRST_INVALID_ARG.] */
+                    result = CODEFIRST_INVALID_ARG;
+                    LOG_CODEFIRST_ERROR;
+                    break;
+                }
+                else if ((deviceHeader != NULL) &&
+                    (currentValueDeviceHeader != deviceHeader))
+                {
+                    /* Codes_SRS_CODEFIRST_99_096:[All values have to belong to the same device, otherwise CodeFirst_SendAsync shall return CODEFIRST_VALUES_FROM_DIFFERENT_DEVICES_ERROR.] */
+                    result = CODEFIRST_VALUES_FROM_DIFFERENT_DEVICES_ERROR;
+                    LOG_CODEFIRST_ERROR;
+                    break;
+                }
+                /* Codes_SRS_CODEFIRST_99_090:[All the properties shall be sent together by using the transacted APIs of the device.] */
+                /* Codes_SRS_CODEFIRST_99_091:[CodeFirst_SendAsync shall start a transaction by calling Device_StartTransaction.] */
+                else if ((deviceHeader == NULL) &&
+                    ((transaction = Device_StartTransaction(currentValueDeviceHeader->DeviceHandle)) == NULL))
+                {
+                    /* Codes_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
+                    result = CODEFIRST_DEVICE_PUBLISH_FAILED;
+                    LOG_CODEFIRST_ERROR;
+                    break;
                 }
                 else
                 {
-                    const REFLECTED_SOMETHING* propertyReflectedData;
-                    const char* modelName;
-                    STRING_HANDLE valuePath;
+                    deviceHeader = currentValueDeviceHeader;
 
-                    if ((valuePath = STRING_new()) == NULL)
+                    if (value == ((unsigned char*)deviceHeader->data))
                     {
-                        /* Codes_SRS_CODEFIRST_99_134:[If CodeFirst_Notify fails for any other reason it shall return CODEFIRST_ERROR.] */
-                        result = CODEFIRST_ERROR;
-                        LOG_CODEFIRST_ERROR;
-                        break;
+                        /* we got a full device, send all its state data */
+                        result = SendAllDeviceProperties(deviceHeader, transaction);
+                        if (result != CODEFIRST_OK)
+                        {
+                            LOG_CODEFIRST_ERROR;
+                            break;
+                        }
                     }
                     else
                     {
-                        if ((modelName = Schema_GetModelName(deviceHeader->ModelHandle)) == NULL)
+                        const REFLECTED_SOMETHING* propertyReflectedData;
+                        const char* modelName;
+                        STRING_HANDLE valuePath;
+
+                        if ((valuePath = STRING_new()) == NULL)
                         {
                             /* Codes_SRS_CODEFIRST_99_134:[If CodeFirst_Notify fails for any other reason it shall return CODEFIRST_ERROR.] */
                             result = CODEFIRST_ERROR;
                             LOG_CODEFIRST_ERROR;
-                            STRING_delete(valuePath);
-                            break;
-                        }
-                        else if ((propertyReflectedData = FindValue(deviceHeader, value, modelName, 0, valuePath)) == NULL)
-                        {
-                            /* Codes_SRS_CODEFIRST_99_104:[If a property cannot be associated with a device, CodeFirst_SendAsync shall return CODEFIRST_INVALID_ARG.] */
-                            result = CODEFIRST_INVALID_ARG;
-                            LOG_CODEFIRST_ERROR;
-                            STRING_delete(valuePath);
                             break;
                         }
                         else
                         {
-                            AGENT_DATA_TYPE agentDataType;
-
-                            /* Codes_SRS_CODEFIRST_99_097:[For each value marshalling to AGENT_DATA_TYPE shall be performed.] */
-                            /* Codes_SRS_CODEFIRST_99_098:[The marshalling shall be done by calling the Create_AGENT_DATA_TYPE_from_Ptr function associated with the property.] */
-                            if (propertyReflectedData->what.property.Create_AGENT_DATA_TYPE_from_Ptr(value, &agentDataType) != AGENT_DATA_TYPES_OK)
+                            if ((modelName = Schema_GetModelName(deviceHeader->ModelHandle)) == NULL)
                             {
-                                /* Codes_SRS_CODEFIRST_99_099:[If Create_AGENT_DATA_TYPE_from_Ptr fails, CodeFirst_SendAsync shall return CODEFIRST_AGENT_DATA_TYPE_ERROR.] */
-                                result = CODEFIRST_AGENT_DATA_TYPE_ERROR;
+                                /* Codes_SRS_CODEFIRST_99_134:[If CodeFirst_Notify fails for any other reason it shall return CODEFIRST_ERROR.] */
+                                result = CODEFIRST_ERROR;
+                                LOG_CODEFIRST_ERROR;
+                                STRING_delete(valuePath);
+                                break;
+                            }
+                            else if ((propertyReflectedData = FindValue(deviceHeader, value, modelName, 0, valuePath)) == NULL)
+                            {
+                                /* Codes_SRS_CODEFIRST_99_104:[If a property cannot be associated with a device, CodeFirst_SendAsync shall return CODEFIRST_INVALID_ARG.] */
+                                result = CODEFIRST_INVALID_ARG;
                                 LOG_CODEFIRST_ERROR;
                                 STRING_delete(valuePath);
                                 break;
                             }
                             else
                             {
-                                /* Codes_SRS_CODEFIRST_99_092:[CodeFirst shall publish each value by using Device_PublishTransacted.] */
-                                /* Codes_SRS_CODEFIRST_99_136:[CodeFirst_SendAsync shall build the full path for each property and then pass it to Device_PublishTransacted.] */
-                                if (Device_PublishTransacted(transaction, STRING_c_str(valuePath), &agentDataType) != DEVICE_OK)
-                                {
-                                    Destroy_AGENT_DATA_TYPE(&agentDataType);
+                                AGENT_DATA_TYPE agentDataType;
 
-                                    /* Codes_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
-                                    result = CODEFIRST_DEVICE_PUBLISH_FAILED;
+                                /* Codes_SRS_CODEFIRST_99_097:[For each value marshalling to AGENT_DATA_TYPE shall be performed.] */
+                                /* Codes_SRS_CODEFIRST_99_098:[The marshalling shall be done by calling the Create_AGENT_DATA_TYPE_from_Ptr function associated with the property.] */
+                                if (propertyReflectedData->what.property.Create_AGENT_DATA_TYPE_from_Ptr(value, &agentDataType) != AGENT_DATA_TYPES_OK)
+                                {
+                                    /* Codes_SRS_CODEFIRST_99_099:[If Create_AGENT_DATA_TYPE_from_Ptr fails, CodeFirst_SendAsync shall return CODEFIRST_AGENT_DATA_TYPE_ERROR.] */
+                                    result = CODEFIRST_AGENT_DATA_TYPE_ERROR;
                                     LOG_CODEFIRST_ERROR;
                                     STRING_delete(valuePath);
                                     break;
                                 }
                                 else
                                 {
-                                    STRING_delete(valuePath); /*anyway*/
-                                }
+                                    /* Codes_SRS_CODEFIRST_99_092:[CodeFirst shall publish each value by using Device_PublishTransacted.] */
+                                    /* Codes_SRS_CODEFIRST_99_136:[CodeFirst_SendAsync shall build the full path for each property and then pass it to Device_PublishTransacted.] */
+                                    if (Device_PublishTransacted(transaction, STRING_c_str(valuePath), &agentDataType) != DEVICE_OK)
+                                    {
+                                        Destroy_AGENT_DATA_TYPE(&agentDataType);
 
-                                Destroy_AGENT_DATA_TYPE(&agentDataType);
+                                        /* Codes_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
+                                        result = CODEFIRST_DEVICE_PUBLISH_FAILED;
+                                        LOG_CODEFIRST_ERROR;
+                                        STRING_delete(valuePath);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        STRING_delete(valuePath); /*anyway*/
+                                    }
+
+                                    Destroy_AGENT_DATA_TYPE(&agentDataType);
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
-        if (i < numProperties)
-        {
-            if (transaction != NULL)
+            if (i < numProperties)
             {
-                (void)Device_CancelTransaction(transaction);
+                if (transaction != NULL)
+                {
+                    (void)Device_CancelTransaction(transaction);
+                }
             }
-        }
-        /* Codes_SRS_CODEFIRST_99_093:[After all values have been published, Device_EndTransaction shall be called.] */
-        else if (Device_EndTransaction(transaction, destination, destinationSize) != DEVICE_OK)
-        {
-            /* Codes_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
-            result = CODEFIRST_DEVICE_PUBLISH_FAILED;
-            LOG_CODEFIRST_ERROR;
-        }
-        else
-        {
-            /* Codes_SRS_CODEFIRST_99_117:[On success, CodeFirst_SendAsync shall return CODEFIRST_OK.] */
-            result = CODEFIRST_OK;
-        }
+            /* Codes_SRS_CODEFIRST_99_093:[After all values have been published, Device_EndTransaction shall be called.] */
+            else if (Device_EndTransaction(transaction, destination, destinationSize) != DEVICE_OK)
+            {
+                /* Codes_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
+                result = CODEFIRST_DEVICE_PUBLISH_FAILED;
+                LOG_CODEFIRST_ERROR;
+            }
+            else
+            {
+                /* Codes_SRS_CODEFIRST_99_117:[On success, CodeFirst_SendAsync shall return CODEFIRST_OK.] */
+                result = CODEFIRST_OK;
+            }
 
-        va_end(ap);
+            va_end(ap);
+        }
     }
 
     return result;
@@ -1209,148 +1291,157 @@ CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t
     }
     else
     {
-        DEVICE_HEADER_DATA* deviceHeader = NULL;
-        size_t i;
-        REPORTED_PROPERTIES_TRANSACTION_HANDLE transaction = NULL;
-        va_list ap;
-        result = CODEFIRST_ACTION_EXECUTION_ERROR; /*this initialization squelches a false warning about result not being initialized*/
-
-        va_start(ap, numReportedProperties);
-
-        for (i = 0; i < numReportedProperties; i++)
+        /*Codes_SRS_CODEFIRST_02_046: [ CodeFirst_SendAsyncReported shall call CodeFirst_Init, passing NULL for overrideSchemaNamespace. ]*/
+        if (CodeFirst_Init_impl(NULL, false) == CODEFIRST_ERROR)
         {
-            void* value = (void*)va_arg(ap, void*);
-            /*Codes_SRS_CODEFIRST_02_018: [ If parameter destination, destinationSize or any of the values passed through va_args is NULL then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
-            if (value == NULL)
+            /*Codes_SRS_CODEFIRST_02_047: [ If CodeFirst_Init returns CODEFIRST_ERROR then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_ERROR. ]*/
+            LogError("CodeFirst_Init_impl returned CODEFIRST_ERROR");
+            result = CODEFIRST_ERROR;
+        }
+        else
+        {
+            DEVICE_HEADER_DATA* deviceHeader = NULL;
+            size_t i;
+            REPORTED_PROPERTIES_TRANSACTION_HANDLE transaction = NULL;
+            va_list ap;
+            result = CODEFIRST_ACTION_EXECUTION_ERROR; /*this initialization squelches a false warning about result not being initialized*/
+
+            va_start(ap, numReportedProperties);
+
+            for (i = 0; i < numReportedProperties; i++)
             {
-                LogError("argument number %zu passed through variable arguments is NULL", i);
-                result = CODEFIRST_INVALID_ARG;
-                break;
-            }
-            else
-            {
-                DEVICE_HEADER_DATA* currentValueDeviceHeader = FindDevice(value);
-                if (currentValueDeviceHeader == NULL)
+                void* value = (void*)va_arg(ap, void*);
+                /*Codes_SRS_CODEFIRST_02_018: [ If parameter destination, destinationSize or any of the values passed through va_args is NULL then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
+                if (value == NULL)
                 {
+                    LogError("argument number %zu passed through variable arguments is NULL", i);
                     result = CODEFIRST_INVALID_ARG;
-                    LOG_CODEFIRST_ERROR;
-                    break;
-                }
-                /*Codes_SRS_CODEFIRST_02_019: [ If values passed through va_args do not belong to the same device then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_VALUES_FROM_DIFFERENT_DEVICES_ERROR. ]*/
-                else if ((deviceHeader != NULL) &&
-                    (currentValueDeviceHeader != deviceHeader))
-                {
-                    result = CODEFIRST_VALUES_FROM_DIFFERENT_DEVICES_ERROR;
-                    LOG_CODEFIRST_ERROR;
-                    break;
-                }
-                /*Codes_SRS_CODEFIRST_02_022: [ CodeFirst_SendAsyncReported shall start a transaction by calling Device_CreateTransaction_ReportedProperties. ]*/
-                else if ((deviceHeader == NULL) &&
-                    ((transaction = Device_CreateTransaction_ReportedProperties(currentValueDeviceHeader->DeviceHandle)) == NULL))
-                {
-                    result = CODEFIRST_DEVICE_PUBLISH_FAILED;
-                    LOG_CODEFIRST_ERROR;
                     break;
                 }
                 else
                 {
-                    deviceHeader = currentValueDeviceHeader;
-                    if (value == ((unsigned char*)deviceHeader->data))
+                    DEVICE_HEADER_DATA* currentValueDeviceHeader = FindDevice(value);
+                    if (currentValueDeviceHeader == NULL)
                     {
-                        /*Codes_SRS_CODEFIRST_02_021: [ If the value passed through va_args is a complete model instance, then CodeFirst_SendAsyncReported shall send all the reported properties of that device. ]*/
-                        result = SendAllDeviceReportedProperties(deviceHeader, transaction);
-                        if (result != CODEFIRST_OK)
-                        {
-                            LOG_CODEFIRST_ERROR;
-                            break;
-                        }
+                        result = CODEFIRST_INVALID_ARG;
+                        LOG_CODEFIRST_ERROR;
+                        break;
+                    }
+                    /*Codes_SRS_CODEFIRST_02_019: [ If values passed through va_args do not belong to the same device then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_VALUES_FROM_DIFFERENT_DEVICES_ERROR. ]*/
+                    else if ((deviceHeader != NULL) &&
+                        (currentValueDeviceHeader != deviceHeader))
+                    {
+                        result = CODEFIRST_VALUES_FROM_DIFFERENT_DEVICES_ERROR;
+                        LOG_CODEFIRST_ERROR;
+                        break;
+                    }
+                    /*Codes_SRS_CODEFIRST_02_022: [ CodeFirst_SendAsyncReported shall start a transaction by calling Device_CreateTransaction_ReportedProperties. ]*/
+                    else if ((deviceHeader == NULL) &&
+                        ((transaction = Device_CreateTransaction_ReportedProperties(currentValueDeviceHeader->DeviceHandle)) == NULL))
+                    {
+                        result = CODEFIRST_DEVICE_PUBLISH_FAILED;
+                        LOG_CODEFIRST_ERROR;
+                        break;
                     }
                     else
                     {
-                        /*Codes_SRS_CODEFIRST_02_020: [ If values passed through va_args are not all of type REFLECTED_REPORTED_PROPERTY then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
-                        const REFLECTED_SOMETHING* propertyReflectedData;
-                        const char* modelName;
-                        
-                        STRING_HANDLE valuePath;
-                        if ((valuePath = STRING_new()) == NULL)
+                        deviceHeader = currentValueDeviceHeader;
+                        if (value == ((unsigned char*)deviceHeader->data))
                         {
-                            result = CODEFIRST_ERROR;
-                            LOG_CODEFIRST_ERROR;
-                            break;
+                            /*Codes_SRS_CODEFIRST_02_021: [ If the value passed through va_args is a complete model instance, then CodeFirst_SendAsyncReported shall send all the reported properties of that device. ]*/
+                            result = SendAllDeviceReportedProperties(deviceHeader, transaction);
+                            if (result != CODEFIRST_OK)
+                            {
+                                LOG_CODEFIRST_ERROR;
+                                break;
+                            }
                         }
                         else
                         {
-                            modelName = Schema_GetModelName(deviceHeader->ModelHandle);
+                            /*Codes_SRS_CODEFIRST_02_020: [ If values passed through va_args are not all of type REFLECTED_REPORTED_PROPERTY then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
+                            const REFLECTED_SOMETHING* propertyReflectedData;
+                            const char* modelName;
 
-                            /*Codes_SRS_CODEFIRST_02_025: [ CodeFirst_SendAsyncReported shall compute for every AGENT_DATA_TYPE the valuePath. ]*/
-                            if ((propertyReflectedData = FindReportedProperty(deviceHeader, value, modelName, 0, valuePath)) == NULL)
+                            STRING_HANDLE valuePath;
+                            if ((valuePath = STRING_new()) == NULL)
                             {
-                                result = CODEFIRST_INVALID_ARG;
+                                result = CODEFIRST_ERROR;
                                 LOG_CODEFIRST_ERROR;
-                                STRING_delete(valuePath);
                                 break;
                             }
                             else
                             {
-                                AGENT_DATA_TYPE agentDataType;
-                                /*Codes_SRS_CODEFIRST_02_023: [ CodeFirst_SendAsyncReported shall convert all REPORTED_PROPERTY model components to AGENT_DATA_TYPE. ]*/
-                                if (propertyReflectedData->what.reportedProperty.Create_AGENT_DATA_TYPE_from_Ptr(value, &agentDataType) != AGENT_DATA_TYPES_OK)
+                                modelName = Schema_GetModelName(deviceHeader->ModelHandle);
+
+                                /*Codes_SRS_CODEFIRST_02_025: [ CodeFirst_SendAsyncReported shall compute for every AGENT_DATA_TYPE the valuePath. ]*/
+                                if ((propertyReflectedData = FindReportedProperty(deviceHeader, value, modelName, 0, valuePath)) == NULL)
                                 {
-                                    result = CODEFIRST_AGENT_DATA_TYPE_ERROR;
+                                    result = CODEFIRST_INVALID_ARG;
                                     LOG_CODEFIRST_ERROR;
                                     STRING_delete(valuePath);
                                     break;
                                 }
                                 else
                                 {
-                                    /*Codes_SRS_CODEFIRST_02_024: [ CodeFirst_SendAsyncReported shall call Device_PublishTransacted_ReportedProperty for every AGENT_DATA_TYPE converted from REPORTED_PROPERTY. ]*/
-                                    if (Device_PublishTransacted_ReportedProperty(transaction, STRING_c_str(valuePath), &agentDataType) != DEVICE_OK)
+                                    AGENT_DATA_TYPE agentDataType;
+                                    /*Codes_SRS_CODEFIRST_02_023: [ CodeFirst_SendAsyncReported shall convert all REPORTED_PROPERTY model components to AGENT_DATA_TYPE. ]*/
+                                    if (propertyReflectedData->what.reportedProperty.Create_AGENT_DATA_TYPE_from_Ptr(value, &agentDataType) != AGENT_DATA_TYPES_OK)
                                     {
-                                        Destroy_AGENT_DATA_TYPE(&agentDataType);
-                                        result = CODEFIRST_DEVICE_PUBLISH_FAILED;
+                                        result = CODEFIRST_AGENT_DATA_TYPE_ERROR;
                                         LOG_CODEFIRST_ERROR;
                                         STRING_delete(valuePath);
                                         break;
                                     }
                                     else
                                     {
-                                        STRING_delete(valuePath);
+                                        /*Codes_SRS_CODEFIRST_02_024: [ CodeFirst_SendAsyncReported shall call Device_PublishTransacted_ReportedProperty for every AGENT_DATA_TYPE converted from REPORTED_PROPERTY. ]*/
+                                        if (Device_PublishTransacted_ReportedProperty(transaction, STRING_c_str(valuePath), &agentDataType) != DEVICE_OK)
+                                        {
+                                            Destroy_AGENT_DATA_TYPE(&agentDataType);
+                                            result = CODEFIRST_DEVICE_PUBLISH_FAILED;
+                                            LOG_CODEFIRST_ERROR;
+                                            STRING_delete(valuePath);
+                                            break;
+                                        }
+                                        else
+                                        {
+                                            STRING_delete(valuePath);
+                                        }
+                                        Destroy_AGENT_DATA_TYPE(&agentDataType);
                                     }
-                                    Destroy_AGENT_DATA_TYPE(&agentDataType);
                                 }
                             }
                         }
                     }
                 }
             }
-        }
 
-        /*Codes_SRS_CODEFIRST_02_027: [ If any error occurs, CodeFirst_SendAsyncReported shall fail and return CODEFIRST_ERROR. ]*/
-        if (i < numReportedProperties)
-        {
-            if (transaction != NULL)
+            /*Codes_SRS_CODEFIRST_02_027: [ If any error occurs, CodeFirst_SendAsyncReported shall fail and return CODEFIRST_ERROR. ]*/
+            if (i < numReportedProperties)
             {
-                Device_DestroyTransaction_ReportedProperties(transaction);
+                if (transaction != NULL)
+                {
+                    Device_DestroyTransaction_ReportedProperties(transaction);
+                }
             }
-        }
-        /*Codes_SRS_CODEFIRST_02_026: [ CodeFirst_SendAsyncReported shall call Device_CommitTransaction_ReportedProperties to commit the transaction. ]*/
-        else
-        {
-            if (Device_CommitTransaction_ReportedProperties(transaction, destination, destinationSize) != DEVICE_OK)
-            {
-                result = CODEFIRST_DEVICE_PUBLISH_FAILED;
-                LOG_CODEFIRST_ERROR;
-            }
+            /*Codes_SRS_CODEFIRST_02_026: [ CodeFirst_SendAsyncReported shall call Device_CommitTransaction_ReportedProperties to commit the transaction. ]*/
             else
             {
-                /*Codes_SRS_CODEFIRST_02_028: [ CodeFirst_SendAsyncReported shall return CODEFIRST_OK when it succeeds. ]*/
-                result = CODEFIRST_OK;
+                if (Device_CommitTransaction_ReportedProperties(transaction, destination, destinationSize) != DEVICE_OK)
+                {
+                    result = CODEFIRST_DEVICE_PUBLISH_FAILED;
+                    LOG_CODEFIRST_ERROR;
+                }
+                else
+                {
+                    /*Codes_SRS_CODEFIRST_02_028: [ CodeFirst_SendAsyncReported shall return CODEFIRST_OK when it succeeds. ]*/
+                    result = CODEFIRST_OK;
+                }
+                Device_DestroyTransaction_ReportedProperties(transaction);
             }
-            Device_DestroyTransaction_ReportedProperties(transaction);
-        }
-        
-        va_end(ap);
 
+            va_end(ap);
+        }
     }
     return result;
 }

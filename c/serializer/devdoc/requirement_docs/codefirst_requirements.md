@@ -27,6 +27,8 @@ CODEFIRST_NOT_A_PROPERTY
  
 DEFINE_ENUM(CODEFIRST_RESULT, CODEFIRST_ENUM_VALUES)
  
+extern CODEFIRST_RESULT CodeFirst_Init(const char* overrideSchemaNamespace);
+extern void CodeFirst_Deinit(void);
 extern SCHEMA_HANDLE CodeFirst_RegisterSchema(const char* schemaNamespace, const REFLECTED_DATA_FROM_DATAPROVIDER* metadata);
  
 extern IOTHUBMESSAGE_DISPOSITION_RESULT CodeFirst_InvokeAction(void* deviceHandle, void* callbackUserContext, const char* relativeActionPath, const char* actionName, size_t parameterCount, const AGENT_DATA_TYPE* parameterValues);
@@ -43,7 +45,7 @@ extern AGENT_DATA_TYPE_TYPE CodeFirst_GetPrimitiveType(const char* typeName);
 
 ### CodeFirst_Init
 ```c
-static CODEFIRST_RESULT CodeFirst_Init(const char* overrideSchemaNamespace);
+CODEFIRST_RESULT CodeFirst_Init(const char* overrideSchemaNamespace);
 ```
 
 `CodeFirst_Init` is a lazy-init style function called by all the other public APIs of this module. 

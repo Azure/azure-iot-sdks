@@ -419,7 +419,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(NULL);
 
         // assert
-        // no explicit assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
     /* Tests_SRS_SCHEMA_99_005:[Schema_Destroy shall free all resources associated with a schema.] */
