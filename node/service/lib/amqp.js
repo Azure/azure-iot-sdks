@@ -3,6 +3,7 @@
 
 'use strict';
 
+var anHourFromNow = require('azure-iot-common').anHourFromNow;
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var Base = require('azure-iot-amqp-base').Amqp;
@@ -27,6 +28,7 @@ function Amqp(config, amqpBase) {
   EventEmitter.call(this);
   this._amqp = amqpBase ? amqpBase : new Base(true, PackageJson.name + '/' + PackageJson.version);
   this._config = config;
+  this._renewalInterval = null;
   this._amqp.setDisconnectHandler(function (err) {
     this.emit('disconnect', err);
   }.bind(this));
@@ -49,6 +51,18 @@ var handleResult = function (errorMessage, done) {
   };
 };
 
+Amqp.prototype._handleSASRenewal = function() {
+  this.disconnect(handleResult('SAS Renewal could not disconnect', function (err) {
+    if (!err) {
+      this.connect(handleResult('SAS Renewal could not connect', function(err) {
+        if (err) {
+          console.log("Unable to re-establish the connection following SAS renewal");
+        }
+      }));
+    }
+  }.bind(this)));
+};
+
 /**
  * @method             module:azure-iothub.Amqp#connect
  * @description        Establishes a connection with the IoT Hub instance.
@@ -61,9 +75,23 @@ Amqp.prototype.connect = function connect(done) {
          '%40sas.root.' +
          this._config.hubName +
          ':' +
-         encodeURIComponent(this._config.sharedAccessSignature) + '@' + this._config.host;
+         encodeURIComponent((typeof(this._config.sharedAccessSignature) === 'string') ? this._config.sharedAccessSignature : this._config.sharedAccessSignature.extend(anHourFromNow())) + '@' + this._config.host;
 
-  this._amqp.connect(uri, undefined, handleResult('AMQP Transport: Could not connect', done));
+  this._amqp.connect(uri, undefined, handleResult('AMQP Transport: Could not connect', function (err, result) {
+      //
+      // If the base transport completes the connection without error AND we
+      // aren't using a SAS token that was passed in by the appliction then set
+      // up an interval timer to renew the sas every 45 minutes.
+      //
+      if (!err) {
+        if (typeof(this._config.sharedAccessSignature) !== 'string') {
+          this._renewalInterval = setInterval(this._handleSASRenewal.bind(this), 2700000);
+        }
+      }
+      if (done) {
+        done(err, result);
+      }
+  }.bind(this)));
 };
 
 /**
@@ -73,6 +101,9 @@ Amqp.prototype.connect = function connect(done) {
  */
 /*Codes_SRS_NODE_IOTHUB_SERVICE_AMQP_16_020: [** The `disconnect` method shall call the `disconnect` method of the base AMQP transport and translate its result to the caller into a transport-agnostic object.]*/
 Amqp.prototype.disconnect = function disconnect(done) {
+  if (this._renewalInterval) {
+    clearInterval(this._renewalInterval);
+  }
   this._amqp.disconnect(handleResult('AMQP Transport: Could not disconnect', done));
 };
 

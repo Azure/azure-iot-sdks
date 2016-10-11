@@ -117,6 +117,12 @@ static void g_pfDesiredPropertyDeinitialize(void* destination)
     (void)(destination);
 }
 
+static void g_onDesiredProperty(void* destination)
+{
+    (void)(destination);
+}
+
+
 BEGIN_TEST_SUITE(Schema_ut)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
@@ -3183,7 +3189,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
 
         ///act
-        SCHEMA_RESULT result = Schema_AddModelModel(model, "ManicMiner", minerModel, 0);
+        SCHEMA_RESULT result = Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_OK, result);
@@ -3201,7 +3207,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
 
         ///act
-        SCHEMA_RESULT result = Schema_AddModelModel(NULL, "ManicMiner", minerModel, 0);
+        SCHEMA_RESULT result = Schema_AddModelModel(NULL, "ManicMiner", minerModel, 0, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
@@ -3220,7 +3226,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
 
         ///act
-        SCHEMA_RESULT result = Schema_AddModelModel(model, NULL, minerModel,0 );
+        SCHEMA_RESULT result = Schema_AddModelModel(model, NULL, minerModel,0, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
@@ -3238,7 +3244,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
 
         ///act
-        SCHEMA_RESULT result = Schema_AddModelModel(model, "ManicMiner", NULL, 0);
+        SCHEMA_RESULT result = Schema_AddModelModel(model, "ManicMiner", NULL, 0, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
@@ -3280,7 +3286,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
         size_t nModels = 444;
-        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0);
+        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
 
         ///act
         SCHEMA_RESULT result = Schema_GetModelModelCount(model, &nModels);
@@ -3302,8 +3308,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
         size_t nModels = 444;
-        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0);
-        (void)Schema_AddModelModel(model, "ManicMiner2", minerModel, 0);
+        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
+        (void)Schema_AddModelModel(model, "ManicMiner2", minerModel, 0, NULL);
 
         ///act
         SCHEMA_RESULT result = Schema_GetModelModelCount(model, &nModels);
@@ -3337,8 +3343,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
-        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0);
-        (void)Schema_AddModelModel(model, "ManicMiner2", minerModel, 0);
+        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
+        (void)Schema_AddModelModel(model, "ManicMiner2", minerModel, 0, NULL);
 
         ///act
         SCHEMA_RESULT result = Schema_GetModelModelCount(model, NULL);
@@ -3358,8 +3364,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
-        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0);
-        (void)Schema_AddModelModel(model, "ManicMiner2", minerModel, 0);
+        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
+        (void)Schema_AddModelModel(model, "ManicMiner2", minerModel, 0, NULL);
 
         ///act
         SCHEMA_MODEL_TYPE_HANDLE result1 = Schema_GetModelModelByName(model, "ManicMiner");
@@ -3382,8 +3388,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
-        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0);
-        (void)Schema_AddModelModel(model, "ManicMiner2", minerModel, 0);
+        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
+        (void)Schema_AddModelModel(model, "ManicMiner2", minerModel, 0, NULL);
 
         ///act
         SCHEMA_MODEL_TYPE_HANDLE result1 = Schema_GetModelModelByName(NULL, "ManicMiner");
@@ -3405,8 +3411,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
-        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0);
-        (void)Schema_AddModelModel(model, "ManicMiner2", minerModel, 0);
+        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
+        (void)Schema_AddModelModel(model, "ManicMiner2", minerModel, 0, NULL);
 
         ///act
         SCHEMA_MODEL_TYPE_HANDLE result1 = Schema_GetModelModelyByIndex(model, 0);
@@ -3435,8 +3441,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
-        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0);
-        (void)Schema_AddModelModel(model, "ManicMiner2", minerModel, 0);
+        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
+        (void)Schema_AddModelModel(model, "ManicMiner2", minerModel, 0, NULL);
 
         ///act
         const char* result1 = Schema_GetModelModelPropertyNameByIndex(model, 0);
@@ -3467,8 +3473,8 @@ BEGIN_TEST_SUITE(Schema_ut)
 
 
         ///act
-        SCHEMA_RESULT result1 = Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0);
-        SCHEMA_RESULT result2 = Schema_AddModelModel(bigModel, "theMediumModem", mediumModel, 0);
+        SCHEMA_RESULT result1 = Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0, NULL);
+        SCHEMA_RESULT result2 = Schema_AddModelModel(bigModel, "theMediumModem", mediumModel, 0, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_OK, result1);
@@ -3578,8 +3584,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         SCHEMA_MODEL_TYPE_HANDLE smallModel = Schema_CreateModelType(schemaHandle, "someSmallModel");
-        (void)Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0);
-        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0);
+        (void)Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0, NULL);
+        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
         (void)Schema_AddModelProperty(mediumModel, "propertyName", "type");
 
         ///act
@@ -3600,8 +3606,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         SCHEMA_MODEL_TYPE_HANDLE smallModel = Schema_CreateModelType(schemaHandle, "someSmallModel");
-        (void)Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0);
-        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0);
+        (void)Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0, NULL);
+        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
         (void)Schema_AddModelProperty(mediumModel, "propertyName", "type");
 
         ///act
@@ -3624,8 +3630,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         SCHEMA_MODEL_TYPE_HANDLE smallModel = Schema_CreateModelType(schemaHandle, "someSmallModel");
-        (void)Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0);
-        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0);
+        (void)Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0, NULL);
+        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
         (void)Schema_AddModelProperty(smallModel, "propertyName", "type");
 
         ///act
@@ -3646,8 +3652,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         SCHEMA_MODEL_TYPE_HANDLE smallModel = Schema_CreateModelType(schemaHandle, "someSmallModel");
-        (void)Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0);
-        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0);
+        (void)Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0, NULL);
+        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
         (void)Schema_AddModelProperty(smallModel, "propertyName", "type");
 
         ///act
@@ -3668,8 +3674,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         SCHEMA_MODEL_TYPE_HANDLE smallModel = Schema_CreateModelType(schemaHandle, "someSmallModel");
-        (void)Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0);
-        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0);
+        (void)Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0, NULL);
+        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
         (void)Schema_AddModelProperty(smallModel, "propertyName", "type");
 
         ///act
@@ -3690,8 +3696,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         SCHEMA_MODEL_TYPE_HANDLE smallModel = Schema_CreateModelType(schemaHandle, "someSmallModel");
-        (void)Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0);
-        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0);
+        (void)Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0, NULL);
+        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
         (void)Schema_AddModelProperty(smallModel, "propertyName", "type");
 
         ///act
@@ -3712,8 +3718,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         SCHEMA_MODEL_TYPE_HANDLE smallModel = Schema_CreateModelType(schemaHandle, "someSmallModel");
-        (void)Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0);
-        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0);
+        (void)Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0, NULL);
+        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
         (void)Schema_AddModelProperty(smallModel, "propertyName", "type");
 
         ///act
@@ -3734,8 +3740,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         SCHEMA_MODEL_TYPE_HANDLE smallModel = Schema_CreateModelType(schemaHandle, "someSmallModel");
-        (void)Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0);
-        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0);
+        (void)Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0, NULL);
+        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
         (void)Schema_AddModelProperty(smallModel, "propertyName", "type");
 
         ///act
@@ -3756,8 +3762,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         SCHEMA_MODEL_TYPE_HANDLE smallModel = Schema_CreateModelType(schemaHandle, "someSmallModel");
-        (void)Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0);
-        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0);
+        (void)Schema_AddModelModel(mediumModel, "theSmallModel", smallModel, 0, NULL);
+        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
         (void)Schema_AddModelProperty(smallModel, "propertyName", "type");
 
         ///act
@@ -3777,7 +3783,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
-        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0);
+        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
         (void)Schema_AddModelProperty(bigModel, "propertyName", "type");
 
         ///act
@@ -3797,7 +3803,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
-        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0);
+        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
         (void)Schema_AddModelProperty(mediumModel, "propertyName", "type");
 
         ///act
@@ -3817,7 +3823,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
-        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0);
+        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
         (void)Schema_AddModelProperty(mediumModel, "propertyName", "type");
 
         ///act
@@ -3850,7 +3856,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
-        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0);
+        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
         (void)Schema_AddModelProperty(mediumModel, "propertyName", "type");
 
         ///act
@@ -3880,7 +3886,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
-        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0);
+        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
         (void)Schema_AddModelProperty(mediumModel, "propertyName", "type");
 
         SCHEMA_RESULT result = Schema_AddDeviceRef(bigModel);
@@ -3904,7 +3910,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
-        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0);
+        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
         (void)Schema_AddModelProperty(mediumModel, "propertyName", "type");
 
         SCHEMA_RESULT result = Schema_AddDeviceRef(bigModel);
@@ -3925,7 +3931,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
-        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0);
+        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
         (void)Schema_AddModelProperty(mediumModel, "propertyName", "type");
 
         SCHEMA_RESULT result = Schema_AddDeviceRef(bigModel);
@@ -3965,7 +3971,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
-        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0);
+        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
         (void)Schema_AddModelProperty(mediumModel, "propertyName", "type");
 
         SCHEMA_RESULT result = Schema_AddDeviceRef(bigModel);
@@ -3987,7 +3993,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
-        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0);
+        (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
         (void)Schema_AddModelProperty(mediumModel, "propertyName", "type");
 
         SCHEMA_RESULT result = Schema_AddDeviceRef(bigModel);
@@ -4491,7 +4497,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
-        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0);
+        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
         (void)Schema_AddModelReportedProperty(model, "a", "b");
 
         /* overview of what the above instructions produce:
@@ -4529,7 +4535,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
         (void)Schema_AddModelReportedProperty(minerModel, "reported", "five_miles_of_gallery");
-        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0);
+        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
         (void)Schema_AddModelReportedProperty(model, "a", "b");
 
         /* overview of what the above instructions produce:
@@ -4566,7 +4572,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///arrange
 
         ///act
-        SCHEMA_RESULT result = Schema_AddModelDesiredProperty(NULL, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+        SCHEMA_RESULT result = Schema_AddModelDesiredProperty(NULL, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
@@ -4584,7 +4590,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         umock_c_reset_all_calls();
 
         ///act
-        SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, NULL, "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+        SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, NULL, "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
@@ -4603,7 +4609,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         umock_c_reset_all_calls();
 
         ///act
-        SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, "a", NULL, g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+        SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, "a", NULL, g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
@@ -4622,7 +4628,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         umock_c_reset_all_calls();
 
         ///act
-        SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, "a", "b", NULL, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+        SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, "a", "b", NULL, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
@@ -4641,7 +4647,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         umock_c_reset_all_calls();
 
         ///act
-        SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, NULL, g_pfDesiredPropertyDeinitialize, 0);
+        SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, NULL, g_pfDesiredPropertyDeinitialize, 0, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
@@ -4660,7 +4666,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         umock_c_reset_all_calls();
 
         ///act
-        SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, NULL, 0);
+        SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, NULL, 0, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_INVALID_ARG, result);
@@ -4705,7 +4711,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_AddModelDesiredProperty_inert_path(name, type);
 
         ///act
-        SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, name, type, g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+        SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, name, type, g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_OK, result);
@@ -4755,7 +4761,7 @@ BEGIN_TEST_SUITE(Schema_ut)
                 sprintf(temp_str, "On failed call %zu", i);
 
                 ///act
-                SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, desiredPropertyName, desiredPropertyType, g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+                SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, desiredPropertyName, desiredPropertyType, g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
 
                 ///assert
                 ASSERT_ARE_EQUAL_WITH_MSG(SCHEMA_RESULT, SCHEMA_ERROR, result, temp_str);
@@ -4775,7 +4781,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         const char* name = "a";
         const char* type = "b";
-        (void)Schema_AddModelDesiredProperty(modelType, name, type, g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+        (void)Schema_AddModelDesiredProperty(modelType, name, type, g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
         umock_c_reset_all_calls();
 
 
@@ -4784,7 +4790,7 @@ BEGIN_TEST_SUITE(Schema_ut)
             .IgnoreArgument_pred();
 
         ///act
-        SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, name, type, g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+        SCHEMA_RESULT result = Schema_AddModelDesiredProperty(modelType, name, type, g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(SCHEMA_RESULT, SCHEMA_DUPLICATE_ELEMENT, result);
@@ -4858,7 +4864,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///arrange
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
-        (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+        (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
 
         size_t nDesiredProperties;
         umock_c_reset_all_calls();
@@ -4884,8 +4890,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///arrange
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
-        (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
-        (void)Schema_AddModelDesiredProperty(modelType, "A", "B", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+        (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
+        (void)Schema_AddModelDesiredProperty(modelType, "A", "B", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
 
         size_t nDesiredProperties;
         umock_c_reset_all_calls();
@@ -4969,7 +4975,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///arrange
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
-        (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+        (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
         umock_c_reset_all_calls();
         const char* desiredPropertyName = "c"; /*only "a" exists*/
 
@@ -4994,7 +5000,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///arrange
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
-        (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+        (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
         umock_c_reset_all_calls();
         const char* desiredPropertyName = "a"; /*only "a" exists*/
 
@@ -5056,7 +5062,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///arrange
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
-        (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+        (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 1))
@@ -5079,7 +5085,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///arrange
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
-        (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+        (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
         umock_c_reset_all_calls();
 
         STRICT_EXPECTED_CALL(VECTOR_element(IGNORED_PTR_ARG, 0))
@@ -5153,7 +5159,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///arrange
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
-        (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+        (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
 
         ///act
         bool result = Schema_ModelDesiredPropertyByPathExists(modelType, "z"); /*only "a" exists*/
@@ -5171,8 +5177,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///arrange
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
-        (void)Schema_AddModelDesiredProperty(modelType, "a1", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
-        (void)Schema_AddModelDesiredProperty(modelType, "a2", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+        (void)Schema_AddModelDesiredProperty(modelType, "a1", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
+        (void)Schema_AddModelDesiredProperty(modelType, "a2", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
 
         ///act
         bool result = Schema_ModelDesiredPropertyByPathExists(modelType, "z"); /*only "a1" and "a2" exists*/
@@ -5190,8 +5196,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///arrange
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
-        (void)Schema_AddModelDesiredProperty(modelType, "a1", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
-        (void)Schema_AddModelDesiredProperty(modelType, "a2", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+        (void)Schema_AddModelDesiredProperty(modelType, "a1", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
+        (void)Schema_AddModelDesiredProperty(modelType, "a2", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
 
         ///act
         bool result_a1 = Schema_ModelDesiredPropertyByPathExists(modelType, "a1"); /*only "a1" and "a2" exists*/
@@ -5213,8 +5219,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
-        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0);
-        (void)Schema_AddModelDesiredProperty(model, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
+        (void)Schema_AddModelDesiredProperty(model, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
 
         /* overview of what the above instructions produce:
         SCHEMA
@@ -5248,9 +5254,9 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
-        (void)Schema_AddModelDesiredProperty(minerModel, "reported", "five_miles_of_gallery", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
-        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0);
-        (void)Schema_AddModelDesiredProperty(model, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+        (void)Schema_AddModelDesiredProperty(minerModel, "reported", "five_miles_of_gallery", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
+        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
+        (void)Schema_AddModelDesiredProperty(model, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
 
         /* overview of what the above instructions produce:
         SCHEMA
@@ -5302,7 +5308,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         const char* name = "a";
         const char* type = "b";
-        (void)Schema_AddModelDesiredProperty(modelType, name, type, g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0);
+        (void)Schema_AddModelDesiredProperty(modelType, name, type, g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
         SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle = Schema_GetModelDesiredPropertyByName(modelType, name);
         umock_c_reset_all_calls();
 
@@ -5355,7 +5361,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
-        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 3);
+        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 3, NULL);
         umock_c_reset_all_calls();
 
         ///act
@@ -5375,7 +5381,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
-        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 3); //<----- this is the offset
+        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 3, NULL); //<----- this is the offset
         umock_c_reset_all_calls();
 
         ///act
@@ -5427,7 +5433,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
-        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 3); //<----- this is the offset
+        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 3, NULL); //<----- this is the offset
         umock_c_reset_all_calls();
 
         ///act
@@ -5460,7 +5466,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///arrange
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
-        (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 3);
+        (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 3, NULL);
         SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle = Schema_GetModelDesiredPropertyByName(modelType, "a");
 
         umock_c_reset_all_calls();
@@ -5495,7 +5501,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///arrange
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
-        (void)Schema_AddModelDesiredProperty(modelType, "a", "theType", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 3);
+        (void)Schema_AddModelDesiredProperty(modelType, "a", "theType", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 3, NULL);
         SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle = Schema_GetModelDesiredPropertyByName(modelType, "a");
 
         umock_c_reset_all_calls();
@@ -5530,7 +5536,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///arrange
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
-        (void)Schema_AddModelDesiredProperty(modelType, "a", "theType", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 3);
+        (void)Schema_AddModelDesiredProperty(modelType, "a", "theType", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 3, NULL);
         SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle = Schema_GetModelDesiredPropertyByName(modelType, "a");
         umock_c_reset_all_calls();
 
@@ -5564,7 +5570,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///arrange
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
-        (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 3);
+        (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 3, NULL);
         SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle = Schema_GetModelDesiredPropertyByName(modelType, "a");
         umock_c_reset_all_calls();
 
@@ -5589,12 +5595,12 @@ BEGIN_TEST_SUITE(Schema_ut)
         ///arrange
         SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
-        (void)Schema_AddModelDesiredProperty(modelType, "desired", "a", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 3);
+        (void)Schema_AddModelDesiredProperty(modelType, "desired", "a", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 3, NULL);
         (void)Schema_AddModelReportedProperty(modelType, "reported", "n");
         (void)Schema_AddModelProperty(modelType, "regularProperty", "j");
         (void)Schema_CreateModelAction(modelType, "action");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
-        (void)Schema_AddModelModel(modelType, "ManicMiner", minerModel, 5); 
+        (void)Schema_AddModelModel(modelType, "ManicMiner", minerModel, 5, NULL);
 
         ///act
         SCHEMA_MODEL_ELEMENT shouldBeModelInModel = Schema_GetModelElementByName(modelType, "ManicMiner");
@@ -5627,4 +5633,108 @@ BEGIN_TEST_SUITE(Schema_ut)
         Schema_Destroy(schemaHandle);
     }
 
+    /*Tests_SRS_SCHEMA_02_084: [ If desiredPropertyHandle is NULL then Schema_GetModelDesiredProperty_pfOnDesiredProperty shall return NULL. ]*/
+    TEST_FUNCTION(Schema_GetModelDesiredProperty_pfOnDesiredProperty_with_NULL_desiredPropertyHandle_returns_NULL)
+    {
+        ///arrange
+
+        ///act
+        pfOnDesiredProperty onDesiredProperty = Schema_GetModelDesiredProperty_pfOnDesiredProperty(NULL);
+
+        ///assert
+        ASSERT_IS_TRUE(onDesiredProperty == NULL);
+
+        ///clean
+    }
+
+    /*Tests_SRS_SCHEMA_02_085: [ Otherwise Schema_GetModelDesiredProperty_pfOnDesiredProperty shall return the saved desired property callback. ]*/
+    TEST_FUNCTION(Schema_GetModelDesiredProperty_pfOnDesiredProperty_created_with_NULL_pfOnDesiredProperty_returns_NULL)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
+        (void)Schema_AddModelDesiredProperty(modelType, "desired", "a", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 3, NULL);
+
+        ///act
+        pfOnDesiredProperty onDesiredProperty = Schema_GetModelDesiredProperty_pfOnDesiredProperty(NULL);
+
+        ///assert
+        ASSERT_IS_TRUE(onDesiredProperty == NULL);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_085: [ Otherwise Schema_GetModelDesiredProperty_pfOnDesiredProperty shall return the saved desired property callback. ]*/
+    TEST_FUNCTION(Schema_GetModelDesiredProperty_pfOnDesiredProperty_created_with_non_NULL_pfOnDesiredProperty_returns_non_NULL)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
+        (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 3, g_onDesiredProperty);
+        SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle = Schema_GetModelDesiredPropertyByName(modelType, "a");
+
+        ///act
+        pfOnDesiredProperty onDesiredProperty = Schema_GetModelDesiredProperty_pfOnDesiredProperty(desiredPropertyHandle);
+
+        ///assert
+        ASSERT_IS_TRUE(onDesiredProperty == g_onDesiredProperty);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_086: [ If modelTypeHandle is NULL then Schema_GetModelModelByName_OnDesiredProperty shall return NULL. ]*/
+    TEST_FUNCTION(Schema_GetModelModelByName_OnDesiredProperty_with_NULL_modelTypeHandle_returns_NULL)
+    {
+        ///arrange
+
+        ///act
+        pfOnDesiredProperty onDesiredProperty =Schema_GetModelModelByName_OnDesiredProperty(NULL, "a");
+
+        ///assert
+        ASSERT_IS_TRUE(onDesiredProperty == NULL);
+
+        ///clean
+    }
+
+    /*Tests_SRS_SCHEMA_02_087: [ If propertyName is NULL then Schema_GetModelModelByName_OnDesiredProperty shall return NULL. ]*/
+    TEST_FUNCTION(Schema_GetModelModelByName_OnDesiredProperty_with_NULL_propertyName_returns_NULL)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
+        SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
+        (void)Schema_AddModelDesiredProperty(minerModel, "reported", "five_miles_of_gallery", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
+        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
+
+        ///act
+        pfOnDesiredProperty onDesiredProperty = Schema_GetModelModelByName_OnDesiredProperty(model, NULL);
+
+        ///assert
+        ASSERT_IS_TRUE(onDesiredProperty == NULL);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_089: [ Otherwise Schema_GetModelModelByName_OnDesiredProperty shall return the desired property callback. ]*/
+    TEST_FUNCTION(Schema_GetModelModelByName_OnDesiredProperty_returns_non_NULL_onDesiredProperty)
+    {
+        ///arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
+        SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
+        (void)Schema_AddModelDesiredProperty(minerModel, "reported", "five_miles_of_gallery", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
+        (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, g_onDesiredProperty);
+
+        ///act
+        pfOnDesiredProperty onDesiredProperty = Schema_GetModelModelByName_OnDesiredProperty(model, "ManicMiner");
+
+        ///assert
+        ASSERT_IS_TRUE(onDesiredProperty == g_onDesiredProperty);
+
+        ///clean
+        Schema_Destroy(schemaHandle);
+    }
 END_TEST_SUITE(Schema_ut)

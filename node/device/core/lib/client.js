@@ -37,7 +37,7 @@ var Client = function (transport, connStr, blobUploadClient) {
 
   if (this._connectionString && ConnectionString.parse(this._connectionString).SharedAccessKey) {
     /*Codes_SRS_NODE_DEVICE_CLIENT_16_027: [If a connection string argument is provided and is using SharedAccessKey authentication, the Client shall automatically generate and renew SAS tokens.] */
-    this._sharedAccessSignatureRenewalInterval = setInterval(this._renewSharedAccessSignature.bind(this), 2700000); // SAS token created by the client have a lifetime of 60 minutes, renew every 45 minutes
+    this._sharedAccessSignatureRenewalInterval = setInterval(this._renewSharedAccessSignature.bind(this), Client.sasRenewalInterval); 
   }
 
   this.blobUploadClient = blobUploadClient;
@@ -139,6 +139,9 @@ Client.prototype._addMethodCallback = function(methodName, callback) {
   });
 };
 
+// SAS token created by the client have a lifetime of 60 minutes, renew every 45 minutes
+Client.sasRenewalInterval = 2700000;
+
 Client.prototype._connectReceiver = function () {
   debug('Getting receiver object from the transport');
   var self = this;
@@ -183,6 +186,8 @@ Client.prototype._renewSharedAccessSignature = function () {
     if (err) {
       /*Codes_SRS_NODE_DEVICE_CLIENT_16_006: [The ‘error’ event shall be emitted when an error occurred within the client code.] */
       this.emit('error', err);
+    } else {
+      this.emit('_sharedAccessSignatureUpdated');
     }
   }.bind(this));
 };
@@ -326,6 +331,7 @@ Client.prototype.open = function (done) {
       } else {
         debug('Open transport successful');
         /*Codes_SRS_NODE_DEVICE_CLIENT_16_045: [If the transport successfully establishes a connection the `open` method shall subscribe to the `disconnect` event of the transport.]*/
+        self._transport.removeAllListeners('disconnect'); // remove the old one before adding a new -- this can happen when renewing SAS tokens
         self._transport.on('disconnect', self._disconnectHandler.bind(self));
         connectReceiverIfListening();
         done(null, res);
@@ -382,18 +388,19 @@ Client.prototype.sendEventBatch = function (messages, done) {
  * @method           module:azure-iot-device.Client#close
  * @description      The `close` method directs the transport to close the current connection to the IoT Hub instance
 
-* @param {Function} done    The callback to be invoked when the connection has been closed.
-*/
+ * @param {Function} done    The callback to be invoked when the connection has been closed.
+ */
 Client.prototype.close = function (done) {
   if (this._sharedAccessSignatureRenewalInterval) clearInterval(this._sharedAccessSignatureRenewalInterval);
   /* Codes_SRS_NODE_DEVICE_CLIENT_16_001: [The close function shall call the transport’s disconnect function if it exists.] */
   if (typeof this._transport.disconnect === 'function') {
+    var self = this;
     this._transport.disconnect(function (err, result) {
       if (err) {
         done(err);
       } else {
         /*Codes_SRS_NODE_DEVICE_CLIENT_16_046: [The `close` method shall remove the listener that has been attached to the transport `disconnect` event.]*/
-        this._transport.removeAllListeners('disconnect');
+        self._transport.removeAllListeners('disconnect');
         done(null, result);
       }
     }.bind(this));

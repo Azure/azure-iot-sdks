@@ -12,9 +12,9 @@ extern "C"
 #else
 #endif
 
-#include "crt_abstractions.h"
-#include "list.h"
-#include "map.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/singlylinkedlist.h"
+#include "azure_c_shared_utility/map.h"
 #include <time.h>
 #include "iothub_service_client_auth.h"
 

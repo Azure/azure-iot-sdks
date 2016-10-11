@@ -28,6 +28,7 @@ typedef struct SCHEMA_DESIRED_PROPERTY_HANDLE_DATA_TAG* SCHEMA_DESIRED_PROPERTY_
 typedef struct SCHEMA_ACTION_HANDLE_DATA_TAG* SCHEMA_ACTION_HANDLE;
 typedef struct SCHEMA_ACTION_ARGUMENT_HANDLE_DATA_TAG* SCHEMA_ACTION_ARGUMENT_HANDLE;
 
+typedef void(*pfOnDesiredProperty)(void* model);
 typedef int(*pfDesiredPropertyFromAGENT_DATA_TYPE)(const AGENT_DATA_TYPE* source, void* dest);
 typedef void(*pfDesiredPropertyInitialize)(void* destination);
 typedef void(*pfDesiredPropertyDeinitialize)(void* destination);
@@ -88,13 +89,17 @@ MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddStructTypeProperty, SCHEMA_STRUCT_T
 
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName, const char*, propertyType);
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelReportedProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, reportedPropertyName, const char*, reportedPropertyType);
-MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelDesiredProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, desiredPropertyName, const char*, desiredPropertyType, pfDesiredPropertyFromAGENT_DATA_TYPE, desiredPropertyFromAGENT_DATA_TYPE, pfDesiredPropertyInitialize, desiredPropertyInitialize, pfDesiredPropertyDeinitialize, desiredPropertyDeinitialize, size_t, offset);
-MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelModel, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName, SCHEMA_MODEL_TYPE_HANDLE, modelType, size_t, offset);
+MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelDesiredProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, desiredPropertyName, const char*, desiredPropertyType, pfDesiredPropertyFromAGENT_DATA_TYPE, desiredPropertyFromAGENT_DATA_TYPE, pfDesiredPropertyInitialize, desiredPropertyInitialize, pfDesiredPropertyDeinitialize, desiredPropertyDeinitialize, size_t, offset, pfOnDesiredProperty, onDesiredProperty);
+MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelModel, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName, SCHEMA_MODEL_TYPE_HANDLE, modelType, size_t, offset, pfOnDesiredProperty, onDesiredProperty);
 MOCKABLE_FUNCTION(, SCHEMA_ACTION_HANDLE, Schema_CreateModelAction, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, actionName);
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddModelActionArgument, SCHEMA_ACTION_HANDLE, actionHandle, const char*, argumentName, const char*, argumentType);
 MOCKABLE_FUNCTION(, pfDesiredPropertyFromAGENT_DATA_TYPE, Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE, SCHEMA_DESIRED_PROPERTY_HANDLE, desiredPropertyHandle);
+MOCKABLE_FUNCTION(, pfOnDesiredProperty, Schema_GetModelDesiredProperty_pfOnDesiredProperty, SCHEMA_DESIRED_PROPERTY_HANDLE, desiredPropertyHandle);
+
 
 MOCKABLE_FUNCTION(, size_t, Schema_GetModelModelByName_Offset, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName);
+MOCKABLE_FUNCTION(, pfOnDesiredProperty, Schema_GetModelModelByName_OnDesiredProperty, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, const char*, propertyName);
+
 MOCKABLE_FUNCTION(, size_t, Schema_GetModelModelByIndex_Offset, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle, size_t, index);
 
 MOCKABLE_FUNCTION(, size_t, Schema_GetModelDesiredProperty_offset, SCHEMA_DESIRED_PROPERTY_HANDLE, desiredPropertyHandle);

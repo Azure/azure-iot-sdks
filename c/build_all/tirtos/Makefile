@@ -50,10 +50,10 @@ XS = $(XDCTOOLS_INSTALLATION_DIR)/xs
 
 all:
 	@echo building packages...
-	@$(XDC) -Pr ../../azure-c-shared-utility
+	@$(XDC) -Pr ../../c-utility
 	@$(XDC) -Pr ../../
 
 clean:
 	@echo cleaning packages ...
-	@$(XDC) clean -Pr ../../azure-c-shared-utility
+	@$(XDC) clean -Pr ../../c-utility
 	@$(XDC) clean -Pr ../../

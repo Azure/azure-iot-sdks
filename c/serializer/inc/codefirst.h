@@ -86,6 +86,7 @@ typedef struct REFLECTION_REPORTED_PROPERTY_TAG
 
 typedef struct REFLECTION_DESIRED_PROPERTY_TAG
 {
+    pfOnDesiredProperty onDesiredProperty;
     void(*desiredPropertInitialize)(void* destination);
     void(*desiredPropertDeinitialize)(void* destination);
     const char* name;

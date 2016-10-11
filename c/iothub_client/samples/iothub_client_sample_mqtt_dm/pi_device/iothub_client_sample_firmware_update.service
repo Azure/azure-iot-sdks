@@ -1,0 +1,13 @@
+[Unit]
+Description=Azure-IoTHub Client DM Sample
+After=network.target auditd.service
+ConditionPathExists=/usr/share/iothub_client_sample/.device_connection_string
+
+[Service]
+Type=forking
+ExecStart=/usr/share/iothub_client_sample/firmware_update
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+Alias=iothub_client_sample_firmware_update

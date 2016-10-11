@@ -160,8 +160,17 @@ extern "C"
  */
  /* WITH_DATA's name argument shall be one of the following data types: */
  /* Codes_SRS_SERIALIZER_99_133:[a model type introduced previously by DECLARE_MODEL] */
+
+#define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_ACTION(...)
+#define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_DESIRED_PROPERTY(type, name, ...) IF(COUNT_ARG(__VA_ARGS__), void __VA_ARGS__ (void*);, )
+#define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_PROPERTY(...)
+#define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_REPORTED_PROPERTY(...) 
+
+#define CREATE_DESIRED_PROPERTY_CALLBACK(...) CREATE_DESIRED_PROPERTY_CALLBACK_##__VA_ARGS__
+
 #define DECLARE_MODEL(name, ...)                                                             \
     REFLECTED_MODEL(name)                                                                    \
+    FOR_EACH_1(CREATE_DESIRED_PROPERTY_CALLBACK, __VA_ARGS__)                                \
     typedef struct name { int :1; FOR_EACH_1(BUILD_MODEL_STRUCT, __VA_ARGS__) } name;        \
     FOR_EACH_1_KEEP_1(CREATE_MODEL_ELEMENT, name, __VA_ARGS__)                               \
     TO_AGENT_DATA_TYPE(name, DROP_FIRST_COMMA_FROM_ARGS(EXPAND_MODEL_ARGS(__VA_ARGS__)))     \
@@ -213,7 +222,7 @@ extern "C"
 
 #define WITH_REPORTED_PROPERTY(type, name) MODEL_REPORTED_PROPERTY(type, name)
 
-#define WITH_DESIRED_PROPERTY(type, name) MODEL_DESIRED_PROPERTY(type, name)
+#define WITH_DESIRED_PROPERTY(type, name, ...) MODEL_DESIRED_PROPERTY(type, name, __VA_ARGS__)
 
 /**
  * @def   WITH_ACTION(name, ...)
@@ -346,7 +355,7 @@ Actions are discarded, since no marshalling will be done for those when sending 
 
 #define TO_AGENT_DT_EXPAND_MODEL_REPORTED_PROPERTY(x, y) ,x,y
 
-#define TO_AGENT_DT_EXPAND_MODEL_DESIRED_PROPERTY(x, y) ,x,y
+#define TO_AGENT_DT_EXPAND_MODEL_DESIRED_PROPERTY(x, y, ...) ,x,y
 
 #define TO_AGENT_DT_EXPAND_MODEL_ACTION(...) 
 
@@ -405,8 +414,17 @@ Actions are discarded, since no marshalling will be done for those when sending 
     static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_PROPERTY_TYPE,             &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {TOSTRING(name), TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##name, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0} } };
 #define REFLECTED_REPORTED_PROPERTY(type, name, modelName) \
     static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_REPORTED_PROPERTY_TYPE,    &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {TOSTRING(name), TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##name, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0} } };
-#define REFLECTED_DESIRED_PROPERTY(type, name, modelName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_DESIRED_PROPERTY_TYPE,     &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {DesiredPropertyInitialize_##name, DesiredPropertyDeinitialize_##name, TOSTRING(name), TOSTRING(type), (int(*)(const AGENT_DATA_TYPE*, void*))FromAGENT_DATA_TYPE_##type, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0}, {0}} };
+
+
+#define REFLECTED_DESIRED_PROPERTY_WITH_ON_DESIRED_PROPERTY_CHANGE(type, name, modelName, COUNTER, onDesiredPropertyChange) \
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(COUNTER))) = { REFLECTION_DESIRED_PROPERTY_TYPE,     &C2(REFLECTED_, C1(DEC(COUNTER))), { {onDesiredPropertyChange, DesiredPropertyInitialize_##name, DesiredPropertyDeinitialize_##name, TOSTRING(name), TOSTRING(type), (int(*)(const AGENT_DATA_TYPE*, void*))FromAGENT_DATA_TYPE_##type, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0}, {0}} };
+
+#define REFLECTED_DESIRED_PROPERTY(type, name, modelName, ...)                                                              \
+    IF(COUNT_ARG(__VA_ARGS__),                                                                                              \
+        DELAY(REFLECTED_DESIRED_PROPERTY_WITH_ON_DESIRED_PROPERTY_CHANGE)(type, name, modelName,__COUNTER__, __VA_ARGS__),  \
+        DELAY(REFLECTED_DESIRED_PROPERTY_WITH_ON_DESIRED_PROPERTY_CHANGE)(type, name, modelName,DEC(__COUNTER__), NULL)     \
+    )                                                                                                                       \
+
 #define REFLECTED_ACTION(name, argc, argv, fn, modelName) \
     static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_ACTION_TYPE,               &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {0}, {TOSTRING(name), (0 ? (uintptr_t)("", "") : argc), argv, fn, TOSTRING(modelName)}, {0}} };
 #define REFLECTED_END_OF_LIST \
@@ -416,7 +434,7 @@ Actions are discarded, since no marshalling will be done for those when sending 
 
 #define EXPAND_MODEL_REPORTED_PROPERTY(type, name) EXPAND_ARGS(MODEL_REPORTED_PROPERTY, type, name)
 
-#define EXPAND_MODEL_DESIRED_PROPERTY(type, name) EXPAND_ARGS(MODEL_DESIRED_PROPERTY, type, name)
+#define EXPAND_MODEL_DESIRED_PROPERTY(type, name, ...) EXPAND_ARGS(MODEL_DESIRED_PROPERTY, type, name, __VA_ARGS__)
 
 #define EXPAND_MODEL_ACTION(...) EXPAND_ARGS(MODEL_ACTION, __VA_ARGS__)
 
@@ -452,9 +470,9 @@ Actions are discarded, since no marshalling will be done for those when sending 
 #define CREATE_GLOBAL_DEINITIALIZE_MODEL_REPORTED_PROPERTY(modelName, type,name) GlobalDeinitialize_##type((char*)destination+offsetof(modelName, name));
 
 /*DESIRED_PROPERTY is not different than regular WITH_DATA*/
-#define INSERT_FIELD_FOR_MODEL_DESIRED_PROPERTY(type, name) INSERT_FIELD_INTO_STRUCT(type, name)
-#define CREATE_GLOBAL_INITIALIZE_MODEL_DESIRED_PROPERTY(modelName, type,name) /*do nothing*/
-#define CREATE_GLOBAL_DEINITIALIZE_MODEL_DESIRED_PROPERTY(modelName, type,name) /*do nothing*/
+#define INSERT_FIELD_FOR_MODEL_DESIRED_PROPERTY(type, name, ...) INSERT_FIELD_INTO_STRUCT(type, name)
+#define CREATE_GLOBAL_INITIALIZE_MODEL_DESIRED_PROPERTY(modelName, type, name, ...) /*do nothing*/
+#define CREATE_GLOBAL_DEINITIALIZE_MODEL_DESIRED_PROPERTY(modelName, type, name, ...) /*do nothing*/
 
 #define INSERT_FIELD_FOR_MODEL_ACTION(name, ...) /* action isn't a part of the model struct */
 #define CREATE_GLOBAL_INITIALIZE_MODEL_ACTION(...) /*do nothing*/
@@ -466,8 +484,8 @@ Actions are discarded, since no marshalling will be done for those when sending 
 #define CREATE_MODEL_REPORTED_PROPERTY(modelName, type, name) \
     IMPL_REPORTED_PROPERTY(type, name, modelName)
 
-#define CREATE_MODEL_DESIRED_PROPERTY(modelName, type, name) \
-    IMPL_DESIRED_PROPERTY(type, name, modelName)
+#define CREATE_MODEL_DESIRED_PROPERTY(modelName, type, name, ...) \
+    IMPL_DESIRED_PROPERTY(type, name, modelName, __VA_ARGS__)
 
 #define IMPL_PROPERTY(propertyType, propertyName, modelName) \
     static int Create_AGENT_DATA_TYPE_From_Ptr_##propertyName(void* param, AGENT_DATA_TYPE* dest) \
@@ -483,16 +501,16 @@ Actions are discarded, since no marshalling will be done for those when sending 
     } \
     REFLECTED_REPORTED_PROPERTY(propertyType, propertyName, modelName)
 
-#define IMPL_DESIRED_PROPERTY(propertyType, propertyName, modelName)             \
-    static void DesiredPropertyInitialize_##propertyName(void* destination)      \
-    {                                                                            \
-        GlobalInitialize_##propertyType(destination);                            \
-    }                                                                            \
-    static void DesiredPropertyDeinitialize_##propertyName(void* destination)    \
-    {                                                                            \
-       GlobalDeinitialize_##propertyType(destination);                           \
-    }                                                                            \
-    REFLECTED_DESIRED_PROPERTY(propertyType, propertyName, modelName)            \
+#define IMPL_DESIRED_PROPERTY(propertyType, propertyName, modelName, ...)           \
+    static void DesiredPropertyInitialize_##propertyName(void* destination)                             \
+    {                                                                                                   \
+        GlobalInitialize_##propertyType(destination);                                                   \
+    }                                                                                                   \
+    static void DesiredPropertyDeinitialize_##propertyName(void* destination)                           \
+    {                                                                                                   \
+       GlobalDeinitialize_##propertyType(destination);                                                  \
+    }                                                                                                   \
+    REFLECTED_DESIRED_PROPERTY(propertyType, propertyName, modelName, __VA_ARGS__)          \
 
 #define CREATE_MODEL_ACTION(modelName, actionName, ...) \
     DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(modelName##actionName, 1); \

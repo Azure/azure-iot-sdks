@@ -86,7 +86,7 @@ void iothub_registrymanager_sample_run(void)
     {
         IOTHUB_REGISTRYMANAGER_HANDLE iotHubRegistryManagerHandle = NULL;
         IOTHUB_DEVICE deviceInfo;
-        LIST_HANDLE deviceList = NULL;
+        SINGLYLINKEDLIST_HANDLE deviceList = NULL;
         IOTHUB_REGISTRY_STATISTICS registryStatistics;
 
         (void)printf("iotHubServiceClientHandle has been created successfully\r\n");
@@ -186,20 +186,20 @@ void iothub_registrymanager_sample_run(void)
         }
 
         // Get device list
-        deviceList = list_create();
+        deviceList = singlylinkedlist_create();
 
         result = IoTHubRegistryManager_GetDeviceList(iotHubRegistryManagerHandle, 3, deviceList);
         switch (result)
         {
         case IOTHUB_REGISTRYMANAGER_OK:
             (void)printf("IoTHubRegistryManager_GetDeviceList: Successfully got device list\r\n");
-            LIST_ITEM_HANDLE next_device = list_get_head_item(deviceList);
+            LIST_ITEM_HANDLE next_device = singlylinkedlist_get_head_item(deviceList);
             int i = 0;
             while (next_device != NULL)
             {
-                IOTHUB_DEVICE* device = (IOTHUB_DEVICE*)list_item_get_value(next_device);
+                IOTHUB_DEVICE* device = (IOTHUB_DEVICE*)singlylinkedlist_item_get_value(next_device);
                 printDeviceInfo(device, i++);
-                next_device = list_get_next_item(next_device);
+                next_device = singlylinkedlist_get_next_item(next_device);
             }
             break;
         case IOTHUB_REGISTRYMANAGER_ERROR:

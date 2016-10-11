@@ -29,6 +29,7 @@ typedef struct SCHEMA_REPORTED_PROPERTY_HANDLE_DATA_TAG
 
 typedef struct SCHEMA_DESIRED_PROPERTY_HANDLE_DATA_TAG
 {
+    pfOnDesiredProperty onDesiredProperty;
     pfDesiredPropertyInitialize desiredPropertInitialize;
     pfDesiredPropertyDeinitialize desiredPropertDeinitialize;
     const char* desiredPropertyName;
@@ -52,6 +53,7 @@ typedef struct SCHEMA_ACTION_HANDLE_DATA_TAG
 
 typedef struct MODEL_IN_MODEL_TAG
 {
+    pfOnDesiredProperty onDesiredProperty; /*is NULL if not specified or if the model in model is not WITH_DESIRED_PROPERTY*/
     size_t offset; /*offset of the model in model (offsetof)*/
     const char* propertyName;
     SCHEMA_MODEL_TYPE_HANDLE modelHandle;
@@ -1892,7 +1894,7 @@ const char* Schema_GetModelName(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle)
 }
 
 /*Codes_SRS_SCHEMA_99_163: [Schema_AddModelModel shall insert an existing model, identified by the handle modelType, into the existing model identified by modelTypeHandle under a property having the name propertyName.]*/
-SCHEMA_RESULT Schema_AddModelModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName, SCHEMA_MODEL_TYPE_HANDLE modelType, size_t offset)
+SCHEMA_RESULT Schema_AddModelModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName, SCHEMA_MODEL_TYPE_HANDLE modelType, size_t offset, pfOnDesiredProperty onDesiredProperty)
 {
     SCHEMA_RESULT result;
     /*Codes_SRS_SCHEMA_99_165: [If any of the parameters is NULL then Schema_AddModelModel shall return SCHEMA_INVALID_ARG.]*/
@@ -1911,6 +1913,7 @@ SCHEMA_RESULT Schema_AddModelModel(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, con
         MODEL_IN_MODEL temp;
         temp.modelHandle = modelType;
         temp.offset = offset;
+        temp.onDesiredProperty = onDesiredProperty;
         if (mallocAndStrcpy_s((char**)&(temp.propertyName), propertyName) != 0)
         {
             result = SCHEMA_ERROR;
@@ -2026,6 +2029,38 @@ size_t Schema_GetModelModelByName_Offset(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandl
         }
     }
     return result;
+}
+
+pfOnDesiredProperty Schema_GetModelModelByName_OnDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* propertyName)
+{
+    pfOnDesiredProperty result;
+    /*Codes_SRS_SCHEMA_02_086: [ If modelTypeHandle is NULL then Schema_GetModelModelByName_OnDesiredProperty shall return NULL. ]*/
+    /*Codes_SRS_SCHEMA_02_087: [ If propertyName is NULL then Schema_GetModelModelByName_OnDesiredProperty shall return NULL. ]*/
+    if (
+        (modelTypeHandle == NULL) ||
+        (propertyName == NULL)
+        )
+    {
+        result = NULL;
+        LogError("invalid argument SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle=%p, const char* propertyName=%p",modelTypeHandle, propertyName);
+    }
+    else
+    {
+        SCHEMA_MODEL_TYPE_HANDLE_DATA* model = (SCHEMA_MODEL_TYPE_HANDLE_DATA*)modelTypeHandle;
+        void* temp = VECTOR_find_if(model->models, matchModelName, propertyName);
+        if (temp == NULL)
+        {
+            LogError("specified propertyName not found (%s)", propertyName);
+            result = NULL;
+        }
+        else
+        {
+            /*Codes_SRS_SCHEMA_02_089: [ Otherwise Schema_GetModelModelByName_OnDesiredProperty shall return the desired property callback. ]*/
+            result = ((MODEL_IN_MODEL*)temp)->onDesiredProperty;
+        }
+    }
+    return result;
+
 }
 
 size_t Schema_GetModelModelByIndex_Offset(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, size_t index)
@@ -2298,7 +2333,7 @@ static bool desiredPropertyExists(const void* element, const void* value)
     return (strcmp(desiredProperty->desiredPropertyName, value) == 0);
 }
 
-SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyName, const char* desiredPropertyType, pfDesiredPropertyFromAGENT_DATA_TYPE desiredPropertyFromAGENT_DATA_TYPE, pfDesiredPropertyInitialize desiredPropertyInitialize, pfDesiredPropertyDeinitialize desiredPropertyDeinitialize, size_t offset)
+SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle, const char* desiredPropertyName, const char* desiredPropertyType, pfDesiredPropertyFromAGENT_DATA_TYPE desiredPropertyFromAGENT_DATA_TYPE, pfDesiredPropertyInitialize desiredPropertyInitialize, pfDesiredPropertyDeinitialize desiredPropertyDeinitialize, size_t offset, pfOnDesiredProperty onDesiredProperty)
 {
     SCHEMA_RESULT result;
     /*Codes_SRS_SCHEMA_02_024: [ If modelTypeHandle is NULL then Schema_AddModelDesiredProperty shall fail and return SCHEMA_INVALID_ARG. ]*/
@@ -2375,6 +2410,7 @@ SCHEMA_RESULT Schema_AddModelDesiredProperty(SCHEMA_MODEL_TYPE_HANDLE modelTypeH
                             desiredProperty->desiredPropertyFromAGENT_DATA_TYPE = desiredPropertyFromAGENT_DATA_TYPE;
                             desiredProperty->desiredPropertInitialize = desiredPropertyInitialize;
                             desiredProperty->desiredPropertDeinitialize = desiredPropertyDeinitialize;
+                            desiredProperty->onDesiredProperty = onDesiredProperty; /*NULL is a perfectly fine value*/
                             desiredProperty->offset = offset;
                             result = SCHEMA_OK;
                         }
@@ -2584,6 +2620,24 @@ pfDesiredPropertyFromAGENT_DATA_TYPE Schema_GetModelDesiredProperty_pfDesiredPro
     {
         SCHEMA_DESIRED_PROPERTY_HANDLE_DATA* desirePropertyHandleData = (SCHEMA_DESIRED_PROPERTY_HANDLE_DATA*)desiredPropertyHandle;
         result = desirePropertyHandleData->desiredPropertyFromAGENT_DATA_TYPE;
+    }
+    return result;
+}
+
+pfOnDesiredProperty Schema_GetModelDesiredProperty_pfOnDesiredProperty(SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle)
+{
+    pfOnDesiredProperty result;
+    /*Codes_SRS_SCHEMA_02_084: [ If desiredPropertyHandle is NULL then Schema_GetModelDesiredProperty_pfOnDesiredProperty shall return NULL. ]*/
+    if (desiredPropertyHandle == NULL)
+    {
+        LogError("invalid argument SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle=%p", desiredPropertyHandle);
+        result = NULL;
+    }
+    else
+    {
+        /*Codes_SRS_SCHEMA_02_085: [ Otherwise Schema_GetModelDesiredProperty_pfOnDesiredProperty shall return the saved desired property callback. ]*/
+        SCHEMA_DESIRED_PROPERTY_HANDLE_DATA* desirePropertyHandleData = (SCHEMA_DESIRED_PROPERTY_HANDLE_DATA*)desiredPropertyHandle;
+        result = desirePropertyHandleData->onDesiredProperty;
     }
     return result;
 }

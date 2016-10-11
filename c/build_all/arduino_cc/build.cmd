@@ -12,7 +12,8 @@ set build_root=%current_path%\..\..\..\..
 rem // resolve to fully qualified path
 for %%i in ("%build_root%") do set build_root=%%~fi
 
-set work_root=%build_root%\Work
+set work_root=%build_root%\arduino_cc_Work
+set test_root=%build_root%\arduino_cc_Work
 set compiler_path=%build_root%\%IOTHUB_ARDUINO_VERSION%
 
 set compiler_hardware_path=%compiler_path%\hardware
@@ -24,22 +25,24 @@ set user_hardware_path=%work_root%\arduino\hardware
 set user_libraries_path=%work_root%\arduino\libraries
 set user_packages_path=%build_root%\arduino15\packages
 
-set test_path=%build_root%\iot-hub-c-huzzah-getstartedkit\remote_monitoring\remote_monitoring.ino
-
 rem -----------------------------------------------------------------------------
 rem -- parse script arguments
 rem -----------------------------------------------------------------------------
 set build_clean=OFF
-set build_test=OFF
+set build_test=ON
 set run_test=OFF
+set clone_test=ON
 
 :args_loop
 if "%1" equ "" goto args_done
 if "%1" equ "-c" goto arg_build_clean
 if "%1" equ "--clean" goto arg_build_clean
+if "%1" equ "--root" goto arg_test_root
 if "%1" equ "-b" goto arg_build_only
 if "%1" equ "--build-only" goto arg_build_only
-if "%1" equ "-r" goto arg_run_e2e_tests
+if "%1" equ "-r" goto arg_run_only
+if "%1" equ "--run-only" goto arg_run_only
+if "%1" equ "-e2e" goto arg_run_e2e_tests
 if "%1" equ "--run-e2e-tests" goto arg_run_e2e_tests
 call :usage && exit /b 1
 
@@ -47,8 +50,19 @@ call :usage && exit /b 1
 set build_clean=ON
 goto args_continue
 
+:arg_test_root
+set clone_test=OFF
+set test_root=%2
+shift
+goto args_continue
+
 :arg_build_only
 set build_test=ON
+goto args_continue
+
+:arg_run_only
+set build_test=OFF
+set run_test=ON
 goto args_continue
 
 :arg_run_e2e_tests
@@ -61,6 +75,31 @@ shift
 goto args_loop
 
 :args_done
+
+echo.
+echo Start compilation for Arduino with the follow parameters:
+echo.
+echo   build_clean = %build_clean%
+echo   build_test  = %build_test%
+echo   run_test    = %run_test%
+echo   clone_test  = %clone_test%
+echo.
+echo   current_path = %current_path%
+echo   build_root   = %build_root%
+echo   work_root    = %work_root%
+echo   test_root    = %test_root%
+echo.
+echo   compiler_path                 = %compiler_path%
+echo   compiler_hardware_path        = %compiler_hardware_path%
+echo   compiler_tools_builder_path   = %compiler_tools_builder_path%
+echo   compiler_tools_processor_path = %compiler_tools_processor_path%
+echo   compiler_libraries_path       = %compiler_libraries_path%
+echo.
+echo   user_hardware_path  = %user_hardware_path%
+echo   user_libraries_path = %user_libraries_path%
+echo   user_packages_path  = %user_packages_path%
+echo.
+echo.
 
 rem -----------------------------------------------------------------------------
 rem -- clean solutions
@@ -79,6 +118,16 @@ rem ----------------------------------------------------------------------------
 rem -- create test directories
 rem -----------------------------------------------------------------------------
 mkdir %work_root%
+
+rem -----------------------------------------------------------------------------
+rem -- download arduino samples
+rem -----------------------------------------------------------------------------
+if %clone_test%==ON (
+    pushd %work_root%
+    git clone https://github.com/Azure-Samples/iot-hub-c-huzzah-getstartedkit
+    git clone https://github.com/Azure-Samples/iot-hub-c-m0wifi-getstartedkit
+    popd
+)
 
 rem -----------------------------------------------------------------------------
 rem -- download arduino libraries
@@ -111,27 +160,47 @@ call download_blob.cmd -directory %user_packages_path% -file adafruit -check har
 call download_blob.cmd -directory %user_packages_path% -file arduino -check hardware\samd\1.6.6\libraries
 
 rem -----------------------------------------------------------------------------
-rem -- build solution
+rem -- Execute all tests
 rem -----------------------------------------------------------------------------
+
+call :ExecuteAllTests
+
+set finalResult=0
 
 if %build_test%==ON (
-    call :ParserTestLst
+    echo.
+    echo.
+    echo Build results:
+
+    for /F "tokens=2* delims=.=" %%A in ('set __errolevel_build.') do (
+        @echo Build %%A %%B
+        if "%%B"=="FAILED" (
+            set finalResult=1
+        )
+    )
 )
 
-rem -----------------------------------------------------------------------------
-rem -- upload and execute solution
-rem -----------------------------------------------------------------------------
+if %run_test%==ON (
+    echo.
+    echo.
+    echo Execution results:
 
-rem Step 3, upload to the test tool (not implemented):
-rem Ex: C:\Users\iottestuser\AppData\Local\Arduino15\packages\esp8266\tools\esptool\0.4.8/esptool.exe -vv -cd nodemcu -cb 115200 -cp COM4 -ca 0x00000 -cf C:\Users\iottestuser\AppData\Local\Temp\build505ec6e3f4000475ae6da076f93e5ffe.tmp/remote_monitoring.ino.bin
-rem
-rem Step 4, execute the test invoking features in the test tool (not defined and implemented):
+    for /F "tokens=2* delims=.=" %%A in ('set __errolevel_run.') do (
+        @echo Run %%A %%B
+        if "%%B"=="FAILED" (
+            set finalResult=1
+        )
+    )
+)
 
-rem if %run_test%==ON (
-rem )
+echo.
+if !finalResult!==0 (
+   echo TEST SUCCEED
+) else (
+   echo TEST FAILED
+)
 
-popd
-goto :eof
+exit /b !finalResult!
 
 
 rem -----------------------------------------------------------------------------
@@ -141,9 +210,11 @@ rem ----------------------------------------------------------------------------
 :usage
 echo build.cmd [options]
 echo options:
-echo  -c, --clean           delete artifacts from previous build before building
-echo  -b, --build-only      only build the project
-echo  -r, --run-test        run end-to-end test
+echo  -c, --clean             delete artifacts from previous build before building
+echo  -b, --build-only        only build the project (default)
+echo  -r, --run-only          only run the test
+echo  -e2e, --run-e2e-tests   run end-to-end test
+echo  --root <test_path>      determine the root of the test tree
 goto :eof
 
 
@@ -152,7 +223,7 @@ rem -- helper subroutines
 rem -----------------------------------------------------------------------------
 
 REM Parser tests.lst
-:ParserTestLst
+:ExecuteAllTests
 set buildlog=tests.lst
 set testName=false
 set projectName=
@@ -165,7 +236,12 @@ for /F "tokens=*" %%F in (%buildlog%) do (
         if /i "!command:~0,1!"=="#" (
             echo Comment=!command:~1!
         ) else ( if /i "!command:~0,1!"=="[" (
-            call :ExecuteTest
+            if %build_test%==ON (
+                call :BuildTest
+            )
+            if %run_test%==ON (
+                call :RunTest
+            )
             set projectName=!command:~1,-1!
             if /i "!projectName!"=="End" goto :eof
         ) else (
@@ -179,11 +255,12 @@ for /F "tokens=*" %%F in (%buildlog%) do (
 goto :eof
 
 
-REM Execute each test in the Tests.lst
-:ExecuteTest
+REM Build each test in the Tests.lst
+:BuildTest
 if not "!projectName!"=="" (
     echo.
-    echo Execute !projectName!
+    echo Build !projectName!
+    echo   Target=!Target!
     echo   RelativePath=!RelativePath!
     echo   RelativeWorkingDir=!RelativeWorkingDir!
     echo   MaxAllowedDurationSeconds=!MaxAllowedDurationSeconds!
@@ -191,10 +268,9 @@ if not "!projectName!"=="" (
     echo   Hardware=!Hardware!
     echo   CPUParameters=!CPUParameters!
     echo   Build=!Build!
-    echo   Installation=!Installation!
-    echo   Execution=!Execution!
 
     if "!Build!"=="Disable" (
+        set __errolevel_build.!projectName!=DISABLED
         echo ** Build for !projectName! is disable. **
         goto :eof
     )
@@ -246,7 +322,7 @@ rem                     "F:\Azure\IoT\SDKs\iot-hub-c-huzzah-getstartedkit-master
     set hardware_parameters=-hardware "%compiler_hardware_path%" -hardware "%user_hardware_path%" -hardware "%user_packages_path%" -hardware "%user_libraries_path%"
     set tools_parameters=-tools "%compiler_tools_builder_path%" -tools "%compiler_tools_processor_path%" -tools "%user_packages_path%"
     set libraries_parameters=-built-in-libraries "%compiler_libraries_path%" -libraries "%user_libraries_path%"
-    set parameters=-logger=machine !hardware_parameters! !tools_parameters! !libraries_parameters! !CPUParameters! -build-path "%build_root%!RelativeWorkingDir!" -warnings=none -prefs=build.warn_data_percentage=75 -verbose %build_root%!RelativePath!
+    set parameters=-logger=machine !hardware_parameters! !tools_parameters! !libraries_parameters! !CPUParameters! -build-path "%build_root%!RelativeWorkingDir!" -warnings=none -prefs=build.warn_data_percentage=75 -verbose %test_root%!RelativePath!\!Target!
 
     echo Dump Arduino preferences:
     echo  !compiler_name! -dump-prefs !parameters!
@@ -255,6 +331,40 @@ rem                     "F:\Azure\IoT\SDKs\iot-hub-c-huzzah-getstartedkit-master
     echo Build !RelativePath!:
     echo  !compiler_name! -compile !parameters!
     call !compiler_name! -compile !parameters!
+
+    if "%errorlevel%"=="0" (
+        set __errolevel_build.!projectName!=SUCCEED
+    ) else (
+        set __errolevel_build.!projectName!=FAILED
+    )
+)
+goto :eof
+
+
+REM Run each test in the Tests.lst
+:RunTest
+if not "!projectName!"=="" (
+    echo.
+    echo Run !projectName!
+    echo   Target=!Target!
+    echo   RelativeWorkingDir=!RelativeWorkingDir!
+    echo   LogLines=!LogLines!
+    echo   MinimumHeap=!MinimumHeap!
+    echo   Execution=!Execution!
+
+    if "!Execution!"=="Disable" (
+        set __errolevel_run.!projectName!=DISABLED
+        echo ** Execution for !projectName! is disable. **
+        goto :eof
+    )
+    
+    call powershell.exe -NoProfile -NonInteractive -ExecutionPolicy unrestricted -Command .\execute.ps1 -binaryPath:%build_root%!RelativeWorkingDir!\!Target!.bin -serialPort:COM4 -esptool:%build_root%\arduino15\packages\esp8266\tools\esptool\0.4.8\esptool.exe -logLines:!LogLines! -minimumHeap:!MinimumHeap!
+
+    if "!errorlevel!"=="0" (
+        set __errolevel_run.!projectName!=SUCCEED
+    ) else (
+        set __errolevel_run.!projectName!=FAILED
+    )
 
 )
 goto :eof

@@ -43,7 +43,7 @@ For guides on how to run the sample applications on supported platforms, check o
 
 All C specific resources are located in the **azure-iot-sdks\c** folder. A description of the key directories follows:
 
-### /azure-c-shared-utility, /azure-uamqp-c, and /azure-umqtt-c
+### /c-utility, /uamqp, and /umqtt
 
 These are git submodules that contain code, such as adapters and protocol implementations, shared with other projects. Note that some of them contain nested submodules.
 

@@ -198,7 +198,7 @@ static CODEFIRST_RESULT buildModel(SCHEMA_HANDLE schemaHandle, const REFLECTED_D
             /* if this is a model type use the appropriate APIs for it */
             if (childModelHande != NULL)
             {
-                if (Schema_AddModelModel(modelTypeHandle, something->what.property.name, childModelHande, something->what.property.offset) != SCHEMA_OK)
+                if (Schema_AddModelModel(modelTypeHandle, something->what.property.name, childModelHande, something->what.property.offset, NULL) != SCHEMA_OK)
                 {
                     /*Codes_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CODEFIRST_SCHEMA_ERROR shall be returned.]*/
                     result = CODEFIRST_SCHEMA_ERROR;
@@ -226,7 +226,7 @@ static CODEFIRST_RESULT buildModel(SCHEMA_HANDLE schemaHandle, const REFLECTED_D
             /* if this is a model type use the appropriate APIs for it */
             if (childModelHande != NULL)
             {
-                if (Schema_AddModelModel(modelTypeHandle, something->what.reportedProperty.name, childModelHande, something->what.reportedProperty.offset) != SCHEMA_OK)
+                if (Schema_AddModelModel(modelTypeHandle, something->what.reportedProperty.name, childModelHande, something->what.reportedProperty.offset, NULL) != SCHEMA_OK)
                 {
                     /*Codes_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CODEFIRST_SCHEMA_ERROR shall be returned.]*/
                     result = CODEFIRST_SCHEMA_ERROR;
@@ -254,7 +254,7 @@ static CODEFIRST_RESULT buildModel(SCHEMA_HANDLE schemaHandle, const REFLECTED_D
             /* if this is a model type use the appropriate APIs for it */
             if (childModelHande != NULL)
             {
-                if (Schema_AddModelModel(modelTypeHandle, something->what.desiredProperty.name, childModelHande, something->what.desiredProperty.offset) != SCHEMA_OK)
+                if (Schema_AddModelModel(modelTypeHandle, something->what.desiredProperty.name, childModelHande, something->what.desiredProperty.offset, something->what.desiredProperty.onDesiredProperty) != SCHEMA_OK)
                 {
                     /*Codes_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CODEFIRST_SCHEMA_ERROR shall be returned.]*/
                     result = CODEFIRST_SCHEMA_ERROR;
@@ -270,7 +270,8 @@ static CODEFIRST_RESULT buildModel(SCHEMA_HANDLE schemaHandle, const REFLECTED_D
                     something->what.desiredProperty.FromAGENT_DATA_TYPE, 
                     something->what.desiredProperty.desiredPropertInitialize, 
                     something->what.desiredProperty.desiredPropertDeinitialize, 
-                    something->what.desiredProperty.offset) != SCHEMA_OK)
+                    something->what.desiredProperty.offset, 
+                    something->what.desiredProperty.onDesiredProperty) != SCHEMA_OK)
                 {
                     /*Codes_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CODEFIRST_SCHEMA_ERROR shall be returned.]*/
                     result = CODEFIRST_SCHEMA_ERROR;

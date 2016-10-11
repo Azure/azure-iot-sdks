@@ -4,7 +4,7 @@
 'use strict';
 
 require('es5-shim');
-var Base = require('azure-iot-mqtt-base').Mqtt;
+var Base = require('./mqtt_base.js');
 var results = require('azure-iot-common').results;
 var errors = require('azure-iot-common').errors;
 var EventEmitter = require('events').EventEmitter;
@@ -24,11 +24,14 @@ var TOPIC_RESPONSE_PUBLISH_FORMAT = "$iothub/%s/res/%d/?$rid=%s";
 /*
  Codes_SRS_NODE_DEVICE_MQTT_12_001: [The `Mqtt` constructor shall accept the transport configuration structure
  Codes_SRS_NODE_DEVICE_MQTT_12_002: [The `Mqtt` constructor shall store the configuration structure in a member variable
+ Codes_SRS_NODE_DEVICE_MQTT_12_003: [The Mqtt constructor shall create an base transport object and store it in a member variable.]
 */
 function Mqtt(config, provider) {
   EventEmitter.call(this);
   this._config = config;
-  /* Codes_SRS_NODE_DEVICE_MQTT_18_025: [** If the `Mqtt` constructor receives a second parameter, it shall be used as a provider in place of mqtt.js **]**   */
+  /*Codes_SRS_NODE_DEVICE_MQTT_16_016: [The Mqtt constructor shall initialize the `uri` property of the `config` object to `mqtts://<host>`.]*/  
+  this._config.uri = "mqtts://" + config.host;
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_025: [ If the Mqtt constructor receives a second parameter, it shall be used as a provider in place of mqtt.js ]   */
   if (provider) {
     this._mqtt = new Base(provider);
   } else {
@@ -143,7 +146,7 @@ Mqtt.prototype.updateSharedAccessSignature = function (sharedAccessSignature, do
     } else {
       /*Codes_SRS_NODE_DEVICE_MQTT_16_007: [The updateSharedAccessSignature method shall save the new shared access signature given as a parameter to its configuration.]*/
       this._config.sharedAccessSignature = sharedAccessSignature;
-      this._mqtt = new Base(this._config);
+      this._mqtt = new Base();
       /*Codes_SRS_NODE_DEVICE_MQTT_16_010: [The updateSharedAccessSignature method shall call the `done` callback with a null error object and a SharedAccessSignatureUpdated object as a result, indicating hat the client needs to reestablish the transport connection when ready.]*/
       done(null, new results.SharedAccessSignatureUpdated(true));
     }

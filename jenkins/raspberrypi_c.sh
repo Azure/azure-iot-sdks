@@ -86,5 +86,5 @@ sed -i 's/\[device connection string\]/'$IOTHUB_DEVICE_CONN_STR'/g' c/iothub_cli
 # -----------------------------------------------------------------------------
 echo ---------- Building the SDK by executing build.sh script ---------- 
 cd $build_root/c/build_all/linux 
-./build.sh --toolchain-file toolchain-rpi.cmake --skip-unittests --no-amqp --no-mqtt -cl -D__STDC_NO_ATOMICS__ -cl --sysroot=$RPI_ROOT 
+./build.sh --toolchain-file toolchain-rpi.cmake --skip-unittests --no-amqp --no-mqtt -cl --sysroot=$RPI_ROOT 
 [ $? -eq 0 ] || exit $?
