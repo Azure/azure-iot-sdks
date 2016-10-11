@@ -12,6 +12,8 @@ extern "C"
 #else
 #endif
 
+#include "azure_c_shared_utility/umock_c_prod.h"
+
 #include "iothub_messaging_ll.h"
 
 typedef struct IOTHUB_MESSAGING_CLIENT_INSTANCE_TAG* IOTHUB_MESSAGING_CLIENT_HANDLE;

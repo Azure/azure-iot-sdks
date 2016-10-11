@@ -72,7 +72,7 @@ extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_Open(IOTHUB_MESSAGING_CLIENT_HAND
 ```c
 extern void IoTHubMessaging_Close(IOTHUB_MESSAGING_CLIENT_HANDLE messagingClientHandle)
 ```
-**SRS_IOTHUBMESSAGING_12_021: [** If `messagingClientHandle` is `NULL`, `IoTHubMessaging_Close` shall return `IOTHUB_MESSAGING_INVALID_ARG`. **]**
+**SRS_IOTHUBMESSAGING_12_021: [** If `messagingClientHandle` is `NULL`, `IoTHubMessaging_Close` shall do nothing. **]**
 
 **SRS_IOTHUBMESSAGING_12_022: [** `IoTHubMessaging_Close` shall be made thread-safe by using the lock created in `IoTHubMessaging_Create`. **]**
 
