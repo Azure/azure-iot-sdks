@@ -49,6 +49,7 @@ util.inherits(Mqtt, EventEmitter);
  */
 /* Codes_SRS_NODE_DEVICE_MQTT_12_004: [The connect method shall call the connect method on MqttTransport */
 Mqtt.prototype.connect = function (done) {
+  this._twinReceiver = null;
   this._mqtt.connect(this._config, function (err, result) {
     if (err) {
       if (done) done(err);
@@ -56,6 +57,7 @@ Mqtt.prototype.connect = function (done) {
       this._mqtt.client.on('disconnect', function (err) {
         this.emit('disconnect', err);
       }.bind(this));
+
       if (done) done(null, result);
     }
   }.bind(this));

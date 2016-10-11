@@ -67,28 +67,41 @@ Twin.fromDeviceClient = function(client, done) {
     if (!client._transport.getTwinReceiver) {
       done(new errors.NotImplementedError('transport does not support Twin'));
     } else {
-      /* Codes_SRS_NODE_DEVICE_TWIN_18_004: [** `fromDeviceClient` shall call `getTwinReceiver` on the protocol object to get a twin receiver. **]**  */
-      client._transport.getTwinReceiver(function(err, receiver) {
+      client._twin = twin;
+      client.on('_sharedAccessSignatureUpdated', function() {
+        twin._connectSubscribeAndGetProperties(function() {});
+      });
+      twin._connectSubscribeAndGetProperties(done);
+    }
+  }
+};
+
+Twin.prototype.updateSharedAccessSignature = function() {
+  this._receiver.removeAllListeners(Twin.responseEvent);
+  this._receiver.removeAllListeners(Twin.postEvent);
+};
+
+Twin.prototype._connectSubscribeAndGetProperties = function(done) {
+  var self = this;
+  /* Codes_SRS_NODE_DEVICE_TWIN_18_004: [** `fromDeviceClient` shall call `getTwinReceiver` on the protocol object to get a twin receiver. **]**  */
+  this._client._transport.getTwinReceiver(function(err, receiver) {
+    if (err) {
+      done(err);
+    } else {
+      self._receiver = receiver;
+
+       self._subscribe( function(err) {
         if (err) {
           done(err);
         } else {
-          twin._receiver = receiver;
-
-          twin._subscribe( function(err) {
-            if (err) {
-              done(err);
-            } else {
-              client._twin = twin;
-              twin._getPropertiesFromService(function (err) {
-                /* Codes_SRS_NODE_DEVICE_TWIN_18_043: [** If the GET operation fails, `fromDeviceClient` shall call the done method with the error object in the first parameter **]** */
-                done(err, twin);
-              });
-            }
+          self._getPropertiesFromService(function (err) {
+            /* Codes_SRS_NODE_DEVICE_TWIN_18_043: [** If the GET operation fails, `fromDeviceClient` shall call the done method with the error object in the first parameter **]** */
+            done(err, self);
           });
         }
       });
     }
-  }
+  });
 };
 
 

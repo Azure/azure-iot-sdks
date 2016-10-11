@@ -75,12 +75,14 @@ var FakeTransport = function(receiver) {
 
 
 var FakeClient = function(transport) {
+  EventEmitter.call(this);
   if (transport) {
     this._transport = transport;  
   } else {
     this._transport = new FakeTransport();
   }
 };
+util.inherits(FakeClient, EventEmitter);
 
 Twin.timeout = 10;
 
@@ -594,7 +596,37 @@ describe('Twin', function () {
     });
     
   });
-  
+
+  it('updateSharedAccessSignature removes all listeners for the response and post events', function(done) {
+    var client = new FakeClient();
+    var removeAllListeners = sinon.spy(client._transport._receiver, "removeAllListeners");
+    Twin.fromDeviceClient(client, function(err, twin) {
+      if (err) return done(err);
+      twin.updateSharedAccessSignature();
+      assert(removeAllListeners.calledWith('response'));
+      assert(removeAllListeners.calledWith('post'));
+      done();
+    });
+    
+  });
+
+  it('when _sharedAccessSignatureUpdated is fired, the twin object shall re-get and re-subscribe', function(done) {
+    var client = new FakeClient();
+    Twin.fromDeviceClient(client, function(err, twin) {
+      if (err) return done(err);
+      var on = sinon.spy(client._transport._receiver, "on");
+      twin.on('properties.desired', function() {
+        if (on.calledWith('response') && on.calledWith('post')) {
+          done();
+        }
+      });
+      process.nextTick(function() {
+        twin.updateSharedAccessSignature();
+        client.emit('_sharedAccessSignatureUpdated');
+      });
+    });
+  });
+
 });
 
 

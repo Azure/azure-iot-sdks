@@ -147,7 +147,7 @@ var runTests = function (hubConnectionString) {
         });
       });
     };
-  
+
     it ('sends and receives reported properties', sendsAndReceiveReportedProperties);
 
     var mergeReportedProperties =  function(first, second, result, done) {
@@ -265,14 +265,17 @@ var runTests = function (hubConnectionString) {
       mergeTags(newProps, moreNewProps, "*", mergeResult, done);
     });
 
-    it.skip('can send reported properties to the service after renewing the sas token', function(done) {
+    it('can send reported properties to the service after renewing the sas token', function(done) {
       deviceClient.on('_sharedAccessSignatureUpdated', function() {
-        sendsAndReceiveReportedProperties(done);
+        // service bug -- delay before sending properties.  Will be fixed as part of some "clock skew" fix.
+        setTimeout(function() {
+          sendsAndReceiveReportedProperties(done);
+        },5000);
       });
       deviceClient._renewSharedAccessSignature();
     });
 
-    it.skip('can receive desired properties from the service after renewing the sas token', function(done) {
+    it('can receive desired properties from the service after renewing the sas token', function(done) {
       deviceClient.on('_sharedAccessSignatureUpdated', function() {
         sendsAndReceivesDesiredProperties(done);
       });
@@ -282,7 +285,7 @@ var runTests = function (hubConnectionString) {
     it.skip('call null out reported properties', function(done) {
       mergeReportedProperties(newProps, null, {}, done);
     });
-    
+
     it.skip('can null out desired properties', function(done) {
       mergeDesiredProperties(newProps, null, null, {}, done);
     });
@@ -293,10 +296,27 @@ var runTests = function (hubConnectionString) {
 
     it.skip('can null out tags', function(done) {
       mergeTags(newProps, null, null, {}, done);
-    });
+        });
 
     it.skip('can null out tags with etag *', function(done) {
       mergeTags(newProps, null, "*", {}, done);
+      });
+
+    it ('can renew SAS 20 times without failure', function(done) 
+    {
+      this.timeout(60000);
+      var iteration = 0;
+      var doItAgain = function() {
+        iteration++;
+        if (iteration === 20) {
+          done();
+        } else {
+          deviceClient._renewSharedAccessSignature();
+          setTimeout(doItAgain, 1000);
+        }
+      };
+
+      doItAgain();
     });
 
   });
