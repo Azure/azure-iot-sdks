@@ -45,7 +45,7 @@
     <path name = "AZURESDK_PATH" dest = "../../../.."/>
 
     <exec name = "iothub_client_sample_amqp">
-		<includes>
+        <includes>
 		    <dir name = "../"/>
 		    <dir name = "$(AZURESDK_PATH)/c-utility/inc"/>
 		    <dir name = "$(AZURESDK_PATH)/iothub_client/inc"/>
@@ -72,8 +72,8 @@
             <dir name = "$(FREERTOS_PATH)/Demo/CORTEX_M7_SAME70_Xplained_AtmelStudio/src/ASF/sam/utils/preprocessor"/>
             <dir name = "$(FREERTOS_PATH)/Demo/CORTEX_M7_SAME70_Xplained_AtmelStudio/src/ASF/sam/utils/header_files"/>
             <dir name = "$(FREERTOS_PATH)/Demo/CORTEX_M7_SAME70_Xplained_AtmelStudio/src/ASF/common/utils"/>
-		</includes>
-		<sources>
+        </includes>
+        <sources>
 		    <dir name = "../"/>
 		    <dir name = "$(AZURESDK_PATH)/iothub_client/src">
                 <exclude name = "iothubtransportmqtt.c"/>
@@ -128,7 +128,7 @@
             <dir name = "$(FREERTOS_PATH)/Source/portable"/>
             <dir name = "$(FREERTOS_PATH)/Source/portable/GCC/ARM_CM7/r0p1"/>
             <dir name = "$(FREERTOS_PATH)/Demo/CORTEX_M7_SAME70_Xplained_AtmelStudio/src/ASF/common/utils/interrupt"/>
-		</sources>
+        </sources>
     </exec>
 </project>
 
