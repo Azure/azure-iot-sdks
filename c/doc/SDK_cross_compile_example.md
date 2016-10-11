@@ -215,9 +215,9 @@ The final step in the process is to run the actual build. For this you will need
 ```
 cd ~/Source/azure-iot-sdks/c/build_all/linux
 ./setup.sh
-./build.sh --toolchain-file toolchain-android.cmake --skip-unittests -cl --sysroot=${MY_TOOLCHAIN}/sysroot -cl -I/tmp/my-android-toolchain-deps/include -cl -L/tmp/my-android-toolchain-deps -cl -llibuuid 
+./build.sh --toolchain-file toolchain-android.cmake --skip-unittests -cl --sysroot=${MY_TOOLCHAIN}/sysroot -cl -I/tmp/my-android-toolchain-deps/include -cl -L/tmp/my-android-toolchain-deps -cl -llibuuid -cl -llibcurl
 ```
-This will tell cmake to build the SDK using the toolchain file toolchain-android.cmake and skip running all tests which is important since the executables will (probably) not run successfully on the host anyway. Absolutely critical is the use of the *--sysroot* option. Without this the compiler will fail to find required headers and libraries. Note the *-cl* option, used to pass a single custom option to the compiler. With the *-I* option the cross-compiler will search additional libraries include files also in `/tmp/my-android-toolchain-deps/include`. With the *-L* option the cross-compiler is set to search libreries also in `/tmp/my-android-toolchain-deps`. With the *-llibuuid* option the cross-compiler will search the shared library `libuuid`. 
+This will tell cmake to build the SDK using the toolchain file toolchain-android.cmake and skip running all tests which is important since the executables will (probably) not run successfully on the host anyway. Absolutely critical is the use of the *--sysroot* option. Without this the compiler will fail to find required headers and libraries. Note the *-cl* option, used to pass a single custom option to the compiler. With the *-I* option the cross-compiler will search additional libraries include files also in `/tmp/my-android-toolchain-deps/include`. With the *-L* option the cross-compiler is set to search libreries also in `/tmp/my-android-toolchain-deps`. With the *-llibuuid* option the cross-compiler will search the shared library `libuuid`, and in a similar way the shared library `libcurl`.
 
 ## Summary
 
