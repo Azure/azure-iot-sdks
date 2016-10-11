@@ -156,9 +156,9 @@ export CC=arm-linux-androideabi-gcc
 export CXX=arm-linux-androideabi-g++
 ```
 
-### Cross/compiling libuuid
+### Cross-compiling libuuid
 
-UNfortunately, the Azure sdk libraries need the presence of a library not included in the android toolchain support binaries. So, you have to download it from <https://sourceforge.net/projects/libuuid/>.
+Unfortunately, the Azure sdk libraries need the presence of a library not included in the android toolchain support binaries. So, you have to download it from <https://sourceforge.net/projects/libuuid/>.
 
 Untar the libuuid archive in your home directory, obtaining a new folder similar to `~/libuuid-x.x.x`. Then type following commands>
 
@@ -168,6 +168,18 @@ cd ~/libuuid-x.x.x
 make
 make install
 ```
+
+### Cross-compiling libcurl
+
+This is another dependency required by Azure sdk libraries. Download from <https://curl.haxx.se/download.html> and unpack it to `~/curl-x.x.x`. So type next commands:
+
+```
+cd ~/curl-x.x.x
+./configure CC=arm-linux-androideabi-gcc --prefix=/tmp/my-android-toolchain-deps --host=arm-linux-androideabi --with-sysroot=${MY_TOOLCHAIN}/sysroot
+make
+make install
+```
+
 
 ### Setting up cmake to cross compile
 
