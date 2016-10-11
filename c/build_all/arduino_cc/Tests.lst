@@ -5,6 +5,7 @@
 Target=remote_monitoring.ino
 RelativePath=\iot-hub-c-huzzah-getstartedkit\remote_monitoring
 RelativeWorkingDir=\arduino_cc_Work\Results\huzzah_remote_monitoring
+CloneURL=https://github.com/Azure-Samples/iot-hub-c-huzzah-getstartedkit
 MaxAllowedDurationSeconds=100
 LogLines=300
 MinimumHeap=22000
@@ -18,6 +19,7 @@ Execution=Enable
 Target=simplesample_http.ino
 RelativePath=\arduino\libraries\AzureIoTHub\examples\simplesample_http
 RelativeWorkingDir=\arduino_cc_Work\Results\huzzah_simplesample_http
+CloneURL=""
 MaxAllowedDurationSeconds=100
 LogLines=300
 MinimumHeap=22000
@@ -31,6 +33,7 @@ Execution=Disable
 Target=remote_monitoring.ino
 RelativePath=\iot-hub-c-m0wifi-getstartedkit\remote_monitoring
 RelativeWorkingDir=\arduino_cc_Work\Results\m0wifi_remote_monitoring
+CloneURL=https://github.com/Azure-Samples/iot-hub-c-m0wifi-getstartedkit
 MaxAllowedDurationSeconds=100
 LogLines=300
 MinimumHeap=22000
@@ -44,6 +47,7 @@ Execution=Disable
 Target=simplesample_http.ino
 RelativePath=\arduino\libraries\AzureIoTHub\examples\simplesample_http
 RelativeWorkingDir=\arduino_cc_Work\Results\m0wifi_simplesample_http
+CloneURL=""
 MaxAllowedDurationSeconds=100
 LogLines=300
 MinimumHeap=22000
@@ -51,6 +55,34 @@ Categories=IoTHub
 Hardware=Adafruit_FeatherM0
 CPUParameters=-fqbn=adafruit:samd:adafruit_feather_m0 -vid-pid=0X239A_0X800B -ide-version=10609
 Build=Disable
+Execution=Disable
+
+[thingdev_remote_monitoring]
+Target=remote_monitoring.ino
+RelativePath=\iot-hub-c-thingdev-getstartedkit\remote_monitoring
+RelativeWorkingDir=\arduino_cc_Work\Results\thingdev_remote_monitoring
+CloneURL=https://github.com/Azure-Samples/iot-hub-c-thingdev-getstartedkit.git
+MaxAllowedDurationSeconds=100
+LogLines=300
+MinimumHeap=22000
+Categories=IoTHub
+Hardware=SparkFun_ESP8266_Thing 
+CPUParameters=-fqbn=esp8266:esp8266:thing:CpuFrequency=80,UploadSpeed=115200 -vid-pid=0X239A_0X800B -ide-version=10609
+Build=Enable
+Execution=Disable
+
+[thingdev_simplesample_http]
+Target=simplesample_http.ino
+RelativePath=\arduino\libraries\AzureIoTHub\examples\simplesample_http
+RelativeWorkingDir=\arduino_cc_Work\Results\thingdev_simplesample_http
+CloneURL=""
+MaxAllowedDurationSeconds=100
+LogLines=300
+MinimumHeap=22000
+Categories=IoTHub
+Hardware=SparkFun_ESP8266_Thing
+CPUParameters=-fqbn=esp8266:esp8266:thing:CpuFrequency=80,UploadSpeed=115200 -vid-pid=0X239A_0X800B -ide-version=10609
+Build=Enable
 Execution=Disable
 
 [End]
