@@ -715,8 +715,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         REGISTER_UMOCK_ALIAS_TYPE(pfDesiredPropertyDeinitialize, void*);
         REGISTER_UMOCK_ALIAS_TYPE(pfOnDesiredProperty, void*);
         
-        
-
         REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelName, TEST_MODEL_NAME);
         REGISTER_GLOBAL_MOCK_HOOK(Create_AGENT_DATA_TYPE_from_DOUBLE, my_Create_AGENT_DATA_TYPE_from_DOUBLE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Create_AGENT_DATA_TYPE_from_DOUBLE, AGENT_DATA_TYPES_JSON_ENCODER_ERRROR);
@@ -3925,6 +3923,152 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         /// cleanup
         CodeFirst_Deinit();
+    }
+
+    /*Tests_SRS_CODEFIRST_02_048: [ If schemaNamespace is NULL then CodeFirst_RegisterSchema shall fail and return NULL. ]*/
+    TEST_FUNCTION(CodeFirst_RegisterSchema_with_NULL_schemaNamespace_fails)
+    {
+        ///arrange
+
+        ///act
+        SCHEMA_HANDLE result = CodeFirst_RegisterSchema(NULL, &ALL_REFLECTED(testReflectedData));
+
+        ///assert
+        ASSERT_IS_NULL(result);
+
+    }
+
+    /*Tests_SRS_CODEFIRST_02_049: [ If metadata is NULL then CodeFirst_RegisterSchema shall fail and return NULL. ]*/
+    TEST_FUNCTION(CodeFirst_RegisterSchema_with_NULL_metadata_fails)
+    {
+        ///arrange
+
+        ///act
+        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("someSchema", NULL);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+
+    }
+
+    /*Tests_SRS_CODEFIRST_02_037: [ CodeFirst_CreateDevice shall call CodeFirst_Init, passing NULL for overrideSchemaNamespace. ]*/
+    TEST_FUNCTION(CodeFirst_CreateDevice_calls_CodeFirst_Init_and_passes_NULL_for_overrideSchemaNamespace_succeeds)
+    {
+        // arrange
+        /*note: no CodeFirst_Init...*/
+        size_t zero = 0;
+        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+            .CopyOutArgumentBuffer_desiredPropertyCount(&zero, sizeof(zero));
+        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+            .CopyOutArgumentBuffer_modelCount(&zero, sizeof(zero));
+        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
+            .IgnoreArgument(3).IgnoreArgument(5);
+        STRICT_EXPECTED_CALL(Schema_AddDeviceRef(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        // act
+        void* result = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, 1, false);
+
+        // assert
+        ASSERT_IS_NOT_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        // cleanup
+        CodeFirst_DestroyDevice(result);
+    }
+
+    /*Tests_SRS_CODEFIRST_02_039: [ If the current device count is zero then CodeFirst_DestroyDevice shall deallocate all other used resources. ]*/
+    TEST_FUNCTION(CodeFirst_DestroyDevice_frees_all_resources)
+    {
+        ///arrange - note - no CodeFirst_Init
+
+        void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, 1, false);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+            .IgnoreArgument_desiredPropertyCount(); /*0 desired properties*/
+        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+            .IgnoreArgument_modelCount(); /*0 model in model*/
+        STRICT_EXPECTED_CALL(Schema_ReleaseDeviceRef(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(Schema_DestroyIfUnused(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(Device_Destroy(TEST_DEVICE_HANDLE));
+
+        // act
+        CodeFirst_DestroyDevice(device);
+
+        // assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //clean - nothing.
+    }
+
+    /*Tests_SRS_CODEFIRST_02_040: [ CodeFirst_SendAsync shall call CodeFirst_Init, passing NULL for overrideSchemaNamespace. ]*/
+    TEST_FUNCTION(CodeFirst_SendAsync_calls_CodeFirst_Init_with_NULL_overrideSchemaNamespace)
+    {
+        ///arrange = note - no CodeFirst_Init
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
+        unsigned char* destination;
+        size_t destinationSize;
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(STRING_new());
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_s2();
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+            .IgnoreArgument_handle();
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
+            .IgnoreArgument_transactionHandle()
+            .IgnoreArgument(3);
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument_handle();
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_transactionHandle()
+            .IgnoreArgument(2)
+            .IgnoreArgument(3);
+        device->this_is_double_Property = 42.0;
+
+        // act
+        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->this_is_double_Property);
+
+        // assert
+        ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        // cleanup
+        CodeFirst_DestroyDevice(device);
+    }
+
+    /*Tests_SRS_CODEFIRST_02_046: [ CodeFirst_SendAsyncReported shall call CodeFirst_Init, passing NULL for overrideSchemaNamespace. ]*/
+    TEST_FUNCTION(CodeFirst_SendReportedAsync_without_CodeFirst_Init_succeeds)
+    {
+        /// arrange - no CodeFirst_Init
+        size_t destinationSize = 1000;
+        unsigned char *destination = (unsigned char*)my_gballoc_malloc(destinationSize);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
+        umock_c_reset_all_calls();
+
+        device->new_reported_this_is_double = 5.5; /*the only reported properties*/
+        device->new_reported_this_is_int = -5; /*the only reported properties*/
+
+        CodeFirst_SendReportedAsync_all_inert_path();
+
+        /// act
+        CODEFIRST_RESULT result = CodeFirst_SendAsyncReported(&destination, &destinationSize, 1, device);
+
+        /// assert
+        ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        /// cleanup
+        CodeFirst_DestroyDevice(device);
+        my_gballoc_free(destination);
     }
 
 END_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider);

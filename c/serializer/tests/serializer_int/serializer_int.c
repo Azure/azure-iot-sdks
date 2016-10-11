@@ -628,16 +628,10 @@ BEGIN_TEST_SUITE(serializer_int)
         (void)umocktypes_bool_register_types();
         (void)umocktypes_charptr_register_types();
         (void)umocktypes_stdint_register_types();
-
-        SERIALIZER_RESULT r;
-        r = serializer_init(NULL);
-        ASSERT_ARE_EQUAL(SERIALIZER_RESULT, r, SERIALIZER_OK);
     }
 
     TEST_SUITE_CLEANUP(TestClassCleanup)
     {
-        serializer_deinit();
-
         umock_c_deinit();
         TEST_MUTEX_DESTROY(g_testByTest);
         TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);

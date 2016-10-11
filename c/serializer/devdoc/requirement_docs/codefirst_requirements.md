@@ -75,9 +75,9 @@ void CodeFirst_Deinit(void);
 SCHEMA_HANDLE CodeFirst_RegisterSchema(const char* schemaNamespace, const REFLECTED_DATA_FROM_DATAPROVIDER* metadata);
 ```
 
-**SRS_CODEFIRST_02_050: [** `CodeFirst_RegisterSchema` shall call `CodeFirst_Init`, passing `NULL` for `overrideSchemaNamespace`. **]**
+**SRS_CODEFIRST_02_048: [** If `schemaNamespace` is `NULL` then `CodeFirst_RegisterSchema` shall fail and return `NULL`. **]**
 
-**SRS_CODEFIRST_02_051: [** If `CodeFirst_Init` returns `CODEFIRST_ERROR` then `CodeFirst_RegisterSchema` shall fail and return `NULL`. **]**
+**SRS_CODEFIRST_02_049: [** If `metadata` is `NULL` then `CodeFirst_RegisterSchema` shall fail and return `NULL`. **]**
 
 **SRS_CODEFIRST_99_002: [**  CodeFirst_RegisterSchema shall create the schema information and give it to the Schema module for one schema, identified by the metadata argument. On success, it shall return a handle to the schema. **]**
 
@@ -94,8 +94,6 @@ extern void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLEC
 `CodeFirst_CreateDevice` creates a device.
 
 **SRS_CODEFIRST_02_037: [** `CodeFirst_CreateDevice` shall call `CodeFirst_Init`, passing `NULL` for `overrideSchemaNamespace`. **]**
-
-**SRS_CODEFIRST_02_038: [** If `CodeFirst_Init` returns `CODEFIRST_ERROR` then `CodeFirst_CreateDevice` shall fail and return `NULL`. **]**
 
 **SRS_CODEFIRST_99_079: [** CodeFirst_CreateDevice shall create a device and allocate a memory block that should hold the device data. **]**
 
@@ -121,7 +119,7 @@ extern void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLEC
 ```c
 extern void CodeFirst_DestroyDevice(void* device);
 ```
-`CodeFirst_CreateDevice` destroys a device, freeing all used resources.
+`CodeFirst_DestroyDevice` destroys a device, freeing all used resources.
 
 **SRS_CODEFIRST_99_085: [** CodeFirst_DestroyDevice shall free all resources associated with a device. **]**
 
@@ -129,7 +127,7 @@ extern void CodeFirst_DestroyDevice(void* device);
 
 **SRS_CODEFIRST_99_087: [** In order to release the device handle, CodeFirst_DestroyDevice shall call Device_Destroy. **]**
 
-**SRS_CODEFIRST_02_039: [** If the current device count is zero then `CodeFirst_CreateDevice` shall deallocate all other used resources. **]**
+**SRS_CODEFIRST_02_039: [** If the current device count is zero then `CodeFirst_DestroyDevice` shall deallocate all other used resources. **]**
 
 ### CodeFirst_SendAsync
 ```c 
@@ -139,8 +137,6 @@ extern CODEFIRST_RESULT CodeFirst_SendAsync(unsigned char** destination, size_t*
 `CodeFirst_SendAsync` shall send to the Device module a set of properties, a `destination` and a `destinationSize`.
 
 **SRS_CODEFIRST_02_040: [** `CodeFirst_SendAsync` shall call `CodeFirst_Init`, passing `NULL` for `overrideSchemaNamespace`. **]**
-
-**SRS_CODEFIRST_02_041: [** If `CodeFirst_Init` returns `CODEFIRST_ERROR` then `CodeFirst_SendAsync` shall fail and return `CODEFIRST_ERROR`. **]**
 
 **SRS_CODEFIRST_99_117: [** On success, CodeFirst_SendAsync shall return CODEFIRST_OK. **]**
 
@@ -254,8 +250,6 @@ extern CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination,
 `CodeFirst_SendAsyncReported` starts, publishes and finishes a device transaction.
 
 **SRS_CODEFIRST_02_046: [** `CodeFirst_SendAsyncReported` shall call `CodeFirst_Init`, passing `NULL` for `overrideSchemaNamespace`. **]**
-
-**SRS_CODEFIRST_02_047: [** If `CodeFirst_Init` returns `CODEFIRST_ERROR` then `CodeFirst_SendAsyncReported` shall fail and return `CODEFIRST_ERROR`. **]**
 
 **SRS_CODEFIRST_02_018: [** If parameter `destination`, `destinationSize` or any of the values passed through va_args is `NULL` then `CodeFirst_SendAsyncReported` shall fail and return `CODEFIRST_INVALID_ARG`. **]**
 
