@@ -9,6 +9,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
     using System.IO;
     using System.Net;
     using System.Net.Security;
+    using System.Net.WebSockets;
     using System.Security.Cryptography.X509Certificates;
     using System.Threading;
     using System.Threading.Tasks;
@@ -29,6 +30,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
     sealed class MqttTransportHandler : TransportHandler
     {
         const int ProtocolGatewayPort = 8883;
+        const int MaxMessageSize = 256 * 1024;
 
         [Flags]
         internal enum TransportState
@@ -96,7 +98,26 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
             this.serverAddress = Dns.GetHostEntry(iotHubConnectionString.HostName).AddressList[0];
             this.qos = settings.PublishToServerQoS;
             this.eventLoopGroupKey = iotHubConnectionString.IotHubName + "#" + iotHubConnectionString.DeviceId + "#" + iotHubConnectionString.Audience;
-            this.channelFactory = channelFactory ?? this.CreateChannelFactory(iotHubConnectionString, settings);
+
+            if (channelFactory == null)
+            {
+                switch (settings.GetTransportType())
+                {
+                    case TransportType.Mqtt_Tcp_Only:
+                        this.channelFactory = this.CreateChannelFactory(iotHubConnectionString, settings);
+                        break;
+                    case TransportType.Mqtt_WebSocket_Only:
+                        this.channelFactory = this.CreateWebSocketChannelFactory(iotHubConnectionString, settings);
+                        break;
+                    default:
+                        throw new InvalidOperationException("Unsupported Transport Setting {0}".FormatInvariant(settings.GetTransportType()));
+                }
+            }
+            else
+            {
+                this.channelFactory = channelFactory;
+            }
+
             this.closeRetryPolicy = new RetryPolicy(new TransientErrorIgnoreStrategy(), 5, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
         }
 
@@ -433,8 +454,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
                 IEventLoopGroup eventLoopGroup = EventLoopGroupPool.TakeOrAdd(this.eventLoopGroupKey);
 
                 Func<Stream, SslStream> streamFactory = stream => new SslStream(stream, true, settings.RemoteCertificateValidationCallback);
-                ClientTlsSettings clientTlsSettings;
-                clientTlsSettings = settings.ClientCertificate != null ? 
+                var clientTlsSettings = settings.ClientCertificate != null ? 
                     new ClientTlsSettings(iotHubConnectionString.HostName, new List<X509Certificate> { settings.ClientCertificate }) : 
                     new ClientTlsSettings(iotHubConnectionString.HostName);
                 Bootstrap bootstrap = new Bootstrap()
@@ -450,7 +470,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
                             .AddLast(
                                 tlsHandler, 
                                 MqttEncoder.Instance, 
-                                new MqttDecoder(false, 256 * 1024), 
+                                new MqttDecoder(false, MaxMessageSize), 
                                 this.mqttIotHubAdapterFactory.Create(this.OnConnected, this.OnMessageReceived, this.OnError, iotHubConnectionString, settings));
                     }));
 
@@ -461,6 +481,61 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
                 });
 
                 return bootstrap.ConnectAsync(address, port);
+            };
+        }
+
+        Func<IPAddress, int, Task<IChannel>> CreateWebSocketChannelFactory(IotHubConnectionString iotHubConnectionString, MqttTransportSettings settings)
+        {
+            return async (address, port) =>
+            {
+                IEventLoopGroup eventLoopGroup = EventLoopGroupPool.TakeOrAdd(this.eventLoopGroupKey);
+
+                var websocketUri = new Uri(WebSocketConstants.Scheme + iotHubConnectionString.HostName + ":" + WebSocketConstants.SecurePort + WebSocketConstants.UriSuffix);
+                var websocket = new ClientWebSocket();
+                websocket.Options.AddSubProtocol(WebSocketConstants.SubProtocols.Mqtt);
+
+                // Check if we're configured to use a proxy server
+                IWebProxy webProxy = WebRequest.DefaultWebProxy;
+                Uri proxyAddress = webProxy?.GetProxy(websocketUri);
+                if (!websocketUri.Equals(proxyAddress))
+                {
+                    // Configure proxy server
+                    websocket.Options.Proxy = webProxy;
+                }
+
+                if (settings.ClientCertificate != null)
+                {
+                    websocket.Options.ClientCertificates.Add(settings.ClientCertificate);
+                }
+                else
+                {
+                    websocket.Options.UseDefaultCredentials = true;
+                }
+
+                using (var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1)))
+                {
+                    await websocket.ConnectAsync(websocketUri, cancellationTokenSource.Token);
+                }
+
+                var clientChannel = new ClientWebSocketChannel(null, websocket);
+                clientChannel
+                    .Option(ChannelOption.Allocator, UnpooledByteBufferAllocator.Default)
+                    .Option(ChannelOption.AutoRead, false)
+                    .Option(ChannelOption.RcvbufAllocator, new AdaptiveRecvByteBufAllocator())
+                    .Option(ChannelOption.MessageSizeEstimator, DefaultMessageSizeEstimator.Default)
+                    .Pipeline.AddLast(
+                        MqttEncoder.Instance,
+                        new MqttDecoder(false, MaxMessageSize),
+                        this.mqttIotHubAdapterFactory.Create(this.OnConnected, this.OnMessageReceived, this.OnError, iotHubConnectionString, settings));
+                await eventLoopGroup.GetNext().RegisterAsync(clientChannel);
+
+                this.ScheduleCleanup(() =>
+                {
+                    EventLoopGroupPool.Release(this.eventLoopGroupKey);
+                    return TaskConstants.Completed;
+                });
+
+                return clientChannel;
             };
         }
 

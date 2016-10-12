@@ -59,6 +59,8 @@
   </Choose>
   <ItemGroup>
     <Compile Include="CertificateHelper.cs" />
+    <Compile Include="Mqtt\ChannelExtensions.cs" />
+    <Compile Include="Mqtt\ClientWebSocketChannelTests.cs" />
     <Compile Include="ClientWebSocketTransportTests.cs" />
     <Compile Include="ConnectionPoolTests.cs" />
     <Compile Include="ConnectionString\DeviceClientConnectionStringExceptionTests.cs" />
@@ -67,8 +69,10 @@
     <Compile Include="ExceptionAssertions.cs" />
     <Compile Include="GateKeeperDelegatingHandlerTests.cs" />
     <Compile Include="MessageTests.cs" />
+    <Compile Include="Mqtt\ReadListeningHandler.cs" />
     <Compile Include="RetryDelegatingHandlerTests.cs" />
     <Compile Include="RoutingDelegatingHandlerTests.cs" />
+    <Compile Include="Mqtt\ServerWebSocketChannel.cs" />
     <Compile Include="TestAssert.cs" />
     <Compile Include="TransportSettingsTests.cs" />
     <Compile Include="UtilsTests.cs" />
