@@ -15,7 +15,6 @@
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
-#include "parson.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/tlsio.h"
@@ -33,12 +32,8 @@
 #include "azure_uamqp_c/cbs.h"
 #include "azure_uamqp_c/amqp_definitions.h"
 
+#include "parson.h"
 #include "iothub_message.h"
-
-#include "iothub_messaging_ll.h"
-
-TEST_DEFINE_ENUM_TYPE(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES);
-IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES);
 
 MOCKABLE_FUNCTION(, JSON_Array*, json_array_get_array, const JSON_Array*, array, size_t, index);
 MOCKABLE_FUNCTION(, JSON_Value*, json_parse_string, const char *, string);
@@ -47,12 +42,22 @@ MOCKABLE_FUNCTION(, JSON_Object*, json_array_get_object, const JSON_Array*, arra
 MOCKABLE_FUNCTION(, JSON_Array*, json_value_get_array, const JSON_Value*, value);
 MOCKABLE_FUNCTION(, size_t, json_array_get_count, const JSON_Array*, array);
 MOCKABLE_FUNCTION(, JSON_Status, json_array_clear, JSON_Array*, array);
-MOCKABLE_FUNCTION(, JSON_Status, json_object_clear, JSON_Object*, object);
 MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value *, value);
+#undef ENABLE_MOCKS
+
+#include "iothub_messaging_ll.h"
+
+TEST_DEFINE_ENUM_TYPE(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_MESSAGING_RESULT, IOTHUB_MESSAGING_RESULT_VALUES);
+
+#define ENABLE_MOCKS
+#include "azure_c_shared_utility/umock_c_prod.h"
 MOCKABLE_FUNCTION(, void, TEST_FUNC_IOTHUB_OPEN_COMPLETE_CALLBACK, void*, context);
 MOCKABLE_FUNCTION(, void, TEST_FUNC_IOTHUB_SEND_COMPLETE_CALLBACK, void*, context, IOTHUB_MESSAGING_RESULT, messagingResult);
 MOCKABLE_FUNCTION(, void, TEST_FUNC_IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK, void*, context, IOTHUB_SERVICE_FEEDBACK_BATCH*, feedbackBatch);
 #undef ENABLE_MOCKS
+
+
 
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;
@@ -1982,8 +1987,6 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         STRICT_EXPECTED_CALL(json_array_clear(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
 
@@ -2081,8 +2084,6 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         STRICT_EXPECTED_CALL(json_array_clear(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
 
@@ -2178,8 +2179,6 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(json_array_clear(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
@@ -2278,8 +2277,6 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         STRICT_EXPECTED_CALL(json_array_clear(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
 
@@ -2377,8 +2374,6 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         STRICT_EXPECTED_CALL(json_array_clear(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
 
@@ -2475,8 +2470,6 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(json_array_clear(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
             .IgnoreArgument(1);

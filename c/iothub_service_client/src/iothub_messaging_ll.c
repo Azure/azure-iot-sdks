@@ -516,7 +516,6 @@ static AMQP_VALUE IoTHubMessaging_LL_FeedbackMessageReceived(const void* context
             }
         }
         json_array_clear(feedback_array);
-        json_object_clear(feedback_object);
         json_value_free(root_value);
     }
     return result;
@@ -1031,6 +1030,27 @@ void IoTHubMessaging_LL_Close(IOTHUB_MESSAGING_HANDLE messagingHandle)
     }
 }
 
+IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_SetFeedbackMessageCallback(IOTHUB_MESSAGING_HANDLE messagingHandle, IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK feedbackMessageReceivedCallback, void* userContextCallback)
+{
+    IOTHUB_MESSAGING_RESULT result;
+
+    /*Codes_SRS_IOTHUBMESSAGING_12_042: [ IoTHubMessaging_LL_SetCallbacks shall verify the messagingHandle input parameter and if it is NULL then return NULL ] */
+    if (messagingHandle == NULL)
+    {
+        LogError("Input parameter cannot be NULL");
+        result = IOTHUB_MESSAGING_INVALID_ARG;
+    }
+    else
+    {
+        /*Codes_SRS_IOTHUBMESSAGING_12_043: [ IoTHubMessaging_LL_SetCallbacks shall save the given feedbackMessageReceivedCallback to use them in local callbacks ] */
+        /*Codes_SRS_IOTHUBMESSAGING_12_044: [ IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_OK after the callbacks have been set ] */
+        messagingHandle->callback_data->feedbackMessageCallback = feedbackMessageReceivedCallback;
+        messagingHandle->callback_data->feedbackUserContext = userContextCallback;
+        result = IOTHUB_MESSAGING_OK;
+    }
+    return result;
+}
+
 IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE messagingHandle, const char* deviceId, IOTHUB_MESSAGE_HANDLE message, IOTHUB_SEND_COMPLETE_CALLBACK sendCompleteCallback, void* userContextCallback)
 {
     IOTHUB_MESSAGING_RESULT result;
@@ -1157,27 +1177,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Send(IOTHUB_MESSAGING_HANDLE messagin
     if (deviceDestinationString != NULL)
     {
         free(deviceDestinationString);
-    }
-    return result;
-}
-
-IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_SetFeedbackMessageCallback(IOTHUB_MESSAGING_HANDLE messagingHandle, IOTHUB_FEEDBACK_MESSAGE_RECEIVED_CALLBACK feedbackMessageReceivedCallback, void* userContextCallback)
-{
-    IOTHUB_MESSAGING_RESULT result;
-
-    /*Codes_SRS_IOTHUBMESSAGING_12_042: [ IoTHubMessaging_LL_SetCallbacks shall verify the messagingHandle input parameter and if it is NULL then return NULL ] */
-    if (messagingHandle == NULL)
-    {
-        LogError("Input parameter cannot be NULL");
-        result = IOTHUB_MESSAGING_INVALID_ARG;
-    }
-    else
-    {
-        /*Codes_SRS_IOTHUBMESSAGING_12_043: [ IoTHubMessaging_LL_SetCallbacks shall save the given feedbackMessageReceivedCallback to use them in local callbacks ] */
-        /*Codes_SRS_IOTHUBMESSAGING_12_044: [ IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_OK after the callbacks have been set ] */
-        messagingHandle->callback_data->feedbackMessageCallback = feedbackMessageReceivedCallback;
-        messagingHandle->callback_data->feedbackUserContext = userContextCallback;
-        result = IOTHUB_MESSAGING_OK;
     }
     return result;
 }
