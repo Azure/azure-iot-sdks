@@ -9,12 +9,11 @@
 #ifdef __cplusplus
 extern "C"
 {
-#else
 #endif
 
-#include "crt_abstractions.h"
-#include "list.h"
-#include "map.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/singlylinkedlist.h"
+#include "azure_c_shared_utility/map.h"
 #include <time.h>
 #include "iothub_service_client_auth.h"
 
@@ -175,7 +174,7 @@ extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_DeleteDevice(IOTHUB_R
 *
 * @return	IOTHUB_REGISTRYMANAGER_RESULT_OK upon success or an error code upon failure.
 */
-extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDeviceList(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, size_t numberOfDevices, LIST_HANDLE deviceList);
+extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDeviceList(IOTHUB_REGISTRYMANAGER_HANDLE registryManagerHandle, size_t numberOfDevices, SINGLYLINKEDLIST_HANDLE deviceList);
 
 /**
 * @brief	Gets the registry statistic info.

@@ -33,7 +33,7 @@ xdcargs = java.lang.System.getenv("XDCARGS").split(" ");
 var slIncs = "";
 var ndkIncs = "";
 var wolfsslIncs = "";
-var serializerIncs = "-I../../inc -I../../../azure-c-shared-utility/inc -I../../../azure-c-shared-utility/inc/azure_c_shared_utility "
+var serializerIncs = "-I../../inc -I../../../c-utility/inc -I../../../c-utility/inc/azure_c_shared_utility "
     + "-I../../../iothub_client/inc ";
 var pthreadIncs = "";
 

@@ -92,9 +92,9 @@ if(NOT "${compileOption_CXX}" STREQUAL "OFF")
     set(CMAKE_CXX_FLAGS "${compileOption_CXX} ${CMAKE_CXX_FLAGS}")
 endif()
 
-add_subdirectory(azure-c-shared-utility)
-add_subdirectory(azure-uamqp-c)
-add_subdirectory(azure-umqtt-c)
+add_subdirectory(c-utility)
+add_subdirectory(uamqp)
+add_subdirectory(umqtt)
 
 enable_testing()
 

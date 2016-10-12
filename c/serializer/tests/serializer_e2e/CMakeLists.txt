@@ -29,7 +29,8 @@ set(${theseTestsName}_h_files
 include_directories(${IOTHUB_TEST_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER} ${SERIALIZER_INC_FOLDER})
 include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})
 
-build_test_artifacts(${theseTestsName} ON)
+file(COPY suppressions.supp DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+build_test_artifacts(${theseTestsName} ON VALGRIND_SUPPRESSIONS_FILE suppressions.supp) 
 
 if(WIN32)
 	if(TARGET ${theseTestsName}_dll)
@@ -42,6 +43,7 @@ if(WIN32)
 			iothub_service_client
 			aziotsharedutil
 			iothub_client_http_transport
+            rpcrt4
 		)
 		linkSharedUtil(${theseTestsName}_dll)
 		linkUAMQP(${theseTestsName}_dll)
@@ -58,6 +60,7 @@ if(WIN32)
 			iothub_service_client
 			aziotsharedutil
 			iothub_client_http_transport
+            rpcrt4
 		)
 		linkSharedUtil(${theseTestsName}_exe)
 		linkUAMQP(${theseTestsName}_exe)
@@ -69,6 +72,7 @@ if(WIN32)
 			serializer
 			iothub_test
 			iothub_service_client
+            rpcrt4
 		)
 	endif()
 else()
