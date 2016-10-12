@@ -345,7 +345,7 @@ BEGIN_TEST_SUITE(DataMarshaller_ut)
         DataMarshaller_Destroy(NULL);
 
         ///assert
-        /// no explicit assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
     /* DataMarshaller_SendData */

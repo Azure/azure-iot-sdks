@@ -715,8 +715,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         REGISTER_UMOCK_ALIAS_TYPE(pfDesiredPropertyDeinitialize, void*);
         REGISTER_UMOCK_ALIAS_TYPE(pfOnDesiredProperty, void*);
         
-        
-
         REGISTER_GLOBAL_MOCK_RETURN(Schema_GetModelName, TEST_MODEL_NAME);
         REGISTER_GLOBAL_MOCK_HOOK(Create_AGENT_DATA_TYPE_from_DOUBLE, my_Create_AGENT_DATA_TYPE_from_DOUBLE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(Create_AGENT_DATA_TYPE_from_DOUBLE, AGENT_DATA_TYPES_JSON_ENCODER_ERRROR);
@@ -897,9 +895,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         arrayOfAgentDataType[14].value.edmStringNoQuotes.length = strlen(someMoreChars);
 
         toBeCleaned = NULL;
-
-        (void)CodeFirst_Init(NULL);
-
     }
 
     TEST_FUNCTION_CLEANUP(TestMethodCleanup)
@@ -914,7 +909,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         DummyDataProvider_test1_P14.data = NULL;
         DummyDataProvider_test1_P14.size = 0;
 
-        CodeFirst_Deinit();
         TEST_MUTEX_RELEASE(g_testByTest);
     }
 
@@ -933,17 +927,17 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_Init_succeds)
     {
         
-
         ///arrange
         CODEFIRST_RESULT result;
-        CodeFirst_Deinit();
-        umock_c_reset_all_calls();
 
         ///act
         result = CodeFirst_Init(NULL);
 
         ///assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
+
+        ///cleanup
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_99_003:[ If the module is already initialized, the initialization shall fail and the return value shall be CODEFIRST_ALREADY_INIT.]*/
@@ -960,6 +954,9 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_ALREADY_INIT, result);
+
+        ///cleanup
+        CodeFirst_Deinit();
     }
 
     /* CodeFirst_InvokeAction */
@@ -976,6 +973,9 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
+
+        ///cleanup
+        CodeFirst_Deinit();
     }
 
 
@@ -991,6 +991,9 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
+
+        ///cleanup
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_99_066:[ If actionName, relativeActionPath or deviceHandle is NULL then EXECUTE_COMMAND_ERROR shall be returned*/
@@ -1010,13 +1013,13 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_99_068:[ If the function is called before CodeFirst is initialized then EXECUTE_COMMAND_ERROR shall be returned.] */
     TEST_FUNCTION(CodeFirst_InvokeAction_When_Not_Initialized_Fails)
     {
         ///arrange
-        CodeFirst_Deinit();
         umock_c_reset_all_calls();
 
         ///act
@@ -1039,6 +1042,9 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
+
+        ///cleanup
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_99_078:[If such a function is not found then the function shall return EXECUTE_COMMAND_ERROR.]*/
@@ -1060,6 +1066,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_99_063:[ If the function is found, then CodeFirst shall call the wrapper of the found function inside the data provider. The wrapper is linked in the reflected data to the function name. The wrapper shall be called with the same arguments as CodeFirst_InvokeAction has been called.]*/
@@ -1086,6 +1093,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_99_063:[ If the function is found, then CodeFirst shall call the wrapper of the found function inside the data provider. The wrapper is linked in the reflected data to the function name. The wrapper shall be called with the same arguments as CodeFirst_InvokeAction has been called.]*/
@@ -1111,6 +1119,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_99_063:[ If the function is found, then CodeFirst shall call the wrapper of the found function inside the data provider. The wrapper is linked in the reflected data to the function name. The wrapper shall be called with the same arguments as CodeFirst_InvokeAction has been called.]*/
@@ -1134,6 +1143,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_99_063:[ If the function is found, then CodeFirst shall call the wrapper of the found function inside the data provider. The wrapper is linked in the reflected data to the function name. The wrapper shall be called with the same arguments as CodeFirst_InvokeAction has been called.]*/
@@ -1159,6 +1169,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_99_063:[ If the function is found, then CodeFirst shall call the wrapper of the found function inside the data provider. The wrapper is linked in the reflected data to the function name. The wrapper shall be called with the same arguments as CodeFirst_InvokeAction has been called.]*/
@@ -1185,6 +1196,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_99_063:[ If the function is found, then CodeFirst shall call the wrapper of the found function inside the data provider. The wrapper is linked in the reflected data to the function name. The wrapper shall be called with the same arguments as CodeFirst_InvokeAction has been called.]*/
@@ -1214,6 +1226,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*from here on there are tests for "test1"*/
@@ -1238,6 +1251,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
@@ -1261,6 +1275,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
@@ -1282,6 +1297,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
@@ -1306,6 +1322,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
@@ -1330,6 +1347,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
@@ -1354,6 +1372,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
@@ -1378,6 +1397,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
@@ -1402,6 +1422,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
@@ -1426,6 +1447,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
@@ -1450,6 +1472,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
@@ -1474,6 +1497,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
@@ -1498,6 +1522,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
@@ -1522,6 +1547,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
@@ -1546,6 +1572,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
@@ -1570,6 +1597,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_SERIALIZER_99_042:[The parameter types are either predefined parameter types(specs SRS_SERIALIZER_99_004 - SRS_SERIALIZER_99_014)*/
@@ -1610,6 +1638,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_140:[CodeFirst_InvokeAction shall pass to the action wrapper that it calls a pointer to the model where the action is defined.] */
@@ -1635,6 +1664,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_140:[CodeFirst_InvokeAction shall pass to the action wrapper that it calls a pointer to the model where the action is defined.] */
@@ -1653,8 +1683,6 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///act
        EXECUTE_COMMAND_RESULT result = CodeFirst_InvokeAction(TEST_DEVICE_HANDLE, g_InvokeActionCallbackArgument, "Inner", "InnerType_reset_Action", 0, NULL);
 
-
-
         ///assert
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_SUCCESS, result);
         ASSERT_ARE_EQUAL(void_ptr, &device->Inner, InnerType_reset_device);
@@ -1662,6 +1690,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_141:[If a child model specified in the relativeActionPath argument cannot be found by CodeFirst_InvokeAction, it shall return EXECUTE_COMMAND_ERROR.] */
@@ -1683,6 +1712,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_141:[If a child model specified in the relativeActionPath argument cannot be found by CodeFirst_InvokeAction, it shall return EXECUTE_COMMAND_ERROR.] */
@@ -1704,6 +1734,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_141:[If a child model specified in the relativeActionPath argument cannot be found by CodeFirst_InvokeAction, it shall return EXECUTE_COMMAND_ERROR.] */
@@ -1725,6 +1756,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* CodeFirst_CreateDevice */
@@ -1733,12 +1765,16 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_CreateDevice_With_NULL_Model_Fails)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
 
         // act
         void* result = CodeFirst_CreateDevice(NULL, &DummyDataProvider_allReflected, 1, false);
 
         // assert
         ASSERT_IS_NULL(result);
+
+        ///cleanup
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_079:[CodeFirst_CreateDevice shall create a device and allocate a memory block that should hold the device data.] */
@@ -1749,6 +1785,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_CreateDevice_With_Valid_Arguments_and_includePropertyPath_false_Succeeds_1)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         size_t zero = 0;
         STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer_desiredPropertyCount(&zero, sizeof(zero));
@@ -1768,11 +1805,13 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(result);
+        CodeFirst_Deinit();
     }
 
     TEST_FUNCTION(CodeFirst_CreateDevice_With_Valid_Arguments_and_includePropertyPath_false_Succeeds_2)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         size_t zero = 0;
         STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer_desiredPropertyCount(&zero, sizeof(zero));
@@ -1793,12 +1832,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(result);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_01_001: [CodeFirst_CreateDevice shall pass the includePropertyPath argument to Device_Create.] */
     TEST_FUNCTION(CodeFirst_CreateDevice_With_Valid_Arguments_and_includePropertyPath_true_Succeeds)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         size_t zero = 0;
         STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
             .CopyOutArgumentBuffer_desiredPropertyCount(&zero, sizeof(zero));
@@ -1819,13 +1860,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(result);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_084:[If Device_Create fails, CodeFirst_CreateDevice shall return NULL.] */
     TEST_FUNCTION(When_Device_Create_Fails_Then_CodeFirst_CreateDevice_Fails)
     {
         // arrange
-
+        (void)CodeFirst_Init(NULL);
         STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
             .IgnoreArgument(3).IgnoreArgument(5).SetReturn(DEVICE_ERROR);
 
@@ -1834,20 +1876,25 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // assert
         ASSERT_IS_NULL(result);
+
+        ///cleanup
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_106:[If CodeFirst_CreateDevice is called when the modules is not initialized is shall return NULL.] */
     TEST_FUNCTION(CodeFirst_CreateDevice_When_The_Module_Is_Not_Initialized_Fails)
     {
         // arrange
-        CodeFirst_Deinit();
         umock_c_reset_all_calls();
 
         // act
         void* result = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, 1, false);
 
         // assert
-        ASSERT_IS_NULL(result);
+        ASSERT_IS_NOT_NULL(result);
+
+        ///cleanup
+        CodeFirst_DestroyDevice(result);
     }
 
     /* CodeFirst_DestroyDevice */
@@ -1861,7 +1908,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_DestroyDevice(NULL);
 
         // assert
-        // no explicit assert, uMock checks the calls
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     }
 
     /* Tests_SRS_CODEFIRST_99_085:[CodeFirst_DestroyDevice shall free all resources associated with a device.] */
@@ -1869,21 +1916,27 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_DestroyDevice_With_Valid_Argument_Destroys_The_Device)
     {
         // arrange
-
+        (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, 1, false);
         umock_c_reset_all_calls();
 
-        STRICT_EXPECTED_CALL(Device_Destroy(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+            .IgnoreArgument_desiredPropertyCount(); /*0 desired properties*/
+        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+            .IgnoreArgument_modelCount(); /*0 model in model*/
         STRICT_EXPECTED_CALL(Schema_ReleaseDeviceRef(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(Schema_DestroyIfUnused(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
-
+        STRICT_EXPECTED_CALL(Device_Destroy(TEST_DEVICE_HANDLE));
         // act
         CodeFirst_DestroyDevice(device);
 
         // assert
-        // no explicit assert, uMock checks the calls
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+        CodeFirst_Deinit();
     }
 
     /* CodeFirst_SendAsync */
@@ -1892,6 +1945,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_With_0_NumProperties_Fails)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, 1, false);
         unsigned char* destination;
         size_t destinationSize;
@@ -1906,6 +1960,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_088:[CodeFirst_SendAsync shall send to the Device module a set of properties.] */
@@ -1922,6 +1977,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_With_One_Property_Succeeds)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         unsigned char* destination;
         size_t destinationSize;
@@ -1957,6 +2013,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_088:[CodeFirst_SendAsync shall send to the Device module a set of properties.] */
@@ -1973,6 +2030,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_2_Properties_Succeeds)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
@@ -2023,12 +2081,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
     TEST_FUNCTION(When_StartTransaction_Fails_CodeFirst_SendAsync_Fails)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
@@ -2047,12 +2107,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
     TEST_FUNCTION(When_PublishTransacted_Fails_CodeFirst_SendAsync_Fails)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
@@ -2084,15 +2146,16 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_DEVICE_PUBLISH_FAILED, result);
         
-
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
     TEST_FUNCTION(When_PublishTransacted_Fails_For_The_2nd_Property_CodeFirst_SendAsync_Fails)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
@@ -2139,15 +2202,16 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_DEVICE_PUBLISH_FAILED, result);
         
-
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
     
     /* Tests_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
     TEST_FUNCTION(When_EndTransacted_Fails_CodeFirst_SendAsync_Fails)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
@@ -2184,12 +2248,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_104:[If a property cannot be associated with a device, CodeFirst_SendAsync shall return CODEFIRST_INVALID_ARG.] */
     TEST_FUNCTION(When_An_Invalid_Pointer_Is_Passed_CodeFirst_SendAsync_Fails)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
@@ -2206,12 +2272,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_104:[If a property cannot be associated with a device, CodeFirst_SendAsync shall return CODEFIRST_INVALID_ARG.] */
     TEST_FUNCTION(When_A_Pointer_Within_The_Device_Block_But_Mismatched_Is_Passed_CodeFirst_SendAsync_Fails)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
@@ -2236,12 +2304,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_099:[If Create_AGENT_DATA_TYPE_from_Ptr fails, CodeFirst_SendAsync shall return CODEFIRST_AGENT_DATA_TYPE_ERROR.] */
     TEST_FUNCTION(When_Creating_The_Agent_Data_Type_Fails_Then_CodeFirst_SendAsync_Fails)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
@@ -2271,12 +2341,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_099:[If Create_AGENT_DATA_TYPE_from_Ptr fails, CodeFirst_SendAsync shall return CODEFIRST_AGENT_DATA_TYPE_ERROR.] */
     TEST_FUNCTION(When_Creating_The_Agent_Data_Type_Fails_For_The_2nd_Property_Then_CodeFirst_SendAsync_Fails)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
@@ -2319,12 +2391,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_096:[All values have to belong to the same device, otherwise CodeFirst_SendAsync shall return CODEFIRST_VALUES_FROM_DIFFERENT_DEVICES_ERROR.] */
     TEST_FUNCTION(Properties_From_2_Different_Devices_Make_CodeFirst_SendAsync_Fail)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device1 = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         SimpleDevice_Model* device2 = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
@@ -2361,6 +2435,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         // cleanup
         CodeFirst_DestroyDevice(device1);
         CodeFirst_DestroyDevice(device2);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_088:[CodeFirst_SendAsync shall send to the Device module a set of properties.] */
@@ -2377,6 +2452,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_With_One_Property_Succeeds_2)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
@@ -2413,6 +2489,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
+
     }
 
     /* Tests_SRS_CODEFIRST_99_088:[CodeFirst_SendAsync shall send to the Device module a set of properties.] */
@@ -2429,6 +2507,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_2_Properties_Succeeds_2)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
@@ -2479,6 +2558,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_130:[If a pointer to the beginning of a device block is passed to CodeFirst_SendAsync instead of a pointer to a property, CodeFirst_SendAsync shall send all the properties that belong to that device.] */
@@ -2486,6 +2566,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_The_Entire_Device_State)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
@@ -2520,12 +2601,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_099:[If Create_AGENT_DATA_TYPE_from_Ptr fails, CodeFirst_SendAsync shall return CODEFIRST_AGENT_DATA_TYPE_ERROR.] */
     TEST_FUNCTION(CodeFirst_When_Create_Agent_Data_Type_For_The_First_Property_Fails_Send_The_Entire_Device_State_Fails)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
@@ -2550,12 +2633,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
     TEST_FUNCTION(CodeFirst_When_Publish_For_The_First_Property_Fails_Send_The_Entire_Device_State_Fails)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
@@ -2584,12 +2669,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_099:[If Create_AGENT_DATA_TYPE_from_Ptr fails, CodeFirst_SendAsync shall return CODEFIRST_AGENT_DATA_TYPE_ERROR.] */
     TEST_FUNCTION(CodeFirst_When_Create_Agent_Data_Type_For_The_Second_Property_Fails_Send_The_Entire_Device_State_Fails)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
@@ -2618,12 +2705,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_094:[If any Device API fail, CodeFirst_SendAsync shall return CODEFIRST_DEVICE_PUBLISH_FAILED.] */
     TEST_FUNCTION(CodeFirst_When_Publish_For_The_Second_Property_Fails_Send_The_Entire_Device_State_Fails)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
@@ -2656,6 +2745,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_133:[CodeFirst_SendAsync shall allow sending of properties that are part of a child model.] */
@@ -2663,6 +2753,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_Can_Send_A_Property_From_A_Child_Model)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &ALL_REFLECTED(testModelInModelReflected), sizeof(OuterType), false);
         umock_c_reset_all_calls();
 
@@ -2704,6 +2795,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_133:[CodeFirst_SendAsync shall allow sending of properties that are part of a child model.] */
@@ -2711,6 +2803,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_Can_Send_The_Last_Property_From_A_Child_Model_With_2_Properties)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &ALL_REFLECTED(testModelInModelReflected), sizeof(OuterType), false);
         umock_c_reset_all_calls();
 
@@ -2752,6 +2845,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
 
@@ -2759,6 +2853,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendAsync_With_NULL_destination_and_NonNulldestinationSize_Fails)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         size_t destinationSize;
         umock_c_reset_all_calls();
@@ -2772,12 +2867,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_04_002: [If CodeFirst_SendAsync receives destination or destinationSize NULL, CodeFirst_SendAsync shall return Invalid Argument.]*/
     TEST_FUNCTION(CodeFirst_SendAsync_With_nonNULL_destination_and_NulldestinationSize_Fails)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         unsigned char* destination;
         umock_c_reset_all_calls();
@@ -2791,12 +2888,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_99_088:[CodeFirst_SendAsync shall send to the Device module a set of properties, a destination and a destinationSize.] */
     TEST_FUNCTION(CodeFirst_SendAsync_With_One_Property_CallBackAndUserContext_Succeeds)
     {
         // arrange
+        (void)CodeFirst_Init(NULL);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
         umock_c_reset_all_calls();
 
@@ -2831,6 +2930,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* CodeFirst_RegisterSchema */
@@ -2840,6 +2940,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         static const SCHEMA_STRUCT_TYPE_HANDLE TEST_CAR_BEHIND_VAN_HANDLE = (SCHEMA_STRUCT_TYPE_HANDLE)0x7001;
 
         ///arrange
+        (void)CodeFirst_Init(NULL);
+        umock_c_reset_all_calls();
         STRICT_EXPECTED_CALL(Schema_GetSchemaByNamespace("TestSchema"));
         STRICT_EXPECTED_CALL(Schema_Create("TestSchema"));
         STRICT_EXPECTED_CALL(Schema_CreateStructType(TEST_SCHEMA_HANDLE, "theCarIsBehindTheVan_Struct"))
@@ -2875,6 +2977,10 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(void_ptr, TEST_SCHEMA_HANDLE, result);
+
+        ///cleanup
+        CodeFirst_Deinit();
+
     }
 
     /* Tests_SRS_CODEFIRST_99_002:[ CodeFirst_RegisterSchema shall create the schema information and give it to the Schema module for one schema, identified by the metadata argument. On success, it shall return a handle to the model.] */
@@ -2883,6 +2989,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         static const SCHEMA_STRUCT_TYPE_HANDLE TEST_CAR_BEHIND_VAN_HANDLE = (SCHEMA_STRUCT_TYPE_HANDLE)0x7001;
 
         ///arrange
+        (void)CodeFirst_Init(NULL);
+        umock_c_reset_all_calls();
         STRICT_EXPECTED_CALL(Schema_GetSchemaByNamespace("TestSchema"));
         STRICT_EXPECTED_CALL(Schema_Create("TestSchema"));
         STRICT_EXPECTED_CALL(Schema_CreateModelType(TEST_SCHEMA_HANDLE, "OuterType"))
@@ -2917,6 +3025,10 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(void_ptr, TEST_SCHEMA_HANDLE, result);
+
+        ///cleanup
+        CodeFirst_Deinit();
+
     }
 
     /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
@@ -2924,6 +3036,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     {
 
         ///arrange
+        (void)CodeFirst_Init(NULL);
+        umock_c_reset_all_calls();
         STRICT_EXPECTED_CALL(Schema_GetSchemaByNamespace("TestSchema"));
         STRICT_EXPECTED_CALL(Schema_Create("TestSchema"))
             .SetReturn((SCHEMA_HANDLE)NULL);
@@ -2933,12 +3047,17 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_IS_NULL(result);
+
+        ///cleanup
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_CreateModelType_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
+        umock_c_reset_all_calls();
         STRICT_EXPECTED_CALL(Schema_Create("TestSchema"));
         STRICT_EXPECTED_CALL(Schema_CreateModelType(TEST_SCHEMA_HANDLE, TEST_DEFAULT_MODEL_NAME))
             .SetReturn((SCHEMA_MODEL_TYPE_HANDLE)NULL);
@@ -2949,12 +3068,17 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_IS_NULL(result);
+
+        //cleanup
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_AddModelProperty_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
+        umock_c_reset_all_calls();
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "TruckType")).SetReturn(TEST_MODEL_HANDLE);
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "SimpleDevice_Model")).SetReturn(TEST_MODEL_HANDLE);
         STRICT_EXPECTED_CALL(Schema_AddModelProperty(TEST_MODEL_HANDLE, "this_is_int", "int"))
@@ -2966,12 +3090,17 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_IS_NULL(result);
+
+        ///cleanup
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_CreateModelAction_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
+        umock_c_reset_all_calls();
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "TruckType")).SetReturn(TEST_MODEL_HANDLE);
         STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_MODEL_HANDLE, "setSpeed"))
             .SetReturn((SCHEMA_ACTION_HANDLE)NULL);
@@ -2982,12 +3111,17 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_IS_NULL(result);
+
+        ///cleanup
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_AddModelActionArgument_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
+        umock_c_reset_all_calls();
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "TruckType")).SetReturn(TEST_MODEL_HANDLE);
         STRICT_EXPECTED_CALL(Schema_CreateModelAction(TEST_MODEL_HANDLE, "setSpeed"))
             .SetReturn(SETSPEED_ACTION_HANDLE);
@@ -3000,12 +3134,17 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_IS_NULL(result);
+
+        ///cleanup
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_CreateStructType_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
+        umock_c_reset_all_calls();
         STRICT_EXPECTED_CALL(Schema_Create("TestSchema"));
         STRICT_EXPECTED_CALL(Schema_CreateStructType(TEST_SCHEMA_HANDLE, "GeoLocation"))
             .SetReturn((SCHEMA_STRUCT_TYPE_HANDLE)NULL);
@@ -3016,12 +3155,17 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_IS_NULL(result);
+
+        ///cleanup
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_AddStructTypeProperty_Fails_Then_CodeFirst_RegisterSchema_Fails)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
+        umock_c_reset_all_calls();
         STRICT_EXPECTED_CALL(Schema_Create("TestSchema"));
         STRICT_EXPECTED_CALL(Schema_AddStructTypeProperty(TEST_STRUCT_TYPE_HANDLE, "Lat", "double"))
             .SetReturn(SCHEMA_ERROR);
@@ -3032,12 +3176,17 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_IS_NULL(result);
+        
+        ///cleanup
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
     TEST_FUNCTION(When_Schema_GetModelByName_Returns_NULL_RegisterSchema_Fails)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
+        umock_c_reset_all_calls();
         STRICT_EXPECTED_CALL(Schema_GetModelByName(TEST_SCHEMA_HANDLE, "TruckType"))
             .SetReturn((SCHEMA_MODEL_TYPE_HANDLE)NULL);
         STRICT_EXPECTED_CALL(Schema_Destroy(TEST_SCHEMA_HANDLE));
@@ -3047,6 +3196,9 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_IS_NULL(result);
+
+        ///cleanup
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_121:[If the schema has already been registered, CodeFirst_RegisterSchema shall return its handle.] */
@@ -3054,6 +3206,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     {
 
         ///arrange
+        (void)CodeFirst_Init(NULL);
+        umock_c_reset_all_calls();
         STRICT_EXPECTED_CALL(Schema_GetSchemaByNamespace("TestSchema"))
             .SetReturn((SCHEMA_HANDLE)TEST_SCHEMA_HANDLE);
 
@@ -3062,12 +3216,17 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_ARE_EQUAL(void_ptr, TEST_SCHEMA_HANDLE, result);
+
+        ///cleanup
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_02_014: [If parameter device or command is NULL then CodeFirst_ExecuteCommand shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CodeFirst_ExecuteCommand_With_NULL_device_fails)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
+        umock_c_reset_all_calls();
 
         ///act
         EXECUTE_COMMAND_RESULT result = CodeFirst_ExecuteCommand(NULL, TEST_COMMAND);
@@ -3076,12 +3235,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ASSERT_ARE_EQUAL(EXECUTE_COMMAND_RESULT, EXECUTE_COMMAND_ERROR, result);
 
         ///cleanup
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_02_014: [If parameter device or command is NULL then CodeFirst_ExecuteCommand shall return EXECUTE_COMMAND_ERROR.] */
     TEST_FUNCTION(CodeFirst_ExecuteCommand_With_NULL_command_fails)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
         umock_c_reset_all_calls();
 
@@ -3094,6 +3255,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_02_015: [CodeFirst_ExecuteCommand shall find the device.]*/
@@ -3101,6 +3263,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_ExecuteCommand_fails_when_it_does_not_find_the_device)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
         umock_c_reset_all_calls();
 
         ///act
@@ -3111,12 +3274,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         ///cleanup
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_02_017: [Otherwise CodeFirst_ExecuteCommand shall call Device_ExecuteCommand and return what Device_ExecuteCommand is returning.] */
     TEST_FUNCTION(CodeFirst_ExecuteCommand_calls_Device_ExecuteCommand)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
         umock_c_reset_all_calls();
 
@@ -3132,12 +3297,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_02_017: [Otherwise CodeFirst_ExecuteCommand shall call Device_ExecuteCommand and return what Device_ExecuteCommand is returning.] */
     TEST_FUNCTION(CodeFirst_ExecuteCommand_calls_Device_ExecuteCommand_can_returns_EXECUTE_COMMAND_FAILED)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
         umock_c_reset_all_calls();
 
@@ -3154,12 +3321,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_02_017: [Otherwise CodeFirst_ExecuteCommand shall call Device_ExecuteCommand and return what Device_ExecuteCommand is returning.] */
     TEST_FUNCTION(CodeFirst_ExecuteCommand_calls_Device_ExecuteCommand_can_returns_EXECUTE_COMMAND_ERROR)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
         umock_c_reset_all_calls();
 
@@ -3176,12 +3345,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_02_018: [ If parameter destination, destinationSize or any of the values passed through va_args is NULL then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
     TEST_FUNCTION(CodeFirst_SendAsyncReported_with_NULL_destination_fails)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
         size_t destinationSize = 10;
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
         umock_c_reset_all_calls();
@@ -3195,12 +3366,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///cleanup
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_02_018: [ If parameter destination, destinationSize or any of the values passed through va_args is NULL then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
     TEST_FUNCTION(CodeFirst_SendAsyncReported_with_NULL_destinationSize_fails)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
         unsigned char *destination = (unsigned char*)my_gballoc_malloc(10);
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
         umock_c_reset_all_calls();
@@ -3215,12 +3388,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///cleanup
         CodeFirst_DestroyDevice(device);
         my_gballoc_free(destination);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_02_018: [ If parameter destination, destinationSize or any of the values passed through va_args is NULL then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
     TEST_FUNCTION(CodeFirst_SendAsyncReported_with_zero_reportedProperties_fails)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
         unsigned char *destination = (unsigned char*)my_gballoc_malloc(10);
         size_t destinationSize = 10;
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
@@ -3236,12 +3411,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///cleanup
         CodeFirst_DestroyDevice(device);
         my_gballoc_free(destination);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_02_018: [ If parameter destination, destinationSize or any of the values passed through va_args is NULL then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
     TEST_FUNCTION(CodeFirst_SendAsyncReported_with_one_NULL_reportedProperties_fails)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
         unsigned char *destination = (unsigned char*)my_gballoc_malloc(10);
         size_t destinationSize = 10;
         void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
@@ -3257,12 +3434,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///cleanup
         CodeFirst_DestroyDevice(device);
         my_gballoc_free(destination);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_02_019: [ If values passed through va_args do not belong to the same device then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_VALUES_FROM_DIFFERENT_DEVICES_ERROR. ]*/
     TEST_FUNCTION(CodeFirst_SendAsyncReported_with_reportedProperties_from_different_devices_fails)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
         size_t destinationSize = 1000;
         unsigned char *destination = (unsigned char*)my_gballoc_malloc(destinationSize);
         
@@ -3306,12 +3485,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_DestroyDevice(device2);
         CodeFirst_DestroyDevice(device1);
         my_gballoc_free(destination);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_02_020: [ If values passed through va_args are not all of type REFLECTED_REPORTED_PROPERTY then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
     TEST_FUNCTION(CodeFirst_SendAsyncReported_WITH_DATA_fails)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
         size_t destinationSize = 1000;
         unsigned char *destination = (unsigned char*)my_gballoc_malloc(destinationSize);
         TruckType* device = (TruckType*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
@@ -3338,12 +3519,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///cleanup
         CodeFirst_DestroyDevice(device);
         my_gballoc_free(destination);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_02_020: [ If values passed through va_args are not all of type REFLECTED_REPORTED_PROPERTY then CodeFirst_SendAsyncReported shall fail and return CODEFIRST_INVALID_ARG. ]*/
     TEST_FUNCTION(CodeFirst_SendAsyncReported_with_reportedProperty_outside_any_device_fails)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
         size_t destinationSize = 1000;
         unsigned char *destination = (unsigned char*)my_gballoc_malloc(destinationSize);
         TruckType* device = (TruckType*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, sizeof(TruckType), false);
@@ -3360,6 +3543,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///cleanup
         CodeFirst_DestroyDevice(device);
         my_gballoc_free(destination);
+        CodeFirst_Deinit();
     }
 
     static void CodeFirst_SendReportedAsync_all_inert_path(void)
@@ -3400,6 +3584,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendReportedAsync_all_happy_path)
     {
         /// arrange
+        (void)CodeFirst_Init(NULL);
         size_t destinationSize = 1000;
         unsigned char *destination = (unsigned char*)my_gballoc_malloc(destinationSize);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
@@ -3420,12 +3605,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         /// cleanup
         CodeFirst_DestroyDevice(device);
         my_gballoc_free(destination);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_02_027: [ If any error occurs, CodeFirst_SendAsyncReported shall fail and return CODEFIRST_ERROR. ]*/
     TEST_FUNCTION(CodeFirst_SendReportedAsync_all_unhappy_path)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
         size_t destinationSize = 1000;
         unsigned char *destination = (unsigned char*)my_gballoc_malloc(destinationSize);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
@@ -3474,6 +3661,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_DestroyDevice(device);
         umock_c_negative_tests_deinit();
         my_gballoc_free(destination);
+        CodeFirst_Deinit();
     }
 
     static void CodeFirst_SendReportedAsync_one_inert_path(void)
@@ -3512,6 +3700,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_SendReportedAsync_one_reportedProperty_happy_path)
     {
         /// arrange
+        (void)CodeFirst_Init(NULL);
         size_t destinationSize = 1000;
         unsigned char *destination = (unsigned char*)my_gballoc_malloc(destinationSize);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
@@ -3532,12 +3721,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         /// cleanup
         CodeFirst_DestroyDevice(device);
         my_gballoc_free(destination);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_02_027: [ If any error occurs, CodeFirst_SendAsyncReported shall fail and return CODEFIRST_ERROR. ]*/
     TEST_FUNCTION(CodeFirst_SendReportedAsync_one_reportedProperty_unhappy_path)
     {
         /// arrange
+        (void)CodeFirst_Init(NULL);
         size_t destinationSize = 1000;
         unsigned char *destination = (unsigned char*)my_gballoc_malloc(destinationSize);
         SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
@@ -3587,11 +3778,13 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         CodeFirst_DestroyDevice(device);
         umock_c_negative_tests_deinit();
         my_gballoc_free(destination);
+        CodeFirst_Deinit();
     }
 
     TEST_FUNCTION(CodeFirst_SendAsyncReported_Can_Send_The_Last_reportedProperty_From_A_Child_Model)
     {
         /// arrange
+        (void)CodeFirst_Init(NULL);
         size_t destinationSize = 1000;
         unsigned char *destination = (unsigned char*)my_gballoc_malloc(destinationSize);
         OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &ALL_REFLECTED(testModelInModelReflected), sizeof(OuterType), false);
@@ -3634,6 +3827,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         // cleanup
         CodeFirst_DestroyDevice(device);
         my_gballoc_free(destination);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_02_030: [ If argument device is NULL then CodeFirst_IngestDesiredProperties shall fail and return CODEFIRST_INVALID_ARG. ]*/
@@ -3654,6 +3848,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_IngestDesiredProperties_with_NULL_desiredProperties_fails)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
         OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &ALL_REFLECTED(testModelInModelReflected), sizeof(OuterType), false);
         umock_c_reset_all_calls();
 
@@ -3665,6 +3860,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///clean
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_02_032: [ CodeFirst_IngestDesiredProperties shall locate the device associated with device. ]*/
@@ -3673,6 +3869,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
     TEST_FUNCTION(CodeFirst_IngestDesiredProperties_succeeds)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
         OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &ALL_REFLECTED(testModelInModelReflected), sizeof(OuterType), false);
         umock_c_reset_all_calls();
 
@@ -3684,12 +3881,14 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///clean
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /*Tests_SRS_CODEFIRST_02_034: [ If there is any failure, then CodeFirst_IngestDesiredProperties shall fail and return CODEFIRST_ERROR. ]*/
     TEST_FUNCTION(CodeFirst_IngestDesiredProperties_fails)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
         OuterType* device = (OuterType*)CodeFirst_CreateDevice(TEST_OUTERTYPE_MODEL_HANDLE, &ALL_REFLECTED(testModelInModelReflected), sizeof(OuterType), false);
         umock_c_reset_all_calls();
 
@@ -3701,12 +3900,15 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///clean
         CodeFirst_DestroyDevice(device);
+        CodeFirst_Deinit();
     }
 
     /* Tests_SRS_CODEFIRST_99_002:[ CodeFirst_RegisterSchema shall create the schema information and give it to the Schema module for one schema, identified by the metadata argument. On success, it shall return a handle to the model.] */
     TEST_FUNCTION(CodeFirst_CreateDevice_passes_onDesiredProperty_callbacks)
     {
         ///arrange
+        (void)CodeFirst_Init(NULL);
+        umock_c_reset_all_calls();
         static const SCHEMA_STRUCT_TYPE_HANDLE TEST_CAR_BEHIND_VAN_HANDLE = (SCHEMA_STRUCT_TYPE_HANDLE)0x7001;
 
         ///arrange
@@ -3746,6 +3948,153 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ASSERT_ARE_EQUAL(void_ptr, TEST_SCHEMA_HANDLE, result);
 
         /// cleanup
+        CodeFirst_Deinit();
+    }
+
+    /*Tests_SRS_CODEFIRST_02_048: [ If schemaNamespace is NULL then CodeFirst_RegisterSchema shall fail and return NULL. ]*/
+    TEST_FUNCTION(CodeFirst_RegisterSchema_with_NULL_schemaNamespace_fails)
+    {
+        ///arrange
+
+        ///act
+        SCHEMA_HANDLE result = CodeFirst_RegisterSchema(NULL, &ALL_REFLECTED(testReflectedData));
+
+        ///assert
+        ASSERT_IS_NULL(result);
+
+    }
+
+    /*Tests_SRS_CODEFIRST_02_049: [ If metadata is NULL then CodeFirst_RegisterSchema shall fail and return NULL. ]*/
+    TEST_FUNCTION(CodeFirst_RegisterSchema_with_NULL_metadata_fails)
+    {
+        ///arrange
+
+        ///act
+        SCHEMA_HANDLE result = CodeFirst_RegisterSchema("someSchema", NULL);
+
+        ///assert
+        ASSERT_IS_NULL(result);
+
+    }
+
+    /*Tests_SRS_CODEFIRST_02_037: [ CodeFirst_CreateDevice shall call CodeFirst_Init, passing NULL for overrideSchemaNamespace. ]*/
+    TEST_FUNCTION(CodeFirst_CreateDevice_calls_CodeFirst_Init_and_passes_NULL_for_overrideSchemaNamespace_succeeds)
+    {
+        // arrange
+        /*note: no CodeFirst_Init...*/
+        size_t zero = 0;
+        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+            .CopyOutArgumentBuffer_desiredPropertyCount(&zero, sizeof(zero));
+        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+            .CopyOutArgumentBuffer_modelCount(&zero, sizeof(zero));
+        STRICT_EXPECTED_CALL(Device_Create(TEST_MODEL_HANDLE, CodeFirst_InvokeAction, TEST_CALLBACK_CONTEXT, false, IGNORED_PTR_ARG))
+            .IgnoreArgument(3).IgnoreArgument(5);
+        STRICT_EXPECTED_CALL(Schema_AddDeviceRef(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+
+        // act
+        void* result = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, 1, false);
+
+        // assert
+        ASSERT_IS_NOT_NULL(result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        // cleanup
+        CodeFirst_DestroyDevice(result);
+    }
+
+    /*Tests_SRS_CODEFIRST_02_039: [ If the current device count is zero then CodeFirst_DestroyDevice shall deallocate all other used resources. ]*/
+    TEST_FUNCTION(CodeFirst_DestroyDevice_frees_all_resources)
+    {
+        ///arrange - note - no CodeFirst_Init
+
+        void* device = CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &DummyDataProvider_allReflected, 1, false);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(Schema_GetModelDesiredPropertyCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+            .IgnoreArgument_desiredPropertyCount(); /*0 desired properties*/
+        STRICT_EXPECTED_CALL(Schema_GetModelModelCount(TEST_MODEL_HANDLE, IGNORED_PTR_ARG))
+            .IgnoreArgument_modelCount(); /*0 model in model*/
+        STRICT_EXPECTED_CALL(Schema_ReleaseDeviceRef(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(Schema_DestroyIfUnused(IGNORED_PTR_ARG))
+            .IgnoreArgument(1);
+        STRICT_EXPECTED_CALL(Device_Destroy(TEST_DEVICE_HANDLE));
+
+        // act
+        CodeFirst_DestroyDevice(device);
+
+        // assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        //clean - nothing.
+    }
+
+    /*Tests_SRS_CODEFIRST_02_040: [ CodeFirst_SendAsync shall call CodeFirst_Init, passing NULL for overrideSchemaNamespace. ]*/
+    TEST_FUNCTION(CodeFirst_SendAsync_calls_CodeFirst_Init_with_NULL_overrideSchemaNamespace)
+    {
+        ///arrange = note - no CodeFirst_Init
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
+        unsigned char* destination;
+        size_t destinationSize;
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(Device_StartTransaction(TEST_DEVICE_HANDLE));
+        STRICT_EXPECTED_CALL(STRING_new());
+        STRICT_EXPECTED_CALL(Schema_GetModelName(TEST_MODEL_HANDLE));
+        STRICT_EXPECTED_CALL(STRING_concat(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_s2();
+        EXPECTED_CALL(Create_AGENT_DATA_TYPE_from_DOUBLE(IGNORED_PTR_ARG, 0.0));
+        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
+            .IgnoreArgument_handle();
+        STRICT_EXPECTED_CALL(Device_PublishTransacted(IGNORED_PTR_ARG, "this_is_double_Property", IGNORED_PTR_ARG))
+            .IgnoreArgument_transactionHandle()
+            .IgnoreArgument(3);
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+            .IgnoreArgument_handle();
+        EXPECTED_CALL(Destroy_AGENT_DATA_TYPE(IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(Device_EndTransaction(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_transactionHandle()
+            .IgnoreArgument(2)
+            .IgnoreArgument(3);
+        device->this_is_double_Property = 42.0;
+
+        // act
+        CODEFIRST_RESULT result = CodeFirst_SendAsync(&destination, &destinationSize, 1, &device->this_is_double_Property);
+
+        // assert
+        ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        // cleanup
+        CodeFirst_DestroyDevice(device);
+    }
+
+    /*Tests_SRS_CODEFIRST_02_046: [ CodeFirst_SendAsyncReported shall call CodeFirst_Init, passing NULL for overrideSchemaNamespace. ]*/
+    TEST_FUNCTION(CodeFirst_SendReportedAsync_without_CodeFirst_Init_succeeds)
+    {
+        /// arrange - no CodeFirst_Init
+        size_t destinationSize = 1000;
+        unsigned char *destination = (unsigned char*)my_gballoc_malloc(destinationSize);
+        SimpleDevice_Model* device = (SimpleDevice_Model*)CodeFirst_CreateDevice(TEST_MODEL_HANDLE, &ALL_REFLECTED(testReflectedData), sizeof(SimpleDevice_Model), false);
+        umock_c_reset_all_calls();
+
+        device->new_reported_this_is_double = 5.5; /*the only reported properties*/
+        device->new_reported_this_is_int = -5; /*the only reported properties*/
+
+        CodeFirst_SendReportedAsync_all_inert_path();
+
+        /// act
+        CODEFIRST_RESULT result = CodeFirst_SendAsyncReported(&destination, &destinationSize, 1, device);
+
+        /// assert
+        ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        /// cleanup
+        CodeFirst_DestroyDevice(device);
+        my_gballoc_free(destination);
     }
 
 END_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider);
