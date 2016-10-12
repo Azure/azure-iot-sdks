@@ -185,6 +185,12 @@ function(linkHttp whatExecutableIsBuilding)
     endif()
 endfunction(linkHttp)
 
+function(linkWebSockets whatExecutableIsBuilding)
+    if(${use_wsio})
+        target_link_libraries(${whatExecutableIsBuilding} websockets)
+    endif()
+endfunction(linkWebSockets)
+
 function(linkSharedUtil whatIsBuilding)
     target_link_libraries(${whatIsBuilding} aziotsharedutil)
 endfunction(linkSharedUtil)
