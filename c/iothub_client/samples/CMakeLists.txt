@@ -23,7 +23,6 @@ endif()
 if(${use_mqtt})
     add_sample_directory(iothub_client_sample_mqtt)
     add_sample_directory(iothub_client_sample_device_method)
-    add_subdirectory(iothub_client_sample_mqtt_dm)
 endif()
 
 if(${use_amqp})

@@ -1,7 +1,0 @@
-Package: iothub-client-sample-firmware-update
-Version: 0.1
-Section: usr
-Priority: optional
-Architecture: armhf
-Maintainer: Azure User <aziotsdklinux@outlook.com>
-Description: Implements firmware update for PI using Azure Device Twin.
