@@ -56,6 +56,10 @@
             this.updateDeviceButton = new System.Windows.Forms.Button();
             this.deleteDeviceButton = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.connectionStateComboBox = new System.Windows.Forms.ComboBox();
+            this.connectionStateLabel = new System.Windows.Forms.Label();
+            this.filterListLabel = new System.Windows.Forms.Label();
+            this.filterListTextBox = new System.Windows.Forms.TextBox();
             this.deviceCountLabel = new System.Windows.Forms.Label();
             this.totalLabel = new System.Windows.Forms.Label();
             this.devicesGridView = new System.Windows.Forms.DataGridView();
@@ -81,6 +85,7 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.eventHubTextBox = new System.Windows.Forms.RichTextBox();
             this.tabMessagesToDevice = new System.Windows.Forms.TabPage();
+            this.messagePropertiesLabel = new System.Windows.Forms.Label();
             this.messagePropertiesGrid = new System.Windows.Forms.DataGridView();
             this.KeyColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ValueColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -98,7 +103,6 @@
             this.sendMessageToDeviceButton = new System.Windows.Forms.Button();
             this.textBoxMessage = new System.Windows.Forms.TextBox();
             this.ehStringToolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.messagePropertiesLabel = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.groupBox5.SuspendLayout();
@@ -436,6 +440,10 @@
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox2.Controls.Add(this.connectionStateComboBox);
+            this.groupBox2.Controls.Add(this.connectionStateLabel);
+            this.groupBox2.Controls.Add(this.filterListLabel);
+            this.groupBox2.Controls.Add(this.filterListTextBox);
             this.groupBox2.Controls.Add(this.deviceCountLabel);
             this.groupBox2.Controls.Add(this.totalLabel);
             this.groupBox2.Controls.Add(this.devicesGridView);
@@ -445,6 +453,46 @@
             this.groupBox2.TabIndex = 6;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Devices";
+            // 
+            // connectionStateComboBox
+            // 
+            this.connectionStateComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.connectionStateComboBox.FormattingEnabled = true;
+            this.connectionStateComboBox.Items.AddRange(new object[] {
+            "All",
+            "Connected",
+            "Disconnected"});
+            this.connectionStateComboBox.Location = new System.Drawing.Point(450, 19);
+            this.connectionStateComboBox.Name = "connectionStateComboBox";
+            this.connectionStateComboBox.Size = new System.Drawing.Size(165, 24);
+            this.connectionStateComboBox.TabIndex = 17;
+            this.connectionStateComboBox.SelectedIndexChanged += new System.EventHandler(this.connectionStateComboBox_SelectedIndexChanged);
+            // 
+            // connectionStateLabel
+            // 
+            this.connectionStateLabel.AutoSize = true;
+            this.connectionStateLabel.Location = new System.Drawing.Point(332, 22);
+            this.connectionStateLabel.Name = "connectionStateLabel";
+            this.connectionStateLabel.Size = new System.Drawing.Size(112, 16);
+            this.connectionStateLabel.TabIndex = 16;
+            this.connectionStateLabel.Text = "Connection State:";
+            // 
+            // filterListLabel
+            // 
+            this.filterListLabel.AutoSize = true;
+            this.filterListLabel.Location = new System.Drawing.Point(87, 22);
+            this.filterListLabel.Name = "filterListLabel";
+            this.filterListLabel.Size = new System.Drawing.Size(43, 16);
+            this.filterListLabel.TabIndex = 14;
+            this.filterListLabel.Text = "Filter: ";
+            // 
+            // filterListTextBox
+            // 
+            this.filterListTextBox.Location = new System.Drawing.Point(130, 19);
+            this.filterListTextBox.Name = "filterListTextBox";
+            this.filterListTextBox.Size = new System.Drawing.Size(196, 22);
+            this.filterListTextBox.TabIndex = 13;
+            this.filterListTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.filterListTextBox_KeyUp);
             // 
             // deviceCountLabel
             // 
@@ -466,6 +514,8 @@
             // 
             // devicesGridView
             // 
+            this.devicesGridView.AllowUserToAddRows = false;
+            this.devicesGridView.AllowUserToDeleteRows = false;
             this.devicesGridView.AllowUserToOrderColumns = true;
             this.devicesGridView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
@@ -653,7 +703,8 @@
             // 
             this.deviceIDsComboBoxForEvent.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.deviceIDsComboBoxForEvent.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.deviceIDsComboBoxForEvent.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.deviceIDsComboBoxForEvent.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.deviceIDsComboBoxForEvent.FormattingEnabled = true;
             this.deviceIDsComboBoxForEvent.Location = new System.Drawing.Point(101, 73);
             this.deviceIDsComboBoxForEvent.Name = "deviceIDsComboBoxForEvent";
@@ -723,6 +774,15 @@
             this.tabMessagesToDevice.Text = "Messages To Device";
             this.tabMessagesToDevice.UseVisualStyleBackColor = true;
             // 
+            // messagePropertiesLabel
+            // 
+            this.messagePropertiesLabel.AutoSize = true;
+            this.messagePropertiesLabel.Location = new System.Drawing.Point(21, 187);
+            this.messagePropertiesLabel.Name = "messagePropertiesLabel";
+            this.messagePropertiesLabel.Size = new System.Drawing.Size(73, 16);
+            this.messagePropertiesLabel.TabIndex = 14;
+            this.messagePropertiesLabel.Text = "Properties:";
+            // 
             // messagePropertiesGrid
             // 
             this.messagePropertiesGrid.AllowUserToResizeColumns = false;
@@ -786,7 +846,8 @@
             // 
             this.deviceIDsComboBoxForCloudToDeviceMessage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.deviceIDsComboBoxForCloudToDeviceMessage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.deviceIDsComboBoxForCloudToDeviceMessage.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.deviceIDsComboBoxForCloudToDeviceMessage.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.deviceIDsComboBoxForCloudToDeviceMessage.FormattingEnabled = true;
             this.deviceIDsComboBoxForCloudToDeviceMessage.Location = new System.Drawing.Point(104, 81);
             this.deviceIDsComboBoxForCloudToDeviceMessage.Name = "deviceIDsComboBoxForCloudToDeviceMessage";
@@ -897,15 +958,6 @@
             this.textBoxMessage.Size = new System.Drawing.Size(516, 22);
             this.textBoxMessage.TabIndex = 4;
             // 
-            // messagePropertiesLabel
-            // 
-            this.messagePropertiesLabel.AutoSize = true;
-            this.messagePropertiesLabel.Location = new System.Drawing.Point(21, 187);
-            this.messagePropertiesLabel.Name = "messagePropertiesLabel";
-            this.messagePropertiesLabel.Size = new System.Drawing.Size(73, 16);
-            this.messagePropertiesLabel.TabIndex = 14;
-            this.messagePropertiesLabel.Text = "Properties:";
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1014,6 +1066,10 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn KeyColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn ValueColumn;
         private System.Windows.Forms.Label messagePropertiesLabel;
+        private System.Windows.Forms.Label filterListLabel;
+        private System.Windows.Forms.TextBox filterListTextBox;
+        private System.Windows.Forms.Label connectionStateLabel;
+        private System.Windows.Forms.ComboBox connectionStateComboBox;
     }
 }
 
