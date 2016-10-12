@@ -120,16 +120,6 @@ rem ----------------------------------------------------------------------------
 mkdir %work_root%
 
 rem -----------------------------------------------------------------------------
-rem -- download arduino samples
-rem -----------------------------------------------------------------------------
-if %clone_test%==ON (
-    pushd %work_root%
-    git clone https://github.com/Azure-Samples/iot-hub-c-huzzah-getstartedkit
-    git clone https://github.com/Azure-Samples/iot-hub-c-m0wifi-getstartedkit
-    popd
-)
-
-rem -----------------------------------------------------------------------------
 rem -- download arduino libraries
 rem -----------------------------------------------------------------------------
 mkdir %user_libraries_path%
@@ -264,6 +254,7 @@ if not "!projectName!"=="" (
     echo   RelativePath=!RelativePath!
     echo   RelativeWorkingDir=!RelativeWorkingDir!
     echo   MaxAllowedDurationSeconds=!MaxAllowedDurationSeconds!
+    echo   CloneURL=!CloneURL!
     echo   Categories=!Categories!
     echo   Hardware=!Hardware!
     echo   CPUParameters=!CPUParameters!
@@ -273,6 +264,14 @@ if not "!projectName!"=="" (
         set __errolevel_build.!projectName!=DISABLED
         echo ** Build for !projectName! is disable. **
         goto :eof
+    )
+
+    if %clone_test%==ON (
+        if not !CloneURL!=="" (
+            pushd %work_root%
+            git clone !CloneURL!
+            popd
+        )
     )
     
     mkdir %build_root%!RelativeWorkingDir!

@@ -7,6 +7,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
     using System.Net.Security;
     using System.Security.Cryptography.X509Certificates;
     using DotNetty.Codecs.Mqtt.Packets;
+    using Microsoft.Azure.Devices.Client.Extensions;
 
     public class MqttTransportSettings : ITransportSettings
     {
@@ -26,6 +27,18 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
         public MqttTransportSettings(TransportType transportType)
         {
             this.transportType = transportType;
+
+            switch (transportType)
+            {
+                case TransportType.Mqtt_WebSocket_Only:
+                case TransportType.Mqtt_Tcp_Only:
+                    this.transportType = transportType;
+                    break;
+                case TransportType.Mqtt:
+                    throw new ArgumentOutOfRangeException(nameof(transportType), transportType, "Must specify Mqtt_WebSocket_Only or Mqtt_Tcp_Only");
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(transportType), transportType, "Unsupported Transport Type {0}".FormatInvariant(transportType));
+            }
 
             this.CleanSession = DefaultCleanSession;
             this.ConnectArrivalTimeout = DefaultConnectArrivalTimeout;

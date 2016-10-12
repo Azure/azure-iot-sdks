@@ -1,7 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Microsoft.Azure.Amqp.Transport
+namespace Microsoft.Azure.Devices.Client
 {
     internal static class WebSocketConstants
     {
@@ -13,6 +13,7 @@ namespace Microsoft.Azure.Amqp.Transport
         internal static class SubProtocols
         {
             public const string Amqpwsb10 = "AMQPWSB10";
+            public const string Mqtt = "mqtt";
         }
     }
 }

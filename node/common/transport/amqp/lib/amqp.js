@@ -35,7 +35,7 @@ function Amqp(autoSettleMessages, sdkVersionString) {
         properties: {
           'com.microsoft:client-version': sdkVersionString
         },
-        maxMessageSize: 9223372036854775807,
+        maxMessageSize: 0,
       },
       encoder: function(body) {
         if(typeof body === 'string') {
@@ -54,7 +54,7 @@ function Amqp(autoSettleMessages, sdkVersionString) {
         properties: {
           'com.microsoft:client-version': sdkVersionString
         },
-        maxMessageSize: 65536,
+        maxMessageSize: 0,
         receiverSettleMode: autoSettleMode,
       },
       decoder: function(body) { return body; },

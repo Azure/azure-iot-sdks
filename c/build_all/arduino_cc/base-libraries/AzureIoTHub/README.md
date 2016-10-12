@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/arduino-libraries/AzureIoTHub.svg?branch=master)](https://travis-ci.org/arduino-libraries/AzureIoTHub)
 
-This library is a port of the [Microsoft Azure IoT device SDK for C](https://github.com/Azure/azure-iot-sdks/blob/master/c/readme.md) to Arduino. It allows you to use several Arduino compatible boards with Azure IoT Hub.
+This library is a port of the [Microsoft Azure IoT device SDK for C](https://github.com/Azure/azure-iot-sdks/blob/master/c/readme.md) to Arduino. It allows you to use several Arduino compatible boards with Azure IoT Hub. Please submit any contribution directly to [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks).
 
 Currently supported hardware:
 - Atmel SAMD Based boards
@@ -46,6 +46,8 @@ You should have the following ready before beginning with any board:
 4. Update Wifi SSID/Password in simplesample_http.ino 
     * Ensure you are using a wifi network that does not require additional manual steps after connection, such as opening a web browser.
 5. Update IoT Hub Connection string in simplesample_http.c
+6. Access the [SparkFun Get Started](https://azure.microsoft.com/en-us/documentation/samples/iot-hub-c-thingdev-getstartedkit/) tutorial to learn more about Microsoft Sparkfun Dev Kit.
+7. Access the [Huzzah Get Started](https://azure.microsoft.com/en-us/documentation/samples/iot-hub-c-huzzah-getstartedkit/) tutorial to learn more about Microsoft Huzzah Dev Kit.
 
 
 ## Adafruit Feather M0
@@ -62,6 +64,7 @@ You should have the following ready before beginning with any board:
 7. Update Wifi SSID/Password in simplesample_http.ino 
     * Ensure you are using a wifi network that does not require additional manual steps after connection, such as opening a web browser.
 8. Update IoT Hub Connection string in simplesample_http.c
+9. Access the [Feather M0 WiFi Get Started](https://azure.microsoft.com/en-us/documentation/samples/iot-hub-c-m0wifi-getstartedkit/) tutorial to learn more about Microsoft Feather M0 WiFi Dev Kit.
 
 ## License
 
