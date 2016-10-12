@@ -267,7 +267,6 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
     moveCarTo_destination_whereIsMyCar_Long = -1.0;
     moveCarTo_reverse = false;
 
-    (void)CodeFirst_Init(NULL);
     global_bufferTemp = STRING_new();
 
 }
@@ -275,7 +274,6 @@ TEST_FUNCTION_INITIALIZE(TestMethodInitialize)
 TEST_FUNCTION_CLEANUP(TestMethodCleanup)
 {
     STRING_delete(global_bufferTemp);
-    CodeFirst_Deinit();
 
     TEST_MUTEX_RELEASE(g_testByTest);
 }

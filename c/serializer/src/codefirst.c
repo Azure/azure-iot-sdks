@@ -34,8 +34,8 @@ typedef struct DEVICE_HEADER_DATA_TAG
 #define COUNT_OF(A) (sizeof(A) / sizeof((A)[0]))
 
 /*design considerations for lazy init of CodeFirst:
-    There are 2 main states: either CodeFirst is in an initialized state, either it is not initialized.
-    The initialized state means thre's a g_OverrideSchemaNamespace set (even when it is set to NULL).
+    There are 2 main states: either CodeFirst is in an initialized state, or it is not initialized.
+    The initialized state means there's a g_OverrideSchemaNamespace set (even when it is set to NULL).
     The uninitialized state means g_OverrideSchemaNamespace is not set.
 
     To switch to Init state, either call CodeFirst_Init (that sets g_OverrideSchemaNamespace to something)

@@ -1876,6 +1876,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // assert
         ASSERT_IS_NULL(result);
+
+        ///cleanup
         CodeFirst_Deinit();
     }
 
@@ -1932,6 +1934,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         // assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
         CodeFirst_Deinit();
     }
 
@@ -2973,6 +2977,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(void_ptr, TEST_SCHEMA_HANDLE, result);
+
+        ///cleanup
         CodeFirst_Deinit();
 
     }
@@ -3019,6 +3025,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///assert
         ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(void_ptr, TEST_SCHEMA_HANDLE, result);
+
+        ///cleanup
         CodeFirst_Deinit();
 
     }
@@ -3039,6 +3047,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_IS_NULL(result);
+
+        ///cleanup
         CodeFirst_Deinit();
     }
 
@@ -3058,6 +3068,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_IS_NULL(result);
+
+        //cleanup
         CodeFirst_Deinit();
     }
 
@@ -3078,6 +3090,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_IS_NULL(result);
+
+        ///cleanup
         CodeFirst_Deinit();
     }
 
@@ -3097,6 +3111,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_IS_NULL(result);
+
+        ///cleanup
         CodeFirst_Deinit();
     }
 
@@ -3118,6 +3134,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_IS_NULL(result);
+
+        ///cleanup
         CodeFirst_Deinit();
     }
 
@@ -3137,6 +3155,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_IS_NULL(result);
+
+        ///cleanup
         CodeFirst_Deinit();
     }
 
@@ -3156,6 +3176,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_IS_NULL(result);
+        
+        ///cleanup
         CodeFirst_Deinit();
     }
 
@@ -3174,6 +3196,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_IS_NULL(result);
+
+        ///cleanup
         CodeFirst_Deinit();
     }
 
@@ -3192,6 +3216,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///assert
         ASSERT_ARE_EQUAL(void_ptr, TEST_SCHEMA_HANDLE, result);
+
+        ///cleanup
         CodeFirst_Deinit();
     }
 
