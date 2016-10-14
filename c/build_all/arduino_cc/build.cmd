@@ -331,7 +331,7 @@ rem                     "F:\Azure\IoT\SDKs\iot-hub-c-huzzah-getstartedkit-master
     echo  !compiler_name! -compile !parameters!
     call !compiler_name! -compile !parameters!
 
-    if "%errorlevel%"=="0" (
+    if "!errorlevel!"=="0" (
         set __errolevel_build.!projectName!=SUCCEED
     ) else (
         set __errolevel_build.!projectName!=FAILED
