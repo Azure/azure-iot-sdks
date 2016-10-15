@@ -84,32 +84,29 @@ if(${use_http})
 endif()
 
 if(${use_amqp})
+    set(iothub_client_amqp_transport_c_files
+        ${iothub_client_ll_transport_c_files}
+		./src/iothubtransportamqp.c
+        ./src/uamqp_messaging.c
+    )
+
+    set(iothub_client_amqp_transport_h_files
+        ${iothub_client_ll_transport_h_files}
+		./inc/iothubtransportamqp.h
+		./inc/iothubtransportamqp_methods.h
+        ./inc/uamqp_messaging.h
+    )	
+
     if (${use_wsio})
         set(iothub_client_amqp_transport_c_files
-            ${iothub_client_ll_transport_c_files}
+            ${iothub_client_amqp_transport_c_files}
             ./src/iothubtransportamqp_websockets.c
-			./src/iothubtransportamqp.c
-			./src/uamqp_messaging.c
         )
         
         set(iothub_client_amqp_transport_h_files
-            ${iothub_client_ll_transport_h_files}
+            ${iothub_client_amqp_transport_h_files}
             ./inc/iothubtransportamqp_websockets.h
-			./inc/iothubtransportamqp.h
-			./inc/uamqp_messaging.h
         )
-    else()
-        set(iothub_client_amqp_transport_c_files
-            ${iothub_client_ll_transport_c_files}
-			./src/iothubtransportamqp.c
-            ./src/uamqp_messaging.c
-        )
-
-        set(iothub_client_amqp_transport_h_files
-            ${iothub_client_ll_transport_h_files}
-			./inc/iothubtransportamqp.h
-            ./inc/uamqp_messaging.h
-        )	
     endif()
     
     set(iothub_client_h_install_files
