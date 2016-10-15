@@ -11,7 +11,7 @@ This module implements the request/response pattern needed for C2D method handli
 ```c
 typedef struct IOTHUBTRANSPORT_AMQP_METHODS_TAG* IOTHUBTRANSPORT_AMQP_METHODS_HANDLE;
 typedef void (*ON_METHODS_ERROR)(void* context);
-typedef int(*ON_METHOD_REQUEST_RECEIVED)(void* context, const unsigned char* request, size_t request_size, BUFFER_HANDLE response);
+typedef int(*ON_METHOD_REQUEST_RECEIVED)(void* context, const char* method_name, const unsigned char* request, size_t request_size, BUFFER_HANDLE response);
 
 MOCKABLE_FUNCTION(, IOTHUBTRANSPORT_AMQP_METHODS_HANDLE, iothubtransportamqp_methods_create, const char*, device_id);
 MOCKABLE_FUNCTION(, void, iothubtransportamqp_methods_destroy, IOTHUBTRANSPORT_AMQP_METHODS_HANDLE, iothubtransport_amqp_methods_handle);
@@ -116,17 +116,22 @@ AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message);
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_048: [** - The message payload shall be obtained by calling `message_get_body_amqp_data` with the index argument being 0. **]**
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_049: [** If `message_get_body_amqp_data` fails an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. **]**
 
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_099: [** The application properties for the received message shall be obtained by calling `message_set_application_properties`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_100: [** A property key `IoThub-methodname` shall be created by calling `amqpvalue_create_symbol`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_101: [** The method name property value shall be found in the map by calling `amqpvalue_get_map_value`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_102: [** The string contained by the property value shall be obtained by calling `amqpvalue_get_string`. **]** 
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_103: [** If any of the calls `message_get_body_amqp_data`, `amqpvalue_create_symbol`,`amqpvalue_get_map_value`, `amqpvalue_get_string` fails an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_085: [** A new BUFFER handle shall be created to be used for the C2D method respose by calling `BUFFER_new`. **]**
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_086: [** If `BUFFER_new` fails an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_050: [** The binary message payload shall be indicated by calling the `on_method_request_received` callback passed to `iothubtransportamqp_methods_subscribe` with the arguments: **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_051: [** - `context` shall be set to the `on_method_request_received_context` argument passed to `iothubtransportamqp_methods_subscribe`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_098: [** - `method_name` shall be set to the application property value for `IoThub-methodname`. **]**
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_052: [** - `request` shall be set to the payload bytes obtained by calling `message_get_body_amqp_data`. **]**
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_053: [** - `request_size` shall be set to the payload size obtained by calling `message_get_body_amqp_data`. **]**
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_054: [** - `response` shall be set the buffer handle that was created by the `BUFFER_new` call. **]**
-
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_089: [** If the `on_method_request_received` callback returns a non zero value an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_060: [** A response message shall be constructed as follows: **]**
 
@@ -138,6 +143,15 @@ AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message);
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_065: [** - The correlation id on the message properties shall be set by calling `properties_set_correlation_id` and passing as argument the correlation id obtained from the request message. **]**
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_066: [** If the `properties_set_correlation_id` call fails, an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_090: [** An AMQP map shall be created to hold the application properties for the response by calling `amqpvalue_create_map`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_091: [** A property key `IoThub-status` shall be created by calling `amqpvalue_create_symbol`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_092: [** A property value of type string shall be created from the stringified status code returned by the `on_method_request_received` callback. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_097: [** The property value shall be created by calling `amqpvalue_create_string`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_093: [** A new entry shall be added in the application properties map by calling `amqpvalue_set_map_value` and passing the key and value that were previously created. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_094: [** The application properties map shall be set on the response message by calling `message_set_application_properties`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_095: [** The application property map and all intermediate values shall be freed after being passed to `message_set_application_properties`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_096: [** If any of the calls `amqpvalue_create_symbol`, `amqpvalue_create_string`, `amqpvalue_create_map`, `amqpvalue_set_map_value` or `message_set_application_properties` fails an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_087: [** The response payload buffer memory shall be obtained by calling `BUFFER_u_char` on the response buffer handle created earlier. **]**
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_088: [** The response payload buffer size shall be obtained by calling `BUFFER_length` on the response buffer handle created earlier. **]**
