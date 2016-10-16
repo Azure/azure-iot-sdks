@@ -9,16 +9,19 @@ This module implements the request/response pattern needed for C2D method handli
 ## Exposed API
 
 ```c
+typedef struct IOTHUBTRANSPORT_AMQP_METHOD_TAG* IOTHUBTRANSPORT_AMQP_METHOD_HANDLE;
 typedef struct IOTHUBTRANSPORT_AMQP_METHODS_TAG* IOTHUBTRANSPORT_AMQP_METHODS_HANDLE;
-typedef void (*ON_METHODS_ERROR)(void* context);
-typedef int(*ON_METHOD_REQUEST_RECEIVED)(void* context, const char* method_name, const unsigned char* request, size_t request_size, BUFFER_HANDLE response);
+typedef void(*ON_METHODS_ERROR)(void* context);
+typedef void(*ON_METHOD_REQUEST_RECEIVED)(void* context, const char* method_name, const unsigned char* request, size_t request_size, IOTHUBTRANSPORT_AMQP_METHOD_HANDLE response);
 
 MOCKABLE_FUNCTION(, IOTHUBTRANSPORT_AMQP_METHODS_HANDLE, iothubtransportamqp_methods_create, const char*, device_id);
 MOCKABLE_FUNCTION(, void, iothubtransportamqp_methods_destroy, IOTHUBTRANSPORT_AMQP_METHODS_HANDLE, iothubtransport_amqp_methods_handle);
 MOCKABLE_FUNCTION(, int, iothubtransportamqp_methods_subscribe, IOTHUBTRANSPORT_AMQP_METHODS_HANDLE, iothubtransport_amqp_methods_handle,
     SESSION_HANDLE, session_handle, ON_METHODS_ERROR, on_methods_error, void*, on_methods_error_context,
     ON_METHOD_REQUEST_RECEIVED, on_method_request_received, void*, on_method_request_received_context);
-MOCKABLE_FUNCTION(, int, iothubtransportamqp_methods_unsubscribe, IOTHUBTRANSPORT_AMQP_METHODS_HANDLE, iothubtransport_amqp_methods_handle);
+MOCKABLE_FUNCTION(, int, iothubtransportamqp_methods_respond, IOTHUBTRANSPORT_AMQP_METHOD_HANDLE, method_handle,
+        const unsigned char*, response, size_t, response_size, int, status_code);
+MOCKABLE_FUNCTION(, void, iothubtransportamqp_methods_unsubscribe, IOTHUBTRANSPORT_AMQP_METHODS_HANDLE, iothubtransport_amqp_methods_handle);
 ```
 
 ### iothubtransportamqp_methods_create
@@ -28,8 +31,11 @@ IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothubtransportamqp_methods_create(const cha
 ```
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_001: [** `iothubtransportamqp_methods_create` shall instantiate a new handler for C2D methods over AMQP for device `device_id` and on success return a non-NULL handle to it. **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_002: [** If `device_id` is NULL, `iothubtransportamqp_methods_create` shall return NULL. **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_003: [** `iothubtransportamqp_methods_create` shall allocate memory for the new instance. **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_004: [** If allocating memory fails, `iothubtransportamqp_methods_create` shall return NULL. **]**
 
 ### iothubtransportamqp_methods_destroy
@@ -39,8 +45,10 @@ void iothubtransportamqp_methods_destroy(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iot
 ```
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_005: [** `iothubtransportamqp_methods_destroy` shall free all resources allocated by `iothubtransportamqp_methods_create` for the handle `iothubtransport_amqp_methods_handle`. **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_006: [** If `iothubtransport_amqp_methods_handle` is NULL, `iothubtransportamqp_methods_destroy` shall do nothing. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_007: [** If the instance pointed to by `iothubtransport_amqp_methods_handle` is subscribed to receive C2D methods, `iothubtransportamqp_methods_destroy` shall perform all actions needed for an unsubscribe. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_007: [** If the instance pointed to by `iothubtransport_amqp_methods_handle` is subscribed to receive C2D methods, `iothubtransportamqp_methods_destroy` shall free all resources allocated by the subscribe. **]**
 
 ### iothubtransportamqp_methods_subscribe
 
@@ -50,62 +58,79 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
     ON_METHOD_REQUEST_RECEIVED on_method_request_received, void* on_method_request_received_context);
 ```
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_008: [** `iothubtransportamqp_methods_subscribe` shall create the links needed for the request/response pattern for C2D methods and on success it shall return 0. **]**
+`iothubtransportamqp_methods_subscribe` creates the links needed for the request/response pattern for C2D methods.
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_008: [** On success it shall return 0. **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_009: [** If any of the argument `iothubtransport_amqp_methods_handle`, `session_handle`, `on_methods_error` or `on_method_request_received` is NULL, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_010: [** `iothubtransportamqp_methods_subscribe` shall create a receiver link by calling `link_create` with the following arguments: **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_011: [** - session_handle shall be the session_handle argument passed to iothubtransportamqp_methods_subscribe **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_011: [** - `session_handle` shall be the session_handle argument passed to iothubtransportamqp_methods_subscribe **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_012: [** - name shall be `methods_requests_link` **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_012: [** - `name` shall be `methods_requests_link` **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_013: [** - role shall be role_receiver. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_013: [** - `role` shall be role_receiver. **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_014: [** - source shall be the a source value created by calling `messaging_create_source`. **]** **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_015: [** The address string used to create the source shall be of the form `/devices/{device id}/methods/devicebound`. **]** **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_016: [** The string shall be created by using STRING_new and STRING_concat. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_014: [** - `source` shall be the a source value created by calling `messaging_create_source`. **]** **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_015: [** The address string used to create the source shall be of the form `/devices/{device id}/methods/devicebound`. **]** **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_016: [** The string shall be created by using `STRING_construct_sprintf`. **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_017: [** - target shall be the a target value created by calling `messaging_create_target`. The address string used to create the target shall be `requests`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_017: [** - `target` shall be the a target value created by calling `messaging_create_target`. The address string used to create the target shall be `requests`. **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_018: [** If any of the `STRING_new` or `STRING_concat` calls fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_018: [** If `STRING_construct_sprintf` fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_019: [** If creating the target or source values fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_020: [** If creating the receiver link fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_021: [** `iothubtransportamqp_methods_subscribe` shall create a sender link by calling `link_create` with the following arguments: **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_022: [** - session_handle shall be the session_handle argument passed to iothubtransportamqp_methods_subscribe **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_022: [** - `session_handle` shall be the session_handle argument passed to iothubtransportamqp_methods_subscribe **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_023: [** - name shall be `methods_responses_link` **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_023: [** - `name` shall be `methods_responses_link` **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_024: [** - role shall be role_sender. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_024: [** - `role` shall be role_sender. **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_025: [** - source shall be the a source value created by calling `messaging_create_source`. **]** **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_026: [** The address string used to create the target shall be `responses`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_025: [** - `source` shall be the a source value created by calling `messaging_create_source`. **]** **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_026: [** The address string used to create the target shall be `responses`. **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_027: [** - target shall be the a target value created by calling `messaging_create_target`. **]** **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_028: [** The address string used to create the source shall be of the form `/devices/{device id}/methods/devicebound`. **]** **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_029: [** The string shall be created by using STRING_new and STRING_concat. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_027: [** - `target` shall be the a target value created by calling `messaging_create_target`. **]** **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_028: [** The address string used to create the source shall be of the form `/devices/{device id}/methods/devicebound`. **]** **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_029: [** The string shall be created by using `STRING_construct_sprintf`. **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_030: [** If any of the `STRING_new` or `STRING_concat` calls fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_030: [** If `STRING_construct_sprintf` fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_031: [** If creating the target or source values fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_032: [** If creating the receiver link fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_033: [** `iothubtransportamqp_methods_subscribe` shall create a message_receiver associated with the receiver link by calling `message_receiver_create` and passing the receiver link handle to it. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_034: [** If `message_receiver_create` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_105: [** The strings created in order to hold the source and target addresses shall be freed by calling `STRING_delete`. **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_035: [** `iothubtransportamqp_methods_subscribe` shall create a message_sender associated with the sender link by calling `message_sender_create` and passing the sender link handle to it. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_036: [** If `message_sender_create` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_033: [** `iothubtransportamqp_methods_subscribe` shall create a message receiver associated with the receiver link by calling `messagereceiver_create` and passing the receiver link handle to it. **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_037: [** `iothubtransportamqp_methods_subscribe` shall open the message sender by calling `message_sender_open`. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_038: [** If `message_sender_open` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_034: [** If `messagereceiver_create` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_039: [** `iothubtransportamqp_methods_subscribe` shall open the message sender by calling `message_receiver_open`. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_040: [** If `message_receiver_open` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_035: [** `iothubtransportamqp_methods_subscribe` shall create a message sender associated with the sender link by calling `messagesender_create` and passing the sender link handle to it. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_036: [** If `messagesender_create` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_037: [** `iothubtransportamqp_methods_subscribe` shall open the message sender by calling `messagesender_open`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_106: [** An `on_message_sender_state_changed` callback together with its context shall be passed to `messagesender_open`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_038: [** If `messagesender_open` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_039: [** `iothubtransportamqp_methods_subscribe` shall open the message sender by calling `messagereceiver_open`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_104: [** An `on_message_received` callback together with its context shall be passed to `messagereceiver_open`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_040: [** If `messagereceiver_open` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
 
 ### message_received callback
 
 ```c
-AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message);
+AMQP_VALUE on_message_received(void* context, MESSAGE_HANDLE message);
 ```
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_041: [** If `message` is NULL, an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_043: [** When `on_message_received` is called to indicate a new message being received over the receiver link, the message shall be processed as below: **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_043: [** When `on_message_received` is called (to indicate a new message being received over the receiver link), the message shall be processed as below: **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_044: [** - The message properties shall be obtained by calling `message_get_properties`. **]**
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_045: [** If `message_get_properties` fails an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe` **]**
@@ -117,60 +142,33 @@ AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message);
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_049: [** If `message_get_body_amqp_data` fails an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_099: [** The application properties for the received message shall be obtained by calling `message_set_application_properties`. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_100: [** A property key `IoThub-methodname` shall be created by calling `amqpvalue_create_symbol`. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_101: [** The method name property value shall be found in the map by calling `amqpvalue_get_map_value`. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_102: [** The string contained by the property value shall be obtained by calling `amqpvalue_get_string`. **]** 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_103: [** If any of the calls `message_get_body_amqp_data`, `amqpvalue_create_symbol`,`amqpvalue_get_map_value`, `amqpvalue_get_string` fails an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_085: [** A new BUFFER handle shall be created to be used for the C2D method respose by calling `BUFFER_new`. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_086: [** If `BUFFER_new` fails an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_100: [** A property key `IoThub-methodname` shall be created by calling `amqpvalue_create_symbol`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_101: [** The method name property value shall be found in the map by calling `amqpvalue_get_map_value`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_102: [** The string contained by the property value shall be obtained by calling `amqpvalue_get_string`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_103: [** If any of the calls `message_get_body_amqp_data`, `amqpvalue_create_symbol`,`amqpvalue_get_map_value`, `amqpvalue_get_string` fails an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_050: [** The binary message payload shall be indicated by calling the `on_method_request_received` callback passed to `iothubtransportamqp_methods_subscribe` with the arguments: **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_051: [** - `context` shall be set to the `on_method_request_received_context` argument passed to `iothubtransportamqp_methods_subscribe`. **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_098: [** - `method_name` shall be set to the application property value for `IoThub-methodname`. **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_052: [** - `request` shall be set to the payload bytes obtained by calling `message_get_body_amqp_data`. **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_053: [** - `request_size` shall be set to the payload size obtained by calling `message_get_body_amqp_data`. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_054: [** - `response` shall be set the buffer handle that was created by the `BUFFER_new` call. **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_060: [** A response message shall be constructed as follows: **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_054: [** - `method_handle` shall be set to a newly created `IOTHUBTRANSPORT_AMQP_METHOD_HANDLE` that can be passed later as an argument to `iothubtransportamqp_methods_respond`. **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_061: [** - A new uAMQP message shall be created by calling `message_create`. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_062: [** If the `message_create` call fails, an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_112: [** Memory shall be allocated for the `IOTHUBTRANSPORT_AMQP_METHOD_HANDLE` to hold the correlation-id, so that it can be used in the `iothubtransportamqp_methods_respond` function. **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_063: [** - A new properties handle shall be created by calling `properties_create`. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_064: [** If the `properties_create call` fails, an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. **]**
-
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_065: [** - The correlation id on the message properties shall be set by calling `properties_set_correlation_id` and passing as argument the correlation id obtained from the request message. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_066: [** If the `properties_set_correlation_id` call fails, an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. **]**
-
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_090: [** An AMQP map shall be created to hold the application properties for the response by calling `amqpvalue_create_map`. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_091: [** A property key `IoThub-status` shall be created by calling `amqpvalue_create_symbol`. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_092: [** A property value of type string shall be created from the stringified status code returned by the `on_method_request_received` callback. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_097: [** The property value shall be created by calling `amqpvalue_create_string`. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_093: [** A new entry shall be added in the application properties map by calling `amqpvalue_set_map_value` and passing the key and value that were previously created. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_094: [** The application properties map shall be set on the response message by calling `message_set_application_properties`. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_095: [** The application property map and all intermediate values shall be freed after being passed to `message_set_application_properties`. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_096: [** If any of the calls `amqpvalue_create_symbol`, `amqpvalue_create_string`, `amqpvalue_create_map`, `amqpvalue_set_map_value` or `message_set_application_properties` fails an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. **]**
-
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_087: [** The response payload buffer memory shall be obtained by calling `BUFFER_u_char` on the response buffer handle created earlier. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_088: [** The response payload buffer size shall be obtained by calling `BUFFER_length` on the response buffer handle created earlier. **]**
-
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_078: [** The binary payload for the response shall be set by calling `message_add_body_amqp_data` for the newly created message handle. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_079: [** The field `bytes` of the `binary_data` argument shall be set to point to the response buffer memory. **]** 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_080: [** The field `length` of the `binary_data` argument shall be set to point to the memory returned in `response_size` argument of the `on_method_request_received` user callback. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_081: [** If the `message_add_body_amqp_data` call fails, an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. **]**
-
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_067: [** The message shall be handed over to the message_sender by calling `messagesender_send` and passing as argument: **]**
-
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_068: [** - The response message handle. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_069: [** - a send callback and its context for the `on_message_send_complete` callback. **]**
-
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_071: [** If the `messagesender_send` call fails, an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. **]**
-
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_082: [** The `response` buffer handle shall be freed by calling `BUFFER_delete`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_113: [** All `IOTHUBTRANSPORT_AMQP_METHOD_HANDLE` handles shall be tracked in an array of handles that shall be resized accordingly to accordingly by when a methopd handle is added to it. **]** 
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_056: [** The `on_message_received` callback shall return a newly constructed delivery state obtained by calling `messaging_delivery_accepted`. **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_057: [** If `messaging_delivery_accepted` fails an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe` and the callback shall return NULL. **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_042: [** When an error is indicated by calling the `on_methods_error`, it shall be called with the context being the `on_methods_error_context` argument passed to `iothubtransportamqp_methods_subscribe`. **]**
@@ -182,6 +180,7 @@ void on_message_sender_state_changed(void* context, MESSAGE_SENDER_STATE new_sta
 ```
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_059: [** When `on_message_sender_state_changed` if called with the `new_state` being `MESSAGE_SENDER_STATE_ERROR`, an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_058: [** When an error is indicated by calling the `on_methods_error`, it shall be called with the context being the `on_methods_error_context` argument passed to `iothubtransportamqp_methods_subscribe`. **]**
 
 ### on_message_send_complete
@@ -191,18 +190,86 @@ void on_message_send_complete(void* context, MESSAGE_SEND_RESULT send_result);
 ```
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_083: [** If `send_result` is `MESSAGE_SEND_ERROR` then an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_084: [** Otherwise no action shall be taken. **]** 
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_084: [** Otherwise no action shall be taken. **]**
+
+### iothubtransportamqp_methods_unsubscribe 
+
+```c
+int iothubtransportamqp_methods_respond(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE method_handle, const unsigned char* response, size_t response_size, int status_code);
+```
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_060: [** `iothubtransportamqp_methods_respond` shall construct a response message and on success it shall return 0. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_107: [** If the argument `method_handle` is NULL, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_108: [** If `response_size` is greater than zero and `response` is NULL, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. **]**
+
+The steps for creating the response message are:
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_061: [** - A new uAMQP message shall be created by calling `message_create`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_062: [** If the `message_create` call fails, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_063: [** - A new properties handle shall be created by calling `properties_create`. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_064: [** If the `properties_create call` fails, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_065: [** - The correlation id on the message properties shall be set by calling `properties_set_correlation_id` and passing as argument the correlation id associated with the `method_handle` handle. **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_066: [** If the `properties_set_correlation_id` call fails, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_090: [** An AMQP map shall be created to hold the application properties for the response by calling `amqpvalue_create_map`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_091: [** A property key `IoThub-status` shall be created by calling `amqpvalue_create_symbol`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_092: [** A property value of type string shall be created from the stringified value of the `status_code` argument. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_097: [** The property value shall be created by calling `amqpvalue_create_string`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_093: [** A new entry shall be added in the application properties map by calling `amqpvalue_set_map_value` and passing the key and value that were previously created. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_094: [** The application properties map shall be set on the response message by calling `message_set_application_properties`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_095: [** The application property map and all intermediate values shall be freed after being passed to `message_set_application_properties`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_096: [** If any of the calls `amqpvalue_create_symbol`, `amqpvalue_create_string`, `amqpvalue_create_map`, `amqpvalue_set_map_value` or `message_set_application_properties` fails `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_078: [** The binary payload for the response shall be set by calling `message_add_body_amqp_data` for the newly created message handle. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_079: [** The field `bytes` of the `binary_data` argument shall be set to the `response` argument value. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_080: [** The field `length` of the `binary_data` argument shall be set to the `response_size` argument value. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_081: [** If the `message_add_body_amqp_data` call fails, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_067: [** The message shall be handed over to the message_sender by calling `messagesender_send` and passing as arguments: **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_068: [** - The response message handle. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_069: [** - A send callback and its context for the `on_message_send_complete` callback. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_071: [** If the `messagesender_send` call fails, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_109: [** `iothubtransportamqp_methods_respond` shall be allowed to be called from the callback `on_method_request_received`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_114: [** The handle `method_handle` shall be removed from the array used to track the method handles. **]**    
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_111: [** The handle `method_handle` shall be freed (have no meaning) after `iothubtransportamqp_methods_respond` has been executed. **]**
 
 ### iothubtransportamqp_methods_unsubscribe
 
 ```c
-int iothubtransportamqp_methods_unsubscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothubtransport_amqp_methods_handle);
+void iothubtransportamqp_methods_unsubscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothubtransport_amqp_methods_handle);
 ```
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_072: [** If the argument `iothubtransport_amqp_methods_handle` is NULL, `iothubtransportamqp_methods_unsubscribe` shall return a non-zero value. **]**
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_073: [** `iothubtransportamqp_methods_unsubscribe` shall free all resources allocated in `iothubtransportamqp_methods_subscribe`: **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_072: [** If the argument `iothubtransport_amqp_methods_handle` is NULL, `iothubtransportamqp_methods_unsubscribe` shall do nothing. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_073: [** Otherwise `iothubtransportamqp_methods_unsubscribe` shall free all resources allocated in `iothubtransportamqp_methods_subscribe`: **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_074: [** - It shall free the message sender by calling `messagesender_destroy'. **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_075: [** - It shall free the message receiver by calling `messagereceiver_destroy'. **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_076: [** - It shall free the sender link by calling `link_destroy'. **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_077: [** - It shall free the receiver link by calling `link_destroy'. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_110: [** `iothubtransportamqp_methods_unsubscribe` shall free all tracked method handles indicated to the user via the callback `on_method_request_received` and than have not yet been completed by calls to `iothubtransportamqp_methods_respond`. **]** 
