@@ -1,6 +1,6 @@
 # Prepare your development environment
 
-This document describes how to prepare your development environment to use the *Microsoft Azure IoT device SDK for C#*.
+This document describes how to prepare your development environment to build and use the Microsoft Azure IoT device SDK using C# programming language
 
 - [Visual Studio](#vs)
 - [Azure SDK for .NET](#azuresdk)
