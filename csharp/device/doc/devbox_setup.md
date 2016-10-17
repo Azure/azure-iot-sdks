@@ -43,13 +43,11 @@ To clone the **master** use following command or simply download the **.zip** fr
 
 `git clone https://github.com/Azure/azure-iot-sdks.git`
 
-### Building the Azure IoT Device Client .NET SDK using command prompt
-
 The following instructions outline how you can build the C# SDK (along with samples). You can either build using command line or you can build using VS 2015 IDE
 
-#### Option 1:  Build using command line
+### Option 1:  Build using command line
 1. Open a Developer Command Prompt for VS2015.
-2. Go to scripts folder located at **csharp\\device\\build**. Run the build script **build** which will build the SDK and the samples using default option.
+2. Go to scripts folder located at **csharp\\device\\build**. Run the build script `build` which will build the SDK and the samples using default option.
 
 Use 'build --options' to list various build options.
 For example to build for x64 as debug build, you can use
@@ -63,10 +61,10 @@ Once build completes, it will create
 3. Microsoft.Azure.Devices.Client.winmd (WinRT version that you will need to UWP application)
 4. Sample executables 
 
-#### Option 2: Build using VS 2015 IDE
+### Option 2: Build using VS 2015 IDE
 1. Open iothub_csharp_deviceclient.sln file in VS 2015 IDE.
 2. Select the configuration that you want and press Build->Build Solution command.
-Just like coo
+Just like command line option it will create Device Client SDK along with the samples.
 
 <a name="samplecode"/>
 ## Sample applications
