@@ -1,16 +1,19 @@
 # Prepare your development environment
 
-This document describes how to prepare your development environment to build and use the Microsoft Azure IoT device SDK using C# programming language
+This document describes how to prepare your development environment to build and use the **Microsoft .NET Device SDK for Azure IoT Devices**
 
-- [Visual Studio](#vs)
+- [Setting up a Windows development environment](#windows)
 - [Azure SDK for .NET](#azuresdk)
-- [NuGet package](#prerequisites)
+- [Directly using .NET SDK using NuGet packages](#directly_using_sdk)
+- [Locally building .NET SDK](#building_sdk)
 - [Application samples](#samplecode)
 
-<a name="vs"/>
-## Visual Studio
+<a name="windows"/>
+## Setting up a Windows development environment
 
-Install [Visual Studio 2015][visual-studio]. You can use any version of Visual Studio 2015, including the Community edition.
+- Install [Visual Studio 2015][visual-studio]. You can use the **Visual Studio Community** Free download if you meet the licensing requirements.
+
+Be sure to include [NuGet Package Manager][NuGet-Package-Manager].
 
 <a name="azuresdk"/>
 ## Azure SDK for .NET
@@ -21,10 +24,24 @@ Install the Azure SDK for .NET 2.7 or later. Use the following links to download
 - [VS 2013][lnk-sdk-vs2013]
 - [VS 2012][lnk-sdk-vs2012]
 
-<a name="prerequisites"/>
-## NuGet package
+<a name="directly_using_sdk"/>
+## Directly using .NET SDK using NuGet packages
 
-If you are creating a client application from scratch, use the Visual Studio package manager to add the latest version of the **Microsoft.Azure.Devices.Client** NuGet package to your project.
+If you are creating a client application from the scratch, use the [NuGet][NuGet] Package Manager to install the latest version of **Microsoft.Azure.Devices.Client** Device SDK for Azure IoT Devices NuGet package to your project.
+
+- The package is located at [Azure IoT Device SDK NuGet Package] [lnk-NuGet-package]. 
+
+<a name="building_sdk"/>
+## Building the .NET SDK locally
+In some cases, you may want to build the .NET SDK libraries locally for development and testing purpose. For example, you may want to build the latest code available on the develop branch which follows the Continuous Integration (CI) approach.
+To pull latest code on **develop** branch you can use following command
+
+`git clone -b develop --recursive https://github.com/Azure/azure-iot-sdks.git azure-iot-develop`
+
+To clone the **master** use following command or simply download the **.zip** from [Azure IoT SDK][lnk-azure-iot] 
+```
+git clone https://github.com/Azure/azure-iot-sdks.git
+```
 
 <a name="samplecode"/>
 ## Sample applications
@@ -59,4 +76,8 @@ Now you are ready to run the CppUWPSample.
 [lnk-sdk-vs2013]: http://go.microsoft.com/fwlink/?LinkId=323510
 [lnk-sdk-vs2012]: http://go.microsoft.com/fwlink/?LinkId=323511
 [lnk-visualstudio-xamarin]: https://msdn.microsoft.com/en-us/library/mt299001.aspx
+[lnk-NuGet-package]:https://www.nuget.org/packages/Microsoft.Azure.Devices.Client
+[lnk-azure-iot]:https://github.com/Azure/azure-iot-sdks
+[NuGet-Package-Manager]:https://visualstudiogallery.msdn.microsoft.com/5d345edc-2e2d-4a9c-b73b-d53956dc458d
+[NuGet]:https://www.nuget.org/
 
