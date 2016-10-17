@@ -91,9 +91,12 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(SCHEMA_ELEMENT_TYPE, SCHEMA_ELEMENT_TYPE_VALUES);
 
 
 static const char SCHEMA_NAMESPACE[] = "TestNamespace";
+static const char SCHEMA_NAMESPACE_2[] = "TestNamespace_2";
 static const char MODEL_NAME[] = "TestModelName";
 
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
+
+#define TEST_SCHEMA_METADATA ((void*)0x42)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
 {
@@ -199,7 +202,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         // arrange
 
         // act
-        SCHEMA_HANDLE result = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE result = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
 
         // assert
         ASSERT_IS_NOT_NULL(result);
@@ -215,7 +218,7 @@ BEGIN_TEST_SUITE(Schema_ut)
         // arrange
 
         // act
-        SCHEMA_HANDLE result = Schema_Create(NULL);
+        SCHEMA_HANDLE result = Schema_Create(NULL, TEST_SCHEMA_METADATA);
 
         // assert
         ASSERT_IS_NULL(result);
@@ -227,8 +230,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         // arrange
 
         // act
-        SCHEMA_HANDLE result1 = Schema_Create("Namespace1");
-        SCHEMA_HANDLE result2 = Schema_Create("Namespace2");
+        SCHEMA_HANDLE result1 = Schema_Create("Namespace1", TEST_SCHEMA_METADATA);
+        SCHEMA_HANDLE result2 = Schema_Create("Namespace2", TEST_SCHEMA_METADATA);
 
         // assert
         ASSERT_IS_NOT_NULL(result1);
@@ -246,8 +249,8 @@ BEGIN_TEST_SUITE(Schema_ut)
         // arrange
 
         // act
-        SCHEMA_HANDLE result1 = Schema_Create("Namespace");
-        SCHEMA_HANDLE result2 = Schema_Create("Namespace");
+        SCHEMA_HANDLE result1 = Schema_Create("Namespace", TEST_SCHEMA_METADATA);
+        SCHEMA_HANDLE result2 = Schema_Create("Namespace", TEST_SCHEMA_METADATA);
 
         // assert
         ASSERT_IS_NOT_NULL(result1);
@@ -279,8 +282,8 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetSchemaCount_should_return_the_number_of_active_schemas)
     {
         // arrange
-        SCHEMA_HANDLE h1 = Schema_Create("one");
-        SCHEMA_HANDLE h2 = Schema_Create("two");
+        SCHEMA_HANDLE h1 = Schema_Create("one", TEST_SCHEMA_METADATA);
+        SCHEMA_HANDLE h2 = Schema_Create("two", TEST_SCHEMA_METADATA);
 
         // act
         size_t count = Schema_GetSchemaCount();
@@ -298,8 +301,8 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetSchemaCount_should_return_the_correct_number_after_a_schema_is_destroyed)
     {
         // arrange
-        SCHEMA_HANDLE h1 = Schema_Create("one");
-        SCHEMA_HANDLE h2 = Schema_Create("two");
+        SCHEMA_HANDLE h1 = Schema_Create("one", TEST_SCHEMA_METADATA);
+        SCHEMA_HANDLE h2 = Schema_Create("two", TEST_SCHEMA_METADATA);
         Schema_Destroy(h1);
 
         // act
@@ -317,9 +320,9 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetSchemaCount_should_return_the_correct_number_after_a_bounce)
     {
         // arrange
-        SCHEMA_HANDLE h1 = Schema_Create("one");
+        SCHEMA_HANDLE h1 = Schema_Create("one", TEST_SCHEMA_METADATA);
         Schema_Destroy(h1);
-        SCHEMA_HANDLE h2 = Schema_Create("two");
+        SCHEMA_HANDLE h2 = Schema_Create("two", TEST_SCHEMA_METADATA);
 
         // act
         size_t count = Schema_GetSchemaCount();
@@ -362,9 +365,9 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetSchemaByNamespace_with_a_matching_namespace_argument_should_return_the_schema)
     {
         // arrange
-        SCHEMA_HANDLE create1 = Schema_Create("one");
-        SCHEMA_HANDLE create2 = Schema_Create("two");
-        SCHEMA_HANDLE create3 = Schema_Create("three");
+        SCHEMA_HANDLE create1 = Schema_Create("one", TEST_SCHEMA_METADATA);
+        SCHEMA_HANDLE create2 = Schema_Create("two", TEST_SCHEMA_METADATA);
+        SCHEMA_HANDLE create3 = Schema_Create("three", TEST_SCHEMA_METADATA);
 
         // act
         SCHEMA_HANDLE get2 = Schema_GetSchemaByNamespace("two");
@@ -396,7 +399,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetSchemaNamespace_With_A_Valid_Handle_Returns_The_Schema_Namespace)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
 
         // act
         const char* result = Schema_GetSchemaNamespace(schemaHandle);
@@ -426,7 +429,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_Deinit_With_A_Valid_Handle_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create("Test");
+        SCHEMA_HANDLE schemaHandle = Schema_Create("Test", TEST_SCHEMA_METADATA);
         (void)Schema_CreateModelType(schemaHandle, "ModelName");
         (void)Schema_CreateStructType(schemaHandle, "StructName");
 
@@ -457,7 +460,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_CreateModelType_With_modelNamespace_NULL_returns_NULL)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
 
         // act
         SCHEMA_MODEL_TYPE_HANDLE result = Schema_CreateModelType(schemaHandle, NULL);
@@ -496,7 +499,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_CreateModelType_With_Valid_Arguments_happy_path)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         umock_c_reset_all_calls();
 
         Schema_CreateModelType_With_Valid_Arguments_inert_path();
@@ -516,7 +519,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_CreateModelType_With_Valid_Arguments_unhappy_paths)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         umock_c_reset_all_calls();
 
         umock_c_negative_tests_init();
@@ -552,7 +555,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_CreateModelType_Twice_With_Different_Model_Names_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
 
         // act
         SCHEMA_MODEL_TYPE_HANDLE modelType1 = Schema_CreateModelType(schemaHandle, "ModelName1");
@@ -571,7 +574,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_CreateModelType_Twice_Same_Model_Name_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
 
         // act
         SCHEMA_MODEL_TYPE_HANDLE modelType1 = Schema_CreateModelType(schemaHandle, "ModelName");
@@ -603,7 +606,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetSchemaForModelType_With_Valid_Handle_Returns_The_Schema_Handle)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
 
         // act
@@ -634,7 +637,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelProperty_With_NULL_Property_Name_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
 
         // act
@@ -651,7 +654,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelProperty_With_NULL_Property_Type_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
 
         // act
@@ -669,7 +672,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelProperty_With_Valid_Arguments_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
 
         // act
@@ -687,7 +690,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelProperty_Adding_2_Properties_With_Different_Names_To_The_Same_Model_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelProperty(modelType, "MyName", "SomeType");
 
@@ -705,7 +708,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelProperty_Adding_The_Same_Property_In_The_Same_Model_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelProperty(modelType, "PropertyName", "PropertyType");
 
@@ -723,7 +726,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelProperty_Adding_The_Same_PropertyName_With_Different_PropertyType_In_The_Same_Model_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelProperty(modelType, "PropertyName", "PropertyType1");
 
@@ -740,7 +743,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelProperty_Adding_The_Same_Property_In_The_Same_Model_When_The_Duplicate_Property_Is_Not_First_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelProperty(modelType, "x", "SomeType");
         (void)Schema_AddModelProperty(modelType, "MyName", "SomeType");
@@ -759,7 +762,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelProperty_Adding_The_Same_Property_In_Different_Models_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType1 = Schema_CreateModelType(schemaHandle, "ModelName1");
         SCHEMA_MODEL_TYPE_HANDLE modelType2 = Schema_CreateModelType(schemaHandle, "ModelName2");
         (void)Schema_AddModelProperty(modelType1, "MyName", "SomeType");
@@ -792,7 +795,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_CreateModelAction_with_NULL_actionName_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle = Schema_CreateModelType(schemaHandle, "ModelName");
 
         // act
@@ -810,7 +813,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_CreateModelAction_with_valid_arguments_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle = Schema_CreateModelType(schemaHandle, "ModelName");
 
         // act
@@ -827,7 +830,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_CreateModelAction_with_Different_Action_Names_Succeed)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle = Schema_CreateModelType(schemaHandle, "ModelName");
 
         // act
@@ -847,7 +850,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_CreateModelAction_with_Same_Action_To_Same_Model_Fail)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle = Schema_CreateModelType(schemaHandle, "ModelName");
 
         // act
@@ -867,7 +870,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_CreateModelAction_With_Same_Action_To_Different_Models_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle1 = Schema_CreateModelType(schemaHandle, "ModelName1");
         SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle2 = Schema_CreateModelType(schemaHandle, "ModelName2");
 
@@ -901,7 +904,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelActionArgument_with_NULL_argumentName_fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle = Schema_CreateModelType(schemaHandle, "ModelName");
         SCHEMA_ACTION_HANDLE actionHandle = Schema_CreateModelAction(modelTypeHandle, "ActionName");
 
@@ -919,7 +922,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelActionArgument_with_NULL_argumentType_fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle = Schema_CreateModelType(schemaHandle, "ModelName");
         SCHEMA_ACTION_HANDLE actionHandle = Schema_CreateModelAction(modelTypeHandle, "ActionName");
 
@@ -938,7 +941,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelActionArgument_with_valid_arguments_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle = Schema_CreateModelType(schemaHandle, "ModelName");
         SCHEMA_ACTION_HANDLE actionHandle = Schema_CreateModelAction(modelTypeHandle, "ActionName");
 
@@ -956,7 +959,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelActionArgument_when_adding_two_different_argument_names_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle = Schema_CreateModelType(schemaHandle, "ModelName");
         SCHEMA_ACTION_HANDLE actionHandle = Schema_CreateModelAction(modelTypeHandle, "ActionName");
 
@@ -976,7 +979,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelActionArgument_when_adding_same_argument_name_twice_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle = Schema_CreateModelType(schemaHandle, "ModelName");
         SCHEMA_ACTION_HANDLE actionHandle = Schema_CreateModelAction(modelTypeHandle, "ActionName");
 
@@ -996,7 +999,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelActionArgument_when_adding_two_different_argument_names_with_same_type_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle = Schema_CreateModelType(schemaHandle, "ModelName");
         SCHEMA_ACTION_HANDLE actionHandle = Schema_CreateModelAction(modelTypeHandle, "ActionName");
 
@@ -1031,7 +1034,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelCount_with_NULL_modelCount_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateModelType(schemaHandle, "ModelName1");
         (void)Schema_CreateModelType(schemaHandle, "ModelName2");
 
@@ -1051,7 +1054,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelCount_With_Zero_Models_Defined_Yields_0)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         size_t modelCount = 42;
 
         // act
@@ -1071,7 +1074,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelCount_With_Two_Models_Defined_Yields_2)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateModelType(schemaHandle, "ModelName1");
         (void)Schema_CreateModelType(schemaHandle, "ModelName2");
         size_t modelCount = 42;
@@ -1093,7 +1096,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelCount_With_Two_Models_Added_with_the_same_modelName_Yields_1)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateModelType(schemaHandle, "ModelName");
         (void)Schema_CreateModelType(schemaHandle, "ModelName");
         size_t modelCount = 42;
@@ -1115,7 +1118,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelByName_with_NULL_schemaHandle_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateModelType(schemaHandle, MODEL_NAME);
 
         // act
@@ -1132,7 +1135,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelByName_with_NULL_modelName_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateModelType(schemaHandle, MODEL_NAME);
 
         // act
@@ -1149,7 +1152,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelByName_With_Zero_Models_Defined_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
 
         // act
         SCHEMA_MODEL_TYPE_HANDLE result = Schema_GetModelByName(schemaHandle, MODEL_NAME);
@@ -1165,7 +1168,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelByName_With_3_Models_Defined_And_modelName_Not_Matching_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateModelType(schemaHandle, "ModelName1");
         (void)Schema_CreateModelType(schemaHandle, "ModelName2");
         (void)Schema_CreateModelType(schemaHandle, "ModelName3");
@@ -1184,7 +1187,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelByName_With_Valid_Arguments_And_modelName_Matching_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateModelType(schemaHandle, "ModelName1");
         (void)Schema_CreateModelType(schemaHandle, "ModelName2");
         (void)Schema_CreateModelType(schemaHandle, "ModelName3");
@@ -1205,7 +1208,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelByIndex_With_NULL_schemaHandle_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateModelType(schemaHandle, MODEL_NAME);
 
         // act
@@ -1222,7 +1225,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelByIndex_With_No_Models_Defined_schemaHandle_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
 
         // act
         SCHEMA_MODEL_TYPE_HANDLE result = Schema_GetModelByIndex(schemaHandle, 0);
@@ -1239,7 +1242,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelByIndex_With_Index_Equals_The_Number_Of_Defined_Models_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateModelType(schemaHandle, "ModelName1");
         (void)Schema_CreateModelType(schemaHandle, "ModelName2");
         (void)Schema_CreateModelType(schemaHandle, "ModelName3");
@@ -1259,7 +1262,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelByIndex_With_Index_Greater_Than_The_Number_Of_Defined_Models_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateModelType(schemaHandle, "ModelName1");
         (void)Schema_CreateModelType(schemaHandle, "ModelName2");
         (void)Schema_CreateModelType(schemaHandle, "ModelName3");
@@ -1279,7 +1282,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelByIndex_With_Index_Within_The_Number_Of_Defined_Models_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateModelType(schemaHandle, "ModelName1");
         (void)Schema_CreateModelType(schemaHandle, "ModelName2");
         (void)Schema_CreateModelType(schemaHandle, "ModelName3");
@@ -1312,7 +1315,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelPropertyByName_With_A_NULL_Name_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelProperty(modelType, "MyName", "SomeType");
 
@@ -1330,7 +1333,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelPropertyByName_When_The_Property_Is_Not_Found_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelProperty(modelType, "MyName", "SomeType");
 
@@ -1348,7 +1351,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelPropertyByName_When_Model_Is_Empty_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
 
         // act
@@ -1365,7 +1368,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelPropertyByName_When_The_Property_Is_Found_Returns_A_Property_Handle)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelProperty(modelType, "MyName", "SomeType");
 
@@ -1397,7 +1400,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelPropertyCount_With_NULL_propertyCount_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create("NameSpace");
+        SCHEMA_HANDLE schemaHandle = Schema_Create("NameSpace", TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE schemaModelTypeHandle = Schema_CreateModelType(schemaHandle, "ModelName");
 
         // act
@@ -1429,7 +1432,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelPropertyCount_With_No_Properties_Defined_Yields_0)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create("NameSpace");
+        SCHEMA_HANDLE schemaHandle = Schema_Create("NameSpace", TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE schemaModelTypeHandle = Schema_CreateModelType(schemaHandle, "ModelName");
         size_t propertyCount = 42;
 
@@ -1450,7 +1453,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelPropertyCount_With_One_Property_Defined_Yields_1)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create("NameSpace");
+        SCHEMA_HANDLE schemaHandle = Schema_Create("NameSpace", TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE schemaModelTypeHandle = Schema_CreateModelType(schemaHandle, "ModelName");
         (void)Schema_AddModelProperty(schemaModelTypeHandle, "PropertyName1", "PropertyType1");
         size_t propertyCount = 42;
@@ -1472,7 +1475,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelPropertyCount_With_Two_Properties_Defined_Yields_2)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create("NameSpace");
+        SCHEMA_HANDLE schemaHandle = Schema_Create("NameSpace", TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE schemaModelTypeHandle = Schema_CreateModelType(schemaHandle, "ModelName");
         (void)Schema_AddModelProperty(schemaModelTypeHandle, "PropertyName1", "PropertyType1");
         (void)Schema_AddModelProperty(schemaModelTypeHandle, "PropertyName2", "PropertyType2");
@@ -1507,7 +1510,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelProperty_With_A_Zero_Index_But_No_Properties_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle = Schema_CreateModelType(schemaHandle, "Model");
 
         // act
@@ -1524,7 +1527,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelPropety_With_Index_Out_Of_Range_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelProperty(modelTypeHandle, "PropertyName", "PropertyType");
 
@@ -1543,7 +1546,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelProperty_With_Valid_Index_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelProperty(modelTypeHandle, "PropertyName", "PropertyType");
 
@@ -1562,7 +1565,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelProperty_Returns_Different_Handles_For_Different_Properties)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelProperty(modelTypeHandle, "PropertyName1", "PropertyType1");
         (void)Schema_AddModelProperty(modelTypeHandle, "PropertyName2", "PropertyType2");
@@ -1598,7 +1601,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelActionByName_With_A_NULL_Name_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
 
         // act
@@ -1615,7 +1618,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelActionByName_When_The_Action_Is_Not_Found_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_CreateModelAction(modelType, "ActionName");
 
@@ -1633,7 +1636,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelActionByName_When_The_Property_Is_Found_Returns_A_Property_Handle)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_CreateModelAction(modelType, "ActionName");
 
@@ -1666,7 +1669,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelActionCount_With_A_NULL_ActionCount_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
 
         // act
@@ -1685,7 +1688,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelActionCount_When_No_Actions_Are_Defined_Yields_0)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         size_t actionCount = 42;
 
@@ -1706,7 +1709,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelActionCount_When_1_Action_Is_Defined_Yields_1)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_CreateModelAction(modelType, "MyName");
         size_t actionCount = 42;
@@ -1728,7 +1731,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelActionCount_When_2_Action_Is_Defined_Yields_2)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_CreateModelAction(modelType, "MyName");
         (void)Schema_CreateModelAction(modelType, "MyName2");
@@ -1763,7 +1766,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelAction_With_A_Zero_Index_But_No_Actions_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
 
         // act
@@ -1780,7 +1783,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelAction_With_Index_Out_Of_Range_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_CreateModelAction(modelType, "MyName");
 
@@ -1799,7 +1802,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelAction_With_Valid_Index_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_CreateModelAction(modelType, "MyName");
 
@@ -1818,7 +1821,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelAction_Returns_Different_Handles_For_Different_Actions)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_CreateModelAction(modelType, "MyName");
         (void)Schema_CreateModelAction(modelType, "MyName2");
@@ -1854,7 +1857,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelActionName_With_A_Valid_Action_Handle_Returns_The_Action_Name)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_CreateModelAction(modelType, "MyName");
 
@@ -1873,7 +1876,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelActionName_With_A_Valid_Action_Handle_Returns_The_Action_Name_2)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_CreateModelAction(modelType, "MyName");
         (void)Schema_CreateModelAction(modelType, "MyName2");
@@ -1908,7 +1911,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelActionArgumentCount_With_A_NULL_ArgumentCount_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_CreateModelAction(modelType, "MyName");
         SCHEMA_ACTION_HANDLE actionHandle = Schema_GetModelActionByIndex(modelType, 0);
@@ -1929,7 +1932,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelActionArgumentCount_With_A_Valid_Action_Handle_And_No_Action_Args_Yields_0)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_CreateModelAction(modelType, "MyName");
         SCHEMA_ACTION_HANDLE actionHandle = Schema_GetModelActionByIndex(modelType, 0);
@@ -1952,7 +1955,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelActionArgumentCount_With_A_Valid_Action_Handle_And_1_Action_Arg_Yields_1)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         SCHEMA_ACTION_HANDLE actionHandle = Schema_CreateModelAction(modelType, "MyName");
         (void)Schema_AddModelActionArgument(actionHandle, "ArgName", "ArgType");
@@ -1986,7 +1989,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelActionArgumentByName_with_NULL_actionArgumentName_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         SCHEMA_ACTION_HANDLE actionHandle = Schema_CreateModelAction(modelType, "ActionName");
 
@@ -2004,7 +2007,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelActionArgumentByName_with_None_Matching_actionArgumentName_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         SCHEMA_ACTION_HANDLE actionHandle = Schema_CreateModelAction(modelType, "ActionName");
         (void)Schema_AddModelActionArgument(actionHandle, "ArgumentName", "ArgumentType");
@@ -2023,7 +2026,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelActionArgumentByName_with_valid_arguments_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         SCHEMA_ACTION_HANDLE actionHandle = Schema_CreateModelAction(modelType, "ActionName");
         (void)Schema_AddModelActionArgument(actionHandle, "ArgumentName", "ArgumentType");
@@ -2056,7 +2059,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelActionArgumentByIndex_With_Zero_Index_When_No_Args_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         SCHEMA_ACTION_HANDLE actionHandle = Schema_CreateModelAction(modelType, "ActionName");
 
@@ -2074,7 +2077,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelActionArgumentByIndex_With_Index_Out_Of_Range_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         SCHEMA_ACTION_HANDLE actionHandle = Schema_CreateModelAction(modelType, "ActionName");
         (void)Schema_AddModelActionArgument(actionHandle, "ArgumentName", "ArgumentType");
@@ -2093,7 +2096,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelActionArgumentByIndex_With_Valid_Arguments_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         SCHEMA_ACTION_HANDLE actionHandle = Schema_CreateModelAction(modelType, "ActionName");
         (void)Schema_AddModelActionArgument(actionHandle, "ArgumentName", "ArgumentType");
@@ -2125,7 +2128,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetActionArgumentName_With_A_Valid_Handle_Returns_The_Name)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         SCHEMA_ACTION_HANDLE actionHandle = Schema_CreateModelAction(modelType, "ActionName");
         (void)Schema_AddModelActionArgument(actionHandle, "ArgumentName", "ArgumentType");
@@ -2158,7 +2161,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetActionArgumentType_With_A_Valid_Handle_Returns_The_Type)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         SCHEMA_ACTION_HANDLE actionHandle = Schema_CreateModelAction(modelType, "ActionName");
         (void)Schema_AddModelActionArgument(actionHandle, "ArgumentName", "ArgumentType");
@@ -2178,7 +2181,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetActionArgumentType_With_A_Valid_Handle_For_Two_Arguments_Same_Type_Returns_The_Type)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         SCHEMA_ACTION_HANDLE actionHandle = Schema_CreateModelAction(modelType, "ActionName");
         (void)Schema_AddModelActionArgument(actionHandle, "ArgumentName1", "ArgumentType");
@@ -2218,7 +2221,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_CreateStructType_With_A_NULL_Name_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
 
         // act
         SCHEMA_STRUCT_TYPE_HANDLE result = Schema_CreateStructType(schemaHandle, NULL);
@@ -2235,7 +2238,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_CreateStructType_With_Valid_Arguments_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
 
         // act
         SCHEMA_STRUCT_TYPE_HANDLE result = Schema_CreateStructType(schemaHandle, "AStruct");
@@ -2252,7 +2255,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_CreateStructType_Creating_2_Different_Structs_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
 
         // act
         SCHEMA_STRUCT_TYPE_HANDLE result1 = Schema_CreateStructType(schemaHandle, "AStruct");
@@ -2272,8 +2275,8 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_CreateStructType_Creating_2_Different_Structs_In_Different_Schemas_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle1 = Schema_Create(SCHEMA_NAMESPACE);
-        SCHEMA_HANDLE schemaHandle2 = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle1 = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        SCHEMA_HANDLE schemaHandle2 = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
 
         // act
         SCHEMA_STRUCT_TYPE_HANDLE result1 = Schema_CreateStructType(schemaHandle1, "Struct");
@@ -2293,7 +2296,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_CreateStructType_Creating_The_Same_Struct_Twice_In_The_Same_Schema_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateStructType(schemaHandle, "Struct");
 
         // act
@@ -2325,7 +2328,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeName_With_A_Valid_Struct_Type_Handle_Returns_The_Struct_Type_Name)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structTypeHandle = Schema_CreateStructType(schemaHandle, "TestStruct");
 
         // act
@@ -2356,7 +2359,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeByName_With_A_NULL_Name_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
 
         // act
         SCHEMA_STRUCT_TYPE_HANDLE result = Schema_GetStructTypeByName(schemaHandle, NULL);
@@ -2372,7 +2375,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeByName_With_Valid_Args_But_No_Structs_Exist_In_Schema_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
 
         // act
         SCHEMA_STRUCT_TYPE_HANDLE result = Schema_GetStructTypeByName(schemaHandle, "Struct");
@@ -2388,7 +2391,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeByName_With_A_Struct_That_Does_Not_Exist_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateStructType(schemaHandle, "x");
 
         // act
@@ -2405,7 +2408,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeByName_With_A_Struct_That_Exists_Returns_A_Non_NULL_Handle)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateStructType(schemaHandle, "StructName");
 
         // act
@@ -2436,7 +2439,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddStructTypeProperty_With_NULL_Property_Name_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "Struct");
 
         // act
@@ -2453,7 +2456,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddStructTypeProperty_With_NULL_Property_Type_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "Struct");
 
         // act
@@ -2471,7 +2474,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddStructTypeProperty_With_Valid_Arguments_For_A_StructType_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "Struct");
 
         // act
@@ -2489,7 +2492,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddStructTypeProperty_Adding_2_Properties_With_Different_Names_To_The_Same_StructType_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "Struct");
         (void)Schema_AddStructTypeProperty(structType, "MyName", "SomeType");
 
@@ -2507,7 +2510,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddStructTypeProperty_Adding_The_Same_Property_In_The_Same_StructType_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "Struct");
         (void)Schema_AddStructTypeProperty(structType, "MyName", "SomeType");
 
@@ -2525,7 +2528,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddStructTypeProperty_Adding_The_Same_Property_With_Different_Type_In_The_Same_StructType_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "Struct");
         (void)Schema_AddStructTypeProperty(structType, "MyName", "SomeType");
 
@@ -2543,7 +2546,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddStructTypeProperty_Adding_The_Same_Property_In_The_Same_StructType_When_The_Duplicate_Property_Is_Not_First_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "Struct");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName1", "PropertyType1");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName2", "PropertyType2");
@@ -2562,7 +2565,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddStructTypeProperty_Adding_The_Same_Property_In_Different_Structs_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType1 = Schema_CreateStructType(schemaHandle, "Struct1");
         SCHEMA_STRUCT_TYPE_HANDLE structType2 = Schema_CreateStructType(schemaHandle, "Struct2");
         (void)Schema_AddStructTypeProperty(structType1, "MyName", "SomeType");
@@ -2596,7 +2599,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeCount_with_NULL_structTypeCount_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
 
         // act
         SCHEMA_RESULT result = Schema_GetStructTypeCount(schemaHandle, NULL);
@@ -2614,7 +2617,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeCount_With_Zero_Struct_Types_Defined_Yields_0)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         size_t structTypeCount = 42;
 
         // act
@@ -2634,7 +2637,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeCount_With_Two_Struct_Types_Defined_Yields_2)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateStructType(schemaHandle, "StructName1");
         (void)Schema_CreateStructType(schemaHandle, "StructName2");
         size_t structTypeCount = 42;
@@ -2656,7 +2659,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeCount_With_Two_Struct_Types_Added_with_the_same_structTypeName_Yields_1)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateStructType(schemaHandle, "StructName");
         (void)Schema_CreateStructType(schemaHandle, "StructName");
         size_t structTypeCount = 42;
@@ -2678,7 +2681,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeByIndex_With_NULL_schemaHandle_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateStructType(schemaHandle, "TestStruct");
 
         // act
@@ -2695,7 +2698,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeByIndex_With_No_Struct_Types_Defined_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
 
         // act
         SCHEMA_STRUCT_TYPE_HANDLE result = Schema_GetStructTypeByIndex(schemaHandle, 0);
@@ -2712,7 +2715,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeByIndex_With_Index_Equals_The_Number_Of_Defined_StructTypes_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateStructType(schemaHandle, "StructName1");
         (void)Schema_CreateStructType(schemaHandle, "StructName2");
         (void)Schema_CreateStructType(schemaHandle, "StructName3");
@@ -2732,7 +2735,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeByIndex_With_Index_Greater_Than_The_Number_Of_Defined_Struct_Types_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateStructType(schemaHandle, "StructName1");
         (void)Schema_CreateStructType(schemaHandle, "StructName2");
         (void)Schema_CreateStructType(schemaHandle, "StructName3");
@@ -2752,7 +2755,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeByIndex_With_Index_Within_The_Number_Of_Defined_Struct_Types_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         (void)Schema_CreateStructType(schemaHandle, "StructName1");
         (void)Schema_CreateStructType(schemaHandle, "StructName2");
         (void)Schema_CreateStructType(schemaHandle, "StructName3");
@@ -2785,7 +2788,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypePropertyByName_with_NULL_propertyName_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "StructName");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName", "PropertyType");
 
@@ -2803,7 +2806,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypePropertyByName_When_The_Property_Is_Not_Found_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "StructName");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName", "PropertyType");
 
@@ -2822,7 +2825,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypePropertyByName_For_A_StructType_When_The_Property_Is_Found_Returns_A_Property_Handle)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "StructName");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName", "PropertyType");
 
@@ -2840,7 +2843,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypePropertyByName_When_The_Property_Is_Found_After_Adding_2_Properties_Returns_A_Property_Handle)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "StructName");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName1", "PropertyType1");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName2", "PropertyType2");
@@ -2874,7 +2877,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypePropertyCount_With_NULL_propertyCount_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "StructName");
 
         // act
@@ -2905,7 +2908,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypePropertyCount_With_No_Properties_Defined_Yields_0)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "StructName");
         size_t propertyCount = 42;
 
@@ -2926,7 +2929,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypePropertyCount_With_1_Property_Defined_Yields_1)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "StructName");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName1", "PropertyType1");
         size_t propertyCount = 42;
@@ -2948,7 +2951,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypePropertyCount_With_2_Properties_Defined_Yields_2)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "StructName");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName1", "PropertyType1");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName2", "PropertyType2");
@@ -2971,7 +2974,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeProperty_With_NULL_propertyHandle_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "StructName");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName1", "PropertyType1");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName2", "PropertyType2");
@@ -2990,7 +2993,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeProperty_With_No_Properies_Defined_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "StructName");
 
         // act
@@ -3007,7 +3010,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeProperty_With_Index_Greater_Than_Number_OF_Properties_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "StructName");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName1", "PropertyType1");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName2", "PropertyType2");
@@ -3026,7 +3029,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeProperty_With_Index_Equal_To_Number_OF_Properties_Fails)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "StructName");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName1", "PropertyType1");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName2", "PropertyType2");
@@ -3046,7 +3049,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeProperty_With_Valid_Arguments_Succeeds)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "StructName");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName1", "PropertyType1");
 
@@ -3065,7 +3068,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetStructTypeProperty_For_2_Different_Properties_Returns_Different_Handles)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "StructName");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName1", "PropertyType1");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName2", "PropertyType2");
@@ -3101,7 +3104,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetPropertyName_With_A_Valid_Handle_Returns_The_Name)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "StructName");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName1", "PropertyType1");
 
@@ -3133,7 +3136,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetPropertyType_With_A_Valid_Handle_Returns_The_Name)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_STRUCT_TYPE_HANDLE structType = Schema_CreateStructType(schemaHandle, "StructName");
         (void)Schema_AddStructTypeProperty(structType, "PropertyName1", "PropertyType1");
 
@@ -3163,7 +3166,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelName_with_non_NULL_parameter_returns_the_name_of_the_parameter)
     {
         // arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "someModel");
 
         // act
@@ -3184,7 +3187,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelModel_happy_path_succeeds)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
 
@@ -3203,7 +3206,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelModel_with_invalid_arg1_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
 
         ///act
@@ -3221,7 +3224,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelModel_with_invalid_arg2_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
 
@@ -3240,7 +3243,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelModel_with_invalid_arg3_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
 
         ///act
@@ -3260,7 +3263,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelModelCount_with_no_model_returns_0)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         (void)Schema_CreateModelType(schemaHandle, "someMinerModel");
         
@@ -3282,7 +3285,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelModelCount_with_1_model_returns_1)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
         size_t nModels = 444;
@@ -3304,7 +3307,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelModelCount_with_2_models_returns_2)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
         size_t nModels = 444;
@@ -3340,7 +3343,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelModelCount_with_invalid_arg_fail_2)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
         (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
@@ -3361,7 +3364,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelModelByName_succeeds)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
         (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
@@ -3385,7 +3388,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelModelByName_fails_with_NULL_parameters)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
         (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
@@ -3408,7 +3411,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelModelByIndex_succeeds)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
         (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
@@ -3438,7 +3441,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelModelPropertyNameByIndex_succeeds)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
         (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
@@ -3466,7 +3469,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelModel_model_in_mode_in_model_succeeds)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         SCHEMA_MODEL_TYPE_HANDLE smallModel = Schema_CreateModelType(schemaHandle, "someSmallModel");
@@ -3504,7 +3507,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_ModelPropertyByPathExists_With_NULL_ModelHandle_Fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         (void)Schema_AddModelProperty(bigModel, "propertyName", "type");
 
@@ -3522,7 +3525,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_ModelPropertyByPathExists_With_NULL_PropertyPath_Fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         (void)Schema_AddModelProperty(bigModel, "propertyName", "type");
 
@@ -3542,7 +3545,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_When_Property_Is_Found_At_Root_Schema_ModelPropertyByPathExists_Returns_True)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         (void)Schema_AddModelProperty(bigModel, "propertyName", "type");
 
@@ -3560,7 +3563,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_When_Property_Is_Not_Found_At_Root_Schema_ModelPropertyByPathExists_Returns_False)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         (void)Schema_AddModelProperty(bigModel, "propertyName", "type");
 
@@ -3580,7 +3583,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_When_Property_Is_Found_In_A_Child_Model_Schema_ModelPropertyByPathExists_Returns_True)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         SCHEMA_MODEL_TYPE_HANDLE smallModel = Schema_CreateModelType(schemaHandle, "someSmallModel");
@@ -3602,7 +3605,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_When_Property_Is_Not_Found_In_A_Child_Model_Schema_ModelPropertyByPathExists_Returns_True)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         SCHEMA_MODEL_TYPE_HANDLE smallModel = Schema_CreateModelType(schemaHandle, "someSmallModel");
@@ -3626,7 +3629,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_When_Property_Is_Found_In_A_2nd_Level_Child_Model_Schema_ModelPropertyByPathExists_Returns_True)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         SCHEMA_MODEL_TYPE_HANDLE smallModel = Schema_CreateModelType(schemaHandle, "someSmallModel");
@@ -3648,7 +3651,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_When_Property_Is_Not_Found_In_A_2nd_Level_Child_Model_Schema_ModelPropertyByPathExists_Returns_True)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         SCHEMA_MODEL_TYPE_HANDLE smallModel = Schema_CreateModelType(schemaHandle, "someSmallModel");
@@ -3670,7 +3673,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_When_A_ModelName_Is_Not_Fount_Schema_ModelPropertyByPathExists_Fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         SCHEMA_MODEL_TYPE_HANDLE smallModel = Schema_CreateModelType(schemaHandle, "someSmallModel");
@@ -3692,7 +3695,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_When_A_ModelName_Is_Only_A_Partial_Match_Schema_ModelPropertyByPathExists_Fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         SCHEMA_MODEL_TYPE_HANDLE smallModel = Schema_CreateModelType(schemaHandle, "someSmallModel");
@@ -3714,7 +3717,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_When_An_Empty_Model_Name_Is_In_The_Path_Schema_ModelPropertyByPathExists_Fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         SCHEMA_MODEL_TYPE_HANDLE smallModel = Schema_CreateModelType(schemaHandle, "someSmallModel");
@@ -3736,7 +3739,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_When_The_Path_Is_An_Empty_String_Schema_ModelPropertyByPathExists_Fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         SCHEMA_MODEL_TYPE_HANDLE smallModel = Schema_CreateModelType(schemaHandle, "someSmallModel");
@@ -3758,7 +3761,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_When_The_Path_Is_A_Slash_Schema_ModelPropertyByPathExists_Fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         SCHEMA_MODEL_TYPE_HANDLE smallModel = Schema_CreateModelType(schemaHandle, "someSmallModel");
@@ -3780,7 +3783,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_When_The_First_Slash_In_The_Path_With_Only_A_PropertyName_Is_Ignored)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
@@ -3800,7 +3803,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_When_The_First_Slash_In_The_Path_With_A_ModelName_And_A_PropertyName_Is_Ignored)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
@@ -3820,7 +3823,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_When_The_Path_Points_To_A_Model_Schema_ModelPropertyByPathExists_returns_true)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
@@ -3853,7 +3856,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     {
         ///arrange
         SCHEMA_RESULT result;
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
@@ -3883,7 +3886,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_ReleaseDeviceRef_To_Call_Fail)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
@@ -3907,7 +3910,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_ReleaseDeviceRef_Succeed)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
@@ -3928,7 +3931,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_ReleaseDeviceRef_2_Device_Addition_Succeed)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
@@ -3968,7 +3971,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_DestroyIfUnused_Succeed)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
@@ -3990,7 +3993,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_DestroyUnused_2_Calls_Succeed)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE bigModel = Schema_CreateModelType(schemaHandle, "someBigModel");
         SCHEMA_MODEL_TYPE_HANDLE mediumModel = Schema_CreateModelType(schemaHandle, "someMediumModel");
         (void)Schema_AddModelModel(bigModel, "theMediumModel", mediumModel, 0, NULL);
@@ -4038,7 +4041,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelReportedProperty_with_NULL_reportedPropertyName_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
 
@@ -4057,7 +4060,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelReportedProperty_with_NULL_reportedPropertyType_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
 
@@ -4076,7 +4079,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelReportedProperty_adding_twice_the_same_reportedproperty_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         const char* reportedPropertyName = "reportedPropertyName";
         (void)Schema_AddModelReportedProperty(modelType, reportedPropertyName, "int"); /*added once here*/
@@ -4119,7 +4122,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelReportedProperty_happy_path)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         const char* reportedPropertyName = "reportedPropertyName";
         const char* reportedPropertyType = "reportedPropertyType";
@@ -4142,7 +4145,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelReportedProperty_unhappy_paths)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         const char* reportedPropertyName = "reportedPropertyName";
         const char* reportedPropertyType = "reportedPropertyType";
@@ -4207,7 +4210,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelReportedPropertyCount_with_NULL_reportedPropertyCount_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
 
         ///act
@@ -4225,7 +4228,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     {
         ///arrange
         size_t count = 22;
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
 
@@ -4249,7 +4252,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     {
         ///arrange
         size_t count = 22;
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelReportedProperty(modelType, "a,", "b");
         umock_c_reset_all_calls();
@@ -4287,7 +4290,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelReportedPropertyByName_with_NULL_reportedPropertyName_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
 
@@ -4305,7 +4308,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelReportedPropertyByName_happy_path)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelReportedProperty(modelType, "a", "b");
         umock_c_reset_all_calls();
@@ -4328,7 +4331,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelReportedPropertyByName_unhappy_path)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelReportedProperty(modelType, "a", "b");
         umock_c_reset_all_calls();
@@ -4365,7 +4368,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelReportedPropertyByIndex_unhappy_path)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
 
@@ -4386,7 +4389,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelReportedPropertyByIndex_happy_path)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelReportedProperty(modelType, "a", "b");
         umock_c_reset_all_calls();
@@ -4422,7 +4425,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_ModelReportedPropertyByPathExists_with_NULL_reportedPropertyPath_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
 
         ///act
@@ -4439,7 +4442,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_ModelReportedPropertyByPathExists_with_no_properties_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
 
         ///act
@@ -4456,7 +4459,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_ModelReportedPropertyByPathExists_with_1_properties_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelReportedProperty(modelType, "a", "b");
 
@@ -4474,7 +4477,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_ModelReportedPropertyByPathExists_with_2_properties_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelReportedProperty(modelType, "a1", "b");
         (void)Schema_AddModelReportedProperty(modelType, "a2", "b");
@@ -4494,7 +4497,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     {
         ///arrange
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
         (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
@@ -4531,7 +4534,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     {
         ///arrange
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
         (void)Schema_AddModelReportedProperty(minerModel, "reported", "five_miles_of_gallery");
@@ -4585,7 +4588,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelDesiredProperty_with_NULL_desiredPropertyName_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
 
@@ -4604,7 +4607,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelDesiredProperty_with_NULL_desiredPropertyType_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
 
@@ -4623,7 +4626,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelDesiredProperty_with_NULL_desiredPropertyFromAGENT_DATA_TYPE_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
 
@@ -4642,7 +4645,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelDesiredProperty_with_NULL_desiredPropertyInitialize_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
 
@@ -4661,7 +4664,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelDesiredProperty_with_NULL_desiredPropertyDeinitialize_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
 
@@ -4702,7 +4705,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelDesiredProperty_happy_path)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
         const char* name = "a";
@@ -4725,7 +4728,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelDesiredProperty_unhappy_paths)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
         umock_c_negative_tests_init();
@@ -4777,7 +4780,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_AddModelDesiredProperty_the_same_desired_property_twice_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         const char* name = "a";
         const char* type = "b";
@@ -4819,7 +4822,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelDesiredPropertyCount_with_NULL_desiredPropertyCount_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
 
@@ -4838,7 +4841,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelDesiredPropertyCount_with_0_desired_properties_succeeds)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         size_t nDesiredProperties;
         umock_c_reset_all_calls();
@@ -4862,7 +4865,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelDesiredPropertyCount_with_1_desired_properties_succeeds)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
 
@@ -4888,7 +4891,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelDesiredPropertyCount_with_2_desired_properties_succeeds)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
         (void)Schema_AddModelDesiredProperty(modelType, "A", "B", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
@@ -4930,7 +4933,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelDesiredPropertyByName_with_NULL_desiredPropertyName_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
 
@@ -4949,7 +4952,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelDesiredPropertyByName_with_non_existing_desiredPropertyName_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
         const char* desiredPropertyName = "a";
@@ -4973,7 +4976,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelDesiredPropertyByName_with_non_existing_desiredPropertyName_fails_2)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
         umock_c_reset_all_calls();
@@ -4998,7 +5001,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelDesiredPropertyByName_succeeds)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
         umock_c_reset_all_calls();
@@ -5038,7 +5041,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelDesiredPropertyByIndex_with_0_desiredProperties_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
 
@@ -5060,7 +5063,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelDesiredPropertyByIndex_with_1_desiredProperties_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
         umock_c_reset_all_calls();
@@ -5083,7 +5086,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelDesiredPropertyByIndex_with_1_desiredProperties_succeeds)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
         umock_c_reset_all_calls();
@@ -5121,7 +5124,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_ModelDesiredPropertyByPathExists_with_NULL_desiredPropertyPath_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
 
@@ -5140,7 +5143,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_ModelDesiredPropertyByPathExists_with_no_properties_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
 
         ///act
@@ -5157,7 +5160,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_ModelDesiredPropertyByPathExists_with_1_properties_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
 
@@ -5175,7 +5178,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_ModelDesiredPropertyByPathExists_with_2_properties_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelDesiredProperty(modelType, "a1", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
         (void)Schema_AddModelDesiredProperty(modelType, "a2", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
@@ -5194,7 +5197,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_ModelDesiredPropertyByPathExists_with_2_properties_succeeds)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelDesiredProperty(modelType, "a1", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
         (void)Schema_AddModelDesiredProperty(modelType, "a2", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
@@ -5216,7 +5219,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     {
         ///arrange
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
         (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 0, NULL);
@@ -5251,7 +5254,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     {
         ///arrange
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
         (void)Schema_AddModelDesiredProperty(minerModel, "reported", "five_miles_of_gallery", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
@@ -5304,7 +5307,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelDesiredProperty_pfDesiredPropertyFromAGENT_DATA_TYPE_succeeds)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         const char* name = "a";
         const char* type = "b";
@@ -5340,7 +5343,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelModelByName_Offset_with_NULL_propertyName_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
 
@@ -5358,7 +5361,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelModelByName_Offset_with_notfound_propertyName_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
         (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 3, NULL);
@@ -5378,7 +5381,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelModelByName_Offset_succeeds)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
         (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 3, NULL); //<----- this is the offset
@@ -5412,7 +5415,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelModelByIndex_Offset_with_invalid_index_fails)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         umock_c_reset_all_calls();
 
@@ -5430,7 +5433,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelModelByIndex_Offset_succeeds)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
         (void)Schema_AddModelModel(model, "ManicMiner", minerModel, 3, NULL); //<----- this is the offset
@@ -5464,7 +5467,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelDesiredProperty_offset_succeeds)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 3, NULL);
         SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle = Schema_GetModelDesiredPropertyByName(modelType, "a");
@@ -5499,7 +5502,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelDesiredPropertyType_succeeds)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelDesiredProperty(modelType, "a", "theType", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 3, NULL);
         SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle = Schema_GetModelDesiredPropertyByName(modelType, "a");
@@ -5534,7 +5537,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelDesiredProperty_pfDesiredPropertyDeinitialize_succeeds)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelDesiredProperty(modelType, "a", "theType", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 3, NULL);
         SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle = Schema_GetModelDesiredPropertyByName(modelType, "a");
@@ -5568,7 +5571,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelDesiredProperty_pfDesiredPropertyInitialize_succeeds)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 3, NULL);
         SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle = Schema_GetModelDesiredPropertyByName(modelType, "a");
@@ -5593,7 +5596,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelElementTypeByName_succeeds)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelDesiredProperty(modelType, "desired", "a", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 3, NULL);
         (void)Schema_AddModelReportedProperty(modelType, "reported", "n");
@@ -5651,7 +5654,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelDesiredProperty_pfOnDesiredProperty_created_with_NULL_pfOnDesiredProperty_returns_NULL)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelDesiredProperty(modelType, "desired", "a", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 3, NULL);
 
@@ -5669,7 +5672,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelDesiredProperty_pfOnDesiredProperty_created_with_non_NULL_pfOnDesiredProperty_returns_non_NULL)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_CreateModelType(schemaHandle, "Model");
         (void)Schema_AddModelDesiredProperty(modelType, "a", "b", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 3, g_onDesiredProperty);
         SCHEMA_DESIRED_PROPERTY_HANDLE desiredPropertyHandle = Schema_GetModelDesiredPropertyByName(modelType, "a");
@@ -5702,7 +5705,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelModelByName_OnDesiredProperty_with_NULL_propertyName_returns_NULL)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
         (void)Schema_AddModelDesiredProperty(minerModel, "reported", "five_miles_of_gallery", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
@@ -5722,7 +5725,7 @@ BEGIN_TEST_SUITE(Schema_ut)
     TEST_FUNCTION(Schema_GetModelModelByName_OnDesiredProperty_returns_non_NULL_onDesiredProperty)
     {
         ///arrange
-        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE);
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
         SCHEMA_MODEL_TYPE_HANDLE model = Schema_CreateModelType(schemaHandle, "someModel");
         SCHEMA_MODEL_TYPE_HANDLE minerModel = Schema_CreateModelType(schemaHandle, "someMinerModel");
         (void)Schema_AddModelDesiredProperty(minerModel, "reported", "five_miles_of_gallery", g_pfDesiredPropertyFromAGENT_DATA_TYPE, g_pfDesiredPropertyInitialize, g_pfDesiredPropertyDeinitialize, 0, NULL);
@@ -5736,5 +5739,170 @@ BEGIN_TEST_SUITE(Schema_ut)
 
         ///clean
         Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_090: [ If metadata is NULL then Schema_Create shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_Create_with_NULL_metadata_fails)
+    {
+        // arrange
+
+        // act
+        SCHEMA_HANDLE result = Schema_Create(SCHEMA_NAMESPACE, NULL);
+
+        // assert
+        ASSERT_IS_NULL(result);
+
+        // cleanup
+    }
+
+    /*Tests_SRS_SCHEMA_02_092: [ Otherwise, Schema_GetMetadata shall succeed and return the saved metadata pointer. ]*/
+    TEST_FUNCTION(Schema_GetMetadata_with_non_NULL_schemaHandle_succeeds)
+    {
+        ///arrange
+        SCHEMA_HANDLE schema = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+
+        ///act
+        void* metadata = Schema_GetMetadata(schema);
+
+        // assert
+        ASSERT_ARE_EQUAL(void_ptr, TEST_SCHEMA_METADATA, metadata);
+
+        // cleanup
+        Schema_Destroy(schema);
+    }
+
+    /*Tests_SRS_SCHEMA_02_091: [ If schemaHandle is NULL then Schema_GetMetadata shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_GetMetadata_with_NULL_schemaHandle_succeeds)
+    {
+        ///arrange
+        SCHEMA_HANDLE schema = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+
+        ///act
+        void* metadata = Schema_GetMetadata(schema);
+
+        // assert
+        ASSERT_ARE_EQUAL(void_ptr, TEST_SCHEMA_METADATA, metadata);
+
+        // cleanup
+        Schema_Destroy(schema);
+    }
+
+    /*Tests_SRS_SCHEMA_02_093: [ If modelName is NULL then Schema_GetSchemaForModel shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_GetSchemaForModel_with_NULL_modelName_fails)
+    {
+        ///arrange
+
+        ///act
+        SCHEMA_HANDLE schema = Schema_GetSchemaForModel(NULL);
+
+        ///assert
+        ASSERT_IS_NULL(schema);
+
+        ///cleanup
+    }
+
+    /*Tests_SRS_SCHEMA_02_094: [ Schema_GetSchemaForModel shall find the SCHEMA_HANDLE that contains a model by name modelName and if found, succeed and return that. ]*/
+    TEST_FUNCTION(Schema_GetSchemaForModel_succeeds)
+    {
+        // arrange
+        SCHEMA_HANDLE schemaHandle = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        (void)Schema_CreateModelType(schemaHandle, "ModelName1");
+        (void)Schema_CreateModelType(schemaHandle, "ModelName2");
+        (void)Schema_CreateModelType(schemaHandle, "ModelName3");
+
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_pred()
+            .IgnoreArgument_value();
+
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_pred()
+            .IgnoreArgument_value();
+
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_pred()
+            .IgnoreArgument_value();
+        // act
+        SCHEMA_HANDLE result1 = Schema_GetSchemaForModel("ModelName1");
+        SCHEMA_HANDLE result2 = Schema_GetSchemaForModel("ModelName2");
+        SCHEMA_HANDLE result3 = Schema_GetSchemaForModel("ModelName3");
+
+        // assert
+        ASSERT_ARE_EQUAL(void_ptr, schemaHandle, result1);
+        ASSERT_ARE_EQUAL(void_ptr, schemaHandle, result2);
+        ASSERT_ARE_EQUAL(void_ptr, schemaHandle, result3);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        // cleanup
+        Schema_Destroy(schemaHandle);
+    }
+
+    /*Tests_SRS_SCHEMA_02_094: [ Schema_GetSchemaForModel shall find the SCHEMA_HANDLE that contains a model by name modelName and if found, succeed and return that. ]*/
+    TEST_FUNCTION(Schema_GetSchemaForModel_2_schemas_succeeds)
+    {
+        // arrange
+        SCHEMA_HANDLE schemaHandle1 = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        (void)Schema_CreateModelType(schemaHandle1, "ModelName1");
+
+        SCHEMA_HANDLE schemaHandle2 = Schema_Create(SCHEMA_NAMESPACE_2, TEST_SCHEMA_METADATA);
+        (void)Schema_CreateModelType(schemaHandle2, "ModelName2");
+
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_pred()
+            .IgnoreArgument_value();
+
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_pred()
+            .IgnoreArgument_value();
+
+        // act
+        SCHEMA_HANDLE result1 = Schema_GetSchemaForModel("ModelName1");
+        SCHEMA_HANDLE result2 = Schema_GetSchemaForModel("ModelName2");
+
+        // assert
+        ASSERT_ARE_EQUAL(void_ptr, schemaHandle1, result1);
+        ASSERT_ARE_EQUAL(void_ptr, schemaHandle2, result2);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        // cleanup
+        Schema_Destroy(schemaHandle1);
+        Schema_Destroy(schemaHandle2);
+    }
+
+    /*Tests_SRS_SCHEMA_02_095: [ If the model is not found in any schema, then Schema_GetSchemaForModel shall fail and return NULL. ]*/
+    TEST_FUNCTION(Schema_GetSchemaForModel_2_schemas_fails)
+    {
+        // arrange
+        SCHEMA_HANDLE schemaHandle1 = Schema_Create(SCHEMA_NAMESPACE, TEST_SCHEMA_METADATA);
+        (void)Schema_CreateModelType(schemaHandle1, "ModelName1");
+
+        SCHEMA_HANDLE schemaHandle2 = Schema_Create(SCHEMA_NAMESPACE_2, TEST_SCHEMA_METADATA);
+        (void)Schema_CreateModelType(schemaHandle2, "ModelName2");
+
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+            .IgnoreArgument_handle()
+            .IgnoreArgument_pred()
+            .IgnoreArgument_value();
+
+        // act
+        SCHEMA_HANDLE result1 = Schema_GetSchemaForModel("ModelName3");
+
+        // assert
+        ASSERT_IS_NULL(result1);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        // cleanup
+        Schema_Destroy(schemaHandle1);
+        Schema_Destroy(schemaHandle2);
     }
 END_TEST_SUITE(Schema_ut)
