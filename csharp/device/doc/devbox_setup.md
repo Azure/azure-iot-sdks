@@ -4,8 +4,8 @@ This document describes how to prepare your development environment to build and
 
 - [Setting up a Windows development environment](#windows)
 - [Azure SDK for .NET](#azuresdk)
-- [Directly using .NET SDK using NuGet packages](#directly_using_sdk)
-- [Locally building .NET SDK](#building_sdk)
+- [Directly using .NET IoT Device Client SDK using NuGet packages](#directly_using_sdk)
+- [Locally building .NET IoT Device Client SDK](#building_sdk)
 - [Application samples](#samplecode)
 
 <a name="windows"/>
@@ -25,14 +25,14 @@ Install the Azure SDK for .NET 2.7 or later. Use the following links to download
 - [VS 2012][lnk-sdk-vs2012]
 
 <a name="directly_using_sdk"/>
-## Directly using .NET SDK using NuGet packages
+## Directly using Azure IoT Device Client .NET SDK using NuGet packages
 
 If you are creating a client application from the scratch, use the [NuGet][NuGet] Package Manager to install the latest version of **Microsoft.Azure.Devices.Client** Device SDK for Azure IoT Devices NuGet package to your project.
 
 - The package is located at [Azure IoT Device SDK NuGet Package] [lnk-NuGet-package]. 
 
 <a name="building_sdk"/>
-## Building the .NET SDK locally
+## Building the Azure IoT Device Client .NET SDK locally
 In some cases, you may want to build the .NET SDK libraries **locally** for development and testing purpose. For example, you may want to build the **latest** code available on the develop branch which follows the Continuous Integration (CI) approach and step through the client library code while debugging.
 
 To pull latest code on **develop** branch you can use following command
