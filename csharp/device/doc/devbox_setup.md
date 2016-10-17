@@ -2,11 +2,11 @@
 
 This document describes how to prepare your development environment to build and use the **Microsoft .NET Device SDK for Azure IoT Devices**
 
-- [Setting up a Windows development environment](#windows)
-- [Azure SDK for .NET](#azuresdk)
-- [Directly using .NET IoT Device Client SDK using NuGet packages](#directly_using_sdk)
-- [Locally building .NET IoT Device Client SDK](#building_sdk)
-- [Application samples](#samplecode)
+1.  [Setting up a Windows development environment](#windows)
+2.  [Azure SDK for .NET](#azuresdk)
+3.  [Directly using .NET IoT Device Client SDK using NuGet packages](#directly_using_sdk)
+4.  [Locally building .NET IoT Device Client SDK](#building_sdk)
+5.  [Application samples](#samplecode)
 
 <a name="windows"/>
 ## Setting up a Windows development environment
@@ -43,6 +43,31 @@ To clone the **master** use following command or simply download the **.zip** fr
 
 `git clone https://github.com/Azure/azure-iot-sdks.git`
 
+### Building the Azure IoT Device Client .NET SDK using command prompt
+
+The following instructions outline how you can build the C# SDK (along with samples). You can either build using command line or you can build using VS 2015 IDE
+
+#### Option 1:  Build using command line
+1. Open a Developer Command Prompt for VS2015.
+2. Go to scripts folder located at **csharp\\device\\build**. Run the build script **build** which will build the SDK and the samples using default option.
+
+Use 'build --options' to list various build options.
+For example to build for x64 as debug build, you can use
+
+`build --platform x64 --config Debug`
+You will be prompted to download and run nuget.exe for downloading packages that Azure IoT SDK has dependency on.
+Once build completes, it will create
+
+1. Microsoft.Azure.Devices.Client.dll (Client SDK Assembly)
+2. Microsoft.Azure.Devices.Client.PCL.dll (PCL library)
+3. Microsoft.Azure.Devices.Client.winmd (WinRT version that you will need to UWP application)
+4. Sample executables 
+
+#### Option 2: Build using VS 2015 IDE
+1. Open iothub_csharp_deviceclient.sln file in VS 2015 IDE.
+2. Select the configuration that you want and press Build->Build Solution command.
+Just like coo
+
 <a name="samplecode"/>
 ## Sample applications
 
@@ -59,7 +84,7 @@ To check for any latest Xamarin update for Visual Studio check Tools->Options->X
 
 ## Running CppUWPSample (Universal Windows) sample application
 
-Visual Studio is having an issue with getting all the depedencies (dll) of the Microsoft.Azure.Devices.Client.WinRT which is referenced in the project to the proper location.  This leads to an exception thrown about not loading file or assembly during run-time.  You will have to manually copy the dlls in the appropriate location in order to run the sample application successfully.  Follow the below steps if needed:
+Visual Studio is having an issue with getting all the dependencies (dll) of the Microsoft.Azure.Devices.Client.WinRT which is referenced in the project to the proper location.  This leads to an exception thrown about not loading file or assembly during run-time.  You will have to manually copy the dlls in the appropriate location in order to run the sample application successfully.  Follow the below steps if needed:
 * Build the UWPSample (Universal Windows) project
 * Note the location of the bin folder, i.e. ...\azure-iot-sdks\csharp\device\samples\UWPSample\bin\x86\Debug\
 * Build the CppUWPSample (Universal Windows) project
