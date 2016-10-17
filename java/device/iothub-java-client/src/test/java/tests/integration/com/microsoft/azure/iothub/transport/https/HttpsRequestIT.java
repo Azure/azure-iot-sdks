@@ -35,10 +35,7 @@ public class HttpsRequestIT
 
         int expectedStatus = 200;
         String expectedBodyPrefix = "@font-face {\n"
-                + "  font-family: 'Inconsolata';\n"
-                + "  font-style: normal;\n"
-                + "  font-weight: 400;\n"
-                + "  src: local('Inconsolata'), url(https://fonts.gstatic.com/s/inconsolata/v12/";
+                + "  font-family: 'Inconsolata';";
         assertThat(testStatus, is(expectedStatus));
         assertThat(testBody, is(startsWith(expectedBodyPrefix)));
     }
