@@ -33,15 +33,15 @@ If you are creating a client application from the scratch, use the [NuGet][NuGet
 
 <a name="building_sdk"/>
 ## Building the .NET SDK locally
-In some cases, you may want to build the .NET SDK libraries locally for development and testing purpose. For example, you may want to build the latest code available on the develop branch which follows the Continuous Integration (CI) approach.
+In some cases, you may want to build the .NET SDK libraries **locally** for development and testing purpose. For example, you may want to build the **latest** code available on the develop branch which follows the Continuous Integration (CI) approach and step through the client library code while debugging.
+
 To pull latest code on **develop** branch you can use following command
 
 `git clone -b develop --recursive https://github.com/Azure/azure-iot-sdks.git azure-iot-develop`
 
 To clone the **master** use following command or simply download the **.zip** from [Azure IoT SDK][lnk-azure-iot] 
-```
-git clone https://github.com/Azure/azure-iot-sdks.git
-```
+
+`git clone https://github.com/Azure/azure-iot-sdks.git`
 
 <a name="samplecode"/>
 ## Sample applications
