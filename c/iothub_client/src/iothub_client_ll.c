@@ -244,7 +244,7 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateFromConnectionString(const char* c
                     LogError("deviceId is not found");
                 }
                 else if (!(
-                    ((!isx509found) && (config->deviceSasToken == NULL) ^ (config->deviceKey == NULL)) ||
+                    ((!isx509found) && ((config->deviceSasToken == NULL) ^ (config->deviceKey == NULL))) ||
                     ((isx509found) && (config->deviceSasToken == NULL) && (config->deviceKey == NULL))
                     ))
                 {
