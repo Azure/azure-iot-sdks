@@ -85,9 +85,11 @@ typedef struct SCHEMA_MODEL_ELEMENT_TAG
 }SCHEMA_MODEL_ELEMENT;
 
 #include "azure_c_shared_utility/umock_c_prod.h"
-extern SCHEMA_HANDLE Schema_Create(const char* schemaNamespace);
+extern SCHEMA_HANDLE Schema_Create(const char* schemaNamespace, void* metadata);
+extern void* Schema_GetMetadata(SCHEMA_HANDLE schemaHandle);
 extern size_t Schema_GetSchemaCount(void);
 extern SCHEMA_HANDLE Schema_GetSchemaByNamespace(const char* schemaNamespace);
+extern SCHEMA_HANDLE Schema_GetSchemaForModel(const char* modelName);
 extern const char* Schema_GetSchemaNamespace(SCHEMA_HANDLE schemaHandle);
 extern SCHEMA_RESULT Schema_AddDeviceRef(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle);
 extern SCHEMA_RESULT Schema_ReleaseDeviceRef(SCHEMA_MODEL_TYPE_HANDLE modelTypeHandle);
@@ -175,6 +177,13 @@ extern void Schema_Destroy(SCHEMA_HANDLE schemaHandle);
 extern SCHEMA_RESULT Schema_DestroyIfUnused(SCHEMA_MODEL_TYPE_HANDLE modelHandle);
 ```
 
+### Schema_Create
+```c
+extern SCHEMA_HANDLE Schema_Create(const char* schemaNamespace, void* metadata);
+```
+
+`Schema_Create` construct a schema for a name and metadata.
+
 **SRS_SCHEMA_99_001: [** Schema_Create shall create a schema with a given namespace. **]**
 
 **SRS_SCHEMA_99_002: [** On success a non-NULL handle to the newly created schema shall be returned. **]**
@@ -182,6 +191,30 @@ extern SCHEMA_RESULT Schema_DestroyIfUnused(SCHEMA_MODEL_TYPE_HANDLE modelHandle
 **SRS_SCHEMA_99_003: [** On failure, NULL shall be returned. **]**
 
 **SRS_SCHEMA_99_004: [** If schemaNamespace is NULL, Schema_Create shall fail. **]**
+
+**SRS_SCHEMA_02_090: [** If `metadata` is `NULL` then Schema_Create shall fail and return NULL. **]**
+
+### Schema_GetMetadata
+```c
+extern void* Schema_GetMetadata(SCHEMA_HANDLE schemaHandle);
+```
+
+`Schema_GetMetadata` returns the saved pointer to the metadata of the schema.
+
+**SRS_SCHEMA_02_091: [** If `schemaHandle` is `NULL` then `Schema_GetMetadata` shall fail and return `NULL`. **]**
+
+**SRS_SCHEMA_02_092: [** Otherwise, `Schema_GetMetadata` shall succeed and return the saved metadata pointer. **]**
+
+### Schema_GetSchemaForModel
+```c
+SCHEMA_HANDLE Schema_GetSchemaForModel(const char* modelName)
+```
+
+**SRS_SCHEMA_02_093: [** If `modelName` is `NULL` then `Schema_GetSchemaForModel` shall fail and return `NULL`. **]**
+
+**SRS_SCHEMA_02_094: [** `Schema_GetSchemaForModel` shall find the SCHEMA_HANDLE that contains a model by name `modelName` and if found, succeed and return that. **]**
+
+**SRS_SCHEMA_02_095: [** If the model is not found in any schema, then `Schema_GetSchemaForModel` shall fail and return `NULL`. **]**
 
 ### size_t Schema_GetSchemaCount(void);
 

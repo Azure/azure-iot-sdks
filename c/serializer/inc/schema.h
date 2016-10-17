@@ -70,12 +70,16 @@ typedef struct SCHEMA_MODEL_ELEMENT_TAG
 }SCHEMA_MODEL_ELEMENT;
 
 #include "azure_c_shared_utility/umock_c_prod.h"
-MOCKABLE_FUNCTION(, SCHEMA_HANDLE, Schema_Create, const char*, schemaNamespace);
+MOCKABLE_FUNCTION(, SCHEMA_HANDLE, Schema_Create, const char*, schemaNamespace, void*, metadata);
+MOCKABLE_FUNCTION(, const void*, Schema_GetMetadata, SCHEMA_HANDLE, schemaHandle);
 MOCKABLE_FUNCTION(, size_t, Schema_GetSchemaCount);
 MOCKABLE_FUNCTION(, SCHEMA_HANDLE, Schema_GetSchemaByNamespace, const char*, schemaNamespace);
+MOCKABLE_FUNCTION(, SCHEMA_HANDLE, Schema_GetSchemaForModel, const char*, modelName);
 MOCKABLE_FUNCTION(, const char*, Schema_GetSchemaNamespace, SCHEMA_HANDLE, schemaHandle);
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddDeviceRef, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle);
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_ReleaseDeviceRef, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle);
+
+
 
 MOCKABLE_FUNCTION(, SCHEMA_MODEL_TYPE_HANDLE, Schema_CreateModelType, SCHEMA_HANDLE, schemaHandle, const char*, modelName);
 MOCKABLE_FUNCTION(, SCHEMA_HANDLE, Schema_GetSchemaForModelType, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle);
