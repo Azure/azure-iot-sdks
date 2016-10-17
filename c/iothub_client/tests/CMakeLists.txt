@@ -26,7 +26,7 @@ if(${use_mqtt})
     add_subdirectory(iothubtransportmqtt_ut)
     if (${run_e2e_tests} OR ${nuget_e2e_tests})
         add_subdirectory(iothubclient_mqtt_e2e)
-        add_subdirectory(iothubclient_dt_reported_e2e)
+        add_subdirectory(iothubclient_mqtt_dt_e2e)
     endif()
 endif()
 

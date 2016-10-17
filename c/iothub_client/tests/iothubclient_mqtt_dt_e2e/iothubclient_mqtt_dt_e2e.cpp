@@ -7,28 +7,28 @@
 #endif
 
 #include "testrunnerswitcher.h"
-#include "iothubclient_common_e2e.h"
+#include "iothubclient_common_dt_e2e.h"
 #include "iothubtransportmqtt.h"
 
 static TEST_MUTEX_HANDLE g_dllByDll;
 
-BEGIN_TEST_SUITE(iothubclient_dt_reported_e2e)
+BEGIN_TEST_SUITE(iothubclient_mqtt_dt_e2e)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
     TEST_INITIALIZE_MEMORY_DEBUG(g_dllByDll);
-    e2e_init();
+    dt_e2e_init();
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
 {
-    e2e_deinit();
+    dt_e2e_deinit();
     TEST_DEINITIALIZE_MEMORY_DEBUG(g_dllByDll);
 }
 
 TEST_FUNCTION(IoTHub_MQTT_SendReported_e2e)
 {
-    e2e_send_event_test(MQTT_Protocol);
+    dt_e2e_send_reported_test(MQTT_Protocol);
 }
 
-END_TEST_SUITE(iothubclient_dt_reported_e2e)
+END_TEST_SUITE(iothubclient_mqtt_dt_e2e)
