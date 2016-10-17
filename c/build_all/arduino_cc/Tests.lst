@@ -11,6 +11,7 @@ LogLines=300
 MinimumHeap=22000
 Categories=IoTHub
 Hardware=Adafruit_Huzzah
+SerialPort=COM4
 CPUParameters=-fqbn=esp8266:esp8266:huzzah:CpuFrequency=80,UploadSpeed=115200,FlashSize=4M3M -ide-version=10609
 Build=Enable
 Execution=Enable
@@ -25,6 +26,7 @@ LogLines=300
 MinimumHeap=22000
 Categories=IoTHub
 Hardware=Adafruit_Huzzah
+SerialPort=COM4
 CPUParameters=-fqbn=esp8266:esp8266:huzzah:CpuFrequency=80,UploadSpeed=115200,FlashSize=4M3M -ide-version=10609
 Build=Enable
 Execution=Disable
@@ -39,6 +41,7 @@ LogLines=300
 MinimumHeap=22000
 Categories=IoTHub
 Hardware=Adafruit_FeatherM0
+SerialPort=COM9
 CPUParameters=-fqbn=adafruit:samd:adafruit_feather_m0 -vid-pid=0X239A_0X800B -ide-version=10609
 Build=Enable
 Execution=Disable
@@ -53,6 +56,7 @@ LogLines=300
 MinimumHeap=22000
 Categories=IoTHub
 Hardware=Adafruit_FeatherM0
+SerialPort=COM9
 CPUParameters=-fqbn=adafruit:samd:adafruit_feather_m0 -vid-pid=0X239A_0X800B -ide-version=10609
 Build=Disable
 Execution=Disable
@@ -67,9 +71,10 @@ LogLines=300
 MinimumHeap=22000
 Categories=IoTHub
 Hardware=SparkFun_ESP8266_Thing 
+SerialPort=COM7
 CPUParameters=-fqbn=esp8266:esp8266:thing:CpuFrequency=80,UploadSpeed=115200 -vid-pid=0X239A_0X800B -ide-version=10609
 Build=Enable
-Execution=Disable
+Execution=Enable
 
 [thingdev_simplesample_http]
 Target=simplesample_http.ino
@@ -81,6 +86,7 @@ LogLines=300
 MinimumHeap=22000
 Categories=IoTHub
 Hardware=SparkFun_ESP8266_Thing
+SerialPort=COM7
 CPUParameters=-fqbn=esp8266:esp8266:thing:CpuFrequency=80,UploadSpeed=115200 -vid-pid=0X239A_0X800B -ide-version=10609
 Build=Enable
 Execution=Disable
