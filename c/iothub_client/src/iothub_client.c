@@ -17,7 +17,7 @@
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/lock.h"
 #include "azure_c_shared_utility/xlogging.h"
-#include "azure_c_shared_utility/list.h"
+#include "azure_c_shared_utility/singlylinkedlist.h"
 
 typedef struct IOTHUB_CLIENT_INSTANCE_TAG
 {
@@ -27,7 +27,7 @@ typedef struct IOTHUB_CLIENT_INSTANCE_TAG
     LOCK_HANDLE LockHandle;
     sig_atomic_t StopThread;
 #ifndef DONT_USE_UPLOADTOBLOB
-    LIST_HANDLE savedDataToBeCleaned; /*list containing UPLOADTOBLOB_SAVED_DATA*/
+    SINGLYLINKEDLIST_HANDLE savedDataToBeCleaned; /*list containing UPLOADTOBLOB_SAVED_DATA*/
 #endif
 } IOTHUB_CLIENT_INSTANCE;
 
@@ -55,12 +55,12 @@ static void garbageCollectorImpl(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance)
 {
     /*see if any savedData structures can be disposed of*/
     /*Codes_SRS_IOTHUBCLIENT_02_072: [ All threads marked as disposable (upon completion of a file upload) shall be joined and the data structures build for them shall be freed. ]*/
-    LIST_ITEM_HANDLE item = list_get_head_item(iotHubClientInstance->savedDataToBeCleaned);
+    LIST_ITEM_HANDLE item = singlylinkedlist_get_head_item(iotHubClientInstance->savedDataToBeCleaned);
     while (item != NULL)
     {
-        const UPLOADTOBLOB_SAVED_DATA* savedData = (const UPLOADTOBLOB_SAVED_DATA*)list_item_get_value(item);
+        const UPLOADTOBLOB_SAVED_DATA* savedData = (const UPLOADTOBLOB_SAVED_DATA*)singlylinkedlist_item_get_value(item);
         LIST_ITEM_HANDLE old_item = item;
-        item = list_get_next_item(item);
+        item = singlylinkedlist_get_next_item(item);
 
         if (Lock(savedData->lockGarbage) != LOCK_OK)
         {
@@ -75,7 +75,7 @@ static void garbageCollectorImpl(IOTHUB_CLIENT_INSTANCE* iotHubClientInstance)
                 {
                     LogError("unable to ThreadAPI_Join");
                 }
-                (void)list_remove(iotHubClientInstance->savedDataToBeCleaned, old_item);
+                (void)singlylinkedlist_remove(iotHubClientInstance->savedDataToBeCleaned, old_item);
                 free((void*)savedData->source);
                 free((void*)savedData->destinationFileName);
 
@@ -205,11 +205,11 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connect
             else
             {
 #ifndef DONT_USE_UPLOADTOBLOB
-                /*Codes_SRS_IOTHUBCLIENT_02_059: [ IoTHubClient_CreateFromConnectionString shall create a LIST_HANDLE containing THREAD_HANDLE (created by future calls to IoTHubClient_UploadToBlobAsync). ]*/
-                if ((result->savedDataToBeCleaned = list_create()) == NULL)
+                /*Codes_SRS_IOTHUBCLIENT_02_059: [ IoTHubClient_CreateFromConnectionString shall create a SINGLYLINKEDLIST_HANDLE containing THREAD_HANDLE (created by future calls to IoTHubClient_UploadToBlobAsync). ]*/
+                if ((result->savedDataToBeCleaned = singlylinkedlist_create()) == NULL)
                 {
-                    /*Codes_SRS_IOTHUBCLIENT_02_070: [ If creating the LIST_HANDLE fails then IoTHubClient_CreateFromConnectionString shall fail and return NULL]*/
-                    LogError("unable to list_create");
+                    /*Codes_SRS_IOTHUBCLIENT_02_070: [ If creating the SINGLYLINKEDLIST_HANDLE fails then IoTHubClient_CreateFromConnectionString shall fail and return NULL]*/
+                    LogError("unable to singlylinkedlist_create");
                     Lock_Deinit(result->LockHandle);
                     free(result);
                     result = NULL;
@@ -223,7 +223,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateFromConnectionString(const char* connect
                     {
                         /* Codes_SRS_IOTHUBCLIENT_12_010: [If IoTHubClient_LL_CreateFromConnectionString fails then IoTHubClient_CreateFromConnectionString shall do clean - up and return NULL] */
 #ifndef DONT_USE_UPLOADTOBLOB
-                        list_destroy(result->savedDataToBeCleaned);
+                        singlylinkedlist_destroy(result->savedDataToBeCleaned);
 #endif
                         Lock_Deinit(result->LockHandle);
                         free(result);
@@ -263,11 +263,11 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* config)
         else
         {
 #ifndef DONT_USE_UPLOADTOBLOB
-            /*Codes_SRS_IOTHUBCLIENT_02_060: [ IoTHubClient_Create shall create a LIST_HANDLE containing THREAD_HANDLE (created by future calls to IoTHubClient_UploadToBlobAsync). ]*/
-            if ((result->savedDataToBeCleaned = list_create()) == NULL)
+            /*Codes_SRS_IOTHUBCLIENT_02_060: [ IoTHubClient_Create shall create a SINGLYLINKEDLIST_HANDLE containing THREAD_HANDLE (created by future calls to IoTHubClient_UploadToBlobAsync). ]*/
+            if ((result->savedDataToBeCleaned = singlylinkedlist_create()) == NULL)
             {
-                /*Codes_SRS_IOTHUBCLIENT_02_061: [ If creating the LIST_HANDLE fails then IoTHubClient_Create shall fail and return NULL. ]*/
-                LogError("unable to list_create");
+                /*Codes_SRS_IOTHUBCLIENT_02_061: [ If creating the SINGLYLINKEDLIST_HANDLE fails then IoTHubClient_Create shall fail and return NULL. ]*/
+                LogError("unable to singlylinkedlist_create");
                 Lock_Deinit(result->LockHandle);
                 free(result);
                 result = NULL;
@@ -283,7 +283,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_Create(const IOTHUB_CLIENT_CONFIG* config)
                     /* Codes_SRS_IOTHUBCLIENT_01_031: [If IoTHubClient_Create fails, all resources allocated by it shall be freed.] */
                     Lock_Deinit(result->LockHandle);
 #ifndef DONT_USE_UPLOADTOBLOB
-                    list_destroy(result->savedDataToBeCleaned);
+                    singlylinkedlist_destroy(result->savedDataToBeCleaned);
 #endif
                     free(result);
                     result = NULL;
@@ -323,11 +323,11 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE transport
         else
         {
 #ifndef DONT_USE_UPLOADTOBLOB
-            /*Codes_SRS_IOTHUBCLIENT_02_073: [ IoTHubClient_CreateWithTransport shall create a LIST_HANDLE that shall be used by IoTHubClient_UploadToBlobAsync. ]*/
-            if ((result->savedDataToBeCleaned = list_create()) == NULL)
+            /*Codes_SRS_IOTHUBCLIENT_02_073: [ IoTHubClient_CreateWithTransport shall create a SINGLYLINKEDLIST_HANDLE that shall be used by IoTHubClient_UploadToBlobAsync. ]*/
+            if ((result->savedDataToBeCleaned = singlylinkedlist_create()) == NULL)
             {
-                /*Codes_SRS_IOTHUBCLIENT_02_074: [ If creating the LIST_HANDLE fails then IoTHubClient_CreateWithTransport shall fail and return NULL. ]*/
-                LogError("unable to list_create");
+                /*Codes_SRS_IOTHUBCLIENT_02_074: [ If creating the SINGLYLINKEDLIST_HANDLE fails then IoTHubClient_CreateWithTransport shall fail and return NULL. ]*/
+                LogError("unable to singlylinkedlist_create");
                 free(result);
                 result = NULL;
             }
@@ -344,7 +344,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE transport
                     LogError("unable to IoTHubTransport_GetLock");
                     /*Codes_SRS_IOTHUBCLIENT_17_006: [ If IoTHubTransport_GetLock fails, then IoTHubClient_CreateWithTransport shall return NULL. ]*/
 #ifndef DONT_USE_UPLOADTOBLOB
-                    list_destroy(result->savedDataToBeCleaned);
+                    singlylinkedlist_destroy(result->savedDataToBeCleaned);
 #endif
                     free(result);
                     result = NULL;
@@ -366,7 +366,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE transport
                         LogError("unable to IoTHubTransport_GetLLTransport");
                         /*Codes_SRS_IOTHUBCLIENT_17_004: [ If IoTHubTransport_GetLLTransport fails, then IoTHubClient_CreateWithTransport shall return NULL. ]*/
 #ifndef DONT_USE_UPLOADTOBLOB
-                        list_destroy(result->savedDataToBeCleaned);
+                        singlylinkedlist_destroy(result->savedDataToBeCleaned);
 #endif
                         free(result);
                         result = NULL;
@@ -377,7 +377,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE transport
                         {
                             LogError("unable to Lock");
 #ifndef DONT_USE_UPLOADTOBLOB
-                            list_destroy(result->savedDataToBeCleaned);
+                            singlylinkedlist_destroy(result->savedDataToBeCleaned);
 #endif
                             free(result);
                             result = NULL;
@@ -392,7 +392,7 @@ IOTHUB_CLIENT_HANDLE IoTHubClient_CreateWithTransport(TRANSPORT_HANDLE transport
                                 /*Codes_SRS_IOTHUBCLIENT_17_008: [ If IoTHubClient_LL_CreateWithTransport fails, then IoTHubClient_Create shall return NULL. ]*/
                                 /*Codes_SRS_IOTHUBCLIENT_17_009: [ If IoTHubClient_LL_CreateWithTransport fails, all resources allocated by it shall be freed. ]*/
 #ifndef DONT_USE_UPLOADTOBLOB
-                                list_destroy(result->savedDataToBeCleaned);
+                                singlylinkedlist_destroy(result->savedDataToBeCleaned);
 #endif
                                 free(result);
                                 result = NULL;
@@ -432,7 +432,7 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
 #ifndef DONT_USE_UPLOADTOBLOB
         /*Codes_SRS_IOTHUBCLIENT_02_069: [ IoTHubClient_Destroy shall free all data created by IoTHubClient_UploadToBlobAsync ]*/
         /*wait for all uploading threads to finish*/
-        while (list_get_head_item(iotHubClientInstance->savedDataToBeCleaned) != NULL)
+        while (singlylinkedlist_get_head_item(iotHubClientInstance->savedDataToBeCleaned) != NULL)
         {
             garbageCollectorImpl(iotHubClientInstance);
         }
@@ -459,7 +459,7 @@ void IoTHubClient_Destroy(IOTHUB_CLIENT_HANDLE iotHubClientHandle)
 #ifndef DONT_USE_UPLOADTOBLOB
         if (iotHubClientInstance->savedDataToBeCleaned != NULL)
         {
-            list_destroy(iotHubClientInstance->savedDataToBeCleaned);
+            singlylinkedlist_destroy(iotHubClientInstance->savedDataToBeCleaned);
         }
 #endif
 
@@ -617,6 +617,38 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHub
             Unlock(iotHubClientInstance->LockHandle);
         }
     }
+
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_SetConnectionStatusCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void * userContextCallback)
+{
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
+    (void)iotHubClientHandle;
+    (void)connectionStatusCallback;
+    (void)userContextCallback;
+
+
+    return result;
+    
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_SetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitinSeconds)
+{
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
+    (void)iotHubClientHandle;
+    (void)retryPolicy;
+    (void)retryTimeoutLimitinSeconds;
+
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_GetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY * retryPolicy, size_t * retryTimeoutLimitinSeconds)
+{
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
+    (void)iotHubClientHandle;
+    (void)retryPolicy;
+    (void)retryTimeoutLimitinSeconds;
 
     return result;
 }
@@ -843,10 +875,10 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubC
                         else
                         {
                             /*Codes_SRS_IOTHUBCLIENT_02_058: [ IoTHubClient_UploadToBlobAsync shall add the structure to the list of structures that need to be cleaned once file upload finishes. ]*/
-                            LIST_ITEM_HANDLE item = list_add(iotHubClientHandleData->savedDataToBeCleaned, savedData);
+                            LIST_ITEM_HANDLE item = singlylinkedlist_add(iotHubClientHandleData->savedDataToBeCleaned, savedData);
                             if (item == NULL)
                             {
-                                LogError("unable to list_add");
+                                LogError("unable to singlylinkedlist_add");
                                 free(savedData->source);
                                 free(savedData->destinationFileName);
                                 free(savedData);
@@ -858,7 +890,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubC
                                 savedData->canBeGarbageCollected = 0;
                                 if ((savedData->lockGarbage = Lock_Init()) == NULL)
                                 {
-                                    (void)list_remove(iotHubClientHandleData->savedDataToBeCleaned, item);
+                                    (void)singlylinkedlist_remove(iotHubClientHandleData->savedDataToBeCleaned, item);
                                     free(savedData->source);
                                     free(savedData->destinationFileName);
                                     free(savedData);
@@ -873,7 +905,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubC
                                         /*Codes_SRS_IOTHUBCLIENT_02_053: [ If copying to the structure or spawning the thread fails, then IoTHubClient_UploadToBlobAsync shall fail and return IOTHUB_CLIENT_ERROR. ]*/
                                         LogError("unablet to ThreadAPI_Create");
                                         (void)Lock_Deinit(savedData->lockGarbage);
-                                        (void)list_remove(iotHubClientHandleData->savedDataToBeCleaned, item);
+                                        (void)singlylinkedlist_remove(iotHubClientHandleData->savedDataToBeCleaned, item);
                                         free(savedData->source);
                                         free(savedData->destinationFileName);
                                         free(savedData);

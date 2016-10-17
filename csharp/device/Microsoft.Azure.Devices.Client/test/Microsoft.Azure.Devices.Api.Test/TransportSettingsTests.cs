@@ -76,6 +76,33 @@ namespace Microsoft.Azure.Devices.Client.Test
         [TestMethod]
         [TestCategory("CIT")]
         [TestCategory("TransportSettings")]
+        public void TransportSettingsTest_TransportType_Mqtt_Tcp_Only()
+        {
+            var transportSetting = new MqttTransportSettings(TransportType.Mqtt_Tcp_Only);
+            Assert.IsTrue(transportSetting.GetTransportType() == TransportType.Mqtt_Tcp_Only, "Should be TransportType.Mqtt_Tcp_Only");
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("TransportSettings")]
+        public void TransportSettingsTest_TransportType_Mqtt_WebSocket_Only()
+        {
+            var transportSetting = new MqttTransportSettings(TransportType.Mqtt_WebSocket_Only);
+            Assert.IsTrue(transportSetting.GetTransportType() == TransportType.Mqtt_WebSocket_Only, "Should be TransportType.Mqtt_WebSocket_Only");
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("TransportSettings")]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void TransportSettingsTest_TransportType_Mqtt()
+        {
+            new MqttTransportSettings(TransportType.Mqtt);
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("TransportSettings")]
         [ExpectedException(typeof(ArgumentOutOfRangeException))]
         public void TransportSettingsTest_ZeroOperationTimeout()
         {
@@ -187,7 +214,12 @@ namespace Microsoft.Azure.Devices.Client.Test
 
             var deviceClient = DeviceClient.Create(hostName, authMethod, new ITransportSettings[]
             {
-                new MqttTransportSettings(TransportType.Mqtt)
+                new MqttTransportSettings(TransportType.Mqtt_Tcp_Only)
+                {
+                    ClientCertificate = cert,
+                    RemoteCertificateValidationCallback = (a, b, c, d) => true
+                },
+                new MqttTransportSettings(TransportType.Mqtt_WebSocket_Only)
                 {
                     ClientCertificate = cert,
                     RemoteCertificateValidationCallback = (a, b, c, d) => true

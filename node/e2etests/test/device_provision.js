@@ -120,7 +120,7 @@ var device_provision = function (hubConnectionString, done) {
   function createDeviceSafe(deviceId, createDevice, next) {
     registry.get(deviceId, function(err) {
       if (!err || err.constructor.name !== 'DeviceNotFoundError') {
-        var errMessageText = 'error creating e2e test device ' + deviceId + !err? 'device already exists':err.constructor.name;
+        var errMessageText = 'error creating e2e test device ' + deviceId + ' ' + (err ? err.constructor.name : 'device already exists');
         console.log(chalk.red(errMessageText));
         done(new errors.DeviceAlreadyExistsError(errMessageText),provisionedDevices);
       } else {

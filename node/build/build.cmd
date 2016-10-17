@@ -78,9 +78,6 @@ if errorlevel 1 goto :cleanup
 call :lint-and-test %node-root%\common\transport\http
 if errorlevel 1 goto :cleanup
 
-call :lint-and-test %node-root%\common\transport\mqtt
-if errorlevel 1 goto :cleanup
-
 call :lint-and-test %node-root%\device\core
 if errorlevel 1 goto :cleanup
 

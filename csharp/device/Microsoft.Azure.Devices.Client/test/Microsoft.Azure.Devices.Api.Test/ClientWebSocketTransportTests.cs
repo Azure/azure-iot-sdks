@@ -49,7 +49,7 @@ namespace Microsoft.Azure.Devices.Client.Test
         public void ClientWebSocketTransportWriteWithoutConnectTest()
         {
             var websocket = new ClientWebSocket();
-            var clientWebSocketTransport = new ClientWebSocketTransport(websocket, null, null);
+            clientWebSocketTransport = new ClientWebSocketTransport(websocket, null, null);
             var args = new TransportAsyncCallbackArgs();
             args.SetBuffer(byteArray, 0, byteArray.Length);
             clientWebSocketTransport.WriteAsync(args);
@@ -62,7 +62,7 @@ namespace Microsoft.Azure.Devices.Client.Test
         public async Task ClientWebSocketTransportReadWithoutConnectTest()
         {
             var websocket = new ClientWebSocket();
-            var clientWebSocketTransport = new ClientWebSocketTransport(websocket, null, null);
+            clientWebSocketTransport = new ClientWebSocketTransport(websocket, null, null);
             var args = new TransportAsyncCallbackArgs();
             var byteArray = new byte[10];
             args.SetBuffer(byteArray, 0, 10);

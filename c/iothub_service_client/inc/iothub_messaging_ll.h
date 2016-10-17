@@ -6,9 +6,9 @@
 #ifndef IOTHUB_MESSAGING_LL_H
 #define IOTHUB_MESSAGING_LL_H
 
-#include "crt_abstractions.h"
-#include "list.h"
-#include "map.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/singlylinkedlist.h"
+#include "azure_c_shared_utility/map.h"
 #include "iothub_message.h"
 #include "iothub_service_client_auth.h"
 
@@ -60,7 +60,7 @@ typedef struct IOTHUB_SERVICE_FEEDBACK_BATCH_TAG
 {
     const char* userId;
     const char* lockToken;
-    LIST_HANDLE feedbackRecordList;
+    SINGLYLINKEDLIST_HANDLE feedbackRecordList;
 } IOTHUB_SERVICE_FEEDBACK_BATCH;
 
 typedef struct IOTHUB_MESSAGING_TAG* IOTHUB_MESSAGING_HANDLE;

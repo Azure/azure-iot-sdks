@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// Copyright (c) Microsoft. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 namespace Microsoft.Azure.Devices.Client
 {
     /// <summary>
-    /// Transport types supported by DeviceClient
+    /// Transport types supported by DeviceClient - AMQP/TCP, HTTP 1.1, MQTT/TCP, AMQP/WS, MQTT/WS
     /// </summary>
     public enum TransportType
     {
@@ -32,7 +31,18 @@ namespace Microsoft.Azure.Devices.Client
 
         /// <summary>
         /// Message Queuing Telemetry Transport.
+        /// Try Mqtt over TCP first and fallback to Mqtt over WebSocket if that fails
         /// </summary>
-        Mqtt = 4
+        Mqtt = 4,
+
+        /// <summary>
+        /// Message Queuing Telemetry Transport over Websocket only.
+        /// </summary>
+        Mqtt_WebSocket_Only = 5,
+
+        /// <summary>
+        /// Message Queuing Telemetry Transport over native TCP only
+        /// </summary>
+        Mqtt_Tcp_Only = 6,
     }
 }
