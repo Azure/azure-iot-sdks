@@ -4,8 +4,8 @@ This document describes how to prepare your development environment to build and
 
 1.  [Setting up a Windows development environment](#windows)
 2.  [Azure SDK for .NET](#azuresdk)
-3.  [Directly using .NET,PCL,WinRT IoT Device Client SDK using NuGet packages](#directly_using_sdk)
-4.  [Locally building .NET,PCL,WinRT IoT Device Client SDK](#building_sdk)
+3.  [Directly using IoT Device Client SDK using NuGet packages](#directly_using_sdk)
+4.  [Locally building IoT Device Client SDK](#building_sdk)
 5.  [Application samples](#samplecode)
 
 <a name="windows"/>
@@ -25,11 +25,62 @@ Install the Azure SDK for .NET 2.7 or later. Use the following links to download
 - [VS 2012][lnk-sdk-vs2012]
 
 <a name="directly_using_sdk"/>
-## Directly using Azure IoT Device Client .NET,PCL,WinRT SDK using NuGet packages
+## Directly using Azure IoT Device Client SDK using NuGet packages
+Go to VS 2015 Solution Explorer and right click on the solution or project and click Manage NuGet Packages.
+There are 2 different NuGet packages to choose from
 
-If you are creating a client application from the scratch, use the [NuGet][NuGet] Package Manager to install the latest version of **Microsoft.Azure.Devices.Client** Device SDK for Azure IoT Devices NuGet package to your project.
+- 1 Microsoft.Azure.Devices.Client
+For bulding classic desktop .NET application, use NuGet Package Manager to install latest version of **Microsoft.Azure.Devices.Client** Device SDK for Azure IoT Devices NuGet package to your project.
+
+Microsoft.Azure.Devices.Client.dll is the assembly for classic .NET desktop application
+Microsoft.Azure.Devices.Client.winmd is assemby for UWP application.
 
 - The package is located at [Azure IoT Device SDK NuGet Package] [lnk-NuGet-package]. 
+
+### Building UWP Apps
+Microsoft.Azure.Devices.Client.winmd is WinRT version which will installed via NuGet Package manager versus Microsoft.Azure.Devices.Client.dll
+
+#### For Building C# and Visual Basic UWP apps
+For building UWP, follow the same steps as you would follow if building classic .NET desktop application.
+
+Visual Basic call would be
+
+
+
+#### For Building C++ and JavaScript UWP apps
+For Visual C++ and JavaScript UWP, there may get "Error	Failed to add reference to 'Microsoft.Azure.Amqp.Uwp" error while installing NuGet Package. 
+
+Use the below workaround to fix the error.Since the assemblies fail to install, you need to manually copy them for C++ or JavaScript UWP application.
+
+- Workaround for building C++ and JavaScript UWP apps
+
+Create a temporary blank UWP project in C#
+Right click on Project and click Manage NuGet Packages and install Microsoft.Azure.Devices.Client NuGet package
+Build the project
+Go the corresponding bin project. For example, for Debug build you will go to bin\x64\Debug and copy following 4 files
+1.) Microsoft.Azure.Devices.Client.winmd
+2.) Microsoft.Azure.Amqp.Uwp.dll
+3.) PCLCrypto.dll
+4.) Validation.dll
+
+There are the files you need to copy in the bin\x64\Debug\AppX folder of your AppX package.
+To add the reference, you reference WinRT assembly  
+\bin\x64\Debug\Microsoft.Azure.Devices.Client.winmd
+
+For JavaScript call would something like this.
+`
+var azureClient = Microsoft.Azure.Devices.Client;
+var deviceClient = azureClient.DeviceClient.createFromConnectionString(deviceConnectionString, azureClient.TransportType.amqp);
+deviceClient.sendEventAsync(eventMessage);
+
+`
+
+- 2 Microsoft.Azure.Devices.Client.PCL
+This is Portable Class library. You may want to use this for Xamarin C# cross-compatible project.
+It currently only supports HTTPS protocol.
+
+
+
 
 <a name="building_sdk"/>
 ## Building the Azure IoT Device Client .NET/PCL SDK locally
