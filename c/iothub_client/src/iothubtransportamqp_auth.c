@@ -313,30 +313,38 @@ AUTHENTICATION_STATE_HANDLE authentication_create(const AUTHENTICATION_CONFIG* c
 	return (AUTHENTICATION_STATE_HANDLE)auth_state;
 }
 
-static STRING_HANDLE create_devices_path(STRING_HANDLE device_id, STRING_HANDLE iot_hub_host_fqdn)
+static STRING_HANDLE concatenate_3_strings(const char* prefix, const char* infix, const char* suffix)
 {
-	char* devices_path = NULL;
-	STRING_HANDLE devices_path_str = NULL;
+	STRING_HANDLE result = NULL;
+	char* concat;
+	size_t totalLength = strlen(prefix) + strlen(infix) + strlen(suffix) + 1; // One extra for \0.
 
-	size_t devices_path_length = STRING_length(device_id) + STRING_length(iot_hub_host_fqdn) + 10; // 10 = strlen("/devices/") + string terminator (\0)/
-
-	if ((devices_path = (char*)malloc(sizeof(char) * devices_path_length)) == NULL)
+	if ((concat = (char*)malloc(totalLength)) != NULL)
 	{
-		LogError("Could not create the devices_path parameter (malloc failed).");
+		(void)strcpy(concat, prefix);
+		(void)strcat(concat, infix);
+		(void)strcat(concat, suffix);
+		result = STRING_construct(concat);
+		free(concat);
 	}
-	else if (sprintf_s(devices_path, devices_path_length, "%s/devices/%s", STRING_c_str(device_id), STRING_c_str(iot_hub_host_fqdn)) <= 0)
+	else
 	{
-		LogError("Could not create the devices_path parameter (sprintf_s failed).");
-	}
-	else if ((devices_path_str = STRING_construct(devices_path)) == NULL)
-	{
-		LogError("Could not create the devices_path parameter (STRING_construct failed).");
+		result = NULL;
 	}
 
-	if (devices_path != NULL)
-		free(devices_path);
+	return result;
+}
 
-	return devices_path_str;
+static STRING_HANDLE create_devices_path(STRING_HANDLE device_id, STRING_HANDLE iothub_host_fqdn)
+{
+	STRING_HANDLE devices_path;
+
+	if ((devices_path = concatenate_3_strings(STRING_c_str(device_id), "/devices/", STRING_c_str(iothub_host_fqdn))) == NULL)
+	{
+		LogError("Could not create the devices_path parameter (concatenate_3_strings failed)");
+	}
+
+	return devices_path;
 }
 
 int authentication_authenticate(AUTHENTICATION_STATE_HANDLE authentication_state_handle)
