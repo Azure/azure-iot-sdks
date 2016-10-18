@@ -51,7 +51,6 @@ void real_free(void* ptr)
 #include "iothub_client_ll.h"
 #include "iothub_client_options.h"
 #include "iothub_client_private.h"
-#include "iothubtransportamqp_common.h"
 #include "iothubtransportamqp_auth.h"
 #include "iothub_client_version.h"
 #undef ENABLE_MOCKS
@@ -83,8 +82,6 @@ static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
     (void)snprintf(temp_str, sizeof(temp_str), "umock_c reported error :%s", ENUM_TO_STRING(UMOCK_C_ERROR_CODE, error_code));
     ASSERT_FAIL(temp_str);
 }
-
-MOCKABLE_FUNCTION(, IOTHUBMESSAGE_DISPOSITION_RESULT, IoTHubClient_LL_MessageCallback, IOTHUB_CLIENT_LL_HANDLE, handle, IOTHUB_MESSAGE_HANDLE, message);
 
 static STRING_HANDLE TEST_STRING_construct_sprintf(const char* format, ...)
 {
@@ -243,99 +240,6 @@ TEST_FUNCTION(AMQP_Create_upperConfig_iotHubName_NULL)
 	// assert
 	ASSERT_IS_NULL(handle);
 }
-
-//TEST_FUNCTION(AMQP_Create_with_config_deviceId_NULL_fails)
-//{
-//	// arrange
-//	DLIST_ENTRY wts;
-//	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
-//
-//	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-//		NULL, TEST_DEVICE_KEY, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME_NULL };
-//
-//	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
-//
-//	// act
-//	TRANSPORT_LL_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
-//
-//	// assert
-//	ASSERT_IS_NULL(transportHandle);
-//}
-//
-//TEST_FUNCTION(AMQP_Create_with_config_deviceKey_and_deviceSasToken_defined_fails)
-//{
-//	// arrange
-//	DLIST_ENTRY wts;
-//	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
-//
-//	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-//		TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_DEVICE_SAS, TEST_IOT_HUB_NAME, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME_NULL };
-//
-//	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
-//
-//	// act
-//	TRANSPORT_LL_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
-//
-//	// assert
-//	ASSERT_IS_NULL(transportHandle);
-//}
-//
-//TEST_FUNCTION(AMQP_Create_with_config_hubName_NULL_fails)
-//{
-//	// arrange
-//	DLIST_ENTRY wts;
-//	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
-//
-//	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-//		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, NULL, TEST_IOT_HUB_SUFFIX, TEST_PROT_GW_HOSTNAME_NULL };
-//
-//	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
-//
-//	// act
-//	TRANSPORT_LL_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
-//
-//	// assert
-//	ASSERT_IS_NULL(transportHandle);
-//}
-//
-//TEST_FUNCTION(AMQP_Create_with_config_hubSuffix_NULL_fails)
-//{
-//	// arrange
-//	DLIST_ENTRY wts;
-//	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
-//
-//	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-//		TEST_DEVICE_ID, TEST_DEVICE_KEY, NULL, TEST_IOT_HUB_NAME, NULL, TEST_PROT_GW_HOSTNAME_NULL };
-//
-//	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
-//
-//	// act
-//	TRANSPORT_LL_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
-//
-//	// assert
-//	ASSERT_IS_NULL(transportHandle);
-//}
-//
-//TEST_FUNCTION(AMQP_Create_with_config_hubFqdn_too_long_fails)
-//{
-//	// arrange
-//	DLIST_ENTRY wts;
-//	TRANSPORT_PROVIDER* transport_interface = (TRANSPORT_PROVIDER*)AMQP_Protocol();
-//
-//	IOTHUB_CLIENT_CONFIG client_config = { (IOTHUB_CLIENT_TRANSPORT_PROVIDER)transport_interface,
-//		TEST_DEVICE_ID, TEST_DEVICE_KEY,
-//		"0123456789012345678901234567890123456789",
-//		"01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234",
-//		TEST_PROT_GW_HOSTNAME_NULL };
-//
-//	IOTHUBTRANSPORT_CONFIG config = { &client_config, &wts };
-//
-//	// act
-//	TRANSPORT_LL_HANDLE transportHandle = transport_interface->IoTHubTransport_Create(&config);
-//
-//	// assert
-//	ASSERT_IS_NULL(transportHandle);
-//}
 
 
 END_TEST_SUITE(iothubtransportamqp_ut)
