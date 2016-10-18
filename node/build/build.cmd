@@ -126,7 +126,7 @@ goto :eof
 
 :cleanup
 set EXITCODE=%ERRORLEVEL%
-call node %node-root%\..\tools\iothub-explorer\iothub-explorer.js %IOTHUB_CONNECTION_STRING% delete %IOTHUB_X509_DEVICE_ID%
+call node %node-root%\..\tools\iothub-explorer\iothub-explorer.js delete %IOTHUB_X509_DEVICE_ID% --login %IOTHUB_CONNECTION_STRING% 
 del %IOTHUB_X509_CERTIFICATE%
 del %IOTHUB_X509_KEY%
 exit /b %EXITCODE%
