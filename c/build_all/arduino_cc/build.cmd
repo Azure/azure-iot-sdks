@@ -250,15 +250,25 @@ REM Build each test in the Tests.lst
 if not "!projectName!"=="" (
     echo.
     echo Build !projectName!
+    echo   test_root=%test_root%
+    echo   work_root=%work_root%
     echo   Target=!Target!
     echo   RelativePath=!RelativePath!
     echo   RelativeWorkingDir=!RelativeWorkingDir!
+    echo   SerialPort=!SerialPort!
     echo   MaxAllowedDurationSeconds=!MaxAllowedDurationSeconds!
     echo   CloneURL=!CloneURL!
     echo   Categories=!Categories!
     echo   Hardware=!Hardware!
     echo   CPUParameters=!CPUParameters!
     echo   Build=!Build!
+
+    if !CloneURL!=="" (
+        set final_test_root=%work_root%
+    ) else (
+        set final_test_root=%test_root%
+    )
+    echo   final_test_root=!final_test_root!
 
     if "!Build!"=="Disable" (
         set __errolevel_build.!projectName!=DISABLED
@@ -272,8 +282,8 @@ if not "!projectName!"=="" (
             git clone !CloneURL!
             popd
         )
-    )
-    
+    ) 
+            
     mkdir %build_root%!RelativeWorkingDir!
 
 rem Step 1, build dump preferences:
@@ -321,7 +331,7 @@ rem                     "F:\Azure\IoT\SDKs\iot-hub-c-huzzah-getstartedkit-master
     set hardware_parameters=-hardware "%compiler_hardware_path%" -hardware "%user_hardware_path%" -hardware "%user_packages_path%" -hardware "%user_libraries_path%"
     set tools_parameters=-tools "%compiler_tools_builder_path%" -tools "%compiler_tools_processor_path%" -tools "%user_packages_path%"
     set libraries_parameters=-built-in-libraries "%compiler_libraries_path%" -libraries "%user_libraries_path%"
-    set parameters=-logger=machine !hardware_parameters! !tools_parameters! !libraries_parameters! !CPUParameters! -build-path "%build_root%!RelativeWorkingDir!" -warnings=none -prefs=build.warn_data_percentage=75 -verbose %test_root%!RelativePath!\!Target!
+    set parameters=-logger=machine !hardware_parameters! !tools_parameters! !libraries_parameters! !CPUParameters! -build-path "%build_root%!RelativeWorkingDir!" -warnings=none -prefs=build.warn_data_percentage=75 -verbose !final_test_root!!RelativePath!\!Target!
 
     echo Dump Arduino preferences:
     echo  !compiler_name! -dump-prefs !parameters!
@@ -357,7 +367,7 @@ if not "!projectName!"=="" (
         goto :eof
     )
     
-    call powershell.exe -NoProfile -NonInteractive -ExecutionPolicy unrestricted -Command .\execute.ps1 -binaryPath:%build_root%!RelativeWorkingDir!\!Target!.bin -serialPort:COM4 -esptool:%build_root%\arduino15\packages\esp8266\tools\esptool\0.4.8\esptool.exe -logLines:!LogLines! -minimumHeap:!MinimumHeap!
+    call powershell.exe -NoProfile -NonInteractive -ExecutionPolicy unrestricted -Command .\execute.ps1 -binaryPath:%build_root%!RelativeWorkingDir!\!Target!.bin -serialPort:!SerialPort! -esptool:%build_root%\arduino15\packages\esp8266\tools\esptool\0.4.8\esptool.exe -logLines:!LogLines! -minimumHeap:!MinimumHeap!
 
     if "!errorlevel!"=="0" (
         set __errolevel_run.!projectName!=SUCCEED

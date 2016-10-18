@@ -233,7 +233,7 @@ var runTests = function (hubConnectionString, storageConnectionString) {
     });
     
 
-    it('Imports then exports devices', function(done) {
+    it.skip('Imports then exports devices', function(done) {
       this.timeout(120000);
 
       var testDeviceCount = 10;
