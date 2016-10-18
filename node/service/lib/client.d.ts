@@ -7,9 +7,9 @@ import { AmqpMessage } from 'azure-iot-amqp-base';
 
 declare class Client extends EventEmitter {
     constructor(transport: Client.Transport);
-    open(done: (err: Error, result?: results.Connected) => void): void;
-    close(done: (err: Error) => void): void;
-    send(deviceId: string, message: Message | Message.BufferConvertible, done: (err: Error, result?: results.MessageEnqueued) => void): void;
+    open(done?: (err: Error, result?: results.Connected) => void): void;
+    close(done?: (err: Error) => void): void;
+    send(deviceId: string, message: Message | Message.BufferConvertible, done?: (err: Error, result?: results.MessageEnqueued) => void): void;
     getFeedbackReceiver(done: (err: Error, receiver?: Client.ServiceReceiver) => void): void;
     getFileNotificationReceiver(done: (err: Error, receiver?: Client.ServiceReceiver) => void): void;
 

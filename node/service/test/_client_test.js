@@ -96,9 +96,11 @@ describe('Client', function () {
     });
 
     it('does not throw if done is falsy', function () {
+      var simulatedAmqp = new SimulatedAmqp();
+      var client = new Client(simulatedAmqp);
       assert.doesNotThrow(function () {
-        testSubject.send('id', new Message('msg'));
-      }, ReferenceError);
+        client.send('id', new Message('msg'));
+      });
     });
   });
 
@@ -114,6 +116,23 @@ describe('Client', function () {
         });
 
         simulatedAmqp.emit('disconnect');
+      });
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_CLIENT_05_009: [**When the `open` method completes, the callback function (indicated by the `done` argument) shall be invoked with the following arguments:
+      - `err` - standard JavaScript `Error` object (or subclass)]*/
+    it('calls the done callback if passed as argument', function(testCallback) {
+      var simulatedAmqp = new SimulatedAmqp();
+      var client = new Client(simulatedAmqp);
+      client.open(testCallback);
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_CLIENT_16_006: [The `open` method should not throw if the `done` callback is not specified.]*/
+    it('doesn\'t throw if the done callback is not passed as argument', function() {
+      var simulatedAmqp = new SimulatedAmqp();
+      var client = new Client(simulatedAmqp);
+      assert.doesNotThrow(function() {
+        client.open();
       });
     });
   });
@@ -133,6 +152,23 @@ describe('Client', function () {
           assert.isFalse(disconnectReceived);
           done();
         });
+      });
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_CLIENT_05_022: [When the `close` method completes, the callback function (indicated by the done argument) shall be invoked with the following arguments:
+      - `err` - standard JavaScript `Error` object (or subclass)]*/
+    it('calls the done callback if passed as argument', function(testCallback) {
+      var simulatedAmqp = new SimulatedAmqp();
+      var client = new Client(simulatedAmqp);
+      client.close(testCallback);
+    });
+
+    /*Tests_SRS_NODE_IOTHUB_CLIENT_16_005: [The `close` method should not throw if the `done` callback is not specified.]*/
+    it('doesn\'t throw if the done callback is not passed as argument', function() {
+      var simulatedAmqp = new SimulatedAmqp();
+      var client = new Client(simulatedAmqp);
+      assert.doesNotThrow(function() {
+        client.close();
       });
     });
   });
