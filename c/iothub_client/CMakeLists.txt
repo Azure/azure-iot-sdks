@@ -84,32 +84,29 @@ if(${use_http})
 endif()
 
 if(${use_amqp})
+    set(iothub_client_amqp_transport_c_files
+        ${iothub_client_ll_transport_c_files}
+		./src/iothubtransportamqp.c
+        ./src/uamqp_messaging.c
+    )
+
+    set(iothub_client_amqp_transport_h_files
+        ${iothub_client_ll_transport_h_files}
+		./inc/iothubtransportamqp.h
+		./inc/iothubtransportamqp_methods.h
+        ./inc/uamqp_messaging.h
+    )	
+
     if (${use_wsio})
         set(iothub_client_amqp_transport_c_files
-            ${iothub_client_ll_transport_c_files}
+            ${iothub_client_amqp_transport_c_files}
             ./src/iothubtransportamqp_websockets.c
-			./src/iothubtransportamqp.c
-			./src/uamqp_messaging.c
         )
         
         set(iothub_client_amqp_transport_h_files
-            ${iothub_client_ll_transport_h_files}
+            ${iothub_client_amqp_transport_h_files}
             ./inc/iothubtransportamqp_websockets.h
-			./inc/iothubtransportamqp.h
-			./inc/uamqp_messaging.h
         )
-    else()
-        set(iothub_client_amqp_transport_c_files
-            ${iothub_client_ll_transport_c_files}
-			./src/iothubtransportamqp.c
-            ./src/uamqp_messaging.c
-        )
-
-        set(iothub_client_amqp_transport_h_files
-            ${iothub_client_ll_transport_h_files}
-			./inc/iothubtransportamqp.h
-            ./inc/uamqp_messaging.h
-        )	
     endif()
     
     set(iothub_client_h_install_files
@@ -119,13 +116,28 @@ if(${use_amqp})
 endif()
 
 if(${use_mqtt})
+    if (${use_wsio})
+        set(iothub_client_mqtt_ws_transport_c_files
+            ${iothub_client_ll_transport_c_files}
+            ./src/iothubtransport_mqtt_common.c
+            ./src/iothubtransportmqtt_websockets.c
+        )
+        set(iothub_client_mqtt_ws_transport_h_files
+            ${iothub_client_ll_transport_h_files}
+            ./inc/iothubtransport_mqtt_common.h
+            ./inc/iothubtransportmqtt_websockets.h
+        )
+    endif()
+
     set(iothub_client_mqtt_transport_c_files
         ${iothub_client_ll_transport_c_files}
+        ./src/iothubtransport_mqtt_common.c
         ./src/iothubtransportmqtt.c
     )
     
     set(iothub_client_mqtt_transport_h_files
         ${iothub_client_ll_transport_h_files}
+        ./inc/iothubtransport_mqtt_common.h
         ./inc/iothubtransportmqtt.h
     )
     
@@ -171,11 +183,10 @@ IF(WIN32)
     add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
   
   if (WINCE) # Be lax with WEC 2013 compiler
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3")
-  SET_SOURCE_FILES_PROPERTIES(src/iothub_client.c src/iothubtransport.c src/iothub_client_ll.c src/iothubtransporthttp.c src/blob.c PROPERTIES LANGUAGE CXX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W3")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W3")
+    SET_SOURCE_FILES_PROPERTIES(src/iothub_client.c src/iothubtransport.c src/iothub_client_ll.c src/iothubtransporthttp.c src/blob.c PROPERTIES LANGUAGE CXX)
   ENDIF(WINCE)
-
 ENDIF(WIN32)
 
 if(${use_http})
@@ -219,6 +230,22 @@ if(${use_mqtt})
         ${iothub_client_libs}
         iothub_client_mqtt_transport
     )
+    if (${use_wsio})
+        include_directories(${IOTHUB_CLIENT_MQTT_TRANSPORT_INC_FOLDER} ${MQTT_INC_FOLDER})
+        add_library(iothub_client_mqtt_ws_transport 
+            ${iothub_client_mqtt_ws_transport_c_files} 
+            ${iothub_client_mqtt_ws_transport_h_files}
+        )
+        linkSharedUtil(iothub_client_mqtt_ws_transport)
+        linkMqttLibrary(iothub_client_mqtt_ws_transport)
+        linkWebSockets(iothub_client_mqtt_ws_transport)
+        target_link_libraries(iothub_client_mqtt_ws_transport)
+        set(iothub_client_libs
+            ${iothub_client_libs}
+            iothub_client_mqtt_ws_transport
+        )
+    endif()
+
 endif()
 
 include_directories(${IOTHUB_CLIENT_INC_FOLDER})
