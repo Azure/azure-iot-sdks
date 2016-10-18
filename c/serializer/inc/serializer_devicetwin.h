@@ -10,6 +10,7 @@
 #include "iothub_client.h"
 #include "iothub_client_ll.h"
 #include "parson.h"
+#include "vector.h"
 
 static void serializer_ingest(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
 {
@@ -133,8 +134,63 @@ typedef struct SERIALIZER_DEVICETWIN_PROTOHANDLE_TAG /*it is called "PROTOHANDLE
     IOTHUB_CLIENT_HANDLE_VARIANT iothubClientHandleVariant;
     void* deviceAssigned;
 } SERIALIZER_DEVICETWIN_PROTOHANDLE;
+ 
+static VECTOR_HANDLE g_allProtoHandles=NULL; /*contains SERIALIZER_DEVICETWIN_PROTOHANDLE*/
 
-static void* IoTHubDeviceTwinCreate_Impl(const char* name, size_t sizeOfName, IOTHUB_CLIENT_HANDLE iotHubClientHandle)
+int lazilyAddProtohandle(const SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHandle)
+{
+    int result;
+    if ((g_allProtoHandles == NULL) &&((g_allProtoHandles = VECTOR_create(sizeof(SERIALIZER_DEVICETWIN_PROTOHANDLE)))==NULL))
+    {
+        LogError("failure in VECTOR_create");
+        result = __LINE__;
+    }
+    else
+    {
+        if (VECTOR_push_back(g_allProtoHandles, protoHandle, 1) != 0)
+        {
+            LogError("failure in VECTOR_push_back");
+            result = __LINE__;
+        }
+        else
+        {
+            result = 0;
+        }
+    }
+    return result;
+}
+
+static IOTHUB_CLIENT_RESULT Generic_IoTHubClient_SetDeviceTwinCallback(const SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback)
+{
+    IOTHUB_CLIENT_RESULT result;
+    switch (protoHandle->iothubClientHandleVariant.iothubClientHandleType)
+    {
+    case IOTHUB_CLIENT_CONVENIENCE_HANDLE_TYPE:
+    {
+        if ((result = IoTHubClient_SetDeviceTwinCallback(protoHandle->iothubClientHandleVariant.iothubClientHandleValue.iothubClientHandle, deviceTwinCallback, userContextCallback)) != IOTHUB_CLIENT_OK)
+        {
+            LogError("failure in IoTHubClient_SetDeviceTwinCallback");
+        }
+        break;
+    }
+    case IOTHUB_CLIENT_LL_HANDLE_TYPE:
+    {
+        if ((result =IoTHubClient_LL_SetDeviceTwinCallback(protoHandle->iothubClientHandleVariant.iothubClientHandleValue.iothubClientLLHandle, deviceTwinCallback, userContextCallback)) != IOTHUB_CLIENT_OK)
+        {
+            LogError("failure in IoTHubClient_LL_SetDeviceTwinCallback");
+        }
+        break;
+    }
+    default:
+    {
+        result = IOTHUB_CLIENT_ERROR;
+        LogError("INTERNAL ERROR");
+    }
+    }/*switch*/
+    return result;
+}
+
+static void* IoTHubDeviceTwinCreate_Impl(const char* name, size_t sizeOfName, SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHandle)
 {
     void* result;
     SCHEMA_HANDLE h = Schema_GetSchemaForModel(name);
@@ -146,37 +202,49 @@ static void* IoTHubDeviceTwinCreate_Impl(const char* name, size_t sizeOfName, IO
     else
     {
         void* metadata = Schema_GetMetadata(h);
-        SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHandle = (SERIALIZER_DEVICETWIN_PROTOHANDLE*)malloc(sizeof(SERIALIZER_DEVICETWIN_PROTOHANDLE));
-        if (protoHandle == NULL)
+        SCHEMA_MODEL_TYPE_HANDLE modelType;
+        modelType = Schema_GetModelByName(h, name);
+        if (modelType == NULL)
         {
-            LogError("failure in malloc");
+            LogError("failure in Schema_GetModelByName");
             result = NULL;
         }
         else
         {
-            result = CodeFirst_CreateDevice(Schema_GetModelByName(h, name), metadata, sizeOfName, true);
-
+            result = CodeFirst_CreateDevice(modelType, metadata, sizeOfName, true);
             if (result == NULL)
             {
-                free(protoHandle);
                 LogError("failure in CodeFirst_CreateDevice");
                 /*return as is*/
             }
             else
             {
-                if (IoTHubClient_SetDeviceTwinCallback(iotHubClientHandle, serializer_ingest, result) != IOTHUB_CLIENT_OK)
+                protoHandle->deviceAssigned = result;
+                if (Generic_IoTHubClient_SetDeviceTwinCallback(protoHandle, serializer_ingest, result) != IOTHUB_CLIENT_OK)
                 {
-                    LogError("failure in IoTHubClient_SetDeviceTwinCallback");
-                    free(protoHandle);
+                    LogError("failure in Generic_IoTHubClient_SetDeviceTwinCallback");
                     CodeFirst_DestroyDevice(result);
                     result = NULL;
                 }
                 else
                 {
-                    protoHandle->iothubClientHandleVariant.iothubClientHandleType = IOTHUB_CLIENT_CONVENIENCE_HANDLE_TYPE;
-                    protoHandle->iothubClientHandleVariant.iothubClientHandleValue.iothubClientHandle = iotHubClientHandle;
-                    protoHandle->deviceAssigned = result;
-                    /*return as is*/
+                    /*lazily add the protohandle to the array of tracking handles*/
+                    if (lazilyAddProtohandle(protoHandle) != 0)
+                    {
+                        LogError("unable to add the protohandle to the collection of handles");
+                        /*unsubscribe*/
+                        if (Generic_IoTHubClient_SetDeviceTwinCallback(protoHandle, NULL, NULL) != IOTHUB_CLIENT_OK)
+                        {
+                            /*just log the error*/
+                            LogError("failure in Generic_IoTHubClient_SetDeviceTwinCallback");
+                        }
+                        CodeFirst_DestroyDevice(result);
+                        result = NULL;
+                    }
+                    else
+                    {
+                        /*return as is*/
+                    }
                 }
             }
         }
@@ -184,83 +252,63 @@ static void* IoTHubDeviceTwinCreate_Impl(const char* name, size_t sizeOfName, IO
     return result;
 }
 
-static void* IoTHubDeviceTwinCreate_LL_Impl(const char* name, size_t sizeOfName, IOTHUB_CLIENT_LL_HANDLE iotHubClientLLHandle)
+static bool protoHandleHasDeviceStartAddress(const void* element, const void* value)
 {
-    void* result;
-    SCHEMA_HANDLE h = Schema_GetSchemaForModel(name);
-    if (h == NULL)
-    {
-        LogError("failure in Schema_GetSchemaForModel.");
-        result = NULL;
-    }
-    else
-    {
-        void* metadata = Schema_GetMetadata(h);
-        SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHandle = (SERIALIZER_DEVICETWIN_PROTOHANDLE*)malloc(sizeof(SERIALIZER_DEVICETWIN_PROTOHANDLE));
-        if (protoHandle == NULL)
-        {
-            LogError("failure in malloc");
-            result = NULL;
-        }
-        else
-        {
-            result = CodeFirst_CreateDevice(Schema_GetModelByName(h, name), metadata, sizeOfName, true);
-
-            if (result == NULL)
-            {
-                free(protoHandle);
-                LogError("failure in CodeFirst_CreateDevice");
-                /*return as is*/
-            }
-            else
-            {
-                if (IoTHubClient_LL_SetDeviceTwinCallback(iotHubClientLLHandle, serializer_ingest, result) != IOTHUB_CLIENT_OK)
-                {
-                    LogError("failure in IoTHubClient_LL_SetDeviceTwinCallback");
-                    free(protoHandle);
-                    CodeFirst_DestroyDevice(result);
-                    result = NULL;
-                }
-                else
-                {
-                    protoHandle->iothubClientHandleVariant.iothubClientHandleType = IOTHUB_CLIENT_LL_HANDLE_TYPE;
-                    protoHandle->iothubClientHandleVariant.iothubClientHandleValue.iothubClientLLHandle = iotHubClientLLHandle;
-                    protoHandle->deviceAssigned = result;
-                    /*return as is*/
-                }
-            }
-        }
-    }
-    return result;
+    const SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHandle = element;
+    return protoHandle->deviceAssigned == value;
 }
-
-#define WHERE_IS_IT(address, type, field) ((type *)((uintptr_t)(address) - offsetof(type,field)))
 
 static void IoTHubDeviceTwin_Destroy_Impl(void* model)
 {
-    SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHandle = WHERE_IS_IT(model, SERIALIZER_DEVICETWIN_PROTOHANDLE, deviceAssigned);
-    if (IoTHubClient_SetDeviceTwinCallback(protoHandle->iothubClientHandleVariant.iothubClientHandleValue.iothubClientHandle, NULL, NULL) != IOTHUB_CLIENT_OK)
+    SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHandle = VECTOR_find_if(g_allProtoHandles, protoHandleHasDeviceStartAddress, model);
+    if (protoHandle == NULL)
     {
-        LogError("failure in IoTHubClient_SetDeviceTwinCallback"); /*blissfully ignored*/
+        LogError("failure in VECTOR_find_if [not found]");
     }
-    CodeFirst_DestroyDevice(model);
-}
+    else
+    {
+        switch (protoHandle->iothubClientHandleVariant.iothubClientHandleType)
+        {
+            case IOTHUB_CLIENT_CONVENIENCE_HANDLE_TYPE:
+            {
+                if (IoTHubClient_SetDeviceTwinCallback(protoHandle->iothubClientHandleVariant.iothubClientHandleValue.iothubClientHandle, NULL, NULL) != IOTHUB_CLIENT_OK)
+                {
+                    LogError("failure in IoTHubClient_SetDeviceTwinCallback");
+                }
+                break;
+            }
+            case IOTHUB_CLIENT_LL_HANDLE_TYPE:
+            {
+                if (IoTHubClient_LL_SetDeviceTwinCallback(protoHandle->iothubClientHandleVariant.iothubClientHandleValue.iothubClientLLHandle, NULL, NULL) != IOTHUB_CLIENT_OK)
+                {
+                    LogError("failure in IoTHubClient_LL_SetDeviceTwinCallback");
+                }
+                break;
+            }
+            default:
+            {
+                LogError("INTERNAL ERROR");
+            }
+        }/*switch*/
+    }
+    CodeFirst_DestroyDevice(protoHandle->deviceAssigned);
+    VECTOR_erase(g_allProtoHandles, protoHandle, 1);
 
-static void IoTHubDeviceTwin_LL_Destroy_Impl(void* model)
-{
-    SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHandle = WHERE_IS_IT(model, SERIALIZER_DEVICETWIN_PROTOHANDLE, deviceAssigned);
-    if (IoTHubClient_LL_SetDeviceTwinCallback(protoHandle->iothubClientHandleVariant.iothubClientHandleValue.iothubClientLLHandle, NULL, NULL) != IOTHUB_CLIENT_OK)
+    if (VECTOR_size(g_allProtoHandles) == 0) /*lazy init means more work @ destroy time*/
     {
-        LogError("failure in IoTHubClient_LL_SetDeviceTwinCallback"); /*blissfully ignored*/
+        VECTOR_destroy(g_allProtoHandles);
+        g_allProtoHandles = NULL;
     }
-    CodeFirst_DestroyDevice(model);
 }
 
 #define DECLARE_DEVICETWIN_MODEL(name, ...)    \
     DECLARE_MODEL(name, __VA_ARGS__)           \
     static name* C2(IoTHubDeviceTwin_Create, name)(IOTHUB_CLIENT_HANDLE iotHubClientHandle)                                                                                         \
     {                                                                                                                                                                               \
-        return IoTHubDeviceTwinCreate_Impl(#name, sizeof(name),iotHubClientHandle);                                                                                                 \
+        SERIALIZER_DEVICETWIN_PROTOHANDLE protoHandle;                                                                                                                              \
+        protoHandle.iothubClientHandleVariant.iothubClientHandleType = IOTHUB_CLIENT_CONVENIENCE_HANDLE_TYPE;                                                                       \
+        protoHandle.iothubClientHandleVariant.iothubClientHandleValue.iothubClientHandle = iotHubClientHandle;                                                                      \
+        return IoTHubDeviceTwinCreate_Impl(#name, sizeof(name), &protoHandle);                                                                                                      \
     }                                                                                                                                                                               \
                                                                                                                                                                                     \
     static void C2(IoTHubDeviceTwin_Destroy, name) (name* model)                                                                                                                    \
@@ -270,12 +318,15 @@ static void IoTHubDeviceTwin_LL_Destroy_Impl(void* model)
                                                                                                                                                                                     \
     static name* C2(IoTHubDeviceTwin_LL_Create, name)(IOTHUB_CLIENT_LL_HANDLE iotHubClientLLHandle)                                                                                 \
     {                                                                                                                                                                               \
-        return IoTHubDeviceTwinCreate_LL_Impl(#name, sizeof(name),iotHubClientLLHandle);                                                                                            \
+        SERIALIZER_DEVICETWIN_PROTOHANDLE protoHandle;                                                                                                                              \
+        protoHandle.iothubClientHandleVariant.iothubClientHandleType = IOTHUB_CLIENT_LL_HANDLE_TYPE;                                                                                \
+        protoHandle.iothubClientHandleVariant.iothubClientHandleValue.iothubClientLLHandle = iotHubClientLLHandle;                                                                  \
+        return IoTHubDeviceTwinCreate_Impl(#name, sizeof(name), &protoHandle);                                                                                                      \
     }                                                                                                                                                                               \
                                                                                                                                                                                     \
     static void C2(IoTHubDeviceTwin_LL_Destroy, name) (name* model)                                                                                                                 \
     {                                                                                                                                                                               \
-        IoTHubDeviceTwin_LL_Destroy_Impl(model);                                                                                                                                    \
+        IoTHubDeviceTwin_Destroy_Impl(model);                                                                                                                                       \
     }                                                                                                                                                                               \
 
 #endif /*SERIALIZER_DEVICE_TWIN_H*/
