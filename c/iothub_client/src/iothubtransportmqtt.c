@@ -64,17 +64,17 @@ static int IoTHubTransportMqtt_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handl
 
 static void IoTHubTransportMqtt_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
 {
-    IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin(handle);
+    IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod(handle);
 }
 
 static int IoTHubTransportMqtt_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
 {
-    return IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod(handle);
+    return IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(handle);
 }
 
 static void IoTHubTransportMqtt_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
 {
-    IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod(handle);
+    IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin(handle);
 }
 
 static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportMqtt_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item)
