@@ -417,15 +417,38 @@ describe('Twin', function () {
       });
     });
       
-    /* Tests_SRS_NODE_DEVICE_TWIN_18_020: [** `_sendTwinRequest` shall call `done` with an `err` value translated using http_errors.js **]**  */
-    it('returns error using http_errors.js', function(done) {
-      transport.status = 404;
-      twin._sendTwinRequest('fake_method', 'fake_resource', {}, 'fake_body', function(err) {
-        assert.instanceOf(err, errors.DeviceNotFoundError);
-        done();
+    /*Tests_SRS_NODE_DEVICE_TWIN_18_020: [** `_sendTwinRequest` shall call `done` with an `err` value translated using `translateError` **]**  */
+    /*Tests_SRS_NODE_DEVICE_TWIN_ERRORS_18_003: [`translateError` shall return an `ArgumentError` if the response status code is `400`.]*/
+    /*Tests_SRS_NODE_DEVICE_TWIN_ERRORS_18_004: [`translateError` shall return an `UnauthorizedError` if the response status code is `401`.]*/
+    /*Tests_SRS_NODE_DEVICE_TWIN_ERRORS_18_005: [`translateError` shall return an `IotHubQuotaExceededError` if the response status code is `403`.]*/
+    /*Tests_SRS_NODE_DEVICE_TWIN_ERRORS_18_006: [`translateError` shall return an `DeviceNotFoundError` if the response status code is `404`.]*/
+    /*Tests_SRS_NODE_DEVICE_TWIN_ERRORS_18_007: [`translateError` shall return an `MessageTooLargeError` if the response status code is `413`.]*/
+    /*Tests_SRS_NODE_DEVICE_TWIN_ERRORS_18_008: [`translateError` shall return an `InternalServerError` if the response status code is `500`.]*/
+    /*Tests_SRS_NODE_DEVICE_TWIN_ERRORS_18_009: [`translateError` shall return an `ServiceUnavailableError` if the response status code is `503`.]*/
+    /*Tests_SRS_NODE_DEVICE_TWIN_ERRORS_18_011: [`translateError` shall return an `ServiceUnavailableError` if the response status code is `504`.]*/
+    /*Tests_SRS_NODE_DEVICE_TWIN_ERRORS_18_012: [`translateError` shall return an `ThrottlingError` if the response status code is `429`.] */
+    /*Tests_SRS_NODE_DEVICE_TWIN_ERRORS_18_013: [`translateError` shall return an `InvalidEtagError` if the response status code is `412`.] */
+    /*Tests_SRS_NODE_DEVICE_TWIN_ERRORS_18_002: [If the error code is unknown, `translateError` should return a generic Javascript `Error` object.]*/
+    [
+      {status: 400, errortype: errors.ArgumentError},
+      {status: 401, errortype: errors.UnauthorizedError},
+      {status: 403, errortype: errors.IotHubQuotaExceededError},
+      {status: 404, errortype: errors.DeviceNotFoundError},
+      {status: 413, errortype: errors.MessageTooLargeError},
+      {status: 500, errortype: errors.InternalServerError},
+      {status: 503, errortype: errors.ServiceUnavailableError},
+      {status: 504, errortype: errors.ServiceUnavailableError},
+      {status: 429, errortype: errors.ThrottlingError},
+      {status: 412, errortype: errors.InvalidEtagError},
+      {status: 999, errortype: Error},
+    ].forEach(function(errorMap) {
+      it('returns '+errorMap.errortype.prototype.name+ ' with error ' + errorMap.status, function(done) {
+        transport.status = errorMap.status;
+        twin._sendTwinRequest('fake_method', 'fake_resource', {}, 'fake_body', function(err) {
+          assert.instanceOf(err, errorMap.errortype);
+          done();
+        });
       });
-    
-    
     });
   });
 

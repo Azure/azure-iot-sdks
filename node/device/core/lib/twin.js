@@ -9,6 +9,7 @@ var errors = require('azure-iot-common').errors;
 var _ = require('lodash');
 var traverse = require('traverse');
 require('es5-shim');
+var translateError = require('./twin_errors.js');
 
 var Twin = function(client) {
   EventEmitter.call(this);
@@ -179,9 +180,8 @@ Twin.prototype._sendTwinRequest = function(method, resource, properties, body, d
       if (resp.status.toString() === '200' || resp.status.toString() === '204') {
        cleanupAndReturn(null, resp.body);
       } else {
-        /* Codes_SRS_NODE_DEVICE_TWIN_18_020: [** `_sendTwinRequest` shall call `done` with an `err` value translated using http_errors.js **]**  */
-        // TODO: use http_errors.js -- how?
-        cleanupAndReturn(new errors.DeviceNotFoundError('response returned status = '+resp.status));
+        /* Codes_SRS_NODE_DEVICE_TWIN_18_020: [** `_sendTwinRequest` shall call `done` with an `err` value translated using `translateError`**]**  */
+        cleanupAndReturn(translateError(resp, resp.status));
       }
     }
   };
