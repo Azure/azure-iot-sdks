@@ -22,8 +22,6 @@ set client-build-root=%current-path%\..\..
 for %%i in ("%client-build-root%") do set client-build-root=%%~fi
 echo Client Build root is %client-build-root%
 
-set --nosign=%1
-
 rem -- Clear directories before starting process
 del /F /Q %client-build-root%\build\tosign
 del /F /Q %client-build-root%\build\signed
@@ -41,11 +39,9 @@ rem -- Copy the DeviceExplorer.exe file to the "tosign" folder
 xcopy /q /y /R %client-build-root%\tools\DeviceExplorer\DeviceExplorer\bin\Release\DeviceExplorer.exe %client-build-root%\build\tosign\
 if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-if not defined no-sign (
-   rem -- Auto-sign the DeviceExplorer.exe
-   csu.exe /s=True /w=True /i=%client-build-root%\build\tosign /o=%client-build-root%\build\signed /c1=400 /d="Signing DeviceExplorer.exe"
-   if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-)
+rem -- Auto-sign the DeviceExplorer.exe
+csu.exe /s=True /w=True /i=%client-build-root%\build\tosign /o=%client-build-root%\build\signed /c1=400 /d="Signing DeviceExplorer.exe"
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 rem -- Copy back the DeviceExplorer.exe to the build output directory
 xcopy /q /y /R %client-build-root%\build\signed\DeviceExplorer.exe %client-build-root%\tools\DeviceExplorer\DeviceExplorer\bin\Release\
@@ -67,11 +63,9 @@ rem -- Copy the .msi to the "tosign" folder
 xcopy /q /y /R %client-build-root%\tools\DeviceExplorer\SetupDeviceExplorer\Release\SetupDeviceExplorer.msi %client-build-root%\build\tosign\
 if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-if not defined no-sign (
-   rem -- Sign the .msi
-   csu.exe /s=True /w=True /i=%client-build-root%\build\tosign /o=%client-build-root%\build\signed /c1=400 /d="Signing SetupDeviceExplorer.msi"
-   if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
-)
+rem -- Sign the .msi
+csu.exe /s=True /w=True /i=%client-build-root%\build\tosign /o=%client-build-root%\build\signed /c1=400 /d="Signing SetupDeviceExplorer.msi"
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 rem -- Copy back the .msi to the build output directory
 xcopy /q /y /R %client-build-root%\build\signed\SetupDeviceExplorer.msi %client-build-root%\tools\DeviceExplorer\SetupDeviceExplorer\Release\
