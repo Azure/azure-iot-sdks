@@ -19,7 +19,7 @@ static void serializer_ingest(DEVICE_TWIN_UPDATE_STATE update_state, const unsig
     char* copyOfPayload = (char*)malloc(size + 1);
     if (copyOfPayload == NULL)
     {
-        printf("unable to malloc\n");
+        LogError("unable to malloc\n");
     }
     else
     {
@@ -28,14 +28,14 @@ static void serializer_ingest(DEVICE_TWIN_UPDATE_STATE update_state, const unsig
         JSON_Value* allJSON = json_parse_string(copyOfPayload);
         if (allJSON == NULL)
         {
-            printf(" failure in json_parse_string");
+            LogError("failure in json_parse_string");
         }
         else
         {
             JSON_Object *allObject = json_value_get_object(allJSON);
             if (allObject == NULL)
             {
-                printf("failure in json_value_get_object");
+                LogError("failure in json_value_get_object");
             }
             else
             {
@@ -46,7 +46,7 @@ static void serializer_ingest(DEVICE_TWIN_UPDATE_STATE update_state, const unsig
                     JSON_Object* desired = json_object_get_object(allObject, "desired");
                     if (desired == NULL)
                     {
-                        printf("failure in json_object_get_object");
+                        LogError("failure in json_object_get_object");
                     }
                     else
                     {
@@ -58,13 +58,13 @@ static void serializer_ingest(DEVICE_TWIN_UPDATE_STATE update_state, const unsig
                             char* pretty = json_serialize_to_string(desiredAfterRemove);
                             if (pretty == NULL)
                             {
-                                printf("failure in json_serialize_to_string\n");
+                                LogError("failure in json_serialize_to_string\n");
                             }
                             else
                             {
                                 if (CodeFirst_IngestDesiredProperties(userContextCallback, pretty) != CODEFIRST_OK)
                                 {
-                                    printf("failure ingesting desired properties\n");
+                                    LogError("failure ingesting desired properties\n");
                                 }
                                 else
                                 {
@@ -82,13 +82,13 @@ static void serializer_ingest(DEVICE_TWIN_UPDATE_STATE update_state, const unsig
                     char* pretty = json_serialize_to_string(allJSON);
                     if (pretty == NULL)
                     {
-                        printf("failure in json_serialize_to_string\n");
+                        LogError("failure in json_serialize_to_string\n");
                     }
                     else
                     {
                         if (CodeFirst_IngestDesiredProperties(userContextCallback, pretty) != CODEFIRST_OK)
                         {
-                            printf("failure ingesting desired properties\n");
+                            LogError("failure ingesting desired properties\n");
                         }
                         else
                         {
@@ -100,7 +100,7 @@ static void serializer_ingest(DEVICE_TWIN_UPDATE_STATE update_state, const unsig
                 }
                 default:
                 {
-                    printf("INTERNAL ERROR: unexpected value for update_state=%d\n", (int)update_state);
+                    LogError("INTERNAL ERROR: unexpected value for update_state=%d\n", (int)update_state);
                 }
                 }
             }
@@ -137,10 +137,10 @@ typedef struct SERIALIZER_DEVICETWIN_PROTOHANDLE_TAG /*it is called "PROTOHANDLE
  
 static VECTOR_HANDLE g_allProtoHandles=NULL; /*contains SERIALIZER_DEVICETWIN_PROTOHANDLE*/
 
-int lazilyAddProtohandle(const SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHandle)
+static int lazilyAddProtohandle(const SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHandle)
 {
     int result;
-    if ((g_allProtoHandles == NULL) &&((g_allProtoHandles = VECTOR_create(sizeof(SERIALIZER_DEVICETWIN_PROTOHANDLE)))==NULL))
+    if ((g_allProtoHandles == NULL) && ((g_allProtoHandles = VECTOR_create(sizeof(SERIALIZER_DEVICETWIN_PROTOHANDLE))) == NULL))
     {
         LogError("failure in VECTOR_create");
         result = __LINE__;
@@ -202,8 +202,7 @@ static void* IoTHubDeviceTwinCreate_Impl(const char* name, size_t sizeOfName, SE
     else
     {
         void* metadata = Schema_GetMetadata(h);
-        SCHEMA_MODEL_TYPE_HANDLE modelType;
-        modelType = Schema_GetModelByName(h, name);
+        SCHEMA_MODEL_TYPE_HANDLE modelType = Schema_GetModelByName(h, name);
         if (modelType == NULL)
         {
             LogError("failure in Schema_GetModelByName");
