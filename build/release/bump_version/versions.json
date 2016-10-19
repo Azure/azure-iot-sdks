@@ -32,7 +32,7 @@
     "uamqp_c_nuget": "1.0.19",
     "umqtt_c_nuget": "1.0.18",
     "iothub-diagnostics": "1.0.2",
-    "iothub-explorer": "1.0.14",
+    "iothub-explorer": "2.0.0",
     "device-explorer": "1.0.13",
     "github-release": "v1.0.10"
 }

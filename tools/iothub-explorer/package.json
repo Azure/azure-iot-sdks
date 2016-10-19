@@ -1,6 +1,6 @@
 {
   "name": "iothub-explorer",
-  "version": "1.0.14",
+  "version": "2.0.0",
   "description": "Azure IoT Hub Explorer",
   "author": "Microsoft Corporation",
   "license": "MIT",
@@ -8,25 +8,35 @@
   "bin": "iothub-explorer.js",
   "dependencies": {
     "azure-event-hubs": "0.0.3",
-    "azure-iot-common": "1.0.15",
-    "azure-iot-device": "1.0.15",
-    "azure-iothub": "1.0.17",
-    "bluebird": "^3.0.1",
+    "azure-iot-common": "^1.0.15",
+    "azure-iot-device": "^1.0.15",
+    "azure-iot-device-amqp": "^1.0.15",
+    "azure-iot-device-amqp-ws": "^1.0.16",
+    "azure-iot-device-http": "^1.0.16",
+    "azure-iot-device-mqtt": "^1.0.15",
+    "azure-iothub": "^1.0.17",
+    "azure-storage": "^1.3.1",
     "colors-tmpl": "^1.0.0",
-    "nopt": "^3.0.4",
+    "commander": "^2.9.0",
+    "pem": "^1.8.3",
     "prettyjson": "^1.1.3",
-    "uuid": "^2.0.1"
+    "uuid": "^2.0.3"
   },
   "devDependencies": {
-    "jshint": "^2.9.2"
+    "jshint": "^2.9.3"
   },
   "scripts": {
-    "jshint": "jshint iothub-explorer.js",
-    "test": "npm -s run-script jshint"
+    "lint": "jshint --show-non-errors .",
+    "test": "npm -s run lint"
   },
   "engines": {
-    "node": "^0.12 || ^4"
+    "node": ">= 0.10"
   },
+  "keywords": [
+    "azure",
+    "iot",
+    "iothub"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Azure/azure-iot-sdks.git"

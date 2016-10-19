@@ -4,6 +4,7 @@ This document describes how to prepare your development environment to use the *
 
 - [Setup your development environment](#devenv)
 - [Build the samples on Linux](#linux)
+- [Install on Windows using PyPI wheels](#windows-wheels)
 - [Build the samples on Windows using nuget packages](#windows)
 - [Build the samples on Windows using cmake and boost libraries](#windows-cmake)
 - [Sample applications](#samplecode)
@@ -39,6 +40,16 @@ The Python iothub_client supports python versions 2.7.x, 3.4.x or 3.5.x. Know th
 ###Known build issues: 
 1. On some small footprint Linux devices, like a *Raspberry Pi* using Raspbian OS, the following build error may occur: `virtual memory exhausted: Cannot allocate memory`. In such a case please try to increase the swap file size on your platform and retry the build. (If swap increase did not work consider running build.sh using --skip-unittests --use-websockets parameters)
 2. CentOS7: Only Python 2.7 is supported due to a missing boost-python3 library package
+
+<a name="windows-wheels"/>
+## Install the Python iothub_client module on Windows from [PyPI] 
+
+The following instructions outline how you can install the libraries in Windows from [PyPi]:
+
+1. Open a command prompt and start the Python interpreter.
+2. Install the iothub_client module with the following command: `pip install iothub-client`
+3. Now Python is ready to run the sample applications. 
+Please follow instructions in [Sample applications](#samplecode) to run the Python samples.
 
 <a name="windows"/>
 ## Build the Python iothub_client module on Windows using Nuget packages (recommended)
@@ -84,6 +95,7 @@ To use the iothub_client extension for native code debugging with [Python Tools 
 This repository contains various Python sample applications that illustrate how to use the Microsoft Azure IoT SDK for Python. To learn how to run a sample application that sends messages to an IoT hub, see [Getting started - running a Python sample application][getstarted].
 
 [python-2.7 or python-3.5]: https://www.python.org/downloads/
+[PyPI]: https://pypi.python.org/pypi/iothub-client/
 [Python Tools for Visual Studio]: https://www.visualstudio.com/en-us/features/python-vs.aspx
 [setup-devbox]: https://github.com/Azure/azure-iot-sdks/blob/master/c/doc/devbox_setup.md
 [getstarted]: python-run-sample.md
