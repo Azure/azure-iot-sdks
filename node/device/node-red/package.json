@@ -14,5 +14,6 @@
     "nodes": {
       "azureiothubnode": "azureiothub/azureiothub.js"
     }
-  }
+  },
+  "keywords": ["node-red"]
 }
