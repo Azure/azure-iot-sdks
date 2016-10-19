@@ -7,8 +7,7 @@ cmake_minimum_required(VERSION 2.8.12)
 
 add_subdirectory(iothubclient_ll_ut)
 if(NOT ${dont_use_uploadtoblob})
-
-add_subdirectory(iothubclient_ll_u2b_ut)
+    add_subdirectory(iothubclient_ll_u2b_ut)
 endif()
 
 add_subdirectory(iothubclient_ut)
@@ -31,6 +30,7 @@ if(${use_mqtt})
     endif()
     if (${run_e2e_tests} OR ${nuget_e2e_tests})
         add_subdirectory(iothubclient_mqtt_e2e)
+        add_subdirectory(iothubclient_mqtt_dt_e2e)
     endif()
 endif()
 
@@ -39,11 +39,11 @@ if(${use_amqp})
     add_subdirectory(iothubtransportamqp_ut)
     if (${run_e2e_tests} OR ${nuget_e2e_tests})
         add_subdirectory(iothubclient_amqp_e2e)
-                if(${use_wsio})
+        if(${use_wsio})
             add_subdirectory(iothubclient_amqp_ws_e2e)
-            endif()
+        endif()
     endif()
-    
+
     if (${run_longhaul_tests})
         add_subdirectory(longhaul_tests)
     endif()
