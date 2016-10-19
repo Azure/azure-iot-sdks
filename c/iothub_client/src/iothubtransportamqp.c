@@ -325,6 +325,12 @@ static void on_message_send_complete(void* context, MESSAGE_SEND_RESULT send_res
     {
         removeEventFromInProgressList(message);
     }
+
+    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_151: [The callback 'on_message_send_complete' shall destroy the message handle (IOTHUB_MESSAGE_HANDLE) using IoTHubMessage_Destroy()]
+    IoTHubMessage_Destroy(message->messageHandle);
+
+    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_152: [The callback 'on_message_send_complete' shall destroy the IOTHUB_MESSAGE_LIST instance]
+    free(message); 
 }
 
 static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE message)
