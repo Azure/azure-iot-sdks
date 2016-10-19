@@ -24,6 +24,8 @@ set(${theseTestsName}_c_files
 )
 
 set(${theseTestsName}_h_files
+    ../../../parson/parson.h
+    ../common_dt_e2e/iothubclient_common_dt_e2e.h
 )
 
 include_directories(../common_dt_e2e)
@@ -39,7 +41,22 @@ if(WIN32)
     if(MSVC)
         #CPP compiler on windows likes to complain about unused local function removed (C4505)
         #C compiler doesn't like to complain about the same thing
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4505")
         set_source_files_properties(../../../parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
+    endif()
+
+    if(TARGET ${theseTestsName}_dll)
+        target_link_libraries(${theseTestsName}_dll
+            aziotsharedutil
+            iothub_test
+            iothub_client
+            iothub_client_mqtt_transport
+            iothub_service_client
+            iothub_client_mqtt_transport
+            rpcrt4
+            serializer
+        )
+        linkMqttLibrary(${theseTestsName}_dll)
     endif()
 
     if(TARGET ${theseTestsName}_exe)
@@ -47,6 +64,7 @@ if(WIN32)
             aziotsharedutil
             iothub_test
             iothub_client
+            iothub_client_mqtt_transport
             iothub_service_client
             iothub_client_mqtt_transport
             rpcrt4
@@ -54,13 +72,23 @@ if(WIN32)
         )
         linkMqttLibrary(${theseTestsName}_exe)
     endif()
+
+    if(TARGET ${theseTestsName}_nuget_exe)
+        target_link_libraries(${theseTestsName}_nuget_exe
+            iothub_test
+            iothub_service_client
+            rpcrt4
+        )
+    endif()
 else()
     if(TARGET ${theseTestsName}_exe)
         target_link_libraries(${theseTestsName}_exe
             aziotsharedutil
             iothub_test
             iothub_client
+            iothub_client_mqtt_transport
             iothub_service_client
+            aziotsharedutil
             iothub_client_mqtt_transport
             serializer
         )
