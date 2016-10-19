@@ -30,7 +30,7 @@ set(${theseTestsName}_h_files
 
 include_directories(../common_dt_e2e)
 include_directories(../../../parson/)
-include_directories(${SERIALIZER_INC_FOLDER})
+include_directories(../../../serializer/inc)
 include_directories(${IOTHUB_TEST_INC_FOLDER})
 include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})
 

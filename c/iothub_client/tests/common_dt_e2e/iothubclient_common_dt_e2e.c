@@ -18,18 +18,17 @@
 
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/uniqueid.h"
 
 #include "parson.h"
 #include "../../../certs/certs.h"
 
 static bool g_callbackRecv = false;
 
-static size_t g_iotHubTestId = 0;
 static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
 
-#define MAX_CLOUD_TRAVEL_TIME  60.0
-#define TEST_STRING_VALUE      "test_string_value"
-#define TEST_INTEGER_VALUE     22
+#define MAX_CLOUD_TRAVEL_TIME  260.0
+#define BUFFER_SIZE            37
 
 BEGIN_NAMESPACE(Contoso);
 
@@ -68,6 +67,15 @@ static void DeviceTwinCallback(int status_code, void* userContextCallback)
     }
 }
 
+static int generate_new_int(void)
+{
+    int retValue;
+    time_t nowTime = time(NULL);
+
+    retValue = (int) nowTime;
+    return retValue;
+}
+
 static DEVICE_DATA *device_data_new(void)
 {
     DEVICE_DATA *retValue = (DEVICE_DATA *) malloc(sizeof(DEVICE_DATA));
@@ -87,7 +95,8 @@ static DEVICE_DATA *device_data_new(void)
         }
         else
         {
-            if (mallocAndStrcpy_s(&(retValue->device->string_property), TEST_STRING_VALUE) != 0)
+            if ( (retValue->device->string_property = malloc(BUFFER_SIZE)) == NULL ||
+                 UniqueId_Generate(retValue->device->string_property, BUFFER_SIZE) != UNIQUEID_OK)
             {
                 LogError("failed to set the string test property.");
                 DESTROY_MODEL_INSTANCE(retValue->device);
@@ -96,7 +105,7 @@ static DEVICE_DATA *device_data_new(void)
             }
             else
             {
-                retValue->device->integer_property = TEST_INTEGER_VALUE;
+                retValue->device->integer_property = generate_new_int();
                 retValue->lock = Lock_Init();
                 if (retValue->lock == NULL)
                 {
@@ -227,7 +236,6 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 
     // cleanup
     IoTHubClient_Destroy(iotHubClientHandle);
-    device_data_delete(deviceData);
 
     const char *connectionString = IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo);
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
@@ -245,11 +253,12 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 
     JSON_Object *root_object = json_value_get_object(root_value);
     const char *string_property = json_object_dotget_string(root_object, "properties.reported.string_property");
-    ASSERT_ARE_EQUAL_WITH_MSG(char_ptr, TEST_STRING_VALUE, string_property, "data retrieved does not equal data reported");
+    ASSERT_ARE_EQUAL_WITH_MSG(char_ptr, deviceData->device->string_property, string_property, "data retrieved does not equal data reported");
 
     int integer_property = (int) json_object_dotget_number(root_object, "properties.reported.integer_property");
-    ASSERT_ARE_EQUAL_WITH_MSG(int, TEST_INTEGER_VALUE, integer_property, "data retrieved does not equal data reported");
+    ASSERT_ARE_EQUAL_WITH_MSG(int, deviceData->device->integer_property, integer_property, "data retrieved does not equal data reported");
 
+    device_data_delete(deviceData);
     json_value_free(root_value);
 }
 
