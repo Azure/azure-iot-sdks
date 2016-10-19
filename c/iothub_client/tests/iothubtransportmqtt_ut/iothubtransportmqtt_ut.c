@@ -286,6 +286,84 @@ TEST_FUNCTION(IoTHubTransportMqtt_Subscribe_success)
     //cleanup
 }
 
+TEST_FUNCTION(IoTHubTransportMqtt_Subscribe_DeviceTwin_success)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
+    umock_c_reset_all_calls();
+
+    // act
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(handle));
+
+    int result = IoTHubTransportMqtt_Subscribe_DeviceTwin(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, result, 0);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+TEST_FUNCTION(IoTHubTransportMqtt_Unsubscribe_DeviceTwin_success)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
+    umock_c_reset_all_calls();
+
+    // act
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin(handle));
+
+    IoTHubTransportMqtt_Unsubscribe_DeviceTwin(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+TEST_FUNCTION(IoTHubTransportMqtt_Subscribe_Method_success)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
+    umock_c_reset_all_calls();
+
+    // act
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod(handle));
+
+    int result = IoTHubTransportMqtt_Subscribe_DeviceMethod(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, result, 0);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
+TEST_FUNCTION(IoTHubTransportMqtt_Unsubscribe_Method_success)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
+    umock_c_reset_all_calls();
+
+    // act
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod(handle));
+
+    IoTHubTransportMqtt_Unsubscribe_DeviceMethod(handle);
+
+    // assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+}
+
 /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_006: [ IoTHubTransportMqtt_Unsubscribe shall unsubscribe the TRANSPORT_LL_HANDLE by calling into the IoTHubMqttAbstract_Unsubscribe function. ] */
 TEST_FUNCTION(IoTHubTransportMqtt_Unsubscribe_success)
 {
