@@ -69,6 +69,12 @@ make
 make install
 ```
 
+### Cross-compiling Openssl
+
+Obtain OpenSSL sources from <http://www.openssl.org/source/>, unpacking it in a directory similar to `~/openssl-1.0.1g`.
+
+Obtain `setenv-android.sh` from <http://openssl.com/fips/2.0/platforms/android/> and save it in your home directory.
+
 ### Setting up cmake to cross compile
 
 Now we need to switch to the SDK directory tree. Enter this command
