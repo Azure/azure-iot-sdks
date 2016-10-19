@@ -36,6 +36,8 @@ typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG
     TRANSPORT_PROVIDER_FIELDS;
     IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC messageCallback;
     void* messageUserContextCallback;
+    IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK conStatusCallback;
+    void* conStatusUserContextCallback;
     time_t lastMessageReceiveTime;
     TICK_COUNTER_HANDLE tickCounter; /*shared tickcounter used to track message timeouts in waitingToSend list*/
     uint64_t currentMessageTimeout;
@@ -850,20 +852,44 @@ IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubClient_LL_MessageCallback(IOTHUB_CLIENT_L
 	return (IOTHUBMESSAGE_DISPOSITION_RESULT) result;
 }
 
-void IotHubClient_LL_ConnectionStatusCallBack(IOTHUB_CLIENT_LL_HANDLE handle, PDLIST_ENTRY connectionStatus)
+void IotHubClient_LL_ConnectionStatusCallBack(IOTHUB_CLIENT_LL_HANDLE handle, IOTHUB_CLIENT_CONNECTION_STATUS status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason)
 {
-    (void)handle;
-    (void)connectionStatus;
+    /*Codes_SRS_IOTHUBCLIENT_LL_25_113: [If parameter connectionStatus is NULL or parameter handle is NULL then IotHubClient_LL_ConnectionStatusCallBack shall return.]*/
+    if (handle == NULL)
+    {
+        /*"shall return"*/
+        LogError("invalid arg");
+    }
+    else
+    {
+        IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)handle;
+
+        /*Codes_SRS_IOTHUBCLIENT_LL_25_114: [IotHubClient_LL_ConnectionStatusCallBack shall call non-callback set by the user from IoTHubClient_LL_SetConnectionStatusCallback passing the status, reason and the passed userContextCallback.]*/
+        if (handleData->conStatusCallback != NULL)
+        {
+            handleData->conStatusCallback(status, reason, handleData->conStatusUserContextCallback);
+        }
+    }
+
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetConnectionStatusCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void * userContextCallback)
 {
-
-    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    (void)iotHubClientHandle;
-    (void)connectionStatusCallback;
-    (void)userContextCallback;
-
+    IOTHUB_CLIENT_RESULT result;
+    /*Codes_SRS_IOTHUBCLIENT_LL_25_111: [IoTHubClient_LL_SetConnectionStatusCallback shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter iotHubClientHandle**]** */
+    if (iotHubClientHandle == NULL)
+    {
+        result = IOTHUB_CLIENT_INVALID_ARG;
+        LOG_ERROR_RESULT;
+    }
+    else
+    {
+        IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)iotHubClientHandle;
+        /*Codes_SRS_IOTHUBCLIENT_LL_25_112: [IoTHubClient_LL_SetConnectionStatusCallback shall return IOTHUB_CLIENT_OK and save the callback and userContext as a member of the handle.] */
+        handleData->conStatusCallback = connectionStatusCallback;
+        handleData->conStatusUserContextCallback = userContextCallback;
+        result = IOTHUB_CLIENT_OK;
+    }
 
     return result;
 }

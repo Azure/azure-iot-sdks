@@ -238,14 +238,13 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetConnectionStatusCallback(IOTHUB_C
 
 ###IotHubClient_LL_ConnectionStatusCallBack
 ```c
-extern void IotHubClient_LL_ConnectionStatusCallBack(IOTHUB_CLIENT_LL_HANDLE handle, PDLIST_ENTRY connectionStatus);
+extern void IotHubClient_LL_ConnectionStatusCallBack(IOTHUB_CLIENT_LL_HANDLE handle, IOTHUB_CLIENT_CONNECTION_STATUS connectionStatus, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason);
 ```
-**SRS_IOTHUBCLIENT_LL_25_113: [**If parameter connectionStatus is NULL or parameter handle is NULL then IotHubClient_LL_ConnectionStatusCallBack shall return.**]** 
+**SRS_IOTHUBCLIENT_LL_25_113: [**If parameter connectionStatus is NULL or parameter handle is NULL then IotHubClient_LL_ConnectionStatusCallBack shall return.**]**
 
-IotHubClient_LL_ConnectionStatusCallBack is a function that is only called by the lower layers. connectionStatus is a PDLIST containing events which represent the transition of various states in establishing a connection to the IOT Hub.
+IotHubClient_LL_ConnectionStatusCallBack is a function that is only called by the lower layers. connectionStatus represents the authentication state of the client to the IOTHUB with reason for change.
 
-**SRS_IOTHUBCLIENT_LL_25_114: [**If parameter connectionStatus contains a entry which can be published then the callback (if set by the user) along with its context and connection status shall be invoked.**]** 
-**SRS_IOTHUBCLIENT_LL_25_115: [**If any callback is NULL then there shall not be a callback call.**]** 
+**SRS_IOTHUBCLIENT_LL_25_114: [**IotHubClient_LL_ConnectionStatusCallBack shall call non-callback set by the user from IoTHubClient_LL_SetConnectionStatusCallback passing the status, reason and the passed userContextCallback.**]**
 
 ###IoTHubClient_LL_SetRetryPolicy
 ```c
