@@ -71,9 +71,11 @@ make install
 
 ### Cross-compiling Openssl
 
-Obtain OpenSSL sources from <http://www.openssl.org/source/>, unpacking it in a directory similar to `~/openssl-1.0.1g`.
+Obtain `setenv-android-x.x.sh` from <http://openssl.com/fips/2.0/platforms/android/> and save it in your home directory. Open the script and 
 
-Obtain `setenv-android.sh` from <http://openssl.com/fips/2.0/platforms/android/> and save it in your home directory.
+Obtain OpenSSL sources from <http://www.openssl.org/source/>, unpacking it in a directory similar to `~/openssl-1.1.0b`.
+
+
 
 ### Setting up cmake to cross compile
 
