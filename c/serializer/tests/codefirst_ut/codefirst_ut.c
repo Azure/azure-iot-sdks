@@ -685,6 +685,8 @@ static SCHEMA_RESULT my_Schema_GetModelModelCount(SCHEMA_MODEL_TYPE_HANDLE model
     return SCHEMA_OK;
 }
 
+#define TEST_SCHEMA_METADATA ((void*)(0x42))
+
 BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
     TEST_SUITE_INITIALIZE(TestClassInitialize)
@@ -2943,7 +2945,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         (void)CodeFirst_Init(NULL);
         umock_c_reset_all_calls();
         STRICT_EXPECTED_CALL(Schema_GetSchemaByNamespace("TestSchema"));
-        STRICT_EXPECTED_CALL(Schema_Create("TestSchema"));
+        STRICT_EXPECTED_CALL(Schema_Create("TestSchema", IGNORED_PTR_ARG))
+            .IgnoreArgument_metadata();
         STRICT_EXPECTED_CALL(Schema_CreateStructType(TEST_SCHEMA_HANDLE, "theCarIsBehindTheVan_Struct"))
             .SetReturn(TEST_CAR_BEHIND_VAN_HANDLE);
         STRICT_EXPECTED_CALL(Schema_AddStructTypeProperty(TEST_CAR_BEHIND_VAN_HANDLE, "whereIsMyCar_Field", "whereIsMyDevice_Struct"));
@@ -2992,7 +2995,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         (void)CodeFirst_Init(NULL);
         umock_c_reset_all_calls();
         STRICT_EXPECTED_CALL(Schema_GetSchemaByNamespace("TestSchema"));
-        STRICT_EXPECTED_CALL(Schema_Create("TestSchema"));
+        STRICT_EXPECTED_CALL(Schema_Create("TestSchema", TEST_SCHEMA_METADATA))
+            .IgnoreArgument_metadata();
         STRICT_EXPECTED_CALL(Schema_CreateModelType(TEST_SCHEMA_HANDLE, "OuterType"))
             .SetReturn(TEST_OUTERTYPE_MODEL_HANDLE);
         STRICT_EXPECTED_CALL(Schema_CreateModelType(TEST_SCHEMA_HANDLE, "InnerType"))
@@ -3039,7 +3043,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         (void)CodeFirst_Init(NULL);
         umock_c_reset_all_calls();
         STRICT_EXPECTED_CALL(Schema_GetSchemaByNamespace("TestSchema"));
-        STRICT_EXPECTED_CALL(Schema_Create("TestSchema"))
+        STRICT_EXPECTED_CALL(Schema_Create("TestSchema", TEST_SCHEMA_METADATA))
             .SetReturn((SCHEMA_HANDLE)NULL);
 
         ///act
@@ -3058,7 +3062,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///arrange
         (void)CodeFirst_Init(NULL);
         umock_c_reset_all_calls();
-        STRICT_EXPECTED_CALL(Schema_Create("TestSchema"));
+        STRICT_EXPECTED_CALL(Schema_Create("TestSchema", TEST_SCHEMA_METADATA));
         STRICT_EXPECTED_CALL(Schema_CreateModelType(TEST_SCHEMA_HANDLE, TEST_DEFAULT_MODEL_NAME))
             .SetReturn((SCHEMA_MODEL_TYPE_HANDLE)NULL);
         STRICT_EXPECTED_CALL(Schema_Destroy(TEST_SCHEMA_HANDLE));
@@ -3145,7 +3149,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///arrange
         (void)CodeFirst_Init(NULL);
         umock_c_reset_all_calls();
-        STRICT_EXPECTED_CALL(Schema_Create("TestSchema"));
+        STRICT_EXPECTED_CALL(Schema_Create("TestSchema", TEST_SCHEMA_METADATA));
         STRICT_EXPECTED_CALL(Schema_CreateStructType(TEST_SCHEMA_HANDLE, "GeoLocation"))
             .SetReturn((SCHEMA_STRUCT_TYPE_HANDLE)NULL);
         STRICT_EXPECTED_CALL(Schema_Destroy(TEST_SCHEMA_HANDLE));
@@ -3166,7 +3170,7 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
         ///arrange
         (void)CodeFirst_Init(NULL);
         umock_c_reset_all_calls();
-        STRICT_EXPECTED_CALL(Schema_Create("TestSchema"));
+        STRICT_EXPECTED_CALL(Schema_Create("TestSchema", TEST_SCHEMA_METADATA));
         STRICT_EXPECTED_CALL(Schema_AddStructTypeProperty(TEST_STRUCT_TYPE_HANDLE, "Lat", "double"))
             .SetReturn(SCHEMA_ERROR);
         STRICT_EXPECTED_CALL(Schema_Destroy(TEST_SCHEMA_HANDLE));
@@ -3913,7 +3917,8 @@ BEGIN_TEST_SUITE(CodeFirst_ut_Dummy_Data_Provider)
 
         ///arrange
         STRICT_EXPECTED_CALL(Schema_GetSchemaByNamespace("TestSchema"));
-        STRICT_EXPECTED_CALL(Schema_Create("TestSchema"));
+        STRICT_EXPECTED_CALL(Schema_Create("TestSchema", IGNORED_PTR_ARG))
+            .IgnoreArgument_metadata();
         STRICT_EXPECTED_CALL(Schema_CreateModelType(TEST_SCHEMA_HANDLE, "OuterType_onDesiredProperty"))
             .SetReturn(TEST_OUTERTYPE_MODEL_HANDLE);
         STRICT_EXPECTED_CALL(Schema_CreateModelType(TEST_SCHEMA_HANDLE, "InnerType_onDesiredProperty"))

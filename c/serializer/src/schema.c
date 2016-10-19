@@ -82,6 +82,7 @@ typedef struct SCHEMA_STRUCT_TYPE_HANDLE_DATA_TAG
 
 typedef struct SCHEMA_HANDLE_DATA_TAG
 {
+    void* metadata;
     const char* Namespace;
     SCHEMA_MODEL_TYPE_HANDLE* ModelTypes;
     size_t ModelTypeCount;
@@ -311,16 +312,19 @@ static bool SchemaNamespacesMatch(const SCHEMA_HANDLE* handle, const char* schem
 }
 
 /* Codes_SRS_SCHEMA_99_001:[Schema_Create shall initialize a schema with a given namespace.] */
-SCHEMA_HANDLE Schema_Create(const char* schemaNamespace)
+SCHEMA_HANDLE Schema_Create(const char* schemaNamespace, void* metadata)
 {
     SCHEMA_HANDLE_DATA* result;
-
+    /*Codes_SRS_SCHEMA_02_090: [ If metadata is NULL then Schema_Create shall fail and return NULL. ]*/
     /* Codes_SRS_SCHEMA_99_004:[If schemaNamespace is NULL, Schema_Create shall fail.] */
-    if (schemaNamespace == NULL)
+    if (
+        (schemaNamespace == NULL)||
+        (metadata == NULL)
+        )
     {
         /* Codes_SRS_SCHEMA_99_003:[On failure, NULL shall be returned.] */
+        LogError("invalid arg const char* schemaNamespace=%p, void* metadata=%p",schemaNamespace, metadata);
         result = NULL;
-        LogError("(Error code:%s)", ENUM_TO_STRING(SCHEMA_RESULT, SCHEMA_INVALID_ARG));
     }
     else
     {
@@ -356,6 +360,7 @@ SCHEMA_HANDLE Schema_Create(const char* schemaNamespace)
             result->ModelTypeCount = 0;
             result->StructTypes = NULL;
             result->StructTypeCount = 0;
+            result->metadata = metadata;
         }
     }
 
@@ -2805,4 +2810,55 @@ pfDesiredPropertyInitialize Schema_GetModelDesiredProperty_pfDesiredPropertyInit
     return result;
 }
 
+static bool SchemaHasModel(const SCHEMA_HANDLE* schemaHandle, const char* modelName)
+{
+    return (Schema_GetModelByName(*schemaHandle, modelName) != NULL);
+}
 
+
+SCHEMA_HANDLE Schema_GetSchemaForModel(const char* modelName)
+{
+    SCHEMA_HANDLE result;
+    /*Codes_SRS_SCHEMA_02_093: [ If modelName is NULL then Schema_GetSchemaForModel shall fail and return NULL. ]*/
+    if (modelName == NULL)
+    {
+        LogError("invalid arg const char* modelName=%p", modelName);
+        result = NULL;
+    }
+    else
+    {
+        /*Codes_SRS_SCHEMA_02_094: [ Schema_GetSchemaForModel shall find the SCHEMA_HANDLE that contains a model by name modelName and if found, succeed and return that. ]*/
+        SCHEMA_HANDLE* temp = VECTOR_find_if(g_schemas, (PREDICATE_FUNCTION)SchemaHasModel, modelName);
+
+        if (temp == NULL)
+        {
+            /*Codes_SRS_SCHEMA_02_095: [ If the model is not found in any schema, then Schema_GetSchemaForModel shall fail and return NULL. ]*/
+            LogError("unable to find a schema that has a model named %s", modelName);
+            result = NULL;
+        }
+        else
+        {
+            /*Codes_SRS_SCHEMA_02_094: [ Schema_GetSchemaForModel shall find the SCHEMA_HANDLE that contains a model by name modelName and if found, succeed and return that. ]*/
+            result = *temp;
+        }
+    }
+
+    return result;
+}
+
+void* Schema_GetMetadata(SCHEMA_HANDLE schemaHandle)
+{
+    void* result;
+    /*Codes_SRS_SCHEMA_02_091: [ If schemaHandle is NULL then Schema_GetMetadata shall fail and return NULL. ]*/
+    if (schemaHandle == NULL)
+    {
+        LogError("invalid arg SCHEMA_HANDLE schemaHandle=%p", schemaHandle);
+        result = NULL;
+    }
+    else
+    {
+        /*Codes_SRS_SCHEMA_02_092: [ Otherwise, Schema_GetMetadata shall succeed and return the saved metadata pointer. ]*/
+        result = ((SCHEMA_HANDLE_DATA*)schemaHandle)->metadata;
+    }
+    return result;
+}

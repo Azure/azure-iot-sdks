@@ -609,7 +609,7 @@ SCHEMA_HANDLE CodeFirst_RegisterSchema(const char* schemaNamespace, const REFLEC
         result = Schema_GetSchemaByNamespace(schemaNamespace);
         if (result == NULL)
         {
-            if ((result = Schema_Create(schemaNamespace)) == NULL)
+            if ((result = Schema_Create(schemaNamespace, (void*)metadata)) == NULL)
             {
                 /* Codes_SRS_CODEFIRST_99_076:[If any Schema APIs fail, CodeFirst_RegisterSchema shall return NULL.] */
                 result = NULL;

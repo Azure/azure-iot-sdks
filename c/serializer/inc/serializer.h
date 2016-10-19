@@ -168,6 +168,8 @@ extern "C"
 
 #define CREATE_DESIRED_PROPERTY_CALLBACK(...) CREATE_DESIRED_PROPERTY_CALLBACK_##__VA_ARGS__
 
+#define SERIALIZER_REGISTER_NAMESPACE(NAMESPACE) CodeFirst_RegisterSchema(#NAMESPACE, & ALL_REFLECTED(NAMESPACE))
+
 #define DECLARE_MODEL(name, ...)                                                             \
     REFLECTED_MODEL(name)                                                                    \
     FOR_EACH_1(CREATE_DESIRED_PROPERTY_CALLBACK, __VA_ARGS__)                                \
@@ -191,6 +193,7 @@ extern "C"
         FOR_EACH_1_KEEP_1(CREATE_MODEL_ELEMENT_GLOBAL_DEINITIALIZE, name, __VA_ARGS__)       \
     }                                                                                        \
 
+    
 
 /**
  * @def   WITH_DATA(type, name)

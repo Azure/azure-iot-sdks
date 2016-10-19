@@ -6,6 +6,9 @@
 
 #include "azure_c_shared_utility/macro_utils.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "agenttypesystem.h"
+
+#include "azure_c_shared_utility/umock_c_prod.h"
 
 #ifdef __cplusplus
 #include <cstddef>
@@ -13,9 +16,6 @@ extern "C" {
 #else
 #include <stddef.h>
 #endif
-
-
-#include "agenttypesystem.h"
 
 /* Codes_SRS_SCHEMA_99_095: [Schema shall expose the following API:] */
 
@@ -69,10 +69,11 @@ typedef struct SCHEMA_MODEL_ELEMENT_TAG
     } elementHandle;
 }SCHEMA_MODEL_ELEMENT;
 
-#include "azure_c_shared_utility/umock_c_prod.h"
-MOCKABLE_FUNCTION(, SCHEMA_HANDLE, Schema_Create, const char*, schemaNamespace);
+MOCKABLE_FUNCTION(, SCHEMA_HANDLE, Schema_Create, const char*, schemaNamespace, void*, metadata);
+MOCKABLE_FUNCTION(, void*, Schema_GetMetadata, SCHEMA_HANDLE, schemaHandle);
 MOCKABLE_FUNCTION(, size_t, Schema_GetSchemaCount);
 MOCKABLE_FUNCTION(, SCHEMA_HANDLE, Schema_GetSchemaByNamespace, const char*, schemaNamespace);
+MOCKABLE_FUNCTION(, SCHEMA_HANDLE, Schema_GetSchemaForModel, const char*, modelName);
 MOCKABLE_FUNCTION(, const char*, Schema_GetSchemaNamespace, SCHEMA_HANDLE, schemaHandle);
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_AddDeviceRef, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle);
 MOCKABLE_FUNCTION(, SCHEMA_RESULT, Schema_ReleaseDeviceRef, SCHEMA_MODEL_TYPE_HANDLE, modelTypeHandle);
