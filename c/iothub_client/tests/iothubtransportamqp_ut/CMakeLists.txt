@@ -17,8 +17,6 @@ set(${theseTestsName}_c_files
 )
 
 set(${theseTestsName}_h_files
-	../../inc/iothubtransportamqp_auth.h
-	../../inc/uamqp_messaging.h
 )
 
 build_c_test_artifacts(${theseTestsName} ON "tests/UnitTests")

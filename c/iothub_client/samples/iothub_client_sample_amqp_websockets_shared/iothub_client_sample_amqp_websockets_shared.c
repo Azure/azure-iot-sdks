@@ -158,7 +158,7 @@ static int create_events(EVENT_INSTANCE* events, const char* deviceId)
 				(void)printf("ERROR: failed getting device %s's message property map\r\n", deviceId);
 				result = __LINE__;
 			}
-			else if (sprintf_s(propText, sizeof(propText), "PropMsg_%zu", i) == 0) 
+			else if (sprintf_s(propText, sizeof(propText), "PropMsg_%d", i) == 0) 
 			{
 				(void)printf("ERROR: sprintf_s failed for device %s's message property\r\n", deviceId);
 				result = __LINE__;

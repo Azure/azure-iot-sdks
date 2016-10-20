@@ -36,8 +36,7 @@ endif()
 
 if(${use_amqp})
 	add_subdirectory(uamqp_messaging_ut)
-	add_subdirectory(iothubtransportamqp_ut)
-
+	
 	if (${run_e2e_tests} OR ${nuget_e2e_tests})
 		add_subdirectory(iothubclient_amqp_e2e)
         

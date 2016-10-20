@@ -25,17 +25,18 @@ void real_free(void* ptr)
 #include "umock_c_negative_tests.h"
 #include "umocktypes.h"
 #include "umocktypes_c.h"
+#include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/gballoc.h"
-#include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/doublylinkedlist.h"
-#include "azure_c_shared_utility/xlogging.h"
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/strings.h"
 #include "azure_c_shared_utility/urlencode.h"
 #include "azure_c_shared_utility/tlsio.h"
 #include "azure_c_shared_utility/vector.h"
+#include "azure_c_shared_utility/agenttime.h"
 
 #include "azure_uamqp_c/cbs.h"
 #include "azure_uamqp_c/link.h"
@@ -56,6 +57,10 @@ void real_free(void* ptr)
 #undef ENABLE_MOCKS
 
 #include "iothubtransportamqp.h"
+
+MOCKABLE_FUNCTION(, time_t, get_time, time_t*, currentTime);
+MOCKABLE_FUNCTION(, double, get_difftime, time_t, stopTime, time_t, startTime);
+
 
 static TEST_MUTEX_HANDLE g_testByTest;
 static TEST_MUTEX_HANDLE g_dllByDll;
@@ -135,10 +140,6 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 	REGISTER_UMOCK_ALIAS_TYPE(AMQP_VALUE, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(MAP_RESULT, int);
 	REGISTER_UMOCK_ALIAS_TYPE(AMQP_TYPE, int);
-/*
-	REGISTER_GLOBAL_MOCK_HOOK(STRING_construct_sprintf, TEST_STRING_construct_sprintf);
-	REGISTER_GLOBAL_MOCK_RETURN(STRING_construct_sprintf, TEST_STRING_HANDLE);
-	REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_construct_sprintf, NULL);*/
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)

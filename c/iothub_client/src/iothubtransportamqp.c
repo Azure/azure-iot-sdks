@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <limits.h>
+#include "azure_c_shared_utility/agenttime.h"
 #include "azure_c_shared_utility/gballoc.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/doublylinkedlist.h"
@@ -165,7 +166,7 @@ static int getSecondsSinceEpoch(size_t* seconds)
 	int result;
 	time_t current_time;
 	
-	if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
+	if ((current_time = get_time((time_t)NULL)) == INDEFINITE_TIME)
 	{
 		LogError("Failed getting the current local time (get_time() failed)");
 		result = __LINE__;
@@ -195,8 +196,6 @@ static STRING_HANDLE create_link_name(const char* deviceId, const char* tag, int
 	}
 
 	return name;
-
-	//return STRING_construct_sprintf("link-%s-%s-%i", deviceId, tag, index);
 }
 
 static STRING_HANDLE create_link_source_name(STRING_HANDLE link_name)
@@ -214,8 +213,6 @@ static STRING_HANDLE create_link_source_name(STRING_HANDLE link_name)
 	}
 
 	return name;
-
-	//return STRING_construct_sprintf("%s-source", STRING_c_str(link_name));
 }
 
 static STRING_HANDLE create_link_target_name(STRING_HANDLE link_name)
@@ -233,7 +230,6 @@ static STRING_HANDLE create_link_target_name(STRING_HANDLE link_name)
 	}
 
 	return name;
-	//return STRING_construct_sprintf("%s-target", STRING_c_str(link_name));
 }
 
 // Auxiliary function to be used on VECTOR_find_if()
@@ -707,107 +703,111 @@ void on_event_sender_state_changed(void* context, MESSAGE_SENDER_STATE new_state
 
 static int createEventSender(AMQP_TRANSPORT_DEVICE_STATE* device_state)
 {
-    int result = __LINE__;
+    int result;
 
-    if (device_state->message_sender == NULL)
+	STRING_HANDLE link_name = NULL;
+	STRING_HANDLE source_name = NULL;
+    AMQP_VALUE source = NULL;
+    AMQP_VALUE target = NULL;
+
+	// Codes_SRS_IOTHUBTRANSPORTAMQP_09_251: [Every new message_sender AMQP link shall be created using unique link and source names per device, per connection]
+	if ((link_name = create_link_name(STRING_c_str(device_state->deviceId), MESSAGE_SENDER_LINK_NAME_TAG, device_state->transport_state->link_count++)) == NULL)
+	{
+		LogError("Failed creating a name for the AMQP message sender link.");
+		result = __LINE__;
+	}
+	else if ((source_name = create_link_source_name(link_name)) == NULL)
+	{
+		LogError("Failed creating a name for the AMQP message sender source.");
+		result = __LINE__;
+	}
+    else if ((source = messaging_create_source(STRING_c_str(source_name))) == NULL)
     {
-		STRING_HANDLE link_name = NULL;
-		STRING_HANDLE source_name = NULL;
-        AMQP_VALUE source = NULL;
-        AMQP_VALUE target = NULL;
+        LogError("Failed creating AMQP messaging source attribute.");
+		result = __LINE__;
+    }
+	// Codes_SRS_IOTHUBTRANSPORTAMQP_09_252: [The message_sender AMQP link shall be created using the `target` address created according to SRS_IOTHUBTRANSPORTAMQP_09_014]
+    else if ((target = messaging_create_target(STRING_c_str(device_state->targetAddress))) == NULL)
+    {
+        LogError("Failed creating AMQP messaging target attribute.");
+		result = __LINE__;
+    }
+	// Codes_SRS_IOTHUBTRANSPORTAMQP_09_068: [IoTHubTransportAMQP_DoWork shall create the AMQP link using link_create(), with role as 'role_sender'] 
+	else if ((device_state->sender_link = link_create(device_state->transport_state->session, STRING_c_str(link_name), role_sender, source, target)) == NULL)
+    {
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_069: [If IoTHubTransportAMQP_DoWork fails to create the AMQP link for sending messages, the function shall fail and return immediately, flagging the connection to be re-stablished] 
+        LogError("Failed creating AMQP link for message sender.");
+		result = __LINE__;
+    }
+    else
+    {
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_119: [IoTHubTransportAMQP_DoWork shall apply a default value of 65536 for the parameter 'Link MAX message size']
+        if (link_set_max_message_size(device_state->sender_link, MESSAGE_SENDER_MAX_LINK_SIZE) != RESULT_OK)
+        {
+            LogError("Failed setting AMQP link max message size.");
+        }
 
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_251: [Every new message_sender AMQP link shall be created using unique link and source names per device, per connection]
-		if ((link_name = create_link_name(STRING_c_str(device_state->deviceId), MESSAGE_SENDER_LINK_NAME_TAG, device_state->transport_state->link_count++)) == NULL)
-		{
-			LogError("Failed creating a name for the AMQP message sender link.");
-		}
-		else if ((source_name = create_link_source_name(link_name)) == NULL)
-		{
-			LogError("Failed creating a name for the AMQP message sender source.");
-		}
-        else if ((source = messaging_create_source(STRING_c_str(source_name))) == NULL)
+		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_249: [The message sender link should have a property set with the type and version of the IoT Hub client application, set as `CLIENT_DEVICE_TYPE_PREFIX/IOTHUB_SDK_VERSION`]
+		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_250: [If the message sender link fails to have the client type and version set on its properties, the failure shall be ignored]
+        attachDeviceClientTypeToLink(device_state->sender_link);
+
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_070: [IoTHubTransportAMQP_DoWork shall create the AMQP message sender using messagesender_create() AMQP API] 
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_191: [IoTHubTransportAMQP_DoWork shall create each AMQP message sender tracking its state changes with a callback function]
+        if ((device_state->message_sender = messagesender_create(device_state->sender_link, on_event_sender_state_changed, (void*)device_state)) == NULL)
         {
-            LogError("Failed creating AMQP messaging source attribute.");
-        }
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_252: [The message_sender AMQP link shall be created using the `target` address created according to SRS_IOTHUBTRANSPORTAMQP_09_014]
-        else if ((target = messaging_create_target(STRING_c_str(device_state->targetAddress))) == NULL)
-        {
-            LogError("Failed creating AMQP messaging target attribute.");
-        }
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_068: [IoTHubTransportAMQP_DoWork shall create the AMQP link using link_create(), with role as 'role_sender'] 
-		else if ((device_state->sender_link = link_create(device_state->transport_state->session, STRING_c_str(link_name), role_sender, source, target)) == NULL)
-        {
-            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_069: [If IoTHubTransportAMQP_DoWork fails to create the AMQP link for sending messages, the function shall fail and return immediately, flagging the connection to be re-stablished] 
-            LogError("Failed creating AMQP link for message sender.");
+            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_071: [IoTHubTransportAMQP_DoWork shall fail and return immediately if the AMQP message sender instance fails to be created, flagging the connection to be re-established] 
+            LogError("Could not allocate AMQP message sender");
+			result = __LINE__;
         }
         else
         {
-            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_119: [IoTHubTransportAMQP_DoWork shall apply a default value of 65536 for the parameter 'Link MAX message size']
-            if (link_set_max_message_size(device_state->sender_link, MESSAGE_SENDER_MAX_LINK_SIZE) != RESULT_OK)
+            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_072: [IoTHubTransportAMQP_DoWork shall open the AMQP message sender using messagesender_open() AMQP API] 
+            if (messagesender_open(device_state->message_sender) != RESULT_OK)
             {
-                LogError("Failed setting AMQP link max message size.");
-            }
-
-			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_249: [The message sender link should have a property set with the type and version of the IoT Hub client application, set as `CLIENT_DEVICE_TYPE_PREFIX/IOTHUB_SDK_VERSION`]
-			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_250: [If the message sender link fails to have the client type and version set on its properties, the failure shall be ignored]
-            attachDeviceClientTypeToLink(device_state->sender_link);
-
-            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_070: [IoTHubTransportAMQP_DoWork shall create the AMQP message sender using messagesender_create() AMQP API] 
-            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_191: [IoTHubTransportAMQP_DoWork shall create each AMQP message sender tracking its state changes with a callback function]
-            if ((device_state->message_sender = messagesender_create(device_state->sender_link, on_event_sender_state_changed, (void*)device_state)) == NULL)
-            {
-                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_071: [IoTHubTransportAMQP_DoWork shall fail and return immediately if the AMQP message sender instance fails to be created, flagging the connection to be re-established] 
-                LogError("Could not allocate AMQP message sender");
+                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_073: [IoTHubTransportAMQP_DoWork shall fail and return immediately if the AMQP message sender instance fails to be opened, flagging the connection to be re-established] 
+                LogError("Failed opening the AMQP message sender.");
+				result = __LINE__;
             }
             else
             {
-                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_072: [IoTHubTransportAMQP_DoWork shall open the AMQP message sender using messagesender_open() AMQP API] 
-                if (messagesender_open(device_state->message_sender) != RESULT_OK)
-                {
-                    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_073: [IoTHubTransportAMQP_DoWork shall fail and return immediately if the AMQP message sender instance fails to be opened, flagging the connection to be re-established] 
-                    LogError("Failed opening the AMQP message sender.");
-                }
-                else
-                {
-                    result = RESULT_OK;
-                }
+                result = RESULT_OK;
             }
         }
-
-		if (link_name != NULL)
-			STRING_delete(link_name);
-		if (source_name != NULL)
-			STRING_delete(source_name);
-        if (source != NULL)
-            amqpvalue_destroy(source);
-        if (target != NULL)
-            amqpvalue_destroy(target);
     }
+
+	if (link_name != NULL)
+		STRING_delete(link_name);
+	if (source_name != NULL)
+		STRING_delete(source_name);
+    if (source != NULL)
+        amqpvalue_destroy(source);
+    if (target != NULL)
+        amqpvalue_destroy(target);
 
     return result;
 }
 
 static int destroyMessageReceiver(AMQP_TRANSPORT_DEVICE_STATE* device_state)
 {
-    int result = __LINE__;
+    int result;
 
-    if (device_state->message_receiver != NULL)
+    if (messagereceiver_close(device_state->message_receiver) != RESULT_OK)
     {
-        if (messagereceiver_close(device_state->message_receiver) != RESULT_OK)
-        {
-            LogError("Failed closing the AMQP message receiver.");
-        }
-
-        messagereceiver_destroy(device_state->message_receiver);
+        LogError("Failed closing the AMQP message receiver.");
+		result = __LINE__;
+    }
+	else
+	{
+		messagereceiver_destroy(device_state->message_receiver);
 
 		device_state->message_receiver = NULL;
 
-        link_destroy(device_state->receiver_link);
+		link_destroy(device_state->receiver_link);
 
 		device_state->receiver_link = NULL;
 
-        result = RESULT_OK;
-    }
+		result = RESULT_OK;
+	}
 
     return result;
 }
@@ -835,89 +835,94 @@ void on_message_receiver_state_changed(const void* context, MESSAGE_RECEIVER_STA
 
 static int createMessageReceiver(AMQP_TRANSPORT_DEVICE_STATE* device_state)
 {
-    int result = __LINE__;
+    int result;
 
-    if (device_state->message_receiver == NULL)
+	STRING_HANDLE link_name = NULL;
+	STRING_HANDLE target_name = NULL;
+    AMQP_VALUE source = NULL;
+    AMQP_VALUE target = NULL;
+
+	// Codes_SRS_IOTHUBTRANSPORTAMQP_09_246: [Every new message_receiver AMQP link shall be created using unique link and target names per device, per connection]
+	if ((link_name = create_link_name(STRING_c_str(device_state->deviceId), MESSAGE_RECEIVER_LINK_NAME_TAG, device_state->transport_state->link_count++)) == NULL)
+	{
+		LogError("Failed creating a name for the AMQP message receiver link.");
+                    result = __LINE__;
+	}
+	else if ((target_name = create_link_target_name(link_name)) == NULL)
+	{
+		LogError("Failed creating a name for the AMQP message receiver target.");
+                    result = __LINE__;
+	}
+	// Codes_SRS_IOTHUBTRANSPORTAMQP_09_253: [The message_receiver AMQP link shall be created using the `source` address created according to SRS_IOTHUBTRANSPORTAMQP_09_053]
+    else if ((source = messaging_create_source(STRING_c_str(device_state->messageReceiveAddress))) == NULL)
     {
-		STRING_HANDLE link_name = NULL;
-		STRING_HANDLE target_name = NULL;
-        AMQP_VALUE source = NULL;
-        AMQP_VALUE target = NULL;
+        LogError("Failed creating AMQP message receiver source attribute.");
+        result = __LINE__;
+    }
+    else if ((target = messaging_create_target(STRING_c_str(target_name))) == NULL)
+    {
+        LogError("Failed creating AMQP message receiver target attribute.");
+        result = __LINE__;
+    }
+// Codes_SRS_IOTHUBTRANSPORTAMQP_09_074: [IoTHubTransportAMQP_DoWork shall create the AMQP link using link_create(), with role as 'role_receiver'] 
+else if ((device_state->receiver_link = link_create(device_state->transport_state->session, STRING_c_str(link_name), role_receiver, source, target)) == NULL)
+    {
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_075: [If IoTHubTransportAMQP_DoWork fails to create the AMQP link for receiving messages, the function shall fail and return immediately, flagging the connection to be re-stablished] 
+        LogError("Failed creating AMQP link for message receiver.");
+        result = __LINE__;
+    }
+    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_076: [IoTHubTransportAMQP_DoWork shall set the receiver link settle mode as receiver_settle_mode_first] 
+    else if (link_set_rcv_settle_mode(device_state->receiver_link, receiver_settle_mode_first) != RESULT_OK)
+    {
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_141: [If IoTHubTransportAMQP_DoWork fails to set the settle mode on the AMQP link for receiving messages, the function shall fail and return immediately, flagging the connection to be re-stablished]
+        LogError("Failed setting AMQP link settle mode for message receiver.");
+        result = __LINE__;
+    }
+    else
+    {
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_119: [IoTHubTransportAMQP_DoWork shall apply a default value of 65536 for the parameter 'Link MAX message size']
+        if (link_set_max_message_size(device_state->receiver_link, MESSAGE_RECEIVER_MAX_LINK_SIZE) != RESULT_OK)
+        {
+            LogError("Failed setting AMQP link max message size for message receiver.");
+        }
 
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_246: [Every new message_receiver AMQP link shall be created using unique link and target names per device, per connection]
-		if ((link_name = create_link_name(STRING_c_str(device_state->deviceId), MESSAGE_RECEIVER_LINK_NAME_TAG, device_state->transport_state->link_count++)) == NULL)
-		{
-			LogError("Failed creating a name for the AMQP message receiver link.");
-		}
-		else if ((target_name = create_link_target_name(link_name)) == NULL)
-		{
-			LogError("Failed creating a name for the AMQP message receiver target.");
-		}
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_253: [The message_receiver AMQP link shall be created using the `source` address created according to SRS_IOTHUBTRANSPORTAMQP_09_053]
-        else if ((source = messaging_create_source(STRING_c_str(device_state->messageReceiveAddress))) == NULL)
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_247: [The message receiver link should have a property set with the type and version of the IoT Hub client application, set as `CLIENT_DEVICE_TYPE_PREFIX/IOTHUB_SDK_VERSION`]
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_248: [If the message receiver link fails to have the client type and version set on its properties, the failure shall be ignored]
+        attachDeviceClientTypeToLink(device_state->receiver_link);
+
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_077: [IoTHubTransportAMQP_DoWork shall create the AMQP message receiver using messagereceiver_create() AMQP API] 
+        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_189: [IoTHubTransportAMQP_DoWork shall create each AMQP message_receiver tracking its state changes with a callback function]
+        if ((device_state->message_receiver = messagereceiver_create(device_state->receiver_link, on_message_receiver_state_changed, (void*)device_state)) == NULL)
         {
-            LogError("Failed creating AMQP message receiver source attribute.");
-        }
-        else if ((target = messaging_create_target(STRING_c_str(target_name))) == NULL)
-        {
-            LogError("Failed creating AMQP message receiver target attribute.");
-        }
-		// Codes_SRS_IOTHUBTRANSPORTAMQP_09_074: [IoTHubTransportAMQP_DoWork shall create the AMQP link using link_create(), with role as 'role_receiver'] 
-		else if ((device_state->receiver_link = link_create(device_state->transport_state->session, STRING_c_str(link_name), role_receiver, source, target)) == NULL)
-        {
-            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_075: [If IoTHubTransportAMQP_DoWork fails to create the AMQP link for receiving messages, the function shall fail and return immediately, flagging the connection to be re-stablished] 
-            LogError("Failed creating AMQP link for message receiver.");
-        }
-        // Codes_SRS_IOTHUBTRANSPORTAMQP_09_076: [IoTHubTransportAMQP_DoWork shall set the receiver link settle mode as receiver_settle_mode_first] 
-        else if (link_set_rcv_settle_mode(device_state->receiver_link, receiver_settle_mode_first) != RESULT_OK)
-        {
-            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_141: [If IoTHubTransportAMQP_DoWork fails to set the settle mode on the AMQP link for receiving messages, the function shall fail and return immediately, flagging the connection to be re-stablished]
-            LogError("Failed setting AMQP link settle mode for message receiver.");
+            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_078: [IoTHubTransportAMQP_DoWork shall fail and return immediately if the AMQP message receiver instance fails to be created, flagging the connection to be re-established] 
+            LogError("Could not allocate AMQP message receiver.");
+            result = __LINE__;
         }
         else
         {
-            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_119: [IoTHubTransportAMQP_DoWork shall apply a default value of 65536 for the parameter 'Link MAX message size']
-            if (link_set_max_message_size(device_state->receiver_link, MESSAGE_RECEIVER_MAX_LINK_SIZE) != RESULT_OK)
+            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_079: [IoTHubTransportAMQP_DoWork shall open the AMQP message receiver using messagereceiver_open() AMQP API, passing a callback function for handling C2D incoming messages] 
+            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_123: [IoTHubTransportAMQP_DoWork shall create each AMQP message_receiver passing the 'on_message_received' as the callback function] 
+            if (messagereceiver_open(device_state->message_receiver, on_message_received, (const void*)device_state->iothub_client_handle) != RESULT_OK)
             {
-                LogError("Failed setting AMQP link max message size for message receiver.");
-            }
-
-			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_247: [The message receiver link should have a property set with the type and version of the IoT Hub client application, set as `CLIENT_DEVICE_TYPE_PREFIX/IOTHUB_SDK_VERSION`]
-			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_248: [If the message receiver link fails to have the client type and version set on its properties, the failure shall be ignored]
-            attachDeviceClientTypeToLink(device_state->receiver_link);
-
-            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_077: [IoTHubTransportAMQP_DoWork shall create the AMQP message receiver using messagereceiver_create() AMQP API] 
-            // Codes_SRS_IOTHUBTRANSPORTAMQP_09_189: [IoTHubTransportAMQP_DoWork shall create each AMQP message_receiver tracking its state changes with a callback function]
-            if ((device_state->message_receiver = messagereceiver_create(device_state->receiver_link, on_message_receiver_state_changed, (void*)device_state)) == NULL)
-            {
-                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_078: [IoTHubTransportAMQP_DoWork shall fail and return immediately if the AMQP message receiver instance fails to be created, flagging the connection to be re-established] 
-                LogError("Could not allocate AMQP message receiver.");
+                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_080: [IoTHubTransportAMQP_DoWork shall fail and return immediately if the AMQP message receiver instance fails to be opened, flagging the connection to be re-established] 
+                LogError("Failed opening the AMQP message receiver.");
+                result = __LINE__;
             }
             else
             {
-                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_079: [IoTHubTransportAMQP_DoWork shall open the AMQP message receiver using messagereceiver_open() AMQP API, passing a callback function for handling C2D incoming messages] 
-                // Codes_SRS_IOTHUBTRANSPORTAMQP_09_123: [IoTHubTransportAMQP_DoWork shall create each AMQP message_receiver passing the 'on_message_received' as the callback function] 
-                if (messagereceiver_open(device_state->message_receiver, on_message_received, (const void*)device_state->iothub_client_handle) != RESULT_OK)
-                {
-                    // Codes_SRS_IOTHUBTRANSPORTAMQP_09_080: [IoTHubTransportAMQP_DoWork shall fail and return immediately if the AMQP message receiver instance fails to be opened, flagging the connection to be re-established] 
-                    LogError("Failed opening the AMQP message receiver.");
-                }
-                else
-                {
-                    result = RESULT_OK;
-                }
+                result = RESULT_OK;
             }
         }
-
-		if (link_name != NULL)
-			STRING_delete(link_name);
-		if (target_name != NULL)
-			STRING_delete(target_name);
-        if (source != NULL)
-            amqpvalue_destroy(source);
-        if (target != NULL)
-            amqpvalue_destroy(target);
     }
+
+    if (link_name != NULL)
+        STRING_delete(link_name);
+    if (target_name != NULL)
+        STRING_delete(target_name);
+    if (source != NULL)
+        amqpvalue_destroy(source);
+    if (target != NULL)
+        amqpvalue_destroy(target);
 
     return result;
 }

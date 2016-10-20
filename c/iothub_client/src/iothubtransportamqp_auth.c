@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #include "iothubtransportamqp_auth.h"
+#include "azure_c_shared_utility/agenttime.h" 
 
 #define RESULT_OK 0
 #define INDEFINITE_TIME ((time_t)(-1))
