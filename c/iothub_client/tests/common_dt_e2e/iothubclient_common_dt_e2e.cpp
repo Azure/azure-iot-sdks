@@ -237,7 +237,7 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     // cleanup
     IoTHubClient_Destroy(iotHubClientHandle);
 
-    const char *connectionString = IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo);
+    const char *connectionString = IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo);
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "Failure in IoTHubServiceClientAuth_CreateFromConnectionString");
 
