@@ -130,3 +130,5 @@ This will tell cmake to build the SDK using the toolchain file toolchain-android
 <http://www.fabriziodini.eu/posts/cross_compile_tutorial/>
 
 <https://wiki.openssl.org/index.php/Android>
+
+<http://openssl.com/fips/2.0/platforms/android/OpenSSL_FIPS_Library_and_Android_Guide.pdf>
