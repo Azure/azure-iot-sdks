@@ -8,8 +8,6 @@ var program = require('commander');
 var prettyjson = require('prettyjson');
 var inputError = require('./common.js').inputError;
 var serviceError = require('./common.js').serviceError;
-var printDevice = require('./common.js').printDevice;
-var getHostFromSas = require('./common.js').getHostFromSas;
 var getSas = require('./common.js').getSas;
 var Registry = require('azure-iothub').Registry;
 
@@ -26,7 +24,7 @@ if(!deviceId) inputError('You must specify a deviceId.');
 var sas = getSas(program.login);
 
 var registry = Registry.fromSharedAccessSignature(sas);
-registry.getTwin(deviceId, function (err, device) {
+registry.getTwin(deviceId, function (err, twin) {
   if (err) serviceError(err);
   else {
     var output = program.raw ? JSON.stringify(twin) : prettyjson.render(twin);

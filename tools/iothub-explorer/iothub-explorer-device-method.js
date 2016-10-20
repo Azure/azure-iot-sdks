@@ -8,10 +8,8 @@ var program = require('commander');
 var prettyjson = require('prettyjson');
 var inputError = require('./common.js').inputError;
 var serviceError = require('./common.js').serviceError;
-var printDevice = require('./common.js').printDevice;
-var getHostFromSas = require('./common.js').getHostFromSas;
 var getSas = require('./common.js').getSas;
-var Registry = require('azure-iothub').Registry;
+var Client = require('azure-iothub').Client;
 
 program
   .description('Call a device method on a specific device')
