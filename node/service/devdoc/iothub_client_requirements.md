@@ -70,6 +70,8 @@ The open method opens a connection to the IoT Hub service.
 
 **SRS_NODE_IOTHUB_CLIENT_16_002: [** If the transport successfully establishes a connection the `open` method shall subscribe to the `disconnect` event of the transport.**]**
 
+**SRS_NODE_IOTHUB_CLIENT_16_006: [** The `open` method should not throw if the `done` callback is not specified. **]**
+
 ###send(devceId, message, done)
 The `send` method sends a cloud-to-device message to the service, intended for delivery to the given device.
 
@@ -119,12 +121,14 @@ The `close` method closes the connection opened by open.
 
 **SRS_NODE_IOTHUB_CLIENT_16_003: [** The `close` method shall remove the listener that has been attached to the transport `disconnect` event. **]**
 
+**SRS_NODE_IOTHUB_CLIENT_16_005: [** The `close` method should not throw if the `done` callback is not specified. **]**
+
 ### invokeDeviceMethod(deviceId, methodParams, done)
 The `invokeDeviceMethod` method calls a device method on a specific device and calls back with the result of this method's execution.
 
 The `invokeDeviceMethod` method shall throw a `ReferenceError` if `methodParams` is falsy.
 
-**SRS_NODE_IOTHUB_CLIENT_16_005: [** The `invokeDeviceMethod` method shall throw a `ReferenceError` if `deviceId` is `null`, `undefined` or an empty string. **]**
+**SRS_NODE_IOTHUB_CLIENT_16_014: [** The `invokeDeviceMethod` method shall throw a `ReferenceError` if `deviceId` is `null`, `undefined` or an empty string. **]**
 
 **SRS_NODE_IOTHUB_CLIENT_16_006: [** The `invokeDeviceMethod` method shall throw a `ReferenceError` if `methodParams.methodName` is `null`, `undefined` or an empty string. **]**
 

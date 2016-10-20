@@ -27,7 +27,7 @@ static bool g_callbackRecv = false;
 
 static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
 
-#define MAX_CLOUD_TRAVEL_TIME  260.0
+#define MAX_CLOUD_TRAVEL_TIME  60.0
 #define BUFFER_SIZE            37
 
 BEGIN_NAMESPACE(Contoso);

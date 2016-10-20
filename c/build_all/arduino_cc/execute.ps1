@@ -12,7 +12,7 @@ param (
     [string] $binaryPath,
 
     [Parameter(Mandatory=$true)]
-	[ValidateSet("COM3","COM4","COM5")]
+	[ValidateNotNullOrEmpty()]
     [string] $serialPort,
 
     [Parameter(Mandatory=$true)]

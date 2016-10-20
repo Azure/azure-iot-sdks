@@ -1,5 +1,6 @@
 {
   "node": true,
+  "mocha": true,
   "bitwise": true,
   "curly": false,
   "eqeqeq": true,
@@ -12,6 +13,7 @@
   "nonew": true,
   "regexp": true,
   "undef": true,
+  "unused": true,
   "strict": true,
   "globalstrict": true,
   "trailing": true

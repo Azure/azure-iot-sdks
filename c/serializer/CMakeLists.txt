@@ -46,6 +46,7 @@ set(serializer_h_files
 ./inc/schemalib.h
 ./inc/schemaserializer.h
 ./inc/serializer.h
+./inc/serializer_devicetwin.h
 )
 
 if(MSVC)

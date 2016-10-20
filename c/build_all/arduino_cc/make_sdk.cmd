@@ -58,10 +58,8 @@ copy %AzureIoTSDKs_path%c\c-utility\adapters\tickcounter_tirtos.c %Adapters_path
 copy %AzureIoTSDKs_path%c\c-utility\adapters\*arduino.* %Adapters_path%
 copy %AzureIoTSDKs_path%c\c-utility\adapters\httpapi_compact.c %Adapters_path%
 
-del %sdk_path%iothubtransportamqp.*
-del %sdk_path%iothubtransportamqp_websockets.*
-del %sdk_path%iothubtransportmqtt.*
-del %sdk_path%uamqp*.*
+del %sdk_path%*amqp*.*
+del %sdk_path%*mqtt*.*
 
 del %SharedUtility_path%tlsio_*.*
 del %SharedUtility_path%wsio*.*

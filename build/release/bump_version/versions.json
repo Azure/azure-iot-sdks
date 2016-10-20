@@ -33,7 +33,7 @@
     "uamqp_c_nuget": "1.0.19",
     "umqtt_c_nuget": "1.0.18",
     "iothub-diagnostics": "1.1.0-dtpreview",
-    "iothub-explorer": "1.1.0-dtpreview",
+    "iothub-explorer": "1.1.0-dtpreview", // Bump to 2.1.0-dtpreview on next release and remove this comment
     "device-explorer": "1.0.13",
     "github-release": "v1.0.10"
 }

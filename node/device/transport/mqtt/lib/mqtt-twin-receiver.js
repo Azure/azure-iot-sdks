@@ -100,24 +100,20 @@ MqttTwinReceiver.prototype._handleRemoveListener = function(eventName) {
     if (EventEmitter.listenerCount(this, MqttTwinReceiver.responseEvent) === 0) { // array of listeners gets updated _before_ firing this event
       this._stopListeningIfLastUnsubscription();
       /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_005: [** When there are no more listeners for the `response` event, the topic should be unsubscribed **]** */
-      process.nextTick( function() {
-        self._client.unsubscribe(responseTopic, function(err) {
-          if (err) {
-            self._handleError(err);
-          }
-        });
+      self._client.unsubscribe(responseTopic, function(err) {
+        if (err) {
+          self._handleError(err);
+        }
       });
     }
   } else if (eventName === MqttTwinReceiver.postEvent) {
     if (EventEmitter.listenerCount(this, MqttTwinReceiver.postEvent) === 0) { // array of listeners gets updated _before_ firing this event
       this._stopListeningIfLastUnsubscription();
       /* Codes_SRS_NODE_DEVICE_MQTT_TWIN_RECEIVER_18_021: [** When there are no more listeners for the post event, the topic should be unsubscribed. **]** */
-      process.nextTick( function() {
-        self._client.unsubscribe(postTopic, function(err) {
-          if (err) {
-            self._handleError(err);
-          }
-        });
+      self._client.unsubscribe(postTopic, function(err) {
+        if (err) {
+          self._handleError(err);
+        }
       });
     }
   }

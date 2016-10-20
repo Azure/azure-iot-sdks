@@ -429,9 +429,32 @@ char* IoTHubDeviceTwin_GetTwin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceC
         else
         {
             /*Codes_SRS_IOTHUBDEVICETWIN_12_030: [ Otherwise IoTHubDeviceTwin_GetTwin shall save the received `deviceTwin` to the out parameter and return with it ]*/
-            if (mallocAndStrcpy_s(&result, (const char*)BUFFER_u_char(responseBuffer)) != 0)
+            size_t howBig;
+            if (0 != BUFFER_size(responseBuffer, &howBig))
             {
+                LogError("failure to assess result size");
                 result = NULL;
+            }
+            else
+            {
+                result = malloc(howBig + 1);
+                if (result == NULL)
+                {
+                    LogError("failure to allocate memory for result");
+                }
+                else
+                {
+                    if (memcpy(result, BUFFER_u_char(responseBuffer), howBig) == 0)
+                    {
+                        result[howBig] = '\0';
+                    }
+                    else
+                    {
+                        LogError("failed to copy from responseBuffer");
+                        free(result);
+                        result = NULL;
+                    }
+                }
             }
             BUFFER_delete(responseBuffer);
         }

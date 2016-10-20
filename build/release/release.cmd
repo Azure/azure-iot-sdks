@@ -7,7 +7,26 @@
 set build-root=%~dp0..\..
 cd %build-root%\build\release
 
+if not "%3" equ "" goto usage
+
+:args-loop
+if "%1" equ "" goto args-done
+if "%1" equ "--nosign" goto arg-no-sign
 set nuget_feed=%1
+goto args-continue
+
+:arg-no-sign
+set no-sign=%1
+goto args-continue
+
+:args-continue
+shift
+goto args-loop
+
+:args-done
+if defined no-sign (
+   if not defined nuget_feed goto usage
+)
 
 if not defined nuget_feed (
 	choice /C yn /M "No feed specified. Are you sure you want to publish to Nuget.org and MBED.org?"
@@ -47,17 +66,26 @@ if not defined nuget_feed (
 	call release_csharp_nuget.cmd
 	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 ) else (
-	call release_csharp_nuget.cmd %nuget_feed%
+	call release_csharp_nuget.cmd %nuget_feed% %no-sign%
 	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 )
 
 rem -----------------------------------------------------------------------------
 rem -- Auto-Sign DeviceExplorer
 rem -----------------------------------------------------------------------------
-call auto_sign_deviceexplorer.cmd
+call auto_sign_deviceexplorer.cmd %no-sign%
+if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 rem -----------------------------------------------------------------------------
 rem -- Publish node npm packages
 rem -----------------------------------------------------------------------------
 
 rem call release_npm.cmd
+goto :eof
+
+:usage
+echo release.cmd [options]
+echo options:
+echo  PublishFolderPath         Pushes Nuget packages to this folder instead of Nuget.org
+echo  --nosign                  Don't call CodeSign Utility, this option requires PublishFolderPath
+exit /b 1

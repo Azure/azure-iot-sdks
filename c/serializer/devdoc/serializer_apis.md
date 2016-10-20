@@ -1,4 +1,4 @@
-# SERIALIZER APIs v4
+# SERIALIZER APIs v5
  
 ## Overview
 The SERIALIZER APIs allows developers to quickly and easily define models for their devices directly as code, while supporting the required features for 
@@ -403,5 +403,92 @@ Frees any resources associated with the model instance.
 
 __Arguments:__
 -	instance – A previously created instance with `CREATE_MODEL_INSTANCE`.
+
+
+## SERIALIZER_DEVICETWIN
+
+In order to better support Device Twin features by providing a stronger cohesion, serializer has been enhanced 
+with a layer specially crafted for Device Twin. The new functionality is accesibile by #include "serializer_devicetwin.h".
+
+`DECLARE_MODEL` becomes `DECLARE_DEVICETWIN_MODEL`. All the semantics are preserved, in addition, model instances
+are created by a C function, and not a by `CREATE_MODEL_INSTANCE` macro.
+
+__Example:__
+```c
+#include "serializer_devicetwin.h"
+
+BEGIN_NAMESPACE(Contoso);
+DECLARE_DEVICETWIN_MODEL(Car,
+    WITH_DESIRED_PROPERTY(CarSettings, settings)
+);
+END_NAMESPACE(Contoso);
+...
+
+REGISTER_SCHEMA_NAMESPACE(Contoso);
+Car* car = IoTHubDeviceTwin_CreateCar(iotHubClientHandle);
+car->settings = ...;
+```
+
+Before using the model name, register the namespace by `REGISTER_SCHEMA_NAMESPACE`. `REGISTER_SCHEMA_NAMESPACE` takes as argument
+the namespace name. 
+
+The above code declares a DEVICETWIN model. The model declaration brings in `IoTHubDeviceTwin_CreateCar` - a C function that 
+creates a model instance (in this example, `Car`).
+
+At the time of calling `IoTHubDeviceTwin_CreateCar(iotHubClientHandle)` the device twin callback is routed to an internal function
+that will automatically update the desired properties.
+
+The model instances created by `IoTHubDeviceTwin_Create`_`ModelName`_ have to be disposed of by calling `IoTHubDeviceTwin_Destroy`_`ModelName`_.
+
+### DECLARE_DEVICETWIN_MODEL
+```c
+DECLARE_DEVICETWIN_MODEL(modelName,... )
+```
+
+`DECLARE_DEVICETWIN_MODEL` defines a DEVICETWIN model. DEVICETWIN models are automatically linked with an `IOTHUB_CLIENT_HANDLE` or `IOTHUB_CLIENT_LL_HANDLE` for the purpose
+of receiving desired properties.
+
+### SERIALIZER_REGISTER_NAMESPACE
+```c
+SERIALIZER_REGISTER_NAMESPACE(name)
+```
+
+`SERIALIZER_REGISTER_NAMESPACE` registers the constituents of a namespace.
+
+### IoTHubDeviceTwin_Create*ModelName*
+```c
+IoTHubDeviceTwin_CreateModelName(IOTHUB_CLIENT_HANDLE handle);
+```
+
+`IoTHubDeviceTwin_Create`_`ModelName`_ creates a `ModelName` model instance. It also links this model instance with
+a IoTHubClient handle for the purpose of receiving desired properties.
+
+### IoTHubDeviceTwin_Destroy*ModelName*
+```c
+IoTHubDeviceTwin_DestroyModelName(ModelName* model);
+```
+`IoTHubDeviceTwin_DestroyModelName` frees all used resources by a model instance of type `ModelName`. It also unregisters the DeviceTwin callback.
+
+
+### IoTHubDeviceTwin_LL_Create*ModelName*
+```c
+IoTHubDeviceTwin_LL_CreateModelName(IOTHUB_CLIENT_LL_HANDLE handle);
+```
+
+`IoTHubDeviceTwin_LL_Create`_`ModelName`_ creates a `ModelName` model instance. It also links this model instance with
+a IoTHubClient_LL handle for the purpose of receiving desired properties.
+
+### IoTHubDeviceTwin_LL_Destroy*ModelName*
+```c
+IoTHubDeviceTwin_LL_DestroyModelName(ModelName* model);
+```
+`IoTHubDeviceTwin_LL_DestroyModelName` frees all used resources by a model instance of type `ModelName`. It also unregisters the DeviceTwin callback.
+
+
+
+    
+    
+
+
 
 
