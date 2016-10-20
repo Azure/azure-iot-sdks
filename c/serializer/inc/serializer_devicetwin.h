@@ -210,7 +210,7 @@ static void* IoTHubDeviceTwinCreate_Impl(const char* name, size_t sizeOfName, SE
         }
         else
         {
-            result = CodeFirst_CreateDevice(modelType, metadata, sizeOfName, true);
+            result = CodeFirst_CreateDevice(modelType, (REFLECTED_DATA_FROM_DATAPROVIDER *)metadata, sizeOfName, true);
             if (result == NULL)
             {
                 LogError("failure in CodeFirst_CreateDevice");
@@ -253,13 +253,13 @@ static void* IoTHubDeviceTwinCreate_Impl(const char* name, size_t sizeOfName, SE
 
 static bool protoHandleHasDeviceStartAddress(const void* element, const void* value)
 {
-    const SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHandle = element;
+    const SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHandle = (const SERIALIZER_DEVICETWIN_PROTOHANDLE*)element;
     return protoHandle->deviceAssigned == value;
 }
 
 static void IoTHubDeviceTwin_Destroy_Impl(void* model)
 {
-    SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHandle = VECTOR_find_if(g_allProtoHandles, protoHandleHasDeviceStartAddress, model);
+    SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHandle = (SERIALIZER_DEVICETWIN_PROTOHANDLE*)VECTOR_find_if(g_allProtoHandles, protoHandleHasDeviceStartAddress, model);
     if (protoHandle == NULL)
     {
         LogError("failure in VECTOR_find_if [not found]");
@@ -307,7 +307,7 @@ static void IoTHubDeviceTwin_Destroy_Impl(void* model)
         SERIALIZER_DEVICETWIN_PROTOHANDLE protoHandle;                                                                                                                              \
         protoHandle.iothubClientHandleVariant.iothubClientHandleType = IOTHUB_CLIENT_CONVENIENCE_HANDLE_TYPE;                                                                       \
         protoHandle.iothubClientHandleVariant.iothubClientHandleValue.iothubClientHandle = iotHubClientHandle;                                                                      \
-        return IoTHubDeviceTwinCreate_Impl(#name, sizeof(name), &protoHandle);                                                                                                      \
+        return (name*)IoTHubDeviceTwinCreate_Impl(#name, sizeof(name), &protoHandle);                                                                                               \
     }                                                                                                                                                                               \
                                                                                                                                                                                     \
     static void C2(IoTHubDeviceTwin_Destroy, name) (name* model)                                                                                                                    \
@@ -320,7 +320,7 @@ static void IoTHubDeviceTwin_Destroy_Impl(void* model)
         SERIALIZER_DEVICETWIN_PROTOHANDLE protoHandle;                                                                                                                              \
         protoHandle.iothubClientHandleVariant.iothubClientHandleType = IOTHUB_CLIENT_LL_HANDLE_TYPE;                                                                                \
         protoHandle.iothubClientHandleVariant.iothubClientHandleValue.iothubClientLLHandle = iotHubClientLLHandle;                                                                  \
-        return IoTHubDeviceTwinCreate_Impl(#name, sizeof(name), &protoHandle);                                                                                                      \
+        return (name*)IoTHubDeviceTwinCreate_Impl(#name, sizeof(name), &protoHandle);                                                                                               \
     }                                                                                                                                                                               \
                                                                                                                                                                                     \
     static void C2(IoTHubDeviceTwin_LL_Destroy, name) (name* model)                                                                                                                 \

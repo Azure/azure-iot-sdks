@@ -24,6 +24,7 @@ add_subdirectory(schemalib_without_init_ut)
 add_subdirectory(schemaserializer_ut)
 if(NOT ${skip_unittests})
 add_subdirectory(serializer_int)
+add_subdirectory(serializer_dt_int)
 endif()
 
 if(${use_amqp} AND ${use_http} AND (${run_e2e_tests} OR ${nuget_e2e_tests}))

@@ -87,6 +87,7 @@ if(${use_amqp})
     set(iothub_client_amqp_transport_c_files
         ${iothub_client_ll_transport_c_files}
 		./src/iothubtransportamqp.c
+		./src/iothubtransportamqp_methods.c
         ./src/uamqp_messaging.c
     )
 

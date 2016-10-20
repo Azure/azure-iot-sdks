@@ -448,12 +448,12 @@ DECLARE_DEVICETWIN_MODEL(modelName,... )
 `DECLARE_DEVICETWIN_MODEL` defines a DEVICETWIN model. DEVICETWIN models are automatically linked with an `IOTHUB_CLIENT_HANDLE` or `IOTHUB_CLIENT_LL_HANDLE` for the purpose
 of receiving desired properties.
 
-### REGISTER_SCHEMA_NAMESPACE
+### SERIALIZER_REGISTER_NAMESPACE
 ```c
-REGISTER_SCHEMA_NAMESPACE(name)
+SERIALIZER_REGISTER_NAMESPACE(name)
 ```
 
-`REGISTER_SCHEMA_NAMESPACE` registers the constituents of a namespace.
+`SERIALIZER_REGISTER_NAMESPACE` registers the constituents of a namespace.
 
 ### IoTHubDeviceTwin_Create*ModelName*
 ```c
