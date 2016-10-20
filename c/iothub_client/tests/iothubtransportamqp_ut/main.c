@@ -3,6 +3,8 @@
 
 #include "testrunnerswitcher.h"
 
+#include <stddef.h>
+
 int main(void)
 {
     size_t failedTestCount = 0;

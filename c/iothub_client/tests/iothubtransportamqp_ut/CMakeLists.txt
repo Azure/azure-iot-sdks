@@ -1,25 +1,22 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#this is CMakeLists.txt for iothubtransportamqp_ut
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.11)
 
-if(NOT ${use_amqp})
-	message(FATAL_ERROR "iothubtransportamqp_ut being generated without AMQP support")
-endif()
+compileAsC11()
+set(theseTestsName iothubtransportamqp_ut )
 
-compileAsC99()
-set(theseTestsName iothubtransportamqp_ut)
-
-set(${theseTestsName}_cpp_files
-${theseTestsName}.cpp
+set(${theseTestsName}_test_files
+	${theseTestsName}.c
 )
 
 set(${theseTestsName}_c_files
-../../src/iothubtransportamqp.c
+	../../src/iothubtransportamqp_auth.c
+	../../src/iothubtransportamqp.c
+	../../src/uamqp_messaging.c
 )
 
 set(${theseTestsName}_h_files
 )
 
-build_test_artifacts(${theseTestsName} ON)
+build_c_test_artifacts(${theseTestsName} ON "tests/UnitTests")
