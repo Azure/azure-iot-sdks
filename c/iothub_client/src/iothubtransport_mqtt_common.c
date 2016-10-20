@@ -474,9 +474,18 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                     {
                         // The connect packet has been acked
                         transport_data->currPacketState = CONNACK_TYPE;
+                        IotHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK);
                     }
                     else
                     {
+                        if (connack->returnCode == CONN_REFUSED_BAD_USERNAME_PASSWORD)
+                        {
+                            IotHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL);
+                        }
+                        else if (connack->returnCode == CONN_REFUSED_NOT_AUTHORIZED)
+                        {
+                            IotHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED);
+                        }
                         LogError("Connection Not Accepted: 0x%x: %s", connack->returnCode, retrieve_mqtt_return_codes(connack->returnCode) );
                         (void)mqtt_client_disconnect(transport_data->mqttClient);
                         transport_data->isConnected = false;
@@ -523,18 +532,39 @@ static void mqtt_operation_complete_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLI
                 transport_data->currPacketState = DISCONNECT_TYPE;
                 break;
             }
-            case MQTT_CLIENT_NO_PING_RESPONSE:
-                LogError("Mqtt Ping Response was not encountered.  Reconnecting device...");
-            case MQTT_CLIENT_ON_ERROR:
+        }
+    }
+}
+
+static void mqtt_error_callback(MQTT_CLIENT_HANDLE handle, MQTT_CLIENT_EVENT_ERROR error, void* callbackCtx)
+{
+    (void)handle;
+    if (callbackCtx != NULL)
+    {
+        PMQTTTRANSPORT_HANDLE_DATA transport_data = (PMQTTTRANSPORT_HANDLE_DATA)callbackCtx;
+        switch (error)
+        {
+            case MQTT_CLIENT_CONNECTION_ERROR:
             {
-                transport_data->isConnected = false;
-                transport_data->currPacketState = PACKET_TYPE_ERROR;
-                if (transport_data->topic_MqttMessage != NULL)
-                {
-                    transport_data->topics_ToSubscribe |= SUBSCRIBE_TELEMETRY_TOPIC;
-                }
+                IotHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_NO_NETWORK);
+                break;
+            }
+            case MQTT_CLIENT_NO_PING_RESPONSE:
+            {
+                LogError("Mqtt Ping Response was not encountered.  Reconnecting device...");
+                break;
             }
         }
+        transport_data->isConnected = false;
+        transport_data->currPacketState = PACKET_TYPE_ERROR;
+        if (transport_data->topic_MqttMessage != NULL)
+        {
+                transport_data->topics_ToSubscribe |= SUBSCRIBE_TELEMETRY_TOPIC;
+        }
+     }
+    else
+    {
+        LogError("Failure: mqtt called back with null context.");
     }
 }
 
@@ -656,60 +686,71 @@ static int SendMqttConnectMsg(PMQTTTRANSPORT_HANDLE_DATA transport_data)
     else
     {
         STRING_HANDLE sasToken = NULL;
+        result = 0;
 
         switch (transport_data->transport_creds.credential_type)
         {
-            case SAS_TOKEN_FROM_USER:
-                sasToken = STRING_clone(transport_data->transport_creds.CREDENTIAL_VALUE.deviceSasToken);
-                break;
-            case DEVICE_KEY:
+        case SAS_TOKEN_FROM_USER:
+            sasToken = STRING_clone(transport_data->transport_creds.CREDENTIAL_VALUE.deviceSasToken);
+            if (!SASToken_Validate(sasToken))
             {
-                // Construct SAS token
-                size_t secSinceEpoch = (size_t)(difftime(get_time(NULL), EPOCH_TIME_T_VALUE) + 0);
-                size_t expiryTime = secSinceEpoch + SAS_TOKEN_DEFAULT_LIFETIME;
-
-                sasToken = SASToken_Create(transport_data->transport_creds.CREDENTIAL_VALUE.deviceKey, transport_data->devicesPath, emptyKeyName, expiryTime);
-                break;
-            }
-            case X509:
-            default:
-                // The assumption here is that x509 is in place, if not setup
-                // correctly the connection will be rejected.
-                sasToken = NULL;
-                break;
-        }
-
-        MQTT_CLIENT_OPTIONS options = { 0 };
-        options.clientId = (char*)STRING_c_str(transport_data->device_id);
-        options.willMessage = NULL;
-        options.username = (char*)STRING_c_str(transport_data->configPassedThroughUsername);
-        if (sasToken != NULL)
-        {
-            options.password = (char*)STRING_c_str(sasToken);
-        }
-        options.keepAliveInterval = transport_data->keepAliveValue;
-        options.useCleanSession = false;
-        options.qualityOfServiceValue = DELIVER_AT_LEAST_ONCE;
-
-        if (GetTransportProviderIfNecessary(transport_data) == 0)
-        {
-            if (mqtt_client_connect(transport_data->mqttClient, transport_data->xioTransport, &options) != 0)
-            {
-                LogError("failure connecting to address %s:%d.", STRING_c_str(transport_data->hostAddress), transport_data->portNum);
+                IotHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN);
+                STRING_delete(sasToken);
                 result = __LINE__;
+            }
+            break;
+        case DEVICE_KEY:
+        {
+            // Construct SAS token
+            size_t secSinceEpoch = (size_t)(difftime(get_time(NULL), EPOCH_TIME_T_VALUE) + 0);
+            size_t expiryTime = secSinceEpoch + SAS_TOKEN_DEFAULT_LIFETIME;
+
+            sasToken = SASToken_Create(transport_data->transport_creds.CREDENTIAL_VALUE.deviceKey, transport_data->devicesPath, emptyKeyName, expiryTime);
+            break;
+        }
+        case X509:
+        default:
+            // The assumption here is that x509 is in place, if not setup
+            // correctly the connection will be rejected.
+            sasToken = NULL;
+            break;
+        }
+
+        if (result == 0)
+        {
+            MQTT_CLIENT_OPTIONS options = { 0 };
+            options.clientId = (char*)STRING_c_str(transport_data->device_id);
+            options.willMessage = NULL;
+            options.username = (char*)STRING_c_str(transport_data->configPassedThroughUsername);
+            if (sasToken != NULL)
+            {
+                options.password = (char*)STRING_c_str(sasToken);
+            }
+            options.keepAliveInterval = transport_data->keepAliveValue;
+            options.useCleanSession = false;
+            options.qualityOfServiceValue = DELIVER_AT_LEAST_ONCE;
+
+            if (GetTransportProviderIfNecessary(transport_data) == 0)
+            {
+                if (mqtt_client_connect(transport_data->mqttClient, transport_data->xioTransport, &options) != 0)
+                {
+                    LogError("failure connecting to address %s:%d.", STRING_c_str(transport_data->hostAddress), transport_data->portNum);
+                    result = __LINE__;
+                }
+                else
+                {
+                    (void)tickcounter_get_current_ms(g_msgTickCounter, &transport_data->mqtt_connect_time);
+                    result = 0;
+                }
             }
             else
             {
-                (void)tickcounter_get_current_ms(g_msgTickCounter, &transport_data->mqtt_connect_time);
-                result = 0;
+                result = __LINE__;
             }
-        }
-        else
-        {
-            result = __LINE__;
+            
+            STRING_delete(sasToken);
         }
         STRING_delete(emptyKeyName);
-        STRING_delete(sasToken);
     }
     return result;
 }
@@ -780,6 +821,7 @@ static int InitializeConnection(PMQTTTRANSPORT_HANDLE_DATA transport_data)
                 if ((current_time - transport_data->mqtt_connect_time) / 1000 > (SAS_TOKEN_DEFAULT_LIFETIME*SAS_REFRESH_MULTIPLIER))
                 {
                     (void)mqtt_client_disconnect(transport_data->mqttClient);
+                    IotHubClient_LL_ConnectionStatusCallBack(transport_data->llClientHandle, IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED, IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN);
                     transport_data->isConnected = false;
                     transport_data->currPacketState = UNKNOWN_TYPE;
                     if (transport_data->topic_MqttMessage != NULL)
@@ -884,7 +926,7 @@ static PMQTTTRANSPORT_HANDLE_DATA InitializeTransportHandleData(const IOTHUB_CLI
         }
         else
         {
-            state->mqttClient = mqtt_client_init(mqtt_notification_callback, mqtt_operation_complete_callback, state);
+            state->mqttClient = mqtt_client_init(mqtt_notification_callback, mqtt_operation_complete_callback, state, mqtt_error_callback, state);
             if (state->mqttClient == NULL)
             {
                 LogError("failure initializing mqtt client.");

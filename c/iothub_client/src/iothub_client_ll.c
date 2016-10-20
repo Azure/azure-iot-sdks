@@ -366,6 +366,8 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* confi
                     setTransportProtocol(handleData, (TRANSPORT_PROVIDER*)config->protocol());
                     handleData->messageCallback = NULL;
                     handleData->messageUserContextCallback = NULL;
+                    handleData->conStatusCallback = NULL;
+                    handleData->conStatusUserContextCallback = NULL;
                     handleData->lastMessageReceiveTime = INDEFINITE_TIME;
                     /*Codes_SRS_IOTHUBCLIENT_LL_02_006: [IoTHubClient_LL_Create shall populate a structure of type IOTHUBTRANSPORT_CONFIG with the information from config parameter and the previous DLIST and shall pass that to the underlying layer _Create function.]*/
                     lowerLayerConfig.upperConfig = config;

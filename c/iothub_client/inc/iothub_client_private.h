@@ -12,6 +12,7 @@
 #include "iothub_message.h"
 #include "iothub_client_ll.h"
 #include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/umock_c_prod.h"
 
 #ifdef __cplusplus
 extern "C"
