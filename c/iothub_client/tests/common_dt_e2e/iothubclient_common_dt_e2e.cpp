@@ -146,8 +146,8 @@ void dt_e2e_init(void)
     g_iothubAcctInfo = IoTHubAccount_Init(true);
     ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo, "Could not initialize IoTHubAccount.");
 
-    result = platform_init();
-    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "Second platform init failed.");
+    /* the return value from the second init is deliberatly ignored. */
+    platform_init();
 
     SERIALIZER_RESULT sResult = serializer_init(NULL);
     ASSERT_ARE_EQUAL_WITH_MSG(SERIALIZER_RESULT, SERIALIZER_OK, sResult, "serializer initialize failed.");
