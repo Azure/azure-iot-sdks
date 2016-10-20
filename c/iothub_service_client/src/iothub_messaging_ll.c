@@ -516,7 +516,6 @@ static AMQP_VALUE IoTHubMessaging_LL_FeedbackMessageReceived(const void* context
             }
         }
         json_array_clear(feedback_array);
-        json_object_clear(feedback_object);
         json_value_free(root_value);
     }
     return result;
@@ -882,15 +881,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not set the sender settle mode.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
-                        result = IOTHUB_MESSAGING_ERROR;
-                    }
-                    /*Codes_SRS_IOTHUBMESSAGING_12_020: [ IoTHubMessaging_LL_Open shall set sender link AMQP maximum message size to the server maximum (255K) by calling link_set_max_message_size ] */
-                    else if (link_set_max_message_size(messagingHandle->sender_link, 65536) != 0)
-                    {
-                        /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
-                        LogError("Could not set the message size.");
                         free((char*)messagingHandle->sasl_plain_config.authcid);
                         free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
