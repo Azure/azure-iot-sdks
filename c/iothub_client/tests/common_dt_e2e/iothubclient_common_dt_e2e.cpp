@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#include <cstdlib>
+#include <stdlib.h>
 #ifdef _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
@@ -18,30 +18,31 @@
 
 #include "azure_c_shared_utility/platform.h"
 #include "azure_c_shared_utility/threadapi.h"
+#include "azure_c_shared_utility/uniqueid.h"
 
 #include "parson.h"
 #include "../../../certs/certs.h"
 
 static bool g_callbackRecv = false;
 
-static size_t g_iotHubTestId = 0;
 static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
 
-#define MAX_CLOUD_TRAVEL_TIME        60.0
-#define TEST_STRING_VALUE             "test_string_value"
+#define MAX_CLOUD_TRAVEL_TIME  260.0
+#define BUFFER_SIZE            37
 
 BEGIN_NAMESPACE(Contoso);
 
 DECLARE_MODEL(thingie_t,
-    WITH_REPORTED_PROPERTY(ascii_char_ptr, string_prop)
+    WITH_REPORTED_PROPERTY(ascii_char_ptr, string_property),
+    WITH_REPORTED_PROPERTY(int, integer_property)
 );
 
 END_NAMESPACE(Contoso);
 
-
-//TEST_DEFINE_ENUM_TYPE(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
-//TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
+TEST_DEFINE_ENUM_TYPE(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(SERIALIZER_RESULT, SERIALIZER_RESULT_VALUES);
+
 
 typedef struct DEVICE_DATA_TAG
 {
@@ -50,35 +51,6 @@ typedef struct DEVICE_DATA_TAG
     int  cb_status;     // status reported by the callback
     LOCK_HANDLE lock;
 } DEVICE_DATA;
-
-/*this function wait for 30 seconds only before 31.10.2016*/
-static void wait30seconds(void)
-{
-    struct tm ten_31_2016;
-    ten_31_2016.tm_year = 2016 - 1900;
-    ten_31_2016.tm_mon = 9;
-    ten_31_2016.tm_mday = 31;
-    ten_31_2016.tm_hour = 0;
-    ten_31_2016.tm_min = 0;
-    ten_31_2016.tm_sec = 0;
-    ten_31_2016.tm_isdst = -1;
-    time_t deadline = mktime(&ten_31_2016);
-    if (deadline == (time_t)-1)
-    {
-        LogError("mktime failed");
-    }
-    else
-    {
-        time_t now = time(NULL);
-        if (difftime(deadline, now) > 0)
-        {
-            /*sleep 30 seconds*/
-            LogInfo("sleeping for 30 seconds");
-            ThreadAPI_Sleep(30 * 1000);
-            LogInfo("done sleeping!!!");
-        }
-    }
-}
 
 static void DeviceTwinCallback(int status_code, void* userContextCallback)
 {
@@ -95,31 +67,51 @@ static void DeviceTwinCallback(int status_code, void* userContextCallback)
     }
 }
 
+static int generate_new_int(void)
+{
+    int retValue;
+    time_t nowTime = time(NULL);
+
+    retValue = (int) nowTime;
+    return retValue;
+}
+
 static DEVICE_DATA *device_data_new(void)
 {
     DEVICE_DATA *retValue = (DEVICE_DATA *) malloc(sizeof(DEVICE_DATA));
 
-    if (retValue != NULL)
+    if (retValue == NULL)
+    {
+        LogError("failed to allocate device data structure.");
+    }
+    else
     {
         retValue->device = CREATE_MODEL_INSTANCE(Contoso, thingie_t);
         if (retValue->device == NULL)
         {
+            LogError("failed to allocate the properties portion of the device data structure.");
             free(retValue);
             retValue = NULL;
         }
         else
         {
-            if (mallocAndStrcpy_s(&(retValue->device->string_prop), TEST_STRING_VALUE) != 0)
+            if ( (retValue->device->string_property = (char *) malloc(BUFFER_SIZE)) == NULL ||
+                 UniqueId_Generate(retValue->device->string_property, BUFFER_SIZE) != UNIQUEID_OK)
             {
+                LogError("failed to set the string test property.");
                 DESTROY_MODEL_INSTANCE(retValue->device);
                 free(retValue);
                 retValue = NULL;
             }
             else
             {
+                retValue->device->integer_property = generate_new_int();
                 retValue->lock = Lock_Init();
                 if (retValue->lock == NULL)
                 {
+                    LogError("failed to construct a lock.");
+                    free(retValue->device->string_property);
+                    DESTROY_MODEL_INSTANCE(retValue->device);
                     free(retValue);
                     retValue = NULL;
                 }
@@ -140,31 +132,38 @@ static void device_data_delete(DEVICE_DATA *deviceData)
     if (deviceData != NULL)
     {
         Lock_Deinit(deviceData->lock);
+        free(deviceData->device->string_property);
         DESTROY_MODEL_INSTANCE(deviceData->device);
         free(deviceData);
     }
 }
 
-extern "C" void dt_e2e_init(void)
+void dt_e2e_init(void)
 {
     int result = platform_init();
-    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "Platform init failed");
+    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "First platform init failed.");
+
     g_iothubAcctInfo = IoTHubAccount_Init(true);
-    ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo, "Could not initialize IoTHubAccount");
-    platform_init();
+    ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo, "Could not initialize IoTHubAccount.");
+
+    result = platform_init();
+    ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "Second platform init failed.");
+
     SERIALIZER_RESULT sResult = serializer_init(NULL);
-    ASSERT_ARE_EQUAL_WITH_MSG(SERIALIZER_RESULT, SERIALIZER_OK, sResult, "serrializer initialize failed");
+    ASSERT_ARE_EQUAL_WITH_MSG(SERIALIZER_RESULT, SERIALIZER_OK, sResult, "serializer initialize failed.");
 }
 
-extern "C" void dt_e2e_deinit(void)
+void dt_e2e_deinit(void)
 {
+    serializer_deinit();
     IoTHubAccount_deinit(g_iothubAcctInfo);
+
     // Need a double deinit
     platform_deinit();
     platform_deinit();
 }
 
-extern "C" void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     // arrange
     IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
@@ -177,15 +176,15 @@ extern "C" void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER proto
 
     IOTHUB_CLIENT_HANDLE iotHubClientHandle;
     DEVICE_DATA *deviceData = device_data_new();
-    ASSERT_IS_NOT_NULL_WITH_MSG(deviceData, "Could not create the device data");
+    ASSERT_IS_NOT_NULL_WITH_MSG(deviceData, "Could not allocate the client data.");
 
     // Send the Event
     {
         // Create the IoT Hub Data
         iotHubClientHandle = IoTHubClient_Create(&iotHubConfig);
-        ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not create IoTHubClient");
+        ASSERT_IS_NOT_NULL_WITH_MSG(iotHubClientHandle, "Could not create IoTHubClient.");
 
-    // Turn on Log 
+        // Turn on Log
         bool trace = true;
         (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
         (void)IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates);
@@ -193,15 +192,13 @@ extern "C" void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER proto
         // generate the data
         unsigned char *buffer;
         size_t         bufferSize;
-        int result = SERIALIZE_REPORTED_PROPERTIES(&buffer, &bufferSize, *(deviceData->device));
-        ASSERT_ARE_EQUAL_WITH_MSG(int, CODEFIRST_OK, result, "Serializing reported data failed");
+        CODEFIRST_RESULT result = SERIALIZE_REPORTED_PROPERTIES(&buffer, &bufferSize, *(deviceData->device));
+        ASSERT_ARE_EQUAL_WITH_MSG(CODEFIRST_RESULT, CODEFIRST_OK, result, "Serializing reported data failed.");
 
         // act
-        result = IoTHubClient_SendReportedState(iotHubClientHandle, buffer, bufferSize, DeviceTwinCallback, deviceData);
-        ASSERT_ARE_EQUAL_WITH_MSG(int, IOTHUB_CLIENT_OK, result, "Setting reported data failed");
+        IOTHUB_CLIENT_RESULT iot_result = IoTHubClient_SendReportedState(iotHubClientHandle, buffer, bufferSize, DeviceTwinCallback, deviceData);
+        ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, iot_result, "sending reported data failed.");
     }
-
-    wait30seconds();
 
     time_t beginOperation, nowTime;
     beginOperation = time(NULL);
@@ -212,7 +209,7 @@ extern "C" void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER proto
     {
         if (Lock(deviceData->lock) != LOCK_OK)
         {
-            ASSERT_FAIL("unable to lock");
+            ASSERT_FAIL("unable to lock.");
         }
         else
         {
@@ -223,27 +220,26 @@ extern "C" void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER proto
             }
             Unlock(deviceData->lock);
         }
-        ThreadAPI_Sleep(100);
+        ThreadAPI_Sleep(1000);
     }
 
     if (Lock(deviceData->lock) != LOCK_OK)
     {
-        ASSERT_FAIL("unable to lock");
+        ASSERT_FAIL("unable to lock.");
     }
     else
     {
         ASSERT_IS_TRUE_WITH_MSG(deviceData->reportedAck, "Failure sending data to IotHub"); // was received by the callback...
-        ASSERT_ARE_EQUAL(int, 204, deviceData->cb_status, "Reported Callback Status is error");
+        ASSERT_IS_TRUE_WITH_MSG(deviceData->cb_status < 300, "Reported Callback Status is error");
         (void)Unlock(deviceData->lock);
     }
 
     // cleanup
     IoTHubClient_Destroy(iotHubClientHandle);
-    device_data_delete(deviceData);
 
     const char *connectionString = IoTHubAccount_GetEventHubConnectionString(g_iothubAcctInfo);
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
-    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "Failure to connect to service");
+    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "Failure in IoTHubServiceClientAuth_CreateFromConnectionString");
 
     IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle = IoTHubDeviceTwin_Create(iotHubServiceClientHandle);
     ASSERT_IS_NOT_NULL_WITH_MSG(serviceClientDeviceTwinHandle, "Failure to initialize a device twin service session");
@@ -252,13 +248,17 @@ extern "C" void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER proto
     ASSERT_IS_NOT_NULL_WITH_MSG(deviceTwinData, "Failure to retrieve device data");
 
     JSON_Value *root_value = json_parse_string(deviceTwinData);
-    ASSERT_IS_NOT_NULL_WITH_MSG(root_value, "Failure to parse data from service");
     free(deviceTwinData);
+    ASSERT_IS_NOT_NULL_WITH_MSG(root_value, "Failure to parse data from service");
 
     JSON_Object *root_object = json_value_get_object(root_value);
-    const char *data = json_object_dotget_string(root_object, "properties.reported.string_prop");
-    ASSERT_IS_TRUE_WITH_MSG(strcmp(data, TEST_STRING_VALUE) == 0, "data retrieved does not equal data reported");
+    const char *string_property = json_object_dotget_string(root_object, "properties.reported.string_property");
+    ASSERT_ARE_EQUAL_WITH_MSG(char_ptr, deviceData->device->string_property, string_property, "data retrieved does not equal data reported");
 
+    int integer_property = (int) json_object_dotget_number(root_object, "properties.reported.integer_property");
+    ASSERT_ARE_EQUAL_WITH_MSG(int, deviceData->device->integer_property, integer_property, "data retrieved does not equal data reported");
+
+    device_data_delete(deviceData);
     json_value_free(root_value);
 }
 

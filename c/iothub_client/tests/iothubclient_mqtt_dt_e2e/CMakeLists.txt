@@ -11,14 +11,16 @@ compileAsC99()
 set(theseTestsName iothubclient_mqtt_dt_e2e)
 
 set(${theseTestsName}_test_files
-    ${theseTestsName}.c
-    ../common_dt_e2e/iothubclient_common_dt_e2e.c
-    main.c
+    ${theseTestsName}.cpp
+    ../common_dt_e2e/iothubclient_common_dt_e2e.cpp
+)
+
+set(${theseTestsName}_cpp_files
+    ${theseTestsName}.cpp
+    ../common_dt_e2e/iothubclient_common_dt_e2e.cpp
 )
 
 set(${theseTestsName}_c_files
-    ${theseTestsName}.c
-    ../common_dt_e2e/iothubclient_common_dt_e2e.c
     ../../../certs/certs.c
     ../../../parson/parson.c
 )
@@ -50,7 +52,6 @@ if(WIN32)
             aziotsharedutil
             iothub_test
             iothub_client
-            iothub_client_mqtt_transport
             iothub_service_client
             iothub_client_mqtt_transport
             rpcrt4
@@ -64,21 +65,12 @@ if(WIN32)
             aziotsharedutil
             iothub_test
             iothub_client
-            iothub_client_mqtt_transport
             iothub_service_client
             iothub_client_mqtt_transport
             rpcrt4
             serializer
         )
         linkMqttLibrary(${theseTestsName}_exe)
-    endif()
-
-    if(TARGET ${theseTestsName}_nuget_exe)
-        target_link_libraries(${theseTestsName}_nuget_exe
-            iothub_test
-            iothub_service_client
-            rpcrt4
-        )
     endif()
 else()
     if(TARGET ${theseTestsName}_exe)
