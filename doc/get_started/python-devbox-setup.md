@@ -44,12 +44,16 @@ The Python iothub_client supports python versions 2.7.x, 3.4.x or 3.5.x. Know th
 <a name="windows-wheels"/>
 ## Install the Python iothub_client module on Windows from [PyPI] 
 
-The following instructions outline how you can install the libraries in Windows from [PyPi]:
+The following instructions outline how you can install the **iothub\_client** module in Windows from [PyPi] using the **iothub\_client** package:
 
-1. Open a command prompt and start the Python interpreter.
-2. Install the iothub_client module with the following command: `pip install iothub-client`
+1. Open a command-prompt window.
+2. Install the **iothub\_client** package with the following command: `pip install iothub-client`
 3. Now Python is ready to run the sample applications. 
 Please follow instructions in [Sample applications](#samplecode) to run the Python samples.
+
+> Note: If it is not already installed, you need to install the [Visual C++ Redistributable for Visual Studio 2015][lnk-c-redist].
+
+> Note: If Pip cannot install the package for the specific version of Python installed on your machine, use one of the following options to build the **iothub_client** module.
 
 <a name="windows"/>
 ## Build the Python iothub_client module on Windows using Nuget packages (recommended)
@@ -58,7 +62,7 @@ The following instructions outline how you can build the libraries in Windows:
 
 1. Open a Visual Studio 2015 x86 Native Tools command prompt and navigate to the folder **python/build_all/windows** in your local copy of the repository.
 2. Run the script `build.cmd` in the **python\\build_all\\windows** directory.
-3. As a result, the `iothub_client.pyd` Python extension module is copied to the **python/device/samples** folder. Please follow instructions in [Sample applications](#samplecode) to run the Python samples.
+3. As a result, the `iothub_client.pyd` Python extension module is copied to the **python/device/samples** folder. Follow the instructions in [Sample applications](#samplecode) to run the Python IoT Hub samples.
 4. In order to run the samples with a different Python version (e.g. 32bit vs. 64bit or 2.7 vs. 3.4) please rebuild the `iothub_client.pyd` extension.
 
 <a name="windows-cmake"/>
@@ -100,3 +104,4 @@ This repository contains various Python sample applications that illustrate how 
 [setup-devbox]: https://github.com/Azure/azure-iot-sdks/blob/master/c/doc/devbox_setup.md
 [getstarted]: python-run-sample.md
 [boost-zip]: http://www.boost.org/users/history/version_1_60_0.html
+[lnk-c-redist]: https://www.microsoft.com/download/details.aspx?id=48145
