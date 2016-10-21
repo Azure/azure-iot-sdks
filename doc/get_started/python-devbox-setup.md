@@ -4,6 +4,7 @@ This document describes how to prepare your development environment to use the *
 
 - [Setup your development environment](#devenv)
 - [Build the samples on Linux](#linux)
+- [Install the iothub-client package on Windows using Pip](#windows-pip)
 - [Build the samples on Windows using nuget packages](#windows)
 - [Build the samples on Windows using cmake and boost libraries](#windows-cmake)
 - [Sample applications](#samplecode)
@@ -39,6 +40,18 @@ The Python iothub_client supports python versions 2.7.x, 3.4.x or 3.5.x. Know th
 ###Known build issues: 
 1. On some small footprint Linux devices, like a *Raspberry Pi* using Raspbian OS, the following build error may occur: `virtual memory exhausted: Cannot allocate memory`. In such a case please try to increase the swap file size on your platform and retry the build. (If swap increase did not work consider running build.sh using --skip-unittests --use-websockets parameters)
 2. CentOS7: Only Python 2.7 is supported due to a missing boost-python3 library package
+
+<a name="windows-pip"/>
+## Install the iothub-client package on Windows using Pip
+
+You can install the **iothub-client** package on Windows using [Pip](https://pip.pypa.io/). This means that you do not need to build the **iothub-client** package on Windows.
+
+1. Ensure that Pip is installed. Run `pip` in a command-prompt window to verify it is installed and working.
+2. Run the following command to install the **iothub-client** package:
+
+    ```
+    pip install iothub-client --upgrade
+    ```
 
 <a name="windows"/>
 ## Build the Python iothub_client module on Windows using Nuget packages (recommended)
