@@ -1,0 +1,135 @@
+<project name = "iothub_client_sample_amqp_freertos" 
+         cross_prefix = "/opt/arm-gnu-toolchain-5.3.1.487-linux.any.x86_64/bin/arm-none-eabi-"
+         generated_warning_header = "
+         #
+         #  Copyright (C) Firmwave Ltd., All rights reserved. 
+         #  Licensed under the MIT license. See LICENSE file in the project root for full license information.
+         #
+         ">
+    <cflags>
+    -std=gnu99 -O0 -g \
+    -march=armv7e-m -mthumb -mfloat-abi=softfp  -mfpu=fpv5-sp-d16 \
+    -ffunction-sections \
+    -Wall -Wchar-subscripts -Wcomment -Wformat=2 -Wimplicit-int \
+    -Wmain -Wparentheses \
+    -Wsequence-point -Wreturn-type -Wswitch -Wtrigraphs \
+    -Wuninitialized -Wunknown-pragmas -Wfloat-equal \
+    -Wshadow -Wpointer-arith -Wbad-function-cast -Wwrite-strings \
+    -Waggregate-return -Wstrict-prototypes \
+    -Wmissing-prototypes -Wmissing-declarations \
+    -Wformat -Wmissing-format-attribute -Wno-deprecated-declarations \
+    -Wredundant-decls -Wnested-externs \
+    -Wunreachable-code
+    </cflags>
+    <ldflags>
+    -march=armv7e-m -mthumb -mfloat-abi=softfp  -mfpu=fpv5-sp-d16 \
+    -Wl,--cref -Wl,--check-sections -Wl,--gc-sections -Wl,--entry=Reset_Handler \
+    -Wl,--unresolved-symbols=report-all -Wl,--warn-common \
+    -Wl,--defsym=malloc_getpagesize_P=0x80 \
+    -L/opt/CycloneTCP_SSL_Crypto_Open_1_7_4/linker \
+    -T"same70_flash.ld" \
+    -Wl,--start-group -lgcc -lc -lm -Wl,--end-group --specs=nosys.specs
+    </ldflags>
+    <defines>
+        <define name = "TRACE_LEVEL" value = "4"/>
+        <define name = "__SAME70Q21__"/>
+        <define name = "printf" value = "iprintf"/>
+        <define name = "_WINSOCK_H"/>
+        <define name = "USE_SAME70_XPLAINED"/>
+        <define name = "BOARD" value = "SAME70_XPLAINED"/>
+        <define name = "MBED_BUILD_TIMESTAMP"/>
+    </defines>
+
+    <path name = "FREERTOS_PATH" dest = "/opt/FreeRTOSv9.0.0/FreeRTOS"/>
+    <path name = "CYCLONETCP_PATH" dest = "/opt/CycloneTCP_SSL_Crypto_Open_1_7_4"/>
+    <path name = "AZURESDK_PATH" dest = "../../../.."/>
+
+    <exec name = "iothub_client_sample_http">
+        <includes>
+		    <dir name = "../"/>
+		    <dir name = "$(AZURESDK_PATH)/c-utility/inc"/>
+		    <dir name = "$(AZURESDK_PATH)/iothub_client/inc"/>
+		    <dir name = "$(AZURESDK_PATH)/uamqp/inc"/>
+		    <dir name = "$(AZURESDK_PATH)/c-utility/inc"/>
+		    <dir name = "$(AZURESDK_PATH)/c-utility/adapters"/>
+		    <dir name = "$(AZURESDK_PATH)/parson"/>
+		    <dir name = "$(AZURESDK_PATH)/certs"/>
+
+            <dir name = "$(CYCLONETCP_PATH)/inc"/>
+            <dir name = "$(CYCLONETCP_PATH)/common"/>
+            <dir name = "$(CYCLONETCP_PATH)/demo/common/atmel/boards/same70_xplained"/>
+            <dir name = "$(CYCLONETCP_PATH)/cyclone_crypto"/>
+            <dir name = "$(CYCLONETCP_PATH)/cyclone_ssl"/>
+            <dir name = "$(CYCLONETCP_PATH)/cyclone_tcp"/>
+
+            <dir name = "$(FREERTOS_PATH)/Source/include"/>
+            <dir name = "$(FREERTOS_PATH)/Source/portable/GCC/ARM_CM7/r0p1"/>
+            <dir name = "$(FREERTOS_PATH)/Demo/CORTEX_M7_SAME70_Xplained_AtmelStudio/src/ASF/sam/utils/cmsis/same70/include"/>
+            <dir name = "$(FREERTOS_PATH)/Demo/CORTEX_M7_SAME70_Xplained_AtmelStudio/src/ASF/thirdparty/CMSIS/Include"/>
+            <dir name = "$(FREERTOS_PATH)/Demo/CORTEX_M7_SAME70_Xplained_AtmelStudio/src/ASF/sam/utils/cmsis/same70/source/templates"/>
+            <dir name = "$(FREERTOS_PATH)/Demo/CORTEX_M7_SAME70_Xplained_AtmelStudio/src/ASF/sam/utils/fpu"/>
+            <dir name = "$(FREERTOS_PATH)/Demo/CORTEX_M7_SAME70_Xplained_AtmelStudio/src/ASF/sam/utils"/>
+            <dir name = "$(FREERTOS_PATH)/Demo/CORTEX_M7_SAME70_Xplained_AtmelStudio/src/ASF/sam/utils/preprocessor"/>
+            <dir name = "$(FREERTOS_PATH)/Demo/CORTEX_M7_SAME70_Xplained_AtmelStudio/src/ASF/sam/utils/header_files"/>
+            <dir name = "$(FREERTOS_PATH)/Demo/CORTEX_M7_SAME70_Xplained_AtmelStudio/src/ASF/common/utils"/>
+        </includes>
+        <sources>
+		    <dir name = "../"/>
+		    <dir name = "$(AZURESDK_PATH)/iothub_client/src">
+                <exclude name = "iothubtransportmqtt.c"/>
+                <exclude name = "iothubtransportamqp.c"/>
+                <exclude name = "iothubtransportamqp_websockets.c"/>
+            </dir>
+		    <dir name = "$(AZURESDK_PATH)/uamqp/src">
+                <exclude name = "socket_listener_win32.c"/>
+            </dir>
+		    <dir name = "$(AZURESDK_PATH)/c-utility/src">
+                <exclude name = "tlsio_openssl.c"/>
+                <exclude name = "x509_openssl.c"/>
+                <exclude name = "x509_schannel.c"/>
+                <exclude name = "tlsio_cyclonessl_socket_bsd.c"/>
+                <exclude name = "tlsio_wolfssl.c"/>
+                <exclude name = "tlsio_schannel.c"/>
+                <exclude name = "wsio.c"/>
+            </dir>
+		    <file name = "$(AZURESDK_PATH)/c-utility/adapters/platform_freertos.c"/>
+		    <file name = "$(AZURESDK_PATH)/c-utility/adapters/tickcounter_freertos.c"/>
+		    <file name = "$(AZURESDK_PATH)/c-utility/adapters/agenttime.c"/>
+		    <file name = "$(AZURESDK_PATH)/c-utility/adapters/threadapi_freertos.c"/>
+		    <file name = "$(AZURESDK_PATH)/c-utility/adapters/httpapi_compact.c"/>
+		    <dir name = "$(AZURESDK_PATH)/certs"/>
+		    <dir name = "$(AZURESDK_PATH)/parson">
+                <exclude name = "tests.c"/>
+            </dir>
+
+            <dir name = "$(CYCLONETCP_PATH)/src"/>
+            <file name = "$(CYCLONETCP_PATH)/common/os_port_freertos.c"/>
+            <file name = "$(CYCLONETCP_PATH)/common/endian.c"/>
+            <file name = "$(CYCLONETCP_PATH)/common/str.c"/>
+            <file name = "$(CYCLONETCP_PATH)/common/date_time.c"/>
+            <file name = "$(CYCLONETCP_PATH)/demo/common/atmel/boards/same70_xplained/sdram.c"/>
+            <dir name = "$(CYCLONETCP_PATH)/cyclone_tcp/core">
+                <exclude name = "bsd_socket.c"/>
+            </dir>
+            <dir name = "$(CYCLONETCP_PATH)/cyclone_tcp/ipv4"/>
+            <dir name = "$(CYCLONETCP_PATH)/cyclone_tcp/ipv6"/>
+            <dir name = "$(CYCLONETCP_PATH)/cyclone_tcp/dns"/>
+            <dir name = "$(CYCLONETCP_PATH)/cyclone_tcp/dhcp">
+                <exclude name = "dhcp_server.c"/>
+            </dir>
+            <dir name = "$(CYCLONETCP_PATH)/cyclone_tcp/netbios"/>
+            <file name = "$(CYCLONETCP_PATH)/cyclone_tcp/drivers/ksz8081.c"/>
+            <file name = "$(CYCLONETCP_PATH)/cyclone_tcp/drivers/same70_eth.c"/>
+            <dir name = "$(CYCLONETCP_PATH)/cyclone_crypto"/>
+            <dir name = "$(CYCLONETCP_PATH)/cyclone_ssl">
+                <exclude name = "tls_server.c"/>
+            </dir>
+            <file name = "$(FREERTOS_PATH)/Source/portable/MemMang/heap_3.c"/>
+            <dir name = "$(FREERTOS_PATH)/Source"/>
+            <dir name = "$(FREERTOS_PATH)/Source/portable"/>
+            <dir name = "$(FREERTOS_PATH)/Source/portable/GCC/ARM_CM7/r0p1"/>
+            <dir name = "$(FREERTOS_PATH)/Demo/CORTEX_M7_SAME70_Xplained_AtmelStudio/src/ASF/common/utils/interrupt"/>
+        </sources>
+    </exec>
+</project>
+

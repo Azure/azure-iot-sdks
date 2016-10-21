@@ -952,7 +952,6 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
     /*Tests_SRS_IOTHUBMESSAGING_12_016: [ IoTHubMessaging_LL_Open shall set the AMQP outgoing window to UINT32 maximum value by calling session_set_outgoing_window ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_018: [ IoTHubMessaging_LL_Open shall create uAMQP sender link by calling the link_create ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_019: [ IoTHubMessaging_LL_Open shall set the AMQP sender link settle mode to sender_settle_mode_unsettled  by calling link_set_snd_settle_mode ] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_020: [ IoTHubMessaging_LL_Open shall set sender link AMQP maximum message size to the server maximum (255K) by calling link_set_max_message_size ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_021: [ IoTHubMessaging_LL_Open shall create uAMQP messaging source for sender by calling the messaging_create_source ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_022: [ IoTHubMessaging_LL_Open shall create uAMQP messaging target for sender by calling the messaging_create_target ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_023: [ IoTHubMessaging_LL_Open shall create uAMQP message sender by calling the messagesender_create with the created sender link and the local IoTHubMessaging_LL_SenderStateChanged callback ] */
@@ -1031,8 +1030,6 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         STRICT_EXPECTED_CALL(link_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, TEST_AMQP_VALUE_NULL, TEST_AMQP_VALUE_NULL))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(link_set_snd_settle_mode(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(link_set_max_message_size(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(messagesender_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
@@ -1192,8 +1189,6 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(link_set_snd_settle_mode(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
             .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(link_set_max_message_size(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(messagesender_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(messagesender_open(IGNORED_NUM_ARG))
@@ -1240,10 +1235,10 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
                 (i != 10) &&
                 (i != 11) &&
                 (i != 12) &&
+                (i != 35) &&
                 (i != 36) &&
                 (i != 37) &&
-                (i != 38) &&
-                (i != 39)
+                (i != 38)
                 )
             {
                 IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_Open(TEST_IOTHUB_MESSAGING_HANDLE, TEST_IOTHUB_OPEN_COMPLETE_CALLBACK, NULL);

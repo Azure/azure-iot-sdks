@@ -273,6 +273,9 @@ Client.prototype.updateSharedAccessSignature = function (sharedAccessSignature, 
   if (!sharedAccessSignature) throw new ReferenceError('sharedAccessSignature is falsy');
 
   this.blobUploadClient.updateSharedAccessSignature(sharedAccessSignature);
+  if (this._twin) {
+    this._twin.updateSharedAccessSignature();
+  }
 
   /*Codes_SRS_NODE_DEVICE_CLIENT_16_032: [The updateSharedAccessSignature method shall call the updateSharedAccessSignature method of the transport currently inuse with the sharedAccessSignature parameter.]*/
   this._transport.updateSharedAccessSignature(sharedAccessSignature, function (err, result) {
