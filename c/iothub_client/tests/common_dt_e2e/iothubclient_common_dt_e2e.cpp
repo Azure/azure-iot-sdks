@@ -234,9 +234,6 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
         (void)Unlock(deviceData->lock);
     }
 
-    // cleanup
-    IoTHubClient_Destroy(iotHubClientHandle);
-
     const char *connectionString = IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo);
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "Failure in IoTHubServiceClientAuth_CreateFromConnectionString");
@@ -248,7 +245,6 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     ASSERT_IS_NOT_NULL_WITH_MSG(deviceTwinData, "Failure to retrieve device data");
 
     JSON_Value *root_value = json_parse_string(deviceTwinData);
-    free(deviceTwinData);
     ASSERT_IS_NOT_NULL_WITH_MSG(root_value, "Failure to parse data from service");
 
     JSON_Object *root_object = json_value_get_object(root_value);
@@ -258,7 +254,16 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     int integer_property = (int) json_object_dotget_number(root_object, "properties.reported.integer_property");
     ASSERT_ARE_EQUAL_WITH_MSG(int, deviceData->device->integer_property, integer_property, "data retrieved does not equal data reported");
 
-    device_data_delete(deviceData);
+    // cleanup
+    IoTHubClient_Destroy(iotHubClientHandle);
+    free(deviceTwinData);
     json_value_free(root_value);
+    IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
+    IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
+    device_data_delete(deviceData);
 }
 
+void dt_e2e_get_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
+{
+    (void) protocol;
+}

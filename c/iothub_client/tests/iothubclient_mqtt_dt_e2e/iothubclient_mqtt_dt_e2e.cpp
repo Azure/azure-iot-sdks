@@ -31,4 +31,9 @@ TEST_FUNCTION(IoTHub_MQTT_SendReported_e2e)
     dt_e2e_send_reported_test(MQTT_Protocol);
 }
 
+TEST_FUNCTION(IoTHub_MQTT_GetDesired_e2e)
+{
+    dt_e2e_get_desired_test(MQTT_Protocol); 
+}
+
 END_TEST_SUITE(iothubclient_mqtt_dt_e2e)
