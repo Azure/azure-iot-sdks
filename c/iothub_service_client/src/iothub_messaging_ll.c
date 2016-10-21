@@ -885,15 +885,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                         free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
-                    /*Codes_SRS_IOTHUBMESSAGING_12_020: [ IoTHubMessaging_LL_Open shall set sender link AMQP maximum message size to the server maximum (255K) by calling link_set_max_message_size ] */
-                    else if (link_set_max_message_size(messagingHandle->sender_link, 65536) != 0)
-                    {
-                        /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
-                        LogError("Could not set the message size.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
-                        result = IOTHUB_MESSAGING_ERROR;
-                    }
                     /*Codes_SRS_IOTHUBMESSAGING_12_023: [ IoTHubMessaging_LL_Open shall create uAMQP message sender by calling the messagesender_create with the created sender link and the local IoTHubMessaging_LL_SenderStateChanged callback ] */
                     else if ((messagingHandle->message_sender = messagesender_create(messagingHandle->sender_link, IoTHubMessaging_LL_SenderStateChanged, messagingHandle)) == NULL)
                     {
