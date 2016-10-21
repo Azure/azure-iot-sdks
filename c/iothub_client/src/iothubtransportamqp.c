@@ -166,7 +166,7 @@ static int getSecondsSinceEpoch(size_t* seconds)
 	int result;
 	time_t current_time;
 	
-	if ((current_time = get_time((time_t)NULL)) == INDEFINITE_TIME)
+	if ((current_time = get_time(NULL)) == INDEFINITE_TIME)
 	{
 		LogError("Failed getting the current local time (get_time() failed)");
 		result = __LINE__;
