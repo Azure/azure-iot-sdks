@@ -54,9 +54,9 @@ static void* IoTHubDeviceTwinCreate_Impl(const char* name, size_t sizeOfName, SE
 
 **SRS_SERIALIZERDEVICETWIN_02_012: [** `IoTHubDeviceTwinCreate_Impl` shall record the pair of (device, IoTHubClient(_LL)). **]**
 
-**SRS_SERIALIZERDEVICETWIN_02_013: [** If all operations complete successfully then `IoTHubDeviceTwinCreate_Impl` shall return a non-`NULL` value. **]**
+**SRS_SERIALIZERDEVICETWIN_02_013: [** If all operations complete successfully then `IoTHubDeviceTwinCreate_Impl` shall succeeds and return a non-`NULL` value. **]**
 
-**SRS_SERIALIZERDEVICETWIN_02_014: [** Otherwise, `IoTHubDeviceTwinCreate_Impl` shall return `NULL`. **]**
+**SRS_SERIALIZERDEVICETWIN_02_014: [** Otherwise, `IoTHubDeviceTwinCreate_Impl` shall fail and return `NULL`. **]**
 
 ### IoTHubDeviceTwin_Destroy_Impl
 ```c
@@ -64,6 +64,8 @@ static void IoTHubDeviceTwin_Destroy_Impl(void* model)
 ```
 
 `IoTHubDeviceTwin_Destroy_Impl` frees all used resources created by `IoTHubDeviceTwinCreate_Impl`.
+
+**SRS_SERIALIZERDEVICETWIN_02_020: [** If `model` is `NULL` then `IoTHubDeviceTwin_Destroy_Impl` shall return. **]**
 
 **SRS_SERIALIZERDEVICETWIN_02_015: [** `IoTHubDeviceTwin_Destroy_Impl` shall locate the saved handle belonging to `model`. **]**
 
