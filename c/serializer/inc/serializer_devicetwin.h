@@ -14,7 +14,6 @@
 
 static void serializer_ingest(DEVICE_TWIN_UPDATE_STATE update_state, const unsigned char* payLoad, size_t size, void* userContextCallback)
 {
-    (void)(update_state);
     /*by convention, userContextCallback is a pointer to a model instance created with CodeFirst_CreateDevice*/
     char* copyOfPayload = (char*)malloc(size + 1);
     if (copyOfPayload == NULL)
@@ -151,6 +150,14 @@ static int lazilyAddProtohandle(const SERIALIZER_DEVICETWIN_PROTOHANDLE* protoHa
         {
             LogError("failure in VECTOR_push_back");
             result = __LINE__;
+
+            /*leave it as it was*/
+
+            if (VECTOR_size(g_allProtoHandles) == 0)
+            {
+                VECTOR_destroy(g_allProtoHandles);
+                g_allProtoHandles = NULL;
+            }
         }
         else
         {
