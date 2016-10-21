@@ -304,6 +304,11 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
     }
 
     /*this test wants to see that IoTHubDeviceTwin_CreatebasicModel_WithData15 doesn't fail*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_009: [ IoTHubDeviceTwinCreate_Impl shall locate the model and the metadata for name by calling Schema_GetSchemaForModel/Schema_GetMetadata/Schema_GetModelByName. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_010: [ IoTHubDeviceTwinCreate_Impl shall call CodeFirst_CreateDevice. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_011: [ IoTHubDeviceTwinCreate_Impl shall set the device twin callback. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_012: [ IoTHubDeviceTwinCreate_Impl shall record the pair of (device, IoTHubClient(_LL)). ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_013: [ If all operations complete successfully then IoTHubDeviceTwinCreate_Impl shall succeeds and return a non-NULL value. ]*/
     TEST_FUNCTION(IoTHubDeviceTwin_CreatebasicModel_WithData15_happy_path)
     {
         ///arrange
@@ -326,6 +331,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
     }
 
     /*this test wants to see that IoTHubDeviceTwin_CreatebasicModel_WithData15 doesn't fail*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_014: [ Otherwise, IoTHubDeviceTwinCreate_Impl shall fail and return NULL. ]*/
     TEST_FUNCTION(IoTHubDeviceTwin_CreatebasicModel_WithData15_unhappy_paths)
     {
         ///arrange
@@ -360,7 +366,6 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         umock_c_negative_tests_deinit();
     }
 
-
     static void IoTHubDeviceTwin_LL_CreatebasicModel_WithData15_inertPath(void)
     {
         STRICT_EXPECTED_CALL(Schema_GetSchemaForModel("basicModel_WithData15"));
@@ -375,6 +380,11 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
     }
 
     /*this test wants to see that IoTHubDeviceTwin_CreatebasicModel_WithData15 doesn't fail*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_009: [ IoTHubDeviceTwinCreate_Impl shall locate the model and the metadata for name by calling Schema_GetSchemaForModel/Schema_GetMetadata/Schema_GetModelByName. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_010: [ IoTHubDeviceTwinCreate_Impl shall call CodeFirst_CreateDevice. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_011: [ IoTHubDeviceTwinCreate_Impl shall set the device twin callback. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_012: [ IoTHubDeviceTwinCreate_Impl shall record the pair of (device, IoTHubClient(_LL)). ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_013: [ If all operations complete successfully then IoTHubDeviceTwinCreate_Impl shall succeeds and return a non-NULL value. ]*/
     TEST_FUNCTION(IoTHubDeviceTwin_LL_CreatebasicModel_WithData15_happy_path)
     {
         ///arrange
@@ -397,6 +407,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
     }
 
     /*this test wants to see that IoTHubDeviceTwin_CreatebasicModel_WithData15 doesn't fail*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_014: [ Otherwise, IoTHubDeviceTwinCreate_Impl shall fail and return NULL. ]*/
     TEST_FUNCTION(IoTHubDeviceTwin_LL_CreatebasicModel_WithData15_unhappy_paths)
     {
         ///arrange
@@ -455,6 +466,11 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
             .IgnoreArgument_ptr();
     }
 
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_001: [ serializer_ingest shall clone the payload into a null terminated string. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_002: [ serializer_ingest shall parse the null terminated string into parson data types. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_003: [ If update_state is DEVICE_TWIN_UPDATE_COMPLETE then serializer_ingest shall locate "desired" json name. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_004: [ If "desired" contains "$version" then serializer_ingest shall remove it. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_005: [ The "desired" value shall be outputed to a null terminated string and serializer_ingest shall call CodeFirst_IngestDesiredProperties. ]*/
     TEST_FUNCTION(serializer_ingest_DEVICE_TWIN_UPDATE_COMPLETE_happy_path)
     {
         ///arrange
@@ -472,6 +488,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         ///clean
     }
 
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_008: [ If any of the above operations fail, then serializer_ingest shall return. ]*/
     TEST_FUNCTION(serializer_ingest_DEVICE_TWIN_UPDATE_COMPLETE_unhappy_path)
     {
         ///arrange
@@ -528,6 +545,10 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
             .IgnoreArgument_ptr();
     }
 
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_001: [ serializer_ingest shall clone the payload into a null terminated string. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_002: [ serializer_ingest shall parse the null terminated string into parson data types. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_006: [ If update_state is DEVICE_TWIN_UPDATE_PARTIAL then serializer_ingest shall remove "$version" (if it exists). ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_007: [ The JSON shall be outputed to a null terminated string and serializer_ingest shall call CodeFirst_IngestDesiredProperties. ]*/
     TEST_FUNCTION(serializer_ingest_DEVICE_TWIN_UPDATE_PARTIAL_happy_path)
     {
         ///arrange
@@ -545,6 +566,7 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         ///clean
     }
 
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_008: [ If any of the above operations fail, then serializer_ingest shall return. ]*/
     TEST_FUNCTION(serializer_ingest_DEVICE_TWIN_UPDATE_PARTIAL_unhappy_path)
     {
         ///arrange
@@ -579,6 +601,81 @@ BEGIN_TEST_SUITE(serializer_dt_ut)
         ///clean
         umock_c_negative_tests_deinit();
     }
+    
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_020: [ If model is NULL then IoTHubDeviceTwin_Destroy_Impl shall return. ]*/
+    TEST_FUNCTION(IoTHubDeviceTwin_Destroy_Impl_with_NULL_model_returns)
+    {
+        ///arrange
 
+        ///act
+        IoTHubDeviceTwin_Destroy_Impl(NULL);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///cleanup
+    }
+
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_015: [ IoTHubDeviceTwin_Destroy_Impl shall locate the saved handle belonging to model. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_016: [ IoTHubDeviceTwin_Destroy_Impl shall set the devicetwin callback to NULL. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_017: [ IoTHubDeviceTwin_Destroy_Impl shall call CodeFirst_DestroyDevice. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_018: [ IoTHubDeviceTwin_Destroy_Impl shall remove the IoTHubClient_Handle and the device handle from the recorded set. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_019: [ If the recorded set of IoTHubClient handles is zero size, then the set shall be destroyed. ]*/
+    TEST_FUNCTION(IoTHubDeviceTwin_LL_Destroy_Impl_returns)
+    {
+        ///arrange
+        (void)SERIALIZER_REGISTER_NAMESPACE(basic15);
+        IoTHubDeviceTwin_LL_CreatebasicModel_WithData15_inertPath();
+        basicModel_WithData15* model = IoTHubDeviceTwin_LL_CreatebasicModel_WithData15(TEST_IOTHUB_CLIENT_LL_HANDLE);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_find_if(g_allProtoHandles, protoHandleHasDeviceStartAddress, model));
+        STRICT_EXPECTED_CALL(IoTHubClient_LL_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, NULL, NULL));
+        STRICT_EXPECTED_CALL(CodeFirst_DestroyDevice(model));
+        STRICT_EXPECTED_CALL(VECTOR_erase(g_allProtoHandles, IGNORED_PTR_ARG, 1))
+            .IgnoreArgument_elements();
+        STRICT_EXPECTED_CALL(VECTOR_size(g_allProtoHandles));
+        STRICT_EXPECTED_CALL(VECTOR_destroy(g_allProtoHandles));
+
+        ///act
+        IoTHubDeviceTwin_LL_DestroybasicModel_WithData15(model);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+
+    }
+
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_015: [ IoTHubDeviceTwin_Destroy_Impl shall locate the saved handle belonging to model. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_016: [ IoTHubDeviceTwin_Destroy_Impl shall set the devicetwin callback to NULL. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_017: [ IoTHubDeviceTwin_Destroy_Impl shall call CodeFirst_DestroyDevice. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_018: [ IoTHubDeviceTwin_Destroy_Impl shall remove the IoTHubClient_Handle and the device handle from the recorded set. ]*/
+    /*Tests_SRS_SERIALIZERDEVICETWIN_02_019: [ If the recorded set of IoTHubClient handles is zero size, then the set shall be destroyed. ]*/
+    TEST_FUNCTION(IoTHubDeviceTwin_Destroy_Impl_returns)
+    {
+        ///arrange
+        (void)SERIALIZER_REGISTER_NAMESPACE(basic15);
+        IoTHubDeviceTwin_CreatebasicModel_WithData15_inertPath();
+        basicModel_WithData15* model = IoTHubDeviceTwin_CreatebasicModel_WithData15(TEST_IOTHUB_CLIENT_HANDLE);
+        umock_c_reset_all_calls();
+
+        STRICT_EXPECTED_CALL(VECTOR_find_if(g_allProtoHandles, protoHandleHasDeviceStartAddress, model));
+        STRICT_EXPECTED_CALL(IoTHubClient_SetDeviceTwinCallback(TEST_IOTHUB_CLIENT_HANDLE, NULL, NULL));
+        STRICT_EXPECTED_CALL(CodeFirst_DestroyDevice(model));
+        STRICT_EXPECTED_CALL(VECTOR_erase(g_allProtoHandles, IGNORED_PTR_ARG, 1))
+            .IgnoreArgument_elements();
+        STRICT_EXPECTED_CALL(VECTOR_size(g_allProtoHandles));
+        STRICT_EXPECTED_CALL(VECTOR_destroy(g_allProtoHandles));
+
+        ///act
+        IoTHubDeviceTwin_LL_DestroybasicModel_WithData15(model);
+
+        ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+        ///clean
+
+    }
     
 END_TEST_SUITE(serializer_dt_ut)
