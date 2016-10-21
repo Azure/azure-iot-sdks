@@ -18,11 +18,6 @@ set(${theseTestsName}_c_files
     ./real_crt_abstractions.c
 )
 
-if(MSVC)
-    set_source_files_properties(../../../parson/parson.c PROPERTIES COMPILE_FLAGS "/wd4244 /wd4232")
-endif()
-
-
 set(${theseTestsName}_h_files
     ../../../parson/parson.h
     ./real_vector.h
