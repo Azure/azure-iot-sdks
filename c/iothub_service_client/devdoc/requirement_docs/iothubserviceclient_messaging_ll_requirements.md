@@ -151,8 +151,6 @@ extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE m
 
 **SRS_IOTHUBMESSAGING_12_019: [** IoTHubMessaging_LL_Open shall set the AMQP sender link settle mode to sender_settle_mode_unsettled  by calling link_set_snd_settle_mode **]**
 
-**SRS_IOTHUBMESSAGING_12_020: [** IoTHubMessaging_LL_Open shall set sender link AMQP maximum message size to the server maximum (255K) by calling link_set_max_message_size **]**
-
 **SRS_IOTHUBMESSAGING_12_021: [** IoTHubMessaging_LL_Open shall create uAMQP messaging source for sender by calling the messaging_create_source **]**
 
 **SRS_IOTHUBMESSAGING_12_022: [** IoTHubMessaging_LL_Open shall create uAMQP messaging target for sender by calling the messaging_create_target **]**
