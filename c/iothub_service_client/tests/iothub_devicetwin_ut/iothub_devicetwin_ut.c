@@ -596,12 +596,14 @@ TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_happy_path_status_code_200)
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 
+    EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+
     EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .SetReturn(TEST_UNSIGNED_CHAR_PTR);
-
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
@@ -747,12 +749,15 @@ TEST_FUNCTION(IoTHubDeviceTwin_GetTwin_non_happy_path)
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 
+    EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+	    .SetReturn(NULL);
+
     EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .SetReturn(TEST_UNSIGNED_CHAR_PTR);
-
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
@@ -901,12 +906,14 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_happy_path_status_code_200)
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 
+    EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+
     EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .SetReturn(TEST_UNSIGNED_CHAR_PTR);
-
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
@@ -1072,12 +1079,16 @@ TEST_FUNCTION(IoTHubDeviceTwin_UpdateTwin_non_happy_path)
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 
+
+    EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)
+	    .SetReturn(NULL));
+
     EXPECTED_CALL(BUFFER_u_char(IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .SetReturn(TEST_UNSIGNED_CHAR_PTR);
-
-    EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-        .IgnoreAllArguments();
 
     STRICT_EXPECTED_CALL(BUFFER_delete(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
