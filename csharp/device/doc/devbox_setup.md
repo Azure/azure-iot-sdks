@@ -50,16 +50,15 @@ Microsoft.Azure.Devices.Client.winmd is [WinRT] [WinRT] version which will insta
 #### For Building C# and Visual Basic UWP apps
 For building UWP, follow the same steps as you would follow if building classic .NET desktop application.
 
-Visual Basic .NET call would be something like this
+Visual Basic .NET call would look something like this
 
-````
+```
 Dim deviceClient As Microsoft.Azure.Devices.Client.DeviceClient = Microsoft.Azure.Devices.Client.DeviceClient.CreateFromConnectionString("{My device connection string}", Microsoft.Azure.Devices.Client.TransportType.Amqp)
 Dim myMessage = "Hello!" + DateTime.Now.ToString()
 Dim message = New Microsoft.Azure.Devices.Client.Message(Encoding.ASCII.GetBytes(myMessage))
 Dim Async = deviceClient.SendEventAsync(message)
-
-````
-
+```
+where you would replace {My device connection string} with your device connection string.
 
 
 #### For Building C++ and JavaScript UWP apps
