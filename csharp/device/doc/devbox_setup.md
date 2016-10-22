@@ -27,15 +27,22 @@ Install the Azure SDK for .NET 2.7 or later. Use the following links to download
 <a name="directly_using_sdk"/>
 ## Directly using Azure IoT Device Client SDK using NuGet packages
 Go to VS 2015 Solution Explorer and right click on the solution or project and click Manage NuGet Packages.
-There are 2 different NuGet packages to choose from
 
-- 1 Microsoft.Azure.Devices.Client
+There are 2 different **NuGet** packages to choose from
+
+### Microsoft.Azure.Devices.Client
 For bulding classic desktop .NET application, use NuGet Package Manager to install latest version of **Microsoft.Azure.Devices.Client** Device SDK for Azure IoT Devices NuGet package to your project.
 
-Microsoft.Azure.Devices.Client.dll is the assembly for classic .NET desktop application
-Microsoft.Azure.Devices.Client.winmd is assemby for UWP application.
+#### Microsoft.Azure.Devices.Client.dll is the assembly for classic .NET desktop application
+#### Microsoft.Azure.Devices.Client.winmd is assemby for building UWP application
 
-- The package is located at [Azure IoT Device SDK NuGet Package] [lnk-NuGet-package]. 
+- The package is located at [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet-package]. 
+
+### Microsoft.Azure.Devices.Client.PCL
+For bulding iOS and Android application in C#, use NuGet Package Manager to install latest version of **Microsoft.Azure.Devices.Client.PCL** Device SDK for Azure IoT Devices NuGet package to your project.
+
+- The package is located at [Azure IoT Device Client PCL SDK NuGet Package] [lnk-NuGet-package_pcl]
+
 
 ### Building UWP Apps
 Microsoft.Azure.Devices.Client.winmd is WinRT version which will installed via NuGet Package manager versus Microsoft.Azure.Devices.Client.dll
@@ -43,7 +50,13 @@ Microsoft.Azure.Devices.Client.winmd is WinRT version which will installed via N
 #### For Building C# and Visual Basic UWP apps
 For building UWP, follow the same steps as you would follow if building classic .NET desktop application.
 
-Visual Basic call would be
+Visual Basic .NET call would be something like this
+``
+Dim deviceClient As Microsoft.Azure.Devices.Client.DeviceClient = Microsoft.Azure.Devices.Client.DeviceClient.CreateFromConnectionString("{My device connection string}", Microsoft.Azure.Devices.Client.TransportType.Amqp)
+Dim myMessage = "Hello!" + DateTime.Now.ToString()
+Dim message = New Microsoft.Azure.Devices.Client.Message(Encoding.ASCII.GetBytes(myMessage))
+Dim Async = deviceClient.SendEventAsync(message)
+``
 
 
 
@@ -76,9 +89,8 @@ deviceClient.sendEventAsync(eventMessage);
 `
 
 - 2 Microsoft.Azure.Devices.Client.PCL
-This is Portable Class library. You may want to use this for Xamarin C# cross-compatible project.
+This is Portable Class library. You may want to use this for Xamarin C# cross-compatible project on Xamarin and iOS.
 It currently only supports HTTPS protocol.
-
 
 
 
@@ -151,6 +163,7 @@ Now you are ready to run the CppUWPSample.
 [lnk-sdk-vs2012]: http://go.microsoft.com/fwlink/?LinkId=323511
 [lnk-visualstudio-xamarin]: https://msdn.microsoft.com/en-us/library/mt299001.aspx
 [lnk-NuGet-package]:https://www.nuget.org/packages/Microsoft.Azure.Devices.Client
+[lnk-NuGet-package_pcl]:https://www.nuget.org/packages/Microsoft.Azure.Devices.Client.PCL
 [lnk-azure-iot]:https://github.com/Azure/azure-iot-sdks
 [NuGet-Package-Manager]:https://visualstudiogallery.msdn.microsoft.com/5d345edc-2e2d-4a9c-b73b-d53956dc458d
 [NuGet]:https://www.nuget.org/
