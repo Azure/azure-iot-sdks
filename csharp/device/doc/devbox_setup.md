@@ -45,9 +45,10 @@ For example,for bulding iOS and Android application in C# in VS 2015, use NuGet 
 
 
 ### Building UWP Apps 
-Microsoft.Azure.Devices.Client.winmd is [WinRT] [WinRT] version which will installed via NuGet Package manager versus Microsoft.Azure.Devices.Client.dll when you select UWP app
+Just like classis desktop app, install [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet-package].
+Microsoft.Azure.Devices.Client.winmd is [WinRT] [WinRT] version which will get installed via NuGet Package manager versus Microsoft.Azure.Devices.Client.dll version when you select Universal app in VS 2015.
 
-#### For Building C# and Visual Basic UWP apps
+####  Building C# and Visual Basic UWP apps
 For building UWP, follow the same steps as you would follow if building classic .NET desktop application.
 
 Visual Basic .NET call would look something like this
@@ -61,20 +62,25 @@ Dim Async = deviceClient.SendEventAsync(message)
 where you would replace {My device connection string} with your device connection string.
 
 
-#### For Building C++ and JavaScript UWP apps
-For Visual C++ and JavaScript UWP, there may get "Error	Failed to add reference to 'Microsoft.Azure.Amqp.Uwp" error while installing NuGet Package. 
+#### Building C++ and JavaScript UWP apps
+For Visual C++ and JavaScript UWP, you may get "Error	Failed to add reference to 'Microsoft.Azure.Amqp.Uwp" error while installing [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet-package]
 
-Use the below workaround to fix the error.Since the assemblies fail to install, you need to manually copy them for C++ or JavaScript UWP application.
+Use the below **workaround** to fix the error. Since the assemblies fail to install, you will have to manually copy them for C++ or JavaScript UWP application.
 
-- Workaround for building C++ and JavaScript UWP apps
+##### Workaround for building C++ and JavaScript UWP apps
 
-Create a temporary blank UWP project in C#
-Right click on Project and click Manage NuGet Packages and install Microsoft.Azure.Devices.Client NuGet package
+Create a **temporary** blank UWP project in C# to get copies of required assemblies. Right click on Project and click Manage NuGet Packages and install Microsoft.Azure.Devices.Client NuGet package
+
 Build the project
-Go the corresponding bin project. For example, for Debug build you will go to bin\x64\Debug and copy following 4 files
+
+Go the corresponding bin project. For example, for Debug build you will go to bin\x64\Debug and copy following **4** files
+
 1.) Microsoft.Azure.Devices.Client.winmd
+
 2.) Microsoft.Azure.Amqp.Uwp.dll
+
 3.) PCLCrypto.dll
+
 4.) Validation.dll
 
 There are the files you need to copy in the bin\x64\Debug\AppX folder of your AppX package.
@@ -82,17 +88,16 @@ To add the reference, you reference WinRT assembly
 \bin\x64\Debug\Microsoft.Azure.Devices.Client.winmd
 
 For JavaScript call would something like this.
-`
+
+```
 var azureClient = Microsoft.Azure.Devices.Client;
 var deviceClient = azureClient.DeviceClient.createFromConnectionString(deviceConnectionString, azureClient.TransportType.amqp);
 deviceClient.sendEventAsync(eventMessage);
+```
 
-`
 
-- 2 Microsoft.Azure.Devices.Client.PCL
-This is Portable Class library. You may want to use this for Xamarin C# cross-compatible project on Xamarin and iOS.
-It currently only supports HTTPS protocol.
-
+### Building iOS and Android apps using C#
+In this scenario, you will use PCL NuGet package  located at [Azure IoT Device Client PCL SDK NuGet Package] [lnk-NuGet-package_pcl]
 
 
 <a name="building_sdk"/>
