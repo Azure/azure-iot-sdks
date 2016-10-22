@@ -95,7 +95,7 @@ deviceClient.sendEventAsync(eventMessage);
 ```
 
 
-### Building iOS and Android apps using C#
+### Building iOS and Android apps using Xamarin
 In this scenario, you will use PCL NuGet package  located at [Azure IoT Device Client PCL SDK NuGet Package] [lnk-NuGet-package_pcl]
 
 
