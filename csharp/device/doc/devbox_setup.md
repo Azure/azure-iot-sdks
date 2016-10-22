@@ -29,10 +29,10 @@ Install the Azure SDK for .NET 2.7 or later. Use the following links to download
 Go to VS 2015 Solution Explorer and right click on the solution or project and click Manage NuGet Packages.There are 2 different **NuGet** packages to choose from
 
 ### 1.) Microsoft.Azure.Devices.Client
-For bulding classic desktop .NET application, use NuGet Package Manager to install latest version of **Microsoft.Azure.Devices.Client** Device SDK for Azure IoT Devices NuGet package to your project.
+For bulding classic desktop [.NET] [.NET] application, use NuGet Package Manager to install latest version of **Microsoft.Azure.Devices.Client** Device SDK for Azure IoT Devices NuGet package to your project.
 
 - Microsoft.Azure.Devices.Client.dll is a .NET assembly for building classic .NET desktop application.
-- Microsoft.Azure.Devices.Client.winmd (Windows Runtime Metadata) is an assembly for building UWP application.
+- Microsoft.Azure.Devices.Client.winmd (Windows Runtime Metadata) is an assembly for building [UWP] [UWP] application.
 
 The package is located at [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet-package]
 
@@ -168,4 +168,6 @@ Now you are ready to run the CppUWPSample.
 [NuGet-Package-Manager]:https://visualstudiogallery.msdn.microsoft.com/5d345edc-2e2d-4a9c-b73b-d53956dc458d
 [NuGet]:https://www.nuget.org/
 [PCL]:https://msdn.microsoft.com/en-us/library/gg597391(v=vs.110).aspx
+[UWP]:https://msdn.microsoft.com/en-us/windows/uwp/get-started/universal-application-platform-guide
+[.NET]:https://www.microsoft.com/net
 
