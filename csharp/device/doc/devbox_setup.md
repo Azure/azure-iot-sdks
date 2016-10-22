@@ -45,18 +45,20 @@ For example,for bulding iOS and Android application in C# in VS 2015, use NuGet 
 
 
 ### Building UWP Apps 
-Microsoft.Azure.Devices.Client.winmd is WinRT version which will installed via NuGet Package manager versus Microsoft.Azure.Devices.Client.dll
+Microsoft.Azure.Devices.Client.winmd is [WinRT] [WinRT] version which will installed via NuGet Package manager versus Microsoft.Azure.Devices.Client.dll when you select UWP app
 
 #### For Building C# and Visual Basic UWP apps
 For building UWP, follow the same steps as you would follow if building classic .NET desktop application.
 
 Visual Basic .NET call would be something like this
-``
+
+````
 Dim deviceClient As Microsoft.Azure.Devices.Client.DeviceClient = Microsoft.Azure.Devices.Client.DeviceClient.CreateFromConnectionString("{My device connection string}", Microsoft.Azure.Devices.Client.TransportType.Amqp)
 Dim myMessage = "Hello!" + DateTime.Now.ToString()
 Dim message = New Microsoft.Azure.Devices.Client.Message(Encoding.ASCII.GetBytes(myMessage))
 Dim Async = deviceClient.SendEventAsync(message)
-``
+
+````
 
 
 
@@ -170,4 +172,5 @@ Now you are ready to run the CppUWPSample.
 [PCL]:https://msdn.microsoft.com/en-us/library/gg597391(v=vs.110).aspx
 [UWP]:https://msdn.microsoft.com/en-us/windows/uwp/get-started/universal-application-platform-guide
 [.NET]:https://www.microsoft.com/net
+[WinRT]:https://msdn.microsoft.com/en-us/windows/uwp/winrt-components/index
 
