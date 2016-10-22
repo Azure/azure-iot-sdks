@@ -26,17 +26,16 @@ Install the Azure SDK for .NET 2.7 or later. Use the following links to download
 
 <a name="directly_using_sdk"/>
 ## Directly using Azure IoT Device Client SDK using NuGet packages
-Go to VS 2015 Solution Explorer and right click on the solution or project and click Manage NuGet Packages.
-
-There are 2 different **NuGet** packages to choose from
+Go to VS 2015 Solution Explorer and right click on the solution or project and click Manage NuGet Packages.There are 2 different **NuGet** packages to choose from
 
 ### Microsoft.Azure.Devices.Client
 For bulding classic desktop .NET application, use NuGet Package Manager to install latest version of **Microsoft.Azure.Devices.Client** Device SDK for Azure IoT Devices NuGet package to your project.
 
-#### Microsoft.Azure.Devices.Client.dll is the assembly for classic .NET desktop application
-#### Microsoft.Azure.Devices.Client.winmd is assemby for building UWP application
+- Microsoft.Azure.Devices.Client.dll is the assembly for classic .NET desktop application.
+- Microsoft.Azure.Devices.Client.winmd is assemby for building UWP application.
 
-- The package is located at [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet-package]. 
+- The package is located at [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet-package]
+
 
 ### Microsoft.Azure.Devices.Client.PCL
 For bulding iOS and Android application in C#, use NuGet Package Manager to install latest version of **Microsoft.Azure.Devices.Client.PCL** Device SDK for Azure IoT Devices NuGet package to your project.
