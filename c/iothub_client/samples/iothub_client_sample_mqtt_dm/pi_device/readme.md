@@ -57,7 +57,7 @@ If you need to install an older version of Raspbian, the below instructions show
 	
 -   Download and unzip the image package
 	```
-	wget https://downloads.raspberrypi.org/NOOBS/images/NOOBS-2016-02-29/NOOBS_1_8_0.zip
+	wget https://downloads.raspberrypi.org/NOOBS/images/NOOBS-2016-02-29/NOOBS_v1_8_0.zip
 	mkdir NOOBS_1_8_0_image
 	unzip NOOBS_1_8_0.zip -d NOOBS_1_8_0_image 
 	cd NOOBS_1_8_0_image
@@ -74,6 +74,20 @@ If you need to install an older version of Raspbian, the below instructions show
 Assuming you have an older version of Raspbian running on your Raspberry Pi, follow the below instructions to install the sample application:
 -   Install the sample firmware_update package using SSH and typing the following commands:
 	```
+	add the following lines to the /etc/apt/source.list files:
+	deb http://ppa.launchpad.net/aziotsdklinux/azureiot-preview/ubuntu vivid main
+	deb-src http://ppa.launchpad.net/aziotsdklinux/azureiot-preview/ubuntu vivid main
+	deb http://ppa.launchpad.net/aziotsdklinux/azureiot-firmware-update-sample/ubuntu vivid main 
+	deb-src http://ppa.launchpad.net/aziotsdklinux/azureiot-firmware-update-sample/ubuntu vivid main
+	```
+
+	add the keys to the device:
+	```
+	sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys FDA6A393E4C2257F
+	```
+
+	```
+	sudo apt-get update
 	sudo apt-get install -y iothub_client_sample_firmware_update
 	```
 
