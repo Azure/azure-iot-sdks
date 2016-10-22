@@ -38,7 +38,8 @@ The package is located at [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet
 
 
 ### 2.) Microsoft.Azure.Devices.Client.PCL
-For bulding iOS and Android application in C#, use NuGet Package Manager to install latest version of **Microsoft.Azure.Devices.Client.PCL** Device SDK for Azure IoT Devices NuGet package to your project.
+[PCL] [PCL] stands for Portable Class Library. This version of .NET library helps you to build cross-platform apps.
+For example,for bulding iOS and Android application in C# in VS 2015, use NuGet Package Manager to install latest version of **Microsoft.Azure.Devices.Client.PCL** Device SDK for Azure IoT Devices NuGet package to your project.
 
 - The package is located at [Azure IoT Device Client PCL SDK NuGet Package] [lnk-NuGet-package_pcl]
 
@@ -166,4 +167,5 @@ Now you are ready to run the CppUWPSample.
 [lnk-azure-iot]:https://github.com/Azure/azure-iot-sdks
 [NuGet-Package-Manager]:https://visualstudiogallery.msdn.microsoft.com/5d345edc-2e2d-4a9c-b73b-d53956dc458d
 [NuGet]:https://www.nuget.org/
+[PCL]:https://msdn.microsoft.com/en-us/library/gg597391(v=vs.110).aspx
 
