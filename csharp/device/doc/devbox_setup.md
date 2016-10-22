@@ -84,8 +84,7 @@ Go the corresponding bin project. For example, for Debug build you will go to bi
 4.) Validation.dll
 
 There are the files you need to copy in the bin\x64\Debug\AppX folder of your AppX package.
-To add the reference, you reference WinRT assembly  
-\bin\x64\Debug\Microsoft.Azure.Devices.Client.winmd
+To add the reference, you reference WinRT assembly \bin\x64\Debug\\**Microsoft.Azure.Devices.Client.winmd**
 
 For JavaScript call would something like this.
 
