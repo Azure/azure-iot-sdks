@@ -394,6 +394,34 @@ void IoTHubDeviceTwin_Destroy(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceCl
     }
 }
 
+static int malloc_and_copy_uchar(char** strDestination, BUFFER_HANDLE strSource)
+{
+    int result;
+    if ((strDestination == NULL) || (strSource == NULL))
+    {
+        /* If strDestination or strSource is a NULL pointer[...] function return EINVAL */
+        LogError("invalid parameter source or destination");
+        result = __LINE__;
+    }
+    else
+    {
+        size_t buffer_size = BUFFER_length(strSource);
+        char *temp = malloc(buffer_size + 1);
+        if (temp == NULL)
+        {
+            LogError("failed to malloc");
+            result = __LINE__;
+        }
+        else
+        {
+            *strDestination = memcpy(temp, BUFFER_u_char(strSource), buffer_size);
+            temp[buffer_size] = '\0';
+            result = 0;
+        }
+    }
+    return result;
+}
+
 char* IoTHubDeviceTwin_GetTwin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle, const char* deviceId)
 {
     char* result;
@@ -429,8 +457,9 @@ char* IoTHubDeviceTwin_GetTwin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceC
         else
         {
             /*Codes_SRS_IOTHUBDEVICETWIN_12_030: [ Otherwise IoTHubDeviceTwin_GetTwin shall save the received `deviceTwin` to the out parameter and return with it ]*/
-            if (mallocAndStrcpy_s(&result, (const char*)BUFFER_u_char(responseBuffer)) != 0)
+            if (malloc_and_copy_uchar(&result, responseBuffer) != 0)
             {
+                LogError("failed to copy response");
                 result = NULL;
             }
             BUFFER_delete(responseBuffer);
@@ -488,8 +517,9 @@ char* IoTHubDeviceTwin_UpdateTwin(IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE servi
         else
         {
             /*CodesSRS_IOTHUBDEVICETWIN_12_047: [ Otherwise IoTHubDeviceTwin_UpdateTwin shall save the received updated device twin to the out parameter and return with it ]*/
-            if (mallocAndStrcpy_s(&result, (const char*)BUFFER_u_char(responseBuffer)) != 0)
+            if (malloc_and_copy_uchar(&result, responseBuffer) != 0)
             {
+                LogError("failed to copy response");
                 result = NULL;
             }
             BUFFER_delete(responseBuffer);

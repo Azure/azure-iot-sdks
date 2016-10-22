@@ -1,6 +1,6 @@
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-#1 Microsoft Azure IoT SDKs
+# Microsoft Azure IoT SDKs
 
 This repository contains both IoT device SDKs and IoT service SDKs. Device SDKs enable you connect client devices to Azure IoT Hub. Service SDKs enable you to manage your IoT Hub service instance.
 
@@ -78,10 +78,14 @@ And if you are looking for end to end samples that show how to do simple analyti
    - [Simple device sample](node/device/samples/simple_sample_device.js): Shows how to connect to IoT Hub and send and receive messages using Node.js on a device.
    - [Send batch](node/device/samples/send_batch_http.js): Shows how to connect to IoT Hub and send a batch of messages using Node.js on a device.
    - [Azure IoT Suite Remote Monitoring device sample](node/device/samples/remote_monitoring.js): Shows how to connect a device runnig Node.js to an Azure IoT Suite remote Monitoring preconfigured solution.
+   - [Device management patterns: Reboot (Device Side)](node/device/samples/dmpatterns_reboot_device.js): Shows how a device handles a C2D method to reboot and provides progress updates through twin reported properties. See [device management patterns](dmpatterns.md) for instructions on running the device management patterns samples.
+   - [Device management patterns: Firmware Update (Device Side)](node/device/samples/dmpatterns_reboot_device.js): Shows how a device handles a C2D method to initiate a firmware update and provides progress updates through twin reported properties. See [device management patterns](dmpatterns.md) for instructions on running the device management patterns samples.
 - Node service SDK:
    - [Registry manager simple sample](node/service/samples/registry_sample.js): Shows how to manage the device ID registry of IoT Hub from a Node.js application.
    - [Bulk Registry sample](node/service/samples/registry_sample.js): Shows how to create a set of device IDs in the device ID registry of IoT Hub in bulk from a Node.js application.
    - [Simple Cloud to Device messaging sample](node/service/samples/send_c2d_message.js) : Shows how to send messages to a device from a Node.js application through IoT Hub.
+   - [Device management patterns: Reboot (Service Side)](node/device/samples/dmpatterns_reboot_service.js): Shows how to initiate a C2D method to reboot a device and view progress through the twin reported properties. See [device management patterns](dmpatterns.md) for instructions on running the device management patterns samples.
+   - [Device management patterns: Firmware Update (Service Side)](node/device/samples/dmpatterns_reboot_service.js): Shows how to initiate a C2D method to reboot a device and view progress through the twin reported properties. See [device management patterns](dmpatterns.md) for instructions on running the device management patterns samples.
 - Python device SDK:   
    - [Simple Sample](python/device/samples/iothub_client_sample.py): shows how to connect to IoT Hub and send and receive messages using the AMQP, MQTT or HTTP protocol.
    - [Class Sample using AMQP](python/device/samples/iothub_client_sample_class.py): shows how to connect to IoT Hub with a HubManager class to send and receive messages using the AMQP protocol.
