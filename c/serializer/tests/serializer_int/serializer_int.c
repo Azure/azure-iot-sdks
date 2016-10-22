@@ -572,6 +572,58 @@ DECLARE_MODEL(outerModel16,
 
 END_NAMESPACE(basic16)
 
+BEGIN_NAMESPACE(basic17)
+
+/*this declares a struct whose type shall used, reused and abused in the following declarations*/
+DECLARE_STRUCT(totallyNotUnique,
+    double, totallyNotUnique
+)
+DECLARE_MODEL(totallyNotUnique_model1,
+    WITH_DATA(totallyNotUnique, tnu)
+)
+
+DECLARE_MODEL(totallyNotUnique_model3,
+    WITH_ACTION(A, totallyNotUnique, tnu)
+)
+
+DECLARE_MODEL(totallyNotUnique_model4,
+    WITH_REPORTED_PROPERTY(totallyNotUnique, tnu)
+)
+    
+DECLARE_MODEL(totallyNotUnique_model6,
+    WITH_DESIRED_PROPERTY(totallyNotUnique, tnu)
+)
+
+DECLARE_MODEL(totallyNotUnique_model7,
+    WITH_DATA(totallyNotUnique, tnu)
+)
+
+DECLARE_MODEL(totallyNotUnique_model8,
+    WITH_ACTION(A2, totallyNotUnique, tnu)
+)
+
+DECLARE_MODEL(totallyNotUnique_model9,
+    WITH_REPORTED_PROPERTY(totallyNotUnique, tnu)
+    )
+
+DECLARE_MODEL(totallyNotUnique_model10,
+    WITH_DESIRED_PROPERTY(totallyNotUnique, tnu)
+)
+
+END_NAMESPACE(basic17)
+
+EXECUTE_COMMAND_RESULT A(totallyNotUnique_model3* m3, totallyNotUnique tnu)
+{
+    (void)m3, tnu;
+    return EXECUTE_COMMAND_SUCCESS;
+}
+
+EXECUTE_COMMAND_RESULT A2(totallyNotUnique_model8* m8, totallyNotUnique tnu)
+{
+    (void)m8, tnu;
+    return EXECUTE_COMMAND_SUCCESS;
+}
+
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/umock_c_prod.h"
     MOCKABLE_FUNCTION(, void, on_structure16, void*, v);

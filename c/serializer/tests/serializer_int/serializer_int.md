@@ -13,3 +13,5 @@ Cell contain the test name. All these are positive test cases (that is, no bad d
 | STRUCT_IN_ROOT_MODEL     | WITH_DATA_IN_STRUCT_IN_ROOT_MODEL     | WITH_REPORTED_PROPERTY_IN_STRUCT_IN_ROOT_MODEL     | WITH_DESIRED_PROPERTY_IN_STRUCT_IN_ROOT_MODEL     | na(structs cannot have actions) |
 | MODEL_IN_MODEL           | WITH_DATA_IN_MODEL_IN_MODEL           | WITH_REPORTED_PROPERTY_IN_MODEL_IN_MODEL           | WITH_DESIRED_PROPERTY_IN_MODEL_IN_MODEL           | WITH_ACTION_IN_MODEL_IN_MODEL   |
 | STRUCT_IN_MODEL_IN_MODEL | WITH_DATA_IN_STRUCT_IN_MODEL_IN_MODEL | WITH_REPORTED_PROPERTY_IN_STRUCT_IN_MODEL_IN_MODEL | WITH_DESIRED_PROPERTY_IN_STRUCT_IN_MODEL_IN_MODEL | na(structs cannot have actions) |
+
+Other tests seek to prove that properties with the same name found in different models can compile (no other checking).

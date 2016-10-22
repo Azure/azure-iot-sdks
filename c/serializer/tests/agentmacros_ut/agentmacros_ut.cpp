@@ -711,7 +711,7 @@ BEGIN_TEST_SUITE(AgentMacros_ut)
             .SetReturn((AGENT_DATA_TYPES_RESULT)7777);
 
         // act
-        int result = Create_AGENT_DATA_TYPE_From_Ptr_simpleProperty((void*)&value, &data);
+        int result = Create_AGENT_DATA_TYPE_From_Ptr_modelWithEachElementsimpleProperty((void*)&value, &data);
 
         // assert
         ASSERT_ARE_EQUAL(int, 7777, result);
