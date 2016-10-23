@@ -53,7 +53,7 @@ Microsoft.Azure.Devices.Client.winmd is [WinRT] [WinRT] version which will get i
 ####  Building C# and Visual Basic UWP apps
 For building UWP, follow the same steps as you would follow if building classic .NET desktop application.
 
-Visual Basic .NET call would look something like this
+For example, for building in **Visual Basic* calls using the SDK client library would look something like this
 
 ```
 Dim deviceClient As Microsoft.Azure.Devices.Client.DeviceClient = Microsoft.Azure.Devices.Client.DeviceClient.CreateFromConnectionString("{My device connection string}", Microsoft.Azure.Devices.Client.TransportType.Amqp)
@@ -71,7 +71,7 @@ Use the below **workaround** to fix the error. Since the assemblies fail to inst
 
 ##### Workaround for building C++ and JavaScript UWP apps
 
-Create a **temporary** blank UWP project in C# to get copies of required assemblies. Right click on Project and click Manage NuGet Packages and install Microsoft.Azure.Devices.Client NuGet package
+Create a **temporary** blank UWP project in **C#** to get copies of the required dependent assemblies since you failed to installl the assemblies. Right click on Project and click Manage NuGet Packages and install [Microsoft.Azure.Devices.Client] [[lnk-NuGet-package] NuGet package.
 
 Build the project
 
