@@ -26,7 +26,7 @@ Install the Azure SDK for .NET 2.7 or later. Use the following links to download
 
 <a name="directly_using_sdk"/>
 ## Directly using Azure IoT Device Client SDK using NuGet packages
-Go to VS 2015 Solution Explorer and right click on the solution or project and click Manage NuGet Packages.There are 2 different **NuGet** packages to choose from
+Go to VS 2015 Solution Explorer and right click on the solution or project and click Manage NuGet Packages. There are **2** different **NuGet** packages to choose from
 
 ### 1.) Microsoft.Azure.Devices.Client
 For bulding classic desktop [.NET] [.NET] application, use NuGet Package Manager to install latest version of **Microsoft.Azure.Devices.Client** Device SDK for Azure IoT Devices NuGet package to your project.
@@ -36,17 +36,19 @@ For bulding classic desktop [.NET] [.NET] application, use NuGet Package Manager
 
 The package is located at [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet-package]
 
-
 ### 2.) Microsoft.Azure.Devices.Client.PCL
-[PCL] [PCL] stands for Portable Class Library. This version of .NET library helps you to build cross-platform apps.
-For example,for bulding iOS and Android application in C# in VS 2015, use NuGet Package Manager to install latest version of **Microsoft.Azure.Devices.Client.PCL** Device SDK for Azure IoT Devices NuGet package to your project.
+[PCL] [PCL] Portable Class Library version of .NET library helps you to build cross-platform apps.
+For example,for bulding iOS and Android application in C# in VS 2015 using [Xamarin] [Xamarin], use NuGet Package Manager to install latest version of **Microsoft.Azure.Devices.Client.PCL** Device SDK for Azure IoT Devices NuGet package to your project.
 
-- The package is located at [Azure IoT Device Client PCL SDK NuGet Package] [lnk-NuGet-package_pcl]
+The package is located at [Azure IoT Device Client PCL SDK NuGet Package] [lnk-NuGet-package_pcl]
 
+> Currently, **Microsoft.Azure.Devices.Client.PCL** only supports HTTPS protocol.
 
-### Building UWP Apps 
-Just like classis desktop app, install [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet-package].
-Microsoft.Azure.Devices.Client.winmd is [WinRT] [WinRT] version which will get installed via NuGet Package manager versus Microsoft.Azure.Devices.Client.dll version when you select Universal app in VS 2015.
+### Building [UWP][UWP] Apps 
+Just like classic desktop app, install [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet-package].
+Microsoft.Azure.Devices.Client.winmd is [WinRT] [WinRT] version which will get installed via NuGet Package manager versus Microsoft.Azure.Devices.Client.dll version when you select Universal app in VS 2015. This is the version you need to build UWP apps.
+
+> Currently, **Microsoft.Azure.Devices.Client.WinRT** doesn't support MQTT protocol.
 
 ####  Building C# and Visual Basic UWP apps
 For building UWP, follow the same steps as you would follow if building classic .NET desktop application.
@@ -176,4 +178,5 @@ Now you are ready to run the CppUWPSample.
 [UWP]:https://msdn.microsoft.com/en-us/windows/uwp/get-started/universal-application-platform-guide
 [.NET]:https://www.microsoft.com/net
 [WinRT]:https://msdn.microsoft.com/en-us/windows/uwp/winrt-components/index
+[Xamarin]:https://www.xamarin.com/
 
