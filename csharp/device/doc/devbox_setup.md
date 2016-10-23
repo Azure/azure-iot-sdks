@@ -53,7 +53,7 @@ Microsoft.Azure.Devices.Client.winmd is [WinRT] [WinRT] version which will get i
 ####  Building C# and Visual Basic UWP apps
 For building UWP, follow the same steps as you would follow if building classic .NET desktop application.
 
-For example, for building in **Visual Basic* calls using the SDK client library would look something like this
+For example, for building in **Visual Basic** calls using the SDK client library would look something like this
 
 ```
 Dim deviceClient As Microsoft.Azure.Devices.Client.DeviceClient = Microsoft.Azure.Devices.Client.DeviceClient.CreateFromConnectionString("{My device connection string}", Microsoft.Azure.Devices.Client.TransportType.Amqp)
@@ -65,17 +65,17 @@ where you would replace {My device connection string} with your device connectio
 
 
 #### Building C++ and JavaScript UWP apps
-For Visual C++ and JavaScript UWP, you may get "Error	Failed to add reference to 'Microsoft.Azure.Amqp.Uwp" error while installing [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet-package]
+For Visual C++ and JavaScript UWP, you may get "**Error	Failed** to add reference to 'Microsoft.Azure.Amqp.Uwp" error while installing [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet-package]
 
-Use the below **workaround** to fix the error. Since the assemblies fail to install, you will have to manually copy them for C++ or JavaScript UWP application.
+Use the below [workaround](#workaround_uwp) to fix the error. Since the assemblies fail to install, you will have to manually copy them for Visual C++ or JavaScript UWP application.
 
+<a name="workaround_uwp"/>
 ##### Workaround for building C++ and JavaScript UWP apps
+Create a **temporary** blank UWP project in **C#** to get copies of the required dependent assemblies since installation of the assemblies failed. Right click on Project in Solution Explorer in VS 2015 and click Manage NuGet Packages and install [Microsoft.Azure.Devices.Client] [lnk-NuGet-package] NuGet package.
 
-Create a **temporary** blank UWP project in **C#** to get copies of the required dependent assemblies since you failed to installl the assemblies. Right click on Project and click Manage NuGet Packages and install [Microsoft.Azure.Devices.Client] [[lnk-NuGet-package] NuGet package.
+**Build** the project
 
-Build the project
-
-Go the corresponding bin project. For example, for Debug build you will go to bin\x64\Debug and copy following **4** files
+Go the corresponding bin folder. For example, for Debug build for x64, you will go to bin\x64\Debug and copy following **4** files that would get installed.
 
 1.) Microsoft.Azure.Devices.Client.winmd
 
@@ -85,10 +85,10 @@ Go the corresponding bin project. For example, for Debug build you will go to bi
 
 4.) Validation.dll
 
-There are the files you need to copy in the bin\x64\Debug\AppX folder of your AppX package.
+There are the files you need to copy in the bin\x64\Debug\AppX folder of your **AppX** package of your project in C++ or JavaScript.
 To add the reference, you reference WinRT assembly \bin\x64\Debug\\**Microsoft.Azure.Devices.Client.winmd**
 
-For JavaScript call would something like this.
+For UWP app in JavaScript, call to device library would be something like this
 
 ```
 var azureClient = Microsoft.Azure.Devices.Client;
