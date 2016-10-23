@@ -70,12 +70,11 @@ For Visual C++ and JavaScript UWP, you may get "**Error	Failed** to add referenc
 Use the below [workaround](#workaround_uwp) for this error. Since the assemblies fail to install, you will have to **manually** copy them for Visual C++ or JavaScript UWP application.
 
 <a name="workaround_uwp"/>
-##### Workaround for building C++ and JavaScript UWP apps
+##### Workaround for building Visual C++ and JavaScript UWP apps
 
 Create a **temporary** blank UWP project in **C#** to get copies of the required dependent assemblies since installation of the assemblies failed. Right click on Project in Solution Explorer in VS 2015 and click Manage NuGet Packages and install [Microsoft.Azure.Devices.Client] [lnk-NuGet-package] NuGet package.
 
 **Build** the temporary C# UWP project
-
 Go the corresponding bin folder. For example, for Debug build for x64, you will go to bin\x64\Debug and copy and paste following **4** files that would get installed.
 
 1.) Microsoft.Azure.Devices.Client.winmd
@@ -90,7 +89,7 @@ There are the files you need to copy in the **corresponding** bin\x64\Debug\AppX
 
 To add the reference for your client SDK, you will reference WinRT assembly bin\x64\Debug\AppX\\**Microsoft.Azure.Devices.Client.winmd** which you just copied.
 
-For UWP app in JavaScript, calls to client device library would be something like this
+For building **JavaScript** UWP app, calls using the SDK client library would look something like this
 
 ```
 var azureClient = Microsoft.Azure.Devices.Client;
@@ -104,7 +103,7 @@ In this scenario, you will use PCL NuGet package  located at [Azure IoT Device C
 
 
 <a name="building_sdk"/>
-## Building the Azure IoT Device Client .NET/PCL SDK locally
+## Building the Azure IoT Device Client .NET SDK locally
 In some cases, you may want to build the .NET SDK libraries **locally** for development and testing purpose. For example, you may want to build the **latest** code available on the develop branch which follows the Continuous Integration (CI) approach and step through the client library code while debugging.
 
 To pull latest code on **develop** branch you can use following command
