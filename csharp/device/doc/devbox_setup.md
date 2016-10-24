@@ -38,7 +38,7 @@ The package is located at [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet
 
 ### 2.) Microsoft.Azure.Devices.Client.PCL
 [PCL] [PCL] Portable Class Library version of .NET library helps you to build cross-platform apps.
-For example,for bulding iOS and Android application in C# in VS 2015 using [Xamarin] [Xamarin], use NuGet Package Manager to install latest version of **Microsoft.Azure.Devices.Client.PCL** Device SDK for Azure IoT Devices NuGet package to your project.
+For example, for bulding iOS and Android application in C# in VS 2015 using [Xamarin] [Xamarin], use NuGet Package Manager to install latest version of **Microsoft.Azure.Devices.Client.PCL** Device SDK for Azure IoT Devices NuGet package to your project.
 
 The package is located at [Azure IoT Device Client PCL SDK NuGet Package] [lnk-NuGet-package_pcl]
 
@@ -46,7 +46,7 @@ The package is located at [Azure IoT Device Client PCL SDK NuGet Package] [lnk-N
 
 ### Building [UWP][UWP] Apps 
 Just like classic desktop app, install [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet-package].
-Microsoft.Azure.Devices.Client.winmd is [WinRT] [WinRT] version which will get installed via NuGet Package manager versus Microsoft.Azure.Devices.Client.dll version when you select Universal app in VS 2015. This is the version you need to build UWP apps.
+Microsoft.Azure.Devices.Client.winmd is [WinRT] [WinRT] version which will get installed via NuGet Package manager when you select Universal app in VS 2015. This is the version you need to build UWP apps.
 
 > Currently, **Microsoft.Azure.Devices.Client.WinRT** doesn't support MQTT protocol.
 
@@ -65,9 +65,9 @@ where you would replace {My device connection string} with your own valid device
 
 
 #### Building Visual C++ and JavaScript UWP apps
-For Visual C++ and JavaScript UWP, you may get "Error	Failed to add reference to 'Microsoft.Azure.Amqp.Uwp' **error** while installing [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet-package]
+For Visual C++ and JavaScript UWP, you may get "Error	Failed to add reference to 'Microsoft.Azure.Amqp.Uwp' **error** while installing [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet-package]. 
 
-Use the below [workaround](#workaround_uwp) for this error. Since the assemblies fail to install, you will have to **manually** copy them for Visual C++ and JavaScript UWP application.
+Use the below [workaround](#workaround_uwp) for this error. Since the required dependent assemblies fail to install, you will have to **manually** copy them for Visual C++ and JavaScript UWP application.
 
 <a name="workaround_uwp"/>
 ##### Workaround for building Visual C++ and JavaScript UWP apps
