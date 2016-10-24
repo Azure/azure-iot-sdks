@@ -99,12 +99,12 @@ deviceClient.sendEventAsync(eventMessage);
 
 
 ### Building iOS and Android apps using Xamarin
-In this scenario, you will use PCL NuGet package  located at [Azure IoT Device Client PCL SDK NuGet Package] [lnk-NuGet-package_pcl]
+For building iOS and Android app in C# , you will use PCL NuGet package  located at [Azure IoT Device Client PCL SDK NuGet Package] [lnk-NuGet-package_pcl]
 
 
 <a name="building_sdk"/>
 ## Building the Azure IoT Device Client .NET SDK locally
-In some cases, you may want to build the .NET SDK libraries **locally** for development and testing purpose. For example, you may want to build the **latest** code available on the develop branch which follows the Continuous Integration (CI) approach and step through the client library code while debugging.
+In some cases, you may want to build the .NET SDK libraries **locally** for development and testing purpose. For example, you may want to build the **latest** code available on the **develop** branch which follows the Continuous Integration (CI) approach and may want step through the client library code while debugging.
 
 To pull latest code on **develop** branch you can use following command
 
@@ -124,6 +124,7 @@ Use 'build --options' to list various build options.
 For example to build for x64 as debug build, you can use
 
 `build --platform x64 --config Debug`
+
 You will be prompted to download and run nuget.exe for downloading packages that Azure IoT SDK has dependency on.
 Once build completes, it will create
 
@@ -137,12 +138,20 @@ Once build completes, it will create
 2. Select the configuration that you want and press Build->Build Solution command.
 Just like command line option it will create Device Client SDK along with the samples.
 
+### Building NuGet Package locally
+In case you want to build NuGet package locally, you can use following steps
+a.) Build Release_Delay_Sign build using VS 2015 IDE
+b.) Go to csharp\device\nuget folder in Windows PowerShell command prompt and run ./make_nuget_package.ps1 command. This will result isn Microsoft.Azure.Devices.Client NuGet Package in \csharp\device\NuGet folder. You can the add this package locally in your build system by going thoough NuGet Package Manager.
+
+
 <a name="samplecode"/>
 ## Sample applications
 
 This repository contains various .NET sample applications that illustrate how to use the Microsoft Azure IoT device SDK for .NET. For more information, see the [readme][readme].
 
-## Building for iOS and Android using C#  
+You can build the **samples** in VS 2015 by opening csharp\device\\**iothub_csharp_deviceclient.sln** file which has various projects for samples. To build particular sample right click on that sample in Solution Explorer and set that project as StartUp Project and build the project.
+
+### Building for iOS and Android using C#  
 For building for iOS and Android using C#, you need to install [Xamarin][lnk-visualstudio-xamarin] for VS 2015
 
 For building iOS sample, open **csharp\device\samples\DeviceClientSampleiOS** project file in VS 2015. You will be prompted to install Xamarin to build native iOS apps in C# if tool is not installed. Install the tool. You can test the sample on iPhone simulator running on your Mac.
@@ -151,16 +160,8 @@ For building Android sample open **csharp\device\samples\DeviceClientSampleAndro
 
 To check for any latest Xamarin update for Visual Studio check Tools->Options->Xamarin->Other.
 
-## Running CppUWPSample (Universal Windows) sample application
+### Running CppUWPSample (Universal Windows) sample application
 
-Visual Studio is having an issue with getting all the dependencies (dll) of the Microsoft.Azure.Devices.Client.WinRT which is referenced in the project to the proper location.  This leads to an exception thrown about not loading file or assembly during run-time.  You will have to manually copy the dlls in the appropriate location in order to run the sample application successfully.  Follow the below steps if needed:
-* Build the UWPSample (Universal Windows) project
-* Note the location of the bin folder, i.e. ...\azure-iot-sdks\csharp\device\samples\UWPSample\bin\x86\Debug\
-* Build the CppUWPSample (Universal Windows) project
-* Note the location of the Appx folder, i.e. ...\azure-iot-sdks\csharp\device\Debug\CppUWPSample\Appx
-* Copy all dll files from the UWPSample bin folder to the CppUWPSample Appx folder.  When prompt about duplicated file names, choose "Skip these files"
-
-Now you are ready to run the CppUWPSample.
 
 
 
