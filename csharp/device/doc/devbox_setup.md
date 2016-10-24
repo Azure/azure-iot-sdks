@@ -65,7 +65,7 @@ where you would replace {My device connection string} with your own valid device
 
 
 #### Building Visual C++ and JavaScript UWP apps
-For Visual C++ and JavaScript UWP, you may get "**Error	Failed** to add reference to 'Microsoft.Azure.Amqp.Uwp' error while installing [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet-package]
+For Visual C++ and JavaScript UWP, you may get "Error	Failed to add reference to 'Microsoft.Azure.Amqp.Uwp' **error** while installing [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet-package]
 
 Use the below [workaround](#workaround_uwp) for this error. Since the assemblies fail to install, you will have to **manually** copy them for Visual C++ and JavaScript UWP application.
 
@@ -82,7 +82,7 @@ Go the corresponding bin folder. For example, for Debug build for x64, you will 
 3. PCLCrypto.dll
 4. Validation.dll
 
-There are the files you need to copy in the **corresponding** bin\x64\Debug\AppX folder of your **AppX** package of your project in Visual C++ or JavaScript on which NuGet package installed failed.
+There are the files you need to copy in the **corresponding** bin\x64\Debug\AppX folder of your **AppX** package of your project in Visual C++ or JavaScript in which NuGet package installation failed.
 
 To add the reference for your client SDK, you will reference WinRT assembly bin\x64\Debug\AppX\\**Microsoft.Azure.Devices.Client.winmd** which you just copied.
 
@@ -101,7 +101,7 @@ For building iOS and Android app in C# , you will use PCL NuGet package  located
 
 <a name="building_sdk"/>
 ## Building the Azure IoT Device Client .NET SDK locally
-In some cases, you may want to build the .NET SDK libraries **locally** for development and testing purpose. For example, you may want to build the **latest** code available on the **develop** branch which follows the Continuous Integration (CI) approach and you may want step through the client library code while debugging.
+In some cases, you may want to build the .NET SDK libraries **locally** for development and testing purpose. For example, you may want to build the **latest** code available on the **develop** branch which follows the Continuous Integration (CI) approach and you may also want step through the client library code while debugging.
 
 To pull latest code on **develop** branch you can use following command
 
@@ -133,10 +133,10 @@ Once build completes, it will create
 ### Option 2: Build using VS 2015 IDE
 1. Open iothub_csharp_deviceclient.sln file in VS 2015 IDE.
 2. Select the configuration that you want and press Build->Build Solution command.
-Just like command line option it will create Device Client SDK along with the samples.
+Just like command line option it will build Device Client SDK along with the samples.
 
 ### Building NuGet Package locally
-In case you want to build NuGet package locally, you can use following steps
+In case, you want to build NuGet package locally, you can use following steps
 
 a.) Build Release_Delay_Sign build using VS 2015 IDE
 
@@ -148,7 +148,7 @@ b.) Go to csharp\device\nuget folder in Windows PowerShell command prompt and ru
 
 This repository contains various .NET sample applications that illustrate how to use the Microsoft Azure IoT device SDK for .NET. For more information, see the [readme][readme].
 
-You can build the **samples** in VS 2015 by opening csharp\device\\**iothub_csharp_deviceclient.sln** file which has various projects for samples. To build particular sample right click on that sample in Solution Explorer and set that project as StartUp Project and build the project. Before running the sample, set the connecting string to a valid device connection and then rebuild the sample before running it.
+You can build the **samples** in VS 2015 by opening csharp\device\\**iothub_csharp_deviceclient.sln** file which has various projects for samples. To build particular sample, right click on that sample in Solution Explorer and set that project as StartUp Project and build the project. Before running the sample, set the connecting string to a valid device connection and then rebuild the sample before running it.
 
 ### Building for iOS and Android using C#  
 For building for iOS and Android using C#, you need to install [Xamarin][lnk-visualstudio-xamarin] for VS 2015
