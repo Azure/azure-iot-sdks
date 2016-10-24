@@ -140,7 +140,7 @@ In case you want to build NuGet package locally, you can use following steps
 
 a.) Build Release_Delay_Sign build using VS 2015 IDE
 
-b.) Go to csharp\device\nuget folder in Windows PowerShell command prompt and run ./make_nuget_package.ps1 command. This will result isn Microsoft.Azure.Devices.Client NuGet Package in \csharp\device\NuGet folder. You can the add this package locally in your build system by going thoough NuGet Package Manager.
+b.) Go to csharp\device\nuget folder in Windows PowerShell command prompt and run ./make_nuget_package.ps1 command. This will result isn Microsoft.Azure.Devices.Client NuGet Package in \csharp\device\NuGet folder.You can  add this package locally in your build system by going though NuGet Package Manager.
 
 
 <a name="samplecode"/>
