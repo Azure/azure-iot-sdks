@@ -5,8 +5,8 @@ This document describes how to prepare your development environment to build and
 1.  [Setting up a Windows development environment](#windows)
 2.  [Azure SDK for .NET](#azuresdk)
 3.  [Directly using IoT Device Client SDK using NuGet packages](#directly_using_sdk)
-4.  [Locally building IoT Device Client SDK](#building_sdk)
-5.  [Application samples](#samplecode)
+4.  [Building the Azure IoT Device Client .NET SDK locally](#building_sdk)
+5.  [Sample Applications](#samplecode)
 
 <a name="windows"/>
 ## Setting up a Windows development environment
