@@ -110,7 +110,7 @@ namespace Microsoft.Azure.Devices.Client.Test
                     }
                 }
             }
-            catch (Exception e)// when (!e.IsFatal())
+            catch (Exception)// when (!e.IsFatal())
             {
                 this.Abort();
             }
@@ -249,7 +249,7 @@ namespace Microsoft.Azure.Devices.Client.Test
             {
                 await this.CloseAsync();
             }
-            catch (Exception ex) //when (!ex.IsFatal())
+            catch (Exception) //when (!ex.IsFatal())
             {
                 this.Abort();
             }

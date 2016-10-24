@@ -91,13 +91,12 @@ namespace Microsoft.Azure.Devices.Client
         const string DeviceId = "DeviceId";
         const string DeviceIdParameterPattern = @"(^\s*?|.*;\s*?)" + DeviceId + @"\s*?=.*";
 #if !PCL
+        IotHubConnectionString iotHubConnectionString = null;
         const RegexOptions RegexOptions = System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.IgnoreCase;
 #else
         const RegexOptions RegexOptions = System.Text.RegularExpressions.RegexOptions.IgnoreCase;
 #endif
         static readonly Regex DeviceIdParameterRegex = new Regex(DeviceIdParameterPattern, RegexOptions);
-
-        IotHubConnectionString iotHubConnectionString = null;
 
         internal IDelegatingHandler InnerHandler { get; set; }
 
