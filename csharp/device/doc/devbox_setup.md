@@ -169,7 +169,7 @@ For example for building debug version for x64 copy these 3 files from device\sa
 
 After this redeploy and re-run the application.
 
-### Building and running JSSample (Universal Windows) JavaScript application
+### Building and running JSSample (Universal Windows) JavaScript sample application
 Open **JSSample.sln** file from samples\JSSample in VS 2015 IDE. Replace the connecting string with a valid connection string in default.js file. Deploy and run the application. The application will throw System.IO.FileNotFoundException : "Could not load file or assembly Microsoft.Azure.Amqp.Uwp".
 
 > To workaround this error copy assemblies that application has dependencies on. Copy **Microsoft.Azure.Amqp.Uwp.dll**, PCLCrypto.dll and Validation.dll into **JSSample AppX** folder from **UWPSample** folder.
