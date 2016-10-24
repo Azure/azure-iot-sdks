@@ -77,13 +77,10 @@ Create a **temporary** blank UWP project in **C#** to get copies of the required
 **Build** the temporary C# UWP project
 Go the corresponding bin folder. For example, for Debug build for x64, you will go to bin\x64\Debug and copy and paste following **4** files that would get installed.
 
-1.) **Microsoft.Azure.Devices.Client.winmd**
-
-2.) Microsoft.Azure.Amqp.Uwp.dll
-
-3.) PCLCrypto.dll
-
-4.) Validation.dll
+1. **Microsoft.Azure.Devices.Client.winmd**
+2. Microsoft.Azure.Amqp.Uwp.dll
+3. PCLCrypto.dll
+4. Validation.dll
 
 There are the files you need to copy in the **corresponding** bin\x64\Debug\AppX folder of your **AppX** package of your project in Visual C++ or JavaScript on which NuGet package installed failed.
 
