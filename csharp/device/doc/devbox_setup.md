@@ -147,7 +147,7 @@ b.) Go to csharp\device\nuget folder in Windows PowerShell command prompt and ru
 
 
 <a name="samplecode"/>
-## Sample applications
+## Sample Applications
 
 This repository contains various .NET sample applications that illustrate how to use the Microsoft Azure IoT device SDK for .NET. For more information, see the [readme][readme].
 
@@ -162,14 +162,24 @@ For building Android sample open **csharp\device\samples\DeviceClientSampleAndro
 
 To check for any latest Xamarin update for Visual Studio check Tools->Options->Xamarin->Other.
 
-### Running CppUWPSample (Universal Windows) sample application
+### Building and running CppUWPSample (Universal Windows) C++ sample application
+Select CppUWPSample as as StartUp Project. Replace the connecting string with a valid connection string in MainPage.xaml.cpp file
+On running the applciation, you will see "Could not load file or assembly 'Microsoft.Azure.Amqp.Uwp' error. To workaround this error copy 3 assemblies that application has dependencies on. Copy **Microsoft.Azure.Amqp.Uwp.dll**, PCLCrypto.dll and Validation.dll into CppUWPSample AppX folder from UWPSample folder.
 
-You may see "Could not load file or assembly 'Microsoft.Azure.Amqp.Uwp' error. To workaround this error copy dependent assemblies  Microsoft.Azure.Amqp.Uwp.dll, PCLCrypto.dll and  Validation.dll into CppUWPSample AppX folder from UWPSample folder. For example for building debug version for x64 copy these 3 files from device\samples\UWPSample\bin\x64\Debug into device\x64\Debug\CppUWPSample\AppX folder.
+For example for building debug version for x64 copy these 3 files from device\samples\UWPSample\bin\x64\Debug into device\x64\Debug\CppUWPSample\AppX folder.
+
+After this redeploy and run the application.
+
+### Building and running JSSample (Universal Windows) JavaScript application
+Open JSSample.sln file from samples\JSSample in VS 2015 IDE. Replace the connecting string with a valid connection string in default.js file. Deploy and run the application. The application will throw System.IO.FileNotFoundException:Could not load file or assembly Microsoft.Azure.Amqp.Uwp.
+
+To workaround this error copy assemblies that application has dependencies on. Copy **Microsoft.Azure.Amqp.Uwp.dll**, PCLCrypto.dll and Validation.dll into CppUWPSample AppX folder from UWPSample folder.
+
+For example for building debug version for x64 copy these 3 files from device\samples\UWPSample\bin\x64\Debug into JSSample\bin\x64\Debug\AppX folder.
+
+After this redeploy and run the application.
 
 
-
-
-### Running Java
 
 [visual-studio]: https://www.visualstudio.com/
 [readme]: ../readme.md
