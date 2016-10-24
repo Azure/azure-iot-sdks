@@ -40,7 +40,9 @@ DEFINE_ENUM(IOTHUB_DEVICEMETHOD_REQUEST_MODE, IOTHUB_DEVICE_METHOD_REQUEST_MODE_
 
 static const char* URL_API_VERSION = "?api-version=2016-09-30-preview";
 static const char* RELATIVE_PATH_FMT_DEVICEMETHOD = "/twins/%s/methods%s";
-static const char* RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD = "{\"methodName\":\"%s\",\"timeout\":%d,\"payload\":\"%s\"}";
+static const char* RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD_JSON = "{\"methodName\":\"%s\",\"timeout\":%d,\"payload\":%s}";
+static const char* RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD_STRING = "{\"methodName\":\"%s\",\"timeout\":%d,\"payload\":\"%s\"}";
+static const char* RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD_NULL = "{\"methodName\":\"%s\",\"timeout\":%d,\"payload\":null}";
 
 /** @brief Structure to store IoTHub authentication information
 */
@@ -103,6 +105,17 @@ static IOTHUB_DEVICE_METHOD_RESULT parseResponseJson(BUFFER_HANDLE responseJson,
         STRING_delete(jsonStringHandle);
         result = IOTHUB_DEVICE_METHOD_ERROR;
     }
+    else if (json_value_get_type(payloadJsonValue) == JSONNull)
+    {
+        *responseStatus = (int)json_value_get_number(statusJsonValue);
+        *responsePayload = NULL;
+        *responsePayloadSize = 0;
+
+        STRING_delete(jsonStringHandle);
+        json_value_free(root_value);
+
+        result = IOTHUB_DEVICE_METHOD_OK;
+    }
     else if ((payload = json_value_get_string(payloadJsonValue)) == NULL)
     {
         LogError("json_value_get_string failed for payload");
@@ -144,8 +157,28 @@ static BUFFER_HANDLE createMethodPayloadJson(const char* methodName, unsigned in
     STRING_HANDLE stringHandle;
     const char* stringHandle_c_str;
     BUFFER_HANDLE result;
+    const char *formatString;
 
-    if ((stringHandle = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD, methodName, timeout, payload)) == NULL)
+    if (payload == NULL)
+    {
+        formatString = RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD_NULL;
+    }
+    else
+    {
+        JSON_Value *parsedValue = json_parse_string(payload);
+        if (parsedValue != NULL)
+        {
+            formatString = RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD_JSON;
+            json_value_free(parsedValue);
+        }
+        else
+        {
+            formatString = RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD_STRING;
+        }
+
+    }
+
+    if ((stringHandle = STRING_construct_sprintf(formatString, methodName, timeout, payload)) == NULL)
     {
         LogError("STRING_construct_sprintf failed");
         result = NULL;

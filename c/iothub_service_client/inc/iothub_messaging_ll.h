@@ -6,18 +6,19 @@
 #ifndef IOTHUB_MESSAGING_LL_H
 #define IOTHUB_MESSAGING_LL_H
 
-#ifdef __cplusplus
-extern "C"
-{
-#else
-#endif
-
 #include "azure_c_shared_utility/umock_c_prod.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/singlylinkedlist.h"
 #include "azure_c_shared_utility/map.h"
 #include "iothub_message.h"
 #include "iothub_service_client_auth.h"
+
+#ifdef __cplusplus
+extern "C"
+{
+#else
+#endif
+
 
 #define IOTHUB_FEEDBACK_STATUS_CODE_VALUES               \
     IOTHUB_FEEDBACK_STATUS_CODE_SUCCESS,                 \

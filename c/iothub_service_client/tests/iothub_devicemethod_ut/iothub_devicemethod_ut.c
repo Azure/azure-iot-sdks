@@ -61,6 +61,7 @@ MOCKABLE_FUNCTION(, JSON_Value*, json_object_get_value, const JSON_Object *, obj
 MOCKABLE_FUNCTION(, const char*, json_object_get_string, const JSON_Object*, object, const char *, name);
 MOCKABLE_FUNCTION(, const char*, json_value_get_string, const JSON_Value*, value);
 MOCKABLE_FUNCTION(, double, json_value_get_number, const JSON_Value*, value);
+MOCKABLE_FUNCTION(, JSON_Value_Type, json_value_get_type, const JSON_Value*, value);
 
 MOCKABLE_FUNCTION(, JSON_Status, json_object_clear, JSON_Object*, object);
 MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value *, value);
@@ -257,6 +258,8 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_UMOCK_ALIAS_TYPE(HTTP_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(HTTPAPIEX_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(HTTPAPIEX_SAS_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(JSON_Value_Type, int);
+
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -713,6 +716,8 @@ TEST_FUNCTION(IoTHubDeviceMethod_Invoke_return_NULL_if_input_parameter_responseP
 TEST_FUNCTION(IoTHubDeviceMethod_Invoke_happy_path)
 {
     // arrange
+    EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
+        .SetReturn(NULL);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreAllArguments();
@@ -786,6 +791,8 @@ TEST_FUNCTION(IoTHubDeviceMethod_Invoke_happy_path)
     EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
+    EXPECTED_CALL(json_value_get_type(IGNORED_PTR_ARG))
+        .SetReturn(JSONString);
     EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG))
         .IgnoreAllArguments();
     STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -833,6 +840,8 @@ TEST_FUNCTION(IoTHubDeviceMethod_Invoke_happy_path)
 TEST_FUNCTION(IoTHubDeviceMethod_Invoke_happy_path_http_return_not_equal_200)
 {
     // arrange
+    EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
+        .SetReturn(NULL);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreAllArguments();
