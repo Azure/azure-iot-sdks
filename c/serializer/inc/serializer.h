@@ -550,7 +550,7 @@ Actions are discarded, since no marshalling will be done for those when sending 
             FOR_EACH_2(START_BUILD_LOCAL_PARAMETER, __VA_ARGS__) \
             INSTRUCTION_THAT_CAN_SUSTAIN_A_COMMA_STEAL; \
             result = actionName((modelName*)device FOR_EACH_2(PUSH_LOCAL_PARAMETER, __VA_ARGS__)); \
-            FOR_EACH_2(END_BUILD_LOCAL_PARAMETER, __VA_ARGS__) \
+            FOR_EACH_2_REVERSE(END_BUILD_LOCAL_PARAMETER, __VA_ARGS__) \
         } \
         return result; \
     }
