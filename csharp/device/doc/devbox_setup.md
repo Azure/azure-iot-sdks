@@ -77,7 +77,7 @@ Create a **temporary** blank UWP project in **C#** to get copies of the required
 **Build** the temporary C# UWP project
 Go the corresponding bin folder. For example, for Debug build for x64, you will go to bin\x64\Debug and copy and paste following **4** files that would get installed.
 
-1.) Microsoft.Azure.Devices.Client.winmd
+1.) **Microsoft.Azure.Devices.Client.winmd**
 
 2.) Microsoft.Azure.Amqp.Uwp.dll
 
@@ -151,7 +151,7 @@ b.) Go to csharp\device\nuget folder in Windows PowerShell command prompt and ru
 
 This repository contains various .NET sample applications that illustrate how to use the Microsoft Azure IoT device SDK for .NET. For more information, see the [readme][readme].
 
-You can build the **samples** in VS 2015 by opening csharp\device\\**iothub_csharp_deviceclient.sln** file which has various projects for samples. To build particular sample right click on that sample in Solution Explorer and set that project as StartUp Project and build the project.
+You can build the **samples** in VS 2015 by opening csharp\device\\**iothub_csharp_deviceclient.sln** file which has various projects for samples. To build particular sample right click on that sample in Solution Explorer and set that project as StartUp Project and build the project. Before running the sample, set the connecting string to a valid device connection and then rebuild the sample before running it.
 
 ### Building for iOS and Android using C#  
 For building for iOS and Android using C#, you need to install [Xamarin][lnk-visualstudio-xamarin] for VS 2015
@@ -164,8 +164,12 @@ To check for any latest Xamarin update for Visual Studio check Tools->Options->X
 
 ### Running CppUWPSample (Universal Windows) sample application
 
+You may see "Could not load file or assembly 'Microsoft.Azure.Amqp.Uwp' error. To workaround this error copy dependent assemblies  Microsoft.Azure.Amqp.Uwp.dll, PCLCrypto.dll and  Validation.dll into CppUWPSample AppX folder from UWPSample folder. For example for building debug version for x64 copy these 3 files from device\samples\UWPSample\bin\x64\Debug into device\x64\Debug\CppUWPSample\AppX folder.
 
 
+
+
+### Running Java
 
 [visual-studio]: https://www.visualstudio.com/
 [readme]: ../readme.md
