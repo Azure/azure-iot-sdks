@@ -22,7 +22,7 @@ set client-build-root=%current-path%\..\..
 for %%i in ("%client-build-root%") do set client-build-root=%%~fi
 echo Client Build root is %client-build-root%
 
-set --nosign=%1
+set no-sign=%1
 
 rem -- Clear directories before starting process
 del /F /Q %client-build-root%\build\tosign
