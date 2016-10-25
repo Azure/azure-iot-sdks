@@ -9,6 +9,6 @@
 extern void dt_e2e_init(void);
 extern void dt_e2e_deinit(void);
 extern void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
-extern void dt_e2e_get_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+extern void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 
 #endif /* IOTHUBCLIENT_COMMON_DT_E2E_H */
