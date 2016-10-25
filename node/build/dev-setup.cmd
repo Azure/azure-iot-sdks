@@ -4,11 +4,6 @@
 @setlocal
 @echo off
 
-if "%OPENSSL_CONF%"=="" (
-  echo The OPENSSL_CONF environment variable must be defined.
-  goto :eof
-)
-
 set node-root=%~dp0..
 REM // resolve to fully qualified path
 for %%i in ("%node-root%") do set node-root=%%~fi
@@ -30,12 +25,6 @@ echo -- Creating links for %cd% --
 call npm link azure-iot-common
 call npm link
 
-cd %node-root%\common\transport\mqtt
-echo.
-echo -- Creating links for %cd% --
-call npm link azure-iot-common
-call npm link
-
 cd %node-root%\device\core
 echo.
 echo -- Creating links for %cd% --
@@ -51,15 +40,6 @@ call npm link azure-iot-common
 call npm link azure-iot-device
 call npm link
 
-cd %node-root%\device\transport\amqp-ws
-echo.
-echo -- Creating links for %cd% --
-call npm link azure-iot-amqp-base
-call npm link azure-iot-common
-call npm link azure-iot-device
-call npm link azure-iot-device-amqp
-call npm link
-
 cd %node-root%\device\transport\http
 echo.
 echo -- Creating links for %cd% --
@@ -71,7 +51,6 @@ call npm link
 cd %node-root%\device\transport\mqtt
 echo.
 echo -- Creating links for %cd% --
-call npm link azure-iot-mqtt-base
 call npm link azure-iot-device
 call npm link
 
@@ -89,7 +68,6 @@ echo -- Creating links for %cd% --
 call npm link azure-iot-common
 call npm link azure-iot-device
 call npm link azure-iot-device-amqp
-call npm link azure-iot-device-amqp-ws
 call npm link azure-iot-device-http
 call npm link azure-iot-device-mqtt
 call npm link azure-iothub

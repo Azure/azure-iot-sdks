@@ -21,6 +21,7 @@ if(${use_wsio})
     ../../../c/iothub_client/src/iothub_client_ll.c
     ../../../c/iothub_client/src/iothub_message.c
     ../../../c/iothub_client/src/iothubtransportamqp_websockets.c
+    ../../../c/iothub_client/src/iothubtransportamqp_auth.c
     ../../../c/iothub_client/src/iothubtransporthttp.c
     ../../../c/iothub_client/src/iothubtransportmqtt.c
     ../../../c/iothub_client/src/version.c
@@ -31,6 +32,7 @@ else()
     ../../../c/iothub_client/src/iothub_client_ll.c
     ../../../c/iothub_client/src/iothub_message.c
     ../../../c/iothub_client/src/iothubtransportamqp.c
+	../../../c/iothub_client/src/iothubtransportamqp_auth.c
     ../../../c/iothub_client/src/iothubtransporthttp.c
     ../../../c/iothub_client/src/iothubtransportmqtt.c
     ../../../c/iothub_client/src/version.c

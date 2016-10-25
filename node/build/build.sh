@@ -63,7 +63,7 @@ create_test_device()
 
 delete_test_device()
 {
-    node $node_root/../tools/iothub-explorer/iothub-explorer.js $IOTHUB_CONNECTION_STRING delete $IOTHUB_X509_DEVICE_ID
+    node $node_root/../tools/iothub-explorer/iothub-explorer.js delete $IOTHUB_X509_DEVICE_ID --login $IOTHUB_CONNECTION_STRING 
     rm $IOTHUB_X509_CERTIFICATE
     rm $IOTHUB_X509_KEY
 }
@@ -98,16 +98,10 @@ lint_and_test $node_root/common/transport/amqp
 lint_and_test $node_root/common/transport/http
 [ $? -eq 0 ] || cleanup_and_exit $?
 
-lint_and_test $node_root/common/transport/mqtt
-[ $? -eq 0 ] || cleanup_and_exit $?
-
 lint_and_test $node_root/device/core
 [ $? -eq 0 ] || cleanup_and_exit $?
 
 lint_and_test $node_root/device/transport/amqp
-[ $? -eq 0 ] || cleanup_and_exit $?
-
-lint_and_test $node_root/device/transport/amqp-ws
 [ $? -eq 0 ] || cleanup_and_exit $?
 
 lint_and_test $node_root/device/transport/http

@@ -35,7 +35,7 @@ function Amqp(autoSettleMessages, sdkVersionString) {
         properties: {
           'com.microsoft:client-version': sdkVersionString
         },
-        maxMessageSize: 9223372036854775807,
+        maxMessageSize: 0,
       },
       encoder: function(body) {
         if(typeof body === 'string') {
@@ -54,7 +54,7 @@ function Amqp(autoSettleMessages, sdkVersionString) {
         properties: {
           'com.microsoft:client-version': sdkVersionString
         },
-        maxMessageSize: 65536,
+        maxMessageSize: 0,
         receiverSettleMode: autoSettleMode,
       },
       decoder: function(body) { return body; },
@@ -102,17 +102,17 @@ Amqp.prototype.connect = function connect(uri, sslOptions, done) {
         debug('AMQP transport connected.');
         this._connected = true;
         /*Codes_SRS_NODE_COMMON_AMQP_16_002: [The connect method shall establish a connection with the IoT hub instance and call the done() callback if given as argument] */
-        if (done) done(null, new results.Connected(result));
+        if (done) process.nextTick(function() { done(null, new results.Connected(result)); });
         return null;
       }.bind(this))
       .catch(function (err) {
         this._connected = false;
         /*Codes_SRS_NODE_COMMON_AMQP_16_003: [The connect method shall call the done callback if the connection fails.] */
-        if (done) done(err);
+        if (done) process.nextTick(function() { done(err); });
       }.bind(this));
   } else {
     debug('connect called when already connected.');
-    if (done) done(null, new results.Connected());
+    if (done) process.nextTick(function() { done(null, new results.Connected()); });
   }
 };
 
@@ -138,13 +138,14 @@ Amqp.prototype.disconnect = function disconnect(done) {
   this._amqp.disconnect()
     .then(function (result) {
       this._connected = false;
+      this._sender = null;
       /*Codes_SRS_NODE_COMMON_AMQP_16_004: [The disconnect method shall call the done callback when the application/service has been successfully disconnected from the service] */
-      if (done) done(null, result);
+      if (done) process.nextTick(function() { done(null, result); });
       return null;
     }.bind(this))
     .catch(function (err) {
       /*SRS_NODE_COMMON_AMQP_16_005: [The disconnect method shall call the done callback and pass the error as a parameter if the disconnection is unsuccessful] */
-      if (done) done(err);
+      if (done) process.nextTick(function() { done(err); });
     });
 };
 
@@ -160,11 +161,11 @@ Amqp.prototype.disconnect = function disconnect(done) {
 Amqp.prototype.send = function send(message, endpoint, to, done) {
   if (!this._connected && done) {
     done(new errors.NotConnectedError('Cannot send while disconnected.'));
-  } else {  
+  } else {
     /*Codes_SRS_NODE_COMMON_AMQP_16_006: [The send method shall construct an AMQP message using information supplied by the caller, as follows:
     The ‘to’ field of the message should be set to the ‘to’ argument.
     The ‘body’ of the message should be built using the message argument.] */
-  
+
     var amqpMessage = AmqpMessage.fromMessage(message);
     amqpMessage.properties.to = to;
     var sendAction = function (sender, msg, done) {
@@ -172,13 +173,13 @@ Amqp.prototype.send = function send(message, endpoint, to, done) {
         .then(function (state) {
           if (done) {
             var result = new results.MessageEnqueued(state);
-            done(null, result);
+            process.nextTick(function() { done(null, result); });
           }
           return null;
         })
         .catch(function (err) {
           /*Codes_SRS_NODE_IOTHUB_AMQPCOMMON_16_007: [If sendEvent encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
-          if (done) done(err);
+          if (done) process.nextTick(function() { done(err); });
         });
     };
 
@@ -188,7 +189,7 @@ Amqp.prototype.send = function send(message, endpoint, to, done) {
           this._sender = sender;
           /*Codes_SRS_NODE_COMMON_AMQP_16_007: [If send encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
           this._sender.on('errorReceived', function (err) {
-            if (done) done(err);
+            if (done) process.nextTick(function() { done(err); });
             return null;
           });
 
@@ -200,7 +201,7 @@ Amqp.prototype.send = function send(message, endpoint, to, done) {
             /*Codes_SRS_NODE_IOTHUB_AMQPCOMMON_16_007: [If sendEvent encounters an error before it can send the request, it shall invoke the done callback function and pass the standard JavaScript Error object with a text description of the error (err.message).]*/
             var error = new errors.NotConnectedError('AMQP: Could not create sender');
             error.amqpError = err;
-            done(error);
+            process.nextTick(function() { done(error); });
           }
         });
     } else {
@@ -228,15 +229,16 @@ Amqp.prototype.getReceiver = function getReceiver(endpoint, done) {
 };
 
 Amqp.prototype._setupReceiverLink = function setupReceiverLink(endpoint, done) {
-  this._amqp.createReceiver(endpoint)
+  var self = this;
+  self._amqp.createReceiver(endpoint)
     .then(function (receiver) {
-      this._receivers[endpoint] = new AmqpReceiver(receiver);
+      self._receivers[endpoint] = new AmqpReceiver(receiver);
       debug('AmqpReceiver object created for endpoint: ' + endpoint);
-      done(null, this._receivers[endpoint]);
+      process.nextTick(function() { done(null, self._receivers[endpoint]); });
       return null;
-    }.bind(this))
+    })
     .catch(function (err) {
-      if (done) done(err);
+      if (done) process.nextTick(function() { done(err); });
     });
 };
 

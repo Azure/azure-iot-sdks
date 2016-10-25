@@ -45,32 +45,31 @@ util.inherits(Client, EventEmitter);
  * @description       Creates an IoT Hub service client from the given
  *                    connection string using the default transport
  *                    ({@link module:azure-iothub~Transport|Transport}).
- * 
+ *
  * @param {String}    connStr       A connection string which encapsulates "device
  *                                  connect" permissions on an IoT hub.
  * @param {Function}  Transport     A transport constructor.
- * 
+ *
  * @returns {module:azure-iothub.Client}
 */
 Client.fromConnectionString = function fromConnectionString(connStr, Transport) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_002: [The fromConnectionString method shall throw ReferenceError if the connStr argument is falsy.]*/
   if (!connStr) throw new ReferenceError('connStr is \'' + connStr + '\'');
-  
+
   if(!Transport){
       Transport = DefaultTransport;
   }
-  
+
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_003: [Otherwise, it shall derive and transform the needed parts from the connection string in order to create a new instance of the default transport (azure-iothub.Transport).]*/
   var cn = ConnectionString.parse(connStr);
-  var sas = SharedAccessSignature.create(cn.HostName, cn.SharedAccessKeyName, cn.SharedAccessKey, anHourFromNow());
 
   var config = {
     hubName: cn.HostName.split('.', 1)[0],
     host: cn.HostName,
     keyName: cn.SharedAccessKeyName,
-    sharedAccessSignature: sas.toString()
+    sharedAccessSignature: SharedAccessSignature.create(cn.HostName, cn.SharedAccessKeyName, cn.SharedAccessKey, anHourFromNow())
   };
-  
+
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_004: [The fromConnectionString method shall return a new instance of the Client object, as by a call to new Client(transport).]*/
   return new Client(new Transport(config));
 };
@@ -80,20 +79,20 @@ Client.fromConnectionString = function fromConnectionString(connStr, Transport) 
  * @description       Creates an IoT Hub service client from the given
  *                    shared access signature using the default transport
  *                    ({@link module:azure-iothub~Transport|Transport}).
- * 
+ *
  * @param {String}    sharedAccessSignature   A shared access signature which encapsulates
  *                            "service connect" permissions on an IoT hub.
  * @param {Function}  Transport     A transport constructor.
- * 
+ *
  * @returns {module:azure-iothub.Client}
  */
 Client.fromSharedAccessSignature = function fromSharedAccessSignature(sharedAccessSignature, Transport) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_005: [The fromSharedAccessSignature method shall throw ReferenceError if the sharedAccessSignature argument is falsy.]*/
   if (!sharedAccessSignature) throw new ReferenceError('sharedAccessSignature is \'' + sharedAccessSignature + '\'');
-  
+
   if(!Transport){
       Transport = DefaultTransport;
-  }  
+  }
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_006: [Otherwise, it shall derive and transform the needed parts from the shared access signature in order to create a new instance of the default transport (azure-iothub.Transport).]*/
   var sas = SharedAccessSignature.parse(sharedAccessSignature);
   var decodedUri = decodeURIComponent(sas.sr);
@@ -131,14 +130,15 @@ Client.prototype.open = function open(done) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_010: [The argument err passed to the callback done shall be null if the protocol operation was successful.]*/
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_011: [Otherwise the argument err shall have a transport property containing implementation-specific response information for use in logging and troubleshooting.]*/
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_012: [If the connection is already open when open is called, it shall have no effect—that is, the done callback shall be invoked immediately with a null argument.]*/
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_16_006: [The `open` method should not throw if the `done` callback is not specified.]*/
   var self = this;
   this._transport.connect(function(err, result) {
     if (err) {
-      done(err);
+      if (done) done(err);
     } else {
       /*Codes_SRS_NODE_IOTHUB_CLIENT_16_002: [If the transport successfully establishes a connection the `open` method shall subscribe to the `disconnect` event of the transport.]*/
       self._transport.on('disconnect', self._disconnectHandler.bind(self));
-      done(null, result);
+      if (done) done(null, result);
     }
   });
 };
@@ -158,13 +158,14 @@ Client.prototype.close = function close(done) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_023: [The argument err passed to the callback done shall be null if the protocol operation was successful.]*/
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_024: [Otherwise the argument err shall have a transport property containing implementation-specific response information for use in logging and troubleshooting.]*/
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_025: [If the connection is not open when close is called, it shall have no effect— that is, the done callback shall be invoked immediately with null arguments.]*/
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_16_005: [The `close` method should not throw if the `done` callback is not specified.]*/
   this._transport.disconnect(function (err, result) {
       if (err) {
-        done(err);
+        if (done) done(err);
       } else {
         /*Codes_SRS_NODE_IOTHUB_CLIENT_16_003: [The `close` method shall remove the listener that has been attached to the transport `disconnect` event.]*/
         this._transport.removeAllListeners('disconnect');
-        done(null, result);
+        if (done) done(null, result);
       }
     }.bind(this));
 };

@@ -39,6 +39,8 @@ typedef struct IOTHUB_CLIENT_LL_HANDLE_DATA_TAG
     time_t lastMessageReceiveTime;
     TICK_COUNTER_HANDLE tickCounter; /*shared tickcounter used to track message timeouts in waitingToSend list*/
     uint64_t currentMessageTimeout;
+    IOTHUB_CLIENT_RETRY_POLICY retryPolicy;
+    size_t retryTimeoutinSeconds;
 #ifndef DONT_USE_UPLOADTOBLOB
     IOTHUB_CLIENT_LL_UPLOADTOBLOB_HANDLE uploadToBlobHandle;
 #endif
@@ -846,6 +848,44 @@ IOTHUBMESSAGE_DISPOSITION_RESULT IoTHubClient_LL_MessageCallback(IOTHUB_CLIENT_L
     }
     /*Codes_SRS_IOTHUBCLIENT_LL_02_031: [Then IoTHubClient_LL_MessageCallback shall return what the user function returns.]*/
 	return (IOTHUBMESSAGE_DISPOSITION_RESULT) result;
+}
+
+void IotHubClient_LL_ConnectionStatusCallBack(IOTHUB_CLIENT_LL_HANDLE handle, PDLIST_ENTRY connectionStatus)
+{
+    (void)handle;
+    (void)connectionStatus;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetConnectionStatusCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void * userContextCallback)
+{
+
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
+    (void)iotHubClientHandle;
+    (void)connectionStatusCallback;
+    (void)userContextCallback;
+
+
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitinSeconds)
+{
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
+    (void)iotHubClientHandle;
+    (void)retryPolicy;
+    (void)retryTimeoutLimitinSeconds;
+
+    return result;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY* retryPolicy, size_t* retryTimeoutLimitinSeconds)
+{
+    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
+    (void)iotHubClientHandle;
+    (void)retryPolicy;
+    (void)retryTimeoutLimitinSeconds;
+
+    return result;
 }
 
 IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetLastMessageReceiveTime(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, time_t* lastMessageReceiveTime)

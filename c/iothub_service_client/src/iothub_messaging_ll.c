@@ -413,12 +413,12 @@ static AMQP_VALUE IoTHubMessaging_LL_FeedbackMessageReceived(const void* context
                     free(feedbackBatch);
                     result = messaging_delivery_rejected("Rejected due to failure reading AMQP message", "json_array_get_count failed");
                 }
-                else if ((feedbackBatch->feedbackRecordList = list_create()) == NULL)
+                else if ((feedbackBatch->feedbackRecordList = singlylinkedlist_create()) == NULL)
                 {
                     /*Codes_SRS_IOTHUBMESSAGING_12_061: [ If any of the parson API fails, IoTHubMessaging_LL_FeedbackMessageReceived shall return IOTHUB_MESSAGING_INVALID_JSON ] */
-                    LogError("list_create failed");
+                    LogError("singlylinkedlist_create failed");
                     free(feedbackBatch);
-                    result = messaging_delivery_rejected("Rejected due to failure reading AMQP message", "list_create failed");
+                    result = messaging_delivery_rejected("Rejected due to failure reading AMQP message", "singlylinkedlist_create failed");
                 }
                 else
                 {
@@ -480,7 +480,7 @@ static AMQP_VALUE IoTHubMessaging_LL_FeedbackMessageReceived(const void* context
                                         feedbackRecord->statusCode = IOTHUB_FEEDBACK_STATUS_CODE_UNKNOWN;
                                     }
                                 }
-                                list_add(feedbackBatch->feedbackRecordList, feedbackRecord);
+                                singlylinkedlist_add(feedbackBatch->feedbackRecordList, feedbackRecord);
                             }
                         }
                     }
@@ -503,20 +503,19 @@ static AMQP_VALUE IoTHubMessaging_LL_FeedbackMessageReceived(const void* context
                     }
 
                     /*Codes_SRS_IOTHUBMESSAGING_12_078: [** IoTHubMessaging_LL_FeedbackMessageReceived shall do clean up before exits ] */
-                    LIST_ITEM_HANDLE feedbackRecord = list_get_head_item(feedbackBatch->feedbackRecordList);
+                    LIST_ITEM_HANDLE feedbackRecord = singlylinkedlist_get_head_item(feedbackBatch->feedbackRecordList);
                     while (feedbackRecord != NULL)
                     {
-                        IOTHUB_SERVICE_FEEDBACK_RECORD* feedback = (IOTHUB_SERVICE_FEEDBACK_RECORD*)list_item_get_value(feedbackRecord);
-                        feedbackRecord = list_get_next_item(feedbackRecord);
+                        IOTHUB_SERVICE_FEEDBACK_RECORD* feedback = (IOTHUB_SERVICE_FEEDBACK_RECORD*)singlylinkedlist_item_get_value(feedbackRecord);
+                        feedbackRecord = singlylinkedlist_get_next_item(feedbackRecord);
                         free(feedback);
                     }
-                    list_destroy(feedbackBatch->feedbackRecordList);
+                    singlylinkedlist_destroy(feedbackBatch->feedbackRecordList);
                     free(feedbackBatch);
                 }
             }
         }
         json_array_clear(feedback_array);
-        json_object_clear(feedback_object);
         json_value_free(root_value);
     }
     return result;
@@ -882,15 +881,6 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not set the sender settle mode.");
-                        free((char*)messagingHandle->sasl_plain_config.authcid);
-                        free((char*)messagingHandle->sasl_plain_config.passwd);
-                        result = IOTHUB_MESSAGING_ERROR;
-                    }
-                    /*Codes_SRS_IOTHUBMESSAGING_12_020: [ IoTHubMessaging_LL_Open shall set sender link AMQP maximum message size to the server maximum (255K) by calling link_set_max_message_size ] */
-                    else if (link_set_max_message_size(messagingHandle->sender_link, 65536) != 0)
-                    {
-                        /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
-                        LogError("Could not set the message size.");
                         free((char*)messagingHandle->sasl_plain_config.authcid);
                         free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;

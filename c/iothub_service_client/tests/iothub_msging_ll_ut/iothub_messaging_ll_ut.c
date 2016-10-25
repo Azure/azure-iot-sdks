@@ -14,7 +14,7 @@
 
 #define ENABLE_MOCKS
 #include "azure_c_shared_utility/strings.h"
-#include "azure_c_shared_utility/list.h"
+#include "azure_c_shared_utility/singlylinkedlist.h"
 #include "parson.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/xlogging.h"
@@ -98,12 +98,12 @@ typedef struct LIST_ITEM_INSTANCE_TAG
     void* next;
 } LIST_ITEM_INSTANCE;
 
-typedef struct LIST_INSTANCE_TAG
+typedef struct SINGLYLINKEDLIST_INSTANCE_TAG
 {
     LIST_ITEM_INSTANCE* head;
 } LIST_INSTANCE;
 
-static LIST_HANDLE my_list_create(void)
+static SINGLYLINKEDLIST_HANDLE my_list_create(void)
 {
     LIST_INSTANCE* result;
 
@@ -116,7 +116,7 @@ static LIST_HANDLE my_list_create(void)
     return result;
 }
 
-static void my_list_destroy(LIST_HANDLE list)
+static void my_list_destroy(SINGLYLINKEDLIST_HANDLE list)
 {
     if (list != NULL)
     {
@@ -133,7 +133,7 @@ static void my_list_destroy(LIST_HANDLE list)
     }
 }
 
-static LIST_ITEM_HANDLE my_list_add(LIST_HANDLE list, const void* item)
+static LIST_ITEM_HANDLE my_list_add(SINGLYLINKEDLIST_HANDLE list, const void* item)
 {
     LIST_ITEM_INSTANCE* result;
 
@@ -176,7 +176,7 @@ static LIST_ITEM_HANDLE my_list_add(LIST_HANDLE list, const void* item)
     return result;
 }
 
-static LIST_ITEM_HANDLE my_list_get_head_item(LIST_HANDLE list)
+static LIST_ITEM_HANDLE my_list_get_head_item(SINGLYLINKEDLIST_HANDLE list)
 {
     LIST_ITEM_HANDLE result;
 
@@ -470,7 +470,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         REGISTER_UMOCK_ALIAS_TYPE(JSON_Value, void*);
         REGISTER_UMOCK_ALIAS_TYPE(JSON_Object, void*);
         REGISTER_UMOCK_ALIAS_TYPE(JSON_Status, int);
-        REGISTER_UMOCK_ALIAS_TYPE(LIST_HANDLE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(SINGLYLINKEDLIST_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(LIST_ITEM_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(receiver_settle_mode, uint8_t);
 
@@ -596,21 +596,21 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         REGISTER_GLOBAL_MOCK_RETURN(json_object_get_string, TEST_CONST_CHAR_PTR);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_object_get_string, NULL);
 
-        REGISTER_GLOBAL_MOCK_HOOK(list_create, my_list_create);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(list_create, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_create, my_list_create);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_create, NULL);
 
-        REGISTER_GLOBAL_MOCK_HOOK(list_add, my_list_add);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(list_add, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_add, my_list_add);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_add, NULL);
 
-        REGISTER_GLOBAL_MOCK_HOOK(list_get_head_item, my_list_get_head_item);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(list_get_head_item, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_get_head_item, my_list_get_head_item);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_get_head_item, NULL);
 
-        REGISTER_GLOBAL_MOCK_HOOK(list_get_next_item, my_list_get_next_item);
-        REGISTER_GLOBAL_MOCK_FAIL_RETURN(list_get_next_item, NULL);
+        REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_get_next_item, my_list_get_next_item);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(singlylinkedlist_get_next_item, NULL);
 
-        REGISTER_GLOBAL_MOCK_HOOK(list_item_get_value, my_list_item_get_value);
+        REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_item_get_value, my_list_item_get_value);
 
-        REGISTER_GLOBAL_MOCK_HOOK(list_destroy, my_list_destroy);
+        REGISTER_GLOBAL_MOCK_HOOK(singlylinkedlist_destroy, my_list_destroy);
 
         REGISTER_GLOBAL_MOCK_HOOK(message_get_body_amqp_data, my_message_get_body_amqp_data);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(message_get_body_amqp_data, 1);
@@ -946,7 +946,6 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
     /*Tests_SRS_IOTHUBMESSAGING_12_016: [ IoTHubMessaging_LL_Open shall set the AMQP outgoing window to UINT32 maximum value by calling session_set_outgoing_window ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_018: [ IoTHubMessaging_LL_Open shall create uAMQP sender link by calling the link_create ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_019: [ IoTHubMessaging_LL_Open shall set the AMQP sender link settle mode to sender_settle_mode_unsettled  by calling link_set_snd_settle_mode ] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_020: [ IoTHubMessaging_LL_Open shall set sender link AMQP maximum message size to the server maximum (255K) by calling link_set_max_message_size ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_021: [ IoTHubMessaging_LL_Open shall create uAMQP messaging source for sender by calling the messaging_create_source ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_022: [ IoTHubMessaging_LL_Open shall create uAMQP messaging target for sender by calling the messaging_create_target ] */
     /*Tests_SRS_IOTHUBMESSAGING_12_023: [ IoTHubMessaging_LL_Open shall create uAMQP message sender by calling the messagesender_create with the created sender link and the local IoTHubMessaging_LL_SenderStateChanged callback ] */
@@ -1025,8 +1024,6 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         STRICT_EXPECTED_CALL(link_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, TEST_AMQP_VALUE_NULL, TEST_AMQP_VALUE_NULL))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(link_set_snd_settle_mode(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(link_set_max_message_size(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(messagesender_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
@@ -1186,8 +1183,6 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(link_set_snd_settle_mode(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
             .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(link_set_max_message_size(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(messagesender_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(messagesender_open(IGNORED_NUM_ARG))
@@ -1234,10 +1229,10 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
                 (i != 10) &&
                 (i != 11) &&
                 (i != 12) &&
+                (i != 35) &&
                 (i != 36) &&
                 (i != 37) &&
-                (i != 38) &&
-                (i != 39)
+                (i != 38)
                 )
             {
                 IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_Open(TEST_IOTHUB_MESSAGING_HANDLE, TEST_IOTHUB_OPEN_COMPLETE_CALLBACK, NULL);
@@ -1936,7 +1931,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         STRICT_EXPECTED_CALL(json_array_get_count(TEST_JSON_ARRAY))
             .SetReturn(1);
 
-        STRICT_EXPECTED_CALL(list_create());
+        STRICT_EXPECTED_CALL(singlylinkedlist_create());
 
         STRICT_EXPECTED_CALL(json_array_get_object(TEST_JSON_ARRAY, 0))
             .SetReturn(TEST_JSON_OBJECT);
@@ -1956,32 +1951,30 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             .SetReturn("originalMessageId");
 
 
-        STRICT_EXPECTED_CALL(list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         
         STRICT_EXPECTED_CALL(messaging_delivery_accepted());
 
-        STRICT_EXPECTED_CALL(list_get_head_item(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
-        STRICT_EXPECTED_CALL(list_item_get_value(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         
-        STRICT_EXPECTED_CALL(list_get_next_item(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(list_destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(json_array_clear(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
@@ -2035,7 +2028,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         STRICT_EXPECTED_CALL(json_array_get_count(TEST_JSON_ARRAY))
             .SetReturn(1);
 
-        STRICT_EXPECTED_CALL(list_create());
+        STRICT_EXPECTED_CALL(singlylinkedlist_create());
 
         STRICT_EXPECTED_CALL(json_array_get_object(TEST_JSON_ARRAY, 0))
             .SetReturn(TEST_JSON_OBJECT);
@@ -2055,32 +2048,30 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             .SetReturn("originalMessageId");
 
 
-        STRICT_EXPECTED_CALL(list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(messaging_delivery_accepted());
 
-        STRICT_EXPECTED_CALL(list_get_head_item(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
-        STRICT_EXPECTED_CALL(list_item_get_value(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
-        STRICT_EXPECTED_CALL(list_get_next_item(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(list_destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(json_array_clear(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
@@ -2134,7 +2125,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         STRICT_EXPECTED_CALL(json_array_get_count(TEST_JSON_ARRAY))
             .SetReturn(1);
 
-        STRICT_EXPECTED_CALL(list_create());
+        STRICT_EXPECTED_CALL(singlylinkedlist_create());
 
         STRICT_EXPECTED_CALL(json_array_get_object(TEST_JSON_ARRAY, 0))
             .SetReturn(TEST_JSON_OBJECT);
@@ -2153,32 +2144,30 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         STRICT_EXPECTED_CALL(json_object_get_string(TEST_JSON_OBJECT, TEST_FEEDBACK_RECORD_KEY_ORIGINAL_MESSAGE_ID))
             .SetReturn("originalMessageId");
 
-        STRICT_EXPECTED_CALL(list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(messaging_delivery_accepted());
 
-        STRICT_EXPECTED_CALL(list_get_head_item(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
-        STRICT_EXPECTED_CALL(list_item_get_value(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
-        STRICT_EXPECTED_CALL(list_get_next_item(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(list_destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(json_array_clear(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
@@ -2232,7 +2221,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         STRICT_EXPECTED_CALL(json_array_get_count(TEST_JSON_ARRAY))
             .SetReturn(1);
 
-        STRICT_EXPECTED_CALL(list_create());
+        STRICT_EXPECTED_CALL(singlylinkedlist_create());
 
         STRICT_EXPECTED_CALL(json_array_get_object(TEST_JSON_ARRAY, 0))
             .SetReturn(TEST_JSON_OBJECT);
@@ -2252,32 +2241,30 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             .SetReturn("originalMessageId");
 
 
-        STRICT_EXPECTED_CALL(list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(messaging_delivery_accepted());
 
-        STRICT_EXPECTED_CALL(list_get_head_item(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
-        STRICT_EXPECTED_CALL(list_item_get_value(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
-        STRICT_EXPECTED_CALL(list_get_next_item(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(list_destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(json_array_clear(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
@@ -2331,7 +2318,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         STRICT_EXPECTED_CALL(json_array_get_count(TEST_JSON_ARRAY))
             .SetReturn(1);
 
-        STRICT_EXPECTED_CALL(list_create());
+        STRICT_EXPECTED_CALL(singlylinkedlist_create());
 
         STRICT_EXPECTED_CALL(json_array_get_object(TEST_JSON_ARRAY, 0))
             .SetReturn(TEST_JSON_OBJECT);
@@ -2351,32 +2338,30 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             .SetReturn("originalMessageId");
 
 
-        STRICT_EXPECTED_CALL(list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(messaging_delivery_accepted());
 
-        STRICT_EXPECTED_CALL(list_get_head_item(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
-        STRICT_EXPECTED_CALL(list_item_get_value(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
-        STRICT_EXPECTED_CALL(list_get_next_item(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(list_destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(json_array_clear(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
@@ -2430,7 +2415,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         STRICT_EXPECTED_CALL(json_array_get_count(TEST_JSON_ARRAY))
             .SetReturn(1);
 
-        STRICT_EXPECTED_CALL(list_create());
+        STRICT_EXPECTED_CALL(singlylinkedlist_create());
 
         STRICT_EXPECTED_CALL(json_array_get_object(TEST_JSON_ARRAY, 0))
             .SetReturn(TEST_JSON_OBJECT);
@@ -2450,32 +2435,30 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             .SetReturn("originalMessageId");
 
 
-        STRICT_EXPECTED_CALL(list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(messaging_delivery_accepted());
 
-        STRICT_EXPECTED_CALL(list_get_head_item(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_head_item(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
-        STRICT_EXPECTED_CALL(list_item_get_value(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_item_get_value(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
-        STRICT_EXPECTED_CALL(list_get_next_item(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_get_next_item(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(list_destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_destroy(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(json_array_clear(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(json_object_clear(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(json_value_free(IGNORED_NUM_ARG))
             .IgnoreArgument(1);
@@ -2527,7 +2510,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         STRICT_EXPECTED_CALL(json_array_get_count(TEST_JSON_ARRAY))
             .SetReturn(1);
 
-        STRICT_EXPECTED_CALL(list_create());
+        STRICT_EXPECTED_CALL(singlylinkedlist_create());
 
         STRICT_EXPECTED_CALL(json_array_get_object(TEST_JSON_ARRAY, 0))
             .SetReturn(TEST_JSON_OBJECT);
@@ -2547,7 +2530,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             .SetReturn("originalMessageId");
 
 
-        STRICT_EXPECTED_CALL(list_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(singlylinkedlist_add(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
         STRICT_EXPECTED_CALL(messaging_delivery_accepted());

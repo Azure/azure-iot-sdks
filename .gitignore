@@ -21,6 +21,7 @@ x64/
 [Bb]in/
 [Oo]bj/
 !/build/release/
+[Cc]make/
 
 # Enable "build/" folder in the NuGet Packages folder since NuGet packages use it for MSBuild targets
 !packages/*/build/
@@ -146,9 +147,11 @@ GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
 
-# CPython
+# CPython & Wheels
 *.pyc
 *.pyd
+*.whl
+*.egg-info
 
 # =========================
 # Windows detritus

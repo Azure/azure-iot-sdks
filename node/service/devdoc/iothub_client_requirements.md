@@ -70,6 +70,8 @@ The open method opens a connection to the IoT Hub service.
 
 **SRS_NODE_IOTHUB_CLIENT_16_002: [** If the transport successfully establishes a connection the `open` method shall subscribe to the `disconnect` event of the transport.**]**
 
+**SRS_NODE_IOTHUB_CLIENT_16_006: [** The `open` method should not throw if the `done` callback is not specified. **]**
+
 ###send(devceId, message, done)
 The `send` method sends a cloud-to-device message to the service, intended for delivery to the given device.
 
@@ -118,6 +120,8 @@ The `close` method closes the connection opened by open.
 **SRS_NODE_IOTHUB_CLIENT_05_025: [**If the connection is not open when close is called, it shall have no effect— that is, the `done` callback shall be invoked immediately with `null` arguments.**]**
 
 **SRS_NODE_IOTHUB_CLIENT_16_003: [** The `close` method shall remove the listener that has been attached to the transport `disconnect` event. **]**
+
+**SRS_NODE_IOTHUB_CLIENT_16_005: [** The `close` method should not throw if the `done` callback is not specified. **]**
 
 ### Events
 #### disconnect

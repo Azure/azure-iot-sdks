@@ -49,6 +49,12 @@ if %min-output%==1 if %integration-tests%==1 set "npm-command=npm -s run ci"
 rem ---------------------------------------------------------------------------
 rem -- create x509 test device
 rem ---------------------------------------------------------------------------
+if "%OPENSSL_CONF%"=="" (
+  echo The OPENSSL_CONF environment variable must be defined in order to generate the x509 certificate for the test device.
+  set ERRORLEVEL=1
+  goto :eof
+)
+
 set IOTHUB_X509_DEVICE_ID=x509device-node-%RANDOM%
 call node %node-root%\build\tools\create_device_certs.js --connectionString %IOTHUB_CONNECTION_STRING% --deviceId %IOTHUB_X509_DEVICE_ID%
 set IOTHUB_X509_CERTIFICATE=%node-root%\%IOTHUB_X509_DEVICE_ID%-cert.pem
@@ -72,16 +78,10 @@ if errorlevel 1 goto :cleanup
 call :lint-and-test %node-root%\common\transport\http
 if errorlevel 1 goto :cleanup
 
-call :lint-and-test %node-root%\common\transport\mqtt
-if errorlevel 1 goto :cleanup
-
 call :lint-and-test %node-root%\device\core
 if errorlevel 1 goto :cleanup
 
 call :lint-and-test %node-root%\device\transport\amqp
-if errorlevel 1 goto :cleanup
-
-call :lint-and-test %node-root%\device\transport\amqp-ws
 if errorlevel 1 goto :cleanup
 
 call :lint-and-test %node-root%\device\transport\http
@@ -126,7 +126,7 @@ goto :eof
 
 :cleanup
 set EXITCODE=%ERRORLEVEL%
-call node %node-root%\..\tools\iothub-explorer\iothub-explorer.js %IOTHUB_CONNECTION_STRING% delete %IOTHUB_X509_DEVICE_ID%
+call node %node-root%\..\tools\iothub-explorer\iothub-explorer.js delete %IOTHUB_X509_DEVICE_ID% --login %IOTHUB_CONNECTION_STRING% 
 del %IOTHUB_X509_CERTIFICATE%
 del %IOTHUB_X509_KEY%
 exit /b %EXITCODE%
