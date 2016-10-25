@@ -210,9 +210,6 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     IOTHUB_CLIENT_RESULT iot_result = IoTHubClient_SendReportedState(iotHubClientHandle, (unsigned char *) buffer, strlen(buffer), reportedStateCallback, device);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, iot_result, "IoTHubClient_SendReportedState failed");
 
-    // cleanup
-    free(buffer);
-
     time_t beginOperation, nowTime;
     beginOperation = time(NULL);
     while (
@@ -244,34 +241,38 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     {
         ASSERT_IS_TRUE_WITH_MSG(device->receivedCallBack, "SendReported ACK was not received in the alloted time"); // was received by the callback...
         ASSERT_IS_TRUE_WITH_MSG(device->status_code < 300, "SnedReported status_code is an error");
-        (void)Unlock(device->lock);
+
+        const char *connectionString = IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo);
+        IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
+        ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "IoTHubServiceClientAuth_CreateFromConnectionString failed");
+
+        IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle = IoTHubDeviceTwin_Create(iotHubServiceClientHandle);
+        ASSERT_IS_NOT_NULL_WITH_MSG(serviceClientDeviceTwinHandle, "IoTHubDeviceTwin_Create failed");
+
+        char *deviceTwinData = IoTHubDeviceTwin_GetTwin(serviceClientDeviceTwinHandle, iotHubConfig.deviceId);
+        ASSERT_IS_NOT_NULL_WITH_MSG(deviceTwinData, "IoTHubDeviceTwin_GetTwin failed");
+
+        JSON_Value *root_value = json_parse_string(deviceTwinData);
+        ASSERT_IS_NOT_NULL_WITH_MSG(root_value, "json_parse_string failed");
+
+        JSON_Object *root_object = json_value_get_object(root_value);
+        const char *string_property = json_object_dotget_string(root_object, "properties.reported.string_property");
+        ASSERT_ARE_EQUAL_WITH_MSG(char_ptr, device->string_property, string_property, "string data retrieved differs from reported");
+
+        int integer_property = (int) json_object_dotget_number(root_object, "properties.reported.integer_property");
+        ASSERT_ARE_EQUAL_WITH_MSG(int, device->integer_property, integer_property, "integer data retrieved differs from reported");
+
+        (void) Unlock(device->lock);
+
+        // cleanup
+        json_value_free(root_value);
+        free(deviceTwinData);
+        IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
+        IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
     }
 
-    const char *connectionString = IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo);
-    IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
-    ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "IoTHubServiceClientAuth_CreateFromConnectionString failed");
-
-    IOTHUB_SERVICE_CLIENT_DEVICE_TWIN_HANDLE serviceClientDeviceTwinHandle = IoTHubDeviceTwin_Create(iotHubServiceClientHandle);
-    ASSERT_IS_NOT_NULL_WITH_MSG(serviceClientDeviceTwinHandle, "IoTHubDeviceTwin_Create failed");
-
-    char *deviceTwinData = IoTHubDeviceTwin_GetTwin(serviceClientDeviceTwinHandle, iotHubConfig.deviceId);
-    ASSERT_IS_NOT_NULL_WITH_MSG(deviceTwinData, "IoTHubDeviceTwin_GetTwin failed");
-
-    JSON_Value *root_value = json_parse_string(deviceTwinData);
-    ASSERT_IS_NOT_NULL_WITH_MSG(root_value, "json_parse_string failed");
-
-    JSON_Object *root_object = json_value_get_object(root_value);
-    const char *string_property = json_object_dotget_string(root_object, "properties.reported.string_property");
-    ASSERT_ARE_EQUAL_WITH_MSG(char_ptr, device->string_property, string_property, "string data retrieved differs from reported");
-
-    int integer_property = (int) json_object_dotget_number(root_object, "properties.reported.integer_property");
-    ASSERT_ARE_EQUAL_WITH_MSG(int, device->integer_property, integer_property, "integer data retrieved differs from reported");
-
     // cleanup
-    json_value_free(root_value);
-    free(deviceTwinData);
-    IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
-    IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
+    free(buffer);
     IoTHubClient_Destroy(iotHubClientHandle);
     device_reported_deinit(device);
 }
@@ -417,9 +418,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     ASSERT_IS_NOT_NULL_WITH_MSG(buffer, "failed to create the payload for IoTHubDeviceTwin_UpdateTwin");
 
     char *deviceTwinData = IoTHubDeviceTwin_UpdateTwin(serviceClientDeviceTwinHandle, iotHubConfig.deviceId, buffer);
-    free(buffer);
     ASSERT_IS_NOT_NULL_WITH_MSG(deviceTwinData, "IoTHubDeviceTwin_UpdateTwin failed");
-    free(deviceTwinData);
 
     time_t beginOperation, nowTime;
     beginOperation = time(NULL);
@@ -452,24 +451,27 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     {
         ASSERT_IS_TRUE_WITH_MSG(device->receivedCallBack, "deviceTwinCallback was never called"); // was received by the callback...
         ASSERT_IS_NOT_NULL_WITH_MSG(device->cb_payload, "payload is NULL");
-        (void)Unlock(device->lock);
+
+        JSON_Value *root_value = json_parse_string(device->cb_payload);
+        ASSERT_IS_NOT_NULL_WITH_MSG(root_value, "json_parse_string failed");
+
+        JSON_Object *root_object = json_value_get_object(root_value);
+        const char *string_property = json_object_dotget_string(root_object, "desired.string_property");
+        ASSERT_ARE_EQUAL_WITH_MSG(char_ptr, expected_desired_string, string_property, "string data retrieved differs from expected");
+
+        int integer_property = (int) json_object_dotget_number(root_object, "desired.integer_property");
+        ASSERT_ARE_EQUAL_WITH_MSG(int, expected_desired_integer, integer_property, "integer data retrieved differs from expected");
+
+        // cleanup
+        json_value_free(root_value);
+        IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
+        IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
+
+        (void) Unlock(device->lock);
     }
 
-    JSON_Value *root_value = json_parse_string(device->cb_payload);
-    ASSERT_IS_NOT_NULL_WITH_MSG(root_value, "json_parse_string failed");
-
-    JSON_Object *root_object = json_value_get_object(root_value);
-    const char *string_property = json_object_dotget_string(root_object, "desired.string_property");
-    ASSERT_ARE_EQUAL_WITH_MSG(char_ptr, expected_desired_string, string_property, "string data retrieved differs from expected");
-
-    int integer_property = (int) json_object_dotget_number(root_object, "desired.integer_property");
-    ASSERT_ARE_EQUAL_WITH_MSG(int, expected_desired_integer, integer_property, "integer data retrieved differs from expected");
-
     // cleanup
-    json_value_free(root_value);
     free(expected_desired_string);
-    IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
-    IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
     IoTHubClient_Destroy(iotHubClientHandle);
     device_desired_deinit(device);
 }
