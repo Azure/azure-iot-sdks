@@ -83,9 +83,9 @@ Now, go to the corresponding bin folder. For example, for Debug build for x64, y
 3. PCLCrypto.dll
 4. Validation.dll
 
-There are the files you need to copy in the **corresponding** bin\x64\Debug\AppX folder of your **AppX** package of your project in Visual C++ or JavaScript in which NuGet package installation failed.
+There are the files you need to copy in the **corresponding** bin\x64\Debug\AppX folder of your **AppX** package of your project in Visual C++ or JavaScript in which NuGet package installation **failed**.
 
-To add the reference for your client SDK, you will reference WinRT assembly bin\x64\Debug\AppX\\**Microsoft.Azure.Devices.Client.winmd** which you just copied.
+- To add the reference for your client SDK, you will reference WinRT assembly bin\x64\Debug\AppX\\**Microsoft.Azure.Devices.Client.winmd** which you just copied.
 
 For building **JavaScript** UWP app, the calls using the SDK client library would look something like this
 
@@ -137,11 +137,11 @@ Once build completes, it will create
 Just like command line option it will build Device Client SDK along with the samples.
 
 ### Building NuGet Package locally
-In case, you want to build NuGet package locally, you can use following steps
+In case, you want to build NuGet package **locally**, you can use following steps
 
 a.) Build Release_Delay_Sign build using VS 2015 IDE
 
-b.) Go to csharp\device\nuget folder in Windows PowerShell command prompt and run ./make_nuget_package.ps1 command. This will result is Microsoft.Azure.Devices.Client NuGet Package in \csharp\device\NuGet folder.You can then add this package locally in your build system by going though NuGet Package Manager.
+b.) Go to csharp\device\nuget folder in Windows PowerShell command prompt and run `./make_nuget_package.ps1` command. This will result is Microsoft.Azure.Devices.Client NuGet Package in \csharp\device\NuGet folder.You can then add this package locally in your build system by going though NuGet Package Manager.
 
 
 <a name="samplecode"/>
@@ -149,7 +149,7 @@ b.) Go to csharp\device\nuget folder in Windows PowerShell command prompt and ru
 
 This repository contains various .NET sample applications that illustrate how to use the Microsoft Azure IoT device SDK for .NET. For more information, see the [readme][readme].
 
-You can build the **samples** in VS 2015 by opening csharp\device\\**iothub_csharp_deviceclient.sln** file which has various projects for samples. To build particular sample, right click on that sample in Solution Explorer and set that project as StartUp Project and build the project. Before running the sample, set the connecting string to a valid device connection and then rebuild the sample before running it.
+You can build the **samples** in VS 2015 by opening csharp\device\\**iothub_csharp_deviceclient.sln** file which has various projects for samples. To build particular sample, right click on that sample in Solution Explorer and set that project as StartUp Project and build the project. Before running the sample, set the connecting string to a valid device connection and then re-build the sample before running it.
 
 ### Building for iOS and Android using C#  
 For building for iOS and Android using C#, you need to install [Xamarin][lnk-visualstudio-xamarin] for VS 2015
@@ -161,7 +161,7 @@ For building Android sample open **csharp\device\samples\DeviceClientSampleAndro
 To check for any latest Xamarin update for Visual Studio check Tools->Options->Xamarin->Other.
 
 ### Building and running CppUWPSample (Universal Windows) C++ sample application
-Select CppUWPSample as as StartUp Project. Replace the connection string with a valid connection string in MainPage.xaml.cpp file
+Select CppUWPSample as as StartUp Project. Replace the connection string with a valid connection string in `MainPage.xaml.cpp` file
 On running the applciation, you will see "Could not load file or assembly Microsoft.Azure.Amqp.Uwp" error.
 
 > To workaround this error copy 3 assemblies that application has dependencies on. Copy **Microsoft.Azure.Amqp.Uwp.dll**, PCLCrypto.dll and Validation.dll into **CppUWPSample AppX** folder from **UWPSample** folder.
@@ -171,7 +171,7 @@ For example for building debug version for x64 copy these 3 files from device\sa
 After this redeploy and re-run the application.
 
 ### Building and running JSSample (Universal Windows) JavaScript sample application
-Open **JSSample.sln** file from samples\JSSample in VS 2015 IDE. Replace the connecting string with a valid connection string in default.js file. Deploy and run the application. The application will throw System.IO.FileNotFoundException : "Could not load file or assembly Microsoft.Azure.Amqp.Uwp".
+Open **JSSample.sln** file from samples\JSSample in VS 2015 IDE. Replace the connecting string with a valid connection string in `default.js` file. Deploy and run the application. The application will throw System.IO.FileNotFoundException : "Could not load file or assembly Microsoft.Azure.Amqp.Uwp".
 
 > To workaround this error copy assemblies that application has dependencies on. Copy **Microsoft.Azure.Amqp.Uwp.dll**, PCLCrypto.dll and Validation.dll into **JSSample AppX** folder from **UWPSample** folder.
 
