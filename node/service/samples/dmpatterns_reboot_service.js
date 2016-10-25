@@ -11,7 +11,7 @@ if(process.argv.length < 4) {
   console.error('Usage: node dmpatterns_reboot_service.js <<IoT Hub Connection String>> <<targetDeviceId>>');
   process.exit(1);
 }
-   
+
 var connectionString = process.argv[2];
 var registry = Registry.fromConnectionString(connectionString);
 var client = Client.fromConnectionString(connectionString);
@@ -56,5 +56,5 @@ function displayRebootStatus(callback) {
       callback(null);
     }
   });
-};
+}
 
