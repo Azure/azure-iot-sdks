@@ -37,7 +37,7 @@ For building classic desktop [.NET] [.NET] application, use NuGet Package Manage
 The package is located at [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet-package]
 
 ### 2.) Microsoft.Azure.Devices.Client.PCL
-[PCL] [PCL] Portable Class Library version of .NET library helps you to build cross-platform apps.
+[PCL] [PCL] (Portable Class Library) version of .NET library helps you to build cross-platform apps.
 For example, for bulding iOS and Android application in C# in VS 2015 using [Xamarin] [Xamarin], use NuGet Package Manager to install latest version of **Microsoft.Azure.Devices.Client.PCL** Device SDK for Azure IoT Devices NuGet package to your project.
 
 The package is located at [Azure IoT Device Client PCL SDK NuGet Package] [lnk-NuGet-package_pcl]
@@ -46,14 +46,14 @@ The package is located at [Azure IoT Device Client PCL SDK NuGet Package] [lnk-N
 
 ### Building [UWP][UWP] Apps 
 Just like classic desktop app, install [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet-package].
-Microsoft.Azure.Devices.Client.winmd is [WinRT] [WinRT] version which will get installed via NuGet Package manager when you select Universal app in VS 2015. This is the version you need to build UWP apps.
+Microsoft.Azure.Devices.Client.winmd is [WinRT] [WinRT] version which will get installed via NuGet Package manager when you select **Universal** app in VS 2015. This is the version you need to build UWP apps.
 
 > Currently, **Microsoft.Azure.Devices.Client.WinRT** doesn't support MQTT protocol.
 
 ####  Building C# and Visual Basic UWP apps
 For building UWP, follow the same steps as you would follow if building classic .NET desktop application.
 
-For example, for building in **Visual Basic** , the calls using the SDK client library would look something like this
+For example, for building in **Visual Basic** , the calls using the SDK client library would be something like this
 
 ```
 Dim deviceClient As Microsoft.Azure.Devices.Client.DeviceClient = Microsoft.Azure.Devices.Client.DeviceClient.CreateFromConnectionString("{My device connection string}", Microsoft.Azure.Devices.Client.TransportType.Amqp)
@@ -67,15 +67,16 @@ where you would replace {My device connection string} with your own valid device
 #### Building Visual C++ and JavaScript UWP apps
 For Visual C++ and JavaScript UWP, you may get "Error	Failed to add reference to 'Microsoft.Azure.Amqp.Uwp' **error** while installing [Azure IoT Device Client SDK NuGet Package] [lnk-NuGet-package]. 
 
-Use the below [workaround](#workaround_uwp) for this error. Since the required dependent assemblies fail to install, you will have to **manually** copy them for Visual C++ and JavaScript UWP application.
+Use the below [workaround](#workaround_uwp) for this error. Since the required dependent assemblies **fail** to install, you will have to **manually** copy them for Visual C++ and JavaScript UWP application.
 
 <a name="workaround_uwp"/>
 ##### Workaround for building Visual C++ and JavaScript UWP apps
 
 Create a **temporary** blank UWP project in **C#** to get copies of the required dependent assemblies since installation of the assemblies failed. Right click on the Project in Solution Explorer in VS 2015 and click Manage NuGet Packages and install [Microsoft.Azure.Devices.Client] [lnk-NuGet-package] NuGet package.
 
-**Build** the temporary C# UWP project
-Go the corresponding bin folder. For example, for Debug build for x64, you will go to bin\x64\Debug and copy and paste following **4** files that would get installed.
+> **Build** the temporary C# UWP project
+
+Now, go to the corresponding bin folder. For example, for Debug build for x64, you will go to bin\x64\Debug and copy and paste following **4** files that would get installed.
 
 1. **Microsoft.Azure.Devices.Client.winmd**
 2. Microsoft.Azure.Amqp.Uwp.dll
@@ -101,7 +102,7 @@ For building iOS and Android app in C# , you will use PCL NuGet package  located
 
 <a name="building_sdk"/>
 ## Building the Azure IoT Device Client .NET SDK locally
-In some cases, you may want to build the .NET SDK libraries **locally** for development and testing purpose. For example, you may want to build the **latest** code available on the **develop** branch which follows the Continuous Integration (CI) approach and you may also want step through the client library code while debugging.
+In some cases, you may want to build the .NET SDK libraries **locally** for development and testing purpose. For example, you may want to build the **latest** code available on the **develop** branch which follows the Continuous Integration (CI) approach and you may also want to step through the client library code while debugging.
 
 To pull latest code on **develop** branch you can use following command
 
@@ -111,7 +112,7 @@ To clone the **master** use following command or simply download the **.zip** fr
 
 `git clone https://github.com/Azure/azure-iot-sdks.git`
 
-The following instructions outline how you can build the C# SDK (along with samples). You can either build using command line or you can build using VS 2015 IDE
+There are ways you can build the C# SDK (along with samples). You can either build using command line or you can build using VS 2015 IDE
 
 ### Option 1:  Build using command line
 1. Open a Developer Command Prompt for VS2015.
