@@ -418,8 +418,8 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 
     char *deviceTwinData = IoTHubDeviceTwin_UpdateTwin(serviceClientDeviceTwinHandle, iotHubConfig.deviceId, buffer);
     free(buffer);
-    free(deviceTwinData);
     ASSERT_IS_NOT_NULL_WITH_MSG(deviceTwinData, "IoTHubDeviceTwin_UpdateTwin failed");
+    free(deviceTwinData);
 
     time_t beginOperation, nowTime;
     beginOperation = time(NULL);
