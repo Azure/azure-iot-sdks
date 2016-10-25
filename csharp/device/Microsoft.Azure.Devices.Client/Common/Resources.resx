@@ -207,4 +207,7 @@
   <data name="SizeExceedsRemainingBufferSpace" xml:space="preserve">
     <value>The specified size exceeds the remaining buffer space ({0} bytes).</value>
   </data>
+  <data name="OperationTimeoutExpired" xml:space="preserve">
+    <value>Operation timeout expired.</value>
+  </data>
 </root>

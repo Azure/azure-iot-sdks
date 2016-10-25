@@ -58,15 +58,19 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="AmqpTransportHandlerTests.cs" />
     <Compile Include="CertificateHelper.cs" />
     <Compile Include="ClientWebSocketTransportTests.cs" />
     <Compile Include="ConnectionPoolTests.cs" />
     <Compile Include="ConnectionString\DeviceClientConnectionStringExceptionTests.cs" />
     <Compile Include="ConnectionString\DeviceClientConnectionStringTests.cs" />
+    <Compile Include="DeviceClientTests.cs" />
     <Compile Include="ErrorDelegatingHandlerTests.cs" />
     <Compile Include="ExceptionAssertions.cs" />
     <Compile Include="GateKeeperDelegatingHandlerTests.cs" />
+    <Compile Include="HttpTransportHandlerTests.cs" />
     <Compile Include="MessageTests.cs" />
+    <Compile Include="MqttTransportHandlerTests.cs" />
     <Compile Include="RetryDelegatingHandlerTests.cs" />
     <Compile Include="RoutingDelegatingHandlerTests.cs" />
     <Compile Include="TestAssert.cs" />

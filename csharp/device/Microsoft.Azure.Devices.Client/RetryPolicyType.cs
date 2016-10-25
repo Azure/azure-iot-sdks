@@ -7,12 +7,12 @@ namespace Microsoft.Azure.Devices.Client
     /// <summary>
     /// Retry Strategy types supported by DeviceClient
     /// </summary>
-    public enum RetryStrategyType
+    public enum RetryPolicyType
     {
         /// <summary>
         /// No retry.  A single attempt to connect then tries a single time to send if connection is established
         /// </summary>
-        None = 0,
+        No_Retry = 0,
 
         /// <summary>
         /// A retry strategy with backoff parameters for calculating the exponential delay between retries. 

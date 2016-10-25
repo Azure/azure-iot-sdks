@@ -2,7 +2,7 @@
 
 ## Overview
 
-DeviceClient class allows devices to communicate with an Azure IoTHub.  It can send event messages and receive messages.  The client handles communication with IoTHub through a transport protocol specified.  It uses Http for UWP or PCL and Amqp otherwise. 
+DeviceClient class allows devices to communicate with an Azure IoTHub.  It can send event messages and receive messages.  The client handles communication with IoTHub through a transport protocol specified.  It uses Amqp for PCL, Http or Amqp for UWP. 
  
 ## References
 
@@ -72,17 +72,7 @@ public AsyncTask OpenAsync()
 
 **SRS_DEVICECLIENT_28_006: [** The async operation shall retry using retry policy specified in the RetryStrategy property. **]**
 
-**SRS_DEVICECLIENT_28_007: [** The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable error occurs. **]**
-
-
-### CloseAsync
-```csharp
-public AsyncTask CloseAsync()
-```
-
-**SRS_DEVICECLIENT_28_008: [** The async operation shall retry using retry policy specified in the RetryStrategy property. **]**
-
-**SRS_DEVICECLIENT_28_009: [** The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable error occurs. **]**
+**SRS_DEVICECLIENT_28_007: [** The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable (authentication, quota exceed) error occurs. **]**
 
 
 ### ReceiveAsync
@@ -93,7 +83,7 @@ public AsyncTaskOfMessage ReceiveAsync(TimeSpan timeout)
 
 **SRS_DEVICECLIENT_28_010: [** The async operation shall retry using retry policy specified in the RetryStrategy property. **]**
 
-**SRS_DEVICECLIENT_28_011: [** The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable error occurs. **]**
+**SRS_DEVICECLIENT_28_011: [** The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable (authentication, quota exceed) error occurs. **]**
 
 
 ### CompleteAsync
@@ -104,7 +94,7 @@ public AsyncTask CompleteAsync(Message message)
 
 **SRS_DEVICECLIENT_28_012: [** The async operation shall retry using retry policy specified in the RetryStrategy property. **]**
 
-**SRS_DEVICECLIENT_28_013: [** The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable error occurs. **]**
+**SRS_DEVICECLIENT_28_013: [** The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable error (authentication, quota exceed) occurs. **]**
 
 
 ### AbandonAsync
@@ -115,7 +105,7 @@ public AsyncTask AbandonAsync(Message message)
 
 **SRS_DEVICECLIENT_28_014: [** The async operation shall retry using retry policy specified in the RetryStrategy property. **]**
 
-**SRS_DEVICECLIENT_28_015: [** The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable error occurs. **]**
+**SRS_DEVICECLIENT_28_015: [** The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable error (authentication, quota exceed) occurs. **]**
 
 
 ### RejectAsync
@@ -126,7 +116,7 @@ public AsyncTask RejectAsync(Message message)
 
 **SRS_DEVICECLIENT_28_016: [** The async operation shall retry using retry policy specified in the RetryStrategy property. **]**
 
-**SRS_DEVICECLIENT_28_017: [** The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable error occurs. **]**
+**SRS_DEVICECLIENT_28_017: [** The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable error (authentication, quota exceed) occurs. **]**
 
 
 ### SendEventAsync
@@ -137,7 +127,7 @@ public AsyncTask SendEventBatchAsync(IEnumerable<Message> messages)
 
 **SRS_DEVICECLIENT_28_018: [** The async operation shall retry using retry policy specified in the RetryStrategy property. **]**
 
-**SRS_DEVICECLIENT_28_019: [** The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable error occurs. **]**
+**SRS_DEVICECLIENT_28_019: [** The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable error (authentication or quota exceed) occurs. **]**
 
 
 ### RetryStrategy
@@ -150,15 +140,9 @@ public RetryStrategyType RetryStrategy
 
 ### OperationTimeoutInMilliseconds
 ```csharp
-public int OperationTimeoutInMilliseconds
+public uint OperationTimeoutInMilliseconds
 ```
 
-**SRS_DEVICECLIENT_28_002: [** This property shall be defaulted to 240000 (4 minute). **]**
+**SRS_DEVICECLIENT_28_002: [** This property shall be defaulted to 240000 (4 minutes). **]**
 
-**SRS_DEVICECLIENT_28_003: [** If this property is set to 0, subsequent operations shall be retried indefinitely until successful or until an unrecoverable error is detected **]**
-
-**SRS_DEVICECLIENT_28_004: [** If setting this property to a negative value, the property setter shall throw an ArgumentException. **]**
-
-
-
-
+**SRS_DEVICECLIENT_28_003: [** If this property is set to 0, subsequent operations shall be retried indefinitely until successful or until an unrecoverable error (authentication or quota exceed) is detected **]**

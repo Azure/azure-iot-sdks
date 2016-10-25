@@ -3,10 +3,12 @@
 
 namespace Microsoft.Azure.Devices.Client
 {
+    using Common;
     using System;
     using System.Linq;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
+    using System.Threading;
     using Microsoft.Azure.Devices.Client.Extensions;
     using Microsoft.Azure.Devices.Client.Transport;
 #if !WINDOWS_UWP && !PCL
@@ -104,12 +106,13 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// Stores the timeout used in the operation retries.
         /// </summary>
-        public int OperationTimeoutInMilliseconds { get; set; }
+        /* Codes_SRS_DEVICECLIENT_28_002: [This property shall be defaulted to 240000 (4 minutes).] */
+        public uint OperationTimeoutInMilliseconds { get; set; } = 4 * 60 * 1000;
 
         /// <summary>
         /// Stores the retry strategy used in the operation retries.
         /// </summary>
-        public RetryStrategyType RetryStrategy { get; set; }
+        public RetryPolicyType RetryPolicy { get; set; }
 
 #if !PCL
         DeviceClient(IotHubConnectionString iotHubConnectionString, ITransportSettings[] transportSettings)
@@ -451,12 +454,19 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
-            /// <summary>
-            /// Explicitly open the DeviceClient instance.
-            /// </summary>
+        private CancellationTokenSource GetOperationTimeoutCancellationTokenSource()
+        {
+            return new CancellationTokenSource(TimeSpan.FromMilliseconds(OperationTimeoutInMilliseconds));
+        }
+
+        /// <summary>
+        /// Explicitly open the DeviceClient instance.
+        /// </summary>
+
         public AsyncTask OpenAsync()
         {
-            return this.InnerHandler.OpenAsync(true).AsTaskOrAsyncOp();
+            /* Codes_SRS_DEVICECLIENT_28_007: [ The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable(authentication, quota exceed) error occurs.] */
+            return ApplyTimeout(operationTimeoutCancellationToken => this.InnerHandler.OpenAsync(true, operationTimeoutCancellationToken));
         }
 
         /// <summary>
@@ -474,7 +484,8 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>The receive message or null if there was no message until the default timeout</returns>
         public AsyncTaskOfMessage ReceiveAsync()
         {
-            return this.InnerHandler.ReceiveAsync().AsTaskOrAsyncOp();
+            /* Codes_SRS_DEVICECLIENT_28_011: [The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable(authentication, quota exceed) error occurs.] */
+            return ApplyTimeout(operationTimeoutCancellationToken => this.InnerHandler.ReceiveAsync(operationTimeoutCancellationToken));
         }
 
         /// <summary>
@@ -483,7 +494,8 @@ namespace Microsoft.Azure.Devices.Client
         /// <returns>The receive message or null if there was no message until the specified time has elapsed</returns>
         public AsyncTaskOfMessage ReceiveAsync(TimeSpan timeout)
         {
-            return this.InnerHandler.ReceiveAsync(timeout).AsTaskOrAsyncOp();
+            /* Codes_SRS_DEVICECLIENT_28_011: [The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable(authentication, quota exceed) error occurs.] */
+            return ApplyTimeout(operationTimeoutCancellationToken => this.InnerHandler.ReceiveAsync(timeout, operationTimeoutCancellationToken));
         }
 
 #if WINDOWS_UWP
@@ -501,7 +513,8 @@ namespace Microsoft.Azure.Devices.Client
                 throw Fx.Exception.ArgumentNull("lockToken");
             }
 
-            return this.InnerHandler.CompleteAsync(lockToken).AsTaskOrAsyncOp();
+            /* Codes_SRS_DEVICECLIENT_28_013: [The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable error(authentication, quota exceed) occurs.] */
+            return ApplyTimeout(operationTimeoutCancellationToken => this.InnerHandler.CompleteAsync(lockToken, operationTimeoutCancellationToken));
         }
 
         /// <summary>
@@ -514,7 +527,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 throw Fx.Exception.ArgumentNull("message");
             }
-
+            /* Codes_SRS_DEVICECLIENT_28_015: [The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable error(authentication, quota exceed) occurs.] */
             return this.CompleteAsync(message.LockToken);
         }
 
@@ -532,8 +545,8 @@ namespace Microsoft.Azure.Devices.Client
             {
                 throw Fx.Exception.ArgumentNull("lockToken");
             }
-
-            return this.InnerHandler.AbandonAsync(lockToken).AsTaskOrAsyncOp();
+            /* Codes_SRS_DEVICECLIENT_28_015: [The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable error(authentication, quota exceed) occurs.] */
+            return ApplyTimeout(operationTimeoutCancellationToken => this.InnerHandler.AbandonAsync(lockToken, operationTimeoutCancellationToken));
         }
 
         /// <summary>
@@ -565,7 +578,7 @@ namespace Microsoft.Azure.Devices.Client
                 throw Fx.Exception.ArgumentNull("lockToken");
             }
 
-            return this.InnerHandler.RejectAsync(lockToken).AsTaskOrAsyncOp();
+            return ApplyTimeout(operationTimeoutCancellationToken => this.InnerHandler.RejectAsync(lockToken, operationTimeoutCancellationToken));
         }
 
         /// <summary>
@@ -578,8 +591,8 @@ namespace Microsoft.Azure.Devices.Client
             {
                 throw Fx.Exception.ArgumentNull("message");
             }
-
-            return this.RejectAsync(message.LockToken);
+            /* Codes_SRS_DEVICECLIENT_28_017: [The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable error(authentication, quota exceed) occurs.] */
+            return ApplyTimeout(operationTimeoutCancellationToken => this.InnerHandler.RejectAsync(message.LockToken, operationTimeoutCancellationToken));
         }
 
         /// <summary>
@@ -592,8 +605,8 @@ namespace Microsoft.Azure.Devices.Client
             {
                 throw Fx.Exception.ArgumentNull("message");
             }
-
-            return this.InnerHandler.SendEventAsync(message).AsTaskOrAsyncOp();
+            /* Codes_SRS_DEVICECLIENT_28_019: [The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable error(authentication or quota exceed) occurs.] */
+            return ApplyTimeout(operationTimeoutCancellationToken => this.InnerHandler.SendEventAsync(message, operationTimeoutCancellationToken));
         }
 
         /// <summary>
@@ -606,9 +619,55 @@ namespace Microsoft.Azure.Devices.Client
             {
                 throw Fx.Exception.ArgumentNull("messages");
             }
-
-            return this.InnerHandler.SendEventAsync(messages).AsTaskOrAsyncOp();
+            /* Codes_SRS_DEVICECLIENT_28_019: [The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable error(authentication or quota exceed) occurs.] */
+            return ApplyTimeout(operationTimeoutCancellationToken => this.InnerHandler.SendEventAsync(messages, operationTimeoutCancellationToken));
         }
+
+        private AsyncTask ApplyTimeout(Func<CancellationToken, System.Threading.Tasks.Task> operation)
+        {
+            if (OperationTimeoutInMilliseconds == 0)
+            {
+                return operation(CancellationToken.None)
+                    .WithTimeout(TimeSpan.MaxValue, () => Resources.OperationTimeoutExpired, CancellationToken.None)
+                    .AsTaskOrAsyncOp();
+            }
+
+            CancellationTokenSource operationTimeoutCancellationTokenSource = GetOperationTimeoutCancellationTokenSource();
+
+            var result = operation(operationTimeoutCancellationTokenSource.Token)
+            .WithTimeout(TimeSpan.FromMilliseconds(OperationTimeoutInMilliseconds), () => Resources.OperationTimeoutExpired, operationTimeoutCancellationTokenSource.Token)
+            .ContinueWith(t =>
+                {
+                    operationTimeoutCancellationTokenSource.Dispose();
+                })
+            .AsTaskOrAsyncOp();
+
+            return result;
+        }
+
+        private AsyncTaskOfMessage ApplyTimeout(Func<CancellationToken, System.Threading.Tasks.Task<Message>> operation)
+        {
+            if (OperationTimeoutInMilliseconds == 0)
+            {
+                return operation(CancellationToken.None)
+                    .WithTimeout(TimeSpan.MaxValue, () => Resources.OperationTimeoutExpired, CancellationToken.None)
+                    .AsTaskOrAsyncOp();
+            }
+            
+            CancellationTokenSource operationTimeoutCancellationTokenSource = GetOperationTimeoutCancellationTokenSource();
+
+            var result = operation(operationTimeoutCancellationTokenSource.Token)
+                .WithTimeout(TimeSpan.FromMilliseconds(OperationTimeoutInMilliseconds), () => Resources.OperationTimeoutExpired, operationTimeoutCancellationTokenSource.Token)
+                .ContinueWith(t =>
+                {
+                    operationTimeoutCancellationTokenSource.Dispose();
+                    return t.Result;
+                })
+                .AsTaskOrAsyncOp();
+
+            return result;
+        }
+
 
 #if !WINDOWS_UWP && !PCL
         /// <summary>

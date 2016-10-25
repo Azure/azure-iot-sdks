@@ -4,6 +4,7 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
 
 #if !PCL
@@ -90,10 +91,11 @@ namespace Microsoft.Azure.Devices.Client
             return iotHubConnectionString.Audience + path;
         }
 
-        protected override async Task OpenLinkAsync(AmqpObject link, IotHubConnectionString connectionString, string audience, TimeSpan timeout)
+        protected override async Task OpenLinkAsync(AmqpObject link, IotHubConnectionString connectionString, string audience, TimeSpan timeout, CancellationToken token)
         {
             var timeoutHelper = new TimeoutHelper(timeout);
-       
+
+            token.ThrowIfCancellationRequested();
             try
             {
                 // this is a device-scope connection string. We need to send a CBS token for this specific link before opening it.
@@ -117,6 +119,7 @@ namespace Microsoft.Azure.Devices.Client
                     await iotHubLinkTokenRefresher.SendCbsTokenAsync(timeoutHelper.RemainingTime());
                 }
 
+                token.ThrowIfCancellationRequested();
                 // Open Amqp Link
                 await link.OpenAsync(timeoutHelper.RemainingTime());
             }
