@@ -452,7 +452,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     {
         ASSERT_IS_TRUE_WITH_MSG(device->receivedCallBack, "deviceTwinCallback was never called"); // was received by the callback...
         ASSERT_ARE_EQUAL_WITH_MSG(DEVICE_TWIN_UPDATE_STATE, DEVICE_TWIN_UPDATE_COMPLETE, device->update_state, "update_state differs from expected");
-        ASSERT_IS_NOT_NULL(device->cb_payload, "payload is NULL");
+        ASSERT_IS_NOT_NULL_WITH_MSG(device->cb_payload, "payload is NULL");
         (void)Unlock(device->lock);
     }
 
