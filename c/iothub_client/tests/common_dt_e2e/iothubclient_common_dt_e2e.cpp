@@ -334,7 +334,15 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
     {
         device->update_state = update_state;
         device->receivedCallBack = true;
-        device->cb_payload = malloc_and_copy_unsigned_char(payload, size);
+        if (device->cb_payload == NULL)
+        {
+            device->cb_payload = malloc_and_copy_unsigned_char(payload, size);
+            LogInfo("cb_payload '%s'", device->cb_payload);
+        }
+        else
+        {
+            LogError("deviceTwinCallback - cb_payload not null");
+        }
         (void) Unlock(device->lock);
     }
 }
