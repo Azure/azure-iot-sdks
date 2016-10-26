@@ -210,9 +210,6 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     IOTHUB_CLIENT_RESULT iot_result = IoTHubClient_SendReportedState(iotHubClientHandle, (unsigned char *) buffer, strlen(buffer), reportedStateCallback, device);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, iot_result, "IoTHubClient_SendReportedState failed");
 
-    // cleanup
-    free(buffer);
-
     int status_code = 400;
     time_t beginOperation, nowTime;
     beginOperation = time(NULL);
@@ -271,9 +268,10 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
         // cleanup
         json_value_free(root_value);
         free(deviceTwinData);
-        IoTHubClient_Destroy(iotHubClientHandle);
+        free(buffer);
         IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
         IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
+        IoTHubClient_Destroy(iotHubClientHandle);
         device_reported_deinit(device);
     }
 }
@@ -424,8 +422,6 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 
     char *deviceTwinData = IoTHubDeviceTwin_UpdateTwin(serviceClientDeviceTwinHandle, iotHubConfig.deviceId, buffer);
     ASSERT_IS_NOT_NULL_WITH_MSG(deviceTwinData, "IoTHubDeviceTwin_UpdateTwin failed");
-    free(buffer);
-    free(deviceTwinData);
 
     JSON_Value *root_value = NULL;
     const char *string_property = NULL;
@@ -477,10 +473,12 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 
         // cleanup
         json_value_free(root_value);
-        IoTHubClient_Destroy(iotHubClientHandle);
         IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
         IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
         free(expected_desired_string);
+        free(buffer);
+        free(deviceTwinData);
+        IoTHubClient_Destroy(iotHubClientHandle);
         device_desired_deinit(device);
     }
 }
