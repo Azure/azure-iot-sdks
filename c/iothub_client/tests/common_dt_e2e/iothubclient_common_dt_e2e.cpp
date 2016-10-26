@@ -199,8 +199,8 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 
     // Turn on Log
     bool trace = true;
-    (void)IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
-    (void)IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates);
+    (void) IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
+    (void) IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates);
 
     // generate the payload
     char *buffer = malloc_and_fill_reported_payload(device->string_property, device->integer_property);
@@ -334,8 +334,11 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
     {
         device->update_state = update_state;
         device->receivedCallBack = true;
-        device->cb_payload = malloc_and_copy_unsigned_char(payload, size);
-        (void)Unlock(device->lock);
+        if (device->cb_payload == NULL)
+        {
+            device->cb_payload = malloc_and_copy_unsigned_char(payload, size);
+        }
+        (void) Unlock(device->lock);
     }
 }
 
@@ -462,16 +465,15 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
         int integer_property = (int) json_object_dotget_number(root_object, "desired.integer_property");
         ASSERT_ARE_EQUAL_WITH_MSG(int, expected_desired_integer, integer_property, "integer data retrieved differs from expected");
 
-        // cleanup
         json_value_free(root_value);
-        IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
-        IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
 
         (void) Unlock(device->lock);
     }
 
     // cleanup
     free(expected_desired_string);
+    IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
+    IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
     IoTHubClient_Destroy(iotHubClientHandle);
     device_desired_deinit(device);
 }
