@@ -38,9 +38,9 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 #if !PCL
-        public Task OpenAsync(TimeSpan timeout)
+        public Task OpenAsync(TimeSpan timeout, CancellationToken cancellationToken)
         {
-            return this.GetOrCreateAsync(timeout);
+            return this.GetOrCreateAsync(timeout, cancellationToken);
         }
 #endif
 
@@ -70,7 +70,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 
 #if !PCL
-        public async Task<TValue> GetOrCreateAsync(TimeSpan timeout)
+        public async Task<TValue> GetOrCreateAsync(TimeSpan timeout, CancellationToken cancellationToken)
         {
             var timeoutHelper = new TimeoutHelper(timeout);
 
@@ -86,7 +86,7 @@ namespace Microsoft.Azure.Devices.Client
                 tcs = new TaskCompletionSource<TValue>();
                 if (this.TrySet(tcs))
                 {
-                    this.CreateValue(tcs, timeoutHelper.RemainingTime()).Fork();
+                    this.CreateValue(tcs, timeoutHelper.RemainingTime(), cancellationToken).Fork();
                 }
             }
 
@@ -114,7 +114,7 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-        protected abstract Task<TValue> OnCreateAsync(TimeSpan timeout);
+        protected abstract Task<TValue> OnCreateAsync(TimeSpan timeout, CancellationToken cancellationToken);
 
         protected abstract void OnSafeClose(TValue value);
 
@@ -156,11 +156,11 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-        async Task CreateValue(TaskCompletionSource<TValue> tcs, TimeSpan timeout)
+        async Task CreateValue(TaskCompletionSource<TValue> tcs, TimeSpan timeout, CancellationToken cancellationToken)
         {
             try
             {
-                TValue value = await OnCreateAsync(timeout);
+                TValue value = await OnCreateAsync(timeout, cancellationToken);
                 tcs.SetResult(value);
 
                 if (this.disposed)

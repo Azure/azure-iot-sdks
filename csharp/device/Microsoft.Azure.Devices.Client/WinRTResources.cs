@@ -326,6 +326,17 @@ namespace Microsoft.Azure.Devices.Client.Common
                 return ResourceManager.GetString("ValueMustBeNonNegative", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Operation timeout expired..
+        /// </summary>
+        internal static string OperationTimeoutExpired
+        {
+            get
+            {
+                return ResourceManager.GetString("OperationTimeoutExpired", resourceCulture);
+            }
+        }
     }
     namespace Api
     {
@@ -397,7 +408,6 @@ namespace Microsoft.Azure.Devices.Client.Common
                     return ResourceManager.GetString("FailedToSerializeUnsupportedType", resourceCulture);
                 }
             }
-
         }
     }
 

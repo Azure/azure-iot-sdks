@@ -8,6 +8,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
     // Therefore, define a separate alias for each type argument
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Devices.Client.Extensions;
 
@@ -31,80 +32,80 @@ namespace Microsoft.Azure.Devices.Client.Transport
         /// <summary>
         /// Explicitly open the DeviceClient instance.
         /// </summary>
-        public Task OpenAsync()
+        public Task OpenAsync(CancellationToken cancellationToken)
         {
-            return this.EnsureOpenedAsync(true);
+            return this.EnsureOpenedAsync(true, cancellationToken);
         }
 
         /// <summary>
         /// Receive a message from the device queue with the specified timeout
         /// </summary>
         /// <returns>The receive message or null if there was no message until the specified time has elapsed</returns>
-        public override async Task<Message> ReceiveAsync()
+        public override async Task<Message> ReceiveAsync(CancellationToken cancellationToken)
         {
-            await this.EnsureOpenedAsync(false);
-            return await base.ReceiveAsync();
+            await this.EnsureOpenedAsync(false, cancellationToken);
+            return await base.ReceiveAsync(cancellationToken);
         }
 
         /// <summary>
         /// Receive a message from the device queue with the specified timeout
         /// </summary>
         /// <returns>The receive message or null if there was no message until the specified time has elapsed</returns>
-        public override async Task<Message> ReceiveAsync(TimeSpan timeout)
+        public override async Task<Message> ReceiveAsync(TimeSpan timeout, CancellationToken cancellationToken)
         {
             TimeoutHelper.ThrowIfNegativeArgument(timeout);
-            await this.EnsureOpenedAsync(false);
-            return await base.ReceiveAsync(timeout);
+            await this.EnsureOpenedAsync(false, cancellationToken);
+            return await base.ReceiveAsync(timeout, cancellationToken);
         }
 
         /// <summary>
         /// Deletes a received message from the device queue
         /// </summary>
         /// <returns>The lock identifier for the previously received message</returns>
-        public override async Task CompleteAsync(string lockToken)
+        public override async Task CompleteAsync(string lockToken, CancellationToken cancellationToken)
         {
-            await this.EnsureOpenedAsync(false);
-            await base.CompleteAsync(lockToken);
+            await this.EnsureOpenedAsync(false, cancellationToken);
+            await base.CompleteAsync(lockToken, cancellationToken);
         }
 
         /// <summary>
         /// Puts a received message back onto the device queue
         /// </summary>
         /// <returns>The previously received message</returns>
-        public override async Task AbandonAsync(string lockToken)
+        public override async Task AbandonAsync(string lockToken, CancellationToken cancellationToken)
         {
-            await this.EnsureOpenedAsync(false);
-            await base.AbandonAsync(lockToken);
+            await this.EnsureOpenedAsync(false, cancellationToken);
+            await base.AbandonAsync(lockToken, cancellationToken);
         }
 
         /// <summary>
         /// Deletes a received message from the device queue and indicates to the server that the message could not be processed.
         /// </summary>
         /// <returns>The previously received message</returns>
-        public override async Task RejectAsync(string lockToken)
+        public override async Task RejectAsync(string lockToken, CancellationToken cancellationToken)
         {
-            await this.EnsureOpenedAsync(false);
-            await base.RejectAsync(lockToken);
+            await this.EnsureOpenedAsync(false, cancellationToken);
+            await base.RejectAsync(lockToken, cancellationToken);
         }
 
         /// <summary>
         /// Sends an event to device hub
         /// </summary>
         /// <returns>The message containing the event</returns>
-        public override async Task SendEventAsync(Message message)
+        public override async Task SendEventAsync(Message message, CancellationToken cancellationToken)
         {
-            await this.EnsureOpenedAsync(false);
-            await base.SendEventAsync(message);
+            await this.EnsureOpenedAsync(false, cancellationToken);
+            await base.SendEventAsync(message, cancellationToken);
         }
 
         /// <summary>
         /// Sends a batch of events to device hub
         /// </summary>
         /// <returns>The task containing the event</returns>
-        public override async Task SendEventAsync(IEnumerable<Message> messages)
+        public override async Task SendEventAsync(IEnumerable<Message> messages, CancellationToken cancellationToken)
         {
-            await this.EnsureOpenedAsync(false);
-            await base.SendEventAsync(messages);
+            await this.EnsureOpenedAsync(false, cancellationToken);
+            await base.SendEventAsync(messages, cancellationToken);
         }
 
         /// <summary>
@@ -143,7 +144,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             return this.open;
         }
 
-        Task EnsureOpenedAsync(bool explicitOpen)
+        Task EnsureOpenedAsync(bool explicitOpen, CancellationToken cancellationToken)
         {
             lock (this.thisLock)
             {
@@ -190,7 +191,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             {
                 try
                 {
-                    base.OpenAsync(explicitOpen).ContinueWith(
+                    base.OpenAsync(explicitOpen, cancellationToken).ContinueWith(
                         t =>
                         {
                             TaskCompletionSource<object> localOpenTaskCompletionSource;
@@ -224,6 +225,12 @@ namespace Microsoft.Azure.Devices.Client.Transport
                         this.openTaskCompletionSource = new TaskCompletionSource<object>(this);
                     }
                     localOpenTaskCompletionSource.SetException(ex);
+
+                    if (ex is TaskCanceledException)
+                    {
+                        throw new TimeoutException();
+                    }
+
                     throw;
                 }
             }

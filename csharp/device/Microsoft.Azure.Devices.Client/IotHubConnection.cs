@@ -44,7 +44,7 @@ namespace Microsoft.Azure.Devices.Client
 
         public abstract void SafeClose(Exception exception);
 
-        public async Task<SendingAmqpLink> CreateSendingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout)
+        public async Task<SendingAmqpLink> CreateSendingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout, CancellationToken cancellationToken)
         {
             this.OnCreateSendingLink(connectionString);
 
@@ -53,7 +53,7 @@ namespace Microsoft.Azure.Devices.Client
             AmqpSession session;
             if (!this.FaultTolerantSession.TryGetOpenedObject(out session))
             {
-                session = await this.FaultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
+                session = await this.FaultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime(), cancellationToken);
             }
 
             var linkAddress = this.BuildLinkAddress(connectionString, path);
@@ -74,12 +74,12 @@ namespace Microsoft.Azure.Devices.Client
             link.AttachTo(session);
 
             var audience = this.BuildAudience(connectionString, path);
-            await this.OpenLinkAsync(link, connectionString, audience, timeoutHelper.RemainingTime());
+            await this.OpenLinkAsync(link, connectionString, audience, timeoutHelper.RemainingTime(), cancellationToken);
 
             return link;
         }
 
-        public async Task<ReceivingAmqpLink> CreateReceivingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout, uint prefetchCount)
+        public async Task<ReceivingAmqpLink> CreateReceivingLinkAsync(string path, IotHubConnectionString connectionString, TimeSpan timeout, uint prefetchCount, CancellationToken cancellationToken)
         {
             this.OnCreateReceivingLink(connectionString);
 
@@ -88,7 +88,7 @@ namespace Microsoft.Azure.Devices.Client
             AmqpSession session;
             if (!this.FaultTolerantSession.TryGetOpenedObject(out session))
             {
-                session = await this.FaultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime());
+                session = await this.FaultTolerantSession.GetOrCreateAsync(timeoutHelper.RemainingTime(), cancellationToken);
             }
 
             var linkAddress = this.BuildLinkAddress(connectionString, path);
@@ -110,7 +110,7 @@ namespace Microsoft.Azure.Devices.Client
             link.AttachTo(session);
 
             var audience = this.BuildAudience(connectionString, path);
-            await this.OpenLinkAsync(link, connectionString, audience, timeoutHelper.RemainingTime());
+            await this.OpenLinkAsync(link, connectionString, audience, timeoutHelper.RemainingTime(), cancellationToken);
 
             return link;
         }
@@ -126,7 +126,7 @@ namespace Microsoft.Azure.Devices.Client
 
         protected abstract string BuildAudience(IotHubConnectionString iotHubConnectionString, string path);
 
-        protected abstract Task OpenLinkAsync(AmqpObject link, IotHubConnectionString connectionString, string audience, TimeSpan timeout);
+        protected abstract Task OpenLinkAsync(AmqpObject link, IotHubConnectionString connectionString, string audience, TimeSpan timeout, CancellationToken cancellationToken);
 
         protected static bool InitializeDisableServerCertificateValidation()
         {
@@ -150,7 +150,7 @@ namespace Microsoft.Azure.Devices.Client
             // do nothing. Override in derived classes if necessary
         }
 
-        protected virtual async Task<AmqpSession> CreateSessionAsync(TimeSpan timeout)
+        protected virtual async Task<AmqpSession> CreateSessionAsync(TimeSpan timeout, CancellationToken token)
         {
             this.OnCreateSession();
 
@@ -158,6 +158,8 @@ namespace Microsoft.Azure.Devices.Client
 
             AmqpSettings amqpSettings = CreateAmqpSettings();
             TransportBase transport;
+
+            token.ThrowIfCancellationRequested();
 
             switch (this.AmqpTransportSettings.GetTransportType())
             {
@@ -185,6 +187,7 @@ namespace Microsoft.Azure.Devices.Client
             var amqpConnection = new AmqpConnection(transport, amqpSettings, amqpConnectionSettings);
             try
             {
+                token.ThrowIfCancellationRequested();
                 await amqpConnection.OpenAsync(timeoutHelper.RemainingTime());
 
                 var sessionSettings = new AmqpSessionSettings()
@@ -193,6 +196,7 @@ namespace Microsoft.Azure.Devices.Client
                 };
 
                 AmqpSession amqpSession = amqpConnection.CreateSession(sessionSettings);
+                token.ThrowIfCancellationRequested();
                 await amqpSession.OpenAsync(timeoutHelper.RemainingTime());
 
                 // This adds itself to amqpConnection.Extensions

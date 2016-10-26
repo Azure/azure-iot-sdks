@@ -268,6 +268,15 @@ namespace Microsoft.Azure.Devices.Client.Common {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Operation timeout expired..
+        /// </summary>
+        internal static string OperationTimeoutExpired {
+            get {
+                return ResourceManager.GetString("OperationTimeoutExpired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An unexpected failure occurred. Applications should not attempt to handle this error. For diagnostic purposes, this English message is associated with the failure: {0}..
         /// </summary>
         internal static string ShipAssertExceptionMessage {

@@ -5,6 +5,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Devices.Client.Common;
 
@@ -24,9 +25,9 @@ namespace Microsoft.Azure.Devices.Client.Transport
             this.InnerHandler = innerHandler;
         }
 
-        public virtual Task OpenAsync(bool explicitOpen)
+        public virtual Task OpenAsync(bool explicitOpen, CancellationToken cancellationToken)
         {
-            return this.InnerHandler?.OpenAsync(explicitOpen) ?? TaskConstants.Completed;
+            return this.InnerHandler?.OpenAsync(explicitOpen, cancellationToken) ?? TaskConstants.Completed;
         }
         
         public virtual Task CloseAsync()
@@ -43,39 +44,39 @@ namespace Microsoft.Azure.Devices.Client.Transport
             }
         }
 
-        public virtual Task<Message> ReceiveAsync()
+        public virtual Task<Message> ReceiveAsync(CancellationToken cancellationToken)
         {
-            return this.InnerHandler?.ReceiveAsync() ?? DummyResultObject;
+            return this.InnerHandler?.ReceiveAsync(cancellationToken) ?? DummyResultObject;
         }
 
-        public virtual Task<Message> ReceiveAsync(TimeSpan timeout)
+        public virtual Task<Message> ReceiveAsync(TimeSpan timeout, CancellationToken cancellationToken)
         {
-            return this.InnerHandler?.ReceiveAsync(timeout) ?? DummyResultObject;
+            return this.InnerHandler?.ReceiveAsync(timeout, cancellationToken) ?? DummyResultObject;
         }
 
-        public virtual Task CompleteAsync(string lockToken)
+        public virtual Task CompleteAsync(string lockToken, CancellationToken cancellationToken)
         {
-            return this.InnerHandler?.CompleteAsync(lockToken) ?? TaskConstants.Completed;
+            return this.InnerHandler?.CompleteAsync(lockToken, cancellationToken) ?? TaskConstants.Completed;
         }
 
-        public virtual Task AbandonAsync(string lockToken)
+        public virtual Task AbandonAsync(string lockToken, CancellationToken cancellationToken)
         {
-            return this.InnerHandler?.AbandonAsync(lockToken) ?? TaskConstants.Completed;
+            return this.InnerHandler?.AbandonAsync(lockToken, cancellationToken) ?? TaskConstants.Completed;
         }
 
-        public virtual Task RejectAsync(string lockToken)
+        public virtual Task RejectAsync(string lockToken, CancellationToken cancellationToken)
         {
-            return this.InnerHandler?.RejectAsync(lockToken) ?? TaskConstants.Completed;
+            return this.InnerHandler?.RejectAsync(lockToken, cancellationToken) ?? TaskConstants.Completed;
         }
 
-        public virtual Task SendEventAsync(Message message)
+        public virtual Task SendEventAsync(Message message, CancellationToken cancellationToken)
         {
-            return this.InnerHandler?.SendEventAsync(message) ?? TaskConstants.Completed;
+            return this.InnerHandler?.SendEventAsync(message, cancellationToken) ?? TaskConstants.Completed;
         }
 
-        public virtual Task SendEventAsync(IEnumerable<Message> messages)
+        public virtual Task SendEventAsync(IEnumerable<Message> messages, CancellationToken cancellationToken)
         {
-            return this.InnerHandler?.SendEventAsync(messages) ?? TaskConstants.Completed;
+            return this.InnerHandler?.SendEventAsync(messages, cancellationToken) ?? TaskConstants.Completed;
         }
 
         protected virtual void Dispose(bool disposing)

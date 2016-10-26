@@ -4,6 +4,7 @@ namespace Microsoft.Azure.Devices.Client.Test
 {
     using System;
     using System.Net.Sockets;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Devices.Client.Common;
     using Microsoft.Azure.Devices.Client.Exceptions;
@@ -24,12 +25,12 @@ namespace Microsoft.Azure.Devices.Client.Test
             var amqpTransportSettings = Substitute.For<ITransportSettings>();
             var mqttTransportSettings = Substitute.For<ITransportSettings>();
             var innerHandler = Substitute.For<IDelegatingHandler>();
-            innerHandler.OpenAsync(Arg.Is(false)).Returns(TaskConstants.Completed);
+            innerHandler.OpenAsync(Arg.Is(false), Arg.Any<CancellationToken>()).Returns(TaskConstants.Completed);
             var sut = new RoutingDelegatingHandler((cs, ts) => innerHandler, null, new [] {amqpTransportSettings, mqttTransportSettings} );
-
-            await sut.OpenAsync(false);
+            var cancellationToken = new CancellationToken();
+            await sut.OpenAsync(false, cancellationToken);
             
-            await innerHandler.Received(1).OpenAsync(Arg.Is(false));
+            await innerHandler.Received(1).OpenAsync(Arg.Is(false), Arg.Any<CancellationToken>());
         }
 
         [TestMethod]
@@ -43,15 +44,15 @@ namespace Microsoft.Azure.Devices.Client.Test
             var innerHandler = Substitute.For<IDelegatingHandler>();
             innerHandler.CloseAsync().Returns(TaskConstants.Completed);
             int openCallCounter = 0;
-            innerHandler.OpenAsync(Arg.Is(false)).Returns(async ci =>
+            innerHandler.OpenAsync(Arg.Is(false), Arg.Any<CancellationToken>()).Returns(async ci =>
             {
                 openCallCounter++;
                 await Task.Yield();
                 throw new InvalidOperationException();
             });
             var sut = new RoutingDelegatingHandler((cs, ts) => innerHandler, null, new [] {amqpTransportSettings, mqttTransportSettings} );
-
-            await sut.OpenAsync(Arg.Is(false)).ExpectedAsync<InvalidOperationException>();
+            var cancellationToken = new CancellationToken();
+            await sut.OpenAsync(Arg.Is(false), cancellationToken).ExpectedAsync<InvalidOperationException>();
 
             await innerHandler.Received(1).CloseAsync();
 
@@ -69,15 +70,15 @@ namespace Microsoft.Azure.Devices.Client.Test
             var innerHandler = Substitute.For<IDelegatingHandler>();
             innerHandler.CloseAsync().Returns(TaskConstants.Completed);
             int openCallCounter = 0;
-            innerHandler.OpenAsync(Arg.Is(false)).Returns(async ci =>
+            innerHandler.OpenAsync(Arg.Is(false), Arg.Any<CancellationToken>()).Returns(async ci =>
             {
                 openCallCounter++;
                 await Task.Yield();
                 throw new TimeoutException();
             });
             var sut = new RoutingDelegatingHandler((cs, ts) => innerHandler, null, new [] {amqpTransportSettings, mqttTransportSettings} );
-
-            await sut.OpenAsync(Arg.Is(false)).ExpectedAsync<IotHubCommunicationException>();
+            var cancellationToken = new CancellationToken();
+            await sut.OpenAsync(Arg.Is(false), cancellationToken).ExpectedAsync<IotHubCommunicationException>();
 
             await innerHandler.Received(2).CloseAsync();
 
@@ -98,6 +99,24 @@ namespace Microsoft.Azure.Devices.Client.Test
             await TransportRouting_TryOpenFailedWithSupportedExceptionFirstTimes_SuccessOnSecondTry(() => new AggregateException(new IotHubCommunicationException(string.Empty)));
         }
 
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("DelegatingHandlers")]
+        [TestCategory("Owner [jasminel]")]
+        public async Task TransportRouting_CancellationTokenCanceled_Open()
+        {
+            var transportSettings = Substitute.For<ITransportSettings>();
+            var innerHandler = Substitute.For<IDelegatingHandler>();
+            innerHandler.OpenAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(TaskConstants.Completed);
+            var sut = new RoutingDelegatingHandler((cs, ts) => innerHandler, null, new[] { transportSettings });
+
+            var userDefinedTimeoutCancellationTokenSource = new CancellationTokenSource();
+            userDefinedTimeoutCancellationTokenSource.Cancel();
+            await sut.OpenAsync(false, userDefinedTimeoutCancellationTokenSource.Token);
+
+            await innerHandler.Received(0).OpenAsync(Arg.Any<bool>(), userDefinedTimeoutCancellationTokenSource.Token);
+        }
+        
         static async Task TransportRouting_TryOpenFailedWithSupportedExceptionFirstTimes_SuccessOnSecondTry(Func<Exception> exceptionFactory)
         {
             var amqpTransportSettings = Substitute.For<ITransportSettings>();
@@ -105,7 +124,7 @@ namespace Microsoft.Azure.Devices.Client.Test
             var innerHandler = Substitute.For<IDelegatingHandler>();
             innerHandler.CloseAsync().Returns(TaskConstants.Completed);
             int openCallCounter = 0;
-            innerHandler.OpenAsync(Arg.Is(false)).Returns(async ci =>
+            innerHandler.OpenAsync(Arg.Is(false), Arg.Any<CancellationToken>()).Returns(async ci =>
             {
                 openCallCounter++;
                 await Task.Yield();
@@ -115,8 +134,8 @@ namespace Microsoft.Azure.Devices.Client.Test
                 }
             });
             var sut = new RoutingDelegatingHandler((cs, ts) => innerHandler, null, new[] { amqpTransportSettings, mqttTransportSettings });
-
-            await sut.OpenAsync(Arg.Is(false));
+            var cancellationToken = new CancellationToken();
+            await sut.OpenAsync(Arg.Is(false), cancellationToken);
 
             await innerHandler.Received(1).CloseAsync();
 
