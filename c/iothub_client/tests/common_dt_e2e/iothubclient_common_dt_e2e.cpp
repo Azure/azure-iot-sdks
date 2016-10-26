@@ -24,7 +24,7 @@
 
 static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
 
-#define MAX_CLOUD_TRAVEL_TIME  1200.0
+#define MAX_CLOUD_TRAVEL_TIME  600.0    /* 10 minutes */
 #define BUFFER_SIZE            37
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
@@ -445,6 +445,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
         {
             if ((device->receivedCallBack) && (device->cb_payload != NULL))
             {
+                LogInfo("device->cb_payload: %s", device->cb_payload);
                 root_value = json_parse_string(device->cb_payload);
                 JSON_Object *root_object = json_value_get_object(root_value);
 
