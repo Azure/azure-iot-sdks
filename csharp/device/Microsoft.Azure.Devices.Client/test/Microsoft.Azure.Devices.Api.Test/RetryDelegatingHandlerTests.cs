@@ -6,6 +6,7 @@ namespace Microsoft.Azure.Devices.Client.Test
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Devices.Client.Common;
     using Microsoft.Azure.Devices.Client.Exceptions;
@@ -32,7 +33,7 @@ namespace Microsoft.Azure.Devices.Client.Test
             int callCounter = 0;
 
             var innerHandlerMock = Substitute.For<IDelegatingHandler>();
-            innerHandlerMock.OpenAsync(true).Returns(t =>
+            innerHandlerMock.OpenAsync(true, Arg.Any<CancellationToken>()).Returns(t =>
             {
                 callCounter++;
 
@@ -44,7 +45,8 @@ namespace Microsoft.Azure.Devices.Client.Test
             });
 
             var sut = new RetryDelegatingHandler(innerHandlerMock);
-            await sut.OpenAsync(true);
+            var cancellationToken = new CancellationToken();
+            await sut.OpenAsync(true, cancellationToken);
 
             Assert.AreEqual(2, callCounter);
         }
@@ -59,7 +61,7 @@ namespace Microsoft.Azure.Devices.Client.Test
 
             var innerHandlerMock = Substitute.For<IDelegatingHandler>();
             var message = new Message(new MemoryStream(new byte[] {1,2,3}));
-            innerHandlerMock.SendEventAsync(Arg.Is(message)).Returns(t =>
+            innerHandlerMock.SendEventAsync(Arg.Is(message), Arg.Any<CancellationToken>()).Returns(t =>
             {
                 callCounter++;
 
@@ -75,7 +77,8 @@ namespace Microsoft.Azure.Devices.Client.Test
             });
 
             var sut = new RetryDelegatingHandler(innerHandlerMock);
-            await sut.SendEventAsync(message);
+            var cancellationToken = new CancellationToken();
+            await sut.SendEventAsync(message, cancellationToken);
 
             Assert.AreEqual(2, callCounter);
         }
@@ -91,7 +94,7 @@ namespace Microsoft.Azure.Devices.Client.Test
             var innerHandlerMock = Substitute.For<IDelegatingHandler>();
             var memoryStream = new NotSeekableStream(new byte[] {1,2,3});
             var message = new Message(memoryStream);
-            innerHandlerMock.SendEventAsync(Arg.Is(message)).Returns(t =>
+            innerHandlerMock.SendEventAsync(Arg.Is(message), Arg.Any<CancellationToken>()).Returns(t =>
             {
                 callCounter++;
                 var m = t.Arg<Message>();
@@ -102,7 +105,8 @@ namespace Microsoft.Azure.Devices.Client.Test
             });
 
             var sut = new RetryDelegatingHandler(innerHandlerMock);
-            await sut.SendEventAsync(message).ExpectedAsync<IotHubClientTransientException>();
+            var cancellationToken = new CancellationToken();
+            await sut.SendEventAsync(message, cancellationToken).ExpectedAsync<IotHubClientTransientException>();
 
             Assert.AreEqual(callCounter, 1);
         }
@@ -118,7 +122,7 @@ namespace Microsoft.Azure.Devices.Client.Test
             var innerHandlerMock = Substitute.For<IDelegatingHandler>();
             var message = new Message(new MemoryStream(new byte[] {1,2,3}));
             IEnumerable<Message> messages = new[] { message };
-            innerHandlerMock.SendEventAsync(Arg.Is(messages)).Returns(t =>
+            innerHandlerMock.SendEventAsync(Arg.Is(messages), Arg.Any<CancellationToken>()).Returns(t =>
             {
                 callCounter++;
 
@@ -134,7 +138,8 @@ namespace Microsoft.Azure.Devices.Client.Test
             });
 
             var sut = new RetryDelegatingHandler(innerHandlerMock);
-            await sut.SendEventAsync(messages);
+            var cancellationToken = new CancellationToken();
+            await sut.SendEventAsync(messages, cancellationToken);
 
             Assert.AreEqual(2, callCounter);
         }
@@ -151,7 +156,7 @@ namespace Microsoft.Azure.Devices.Client.Test
             var memoryStream = new NotSeekableStream(new byte[] {1,2,3});
             var message = new Message(memoryStream);
             var messages = new[] { message };
-            innerHandlerMock.SendEventAsync(Arg.Is(messages)).Returns(t =>
+            innerHandlerMock.SendEventAsync(Arg.Is(messages), Arg.Any<CancellationToken>()).Returns(t =>
             {
                 callCounter++;
                 Message m = t.Arg<IEnumerable<Message>>().First();
@@ -162,7 +167,8 @@ namespace Microsoft.Azure.Devices.Client.Test
             });
 
             var sut = new RetryDelegatingHandler(innerHandlerMock);
-            await sut.SendEventAsync(messages).ExpectedAsync<IotHubClientTransientException>();
+            var cancellationToken = new CancellationToken();
+            await sut.SendEventAsync(messages, cancellationToken).ExpectedAsync<IotHubClientTransientException>();
 
             Assert.AreEqual(callCounter, 1);
         }
@@ -177,7 +183,7 @@ namespace Microsoft.Azure.Devices.Client.Test
 
             var innerHandlerMock = Substitute.For<IDelegatingHandler>();
             var message = new Message(new MemoryStream(new byte[] {1,2,3}));
-            innerHandlerMock.SendEventAsync(Arg.Is(message)).Returns(t =>
+            innerHandlerMock.SendEventAsync(Arg.Is(message), Arg.Any<CancellationToken>()).Returns(t =>
             {
                 callCounter++;
                 var m = t.Arg<Message>();
@@ -192,7 +198,8 @@ namespace Microsoft.Azure.Devices.Client.Test
             });
 
             var sut = new RetryDelegatingHandler(innerHandlerMock);
-            await sut.SendEventAsync(message);
+            var cancellationToken = new CancellationToken();
+            await sut.SendEventAsync(message, cancellationToken);
 
             Assert.AreEqual(callCounter, 2);
         }
@@ -206,7 +213,7 @@ namespace Microsoft.Azure.Devices.Client.Test
             int callCounter = 0;
 
             var innerHandlerMock = Substitute.For<IDelegatingHandler>();
-            innerHandlerMock.OpenAsync(true).Returns(t =>
+            innerHandlerMock.OpenAsync(true, Arg.Any<CancellationToken>()).Returns(t =>
             {
                 callCounter++;
 
@@ -218,8 +225,8 @@ namespace Microsoft.Azure.Devices.Client.Test
             });
 
             var sut = new RetryDelegatingHandler(innerHandlerMock);
-
-            await sut.OpenAsync(true).ExpectedAsync<InvalidOperationException>();
+            var cancellationToken = new CancellationToken();
+            await sut.OpenAsync(true, cancellationToken).ExpectedAsync<InvalidOperationException>();
 
             Assert.AreEqual(callCounter, 1);
         }
@@ -230,14 +237,116 @@ namespace Microsoft.Azure.Devices.Client.Test
         public async Task Retry_TransientErrorThrownAfterNumberOfRetries_Throws()
         {
             var innerHandlerMock = Substitute.For<IDelegatingHandler>();
-            innerHandlerMock.OpenAsync(Arg.Is(true)).Returns(t =>
+            innerHandlerMock.OpenAsync(Arg.Is(true), Arg.Any<CancellationToken>()).Returns(t =>
             {
                 throw new IotHubClientTransientException("");
             });
 
             var sut = new RetryDelegatingHandler(innerHandlerMock);
+            var cancellationToken = new CancellationToken();
+            await sut.OpenAsync(true, cancellationToken).ExpectedAsync<IotHubClientTransientException>();
+        }
 
-            await sut.OpenAsync(true).ExpectedAsync<IotHubClientTransientException>();
+        [TestMethod]
+        [TestCategory("DelegatingHandlers")]
+        [TestCategory("Owner [jasminel]")]
+        public async Task Retry_CancellationTokenCanceled_Open()
+        {
+            var innerHandlerMock = Substitute.For<IDelegatingHandler>();
+            innerHandlerMock.OpenAsync(Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(TaskConstants.Completed);
+
+            var sut = new RetryDelegatingHandler(innerHandlerMock);
+            var cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.Cancel();
+            await sut.OpenAsync(Arg.Any<bool>(), cancellationTokenSource.Token).ExpectedAsync<TaskCanceledException>();
+        }
+
+        [TestMethod]
+        [TestCategory("DelegatingHandlers")]
+        [TestCategory("Owner [jasminel]")]
+        public async Task Retry_CancellationTokenCanceled_SendEvent()
+        {
+            var innerHandlerMock = Substitute.For<IDelegatingHandler>();
+            innerHandlerMock.SendEventAsync(Arg.Any<Message>(), Arg.Any<CancellationToken>()).Returns(TaskConstants.Completed);
+
+            var sut = new RetryDelegatingHandler(innerHandlerMock);
+            var cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.Cancel();
+            await sut.SendEventAsync(Arg.Any<Message>(), cancellationTokenSource.Token).ExpectedAsync<TaskCanceledException>();
+        }
+
+        [TestMethod]
+        [TestCategory("DelegatingHandlers")]
+        [TestCategory("Owner [jasminel]")]
+        public async Task Retry_CancellationTokenCanceled_SendEventWithIEnumMessage()
+        {
+            var innerHandlerMock = Substitute.For<IDelegatingHandler>();
+            innerHandlerMock.SendEventAsync(new List<Message>(), Arg.Any<CancellationToken>()).Returns(TaskConstants.Completed);
+
+            var sut = new RetryDelegatingHandler(innerHandlerMock);
+            var cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.Cancel();
+            await sut.SendEventAsync(new List<Message>(), cancellationTokenSource.Token).ExpectedAsync<TaskCanceledException>();
+
+            await innerHandlerMock.Received(0).SendEventAsync(new List<Message>(), Arg.Any<CancellationToken>());
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("DelegatingHandlers")]
+        [TestCategory("Owner [jasminel]")]
+        public async Task Retry_CancellationTokenCanceled_Receive()
+        {
+            var innerHandlerMock = Substitute.For<IDelegatingHandler>();
+            var cancellationTokenSource = new CancellationTokenSource();
+
+            cancellationTokenSource.Cancel();
+            innerHandlerMock.ReceiveAsync(cancellationTokenSource.Token).Returns(new Task<Message>(() => new Message(new byte[0])));
+            var sut = new RetryDelegatingHandler(innerHandlerMock);
+
+            await sut.ReceiveAsync(cancellationTokenSource.Token).ExpectedAsync<TaskCanceledException>();
+        }
+
+        [TestMethod]
+        [TestCategory("DelegatingHandlers")]
+        [TestCategory("Owner [jasminel]")]
+        public async Task Retry_CancellationTokenCanceled_Complete()
+        {
+            var innerHandlerMock = Substitute.For<IDelegatingHandler>();
+            innerHandlerMock.CompleteAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(TaskConstants.Completed);
+
+            var sut = new RetryDelegatingHandler(innerHandlerMock);
+            var cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.Cancel();
+            await sut.CompleteAsync(Arg.Any<string>(), cancellationTokenSource.Token).ExpectedAsync<TaskCanceledException>();
+        }
+
+        [TestMethod]
+        [TestCategory("DelegatingHandlers")]
+        [TestCategory("Owner [jasminel]")]
+        public async Task Retry_CancellationTokenCanceled_Abandon()
+        {
+            var innerHandlerMock = Substitute.For<IDelegatingHandler>();
+            innerHandlerMock.AbandonAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(TaskConstants.Completed);
+
+            var sut = new RetryDelegatingHandler(innerHandlerMock);
+            var cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.Cancel();
+            await sut.AbandonAsync(Arg.Any<string>(), cancellationTokenSource.Token).ExpectedAsync<TaskCanceledException>();
+        }
+
+        [TestMethod]
+        [TestCategory("DelegatingHandlers")]
+        [TestCategory("Owner [jasminel]")]
+        public async Task Retry_CancellationTokenCanceled_Reject()
+        {
+            var innerHandlerMock = Substitute.For<IDelegatingHandler>();
+            innerHandlerMock.RejectAsync(Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(TaskConstants.Completed);
+
+            var sut = new RetryDelegatingHandler(innerHandlerMock);
+            var cancellationTokenSource = new CancellationTokenSource();
+            cancellationTokenSource.Cancel();
+            await sut.RejectAsync(Arg.Any<string>(), cancellationTokenSource.Token).ExpectedAsync<TaskCanceledException>();
         }
 
         class NotSeekableStream : MemoryStream

@@ -198,4 +198,7 @@
   <data name="FailedToSerializeUnsupportedType" xml:space="preserve">
     <value>Serialization operation failed due to unsupported type {0}.</value>
   </data>
+  <data name="OperationTimeoutExpired" xml:space="preserve">
+    <value>Operation timeout expired.</value>
+  </data>
 </root>

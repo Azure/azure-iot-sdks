@@ -55,14 +55,14 @@ set PATH=%PATH%;%userprofile%\cmake_%build-platform%\javawrapper\Debug
 
 REM -- compile javawrapper --
 cd ..\..\device
-call mvn install
-
 copy %userprofile%\cmake_%build-platform%\javawrapper\Debug\iothub_client_java.dll %cd%\samples\direct_call_of_wrapped_functions\target
 copy %userprofile%\cmake_%build-platform%\javawrapper\Debug\iothub_client_java.dll %cd%\samples\send-receive-sample\target
 copy %userprofile%\cmake_%build-platform%\javawrapper\Debug\iothub_client_java.dll %cd%\samples\send-receive-sample-x509\target
 copy %userprofile%\cmake_%build-platform%\javawrapper\Debug\iothub_client_java.dll %cd%\samples\send-event-sample\target
 copy %userprofile%\cmake_%build-platform%\javawrapper\Debug\iothub_client_java.dll %cd%\samples\send-serialized-event\target
 copy %userprofile%\cmake_%build-platform%\javawrapper\Debug\iothub_client_mock.dll %cd%\test
+
+call mvn install
 cd %build-root%
 
 goto :eof

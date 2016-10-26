@@ -4,6 +4,7 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Amqp;
     using Microsoft.Azure.Devices.Client.Extensions;
@@ -45,7 +46,7 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-        protected override async Task<AmqpSession> CreateSessionAsync(TimeSpan timeout)
+        protected override async Task<AmqpSession> CreateSessionAsync(TimeSpan timeout, CancellationToken cancellationToken)
         {
             var timeoutHelper = new TimeoutHelper(timeout);
 
@@ -54,7 +55,7 @@ namespace Microsoft.Azure.Devices.Client
                 this.iotHubTokenRefresher.Cancel();
             }
 
-            AmqpSession amqpSession = await base.CreateSessionAsync(timeoutHelper.RemainingTime());
+            AmqpSession amqpSession = await base.CreateSessionAsync(timeoutHelper.RemainingTime(), cancellationToken);
 
 #if !WINDOWS_UWP
             if (this.AmqpTransportSettings.ClientCertificate == null)
@@ -85,8 +86,9 @@ namespace Microsoft.Azure.Devices.Client
             return string.Empty;
         }
 
-        protected override async Task OpenLinkAsync(AmqpObject link, IotHubConnectionString doNotUse, string doNotUse2, TimeSpan timeout)
+        protected override async Task OpenLinkAsync(AmqpObject link, IotHubConnectionString doNotUse, string doNotUse2, TimeSpan timeout, CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
             try
             {
                 await link.OpenAsync(timeout);

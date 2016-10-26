@@ -223,7 +223,6 @@
     <Compile Include="Common\UrlEncodedDictionarySerializer.cs" />
     <Compile Include="DeviceAuthenticationWithX509Certificate.cs" />
     <Compile Include="DotNetHelpers.cs" />
-    <Compile Include="IDelegatingHandler.cs" />
     <Compile Include="IotHubClientWebSocket.cs" />
     <Compile Include="IotHubConnection.cs" />
     <Compile Include="IotHubDeviceMuxConnection.cs" />
