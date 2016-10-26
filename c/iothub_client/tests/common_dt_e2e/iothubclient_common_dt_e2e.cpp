@@ -22,8 +22,6 @@
 #include "parson.h"
 #include "certs.h"
 
-static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
-
 #define MAX_CLOUD_TRAVEL_TIME  600.0    /* 10 minutes */
 #define BUFFER_SIZE            37
 
@@ -138,17 +136,12 @@ void dt_e2e_init(void)
     int result = platform_init();
     ASSERT_ARE_EQUAL_WITH_MSG(int, 0, result, "platform_init failed");
 
-    g_iothubAcctInfo = IoTHubAccount_Init(true);
-    ASSERT_IS_NOT_NULL_WITH_MSG(g_iothubAcctInfo, "IoTHubAccount_Init failed");
-
     /* the return value from the second init is deliberatly ignored. */
     platform_init();
 }
 
 void dt_e2e_deinit(void)
 {
-    IoTHubAccount_deinit(g_iothubAcctInfo);
-
     // Need a double deinit
     platform_deinit();
     platform_deinit();
@@ -182,12 +175,15 @@ static char *malloc_and_fill_reported_payload(const char *string, int aint)
 void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     // arrange
+    IOTHUB_ACCOUNT_INFO_HANDLE iothubAcctInfo = IoTHubAccount_Init(true);
+    ASSERT_IS_NOT_NULL_WITH_MSG(iothubAcctInfo, "IoTHubAccount_Init failed");
+
     IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
 
-    iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
-    iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
-    iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
-    iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
+    iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(iothubAcctInfo);
+    iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(iothubAcctInfo);
+    iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(iothubAcctInfo);
+    iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(iothubAcctInfo);
     iotHubConfig.protocol = protocol;
 
     DEVICE_REPORTED_DATA *device = device_reported_init();
@@ -243,7 +239,7 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     {
         ASSERT_IS_TRUE_WITH_MSG(status_code < 300, "SnedReported status_code is an error");
 
-        const char *connectionString = IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo);
+        const char *connectionString = IoTHubAccount_GetIoTHubConnString(iothubAcctInfo);
         IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
         ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "IoTHubServiceClientAuth_CreateFromConnectionString failed");
 
@@ -272,6 +268,7 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
         IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
         IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
         IoTHubClient_Destroy(iotHubClientHandle);
+        IoTHubAccount_deinit(iothubAcctInfo);
         device_reported_deinit(device);
     }
 }
@@ -385,12 +382,15 @@ static void device_desired_deinit(DEVICE_DESIRED_DATA *device)
 void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
     // arrange
+    IOTHUB_ACCOUNT_INFO_HANDLE iothubAcctInfo = IoTHubAccount_Init(true);
+    ASSERT_IS_NOT_NULL_WITH_MSG(iothubAcctInfo, "IoTHubAccount_Init failed");
+
     IOTHUB_CLIENT_CONFIG iotHubConfig = { 0 };
 
-    iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(g_iothubAcctInfo);
-    iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(g_iothubAcctInfo);
-    iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(g_iothubAcctInfo);
-    iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(g_iothubAcctInfo);
+    iotHubConfig.iotHubName = IoTHubAccount_GetIoTHubName(iothubAcctInfo);
+    iotHubConfig.iotHubSuffix = IoTHubAccount_GetIoTHubSuffix(iothubAcctInfo);
+    iotHubConfig.deviceId = IoTHubAccount_GetDeviceId(iothubAcctInfo);
+    iotHubConfig.deviceKey = IoTHubAccount_GetDeviceKey(iothubAcctInfo);
     iotHubConfig.protocol = protocol;
 
     DEVICE_DESIRED_DATA *device = device_desired_init();
@@ -408,7 +408,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     IOTHUB_CLIENT_RESULT iot_result = IoTHubClient_SetDeviceTwinCallback(iotHubClientHandle, deviceTwinCallback, device);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, iot_result, "IoTHubClient_SetDeviceTwinCallback failed");
 
-    const char *connectionString = IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo);
+    const char *connectionString = IoTHubAccount_GetIoTHubConnString(iothubAcctInfo);
     IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
     ASSERT_IS_NOT_NULL_WITH_MSG(iotHubServiceClientHandle, "IoTHubServiceClientAuth_CreateFromConnectionString failed");
 
@@ -479,6 +479,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
         free(buffer);
         free(deviceTwinData);
         IoTHubClient_Destroy(iotHubClientHandle);
+        IoTHubAccount_deinit(iothubAcctInfo);
         device_desired_deinit(device);
     }
 }
