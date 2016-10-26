@@ -987,43 +987,6 @@ void IoTHubClient_LL_SendComplete(IOTHUB_CLIENT_LL_HANDLE handle, PDLIST_ENTRY c
     }
 }
 
-static int wrap_data_in_json(const unsigned char* data, size_t length, BUFFER_HANDLE response)
-{
-    int result;
-    unsigned char* wrapper = (unsigned char*)malloc(length+2);
-    if (wrapper == NULL)
-    {
-        LogError("allocation failure");
-        result = __LINE__;
-    }
-    else
-    {
-        unsigned char* iterator = wrapper;
-        *iterator = '\"';
-        iterator++;
-        if (memcpy(iterator, data, length) == NULL)
-        {
-            LogError("failed copying memory for response");
-            result = __LINE__;
-        }
-        else
-        {
-            iterator += length;
-            *iterator = '\"';
-            if (BUFFER_build(response, wrapper, length+2) != 0)
-            {
-                result = __LINE__;
-            }
-            else
-            {
-                result = 0;
-            }
-        }
-        free(wrapper);
-    }
-    return result;
-}
-
 int IoTHubClient_LL_DeviceMethodComplete(IOTHUB_CLIENT_LL_HANDLE handle, const char* method_name, const unsigned char* payLoad, size_t size, BUFFER_HANDLE response)
 {
     int result;
@@ -1039,22 +1002,13 @@ int IoTHubClient_LL_DeviceMethodComplete(IOTHUB_CLIENT_LL_HANDLE handle, const c
         IOTHUB_CLIENT_LL_HANDLE_DATA* handleData = (IOTHUB_CLIENT_LL_HANDLE_DATA*)handle;
         if (handleData->deviceMethodCallback)
         {
-            const unsigned char* payload_to_report = payLoad;
-            size_t size_to_report = size;
             unsigned char* payload_resp = NULL;
             size_t resp_size = 0;
-
-            if (payload_to_report[0] == '\"' && payload_to_report[size_to_report - 1] == '\"')
-            {
-                payload_to_report++;
-                size_to_report -= 2;
-            }
-
-            result = handleData->deviceMethodCallback(method_name, payload_to_report, size_to_report, &payload_resp, &resp_size, handleData->deviceMethodUserContextCallback);
+            result = handleData->deviceMethodCallback(method_name, payLoad, size, &payload_resp, &resp_size, handleData->deviceMethodUserContextCallback);
             /* Codes_SRS_IOTHUBCLIENT_LL_07_020: [ deviceMethodCallback shall buil the BUFFER_HANDLE with the response payload from the IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC callback. ] */
             if (payload_resp != NULL && resp_size > 0)
             {
-                if (wrap_data_in_json(payload_resp, resp_size, response) != 0)
+                if (BUFFER_build(response, payload_resp, resp_size) != 0)
                 {
                     result = 500;
                 }

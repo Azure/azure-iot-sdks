@@ -65,6 +65,7 @@ MOCKABLE_FUNCTION(, JSON_Value_Type, json_value_get_type, const JSON_Value*, val
 
 MOCKABLE_FUNCTION(, JSON_Status, json_object_clear, JSON_Object*, object);
 MOCKABLE_FUNCTION(, void, json_value_free, JSON_Value *, value);
+MOCKABLE_FUNCTION(, char*, json_serialize_to_string, const JSON_Value*, value);
 
 #undef ENABLE_MOCKS
 
@@ -97,6 +98,13 @@ STRING_HANDLE my_STRING_construct(const char* psz)
 }
 
 STRING_HANDLE my_STRING_construct_n(const char* psz, size_t n)
+{
+    (void)psz;
+    n = 0;
+    return (STRING_HANDLE)my_gballoc_malloc(1);
+}
+
+STRING_HANDLE my_STRING_from_byte_array(const unsigned char* psz, size_t n)
 {
     (void)psz;
     n = 0;
@@ -155,6 +163,26 @@ void my_HTTPAPIEX_SAS_Destroy(HTTPAPIEX_SAS_HANDLE handle)
 {
     my_gballoc_free(handle);
 }
+
+char* my_json_serialize_to_string(const JSON_Value *value)
+{
+    (void)value;
+    char* s = (char*)my_gballoc_malloc(1);
+    *s=0;
+    return s;
+}
+
+JSON_Value *my_json_parse_string(const char *string)
+{
+    (void)string;
+    return (JSON_Value*)my_gballoc_malloc(1);
+}
+
+void my_json_value_free(JSON_Value *value)
+{
+    my_gballoc_free(value);
+}
+
 
 #include "iothub_devicemethod.h"
 #include "iothub_service_client_auth.h"
@@ -275,6 +303,9 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_HOOK(STRING_construct_n, my_STRING_construct_n);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_construct_n, NULL);
 
+    REGISTER_GLOBAL_MOCK_HOOK(STRING_from_byte_array, my_STRING_from_byte_array);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_from_byte_array, NULL);
+
     REGISTER_GLOBAL_MOCK_HOOK(STRING_c_str, my_STRING_c_str);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(STRING_c_str, NULL);
 
@@ -308,8 +339,10 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_RETURN(HTTPAPIEX_SAS_ExecuteRequest, HTTPAPIEX_OK);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(HTTPAPIEX_SAS_ExecuteRequest, HTTPAPIEX_ERROR);
 
-    REGISTER_GLOBAL_MOCK_RETURN(json_parse_string, TEST_JSON_VALUE);
+    REGISTER_GLOBAL_MOCK_HOOK(json_parse_string, my_json_parse_string);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_parse_string, NULL);
+
+    REGISTER_GLOBAL_MOCK_HOOK(json_value_free, my_json_value_free);
 
     REGISTER_GLOBAL_MOCK_RETURN(json_value_get_object, TEST_JSON_OBJECT);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_value_get_object, NULL);
@@ -325,6 +358,9 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
     REGISTER_GLOBAL_MOCK_RETURN(json_value_get_number, 42);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_value_get_number, 0);
+
+    REGISTER_GLOBAL_MOCK_HOOK(json_serialize_to_string, my_json_serialize_to_string);
+    REGISTER_GLOBAL_MOCK_FAIL_RETURN(json_serialize_to_string, NULL);
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -716,8 +752,6 @@ TEST_FUNCTION(IoTHubDeviceMethod_Invoke_return_NULL_if_input_parameter_responseP
 TEST_FUNCTION(IoTHubDeviceMethod_Invoke_happy_path)
 {
     // arrange
-    EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
-        .SetReturn(NULL);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreAllArguments();
@@ -778,7 +812,7 @@ TEST_FUNCTION(IoTHubDeviceMethod_Invoke_happy_path)
         .SetReturn(TEST_UNSIGNED_CHAR_PTR);
     EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    EXPECTED_CALL(STRING_construct_n(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    EXPECTED_CALL(STRING_from_byte_array(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreAllArguments();
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
@@ -791,12 +825,8 @@ TEST_FUNCTION(IoTHubDeviceMethod_Invoke_happy_path)
     EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
-    EXPECTED_CALL(json_value_get_type(IGNORED_PTR_ARG))
-        .SetReturn(JSONString);
-    EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG))
+    EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG))
         .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
     EXPECTED_CALL(json_value_get_number(IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
@@ -840,8 +870,6 @@ TEST_FUNCTION(IoTHubDeviceMethod_Invoke_happy_path)
 TEST_FUNCTION(IoTHubDeviceMethod_Invoke_happy_path_http_return_not_equal_200)
 {
     // arrange
-    EXPECTED_CALL(json_parse_string(IGNORED_PTR_ARG))
-        .SetReturn(NULL);
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     EXPECTED_CALL(BUFFER_create(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreAllArguments();
@@ -927,6 +955,8 @@ TEST_FUNCTION(IoTHubDeviceMethod_Invoke_happy_path_http_return_not_equal_200)
 /*Tests_SRS_IOTHUBDEVICEMETHOD_12_047: [ If parsing the response fails IoTHubDeviceMethod_Invoke shall return IOTHUB_DEVICE_METHOD_ERROR ]*/
 TEST_FUNCTION(IoTHubDeviceMethod_Invoke_non_happy_path)
 {
+    IOTHUB_DEVICE_METHOD_RESULT result;
+
     // arrange
     int umockc_result = umock_c_negative_tests_init();
     ASSERT_ARE_EQUAL(int, 0, umockc_result);
@@ -991,7 +1021,7 @@ TEST_FUNCTION(IoTHubDeviceMethod_Invoke_non_happy_path)
         .SetReturn(TEST_UNSIGNED_CHAR_PTR);
     EXPECTED_CALL(BUFFER_length(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
-    EXPECTED_CALL(STRING_construct_n(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+    EXPECTED_CALL(STRING_from_byte_array(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreAllArguments();
 
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
@@ -1005,10 +1035,8 @@ TEST_FUNCTION(IoTHubDeviceMethod_Invoke_non_happy_path)
     EXPECTED_CALL(json_object_get_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
-    EXPECTED_CALL(json_value_get_string(IGNORED_PTR_ARG))
+    EXPECTED_CALL(json_serialize_to_string(IGNORED_PTR_ARG))
         .IgnoreAllArguments();
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument(1);
     EXPECTED_CALL(json_value_get_number(IGNORED_PTR_ARG))
         .IgnoreAllArguments();
 
@@ -1034,6 +1062,13 @@ TEST_FUNCTION(IoTHubDeviceMethod_Invoke_non_happy_path)
     // act
     umock_c_negative_tests_snapshot();
 
+    // first make sure our expected calls are correct.
+    result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, deviceId, methodName, methodPayload, timeout, &responseStatus, &responsePayload, &responsePayloadSize);
+
+    ASSERT_ARE_EQUAL(int, result, IOTHUB_DEVICE_METHOD_OK);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    free((void*)responsePayload);
+
     for (size_t i = 0; i < umock_c_negative_tests_call_count(); i++)
     {
         /// arrange
@@ -1053,18 +1088,15 @@ TEST_FUNCTION(IoTHubDeviceMethod_Invoke_non_happy_path)
             (i != 23) && /*STRING_delete*/
             (i != 24) && /*STRING_delete*/
             (i != 25) && /*STRING_delete*/
-            (i != 26) && /*BUFFER_u_char*/
-            (i != 27) && /*STRING_construct_n*/
-            (i != 28) && /*STRING_c_str*/
+            (i != 27) && /*BUFFER_length*/
             (i != 35) && /*json_value_get_number*/
             (i != 36) && /*STRING_delete*/
-            (i != 37) && /*json_object_clear*/
-            (i != 38) && /*json_value_free*/
-            (i != 39) && /*BUFFER_delete*/
-            (i != 40)    /*BUFFER_delete*/
+            (i != 37) && /*json_value_free*/
+            (i != 38) && /*BUFFER_delete*/
+            (i != 39)    /*BUFFER_delete*/
             )
         {
-            IOTHUB_DEVICE_METHOD_RESULT result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, deviceId, methodName, methodPayload, timeout, &responseStatus, &responsePayload, &responsePayloadSize);
+            result = IoTHubDeviceMethod_Invoke(TEST_IOTHUB_SERVICE_CLIENT_DEVICE_METHOD_HANDLE, deviceId, methodName, methodPayload, timeout, &responseStatus, &responsePayload, &responsePayloadSize);
 
             /// assert
             ASSERT_ARE_NOT_EQUAL(int, result, IOTHUB_DEVICE_METHOD_OK);

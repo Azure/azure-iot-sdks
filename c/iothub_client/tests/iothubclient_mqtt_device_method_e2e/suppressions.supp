@@ -8,3 +8,14 @@
 	drd:ConflictingAccess
 	obj:/*lib*/libcrypto*
 }
+{
+	SHA256 has unprotected global access
+	Helgrind:Race
+	fun:SHA256Input
+}
+{
+	DRD SHA256 has unprotected global access
+	drd:ConflictingAccess
+	fun:SHA256Input
+}
+

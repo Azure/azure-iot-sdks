@@ -1,7 +1,7 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#this is CMakeLists.txt for iothubclient_device_method_e2e
+#this is CMakeLists.txt for iothubclient_mqtt_device_method_e2e
 cmake_minimum_required(VERSION 2.8.11)
 
 if(NOT (${use_mqtt}))

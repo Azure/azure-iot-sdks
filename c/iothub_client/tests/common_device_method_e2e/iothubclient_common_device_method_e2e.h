@@ -14,27 +14,19 @@ extern void device_method_e2e_init(void);
 
 extern void device_method_e2e_deinit(void);
 
-extern void device_method_e2e_method_call_with_string(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+extern void device_method_function_cleanup();
 
-extern void device_method_e2e_method_call_with_single_quoted_json(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+extern void device_method_e2e_method_call_with_string(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 
 extern void device_method_e2e_method_call_with_double_quoted_json(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 
 extern void device_method_e2e_method_call_with_empty_json_object(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 
-extern void device_method_e2e_method_call_with_empty_string(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+extern void device_method_e2e_method_call_with_null(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 
 extern void device_method_e2e_method_call_with_embedded_double_quote(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 
-extern void device_method_e2e_method_call_with_embedded_double_quote_quote(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
-
-extern void device_method_e2e_method_call_with_embedded_double_quote_quote_quote(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
-
-extern void device_method_e2e_method_call_with_embedded_quote(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
-
-extern void device_method_e2e_method_call_with_embedded_quote_quote(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
-
-extern void device_method_e2e_method_call_with_embedded_quote_quote_quote(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
+extern void device_method_e2e_method_call_with_embedded_single_quote(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol);
 
 #ifdef __cplusplus
 }

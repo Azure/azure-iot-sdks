@@ -3320,13 +3320,9 @@ TEST_FUNCTION(IoTHubClient_LL_DeviceMethodComplete_succeed)
     //.IgnoreArgument_response()
     //.IgnoreArgument_resp_size();
 
-    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-        .IgnoreArgument_size();
     STRICT_EXPECTED_CALL(BUFFER_build(TEST_BUFFER_HANDLE, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
         .IgnoreArgument_source()
         .IgnoreArgument_size();
-    STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-        .IgnoreArgument_ptr();
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
         .IgnoreArgument_ptr();
 

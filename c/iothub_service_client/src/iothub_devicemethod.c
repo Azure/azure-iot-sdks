@@ -31,7 +31,7 @@ DEFINE_ENUM(IOTHUB_DEVICEMETHOD_REQUEST_MODE, IOTHUB_DEVICE_METHOD_REQUEST_MODE_
 #define  HTTP_HEADER_VAL_AUTHORIZATION  " "
 #define  HTTP_HEADER_KEY_REQUEST_ID  "Request-Id"
 #define  HTTP_HEADER_KEY_USER_AGENT  "User-Agent"
-#define  HTTP_HEADER_VAL_USER_AGENT  "Microsoft.Azure.Devices/1.0.0"
+#define  HTTP_HEADER_VAL_USER_AGENT  "iothubclient/1.0.16"
 #define  HTTP_HEADER_KEY_ACCEPT  "Accept"
 #define  HTTP_HEADER_VAL_ACCEPT  "application/json"
 #define  HTTP_HEADER_KEY_CONTENT_TYPE  "Content-Type"
@@ -40,9 +40,7 @@ DEFINE_ENUM(IOTHUB_DEVICEMETHOD_REQUEST_MODE, IOTHUB_DEVICE_METHOD_REQUEST_MODE_
 
 static const char* URL_API_VERSION = "?api-version=2016-09-30-preview";
 static const char* RELATIVE_PATH_FMT_DEVICEMETHOD = "/twins/%s/methods%s";
-static const char* RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD_JSON = "{\"methodName\":\"%s\",\"timeout\":%d,\"payload\":%s}";
-static const char* RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD_STRING = "{\"methodName\":\"%s\",\"timeout\":%d,\"payload\":\"%s\"}";
-static const char* RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD_NULL = "{\"methodName\":\"%s\",\"timeout\":%d,\"payload\":null}";
+static const char* RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD = "{\"methodName\":\"%s\",\"timeout\":%d,\"payload\":\"%s\"}";
 
 /** @brief Structure to store IoTHub authentication information
 */
@@ -60,7 +58,7 @@ static IOTHUB_DEVICE_METHOD_RESULT parseResponseJson(BUFFER_HANDLE responseJson,
     JSON_Object* json_object;
     JSON_Value* statusJsonValue;
     JSON_Value* payloadJsonValue;
-    const char* payload;
+    char* payload;
     STRING_HANDLE jsonStringHandle;
     const char* jsonStr;
     unsigned char* bufferStr;
@@ -70,7 +68,7 @@ static IOTHUB_DEVICE_METHOD_RESULT parseResponseJson(BUFFER_HANDLE responseJson,
         LogError("BUFFER_u_char failed");
         result = IOTHUB_DEVICE_METHOD_ERROR;
     }
-    else if ((jsonStringHandle = STRING_construct_n((const char*)bufferStr, BUFFER_length(responseJson))) == NULL)
+    else if ((jsonStringHandle = STRING_from_byte_array(bufferStr, BUFFER_length(responseJson))) == NULL)
     {
         LogError("STRING_construct_n failed");
         result = IOTHUB_DEVICE_METHOD_ERROR;
@@ -91,62 +89,39 @@ static IOTHUB_DEVICE_METHOD_RESULT parseResponseJson(BUFFER_HANDLE responseJson,
     {
         LogError("json_value_get_object failed");
         STRING_delete(jsonStringHandle);
+        json_value_free(root_value);
         result = IOTHUB_DEVICE_METHOD_ERROR;
     }
     else if ((statusJsonValue = json_object_get_value(json_object, "status")) == NULL)
     {
         LogError("json_object_get_value failed for status");
         STRING_delete(jsonStringHandle);
+        json_value_free(root_value);
         result = IOTHUB_DEVICE_METHOD_ERROR;
     }
     else if ((payloadJsonValue = json_object_get_value(json_object, "payload")) == NULL)
     {
         LogError("json_object_get_value failed for payload");
         STRING_delete(jsonStringHandle);
+        json_value_free(root_value);
         result = IOTHUB_DEVICE_METHOD_ERROR;
     }
-    else if (json_value_get_type(payloadJsonValue) == JSONNull)
+    else if ((payload = json_serialize_to_string(payloadJsonValue)) == NULL)
     {
-        *responseStatus = (int)json_value_get_number(statusJsonValue);
-        *responsePayload = NULL;
-        *responsePayloadSize = 0;
-
+        LogError("json_serialize_to_string failed for payload");
         STRING_delete(jsonStringHandle);
         json_value_free(root_value);
-
-        result = IOTHUB_DEVICE_METHOD_OK;
-    }
-    else if ((payload = json_value_get_string(payloadJsonValue)) == NULL)
-    {
-        LogError("json_value_get_string failed for payload");
-        STRING_delete(jsonStringHandle);
         result = IOTHUB_DEVICE_METHOD_ERROR;
     }
     else
     {
-        size_t payloadLength = strlen(payload);
+        *responseStatus = (int)json_value_get_number(statusJsonValue);
+        *responsePayload = (unsigned char *)payload;
+        *responsePayloadSize = strlen(payload);
 
-        unsigned char* payloadOut = NULL;
-        if ((payloadOut = malloc(payloadLength)) == NULL)
-        {
-            LogError("malloc failed for payload");
-            result = IOTHUB_DEVICE_METHOD_ERROR;
-        }
-        else if ((memcpy(payloadOut, payload, payloadLength)) == NULL)
-        {
-            LogError("memcpy failed for payload");
-            free((void*)payloadOut);
-            result = IOTHUB_DEVICE_METHOD_ERROR;
-        }
-        else
-        {
-            *responseStatus = (int)json_value_get_number(statusJsonValue);
-            *responsePayload = payloadOut;
-            *responsePayloadSize = payloadLength;
-            result = IOTHUB_DEVICE_METHOD_OK;
-        }
         STRING_delete(jsonStringHandle);
         json_value_free(root_value);
+        result = IOTHUB_DEVICE_METHOD_OK;
     }
 
     return result;
@@ -157,28 +132,8 @@ static BUFFER_HANDLE createMethodPayloadJson(const char* methodName, unsigned in
     STRING_HANDLE stringHandle;
     const char* stringHandle_c_str;
     BUFFER_HANDLE result;
-    const char *formatString;
 
-    if (payload == NULL)
-    {
-        formatString = RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD_NULL;
-    }
-    else
-    {
-        JSON_Value *parsedValue = json_parse_string(payload);
-        if (parsedValue != NULL)
-        {
-            formatString = RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD_JSON;
-            json_value_free(parsedValue);
-        }
-        else
-        {
-            formatString = RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD_STRING;
-        }
-
-    }
-
-    if ((stringHandle = STRING_construct_sprintf(formatString, methodName, timeout, payload)) == NULL)
+    if ((stringHandle = STRING_construct_sprintf(RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD, methodName, timeout, payload)) == NULL)
     {
         LogError("STRING_construct_sprintf failed");
         result = NULL;
