@@ -51,7 +51,7 @@ namespace Microsoft.Azure.Devices.Client.Test.Transport.Mqtt
             {
                 await asyncMethod(tokenSource.Token);
             }
-            catch (SocketException ex)
+            catch (SocketException)
             {
                 Assert.Fail("Fail to skip execution of this operation using cancellation token.");
             }

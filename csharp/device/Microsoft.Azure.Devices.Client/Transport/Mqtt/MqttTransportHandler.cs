@@ -79,7 +79,7 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
         TransportState State => (TransportState)Volatile.Read(ref this.state);
 
         internal MqttTransportHandler(IotHubConnectionString iotHubConnectionString)
-            : this(iotHubConnectionString, new MqttTransportSettings(TransportType.Mqtt))
+            : this(iotHubConnectionString, new MqttTransportSettings(TransportType.Mqtt_Tcp_Only))
         {
 
         }
@@ -212,19 +212,13 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
                     await this.SubscribeAsync();
                 }
 
-                using (CancellationTokenSource linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, this.disconnectAwaitersCancellationSource.Token))
-                {
-                    if (!await this.receivingSemaphore.WaitAsync(timeout, linkedCts.Token))
-                    {
-                        message = null;
-                    }
-                }
+                bool hasMessage = await this.ReceiveMessageArrivalAsync(timeout, cancellationToken);
 
-                lock (this.syncRoot)
+                if (hasMessage)
                 {
-                    this.messageQueue.TryDequeue(out message);
-                    if (message != null)
+                    lock (this.syncRoot)
                     {
+                        this.messageQueue.TryDequeue(out message);
                         message.LockToken = message.LockToken;
                         if (this.qos == QualityOfService.AtLeastOnce)
                         {
@@ -236,6 +230,16 @@ namespace Microsoft.Azure.Devices.Client.Transport.Mqtt
             }, cancellationToken);
 
             return message;
+        }
+
+        private async Task<bool> ReceiveMessageArrivalAsync(TimeSpan timeout, CancellationToken cancellationToken)
+        {
+            bool hasMessage = false;
+            using (CancellationTokenSource linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, this.disconnectAwaitersCancellationSource.Token))
+            {
+                hasMessage = await this.receivingSemaphore.WaitAsync(timeout, linkedCts.Token);
+            }
+            return hasMessage;
         }
 
         public override async Task CompleteAsync(string lockToken, CancellationToken cancellationToken)

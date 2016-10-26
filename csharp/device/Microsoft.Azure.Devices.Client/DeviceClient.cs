@@ -647,14 +647,12 @@ namespace Microsoft.Azure.Devices.Client
             CancellationTokenSource operationTimeoutCancellationTokenSource = GetOperationTimeoutCancellationTokenSource();
 
             var result = operation(operationTimeoutCancellationTokenSource.Token)
-            .WithTimeout(TimeSpan.FromMilliseconds(OperationTimeoutInMilliseconds), () => Resources.OperationTimeoutExpired, operationTimeoutCancellationTokenSource.Token)
-            .ContinueWith(t =>
+                .WithTimeout(TimeSpan.FromMilliseconds(OperationTimeoutInMilliseconds), () => Resources.OperationTimeoutExpired, operationTimeoutCancellationTokenSource.Token);
+            result.ContinueWith(t =>
                 {
                     operationTimeoutCancellationTokenSource.Dispose();
-                })
-            .AsTaskOrAsyncOp();
-
-            return result;
+                });
+            return result.AsTaskOrAsyncOp();
         }
 
         private AsyncTaskOfMessage ApplyTimeout(Func<CancellationToken, System.Threading.Tasks.Task<Message>> operation)
@@ -669,15 +667,13 @@ namespace Microsoft.Azure.Devices.Client
             CancellationTokenSource operationTimeoutCancellationTokenSource = GetOperationTimeoutCancellationTokenSource();
 
             var result = operation(operationTimeoutCancellationTokenSource.Token)
-                .WithTimeout(TimeSpan.FromMilliseconds(OperationTimeoutInMilliseconds), () => Resources.OperationTimeoutExpired, operationTimeoutCancellationTokenSource.Token)
-                .ContinueWith(t =>
+                .WithTimeout(TimeSpan.FromMilliseconds(OperationTimeoutInMilliseconds), () => Resources.OperationTimeoutExpired, operationTimeoutCancellationTokenSource.Token);
+            result.ContinueWith(t =>
                 {
                     operationTimeoutCancellationTokenSource.Dispose();
                     return t.Result;
-                })
-                .AsTaskOrAsyncOp();
-
-            return result;
+                });
+            return result.AsTaskOrAsyncOp();
         }
 
 

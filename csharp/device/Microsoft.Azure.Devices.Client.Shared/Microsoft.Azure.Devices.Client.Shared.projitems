@@ -104,6 +104,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Transport\IHttpClientHelper.cs"> <Link>IHttpClientHelper.cs</Link> </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Transport\TransportHandlerBase.cs"> <Link>TransportHandlerBase.cs</Link> </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\TransportType.cs"> <Link>TransportType.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\RetryStrategyType.cs"> <Link>RetryStrategyType.cs</Link> </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\RetryPolicyType.cs"> <Link>RetryPolicyType.cs</Link> </Compile>
   </ItemGroup>
 </Project>
