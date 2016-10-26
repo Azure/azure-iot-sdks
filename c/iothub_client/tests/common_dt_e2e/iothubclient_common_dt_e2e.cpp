@@ -213,6 +213,7 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     // cleanup
     free(buffer);
 
+    int status_code = 400;
     time_t beginOperation, nowTime;
     beginOperation = time(NULL);
     while (
@@ -228,6 +229,7 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
         {
             if (device->receivedCallBack)
             {
+                status_code = device->status_code;
                 Unlock(device->lock);
                 break;
             }
@@ -242,8 +244,7 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     }
     else
     {
-        ASSERT_IS_TRUE_WITH_MSG(device->receivedCallBack, "SendReported ACK was not received in the alloted time"); // was received by the callback...
-        ASSERT_IS_TRUE_WITH_MSG(device->status_code < 300, "SnedReported status_code is an error");
+        ASSERT_IS_TRUE_WITH_MSG(status_code < 300, "SnedReported status_code is an error");
 
         const char *connectionString = IoTHubAccount_GetIoTHubConnString(g_iothubAcctInfo);
         IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
@@ -430,6 +431,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     free(buffer);
     free(deviceTwinData);
 
+    JSON_Value *root_value = NULL;
     time_t beginOperation, nowTime;
     beginOperation = time(NULL);
     while (
@@ -445,6 +447,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
         {
             if ((device->receivedCallBack) && (device->cb_payload != NULL))
             {
+                root_value = json_parse_string(device->cb_payload);
                 Unlock(device->lock);
                 break;
             }
@@ -459,10 +462,6 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     }
     else
     {
-        ASSERT_IS_TRUE_WITH_MSG(device->receivedCallBack, "deviceTwinCallback was never called"); // was received by the callback...
-        ASSERT_IS_NOT_NULL_WITH_MSG(device->cb_payload, "payload is NULL");
-
-        JSON_Value *root_value = json_parse_string(device->cb_payload);
         ASSERT_IS_NOT_NULL_WITH_MSG(root_value, "json_parse_string failed");
 
         JSON_Object *root_object = json_value_get_object(root_value);
