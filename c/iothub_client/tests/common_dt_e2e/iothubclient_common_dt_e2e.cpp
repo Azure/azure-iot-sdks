@@ -335,15 +335,11 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
     {
         device->update_state = update_state;
         device->receivedCallBack = true;
-        if (device->cb_payload == NULL)
+        if (device->cb_payload != NULL)
         {
-            device->cb_payload = malloc_and_copy_unsigned_char(payload, size);
-            LogInfo("cb_payload '%s'", device->cb_payload);
+            free(device->cb_payload);
         }
-        else
-        {
-            LogError("deviceTwinCallback - cb_payload not null");
-        }
+        device->cb_payload = malloc_and_copy_unsigned_char(payload, size);
         (void) Unlock(device->lock);
     }
 }
@@ -432,6 +428,8 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     free(deviceTwinData);
 
     JSON_Value *root_value = NULL;
+    const char *string_property = NULL;
+    int integer_property;
     time_t beginOperation, nowTime;
     beginOperation = time(NULL);
     while (
@@ -448,8 +446,16 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
             if ((device->receivedCallBack) && (device->cb_payload != NULL))
             {
                 root_value = json_parse_string(device->cb_payload);
+                JSON_Object *root_object = json_value_get_object(root_value);
+
+                string_property = json_object_dotget_string(root_object, "desired.string_property");
+                integer_property = (int)json_object_dotget_number(root_object, "desired.integer_property");
+
                 Unlock(device->lock);
-                break;
+                if ((string_property != NULL) && (integer_property != 0))
+                {
+                    break;
+                }
             }
             Unlock(device->lock);
         }
@@ -463,12 +469,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     else
     {
         ASSERT_IS_NOT_NULL_WITH_MSG(root_value, "json_parse_string failed");
-
-        JSON_Object *root_object = json_value_get_object(root_value);
-        const char *string_property = json_object_dotget_string(root_object, "desired.string_property");
         ASSERT_ARE_EQUAL_WITH_MSG(char_ptr, expected_desired_string, string_property, "string data retrieved differs from expected");
-
-        int integer_property = (int) json_object_dotget_number(root_object, "desired.integer_property");
         ASSERT_ARE_EQUAL_WITH_MSG(int, expected_desired_integer, integer_property, "integer data retrieved differs from expected");
 
         (void)Unlock(device->lock);
