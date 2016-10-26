@@ -271,9 +271,9 @@ void dt_e2e_send_reported_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
         // cleanup
         json_value_free(root_value);
         free(deviceTwinData);
+        IoTHubClient_Destroy(iotHubClientHandle);
         IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
         IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
-        IoTHubClient_Destroy(iotHubClientHandle);
         device_reported_deinit(device);
     }
 }
@@ -476,10 +476,10 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 
         // cleanup
         json_value_free(root_value);
+        IoTHubClient_Destroy(iotHubClientHandle);
         IoTHubDeviceTwin_Destroy(serviceClientDeviceTwinHandle);
         IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
         free(expected_desired_string);
-        IoTHubClient_Destroy(iotHubClientHandle);
         device_desired_deinit(device);
     }
 }
