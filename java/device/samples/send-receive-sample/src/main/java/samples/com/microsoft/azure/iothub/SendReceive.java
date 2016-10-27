@@ -202,9 +202,9 @@ public class SendReceive
                 protocol.name());
 
         DeviceClient client = new DeviceClient(connString, protocol);
-        if (pathToCertificate != null )
+        if (pathToCertificate != null)
         {
-            client.setOption("SetCertificatePath", pathToCertificate );
+            client.setOption("SetCertificatePath", pathToCertificate);
         }
 
         System.out.println("Successfully created an IoT Hub client.");
@@ -224,6 +224,10 @@ public class SendReceive
 
         System.out.println("Successfully set message callback.");
 
+        // Set your token expiry time limit here
+        long time = 2400;
+        client.setOption("SetSASTokenExpiryTime", time);
+
         client.open();
 
         System.out.println("Opened connection to IoT Hub.");
@@ -232,12 +236,7 @@ public class SendReceive
 
         System.out.println("Sending the following event messages: ");
 
-        // Set your token expiry time limit here
-        long time = 2400;
-        client.setOption("SetSASTokenExpiryTime", time);
-
         System.out.println("Updated token expiry time to " + time);
-
 
         for (int i = 0; i < numRequests; ++i)
         {
@@ -252,13 +251,14 @@ public class SendReceive
                 System.out.println(msgStr);
                 EventCallback eventCallback = new EventCallback();
                 client.sendEventAsync(msg, eventCallback, i);
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
             }
-            try {
+            try
+            {
                 Thread.sleep(200);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException e)
+            {
                 e.printStackTrace();
             }
         }
