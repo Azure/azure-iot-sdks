@@ -33,7 +33,7 @@ Azure IoT device SDKs can be used with a broad range of OS platforms and devices
 - Have a Real Time Clock or implement code to connect to an NTP server: necessary for both establishing the TLS connection and generating the secure token for authentication.
 - Having at least 64KB of RAM: the memory footprint of the SDK depends on the SDK and protocol used as well as the platform targeted. The smallest footprint is achieved using the C SDK targeting microcontrollers.
 
-You can find an exhaustive list of the OS platforms the various SDKs have been tested against on our [OS Platforms and hardware compatibility](https://azure.microsoft.com/documentation/articles/iot-hub-tested-configurations/) page. Note that you might still be able to use the SDKs on OS and hardware platforms that are not listed on this page: all the SDKs are open sourced and designed to be portable. If you have suggestions, feedback or issues to report, refer to the Contribution and Support sections below.
+You can find an exhaustive list of the OS platforms the various SDKs have been tested against in the [Azure Certified for IoT device catalog](https://catalog.azureiotsuite.com/). Note that you might still be able to use the SDKs on OS and hardware platforms that are not listed on this page: all the SDKs are open sourced and designed to be portable. If you have suggestions, feedback or issues to report, refer to the Contribution and Support sections below.
 
 ## Microsoft Azure IoT service SDKs
 
@@ -117,7 +117,7 @@ This folder contains the following documents that are relevant to all the langua
 - [Set up IoT Hub](doc/setup_iothub.md) describes how to configure your Azure IoT Hub service.
 - [Manage IoT Hub](doc/manage_iot_hub.md) describes how to provision devices in your Azure IoT Hub service.
 - [FAQ](doc/faq.md) contains frequently asked questions about the SDKs and libraries.
-- [OS Platforms and hardware compatibility](https://azure.microsoft.com/documentation/articles/iot-hub-tested-configurations/) describes the SDK compatibility with different OS platforms as well as specific device configurations.
+- [Azure Certified for IoT device catalog](https://catalog.azureiotsuite.com/).
 
 ### /tools
 
