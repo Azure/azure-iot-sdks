@@ -15,11 +15,21 @@ echo compile javawrapper and samples
 source ./javawrapper/build_all/linux/exportLibPath.sh
 
 cd javawrapper/device/
+mkdir ./samples/direct_call_of_wrapped_functions/target
 cp ./../../c/cmake/iotsdk_linux/javawrapper/libiothub_client_java.so ./samples/direct_call_of_wrapped_functions/target
+
+mkdir ./samples/send-receive-sample/target
 cp ./../../c/cmake/iotsdk_linux/javawrapper/libiothub_client_java.so ./samples/send-receive-sample/target
+
+mkdir ./samples/send-receive-sample-x509/target
 cp ./../../c/cmake/iotsdk_linux/javawrapper/libiothub_client_java.so ./samples/send-receive-sample-x509/target
+
+mkdir ./samples/send-event-sample/target
 cp ./../../c/cmake/iotsdk_linux/javawrapper/libiothub_client_java.so ./samples/send-event-sample/target
+
+mkdir ./samples/send-serialized-event/target
 cp ./../../c/cmake/iotsdk_linux/javawrapper/libiothub_client_java.so ./samples/send-serialized-event/target
+
 cp ./../../c/cmake/iotsdk_linux/javawrapper/libiothub_client_mock.so ./test
 
 mvn install
