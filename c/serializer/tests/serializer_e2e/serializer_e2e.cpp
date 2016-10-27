@@ -6,6 +6,7 @@
 #include <crtdbg.h>
 #endif
 
+#include "macro_utils.h"
 #include "testrunnerswitcher.h"
 #include "micromock.h"
 #include "micromockcharstararenullterminatedstrings.h"
