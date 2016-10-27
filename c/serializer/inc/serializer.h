@@ -414,13 +414,13 @@ Actions are discarded, since no marshalling will be done for those when sending 
 #define REFLECTED_MODEL(name) \
     static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_MODEL_TYPE,                &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {0}, {0}, {TOSTRING(name)} } };
 #define REFLECTED_PROPERTY(type, name, modelName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_PROPERTY_TYPE,             &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {TOSTRING(name), TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##name, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0} } };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_PROPERTY_TYPE,             &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {TOSTRING(name), TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##modelName##name, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0} } };
 #define REFLECTED_REPORTED_PROPERTY(type, name, modelName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_REPORTED_PROPERTY_TYPE,    &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {TOSTRING(name), TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##name, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0} } };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_REPORTED_PROPERTY_TYPE,    &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {TOSTRING(name), TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##modelName##name, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0} } };
 
 
 #define REFLECTED_DESIRED_PROPERTY_WITH_ON_DESIRED_PROPERTY_CHANGE(type, name, modelName, COUNTER, onDesiredPropertyChange) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(COUNTER))) = { REFLECTION_DESIRED_PROPERTY_TYPE,     &C2(REFLECTED_, C1(DEC(COUNTER))), { {onDesiredPropertyChange, DesiredPropertyInitialize_##name, DesiredPropertyDeinitialize_##name, TOSTRING(name), TOSTRING(type), (int(*)(const AGENT_DATA_TYPE*, void*))FromAGENT_DATA_TYPE_##type, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0}, {0}} };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(COUNTER))) =      { REFLECTION_DESIRED_PROPERTY_TYPE,     &C2(REFLECTED_, C1(DEC(COUNTER))),         { {onDesiredPropertyChange, DesiredPropertyInitialize_##modelName##name, DesiredPropertyDeinitialize_##modelName##name, TOSTRING(name), TOSTRING(type), (int(*)(const AGENT_DATA_TYPE*, void*))FromAGENT_DATA_TYPE_##type, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0}, {0}} };
 
 #define REFLECTED_DESIRED_PROPERTY(type, name, modelName, ...)                                                              \
     IF(COUNT_ARG(__VA_ARGS__),                                                                                              \
@@ -491,25 +491,25 @@ Actions are discarded, since no marshalling will be done for those when sending 
     IMPL_DESIRED_PROPERTY(type, name, modelName, __VA_ARGS__)
 
 #define IMPL_PROPERTY(propertyType, propertyName, modelName) \
-    static int Create_AGENT_DATA_TYPE_From_Ptr_##propertyName(void* param, AGENT_DATA_TYPE* dest) \
+    static int Create_AGENT_DATA_TYPE_From_Ptr_##modelName##propertyName(void* param, AGENT_DATA_TYPE* dest) \
     { \
         return C1(ToAGENT_DATA_TYPE_##propertyType)(dest, *(propertyType*)param); \
     } \
     REFLECTED_PROPERTY(propertyType, propertyName, modelName)
 
 #define IMPL_REPORTED_PROPERTY(propertyType, propertyName, modelName) \
-    static int Create_AGENT_DATA_TYPE_From_Ptr_##propertyName(void* param, AGENT_DATA_TYPE* dest) \
+    static int Create_AGENT_DATA_TYPE_From_Ptr_##modelName##propertyName(void* param, AGENT_DATA_TYPE* dest) \
     { \
         return C1(ToAGENT_DATA_TYPE_##propertyType)(dest, *(propertyType*)param); \
     } \
     REFLECTED_REPORTED_PROPERTY(propertyType, propertyName, modelName)
 
 #define IMPL_DESIRED_PROPERTY(propertyType, propertyName, modelName, ...)           \
-    static void DesiredPropertyInitialize_##propertyName(void* destination)                             \
+    static void DesiredPropertyInitialize_##modelName##propertyName(void* destination)                             \
     {                                                                                                   \
         GlobalInitialize_##propertyType(destination);                                                   \
     }                                                                                                   \
-    static void DesiredPropertyDeinitialize_##propertyName(void* destination)                           \
+    static void DesiredPropertyDeinitialize_##modelName##propertyName(void* destination)                           \
     {                                                                                                   \
        GlobalDeinitialize_##propertyType(destination);                                                  \
     }                                                                                                   \
@@ -550,7 +550,7 @@ Actions are discarded, since no marshalling will be done for those when sending 
             FOR_EACH_2(START_BUILD_LOCAL_PARAMETER, __VA_ARGS__) \
             INSTRUCTION_THAT_CAN_SUSTAIN_A_COMMA_STEAL; \
             result = actionName((modelName*)device FOR_EACH_2(PUSH_LOCAL_PARAMETER, __VA_ARGS__)); \
-            FOR_EACH_2(END_BUILD_LOCAL_PARAMETER, __VA_ARGS__) \
+            FOR_EACH_2_REVERSE(END_BUILD_LOCAL_PARAMETER, __VA_ARGS__) \
         } \
         return result; \
     }

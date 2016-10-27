@@ -21,6 +21,7 @@ void my_gballoc_free(void * t)
 #include <crtdbg.h>
 #endif
 
+#include "macro_utils.h"
 #include "umock_c.h"
 #include "umocktypes_charptr.h"
 #include "umocktypes_bool.h"
