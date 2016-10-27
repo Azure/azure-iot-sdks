@@ -1,12 +1,11 @@
 # Prepare your development environment
 
-This document describes how to prepare your development environment to build and use the **Microsoft .NET Device SDK for Azure IoT Devices**
+This document describes how to prepare your development environment to build and use the **Microsoft Azure IoT device SDK for .NET**
 
 1.  [Setting up a Windows development environment](#windows)
-2.  [Azure SDK for .NET](#azuresdk)
-3.  [Directly using IoT Device Client SDK using NuGet packages](#directly_using_sdk)
-4.  [Building the Azure IoT Device Client .NET SDK locally](#building_sdk)
-5.  [Sample Applications](#samplecode)
+2.  [Directly using IoT Device Client SDK using NuGet packages](#directly_using_sdk)
+3.  [Building the Azure IoT Device Client .NET SDK locally](#building_sdk)
+4.  [Sample Applications](#samplecode)
 
 <a name="windows"/>
 ## Setting up a Windows development environment
@@ -14,15 +13,6 @@ This document describes how to prepare your development environment to build and
 - Install [Visual Studio 2015][visual-studio]. You can use the **Visual Studio Community** Free download if you meet the licensing requirements.
 
 Be sure to include [NuGet Package Manager][NuGet-Package-Manager].
-
-<a name="azuresdk"/>
-## Azure SDK for .NET
-
-Install the Azure SDK for .NET 2.7 or later. Use the following links to download the SDK installer for your version of Visual Studio:
-
-- [VS 2015][lnk-sdk-vs2015]
-- [VS 2013][lnk-sdk-vs2013]
-- [VS 2012][lnk-sdk-vs2012]
 
 <a name="directly_using_sdk"/>
 ## Directly using Azure IoT Device Client SDK using NuGet packages
