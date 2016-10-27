@@ -2,16 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import Query = require('./query');
+import Device = require('./device');
 import RestApiClient = require('./rest_api_client');
 
 declare class Registry {
     constructor(config: Registry.TransportConfig, restApiClient: RestApiClient);
 
     // CRUD operations
-    create(deviceInfo: { deviceId: string; }, done: Registry.ResponseCallback): void;
-    update(deviceInfo: { deviceId: string; }, done: Registry.ResponseCallback): void;
-    get(deviceId: string, done: Registry.ResponseCallback): void;
-    list(done: (err: Error, devices?: any[], response?: any) => void): void;
+    create(deviceInfo: { deviceId: string; }, done: Registry.DeviceCallback): void;
+    update(deviceInfo: { deviceId: string; }, done: Registry.DeviceCallback): void;
+    get(deviceId: string, done: Registry.DeviceCallback): void;
+    list(done: (err: Error, devices?: Device[], response?: any) => void): void;
     delete(deviceId: string, done: Registry.ResponseCallback): void;
 
     // Bulk Import/Export Jobs
@@ -48,6 +49,7 @@ declare namespace Registry {
         continuationToken: string;
     }
 
+    type DeviceCallback = (err: Error, device: Device) => void;
     type ResponseCallback = (err: Error, device: any, response: any) => void;
     type JobCallback = (err: Error, jobStatus?: JobStatus) => void;
 }

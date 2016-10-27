@@ -10,6 +10,7 @@ var ConnectionString = require('./connection_string.js');
 var SharedAccessSignature = require('./shared_access_signature.js');
 var Twin = require('./twin.js');
 var Query = require('./query.js');
+var Device = require('./device.js');
 
 /**
  * @class           module:azure-iothub.Registry
@@ -131,7 +132,13 @@ Registry.prototype.create = function (deviceInfo, done) {
     'Content-Type': 'application/json; charset=utf-8'
   };
 
-  this._restApiClient.executeApiCall('PUT', path, httpHeaders, deviceInfo, done);
+  this._restApiClient.executeApiCall('PUT', path, httpHeaders, deviceInfo, function(err, device) {
+    if (err) {
+      done(err);
+    } else {
+      done(null, new Device(device));
+    }
+  });
 };
 
 /**
@@ -173,7 +180,13 @@ Registry.prototype.update = function (deviceInfo, done) {
     'If-Match': '*'
   };
 
-  this._restApiClient.executeApiCall('PUT', path, httpHeaders, deviceInfo, done);
+  this._restApiClient.executeApiCall('PUT', path, httpHeaders, deviceInfo, function(err, device) {
+    if (err) {
+      done(err);
+    } else {
+      done(null, new Device(device));
+    }
+  });
 };
 
 /**
@@ -203,7 +216,13 @@ Registry.prototype.get = function (deviceId, done) {
   ```]*/
   var path = endpoint.devicePath(deviceId) + endpoint.versionQueryString();
 
-  this._restApiClient.executeApiCall('GET', path, null, null, done);
+  this._restApiClient.executeApiCall('GET', path, null, null, function(err, device) {
+    if (err) {
+      done(err);
+    } else {
+      done(null, new Device(device));
+    }
+  });
 };
 
 /**
@@ -228,7 +247,13 @@ Registry.prototype.list = function (done) {
   ```]*/
   var path = endpoint.devicePath('') + endpoint.versionQueryString();
 
-  this._restApiClient.executeApiCall('GET', path, null, null, done);
+  this._restApiClient.executeApiCall('GET', path, null, null, function(err, devices) {
+    if (err) {
+      done(err);
+    } else {
+      done(null, devices ? devices.map(function(device) { return new Device(device); }) : []);
+    }
+  });
 };
 
 /**
