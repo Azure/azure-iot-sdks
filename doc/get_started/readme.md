@@ -7,6 +7,6 @@ Each document describes:
 - How to run the sample application on the device.
 - How to verify that the device is communicating with IoT Hub.
 
-For a list of the currently certified devices, see [OS Platforms and hardware compatibility with device SDKs][lnk-compatibilty]
+For a list of the currently certified devices, see the [Azure Certified for IoT device catalog][lnk-compatibilty]
 
-[lnk-compatibilty]: https://azure.microsoft.com/documentation/articles/iot-hub-tested-configurations/
+[lnk-compatibilty]: https://catalog.azureiotsuite.com/

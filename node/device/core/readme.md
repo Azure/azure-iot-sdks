@@ -22,7 +22,9 @@ For example, if you want to send an event from your device to an IoT Hub _using 
 npm install -g azure-iot-device-amqp@latest
 ```
 
-Then you can use the following code to send a message to IoT Hub:
+Then you can use the code below to send a message to IoT Hub.
+
+Note that for this sample to work, you will need to [setup your IoT hub][lnk-setup-iot-hub] and [provision your device and get its credentials][lnk-manage-iot-hub]. In the code, replace '[IoT Hub device connection string]' with the device credentials created in the IoT Hub.
 
 ```js
 var connectionString = '[IoT Hub device connection string]';
@@ -61,3 +63,5 @@ See the `azure-iot-device-*` transport-specific packages for more information.
 [nodejs_lnk]: https://nodejs.org/
 [nodejs_dwld_lnk]: https://nodejs.org/en/download/
 [npm_lnk]:https://docs.npmjs.com/getting-started/what-is-npm
+[lnk-setup-iot-hub]: ../../../doc/setup_iothub.md
+[lnk-manage-iot-hub]: ../../../doc/manage_iot_hub.md
