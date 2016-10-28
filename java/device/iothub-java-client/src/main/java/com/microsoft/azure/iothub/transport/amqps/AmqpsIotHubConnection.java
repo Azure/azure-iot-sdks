@@ -10,6 +10,7 @@ import com.microsoft.azure.iothub.IotHubMessageResult;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
 import com.microsoft.azure.iothub.transport.State;
 import com.microsoft.azure.iothub.transport.TransportUtils;
+import com.microsoft.azure.iothub.ws.impl.WebSocketImpl;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Accepted;
@@ -28,7 +29,7 @@ import org.apache.qpid.proton.engine.Sender;
 import org.apache.qpid.proton.engine.Session;
 import org.apache.qpid.proton.engine.SslDomain;
 import org.apache.qpid.proton.engine.Transport;
-import org.apache.qpid.proton.engine.impl.WebSocketImpl;
+import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
@@ -390,8 +391,9 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
             if (this.useWebSockets)
             {
-                WebSocketImpl webSocket = (WebSocketImpl) transport.webSocket();
+                WebSocketImpl webSocket = new WebSocketImpl();
                 webSocket.configure(this.hostName, webSocketPath, 0, webSocketSubProtocol, null, null);
+                ((TransportInternal)transport).addTransportLayer(webSocket);
             }
 
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_031: [The event handler shall set the SASL_PLAIN authentication on the transport using the given user name and sas token.]

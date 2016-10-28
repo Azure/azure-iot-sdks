@@ -15,7 +15,8 @@
     },
     "java": {
         "device": "1.0.14",
-        "service": "1.0.9"
+        "service": "1.0.9",
+        "websocket": "0.1.0"
     },
     "node": {
         "common": "1.0.15",

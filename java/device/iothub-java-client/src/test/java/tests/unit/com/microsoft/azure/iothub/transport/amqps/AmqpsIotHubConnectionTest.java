@@ -14,6 +14,9 @@ import com.microsoft.azure.iothub.transport.amqps.AmqpsIotHubConnection;
 import com.microsoft.azure.iothub.transport.amqps.AmqpsMessage;
 import com.microsoft.azure.iothub.transport.amqps.IotHubReactor;
 import com.microsoft.azure.iothub.transport.amqps.ServerListener;
+import com.microsoft.azure.iothub.ws.impl.WebSocketImpl;
+import com.microsoft.azure.iothub.ws.WebSocketHandler;
+
 import mockit.*;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
@@ -22,7 +25,7 @@ import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.amqp.transport.SenderSettleMode;
 import org.apache.qpid.proton.engine.*;
-import org.apache.qpid.proton.engine.impl.WebSocketImpl;
+import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
@@ -106,6 +109,9 @@ public class AmqpsIotHubConnectionTest {
     protected Transport mockTransport;
 
     @Mocked
+    protected TransportInternal mockTransportInternal;
+
+    @Mocked
     protected Sasl mockSasl;
 
     @Mocked
@@ -115,7 +121,7 @@ public class AmqpsIotHubConnectionTest {
     protected String mockCertPath;
 
     @Mocked
-    WebSocketImpl mockWebSocket;
+    protected WebSocketImpl mockWebSocket;
 
     @Mocked
     ServerListener mockServerListener;
@@ -850,18 +856,19 @@ public class AmqpsIotHubConnectionTest {
                 mockEvent.getConnection();
                 result = mockConnection;
                 mockConnection.getTransport();
-                result = mockTransport;
-                mockTransport.webSocket();
+                result = mockTransportInternal;
+                new WebSocketImpl();
                 result = mockWebSocket;
                 mockWebSocket.configure(anyString, anyString, anyInt, anyString, (Map<String, String>) any, (WebSocketHandler) any);
-                mockTransport.sasl();
+                mockTransportInternal.addTransportLayer(mockWebSocket);
+                mockTransportInternal.sasl();
                 result = mockSasl;
                 mockSasl.plain(anyString, anyString);
                 mockSslDomain.setTrustedCaDb(mockCertPath);
                 mockSslDomain.getTrustedCaDb();
                 result = mockCertPath;
                 mockSslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
-                mockTransport.ssl(mockSslDomain);
+                mockTransportInternal.ssl(mockSslDomain);
             }
         };
 
@@ -886,11 +893,11 @@ public class AmqpsIotHubConnectionTest {
                 times = 1;
                 mockConnection.getTransport();
                 times = 1;
-                mockTransport.webSocket();
-                times = 1;
                 mockWebSocket.configure(hostName + ":" + amqpPort, "/$iothub/websocket", 0, "AMQPWSB10", null, null);
                 times = 1;
-                mockTransport.sasl();
+                mockTransportInternal.addTransportLayer(mockWebSocket);
+                times = 1;
+                mockTransportInternal.sasl();
                 times = 1;
                 mockSasl.plain(deviceId + "@sas." + hubName, anyString);
                 times = 1;
@@ -898,7 +905,7 @@ public class AmqpsIotHubConnectionTest {
                 times = 1;
                 mockSslDomain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
                 times = 1;
-                mockTransport.ssl(mockSslDomain);
+                mockTransportInternal.ssl(mockSslDomain);
                 times = 1;
             }
         };

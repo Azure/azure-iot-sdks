@@ -6,6 +6,7 @@
 package com.microsoft.azure.iot.service.transport.amqps;
 
 import com.microsoft.azure.iot.service.sdk.IotHubServiceClientProtocol;
+import com.microsoft.azure.iothub.ws.impl.WebSocketImpl;
 import mockit.Expectations;
 import mockit.Mocked;
 import mockit.Verifications;
@@ -19,7 +20,7 @@ import org.apache.qpid.proton.amqp.transport.ReceiverSettleMode;
 import org.apache.qpid.proton.amqp.transport.SenderSettleMode;
 import org.apache.qpid.proton.amqp.transport.Source;
 import org.apache.qpid.proton.engine.*;
-import org.apache.qpid.proton.engine.impl.WebSocketImpl;
+import org.apache.qpid.proton.engine.impl.TransportInternal;
 import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.message.MessageError;
 import org.apache.qpid.proton.messenger.impl.Address;
@@ -55,6 +56,7 @@ public class AmqpSendHandlerTest
     @Mocked Data data;
     @Mocked Event event;
     @Mocked Transport transport;
+    @Mocked TransportInternal transportInternal;
     @Mocked Connection connection;
     @Mocked Address address;
     @Mocked WebSocketImpl webSocket;
@@ -282,16 +284,22 @@ public class AmqpSendHandlerTest
         new Expectations()
         {
             {
-                connection = event.getConnection();
-                transport = connection.getTransport();
-                webSocket = (WebSocketImpl)transport.webSocket();
+                event.getConnection();
+                result = connection;
+                connection.getTransport();
+                result = transportInternal;
+                new WebSocketImpl();
+                result = webSocket;
                 webSocket.configure(anyString, anyString, 0, anyString, null, null);
+                transportInternal.addTransportLayer(webSocket);
                 sasl.plain(anyString, anyString);
-                address = new Address(hostAddr);
-                sslDomain = Proton.sslDomain();
+                new Address(hostAddr);
+                result = address;
+                Proton.sslDomain();
+                result = sslDomain;
                 sslDomain.init(SslDomain.Mode.CLIENT);
                 sslDomain.setPeerAuthentication(SslDomain.VerifyMode.ANONYMOUS_PEER);
-                transport.ssl(sslDomain);
+                transportInternal.ssl(sslDomain);
             }
         };
         // Act
