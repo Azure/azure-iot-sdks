@@ -11,7 +11,13 @@ The library is available as a NuGet package for you include in your own developm
  * Batches messages to improve communication efficiency.
  * Supports pluggable transport protocols.
 
-Note the library Microsoft.Azure.Devices.Client supports both HTTPS and AMQP protocols. The Microsoft.Azure.Devices.Client.WinRT library currently supports HTTPS at this time.
+> Note: Currently, **Microsoft.Azure.Devices.Client.WinRT** doesn't support  **MQTT** protocol.
+
+For example,calling `DeviceClient deviceClient = DeviceClient.CreateFromConnectionString(DeviceConnectionString, TransportType.Mqtt);` will result in "Mqtt protocol is not supported" exception.
+
+> Note : Currently, **Microsoft.Azure.Devices.Client.PCL** only supports **HTTPS** protocol.
+
+For example, calling `DeviceClient deviceClient = DeviceClient.CreateFromConnectionString(DeviceConnectionString, TransportType.Amqp);` will result in "Amqp protocol is not supported" exception.
 
 
 ## Application development guidelines
