@@ -33,23 +33,28 @@ namespace Microsoft.Azure.Devices.Client.Transport
             this.transportSettings = transportSettings;
         }
 
-        public override async Task OpenAsync(bool explicitOpen)
+        public override async Task OpenAsync(bool explicitOpen, CancellationToken cancellationToken)
         {
-            await this.TryOpenPrioritizedTransportsAsync(explicitOpen);
+            await this.TryOpenPrioritizedTransportsAsync(explicitOpen, cancellationToken);
         }
 
-        async Task TryOpenPrioritizedTransportsAsync(bool explicitOpen)
+        async Task TryOpenPrioritizedTransportsAsync(bool explicitOpen, CancellationToken cancellationToken)
         {
             Exception lastException = null;
             // Concrete Device Client creation was deferred. Use prioritized list of transports.
             foreach (ITransportSettings transportSetting in this.transportSettings)
             {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
                 try
                 {
                     this.InnerHandler = this.transportHandlerFactory(this.iotHubConnectionString, transportSetting);
 
                     // Try to open a connection with this transport
-                    await base.OpenAsync(explicitOpen);
+                    await base.OpenAsync(explicitOpen, cancellationToken);
                 }
                 catch (Exception exception)
                 {

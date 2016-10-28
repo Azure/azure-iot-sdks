@@ -82,7 +82,7 @@ public class AmqpsTransportTest
 
     // Tests_SRS_AMQPSTRANSPORT_15_003: [If an AMQPS connection is already open, the function shall do nothing.]
     @Test
-    public void openDoesNothingIfAlreadyOpened() throws IOException
+    public void openDoesNothingIfAlreadyOpened() throws IOException, InterruptedException
     {
         AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
         transport.open();
@@ -100,7 +100,7 @@ public class AmqpsTransportTest
 
     // Tests_SRS_AMQPSTRANSPORT_15_004: [The function shall open an AMQPS connection with the IoT Hub given in the configuration.]
     @Test
-    public void openOpensAmqpsConnection() throws IOException
+    public void openOpensAmqpsConnection() throws IOException, InterruptedException
     {
         new NonStrictExpectations()
         {
@@ -168,7 +168,7 @@ public class AmqpsTransportTest
 
     // Tests_SRS_AMQPSTRANSPORT_15_007: [If the AMQPS connection is closed, the function shall do nothing.]
     @Test
-    public void closeDoesNothingIfConnectionAlreadyClosed() throws IOException
+    public void closeDoesNothingIfConnectionAlreadyClosed() throws IOException, InterruptedException
     {
         AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
         transport.open();
@@ -187,7 +187,7 @@ public class AmqpsTransportTest
 
     // Tests_SRS_AMQPSTRANSPORT_15_008: [The function shall close an AMQPS connection with the IoT Hub given in the configuration.]
     @Test
-    public void closeClosesAmqpsConnection() throws IOException
+    public void closeClosesAmqpsConnection() throws IOException, InterruptedException
     {
         AmqpsTransport transport = new AmqpsTransport(mockConfig, false);
         transport.open();

@@ -26,7 +26,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         readonly Uri baseAddress;
         readonly IAuthorizationHeaderProvider authenticationHeaderProvider;
         readonly IReadOnlyDictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>> defaultErrorMapping;
-        readonly bool usingX509ClientCert;
+        readonly bool usingX509ClientCert = false;
         HttpClient httpClientObj;
         bool isDisposed;
 
@@ -113,7 +113,11 @@ namespace Microsoft.Azure.Devices.Client.Transport
             return result;
         }
 
+#if WINDOWS_UWP || PCL
+        public Task<T> PutAsync<T>(
+#else
         public async Task<T> PutAsync<T>(
+#endif
             Uri requestUri,
             T entity,
             PutOperationType operationType,
