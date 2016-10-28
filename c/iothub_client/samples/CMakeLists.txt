@@ -22,6 +22,9 @@ endif()
 
 if(${use_mqtt})
 	add_sample_directory(iothub_client_sample_mqtt)
+	if (${use_wsio})
+		add_sample_directory(iothub_client_sample_mqtt_websockets)
+	endif()
 endif()
 
 if(${use_amqp})
