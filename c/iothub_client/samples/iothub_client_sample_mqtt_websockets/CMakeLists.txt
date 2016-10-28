@@ -33,3 +33,6 @@ target_link_libraries(iothub_client_sample_mqtt_websockets
     iothub_client 
 )
 
+linkSharedUtil(iothub_client_sample_mqtt_websockets)
+linkMqttLibrary(iothub_client_sample_mqtt_websockets)
+
