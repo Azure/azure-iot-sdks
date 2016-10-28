@@ -13,6 +13,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Azure.Devices.Client;
     using Microsoft.Azure.Devices.Client.Exceptions;
     using Microsoft.Azure.Devices.Client.Extensions;
     using Newtonsoft.Json;
@@ -122,7 +123,45 @@ namespace Microsoft.Azure.Devices.Client.Transport
             return new HttpTransportHandler(iotHubConnectionString);
         }
 
-        public override Task OpenAsync(bool explicitOpen)
+        private Task HandleTimeoutCancellation(Func<Task> func, CancellationToken token)
+        {
+            var tcs = new TaskCompletionSource<bool>();
+
+            func().ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        tcs.SetResult(false);
+                    }
+                    else
+                    {
+                        tcs.TrySetException(t.Exception);
+                    }
+                }
+                else if (t.IsCanceled)
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        tcs.SetResult(false);
+                    }
+                    else
+                    {
+                        tcs.TrySetCanceled();
+                    }
+                }
+                else
+                {
+                    tcs.SetResult(false);
+                }
+            }, CancellationToken.None);
+
+            return tcs.Task;
+        }
+
+
+        public override Task OpenAsync(bool explicitOpen, CancellationToken cancellationToken)
         {
             return TaskHelpers.CompletedTask;
         }
@@ -132,7 +171,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             return TaskHelpers.CompletedTask;
         }
 
-        public override Task SendEventAsync(Message message)
+        public override Task SendEventAsync(Message message, CancellationToken cancellationToken)
         {
             if (message == null)
             {
@@ -150,15 +189,16 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 customHeaders.Add(CustomHeaderConstants.HttpAppPropertyPrefix + property.Key, property.Value);
             }
 
-            return this.httpClientHelper.PostAsync<byte[]>(
-                GetRequestUri(this.deviceId, CommonConstants.DeviceEventPathTemplate, null),
-                message.GetBytes(),
-                ExceptionHandlingHelper.GetDefaultErrorMapping(),
-                customHeaders,
-                CancellationToken.None);
+            return this.HandleTimeoutCancellation(() =>
+                this.httpClientHelper.PostAsync<byte[]>(
+                    GetRequestUri(this.deviceId, CommonConstants.DeviceEventPathTemplate, null),
+                    message.GetBytes(),
+                    ExceptionHandlingHelper.GetDefaultErrorMapping(),
+                    customHeaders,
+                    cancellationToken), cancellationToken);
         }
 
-        public override Task SendEventAsync(IEnumerable<Message> messages)
+        public override Task SendEventAsync(IEnumerable<Message> messages, CancellationToken cancellationToken)
         {
             if (messages == null)
             {
@@ -168,12 +208,13 @@ namespace Microsoft.Azure.Devices.Client.Transport
             var customHeaders = PrepareCustomHeaders(CommonConstants.DeviceEventPathTemplate.FormatInvariant(this.deviceId), string.Empty, CommonConstants.DeviceToCloudOperation);
 
             string body = ToJson(messages);
-            return this.httpClientHelper.PostAsync<string>(
-                GetRequestUri(this.deviceId, CommonConstants.DeviceEventPathTemplate, null),
-                body,
-                ExceptionHandlingHelper.GetDefaultErrorMapping(),
-                customHeaders,
-                CancellationToken.None);
+            return this.HandleTimeoutCancellation(() =>
+                this.httpClientHelper.PostAsync<string>(
+                    GetRequestUri(this.deviceId, CommonConstants.DeviceEventPathTemplate, null),
+                    body,
+                    ExceptionHandlingHelper.GetDefaultErrorMapping(),
+                    customHeaders,
+                    cancellationToken), cancellationToken);
         }
 
         protected override void Dispose(bool disposing)
@@ -189,31 +230,6 @@ namespace Microsoft.Azure.Devices.Client.Transport
             {
                 base.Dispose(disposing);
             }
-        }
-
-        internal Task SendEventAsync(IEnumerable<string> messages)
-        {
-            var customHeaders = PrepareCustomHeaders(CommonConstants.DeviceEventPathTemplate.FormatInvariant(this.deviceId), string.Empty, CommonConstants.DeviceToCloudOperation);
-
-            string body = ToJson(messages);
-            return this.httpClientHelper.PostAsync<string>(
-                GetRequestUri(this.deviceId, CommonConstants.DeviceEventPathTemplate, null),
-                body,
-                ExceptionHandlingHelper.GetDefaultErrorMapping(),
-                customHeaders,
-                CancellationToken.None);
-        }
-
-        internal Task SendEventAsync(IEnumerable<Tuple<string, IDictionary<string, string>>> messages)
-        {
-            var customHeaders = PrepareCustomHeaders(CommonConstants.DeviceEventPathTemplate.FormatInvariant(this.deviceId), string.Empty, CommonConstants.DeviceToCloudOperation);
-            string body = ToJson(messages);
-            return this.httpClientHelper.PostAsync<string>(
-                GetRequestUri(this.deviceId, CommonConstants.DeviceEventPathTemplate, null),
-                body,
-                ExceptionHandlingHelper.GetDefaultErrorMapping(),
-                customHeaders,
-                CancellationToken.None);
         }
 
 #if !WINDOWS_UWP && !PCL
@@ -278,12 +294,12 @@ namespace Microsoft.Azure.Devices.Client.Transport
         }
 #endif
 
-        public override Task<Message> ReceiveAsync()
+        public override Task<Message> ReceiveAsync(CancellationToken cancellationToken)
         {
-            return this.ReceiveAsync(TimeSpan.Zero);
+            return this.ReceiveAsync(TimeSpan.Zero, cancellationToken);
         }
 
-        public override async Task<Message> ReceiveAsync(TimeSpan timeout)
+        public override async Task<Message> ReceiveAsync(TimeSpan timeout, CancellationToken cancellationToken)
         {
             // Long-polling is not supported
             if (!TimeSpan.Zero.Equals(timeout))
@@ -295,14 +311,18 @@ namespace Microsoft.Azure.Devices.Client.Transport
             IDictionary<string, string> queryValueDictionary =
                 new Dictionary<string, string>() { { CustomHeaderConstants.MessageLockTimeout, DefaultOperationTimeout.TotalSeconds.ToString(CultureInfo.InvariantCulture) } };
 
-            var responseMessage = await this.httpClientHelper.GetAsync<HttpResponseMessage>(
-                GetRequestUri(this.deviceId, CommonConstants.DeviceBoundPathTemplate, queryValueDictionary),
-                ExceptionHandlingHelper.GetDefaultErrorMapping(),
-                customHeaders,
-                true,
-                CancellationToken.None);
+            HttpResponseMessage responseMessage = null;
+            await this.HandleTimeoutCancellation(async () =>
+            {
+                responseMessage = await this.httpClientHelper.GetAsync<HttpResponseMessage>(
+                    GetRequestUri(this.deviceId, CommonConstants.DeviceBoundPathTemplate, queryValueDictionary),
+                    ExceptionHandlingHelper.GetDefaultErrorMapping(),
+                    customHeaders,
+                    true,
+                    cancellationToken);
+            }, cancellationToken);
 
-            if (responseMessage.StatusCode == HttpStatusCode.NoContent)
+            if (responseMessage == null || responseMessage.StatusCode == HttpStatusCode.NoContent)
             {
                 return null;
             }
@@ -381,7 +401,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             return message;
         }
 
-        public override Task CompleteAsync(string lockToken)
+        public override Task CompleteAsync(string lockToken, CancellationToken cancellationToken)
         {
             var customHeaders = PrepareCustomHeaders(
                 CommonConstants.DeviceBoundPathCompleteTemplate.FormatInvariant(this.deviceId, lockToken),
@@ -390,15 +410,16 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
             var eTag = new ETagHolder { ETag = lockToken };
 
-            return this.httpClientHelper.DeleteAsync(
-                GetRequestUri(this.deviceId, CommonConstants.DeviceBoundPathTemplate + "/{0}".FormatInvariant(lockToken), null),
-                eTag,
-                ExceptionHandlingHelper.GetDefaultErrorMapping(),
-                customHeaders,
-                CancellationToken.None);
+            return this.HandleTimeoutCancellation(() =>
+                this.httpClientHelper.DeleteAsync(
+                    GetRequestUri(this.deviceId, CommonConstants.DeviceBoundPathTemplate + "/{0}".FormatInvariant(lockToken), null),
+                    eTag,
+                    ExceptionHandlingHelper.GetDefaultErrorMapping(),
+                    customHeaders,
+                    cancellationToken), cancellationToken);
         }
 
-        public override Task AbandonAsync(string lockToken)
+        public override Task AbandonAsync(string lockToken, CancellationToken cancellationToken)
         {
             var customHeaders = PrepareCustomHeaders(
                 CommonConstants.DeviceBoundPathAbandonTemplate.FormatInvariant(this.deviceId, lockToken),
@@ -408,15 +429,16 @@ namespace Microsoft.Azure.Devices.Client.Transport
             // Even though If-Match is not a customHeader, add it here for convenience
             customHeaders.Add(HttpRequestHeader.IfMatch.ToString(), lockToken);
 
-            return this.httpClientHelper.PostAsync(
-                GetRequestUri(this.deviceId, CommonConstants.DeviceBoundPathTemplate + "/{0}/abandon".FormatInvariant(lockToken), null),
-                (Object)null,
-                ExceptionHandlingHelper.GetDefaultErrorMapping(),
-                customHeaders,
-                CancellationToken.None);
+            return this.HandleTimeoutCancellation(() =>
+                this.httpClientHelper.PostAsync(
+                    GetRequestUri(this.deviceId, CommonConstants.DeviceBoundPathTemplate + "/{0}/abandon".FormatInvariant(lockToken), null),
+                    (Object)null,
+                    ExceptionHandlingHelper.GetDefaultErrorMapping(),
+                    customHeaders,
+                    cancellationToken), cancellationToken);
         }
 
-        public override Task RejectAsync(string lockToken)
+        public override Task RejectAsync(string lockToken, CancellationToken cancellationToken)
         {
             var customHeaders = PrepareCustomHeaders(
                 CommonConstants.DeviceBoundPathRejectTemplate.FormatInvariant(this.deviceId, lockToken),
@@ -425,12 +447,16 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
             var eTag = new ETagHolder { ETag = lockToken };
 
-            return this.httpClientHelper.DeleteAsync(
-                GetRequestUri(this.deviceId, CommonConstants.DeviceBoundPathTemplate + "/{0}".FormatInvariant(lockToken), new Dictionary<string, string> { { "reject", null } }),
-                eTag,
-                ExceptionHandlingHelper.GetDefaultErrorMapping(),
-                customHeaders,
-                CancellationToken.None);
+            return this.HandleTimeoutCancellation(() =>
+                this.httpClientHelper.DeleteAsync(
+                    GetRequestUri(this.deviceId, CommonConstants.DeviceBoundPathTemplate + "/{0}".FormatInvariant(lockToken), new Dictionary<string, string>
+                    {
+                        { "reject", null }
+                    }),
+                    eTag,
+                    ExceptionHandlingHelper.GetDefaultErrorMapping(),
+                    customHeaders,
+                    cancellationToken), cancellationToken);
         }
 
         static IDictionary<string, string> PrepareCustomHeaders(string toHeader, string messageId, string operation)

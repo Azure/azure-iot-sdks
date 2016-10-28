@@ -4,16 +4,17 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Amqp;
 
     sealed class FaultTolerantAmqpObject<T> : Singleton<T> where T : AmqpObject
     {
-        readonly Func<TimeSpan, Task<T>> createObjectAsync;
+        readonly Func<TimeSpan, CancellationToken, Task<T>> createObjectAsync;
         readonly Action<T> closeObject;
         readonly EventHandler onObjectClosed;
 
-        public FaultTolerantAmqpObject(Func<TimeSpan, Task<T>> createObjectAsync, Action<T> closeObject)
+        public FaultTolerantAmqpObject(Func<TimeSpan, CancellationToken, Task<T> > createObjectAsync, Action<T> closeObject)
         {
             this.createObjectAsync = createObjectAsync;
             this.closeObject = closeObject;
@@ -39,9 +40,9 @@ namespace Microsoft.Azure.Devices.Client
             return openedAmqpObject != null;
         }
 
-        protected override async Task<T> OnCreateAsync(TimeSpan timeout)
+        protected override async Task<T> OnCreateAsync(TimeSpan timeout, CancellationToken cancellationToken)
         {
-            T amqpObject = await this.createObjectAsync(timeout);
+            T amqpObject = await this.createObjectAsync(timeout, cancellationToken);
             amqpObject.SafeAddClosed((s, e) => this.Invalidate(amqpObject));
 
             return amqpObject;

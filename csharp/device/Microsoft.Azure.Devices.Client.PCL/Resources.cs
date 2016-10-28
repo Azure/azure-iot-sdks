@@ -11,5 +11,6 @@ namespace Microsoft.Azure.Devices.Client
         public static string InvalidBufferSize = "The buffer size is invalid.";
         public static string ValueMustBeNonNegative = "The value of this argument must be non-negative.";
         public static string StringIsNotBase64 = "'{0}' is not a valid Base64 encoded string.";
+        public static string OperationTimeoutExpired = "Operation timeout expired.";
     }
 }

@@ -52,7 +52,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             this.handlerFactory = handlerFactory;
         }
 
-        public override async Task OpenAsync(bool explicitOpen)
+        public override async Task OpenAsync(bool explicitOpen, CancellationToken cancellationToken)
         {
             TaskCompletionSource<int> openCompletionBeforeOperationStarted = this.openCompletion;
             IDelegatingHandler handlerBeforeOperationStarted = this.InnerHandler;
@@ -68,7 +68,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                     this.InnerHandler = this.handlerFactory();
                     try
                     {
-                        await this.ExecuteWithErrorHandlingAsync(() => base.OpenAsync(explicitOpen), false);
+                        await this.ExecuteWithErrorHandlingAsync(() => base.OpenAsync(explicitOpen, cancellationToken), false, cancellationToken);
                         openCompletionBeforeOperationStarted.TrySetResult(0);
                     }
                     catch (Exception ex) when (IsTransportHandlerStillUsable(ex))
@@ -92,51 +92,51 @@ namespace Microsoft.Azure.Devices.Client.Transport
             }
         }
 
-        public override Task<Message> ReceiveAsync()
+        public override Task<Message> ReceiveAsync(CancellationToken cancellationToken)
         {
-            return this.ExecuteWithErrorHandlingAsync(() => base.ReceiveAsync(), true);
+            return this.ExecuteWithErrorHandlingAsync(() => base.ReceiveAsync(cancellationToken), true, cancellationToken);
         }
 
-        public override Task<Message> ReceiveAsync(TimeSpan timeout)
+        public override Task<Message> ReceiveAsync(TimeSpan timeout, CancellationToken cancellationToken)
         {
-            return this.ExecuteWithErrorHandlingAsync(() => base.ReceiveAsync(timeout), true);
+            return this.ExecuteWithErrorHandlingAsync(() => base.ReceiveAsync(timeout, cancellationToken), true, cancellationToken);
         }
 
-        public override Task AbandonAsync(string lockToken)
+        public override Task AbandonAsync(string lockToken, CancellationToken cancellationToken)
         {
-            return this.ExecuteWithErrorHandlingAsync(() => base.AbandonAsync(lockToken), true);
+            return this.ExecuteWithErrorHandlingAsync(() => base.AbandonAsync(lockToken, cancellationToken), true, cancellationToken);
         }
 
-        public override Task CompleteAsync(string lockToken)
+        public override Task CompleteAsync(string lockToken, CancellationToken cancellationToken)
         {
-            return this.ExecuteWithErrorHandlingAsync(() => base.CompleteAsync(lockToken), true);
+            return this.ExecuteWithErrorHandlingAsync(() => base.CompleteAsync(lockToken, cancellationToken), true, cancellationToken);
         }
 
-        public override Task RejectAsync(string lockToken)
+        public override Task RejectAsync(string lockToken, CancellationToken cancellationToken)
         {
-            return this.ExecuteWithErrorHandlingAsync(() => base.RejectAsync(lockToken), true);
+            return this.ExecuteWithErrorHandlingAsync(() => base.RejectAsync(lockToken, cancellationToken), true, cancellationToken);
         }
 
-        public override Task SendEventAsync(IEnumerable<Message> messages)
+        public override Task SendEventAsync(IEnumerable<Message> messages, CancellationToken cancellationToken)
         {
-            return this.ExecuteWithErrorHandlingAsync(() => base.SendEventAsync(messages), true);
+            return this.ExecuteWithErrorHandlingAsync(() => base.SendEventAsync(messages, cancellationToken), true, cancellationToken);
         }
 
-        public override Task SendEventAsync(Message message)
+        public override Task SendEventAsync(Message message, CancellationToken cancellationToken)
         {
-            return this.ExecuteWithErrorHandlingAsync(() => base.SendEventAsync(message), true);
+            return this.ExecuteWithErrorHandlingAsync(() => base.SendEventAsync(message, cancellationToken), true, cancellationToken);
         }
 
-        Task ExecuteWithErrorHandlingAsync(Func<Task> asyncOperation, bool ensureOpen)
+        Task ExecuteWithErrorHandlingAsync(Func<Task> asyncOperation, bool ensureOpen, CancellationToken cancellationToken)
         {
-            return ExecuteWithErrorHandlingAsync(async () => { await asyncOperation(); return 0; }, ensureOpen);
+            return ExecuteWithErrorHandlingAsync(async () => { await asyncOperation(); return 0; }, ensureOpen, cancellationToken);
         }
 
-        async Task<T> ExecuteWithErrorHandlingAsync<T>(Func<Task<T>> asyncOperation, bool ensureOpen)
+        async Task<T> ExecuteWithErrorHandlingAsync<T>(Func<Task<T>> asyncOperation, bool ensureOpen, CancellationToken cancellationToken)
         {
             if (ensureOpen)
             {
-                await this.EnsureOpenAsync();
+                await this.EnsureOpenAsync(cancellationToken);
             }
 
             TaskCompletionSource<int> openCompletionBeforeOperationStarted = this.openCompletion;
@@ -173,9 +173,9 @@ namespace Microsoft.Azure.Devices.Client.Transport
             }
         }
 
-        Task EnsureOpenAsync()
+        Task EnsureOpenAsync(CancellationToken cancellationToken)
         {
-            return this.OpenAsync(false);
+            return this.OpenAsync(false, cancellationToken);
         }
 
         static bool IsTransportHandlerStillUsable(Exception exception)

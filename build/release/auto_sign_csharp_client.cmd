@@ -13,6 +13,8 @@
 @setlocal EnableExtensions EnableDelayedExpansion
 @echo off
 
+set no-sign=%1
+
 rem **********************************
 rem * Specify the Build Root Folders *
 rem **********************************
@@ -48,41 +50,43 @@ if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 xcopy /q /y /R %client-build-root%\csharp\service\Microsoft.Azure.Devices.Uwp\bin\Release_Delay_Sign\Microsoft.Azure.Devices.Uwp.dll %client-build-root%\build\tosign\
 if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-rem -- Auto-sign the managed dlls placed in the "tosign" Folder
-csu.exe /s=True /w=True /i=%client-build-root%\build\tosign /o=%client-build-root%\build\signed /c1=72 /c2=401 /d="Signing Azure IoT Managed Client binaries"
-if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+if not defined no-sign (
+    rem -- Auto-sign the managed dlls placed in the "tosign" Folder
+    csu.exe /s=True /w=True /i=%client-build-root%\build\tosign /o=%client-build-root%\build\signed /c1=72 /c2=401 /d="Signing Azure IoT Managed Client binaries"
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-rem -- Copy the signed managed dlls back to their respective build output directories
-xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.dll %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client\bin\Release_Delay_Sign\
-if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    rem -- Copy the signed managed dlls back to their respective build output directories
+    xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.dll %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client\bin\Release_Delay_Sign\
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.dll %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client\obj\Release_Delay_Sign\
-if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.dll %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client\obj\Release_Delay_Sign\
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.PCL.dll %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client.PCL\bin\Release_Delay_Sign\
-if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.PCL.dll %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client.PCL\bin\Release_Delay_Sign\
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.PCL.dll %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client.PCL\obj\Release_Delay_Sign\
-if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.PCL.dll %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client.PCL\obj\Release_Delay_Sign\
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.winmd %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client.WinRT\bin\Release_Delay_Sign\
-if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.winmd %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client.WinRT\bin\Release_Delay_Sign\
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.winmd %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client.WinRT\obj\Release_Delay_Sign\
-if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Client.winmd %client-build-root%\csharp\device\Microsoft.Azure.Devices.Client.WinRT\obj\Release_Delay_Sign\
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.dll %client-build-root%\csharp\service\Microsoft.Azure.Devices\bin\Release_Delay_Sign\
-if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.dll %client-build-root%\csharp\service\Microsoft.Azure.Devices\bin\Release_Delay_Sign\
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.dll %client-build-root%\csharp\service\Microsoft.Azure.Devices\obj\Release_Delay_Sign\
-if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.dll %client-build-root%\csharp\service\Microsoft.Azure.Devices\obj\Release_Delay_Sign\
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Uwp.dll %client-build-root%\csharp\service\Microsoft.Azure.Devices.Uwp\bin\Release_Delay_Sign\
-if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Uwp.dll %client-build-root%\csharp\service\Microsoft.Azure.Devices.Uwp\bin\Release_Delay_Sign\
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Uwp.dll %client-build-root%\csharp\service\Microsoft.Azure.Devices.Uwp\obj\Release_Delay_Sign\
-if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+    xcopy /q /y /R %client-build-root%\build\signed\Microsoft.Azure.Devices.Uwp.dll %client-build-root%\csharp\service\Microsoft.Azure.Devices.Uwp\obj\Release_Delay_Sign\
+    if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-rem -- Clean directories
-del /F /Q %client-build-root%\build\tosign
-del /F /Q %client-build-root%\build\signed
+    rem -- Clean directories
+    del /F /Q %client-build-root%\build\tosign
+    del /F /Q %client-build-root%\build\signed
+)

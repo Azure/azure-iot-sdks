@@ -4,6 +4,7 @@
 namespace Microsoft.Azure.Devices.Client.Test
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Devices.Client;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -206,7 +207,7 @@ namespace Microsoft.Azure.Devices.Client.Test
 
             // Hacky way to verify that the SingleTokenConnection object has been closed.
             var singleConnection = (IotHubSingleTokenConnection)hubscopeConnectionPool.Connection;
-            await singleConnection.CreateSendingLinkAsync("test", iotHubConnectionString, TimeSpan.FromMinutes(2));
+            await singleConnection.CreateSendingLinkAsync("test", iotHubConnectionString, TimeSpan.FromMinutes(2), CancellationToken.None);
         }
     }
 }

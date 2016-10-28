@@ -8,8 +8,8 @@
   "typings": "index.d.ts",
   "dependencies": {
     "azure-iot-http-base": "1.0.16",
-    "azure-iot-common": "1.0.15",
-    "azure-iot-device": "1.0.15",
+    "azure-iot-common": "1.0.16",
+    "azure-iot-device": "1.0.16",
     "node-crontab": "^0.0.8"
   },
   "devDependencies": {

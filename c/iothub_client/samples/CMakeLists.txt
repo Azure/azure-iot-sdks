@@ -22,13 +22,19 @@ endif()
 
 if(${use_mqtt})
 	add_sample_directory(iothub_client_sample_mqtt)
+	if (${use_wsio})
+		add_sample_directory(iothub_client_sample_mqtt_websockets)
+	endif()
 endif()
 
 if(${use_amqp})
 	add_sample_directory(iothub_client_sample_amqp)
+	add_sample_directory(iothub_client_sample_amqp_shared)
+	add_sample_directory(iothub_ll_client_sample_amqp_shared)
 	
 	if (${use_wsio})
 		add_sample_directory(iothub_client_sample_amqp_websockets)
+		add_sample_directory(iothub_client_sample_amqp_websockets_shared)
 	endif()
 endif()
 
