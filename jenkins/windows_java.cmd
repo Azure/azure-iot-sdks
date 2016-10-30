@@ -18,3 +18,9 @@ cd %build-root%\java\service
 call mvn verify -DskipITs=false
 if errorlevel 1 goto :eof
 cd %build-root%
+
+REM -- Websocket Transport Layer --
+cd %build-root%\java\websocket-transport-layer
+call mvn verify
+if errorlevel 1 goto :eof
+cd %build-root%
