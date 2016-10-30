@@ -405,6 +405,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     (void) IoTHubClient_SetOption(iotHubClientHandle, OPTION_LOG_TRACE, &trace);
     (void) IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates);
 
+	// subscribe
     IOTHUB_CLIENT_RESULT iot_result = IoTHubClient_SetDeviceTwinCallback(iotHubClientHandle, deviceTwinCallback, device);
     ASSERT_ARE_EQUAL_WITH_MSG(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, iot_result, "IoTHubClient_SetDeviceTwinCallback failed");
 
@@ -424,7 +425,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     ASSERT_IS_NOT_NULL_WITH_MSG(deviceTwinData, "IoTHubDeviceTwin_UpdateTwin failed");
 
     JSON_Value *root_value = NULL;
-    const char *string_property = NULL;
+    const char *string_property;
     int integer_property;
     time_t beginOperation, nowTime;
     beginOperation = time(NULL);
@@ -445,19 +446,30 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
                 root_value = json_parse_string(device->cb_payload);
                 JSON_Object *root_object = json_value_get_object(root_value);
 
-                string_property = json_object_dotget_string(root_object, "desired.string_property");
-                integer_property = (int)json_object_dotget_number(root_object, "desired.integer_property");
-
+				switch (device->update_state)
+				{
+					case DEVICE_TWIN_UPDATE_COMPLETE:
+						string_property = json_object_dotget_string(root_object, "desired.string_property");
+						integer_property = (int)json_object_dotget_number(root_object, "desired.integer_property");
+						break;
+					case DEVICE_TWIN_UPDATE_PARTIAL:
+						string_property = json_object_get_string(root_object, "string_property");
+						integer_property = (int) json_object_get_number(root_object, "integer_property");
+						break;
+					default: // invalid update state
+						ASSERT_FAIL("Invalid update_state reported");
+						break;
+				}
                 Unlock(device->lock);
-                if ((string_property != NULL) && (integer_property != 0))
-                {
-                    break;
-                }
+                break;
             }
             Unlock(device->lock);
         }
         ThreadAPI_Sleep(1000);
     }
+
+	// unsibscribe
+	iot_result = IoTHubClient_SetDeviceTwinCallback(iotHubClientHandle, NULL, NULL);
 
     if (Lock(device->lock) != LOCK_OK)
     {
