@@ -144,6 +144,10 @@ typedef struct AMQP_TRANSPORT_STATE_TAG
     // Saved reference to the IoTHub LL Client.
     IOTHUB_CLIENT_LL_HANDLE iothub_client_handle;
 
+    // Time when the next connection retry should be triggered
+    size_t connection_retry_time;
+    size_t back_off;
+
     // TSL I/O transport.
     XIO_HANDLE tls_io;
     // Pointer to the function that creates the TLS I/O (internal use only).
@@ -1109,6 +1113,16 @@ static void prepareForConnectionRetry(AMQP_TRANSPORT_INSTANCE* transport_state)
     destroyEventSender(transport_state);
     destroyConnection(transport_state);
     transport_state->connection_state = AMQP_MANAGEMENT_STATE_IDLE;
+    if(transport_state->back_off == 0) {
+      transport_state->back_off = rand()%10+5;
+    } else if (transport_state->back_off < 3600) {
+      transport_state->back_off *= 2;
+    } else {
+      transport_state->back_off = 3600;
+    }
+    LogInfo("Next connection retry in %d seconds", transport_state->back_off);
+    transport_state->connection_retry_time = (size_t)(difftime(get_time(NULL), (time_t)0)) + transport_state->back_off;
+
     rollEventsBackToWaitList(transport_state);
 }
 
@@ -1241,6 +1255,9 @@ static TRANSPORT_LL_HANDLE IoTHubTransportAMQP_Create(const IOTHUBTRANSPORT_CONF
             transport_state->tls_io_transport_provider = getTLSIOTransport;
             transport_state->isRegistered = false;
             transport_state->is_trace_on = false;
+
+            transport_state->connection_retry_time = 0;
+            transport_state->back_off = 0;
 
             transport_state->cbs.cbs = NULL;
             transport_state->cbs.sasTokenKeyName = NULL;
@@ -1449,11 +1466,17 @@ static void IoTHubTransportAMQP_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT
         // Codes_SRS_IOTHUBTRANSPORTAMQP_09_147: [IoTHubTransportAMQP_DoWork shall save a reference to the client handle in transport_state->iothub_client_handle]
         transport_state->iothub_client_handle = iotHubClientHandle;
 
+        size_t timeout_retry_s = (size_t)(difftime(get_time(NULL), (time_t)transport_state->connection_retry_time));
+
         if (transport_state->connection != NULL &&
             transport_state->connection_state == AMQP_MANAGEMENT_STATE_ERROR)
         {
             LogError("An error occured on AMQP connection. The connection will be restablished.");
             trigger_connection_retry = true;
+        }
+        else if ((transport_state->connection == NULL || (transport_state->connection!= NULL && transport_state->connection_state == AMQP_MANAGEMENT_STATE_IDLE))
+          && transport_state->back_off != 0 && timeout_retry_s > 0) {
+        //do nothing
         }
         // Codes_SRS_IOTHUBTRANSPORTAMQP_09_055: [If the transport handle has a NULL connection, IoTHubTransportAMQP_DoWork shall instantiate and initialize the AMQP components and establish the connection] 
         else if (transport_state->connection == NULL &&
@@ -1558,10 +1581,14 @@ static void IoTHubTransportAMQP_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT
         {
             prepareForConnectionRetry(transport_state);
         }
+        else if (transport_state->back_off != 0 && timeout_retry_s > 0) {
+          //Do nothing
+        }
         else
         {
             // Codes_SRS_IOTHUBTRANSPORTAMQP_09_103: [IoTHubTransportAMQP_DoWork shall invoke connection_dowork() on AMQP for triggering sending and receiving messages] 
-            connection_dowork(transport_state->connection);
+          transport_state->back_off = 0;
+          connection_dowork(transport_state->connection);
         }
     }
 }
