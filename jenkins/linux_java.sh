@@ -15,3 +15,9 @@ export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 cd $build_root/java/service
 mvn verify -DskipITs=false
 [ $? -eq 0 ] || exit $?
+
+# -- Java Websocket Transport Layer --
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+cd $build_root/java/websocket-transport-layer
+mvn verify
+[ $? -eq 0 ] || exit $?
