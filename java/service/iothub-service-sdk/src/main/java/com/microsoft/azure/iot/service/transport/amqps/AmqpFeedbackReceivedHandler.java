@@ -7,12 +7,14 @@ package com.microsoft.azure.iot.service.transport.amqps;
 
 import com.microsoft.azure.iot.service.sdk.IotHubServiceClientProtocol;
 import com.microsoft.azure.iot.service.transport.TransportUtils;
+import com.microsoft.azure.iothub.ws.impl.WebSocketImpl;
 import org.apache.qpid.proton.Proton;
 import org.apache.qpid.proton.amqp.Symbol;
 import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.engine.*;
-import org.apache.qpid.proton.engine.impl.WebSocketImpl;
+import org.apache.qpid.proton.engine.impl.TransportInternal;
+import org.apache.qpid.proton.engine.impl.TransportLayer;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
 
@@ -136,8 +138,9 @@ public class AmqpFeedbackReceivedHandler extends BaseHandler
         {
             if (this.iotHubServiceClientProtocol == IotHubServiceClientProtocol.AMQPS_WS)
             {
-                WebSocketImpl webSocket = (WebSocketImpl)transport.webSocket();
+                WebSocketImpl webSocket = new WebSocketImpl();
                 webSocket.configure(this.webSocketHostName, WEBSOCKET_PATH, 0, WEBSOCKET_SUB_PROTOCOL, null, null);
+                ((TransportInternal)transport).addTransportLayer(webSocket);
             }
             Sasl sasl = transport.sasl();
             sasl.plain(this.userName, this.sasToken);

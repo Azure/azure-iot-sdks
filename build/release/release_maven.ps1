@@ -15,6 +15,7 @@ $maven_javadoc_plugin_artifactId = "maven-javadoc-plugin"
 $maven_javadoc_plugin_version = "2.10.3"
 $java_version_service = "1.8"
 $java_version_client = "1.7"
+$java_version_websocket_layer = "1.7"
 
 $sourcesPath = "src\main\java\com\microsoft\azure\iothub"
 $testsPath = "src\test\java\tests\unit\com\microsoft\azure\iothub"
@@ -28,6 +29,7 @@ $copyLocation = (join-path $mavenDir _temp)
 $cleanClassFilesLocation = (join-path $mavenDir CleanClassFiles)
 $javaDeviceClientLocation = (join-path (join-path (join-path (split-path (split-path $currentScriptLocation)) java) device) iothub-java-client)
 $javaServiceClientLocation = (join-path (join-path (join-path (split-path (split-path $currentScriptLocation)) java) service) iothub-service-sdk)
+$websocketTransportLayerLocation = (join-path (join-path (split-path (split-path $currentScriptLocation)) java) websocket-transport-layer)
 #$jarsCopyLocation = (join-path $mavenArtifactsDir UnsignedJars)
 
 function Is-Null
@@ -250,6 +252,7 @@ if(!(Test-Path -Path $copyLocation)){
 
 Release-Client $javaDeviceClientLocation "com.microsoft.azure.iothub-java-client" "iothub-java-device-client" $java_version_client
 Release-Client $javaServiceClientLocation "com.microsoft.azure.iothub-java-client" "iothub-java-service-client" $java_version_service
+Release-Client $websocketTransportLayerLocation "com.microsoft.azure.iothub-java-client" "websocket-transport-layer" $java_version_websocket_layer
 
 Set-Location $currentLocation
 
