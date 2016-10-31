@@ -74,14 +74,10 @@ extern "C"
 	*/
 	DEFINE_ENUM(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT_VALUES);
 
-#define IOTHUB_CLIENT_CONNECTION_STATUS_VALUES                                     \
-    IOTHUB_CLIENT_CONNECTION_INPROGRESS,                                           \
-    IOTHUB_CLIENT_CONNECTION_SUCCESS,                                              \
-    IOTHUB_CLIENT_CONNECTION_DISCONNECTED,                                         \
-    IOTHUB_CLIENT_CONNECTION_RETRY,                                                \
-    IOTHUB_CLIENT_CONNECTION_RETRY_TIMEOUT,                                        \
-    IOTHUB_CLIENT_CONNECTION_RECOVERABLE_ERROR,                                    \
-    IOTHUB_CLIENT_CONNECTION_UNRECOVERABLE_ERROR                                   \
+#define IOTHUB_CLIENT_CONNECTION_STATUS_VALUES             \
+    IOTHUB_CLIENT_CONNECTION_AUTHENTICATED,                \
+    IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED               \
+
 
     /** @brief Enumeration passed in by the IoT Hub when the connection status
     *		   callback is invoked to indicate status of the connection in
@@ -89,11 +85,13 @@ extern "C"
     */
     DEFINE_ENUM(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_STATUS_VALUES);
 
-#define IOTHUB_CLIENT_CONNECTION_STATUS_REASON_VALUES                               \
-    IOTHUB_CLIENT_CONNECTION_UNRECOVERABLE_SERVER_AUTHENTICATION_ERROR,             \
-    IOTHUB_CLIENT_CONNECTION_UNRECOVERABLE_SERVER_QUOTA_EXCEEDED,                   \
-    IOTHUB_CLIENT_CONNECTION_USER_REQUEST,                                          \
-    IOTHUB_CLIENT_CONNECTION_OK                                                     \
+#define IOTHUB_CLIENT_CONNECTION_STATUS_REASON_VALUES      \
+    IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN,            \
+    IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED,              \
+    IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL,               \
+    IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED,                \
+    IOTHUB_CLIENT_CONNECTION_NO_NETWORK,                   \
+    IOTHUB_CLIENT_CONNECTION_OK                            \
 
     /** @brief Enumeration passed in by the IoT Hub when the connection status
     *		   callback is invoked to indicate status of the connection in

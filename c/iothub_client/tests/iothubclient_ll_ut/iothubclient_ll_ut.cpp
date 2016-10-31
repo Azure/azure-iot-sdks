@@ -260,9 +260,12 @@ public:
 
         MOCK_STATIC_METHOD_2(, IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_GetSendStatus, TRANSPORT_LL_HANDLE, handle, IOTHUB_CLIENT_STATUS*, iotHubClientStatus)
         *iotHubClientStatus = currentIotHubClientStatus;
-    MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK)
+        MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK)
 
         MOCK_STATIC_METHOD_2(, void, eventConfirmationCallback, IOTHUB_CLIENT_CONFIRMATION_RESULT, result2, void*, userContextCallback)
+        MOCK_VOID_METHOD_END()
+
+        MOCK_STATIC_METHOD_3(, void, connectionStatusCallback, IOTHUB_CLIENT_CONNECTION_STATUS, result3, IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason, void*, userContextCallback)
         MOCK_VOID_METHOD_END()
 
         MOCK_STATIC_METHOD_2(, IOTHUBMESSAGE_DISPOSITION_RESULT, messageCallback, IOTHUB_MESSAGE_HANDLE, message, void*, userContextCallback)
@@ -363,6 +366,7 @@ DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientLLMocks, , void, FAKE_IoTHubTransport_
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientLLMocks, , IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_GetSendStatus, TRANSPORT_LL_HANDLE, handle, IOTHUB_CLIENT_STATUS*, iotHubClientStatus);
 
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientLLMocks, , void, eventConfirmationCallback, IOTHUB_CLIENT_CONFIRMATION_RESULT, result2, void*, userContextCallback);
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientLLMocks, , void, connectionStatusCallback, IOTHUB_CLIENT_CONNECTION_STATUS, result3, IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason, void*, userContextCallback);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientLLMocks, , IOTHUBMESSAGE_DISPOSITION_RESULT, messageCallback, IOTHUB_MESSAGE_HANDLE, message, void*, userContextCallback);
 
 
@@ -3151,6 +3155,39 @@ TEST_FUNCTION(IoTHubClient_LL_SendEventAsync_fails_when_malloc_fails)
     IoTHubClient_LL_Destroy(handle);
 }
 
+/*Tests_SRS_IOTHUBCLIENT_LL_25_111: [IoTHubClient_LL_SetConnectionStatusCallback shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter iotHubClientHandle]*/
+TEST_FUNCTION(IoTHubClient_LL_SetConnectionStatusCallback_with_NULL_iotHubClientHandle_fails)
+{
+    ///arrange
+    CIoTHubClientLLMocks mocks;
+
+    ///act
+    auto result = IoTHubClient_LL_SetConnectionStatusCallback(NULL, connectionStatusCallback, (void*)1);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
+    mocks.AssertActualAndExpectedCalls();
+}
+
+/*Tests_SRS_IOTHUBCLIENT_LL_25_112: [IoTHubClient_LL_SetConnectionStatusCallback shall return IOTHUB_CLIENT_OK and save the callback and userContext as a member of the handle.]*/
+TEST_FUNCTION(IoTHubClient_LL_SetConnectionStatusCallback_with_non_NULL_succeeds)
+{
+    ///arrange
+    CIoTHubClientLLMocks mocks;
+    auto handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+    mocks.ResetAllCalls();
+
+   ///act
+    auto result = IoTHubClient_LL_SetConnectionStatusCallback(handle, connectionStatusCallback, (void*)1);
+
+    ///assert
+    ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+    mocks.AssertActualAndExpectedCalls();
+
+    ///cleanup
+    IoTHubClient_LL_Destroy(handle);
+}
+
 /*Tests_SRS_IOTHUBCLIENT_LL_02_016: [IoTHubClient_LL_SetMessageCallback shall fail and return IOTHUB_CLIENT_INVALID_ARG if parameter iotHubClientHandle is NULL.]*/
 TEST_FUNCTION(IoTHubClient_LL_SetMessageCallback_with_NULL_iotHubClientHandle_fails)
 {
@@ -3594,6 +3631,62 @@ TEST_FUNCTION(IoTHubClient_LL_SendComplete_with_3_items_one_with_callback_but_ba
     ///assert
     mocks.AssertActualAndExpectedCalls();
 
+    ///cleanup
+    IoTHubClient_LL_Destroy(handle);
+}
+
+/*Tests_SRS_IOTHUBCLIENT_LL_25_114: [**IotHubClient_LL_ConnectionStatusCallBack shall call non-callback set by the user from IoTHubClient_LL_SetConnectionStatusCallback passing the status, reason and the passed userContextCallback.]*/
+TEST_FUNCTION(IoTHubClient_LL_ConnectionStatusCallBack_calls_upper_layer_succeeds)
+{
+    ///arrange
+    CIoTHubClientLLMocks mocks;
+    auto handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+    (void)IoTHubClient_LL_SetConnectionStatusCallback(handle, connectionStatusCallback, (void*)11);
+    mocks.ResetAllCalls();
+
+    STRICT_EXPECTED_CALL(mocks, connectionStatusCallback((IOTHUB_CLIENT_CONNECTION_STATUS)IGNORE, (IOTHUB_CLIENT_CONNECTION_STATUS_REASON)IGNORE, (void*)11)).IgnoreAllArguments();
+
+    ///act
+    IotHubClient_LL_ConnectionStatusCallBack(handle,(IOTHUB_CLIENT_CONNECTION_STATUS)IGNORE, (IOTHUB_CLIENT_CONNECTION_STATUS_REASON)IGNORE);
+
+    ///assert
+    mocks.AssertActualAndExpectedCalls();
+    ///cleanup
+    IoTHubClient_LL_Destroy(handle);
+}
+
+/*Tests_SRS_IOTHUBCLIENT_LL_25_113: [If parameter connectionStatus is NULL or parameter handle is NULL then IotHubClient_LL_ConnectionStatusCallBack shall return.] */
+TEST_FUNCTION(IoTHubClient_LL_ConnectionStatusCallBack_with_NULL_parameter_fails)
+{
+    ///arrange
+    CIoTHubClientLLMocks mocks;
+    auto handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+    (void)IoTHubClient_LL_SetConnectionStatusCallback(handle, connectionStatusCallback, (void*)11);
+    mocks.ResetAllCalls();
+
+    ///act
+    IotHubClient_LL_ConnectionStatusCallBack(NULL, (IOTHUB_CLIENT_CONNECTION_STATUS)IGNORE, (IOTHUB_CLIENT_CONNECTION_STATUS_REASON)IGNORE);
+
+    ///assert
+    mocks.AssertActualAndExpectedCalls();
+    ///cleanup
+    IoTHubClient_LL_Destroy(handle);
+}
+
+/*Tests_SRS_IOTHUBCLIENT_LL_25_113: [If parameter connectionStatus is NULL or parameter handle is NULL then IotHubClient_LL_ConnectionStatusCallBack shall return.] */
+TEST_FUNCTION(IoTHubClient_LL_ConnectionStatusCallBack_with_NULL_callback_fails)
+{
+    ///arrange
+    CIoTHubClientLLMocks mocks;
+    auto handle = IoTHubClient_LL_Create(&TEST_CONFIG);
+    (void)IoTHubClient_LL_SetConnectionStatusCallback(handle, NULL, (void*)11);
+    mocks.ResetAllCalls();
+
+    ///act
+    IotHubClient_LL_ConnectionStatusCallBack(NULL, (IOTHUB_CLIENT_CONNECTION_STATUS)IGNORE, (IOTHUB_CLIENT_CONNECTION_STATUS_REASON)IGNORE);
+
+    ///assert
+    mocks.AssertActualAndExpectedCalls();
     ///cleanup
     IoTHubClient_LL_Destroy(handle);
 }
