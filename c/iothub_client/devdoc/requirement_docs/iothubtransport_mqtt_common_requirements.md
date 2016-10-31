@@ -118,9 +118,9 @@ void IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE han
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_048: [** If the parameter `handle` is `NULL` than `IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin` shall do nothing. **]**
 
-**SRS_IOTHUB_MQTT_TRANSPORT_07_049: [** If `subscribe_state` is set to `IOTHUB_DEVICE_TWIN_DESIRED_STATE` then `IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin` shall send the get state topic to the mqtt client. **]**
+**SRS_IOTHUB_MQTT_TRANSPORT_07_049: [** If `subscribe_state` is set to `IOTHUB_DEVICE_TWIN_DESIRED_STATE` then `IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin` shall remove the get state topic from the subscription flag. **]**
 
-**SRS_IOTHUB_MQTT_TRANSPORT_07_050: [** If `subscribe_state` is set to `IOTHUB_DEVICE_TWIN_NOTIFICATION_STATE` then `IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin` shall send the notify state topic to the mqtt client. **]**
+**SRS_IOTHUB_MQTT_TRANSPORT_07_050: [** If `subscribe_state` is set to `IOTHUB_DEVICE_TWIN_NOTIFICATION_STATE` then `IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin` shall remove the get state topic from the subscription flag. **]**
 
 
 ### IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod

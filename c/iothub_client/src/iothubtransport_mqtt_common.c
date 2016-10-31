@@ -1703,33 +1703,19 @@ void IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE han
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_048: [If the parameter handle is NULL than IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin shall do nothing.] */
     if (transport_data != NULL)
     {
-        size_t unsub_count = 0;
-        const char* unsubscribe[2];
-
         if (transport_data->topic_GetState != NULL)
         {
             /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_049: [If subscribe_state is set to IOTHUB_DEVICE_TWIN_DESIRED_STATE then IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin shall unsubscribe from the topic_GetState to the mqtt client.] */
-            unsubscribe[unsub_count] = STRING_c_str(transport_data->topic_GetState);
             transport_data->topics_ToSubscribe &= ~SUBSCRIBE_GET_REPORTED_STATE_TOPIC;
             STRING_delete(transport_data->topic_GetState);
             transport_data->topic_GetState = NULL;
-            unsub_count++;
         }
         if (transport_data->topic_NotifyState != NULL)
         {
             /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_050: [If subscribe_state is set to IOTHUB_DEVICE_TWIN_NOTIFICATION_STATE then IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin shall unsubscribe from the topic_NotifyState to the mqtt client.] */
-            unsubscribe[unsub_count] = STRING_c_str(transport_data->topic_NotifyState);
             transport_data->topics_ToSubscribe &= ~SUBSCRIBE_NOTIFICATION_STATE_TOPIC;
             STRING_delete(transport_data->topic_NotifyState);
             transport_data->topic_NotifyState = NULL;
-            unsub_count++;
-        }
-        if (unsub_count > 0)
-        {
-            if (mqtt_client_unsubscribe(transport_data->mqttClient, get_next_packet_id(transport_data), unsubscribe, unsub_count) != 0)
-            {
-                LogError("Failure calling mqtt_client_unsubscribe");
-            }
         }
     }
     else
