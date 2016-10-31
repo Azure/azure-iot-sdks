@@ -18,9 +18,11 @@ set(${theseTestsName}_test_files
 )
 
 set(${theseTestsName}_c_files
-	../../src/iothubtransportamqp_auth.c
 	../../src/iothubtransportamqp.c
 	../../src/uamqp_messaging.c
+	real_vector.c
+	real_strings.c
+	real_doublylinkedlist.c
 )
 
 set(${theseTestsName}_h_files

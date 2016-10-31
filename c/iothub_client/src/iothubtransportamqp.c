@@ -35,6 +35,7 @@
 #include "iothub_client_private.h"
 #include "iothubtransportamqp_auth.h"
 #include "iothubtransportamqp.h"
+#include "iothubtransportamqp_methods.h"
 #include "iothub_client_version.h"
 
 #define INDEFINITE_TIME ((time_t)(-1))
@@ -134,6 +135,12 @@ typedef struct AMQP_TRANSPORT_DEVICE_STATE_TAG
 	PDLIST_ENTRY waitingToSend;
 	// Internal list with the items currently being processed/sent through uAMQP.
 	DLIST_ENTRY inProgress;
+    // the methods portion
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE methods_handle;
+    // is subscription for methods needed?
+    int subscribe_methods_needed : 1;
+    // is the transport subscribed for methods?
+    int subscribed_for_methods : 1;
 } AMQP_TRANSPORT_DEVICE_STATE;
 
 
@@ -453,6 +460,86 @@ static void on_connection_io_error(void* context)
     {
         transport_state->connection_state = AMQP_MANAGEMENT_STATE_ERROR;
     }
+}
+
+static void on_methods_error(void* context)
+{
+    /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_030: [ `on_methods_error` shall do nothing. ]*/
+    (void)context;
+}
+
+static int on_method_request_received(void* context, const char* method_name, const unsigned char* request, size_t request_size, IOTHUBTRANSPORT_AMQP_METHOD_HANDLE method_handle)
+{
+    int result;
+
+    /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_016: [ `on_methods_request_received` shall create a BUFFER_HANDLE by calling `BUFFER_new`. ]*/
+    BUFFER_HANDLE response_buffer = BUFFER_new();
+
+    if (response_buffer == NULL)
+    {
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_025: [ If creating the buffer fails, `on_methods_request_received` shall fail and return a non-zero value. ]*/
+        LogError("Could not allocate buffer");
+        result = __LINE__;
+    }
+    else
+    {
+        AMQP_TRANSPORT_DEVICE_STATE* device_state = (AMQP_TRANSPORT_DEVICE_STATE*)context;
+
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_017: [ `on_methods_request_received` shall call the `IoTHubClient_LL_DeviceMethodComplete` passing the method name, request buffer and size and the newly created BUFFER handle. ]*/
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_022: [ The status code shall be the return value of the call to `IoTHubClient_LL_DeviceMethodComplete`. ]*/
+        int status = IoTHubClient_LL_DeviceMethodComplete(device_state->iothub_client_handle, method_name, request, request_size, response_buffer);
+
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_020: [ The response bytes shall be obtained by calling `BUFFER_u_char`. ]*/
+        const unsigned char* response_payload = BUFFER_u_char(response_buffer);
+
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_021: [ The response size shall be obtained by calling `BUFFER_length`. ]*/
+        size_t response_size = BUFFER_length(response_buffer);
+
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_019: [ `on_methods_request_received` shall call `iothubtransportamqp_methods_respond` passing to it the `method_handle` argument, the response bytes, response size and the status code. ]*/
+        if (iothubtransportamqp_methods_respond(method_handle, response_payload, response_size, status) != 0)
+        {
+            /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_029: [ If `iothubtransportamqp_methods_respond` fails, `on_methods_request_received` shall return a non-zero value. ]*/
+            LogError("iothubtransportamqp_methods_respond failed");
+            result = __LINE__;
+        }
+        else
+        {
+            /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_028: [ On success, `on_methods_request_received` shall return 0. ]*/
+            result = 0;
+        }
+
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_023: [ After calling `iothubtransportamqp_methods_respond`, the allocated buffer shall be freed by using BUFFER_delete. ]*/
+        BUFFER_delete(response_buffer);
+    }
+
+    return result;
+}
+
+static int subscribe_methods(AMQP_TRANSPORT_DEVICE_STATE* deviceState)
+{
+    int result;
+
+    if (deviceState->subscribe_methods_needed == 0)
+    {
+        result = 0;
+    }
+    else
+    {
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_024: [ If the device authentication status is AUTHENTICATION_STATUS_OK and `IoTHubTransportAMQP_Subscribe_DeviceMethod` was called to register for methods, `IoTHubTransportAMQP_DoWork` shall call `iothubtransportamqp_methods_subscribe`. ]*/
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_027: [ The current session handle shall be passed to `iothubtransportamqp_methods_subscribe`. ]*/
+        if (iothubtransportamqp_methods_subscribe(deviceState->methods_handle, deviceState->transport_state->session, on_methods_error, deviceState, on_method_request_received, deviceState) != 0)
+        {
+            LogError("Cannot subscribe for methods");
+            result = __LINE__;
+        }
+        else
+        {
+            deviceState->subscribed_for_methods = 1;
+            result = 0;
+        }
+    }
+
+    return result;
 }
 
 void set_session_options(SESSION_HANDLE session)
@@ -993,6 +1080,9 @@ static void prepareDeviceForConnectionRetry(AMQP_TRANSPORT_DEVICE_STATE* device_
 		LogError("Failed resetting the authenticatication state of device %s", device_state->deviceId);
 	}
 
+    iothubtransportamqp_methods_unsubscribe(device_state->methods_handle);
+    device_state->subscribed_for_methods = 0;
+
 	destroyMessageReceiver(device_state);
 	destroyEventSender(device_state);
 	rollEventsBackToWaitList(device_state);
@@ -1164,6 +1254,13 @@ static RESULT device_DoWork(AMQP_TRANSPORT_DEVICE_STATE* device_state)
 			}
 			break;
 		case AUTHENTICATION_STATUS_OK:
+            /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_031: [ `iothubtransportamqp_methods_subscribe` shall only be called once (subsequent DoWork calls shall not call it if already subscribed). ]*/
+            if ((device_state->subscribed_for_methods == 0) &&
+                (subscribe_methods(device_state) != 0))
+            {
+                LogError("Failed subscribing for methods");
+            }
+
 			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_145: [If the device authentication status is AUTHENTICATION_STATUS_OK, IoTHubTransportAMQP_DoWork shall proceed to sending events, registering for messages]
 
 			// Codes_SRS_IOTHUBTRANSPORTAMQP_09_121: [IoTHubTransportAMQP_DoWork shall create an AMQP message_receiver if transport_state->message_receive is NULL and transport_state->receive_messages is true] 
@@ -1337,16 +1434,45 @@ static void IoTHubTransportAMQP_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE hand
 
 static int IoTHubTransportAMQP_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
 {
-    (void)handle;
-    int result = __LINE__;
-    LogError("not implemented (yet)");
+    int result;
+
+    if (handle == NULL)
+    {
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_004: [ If `handle` is NULL, `IoTHubTransportAMQP_Subscribe_DeviceMethod` shall fail and return a non-zero value. ] */
+        LogError("NULL handle");
+        result = __LINE__;
+    }
+    else
+    {
+        AMQP_TRANSPORT_DEVICE_STATE* device_state = (AMQP_TRANSPORT_DEVICE_STATE*)handle;
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_026: [ `IoTHubTransportAMQP_Subscribe_DeviceMethod` shall remember that a subscribe is to be performed in the next call to DoWork and on success it shall return 0. ]*/
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_005: [ If the transport is already subscribed to receive C2D method requests, `IoTHubTransportAMQP_Subscribe_DeviceMethod` shall perform no additional action and return 0. ]*/
+        device_state->subscribe_methods_needed = 1;
+        result = 0;
+    }
+
     return result;
 }
 
 static void IoTHubTransportAMQP_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
 {
-    (void)handle;
-    LogError("not implemented (yet)");
+    if (handle == NULL)
+    {
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_006: [ If `handle` is NULL, `IoTHubTransportAMQP_Unsubscribe_DeviceMethod` shall do nothing. ]*/
+        LogError("NULL handle");
+    }
+    else
+    {
+        AMQP_TRANSPORT_DEVICE_STATE* device_state = (AMQP_TRANSPORT_DEVICE_STATE*)handle;
+
+        /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_008: [ If the transport is not subscribed to receive C2D method requests then `IoTHubTransportAMQP_Unsubscribe_DeviceMethod` shall do nothing. ]*/
+        if (device_state->subscribe_methods_needed != 0)
+        {
+            /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_007: [ `IoTHubTransportAMQP_Unsubscribe_DeviceMethod` shall unsubscribe from receiving C2D method requests by calling `iothubtransportamqp_methods_unsubscribe`. ]*/
+            device_state->subscribe_methods_needed = 0;
+            iothubtransportamqp_methods_unsubscribe(device_state->methods_handle);
+        }
+    }
 }
 
 static IOTHUB_CLIENT_RESULT IoTHubTransportAMQP_GetSendStatus(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
@@ -1581,6 +1707,7 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE han
 			else
 			{
 				bool cleanup_required;
+                const char* deviceId = device->deviceId;
 
 				// Codes_SRS_IOTHUBTRANSPORTAMQP_09_225: [IoTHubTransportAMQP_Register shall save the handle references to the IoTHubClient, transport, waitingToSend list on the device state.]
 				device_state->iothub_client_handle = iotHubClientHandle;
@@ -1599,11 +1726,14 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE han
 				device_state->receive_messages = false;
 				device_state->message_receiver = NULL;
 				device_state->message_sender = NULL;
+                device_state->message_sender_state = MESSAGE_SENDER_STATE_IDLE;
 				device_state->receiver_link = NULL;
 				device_state->sender_link = NULL;
+                device_state->subscribe_methods_needed = 0;
+                device_state->subscribed_for_methods = 0;
 
 				// Codes_SRS_IOTHUBTRANSPORTAMQP_09_227: [IoTHubTransportAMQP_Register shall store a copy of config->deviceId into device_state->deviceId.]
-				if ((device_state->deviceId = STRING_construct(device->deviceId)) == NULL)
+				if ((device_state->deviceId = STRING_construct(deviceId)) == NULL)
 				{
 					// Codes_SRS_IOTHUBTRANSPORTAMQP_09_228: [If STRING_construct fails to copy config->deviceId, IoTHubTransportAMQP_Register shall fail and return NULL.]
 					LogError("IoTHubTransportAMQP_Register failed to copy the deviceId.");
@@ -1630,40 +1760,51 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportAMQP_Register(TRANSPORT_LL_HANDLE han
 					LogError("IoTHubTransportAMQP_Register failed to construct the messageReceiveAddress.");
 					cleanup_required = true;
 				}
-				// Codes_SRS_IOTHUBTRANSPORTAMQP_09_231: [IoTHubTransportAMQP_Register shall add the device to transport_state->registered_devices using VECTOR_push_back().]
-				else if (VECTOR_push_back(transport_state->registered_devices, &device_state, 1) != 0)
-				{
-					// Codes_SRS_IOTHUBTRANSPORTAMQP_09_232: [If VECTOR_push_back() fails to add the new registered device, IoTHubTransportAMQP_Register shall clean the memory it allocated, fail and return NULL.]
-					LogError("IoTHubTransportAMQP_Register failed to add the new device to its list of registered devices (VECTOR_push_back failed).");
-					cleanup_required = true;
-				}
 				else
 				{
-					AUTHENTICATION_CONFIG auth_config;
-					auth_config.device_id = STRING_c_str(device_state->deviceId);
-					auth_config.device_key = device->deviceKey;
-					auth_config.device_sas_token = device->deviceSasToken;
-					auth_config.cbs_connection = &device_state->transport_state->cbs_connection;
-					auth_config.iot_hub_host_fqdn = STRING_c_str(device_state->transport_state->iotHubHostFqdn);
-
-					// Codes_SRS_IOTHUBTRANSPORTAMQP_09_229: [IoTHubTransportAMQP_Register shall create an authentication state for the device using authentication_create() and store it on the device state.]
-					if ((device_state->authentication = authentication_create(&auth_config)) == NULL)
+					/* Codes_SRS_IOTHUBTRANSPORTAMQP_01_010: [ `IoTHubTransportAMQP_Create` shall create a new iothubtransportamqp_methods instance by calling `iothubtransportamqp_methods_create` while passing to it the the fully qualified domain name and the device Id. ]*/
+					device_state->methods_handle = iothubtransportamqp_methods_create(STRING_c_str(transport_state->iotHubHostFqdn), deviceId);
+					if (device_state->methods_handle == NULL)
 					{
-						// Codes_SRS_IOTHUBTRANSPORTAMQP_09_230: [If authentication_create() fails, IoTHubTransportAMQP_Register shall fail and return NULL.]
-						LogError("IoTHubTransportAMQP_Register failed to create an authentication state for the device.");
+						/* Codes_SRS_IOTHUBTRANSPORTAMQP_01_011: [ If `iothubtransportamqp_methods_create` fails, `IoTHubTransportAMQP_Create` shall fail and return NULL. ]*/
+						LogError("Cannot create the methods module");
+						cleanup_required = true;
+					}
+					// Codes_SRS_IOTHUBTRANSPORTAMQP_09_231: [IoTHubTransportAMQP_Register shall add the device to transport_state->registered_devices using VECTOR_push_back().]
+					else if (VECTOR_push_back(transport_state->registered_devices, &device_state, 1) != 0)
+					{
+						// Codes_SRS_IOTHUBTRANSPORTAMQP_09_232: [If VECTOR_push_back() fails to add the new registered device, IoTHubTransportAMQP_Register shall clean the memory it allocated, fail and return NULL.]
+						LogError("IoTHubTransportAMQP_Register failed to add the new device to its list of registered devices (VECTOR_push_back failed).");
 						cleanup_required = true;
 					}
 					else
 					{
-						// Codes_SRS_IOTHUBTRANSPORTAMQP_09_234: [If the device is the first being registered on the transport, IoTHubTransportAMQP_Register shall save its authentication mode as the transport preferred authentication mode.]
-						if (VECTOR_size(transport_state->registered_devices) == 1)
-						{
-							transport_state->preferred_credential_type = authentication_get_credential(device_state->authentication)->type;
-						}
+						AUTHENTICATION_CONFIG auth_config;
+						auth_config.device_id = deviceId;
+						auth_config.device_key = device->deviceKey;
+						auth_config.device_sas_token = device->deviceSasToken;
+						auth_config.cbs_connection = &device_state->transport_state->cbs_connection;
+						auth_config.iot_hub_host_fqdn = STRING_c_str(device_state->transport_state->iotHubHostFqdn);
 
-						// Codes_SRS_IOTHUBTRANSPORTAMQP_09_233: [IoTHubTransportAMQP_Register shall return its internal device representation as a IOTHUB_DEVICE_HANDLE.]
-						result = (IOTHUB_DEVICE_HANDLE)device_state;
-						cleanup_required = false;
+						// Codes_SRS_IOTHUBTRANSPORTAMQP_09_229: [IoTHubTransportAMQP_Register shall create an authentication state for the device using authentication_create() and store it on the device state.]
+						if ((device_state->authentication = authentication_create(&auth_config)) == NULL)
+						{
+							// Codes_SRS_IOTHUBTRANSPORTAMQP_09_230: [If authentication_create() fails, IoTHubTransportAMQP_Register shall fail and return NULL.]
+							LogError("IoTHubTransportAMQP_Register failed to create an authentication state for the device.");
+							cleanup_required = true;
+						}
+						else
+						{
+							// Codes_SRS_IOTHUBTRANSPORTAMQP_09_234: [If the device is the first being registered on the transport, IoTHubTransportAMQP_Register shall save its authentication mode as the transport preferred authentication mode.]
+							if (VECTOR_size(transport_state->registered_devices) == 1)
+							{
+								transport_state->preferred_credential_type = authentication_get_credential(device_state->authentication)->type;
+							}
+
+							// Codes_SRS_IOTHUBTRANSPORTAMQP_09_233: [IoTHubTransportAMQP_Register shall return its internal device representation as a IOTHUB_DEVICE_HANDLE.]
+							result = (IOTHUB_DEVICE_HANDLE)device_state;
+							cleanup_required = false;
+						}
 					}
 				}
 
@@ -1735,6 +1876,9 @@ static void IoTHubTransportAMQP_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
 				STRING_delete(device_state->deviceId);
 				// Codes_SRS_IOTHUBTRANSPORTAMQP_09_217: [IoTHubTransportAMQP_Unregister shall destroy the authentication state of the device using authentication_destroy.]
 				authentication_destroy(device_state->authentication);
+
+                /* Codes_SRS_IOTHUBTRANSPORTAMQP_01_012: [ `IoTHubTransportAMQP_Unregister` shall destroy the C2D methods handler by calling `iothubtransportamqp_methods_destroy`. ] ]*/
+                iothubtransportamqp_methods_destroy(device_state->methods_handle);
 
 				// Codes_SRS_IOTHUBTRANSPORTAMQP_09_218: [IoTHubTransportAMQP_Unregister shall remove the device from its list of registered devices using VECTOR_erase().]
 				VECTOR_erase(device_state->transport_state->registered_devices, registered_device_state, 1);

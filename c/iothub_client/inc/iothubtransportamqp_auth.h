@@ -15,6 +15,7 @@
 #include "azure_uamqp_c/cbs.h"
 #include "azure_uamqp_c/sasl_mechanism.h"
 #include "iothub_transport_ll.h" 
+#include "azure_c_shared_utility/umock_c_prod.h"
 
 #ifdef __cplusplus 
 extern "C" 
@@ -98,7 +99,7 @@ typedef struct AUTHENTICATION_STATE* AUTHENTICATION_STATE_HANDLE;
 * 
 *   @returns an instance of the AUTHENTICATION_STATE_HANDLE if succeeds, NULL if any failure occurs. 
 */ 
-extern AUTHENTICATION_STATE_HANDLE authentication_create(const AUTHENTICATION_CONFIG* config);
+MOCKABLE_FUNCTION(, AUTHENTICATION_STATE_HANDLE, authentication_create, const AUTHENTICATION_CONFIG*, config);
  
 /** @brief Establishes the first authentication for the device in the transport it is registered to. 
 * 
@@ -108,19 +109,19 @@ extern AUTHENTICATION_STATE_HANDLE authentication_create(const AUTHENTICATION_CO
 * 
 *   @returns 0 if it succeeds, non-zero if it fails. 
 */ 
-extern int authentication_authenticate(AUTHENTICATION_STATE_HANDLE authentication_state); 
+MOCKABLE_FUNCTION(, int, authentication_authenticate, AUTHENTICATION_STATE_HANDLE, authentication_state);
  
 /** @brief Indicates if the device is authenticated successfuly, if authentication is in progress or completed with failure. 
 * 
 *   @returns A flag indicating the current authentication status of the device. 
 */ 
-extern AUTHENTICATION_STATUS authentication_get_status(AUTHENTICATION_STATE_HANDLE authentication_state); 
+MOCKABLE_FUNCTION(, AUTHENTICATION_STATUS, authentication_get_status, AUTHENTICATION_STATE_HANDLE, authentication_state);
 
 /** @brief Gets the credential stored by the handle for authenticating the device.
 *
 *   @returns A AMQP_TRANSPORT_CREDENTIAL with the credentials type and data.
 */
-extern AMQP_TRANSPORT_CREDENTIAL* authentication_get_credential(AUTHENTICATION_STATE_HANDLE authentication_state);
+MOCKABLE_FUNCTION(, AMQP_TRANSPORT_CREDENTIAL*, authentication_get_credential, AUTHENTICATION_STATE_HANDLE, authentication_state);
 
 /** @brief Refreshes the authentication if needed. 
 * 
@@ -128,7 +129,7 @@ extern AMQP_TRANSPORT_CREDENTIAL* authentication_get_credential(AUTHENTICATION_S
 * 
 *   @returns 0 if it succeeds, non-zero if it fails. 
 */ 
-extern int authentication_refresh(AUTHENTICATION_STATE_HANDLE authentication_state); 
+MOCKABLE_FUNCTION(, int, authentication_refresh, AUTHENTICATION_STATE_HANDLE, authentication_state);
 
 /** @brief Resets the state of the authentication.
 *
@@ -136,7 +137,7 @@ extern int authentication_refresh(AUTHENTICATION_STATE_HANDLE authentication_sta
 *
 *   @returns 0 if it succeeds, non-zero if it fails.
 */
-extern int authentication_reset(AUTHENTICATION_STATE_HANDLE authentication_state);
+MOCKABLE_FUNCTION(, int, authentication_reset, AUTHENTICATION_STATE_HANDLE, authentication_state);
 
 /** @brief De-authenticates the device and destroy the state instance. 
 * 
@@ -145,7 +146,7 @@ extern int authentication_reset(AUTHENTICATION_STATE_HANDLE authentication_state
 * 
 *   @returns Nothing. 
 */ 
-extern void authentication_destroy(AUTHENTICATION_STATE_HANDLE authentication_state); 
+MOCKABLE_FUNCTION(, void, authentication_destroy, AUTHENTICATION_STATE_HANDLE, authentication_state);
  
 #ifdef __cplusplus 
 } 

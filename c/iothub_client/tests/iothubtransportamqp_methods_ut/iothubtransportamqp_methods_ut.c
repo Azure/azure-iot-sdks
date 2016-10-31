@@ -64,13 +64,13 @@ static int g_respond_result;
 
 MOCK_FUNCTION_WITH_CODE(, void, test_on_methods_error, void*, context);
 MOCK_FUNCTION_END()
-MOCK_FUNCTION_WITH_CODE(, void, test_on_method_request_received, void*, context, const char*, method_name, const unsigned char*, request, size_t, request_size, IOTHUBTRANSPORT_AMQP_METHOD_HANDLE, method_handle);
+MOCK_FUNCTION_WITH_CODE(, int, test_on_method_request_received, void*, context, const char*, method_name, const unsigned char*, request, size_t, request_size, IOTHUBTRANSPORT_AMQP_METHOD_HANDLE, method_handle);
     g_method_handle = method_handle;
-MOCK_FUNCTION_END()
-MOCK_FUNCTION_WITH_CODE(, void, test_on_method_request_received_calling_respond, void*, context, const char*, method_name, const unsigned char*, request, size_t, request_size, IOTHUBTRANSPORT_AMQP_METHOD_HANDLE, method_handle);
+MOCK_FUNCTION_END(0)
+MOCK_FUNCTION_WITH_CODE(, int, test_on_method_request_received_calling_respond, void*, context, const char*, method_name, const unsigned char*, request, size_t, request_size, IOTHUBTRANSPORT_AMQP_METHOD_HANDLE, method_handle);
     const unsigned char response_payload[] = { 0x43 };
     g_respond_result = iothubtransportamqp_methods_respond(method_handle, response_payload, sizeof(response_payload), 242);
-MOCK_FUNCTION_END()
+MOCK_FUNCTION_END(0)
 
 #define TEST_SESSION_HANDLE         (SESSION_HANDLE)0x4245
 #define TEST_SENDER_LINK            (LINK_HANDLE)0x4246
@@ -87,6 +87,10 @@ MOCK_FUNCTION_END()
 #define TEST_DELIVERY_ACCEPTED      (AMQP_VALUE)0x4257
 #define TEST_DELIVERY_RELEASED      (AMQP_VALUE)0x4258
 #define TEST_DELIVERY_REJECTED      (AMQP_VALUE)0x4259
+
+#define LINK_ATTACH_PROPERTIES_MAP		(AMQP_VALUE)0x4260
+#define CHANNEL_CORRELATION_ID_KEY		(AMQP_VALUE)0x4261
+#define CHANNEL_CORRELATION_ID_VALUE	(AMQP_VALUE)0x4262
 
 #define TEST_METHOD_NAME            "test_method_name"
 
@@ -319,6 +323,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(PROPERTIES_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUBTRANSPORT_AMQP_METHOD_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(ON_MESSAGE_SEND_COMPLETE, void*);
+	REGISTER_UMOCK_ALIAS_TYPE(fields, void*);
 }
 
 TEST_SUITE_CLEANUP(suite_cleanup)
@@ -363,7 +368,19 @@ static void setup_subscribe_expected_calls(void)
         .SetReturn(TEST_SENDER_TARGET);
     STRICT_EXPECTED_CALL(link_create(TEST_SESSION_HANDLE, "methods_responses_link", role_sender, TEST_SENDER_SOURCE, TEST_SENDER_TARGET))
         .SetReturn(TEST_SENDER_LINK);
-    STRICT_EXPECTED_CALL(messagereceiver_create(TEST_RECEIVER_LINK, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+	STRICT_EXPECTED_CALL(amqpvalue_create_map())
+		.SetReturn(LINK_ATTACH_PROPERTIES_MAP);
+	STRICT_EXPECTED_CALL(amqpvalue_create_symbol("com.microsoft:channel-correlation-id"))
+		.SetReturn(CHANNEL_CORRELATION_ID_KEY);
+	STRICT_EXPECTED_CALL(amqpvalue_create_string("testdevice"))
+		.SetReturn(CHANNEL_CORRELATION_ID_VALUE);
+	STRICT_EXPECTED_CALL(amqpvalue_set_map_value(LINK_ATTACH_PROPERTIES_MAP, CHANNEL_CORRELATION_ID_KEY, CHANNEL_CORRELATION_ID_VALUE));
+	STRICT_EXPECTED_CALL(link_set_attach_properties(TEST_SENDER_LINK, LINK_ATTACH_PROPERTIES_MAP));
+	STRICT_EXPECTED_CALL(link_set_attach_properties(TEST_RECEIVER_LINK, LINK_ATTACH_PROPERTIES_MAP));
+	STRICT_EXPECTED_CALL(amqpvalue_destroy(CHANNEL_CORRELATION_ID_VALUE));
+	STRICT_EXPECTED_CALL(amqpvalue_destroy(CHANNEL_CORRELATION_ID_KEY));
+	STRICT_EXPECTED_CALL(amqpvalue_destroy(LINK_ATTACH_PROPERTIES_MAP));
+	STRICT_EXPECTED_CALL(messagereceiver_create(TEST_RECEIVER_LINK, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument_on_message_receiver_state_changed()
         .IgnoreArgument_context();
     STRICT_EXPECTED_CALL(messagesender_create(TEST_SENDER_LINK, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
@@ -409,7 +426,7 @@ static void setup_message_received_calls(void)
         .CopyOutArgumentBuffer(2, &application_properties, sizeof(application_properties));
     STRICT_EXPECTED_CALL(amqpvalue_get_inplace_described_value(application_properties))
         .SetReturn(application_properties_map);
-    STRICT_EXPECTED_CALL(amqpvalue_create_symbol("IoThub-methodname"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_string("IoThub-methodname"))
         .SetReturn(test_property_key);
     STRICT_EXPECTED_CALL(amqpvalue_get_map_value(application_properties_map, test_property_key))
         .SetReturn(test_property_value);
@@ -446,11 +463,12 @@ static void setup_method_respond_calls(void)
     EXPECTED_CALL(amqpvalue_create_uuid(correlation_id_uuid))
         .SetReturn(response_correlation_id);
     STRICT_EXPECTED_CALL(properties_set_correlation_id(response_properties_handle, response_correlation_id));
+    STRICT_EXPECTED_CALL(message_set_properties(TEST_RESPONSE_UAMQP_MESSAGE, response_properties_handle));
     STRICT_EXPECTED_CALL(amqpvalue_create_map())
         .SetReturn(response_properties_map);
-    STRICT_EXPECTED_CALL(amqpvalue_create_symbol("IoThub-status"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_string("IoThub-status"))
         .SetReturn(status_property_key);
-    STRICT_EXPECTED_CALL(amqpvalue_create_string("100"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_int(100))
         .SetReturn(status_property_value);
     STRICT_EXPECTED_CALL(amqpvalue_set_map_value(response_properties_map, status_property_key, status_property_value));
     STRICT_EXPECTED_CALL(message_set_application_properties(TEST_RESPONSE_UAMQP_MESSAGE, response_properties_map));
@@ -461,7 +479,7 @@ static void setup_method_respond_calls(void)
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 }
 
-static void setup_respond_calls(const char* status)
+static void setup_respond_calls(int status)
 {
     static const unsigned char response_payload[] = { 0x43 };
     AMQP_VALUE response_correlation_id = (AMQP_VALUE)0x6000;
@@ -482,11 +500,12 @@ static void setup_respond_calls(const char* status)
     EXPECTED_CALL(amqpvalue_create_uuid(correlation_id_uuid))
         .SetReturn(response_correlation_id);
     STRICT_EXPECTED_CALL(properties_set_correlation_id(response_properties_handle, response_correlation_id));
+    STRICT_EXPECTED_CALL(message_set_properties(TEST_RESPONSE_UAMQP_MESSAGE, response_properties_handle));
     STRICT_EXPECTED_CALL(amqpvalue_create_map())
         .SetReturn(response_properties_map);
-    STRICT_EXPECTED_CALL(amqpvalue_create_symbol("IoThub-status"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_string("IoThub-status"))
         .SetReturn(status_property_key);
-    STRICT_EXPECTED_CALL(amqpvalue_create_string(status))
+    STRICT_EXPECTED_CALL(amqpvalue_create_int(status))
         .SetReturn(status_property_value);
     STRICT_EXPECTED_CALL(amqpvalue_set_map_value(response_properties_map, status_property_key, status_property_value));
     STRICT_EXPECTED_CALL(message_set_application_properties(TEST_RESPONSE_UAMQP_MESSAGE, response_properties_map));
@@ -509,6 +528,7 @@ static void setup_respond_calls(const char* status)
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_001: [ `iothubtransportamqp_methods_create` shall instantiate a new handler for C2D methods over AMQP for device `device_id` and on success return a non-NULL handle to it. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_003: [ `iothubtransportamqp_methods_create` shall allocate memory for the new instance. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_115: [ `iothubtransportamqp_methods_create` shall save the device id for later use by using `mallocAndStrcpy_s`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_139: [ `iothubtransportamqp_methods_create` shall save the `hostname` for later use by using `mallocAndStrcpy_s`. ]*/
 TEST_FUNCTION(iothubtransportamqp_methods_create_copies_the_device_id_and_succeeds)
 {
     /// arrange
@@ -516,9 +536,11 @@ TEST_FUNCTION(iothubtransportamqp_methods_create_copies_the_device_id_and_succee
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "testdevice"))
         .IgnoreArgument_destination();
+	STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "testhost"))
+		.IgnoreArgument_destination();
 
     /// act
-    amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
 
     /// assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -528,17 +550,31 @@ TEST_FUNCTION(iothubtransportamqp_methods_create_copies_the_device_id_and_succee
     iothubtransportamqp_methods_destroy(amqp_methods_handle);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_002: [ If `device_id` is NULL, `iothubtransportamqp_methods_create` shall return NULL. ]*/
-TEST_FUNCTION(iothubtransportamqp_methods_create_with_NULL_device_id_fails)
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_002: [ If any argument is NULL, `iothubtransportamqp_methods_create` shall return NULL. ]*/
+TEST_FUNCTION(iothubtransportamqp_methods_create_with_NULL_hostname_fails)
 {
     /// arrange
     IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle;
+
     /// act
-    amqp_methods_handle = iothubtransportamqp_methods_create(NULL);
+    amqp_methods_handle = iothubtransportamqp_methods_create(NULL, "testdevice");
 
     /// assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_IS_NULL(amqp_methods_handle);
+}
+
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_002: [ If any argument is NULL, `iothubtransportamqp_methods_create` shall return NULL. ]*/
+TEST_FUNCTION(iothubtransportamqp_methods_create_with_NULL_device_id_fails)
+{
+	/// arrange
+	IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle;
+	/// act
+	amqp_methods_handle = iothubtransportamqp_methods_create("test.something", NULL);
+
+	/// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+	ASSERT_IS_NULL(amqp_methods_handle);
 }
 
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_004: [ If allocating memory fails, `iothubtransportamqp_methods_create` shall return NULL. ]*/
@@ -550,7 +586,7 @@ TEST_FUNCTION(when_allocating_memory_fails_then_iothubtransportamqp_methods_crea
         .SetReturn(NULL);
 
     /// act
-    amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
 
     /// assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
@@ -569,11 +605,33 @@ TEST_FUNCTION(when_copying_the_device_id_fails_iothubtransportamqp_methods_creat
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     /// act
-    amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
 
     /// assert
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
     ASSERT_IS_NULL(amqp_methods_handle);
+}
+
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_116: [ If `mallocAndStrcpy_s` fails, `iothubtransportamqp_methods_create` shall return NULL. ]*/
+TEST_FUNCTION(when_copying_the_hostname_fails_iothubtransportamqp_methods_create_fails)
+{
+	/// arrange
+	IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle;
+	EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+	STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "testdevice"))
+		.IgnoreArgument_destination();
+	STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, "testhost"))
+		.IgnoreArgument_destination()
+		.SetReturn(42);
+	EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+	EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+	/// act
+	amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
+
+	/// assert
+	ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+	ASSERT_IS_NULL(amqp_methods_handle);
 }
 
 /* iothubtransportamqp_methods_destroy */
@@ -582,9 +640,10 @@ TEST_FUNCTION(when_copying_the_device_id_fails_iothubtransportamqp_methods_creat
 TEST_FUNCTION(iothubtransportamqp_methods_destroy_frees_the_device_id_and_handle)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     umock_c_reset_all_calls();
 
+	EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
@@ -611,7 +670,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_destroy_with_NULL_frees_nothing)
 TEST_FUNCTION(destroy_after_subscribe_also_destroys_links_and_the_message_receiver_and_sender)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
     (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
@@ -624,6 +683,7 @@ TEST_FUNCTION(destroy_after_subscribe_also_destroys_links_and_the_message_receiv
     STRICT_EXPECTED_CALL(link_destroy(TEST_RECEIVER_LINK));
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+	EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     /// act
     iothubtransportamqp_methods_destroy(amqp_methods_handle);
@@ -636,7 +696,7 @@ TEST_FUNCTION(destroy_after_subscribe_also_destroys_links_and_the_message_receiv
 TEST_FUNCTION(iothubtransportamqp_methods_destroy_frees_tracked_handles)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
     (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
@@ -652,6 +712,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_destroy_frees_tracked_handles)
 
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+	EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     /// act
     iothubtransportamqp_methods_destroy(amqp_methods_handle);
@@ -664,7 +725,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_destroy_frees_tracked_handles)
 TEST_FUNCTION(iothubtransportamqp_methods_destroy_frees_2_tracked_handles)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
     (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
@@ -683,6 +744,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_destroy_frees_2_tracked_handles)
 
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+	EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     /// act
     iothubtransportamqp_methods_destroy(amqp_methods_handle);
@@ -713,6 +775,12 @@ TEST_FUNCTION(iothubtransportamqp_methods_destroy_frees_2_tracked_handles)
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_027: [ - `target` shall be the a target value created by calling `messaging_create_target`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_028: [ The address string used to create the source shall be of the form `/devices/{device id}/methods/devicebound`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_105: [ The string created in order to hold the source and target addresses shall be freed by calling `STRING_delete`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_140: [ A link attach properties map shall be created by calling `amqpvalue_create_map`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_141: [ A property key which shall be a symbol named `com.microsoft:channel-correlation-id` shall be created by calling `amqp_create_symbol`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_142: [ A property value of type string that shall contain the device id shall be created by calling `amqpvalue_create_string`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_143: [ The `com.microsoft:channel-correlation-id` shall be added to the link attach properties by calling `amqpvalue_set_map_value`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_144: [ The link attach properties shall be set on the receiver and sender link by calling `link_set_attach_properties`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_146: [ The link attach properties and all associated values shall be freed by calling `amqpvalue_destroy` after setting the link attach properties. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_033: [ `iothubtransportamqp_methods_subscribe` shall create a message receiver associated with the receiver link by calling `messagereceiver_create` and passing the receiver link handle to it. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_118: [ An `on_message_receiver_state_changed` callback together with its context shall be passed to `messagereceiver_create`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_035: [ `iothubtransportamqp_methods_subscribe` shall create a message sender associated with the sender link by calling `messagesender_create` and passing the sender link handle to it. ]*/
@@ -723,7 +791,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_destroy_frees_2_tracked_handles)
 TEST_FUNCTION(iothubtransportamqp_methods_subscribe_creates_links_and_sender_and_receiver)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     int result;
 
     umock_c_reset_all_calls();
@@ -744,7 +812,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_subscribe_creates_links_and_sender_and
 TEST_FUNCTION(iothubtransportamqp_methods_subscribe_after_subscribe_fails)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     int result;
 
     umock_c_reset_all_calls();
@@ -767,7 +835,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_subscribe_after_subscribe_fails)
 TEST_FUNCTION(when_iothubtransport_amqp_methods_handle_is_NULL_iothubtransportamqp_methods_subscribe_fails)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     int result;
     umock_c_reset_all_calls();
 
@@ -786,7 +854,7 @@ TEST_FUNCTION(when_iothubtransport_amqp_methods_handle_is_NULL_iothubtransportam
 TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_session_fails)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     int result;
     umock_c_reset_all_calls();
 
@@ -805,7 +873,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_session_fails)
 TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_on_methods_error_callback_fails)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     int result;
     umock_c_reset_all_calls();
 
@@ -824,7 +892,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_on_methods_error_c
 TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_on_method_request_received_callback_fails)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     int result;
     umock_c_reset_all_calls();
 
@@ -843,7 +911,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_on_method_request_
 TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_error_context_succeeds)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     int result;
 
     umock_c_reset_all_calls();
@@ -864,7 +932,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_error_context_succ
 TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_methods_receive_callback_context_succeeds)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     int result;
 
     umock_c_reset_all_calls();
@@ -889,13 +957,14 @@ TEST_FUNCTION(iothubtransportamqp_methods_subscribe_with_NULL_methods_receive_ca
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_036: [ If `messagesender_create` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_038: [ If `messagesender_open` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_040: [ If `messagereceiver_open` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
 TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_subscribe_fails)
 {
     ///arrange
     int negativeTestsInitResult = umock_c_negative_tests_init();
     IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle;
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
-    amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     int result;
 
     umock_c_reset_all_calls();
@@ -916,7 +985,22 @@ TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_subscribe_fails)
         .SetReturn(TEST_SENDER_TARGET).SetFailReturn(NULL);
     STRICT_EXPECTED_CALL(link_create(TEST_SESSION_HANDLE, "methods_responses_link", role_sender, TEST_SENDER_SOURCE, TEST_SENDER_TARGET))
         .SetReturn(TEST_SENDER_LINK).SetFailReturn(NULL);
-    STRICT_EXPECTED_CALL(messagereceiver_create(TEST_RECEIVER_LINK, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+	STRICT_EXPECTED_CALL(amqpvalue_create_map())
+		.SetReturn(LINK_ATTACH_PROPERTIES_MAP).SetFailReturn(NULL);
+	STRICT_EXPECTED_CALL(amqpvalue_create_symbol("com.microsoft:channel-correlation-id"))
+		.SetReturn(CHANNEL_CORRELATION_ID_KEY).SetFailReturn(NULL);
+	STRICT_EXPECTED_CALL(amqpvalue_create_string("testdevice"))
+		.SetReturn(CHANNEL_CORRELATION_ID_VALUE).SetFailReturn(NULL);
+	STRICT_EXPECTED_CALL(amqpvalue_set_map_value(LINK_ATTACH_PROPERTIES_MAP, CHANNEL_CORRELATION_ID_KEY, CHANNEL_CORRELATION_ID_VALUE))
+		.SetFailReturn(42);
+	STRICT_EXPECTED_CALL(link_set_attach_properties(TEST_SENDER_LINK, LINK_ATTACH_PROPERTIES_MAP))
+		.SetFailReturn(42);
+	STRICT_EXPECTED_CALL(link_set_attach_properties(TEST_RECEIVER_LINK, LINK_ATTACH_PROPERTIES_MAP))
+		.SetFailReturn(43);
+	STRICT_EXPECTED_CALL(amqpvalue_destroy(CHANNEL_CORRELATION_ID_VALUE));
+	STRICT_EXPECTED_CALL(amqpvalue_destroy(CHANNEL_CORRELATION_ID_KEY));
+	STRICT_EXPECTED_CALL(amqpvalue_destroy(LINK_ATTACH_PROPERTIES_MAP));
+	STRICT_EXPECTED_CALL(messagereceiver_create(TEST_RECEIVER_LINK, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument_on_message_receiver_state_changed()
         .IgnoreArgument_context()
         .SetFailReturn(NULL);
@@ -938,8 +1022,11 @@ TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_subscribe_fails)
     {
         if ((i != 0) && // STRING_c_str
             (i != 5) && // STRING_c_str
-            (i != 12)) // STRING_delete
-        {
+			(i != 14) && // amqpvalue_destroy
+			(i != 15) && // amqpvalue_destroy
+			(i != 16) && // amqpvalue_destroy
+			(i != 21)) // STRING_delete
+		{
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(i);
 
@@ -963,7 +1050,7 @@ TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_subscribe_fails)
 TEST_FUNCTION(when_STRING_construct_sprintf_fails_iothubtransportamqp_methods_subscribe_fails)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     int result;
 
     umock_c_reset_all_calls();
@@ -990,7 +1077,7 @@ TEST_FUNCTION(when_STRING_construct_sprintf_fails_iothubtransportamqp_methods_su
 TEST_FUNCTION(iothubtransportamqp_methods_unsubscribe_frees_the_message_sender_receiver_and_links)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
     (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
@@ -1027,7 +1114,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_unsubscribe_with_NULL_does_not_destroy
 TEST_FUNCTION(iothubtransportamqp_methods_unsubscribe_before_subscribe_does_not_destroy_links_and_message_handlers)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     umock_c_reset_all_calls();
 
     /// act
@@ -1044,7 +1131,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_unsubscribe_before_subscribe_does_not_
 TEST_FUNCTION(iothubtransportamqp_methods_unsubscribe_after_unsubscribe_does_not_destroy_links_and_message_handlers)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
     (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
@@ -1070,7 +1157,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_unsubscribe_after_unsubscribe_does_not
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_048: [ - The message payload shall be obtained by calling `message_get_body_amqp_data` with the index argument being 0. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_099: [ The application properties for the received message shall be obtained by calling `message_get_application_properties`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_123: [ The AMQP map shall be retrieve from the application properties by calling `amqpvalue_get_inplace_described_value`. ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_100: [ A property key `IoThub-methodname` shall be created by calling `amqpvalue_create_symbol`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_100: [ A property key `IoThub-methodname` shall be created by calling `amqpvalue_create_string`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_101: [ The method name property value shall be found in the map by calling `amqpvalue_get_map_value`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_102: [ The string contained by the property value shall be obtained by calling `amqpvalue_get_string`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_050: [ The binary message payload shall be indicated by calling the `on_method_request_received` callback passed to `iothubtransportamqp_methods_subscribe` with the arguments: ]*/
@@ -1080,12 +1167,12 @@ TEST_FUNCTION(iothubtransportamqp_methods_unsubscribe_after_unsubscribe_does_not
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_053: [ - `request_size` shall be set to the payload size obtained by calling `message_get_body_amqp_data`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_054: [ - `method_handle` shall be set to a newly created `IOTHUBTRANSPORT_AMQP_METHOD_HANDLE` that can be passed later as an argument to `iothubtransportamqp_methods_respond`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_112: [ Memory shall be allocated for the `IOTHUBTRANSPORT_AMQP_METHOD_HANDLE` to hold the correlation-id, so that it can be used in the `iothubtransportamqp_methods_respond` function. ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_056: [ The `on_message_received` callback shall return a newly constructed delivery state obtained by calling `messaging_delivery_accepted`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_056: [ On success the `on_message_received` callback shall return a newly constructed delivery state obtained by calling `messaging_delivery_accepted`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_113: [ All `IOTHUBTRANSPORT_AMQP_METHOD_HANDLE` handles shall be tracked in an array of handles that shall be resized accordingly when a methopd handle is added to it. ]*/
 TEST_FUNCTION(when_a_message_is_received_a_new_method_request_is_indicated)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     AMQP_VALUE result;
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
@@ -1107,12 +1194,12 @@ TEST_FUNCTION(when_a_message_is_received_a_new_method_request_is_indicated)
 
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_041: [ If `message` is NULL, the RELEASED outcome shall be returned and an error shall be indicated. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_129: [ The released outcome shall be created by calling `messaging_delivery_released`. ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_128: [ When the released outcome is returned, an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_128: [ When the RELEASED outcome is returned, an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_042: [ When an error is indicated by calling the `on_methods_error`, it shall be called with the context being the `on_methods_error_context` argument passed to `iothubtransportamqp_methods_subscribe`. ]*/
 TEST_FUNCTION(when_a_message_is_received_and_a_NULL_message_handle_is_passed_the_error_shall_be_indicated_through_on_methods_error)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     AMQP_VALUE result;
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
@@ -1137,7 +1224,7 @@ TEST_FUNCTION(when_a_message_is_received_and_a_NULL_message_handle_is_passed_the
 TEST_FUNCTION(when_message_get_properties_fails_the_message_is_rejected)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     AMQP_VALUE result;
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
@@ -1165,7 +1252,7 @@ TEST_FUNCTION(when_message_get_properties_fails_the_message_is_rejected)
 TEST_FUNCTION(when_properties_get_correlation_id_fails_the_message_is_rejected)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     AMQP_VALUE correlation_id = (AMQP_VALUE)0x5000;
     AMQP_VALUE result;
     umock_c_reset_all_calls();
@@ -1197,7 +1284,7 @@ TEST_FUNCTION(when_properties_get_correlation_id_fails_the_message_is_rejected)
 TEST_FUNCTION(when_allocating_memory_for_the_method_handle_fails_the_message_is_rejected)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     AMQP_VALUE correlation_id = (AMQP_VALUE)0x5000;
     AMQP_VALUE result;
     umock_c_reset_all_calls();
@@ -1230,7 +1317,7 @@ TEST_FUNCTION(when_allocating_memory_for_the_method_handle_fails_the_message_is_
 TEST_FUNCTION(when_reallocating_memory_for_tracked_handles_fails_the_message_is_rejected)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     AMQP_VALUE correlation_id = (AMQP_VALUE)0x5000;
     AMQP_VALUE result;
     umock_c_reset_all_calls();
@@ -1264,7 +1351,7 @@ TEST_FUNCTION(when_reallocating_memory_for_tracked_handles_fails_the_message_is_
 TEST_FUNCTION(when_amqpvalue_get_uuid_fails_the_message_is_rejected)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     AMQP_VALUE correlation_id = (AMQP_VALUE)0x5000;
     uuid correlation_id_uuid;
     AMQP_VALUE result;
@@ -1302,7 +1389,7 @@ TEST_FUNCTION(when_amqpvalue_get_uuid_fails_the_message_is_rejected)
 TEST_FUNCTION(when_message_get_body_amqp_data_fails_the_message_is_rejected)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     AMQP_VALUE correlation_id = (AMQP_VALUE)0x5000;
     uuid correlation_id_uuid;
     const unsigned char test_method_request_payload[] = { 42 };
@@ -1348,7 +1435,7 @@ TEST_FUNCTION(when_message_get_body_amqp_data_fails_the_message_is_rejected)
 TEST_FUNCTION(when_message_get_application_properties_fails_the_message_is_rejected)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     AMQP_VALUE application_properties = (AMQP_VALUE)0x5001;
     AMQP_VALUE correlation_id = (AMQP_VALUE)0x5000;
     uuid correlation_id_uuid;
@@ -1397,7 +1484,7 @@ TEST_FUNCTION(when_message_get_application_properties_fails_the_message_is_rejec
 TEST_FUNCTION(when_amqpvalue_get_inplace_described_value_fails_the_message_is_released)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     AMQP_VALUE application_properties = (AMQP_VALUE)0x5001;
     AMQP_VALUE correlation_id = (AMQP_VALUE)0x5000;
     uuid correlation_id_uuid;
@@ -1444,11 +1531,11 @@ TEST_FUNCTION(when_amqpvalue_get_inplace_described_value_fails_the_message_is_re
     iothubtransportamqp_methods_destroy(amqp_methods_handle);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_132: [ If `amqpvalue_create_symbol` fails the RELEASED outcome shall be returned and an error shall be indicated through the `on_methods_error` callback. ]*/
-TEST_FUNCTION(when_amqpvalue_create_symbol_fails_the_message_is_released)
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_132: [ If `amqpvalue_create_string` fails the RELEASED outcome shall be returned. ]*/
+TEST_FUNCTION(when_amqpvalue_create_string_fails_the_message_is_released)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     AMQP_VALUE application_properties = (AMQP_VALUE)0x5001;
     AMQP_VALUE application_properties_map = (AMQP_VALUE)0x5002;
     AMQP_VALUE correlation_id = (AMQP_VALUE)0x5000;
@@ -1479,7 +1566,7 @@ TEST_FUNCTION(when_amqpvalue_create_symbol_fails_the_message_is_released)
         .CopyOutArgumentBuffer(2, &application_properties, sizeof(application_properties));
     STRICT_EXPECTED_CALL(amqpvalue_get_inplace_described_value(application_properties))
         .SetReturn(application_properties_map);
-    STRICT_EXPECTED_CALL(amqpvalue_create_symbol("IoThub-methodname"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_string("IoThub-methodname"))
         .SetReturn(NULL);
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(application_properties_destroy(application_properties));
@@ -1499,10 +1586,10 @@ TEST_FUNCTION(when_amqpvalue_create_symbol_fails_the_message_is_released)
 }
 
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_103: [ If `amqpvalue_get_map_value` fails the REJECTED outcome with `amqp:decode-error` shall be returned. ]*/
-TEST_FUNCTION(when_amqpvalue_create_symbol_fails_the_message_is_rejected)
+TEST_FUNCTION(when_amqpvalue_get_map_value_fails_the_message_is_rejected)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     AMQP_VALUE application_properties = (AMQP_VALUE)0x5001;
     AMQP_VALUE application_properties_map = (AMQP_VALUE)0x5002;
     AMQP_VALUE test_property_key = (AMQP_VALUE)0x5003;
@@ -1534,7 +1621,7 @@ TEST_FUNCTION(when_amqpvalue_create_symbol_fails_the_message_is_rejected)
         .CopyOutArgumentBuffer(2, &application_properties, sizeof(application_properties));
     STRICT_EXPECTED_CALL(amqpvalue_get_inplace_described_value(application_properties))
         .SetReturn(application_properties_map);
-    STRICT_EXPECTED_CALL(amqpvalue_create_symbol("IoThub-methodname"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_string("IoThub-methodname"))
         .SetReturn(test_property_key);
     STRICT_EXPECTED_CALL(amqpvalue_get_map_value(application_properties_map, test_property_key))
         .SetReturn(NULL);
@@ -1560,7 +1647,7 @@ TEST_FUNCTION(when_amqpvalue_create_symbol_fails_the_message_is_rejected)
 TEST_FUNCTION(when_amqpvalue_get_string_fails_the_message_is_rejected)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     AMQP_VALUE application_properties = (AMQP_VALUE)0x5001;
     AMQP_VALUE application_properties_map = (AMQP_VALUE)0x5002;
     AMQP_VALUE test_property_key = (AMQP_VALUE)0x5003;
@@ -1593,7 +1680,7 @@ TEST_FUNCTION(when_amqpvalue_get_string_fails_the_message_is_rejected)
         .CopyOutArgumentBuffer(2, &application_properties, sizeof(application_properties));
     STRICT_EXPECTED_CALL(amqpvalue_get_inplace_described_value(application_properties))
         .SetReturn(application_properties_map);
-    STRICT_EXPECTED_CALL(amqpvalue_create_symbol("IoThub-methodname"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_string("IoThub-methodname"))
         .SetReturn(test_property_key);
     STRICT_EXPECTED_CALL(amqpvalue_get_map_value(application_properties_map, test_property_key))
         .SetReturn(test_property_value);
@@ -1623,7 +1710,7 @@ TEST_FUNCTION(when_amqpvalue_get_string_fails_the_message_is_rejected)
 TEST_FUNCTION(when_messaging_delivery_accepted_fails_an_RELEASED_outcome_shall_be_created)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     AMQP_VALUE application_properties = (AMQP_VALUE)0x5001;
     AMQP_VALUE application_properties_map = (AMQP_VALUE)0x5002;
     AMQP_VALUE test_property_key = (AMQP_VALUE)0x5003;
@@ -1657,7 +1744,7 @@ TEST_FUNCTION(when_messaging_delivery_accepted_fails_an_RELEASED_outcome_shall_b
         .CopyOutArgumentBuffer(2, &application_properties, sizeof(application_properties));
     STRICT_EXPECTED_CALL(amqpvalue_get_inplace_described_value(application_properties))
         .SetReturn(application_properties_map);
-    STRICT_EXPECTED_CALL(amqpvalue_create_symbol("IoThub-methodname"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_string("IoThub-methodname"))
         .SetReturn(test_property_key);
     STRICT_EXPECTED_CALL(amqpvalue_get_map_value(application_properties_map, test_property_key))
         .SetReturn(test_property_value);
@@ -1684,11 +1771,11 @@ TEST_FUNCTION(when_messaging_delivery_accepted_fails_an_RELEASED_outcome_shall_b
     iothubtransportamqp_methods_destroy(amqp_methods_handle);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_128: [ When the released outcome is returned, an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_128: [ When the RELEASED outcome is returned, an error shall be indicated by calling the `on_methods_error` callback passed to `iothubtransportamqp_methods_subscribe`. ]*/
 TEST_FUNCTION(when_creating_the_RELEASED_outcome_fails_an_error_is_triggered)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     AMQP_VALUE application_properties = (AMQP_VALUE)0x5001;
     AMQP_VALUE application_properties_map = (AMQP_VALUE)0x5002;
     AMQP_VALUE test_property_key = (AMQP_VALUE)0x5003;
@@ -1722,7 +1809,7 @@ TEST_FUNCTION(when_creating_the_RELEASED_outcome_fails_an_error_is_triggered)
         .CopyOutArgumentBuffer(2, &application_properties, sizeof(application_properties));
     STRICT_EXPECTED_CALL(amqpvalue_get_inplace_described_value(application_properties))
         .SetReturn(application_properties_map);
-    STRICT_EXPECTED_CALL(amqpvalue_create_symbol("IoThub-methodname"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_string("IoThub-methodname"))
         .SetReturn(test_property_key);
     STRICT_EXPECTED_CALL(amqpvalue_get_map_value(application_properties_map, test_property_key))
         .SetReturn(test_property_value);
@@ -1750,6 +1837,75 @@ TEST_FUNCTION(when_creating_the_RELEASED_outcome_fails_an_error_is_triggered)
     iothubtransportamqp_methods_destroy(amqp_methods_handle);
 }
 
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_147: [ If `on_method_request_received` fails, the REJECTED outcome shall be returned with `amqp:internal-error`. ]*/
+TEST_FUNCTION(when_calling_the_method_request_received_callback_fails_then_RELEASED_shall_be_returned)
+{
+    /// arrange
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
+    AMQP_VALUE application_properties = (AMQP_VALUE)0x5001;
+    AMQP_VALUE application_properties_map = (AMQP_VALUE)0x5002;
+    AMQP_VALUE test_property_key = (AMQP_VALUE)0x5003;
+    AMQP_VALUE test_property_value = (AMQP_VALUE)0x5004;
+    const char* method_name_ptr = TEST_METHOD_NAME;
+    AMQP_VALUE correlation_id = (AMQP_VALUE)0x5000;
+    uuid correlation_id_uuid;
+    const unsigned char test_method_request_payload[] = { 42 };
+    BINARY_DATA binary_data;
+    AMQP_VALUE result;
+
+    binary_data.bytes = test_method_request_payload;
+    binary_data.length = sizeof(test_method_request_payload);
+
+    umock_c_reset_all_calls();
+    setup_subscribe_expected_calls();
+    (void)iothubtransportamqp_methods_subscribe(amqp_methods_handle, TEST_SESSION_HANDLE, test_on_methods_error, (void*)0x4242, test_on_method_request_received, (void*)0x4243);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(message_get_properties(TEST_UAMQP_MESSAGE, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer(2, &test_properties_handle, sizeof(test_properties_handle));
+    STRICT_EXPECTED_CALL(properties_get_correlation_id(test_properties_handle, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer(2, &correlation_id, sizeof(correlation_id));
+    EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
+    EXPECTED_CALL(gballoc_realloc(IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    STRICT_EXPECTED_CALL(amqpvalue_get_uuid(correlation_id, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer(2, &correlation_id_uuid, sizeof(correlation_id_uuid));
+    STRICT_EXPECTED_CALL(message_get_body_amqp_data(TEST_UAMQP_MESSAGE, 0, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer(3, &binary_data, sizeof(binary_data));
+    STRICT_EXPECTED_CALL(message_get_application_properties(TEST_UAMQP_MESSAGE, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer(2, &application_properties, sizeof(application_properties));
+    STRICT_EXPECTED_CALL(amqpvalue_get_inplace_described_value(application_properties))
+        .SetReturn(application_properties_map);
+    STRICT_EXPECTED_CALL(amqpvalue_create_string("IoThub-methodname"))
+        .SetReturn(test_property_key);
+    STRICT_EXPECTED_CALL(amqpvalue_get_map_value(application_properties_map, test_property_key))
+        .SetReturn(test_property_value);
+    STRICT_EXPECTED_CALL(amqpvalue_get_string(test_property_value, IGNORED_PTR_ARG))
+        .CopyOutArgumentBuffer(2, &method_name_ptr, sizeof(method_name_ptr));
+    STRICT_EXPECTED_CALL(messaging_delivery_accepted());
+    STRICT_EXPECTED_CALL(test_on_method_request_received((void*)0x4243, TEST_METHOD_NAME, IGNORED_PTR_ARG, sizeof(test_method_request_payload), IGNORED_PTR_ARG))
+        .ValidateArgumentBuffer(3, test_method_request_payload, sizeof(test_method_request_payload))
+        .IgnoreArgument_method_handle()
+        .SetReturn(42);
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(TEST_DELIVERY_ACCEPTED));
+    EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(messaging_delivery_rejected("amqp:internal-error", IGNORED_PTR_ARG))
+        .IgnoreArgument_error_description();
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(test_property_value));
+    STRICT_EXPECTED_CALL(amqpvalue_destroy(test_property_key));
+    STRICT_EXPECTED_CALL(application_properties_destroy(application_properties));
+    STRICT_EXPECTED_CALL(properties_destroy(test_properties_handle));
+
+    /// act
+    result = g_on_message_received(amqp_methods_handle, TEST_UAMQP_MESSAGE);
+
+    /// assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+    ASSERT_ARE_EQUAL(void_ptr, result, TEST_DELIVERY_REJECTED);
+
+    /// cleanup
+    iothubtransportamqp_methods_destroy(amqp_methods_handle);
+}
+
 /* iothubtransportamqp_methods_respond */
 
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_107: [ If the argument `method_handle` is NULL, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
@@ -1772,7 +1928,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_with_NULL_response_fails)
 {
     /// arrange
     int result;
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     const unsigned char response_payload[] = { 0x43 };
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
@@ -1797,10 +1953,10 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_with_NULL_response_fails)
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_063: [ - A new properties handle shall be created by calling `properties_create`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_124: [ - An AMQP value holding the correlation id associated with the `method_handle` handle shall be created by calling `amqpvalue_create_uuid`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_065: [ - The correlation id on the message properties shall be set by calling `properties_set_correlation_id` and passing as argument the already create correlation ID AMQP value. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_148: [ The properties shall be set on the message by calling `message_set_properties`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_090: [ An AMQP map shall be created to hold the application properties for the response by calling `amqpvalue_create_map`. ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_091: [ A property key `IoThub-status` shall be created by calling `amqpvalue_create_symbol`. ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_092: [ A property value of type string shall be created from the stringified value of the `status_code` argument. ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_097: [ The property value shall be created by calling `amqpvalue_create_string`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_091: [ A property key `IoThub-status` shall be created by calling `amqpvalue_create_int`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_097: [ A property value of type int shall be created from the `status_code` argument by calling `amqpvalue_create_int`. ] ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_093: [ A new entry shall be added in the application properties map by calling `amqpvalue_set_map_value` and passing the key and value that were previously created. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_094: [ The application properties map shall be set on the response message by calling `message_set_application_properties`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_078: [ The binary payload for the response shall be set by calling `message_add_body_amqp_data` for the newly created message handle. ]*/
@@ -1815,7 +1971,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_sends_the_uAMQP_message)
 {
     /// arrange
     int result;
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     const unsigned char response_payload[] = { 0x43 };
     uuid correlation_id_uuid;
     AMQP_VALUE response_correlation_id = (AMQP_VALUE)0x6000;
@@ -1843,11 +1999,12 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_sends_the_uAMQP_message)
     EXPECTED_CALL(amqpvalue_create_uuid(correlation_id_uuid))
         .SetReturn(response_correlation_id);
     STRICT_EXPECTED_CALL(properties_set_correlation_id(response_properties_handle, response_correlation_id));
+    STRICT_EXPECTED_CALL(message_set_properties(TEST_RESPONSE_UAMQP_MESSAGE, response_properties_handle));
     STRICT_EXPECTED_CALL(amqpvalue_create_map())
         .SetReturn(response_properties_map);
-    STRICT_EXPECTED_CALL(amqpvalue_create_symbol("IoThub-status"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_string("IoThub-status"))
         .SetReturn(status_property_key);
-    STRICT_EXPECTED_CALL(amqpvalue_create_string("100"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_int(100))
         .SetReturn(status_property_value);
     STRICT_EXPECTED_CALL(amqpvalue_set_map_value(response_properties_map, status_property_key, status_property_value));
     STRICT_EXPECTED_CALL(message_set_application_properties(TEST_RESPONSE_UAMQP_MESSAGE, response_properties_map));
@@ -1876,12 +2033,12 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_sends_the_uAMQP_message)
     iothubtransportamqp_methods_destroy(amqp_methods_handle);
 }
 
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_092: [ A property value of type string shall be created from the stringified value of the `status_code` argument. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_097: [ A property value of type int shall be created from the `status_code` argument by calling `amqpvalue_create_int`. ]*/
 TEST_FUNCTION(iothubtransportamqp_methods_respond_encodes_the_status)
 {
     /// arrange
     int result;
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     const unsigned char response_payload[] = { 0x43 };
 
     umock_c_reset_all_calls();
@@ -1891,7 +2048,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_encodes_the_status)
     setup_message_received_calls();
     g_on_message_received(amqp_methods_handle, TEST_UAMQP_MESSAGE);
     umock_c_reset_all_calls();
-    setup_respond_calls("242");
+    setup_respond_calls(242);
 
     /// act
     result = iothubtransportamqp_methods_respond(g_method_handle, response_payload, sizeof(response_payload), 242);
@@ -1909,7 +2066,8 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_encodes_the_status)
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_064: [ If the `properties_create call` fails, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_125: [ If `amqpvalue_create_uuid` fails, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_066: [ If the `properties_set_correlation_id` call fails, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
-/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_096: [ If any of the calls `amqpvalue_create_symbol`, `amqpvalue_create_string`, `amqpvalue_create_map`, `amqpvalue_set_map_value` or `message_set_application_properties` fails `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_149: [ If `message_set_properties` fails, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_096: [ If any of the calls `amqpvalue_create_string`, `amqpvalue_create_int`, `amqpvalue_create_map`, `amqpvalue_set_map_value` or `message_set_application_properties` fails `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_081: [ If the `message_add_body_amqp_data` call fails, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_071: [ If the `messagesender_send` call fails, `iothubtransportamqp_methods_respond` shall fail and return a non-zero value. ]*/
 TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_respond_fails)
@@ -1927,7 +2085,7 @@ TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_respond_fails)
     BINARY_DATA response_binary_data;
     IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle;
     ASSERT_ARE_EQUAL(int, 0, negativeTestsInitResult);
-    amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
 
     response_binary_data.bytes = response_payload;
     response_binary_data.length = sizeof(response_payload);
@@ -1948,11 +2106,13 @@ TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_respond_fails)
         .SetReturn(response_correlation_id).SetFailReturn(NULL);
     STRICT_EXPECTED_CALL(properties_set_correlation_id(response_properties_handle, response_correlation_id))
         .SetFailReturn(1);
+    STRICT_EXPECTED_CALL(message_set_properties(TEST_RESPONSE_UAMQP_MESSAGE, response_properties_handle))
+        .SetFailReturn(1);
     STRICT_EXPECTED_CALL(amqpvalue_create_map())
         .SetReturn(response_properties_map).SetFailReturn(NULL);
-    STRICT_EXPECTED_CALL(amqpvalue_create_symbol("IoThub-status"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_string("IoThub-status"))
         .SetReturn(status_property_key).SetFailReturn(NULL);
-    STRICT_EXPECTED_CALL(amqpvalue_create_string("100"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_int(100))
         .SetReturn(status_property_value).SetFailReturn(NULL);
     STRICT_EXPECTED_CALL(amqpvalue_set_map_value(response_properties_map, status_property_key, status_property_value))
         .SetFailReturn(1);
@@ -1992,7 +2152,7 @@ TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_respond_fails)
 TEST_FUNCTION(iothubtransportamqp_methods_respond_can_be_called_from_the_method_request_callback)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     const unsigned char response_payload[] = { 0x43 };
     uuid correlation_id_uuid;
     AMQP_VALUE response_correlation_id = (AMQP_VALUE)0x6000;
@@ -2035,7 +2195,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_can_be_called_from_the_method_
         .CopyOutArgumentBuffer(2, &application_properties, sizeof(application_properties));
     STRICT_EXPECTED_CALL(amqpvalue_get_inplace_described_value(application_properties))
         .SetReturn(application_properties_map);
-    STRICT_EXPECTED_CALL(amqpvalue_create_symbol("IoThub-methodname"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_string("IoThub-methodname"))
         .SetReturn(test_property_key);
     STRICT_EXPECTED_CALL(amqpvalue_get_map_value(application_properties_map, test_property_key))
         .SetReturn(test_property_value);
@@ -2054,11 +2214,12 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_can_be_called_from_the_method_
     EXPECTED_CALL(amqpvalue_create_uuid(correlation_id_uuid))
         .SetReturn(response_correlation_id);
     STRICT_EXPECTED_CALL(properties_set_correlation_id(response_properties_handle, response_correlation_id));
+    STRICT_EXPECTED_CALL(message_set_properties(TEST_RESPONSE_UAMQP_MESSAGE, response_properties_handle));
     STRICT_EXPECTED_CALL(amqpvalue_create_map())
         .SetReturn(response_properties_map);
-    STRICT_EXPECTED_CALL(amqpvalue_create_symbol("IoThub-status"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_string("IoThub-status"))
         .SetReturn(status_property_key);
-    STRICT_EXPECTED_CALL(amqpvalue_create_string("242"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_int(242))
         .SetReturn(status_property_value);
     STRICT_EXPECTED_CALL(amqpvalue_set_map_value(response_properties_map, status_property_key, status_property_value));
     STRICT_EXPECTED_CALL(message_set_application_properties(TEST_RESPONSE_UAMQP_MESSAGE, response_properties_map));
@@ -2097,7 +2258,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_to_the_second_method_succeeds)
 {
     /// arrange
     int result;
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     const unsigned char response_payload[] = { 0x43 };
     static uuid correlation_id_uuid;
     AMQP_VALUE response_correlation_id = (AMQP_VALUE)0x6000;
@@ -2133,11 +2294,12 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_to_the_second_method_succeeds)
     EXPECTED_CALL(amqpvalue_create_uuid(correlation_id_uuid))
         .SetReturn(response_correlation_id);
     STRICT_EXPECTED_CALL(properties_set_correlation_id(response_properties_handle, response_correlation_id));
+    STRICT_EXPECTED_CALL(message_set_properties(TEST_RESPONSE_UAMQP_MESSAGE, response_properties_handle));
     STRICT_EXPECTED_CALL(amqpvalue_create_map())
         .SetReturn(response_properties_map);
-    STRICT_EXPECTED_CALL(amqpvalue_create_symbol("IoThub-status"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_string("IoThub-status"))
         .SetReturn(status_property_key);
-    STRICT_EXPECTED_CALL(amqpvalue_create_string("242"))
+    STRICT_EXPECTED_CALL(amqpvalue_create_int(242))
         .SetReturn(status_property_value);
     STRICT_EXPECTED_CALL(amqpvalue_set_map_value(response_properties_map, status_property_key, status_property_value));
     STRICT_EXPECTED_CALL(message_set_application_properties(TEST_RESPONSE_UAMQP_MESSAGE, response_properties_map));
@@ -2167,10 +2329,10 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_to_the_second_method_succeeds)
 }
 
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_114: [ The handle `method_handle` shall be removed from the array used to track the method handles. ]*/
-TEST_FUNCTION(iothubtransportamqp_methods_respond_removed_the_handle_from_the_tracked_handles)
+TEST_FUNCTION(iothubtransportamqp_methods_respond_removes_the_handle_from_the_tracked_handles)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     const unsigned char response_payload[] = { 0x43 };
     IOTHUBTRANSPORT_AMQP_METHOD_HANDLE g_first_method_handle;
     IOTHUBTRANSPORT_AMQP_METHOD_HANDLE g_second_method_handle;
@@ -2188,7 +2350,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_removed_the_handle_from_the_tr
     g_on_message_received(amqp_methods_handle, TEST_UAMQP_MESSAGE);
     g_second_method_handle = g_method_handle;
     umock_c_reset_all_calls();
-    setup_respond_calls("242");
+    setup_respond_calls(242);
     (void)iothubtransportamqp_methods_respond(g_second_method_handle, response_payload, sizeof(response_payload), 242);
     iothubtransportamqp_methods_unsubscribe(amqp_methods_handle);
     umock_c_reset_all_calls();
@@ -2199,6 +2361,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_removed_the_handle_from_the_tr
 
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+	EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
 
     /// act
     iothubtransportamqp_methods_destroy(amqp_methods_handle);
@@ -2211,7 +2374,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_removed_the_handle_from_the_tr
 TEST_FUNCTION(iothubtransportamqp_methods_respond_after_a_handle_has_been_removed_works)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     const unsigned char response_payload[] = { 0x43 };
 
     umock_c_reset_all_calls();
@@ -2222,7 +2385,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_after_a_handle_has_been_remove
     setup_message_received_calls();
     g_on_message_received(amqp_methods_handle, TEST_UAMQP_MESSAGE);
     umock_c_reset_all_calls();
-    setup_respond_calls("242");
+    setup_respond_calls(242);
     (void)iothubtransportamqp_methods_respond(g_method_handle, response_payload, sizeof(response_payload), 242);
     umock_c_reset_all_calls();
 
@@ -2246,7 +2409,7 @@ TEST_FUNCTION(iothubtransportamqp_methods_respond_after_a_handle_has_been_remove
 TEST_FUNCTION(when_on_message_receiver_state_changed_is_called_with_error_the_on_error_callback_shall_be_triggered)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
@@ -2269,7 +2432,7 @@ TEST_FUNCTION(when_on_message_receiver_state_changed_is_called_with_error_the_on
 TEST_FUNCTION(when_on_message_receiver_state_changed_is_called_with_error_as_new_and_previous_state_no_error_callback_is_triggered)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
@@ -2290,7 +2453,7 @@ TEST_FUNCTION(when_on_message_receiver_state_changed_is_called_with_error_as_new
 TEST_FUNCTION(when_state_changes_from_OPENING_to_OPEN_for_the_message_receiver_no_error_callback_is_triggered)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
@@ -2314,7 +2477,7 @@ TEST_FUNCTION(when_state_changes_from_OPENING_to_OPEN_for_the_message_receiver_n
 TEST_FUNCTION(when_on_message_sender_state_changed_is_called_with_error_the_on_error_callback_shall_be_triggered)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
@@ -2337,7 +2500,7 @@ TEST_FUNCTION(when_on_message_sender_state_changed_is_called_with_error_the_on_e
 TEST_FUNCTION(when_on_message_sender_state_changed_is_called_with_error_as_new_and_previous_state_no_error_callback_is_triggered)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
@@ -2358,7 +2521,7 @@ TEST_FUNCTION(when_on_message_sender_state_changed_is_called_with_error_as_new_a
 TEST_FUNCTION(when_state_changes_from_OPENING_to_OPEN_for_the_message_sender_no_error_callback_is_triggered)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
 
     umock_c_reset_all_calls();
     setup_subscribe_expected_calls();
@@ -2381,7 +2544,7 @@ TEST_FUNCTION(when_state_changes_from_OPENING_to_OPEN_for_the_message_sender_no_
 TEST_FUNCTION(when_an_error_is_indicated_in_the_send_complete_callback_an_error_is_indicated_through_on_methods_error)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     const unsigned char response_payload[] = { 0x43 };
 
     umock_c_reset_all_calls();
@@ -2411,7 +2574,7 @@ TEST_FUNCTION(when_an_error_is_indicated_in_the_send_complete_callback_an_error_
 TEST_FUNCTION(when_no_error_is_indicated_in_the_send_complete_callback_no_error_is_buubled_up_to_the_user)
 {
     /// arrange
-    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testdevice");
+    IOTHUBTRANSPORT_AMQP_METHODS_HANDLE amqp_methods_handle = iothubtransportamqp_methods_create("testhost", "testdevice");
     const unsigned char response_payload[] = { 0x43 };
 
     umock_c_reset_all_calls();
