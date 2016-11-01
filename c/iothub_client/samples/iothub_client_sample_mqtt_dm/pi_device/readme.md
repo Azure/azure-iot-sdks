@@ -73,8 +73,9 @@ If you need to install an older version of Raspbian, the below instructions show
 ### Install the sample application
 Assuming you have an older version of Raspbian running on your Raspberry Pi, follow the below instructions to install the sample application:
 -   Install the sample firmware_update package using SSH and typing the following commands:
-	```
+	
 	add the following lines to the /etc/apt/source.list files:
+	```
 	deb http://ppa.launchpad.net/aziotsdklinux/azureiot-preview/ubuntu vivid main
 	deb-src http://ppa.launchpad.net/aziotsdklinux/azureiot-preview/ubuntu vivid main
 	deb http://ppa.launchpad.net/aziotsdklinux/azureiot-firmware-update-sample/ubuntu vivid main 
