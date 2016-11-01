@@ -115,12 +115,12 @@ User-Agent: <sdk-name>/<sdk-version>
 
 **SRS_NODE_JOB_CLIENT_16_035: [** The `_getJobsFunc` function shall return a function that can be used by the `Query` object to get a new page of results **]**
 
-### scheduleDeviceMethod(jobId, queryOrDevices, methodParams, jobStartTime, maxExecutionTimeInSeconds, done)
+### scheduleDeviceMethod(jobId, queryCondition, methodParams, jobStartTime, maxExecutionTimeInSeconds, done)
 The `scheduleDeviceMethod` method schedules a device method call on a list of devices at a specific time.
 
 **SRS_NODE_JOB_CLIENT_16_013: [** The `scheduleDeviceMethod` method shall throw a `ReferenceError` if `jobId` is `null`, `undefined` or an empty string. **]**
 
-**SRS_NODE_JOB_CLIENT_16_014: [** The `scheduleDeviceMethod` method shall throw a `ReferenceError` if `queryOrDevices` is falsy. **]**
+**SRS_NODE_JOB_CLIENT_16_014: [** The `scheduleDeviceMethod` method shall throw a `ReferenceError` if `queryCondition` is falsy. **]**
 
 **SRS_NODE_JOB_CLIENT_16_029: [** The `scheduleDeviceMethod` method shall throw a `ReferenceError` if `methodParams` is falsy. **]** 
 
@@ -146,20 +146,19 @@ User-Agent: <sdk-name>/<sdk-version>
   jobId: '<jobId>',
   type: 'scheduleDirectRequest',
   cloudToDeviceMethod: <methodParams>,
-  queryCondition: '<queryOrDevices>',   // if the queryOrDevices parameter is a string
-  deviceIds: '<queryOrDevices>',        // if the queryOrDevices parameter is an array
+  queryCondition: '<queryCondition>',   // if the queryCondition parameter is a string
   startTime: <jobStartTime>,            // as an ISO-8601 date string
   maxExecutionTimeInSeconds: <maxExecutionTimeInSeconds>  // Number of seconds
 }
 ```
 **]**
 
-### scheduleTwinUpdate(jobId, queryOrDevices, patch, jobStartTime, maxExecutionTimeInSeconds, done)
+### scheduleTwinUpdate(jobId, queryCondition, patch, jobStartTime, maxExecutionTimeInSeconds, done)
 The `scheduleTwinUpdate` method schedules an update of the device twin on a list of devices at a specific time.
 
 **SRS_NODE_JOB_CLIENT_16_021: [** The `scheduleTwinUpdate` method shall throw a `ReferenceError` if `jobId` is `null`, `undefined` or an empty string. **]**
 
-**SRS_NODE_JOB_CLIENT_16_022: [** The `scheduleTwinUpdate` method shall throw a `ReferenceError` if `queryOrDevices` is falsy. **]**
+**SRS_NODE_JOB_CLIENT_16_022: [** The `scheduleTwinUpdate` method shall throw a `ReferenceError` if `queryCondition` is falsy. **]**
 
 **SRS_NODE_JOB_CLIENT_16_023: [** The `scheduleTwinUpdate` method shall throw a `ReferenceError` if `patch` is falsy. **]**
 
@@ -179,8 +178,7 @@ User-Agent: <sdk-name>/<sdk-version>
   jobId: '<jobId>',
   type: 'scheduleTwinUpdate',
   updateTwin: <patch>                   // Valid JSON object
-  queryCondition: '<queryOrDevices>',   // if the queryOrDevices parameter is a string
-  deviceIds: '<queryOrDevices>',        // if the queryOrDevices parameter is an array
+  queryCondition: '<queryCondition>',   // if the queryCondition parameter is a string
   startTime: <jobStartTime>,            // as an ISO-8601 date string
   maxExecutionTimeInSeconds: <maxExecutionTimeInSeconds>  // Number of seconds
 }

@@ -11,14 +11,14 @@ declare class JobClient {
     createQuery(jobType?: string, jobStatus?: string, pageSize?: Number): Query;
     cancelJob(jobId: string, done: JobClient.JobCallback): void;
     scheduleDeviceMethod(jobId: string,
-                         queryOrDevices: string | string[],
+                         queryCondition: string,
                          methodParams: DeviceMethodParams,
                          jobStartTime?: Date | JobClient.JobCallback,
                          maxExecutionTimeInSeconds?: Number | JobClient.JobCallback,
                          done?: JobClient.JobCallback): void;
 
     scheduleTwinUpdate(jobId: string,
-                       queryOrDevices: string | string[],
+                       queryCondition: string,
                        patch: Object,
                        jobStartTime?: Date | JobClient.JobCallback,
                        maxExecutionTimeInSeconds?: Number | JobClient.JobCallback,

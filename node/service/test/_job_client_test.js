@@ -275,9 +275,9 @@ describe('JobClient', function() {
       testFalsyArg(new JobClient({}).scheduleDeviceMethod, 'jobId', badJobId, [badJobId, 'SELECT * FROM devices', goodParams]);
     });
 
-    /*Tests_SRS_NODE_JOB_CLIENT_16_014: [The `scheduleDeviceMethod` method shall throw a `ReferenceError` if `queryOrDevices` is falsy.]*/
+    /*Tests_SRS_NODE_JOB_CLIENT_16_014: [The `scheduleDeviceMethod` method shall throw a `ReferenceError` if `queryCondition` is falsy.]*/
     [undefined, null, ''].forEach(function(badQuery) {
-      testFalsyArg(new JobClient({}).scheduleDeviceMethod, 'queryOrDevices', badQuery, ['id', badQuery, goodParams]);
+      testFalsyArg(new JobClient({}).scheduleDeviceMethod, 'queryCondition', badQuery, ['id', badQuery, goodParams]);
     });
 
     /*Tests_SRS_NODE_JOB_CLIENT_16_029: [The `scheduleDeviceMethod` method shall throw a `ReferenceError` if `methodParams` is falsy.]*/ 
@@ -291,7 +291,7 @@ describe('JobClient', function() {
     });
 
     [42, {}, function() {}].forEach(function(badQueryType) {
-      testBadTypeArg(new JobClient({}).scheduleDeviceMethod, 'queryOrDevices', badQueryType, ['id', badQueryType, { methodName: 'name' }, new Date(), 3600]);
+      testBadTypeArg(new JobClient({}).scheduleDeviceMethod, 'queryCondition', badQueryType, ['id', badQueryType, { methodName: 'name' }, new Date(), 3600]);
     });
 
     it('throws a TypeError if the callback is not the last parameter', function() {
@@ -328,8 +328,7 @@ describe('JobClient', function() {
       jobId: '<jobId>',
       type: 'scheduleDirectRequest',
       cloudToDeviceMethod: <methodParams>,
-      queryCondition: '<queryOrDevices>',   // if the queryOrDevices parameter is a string
-      deviceIds: '<queryOrDevices>',        // if the queryOrDevices parameter is an array
+      queryCondition: '<queryCondition>',   // if the query parameter is a string
       startTime: <jobStartTime>,            // as an ISO-8601 date string
       maxExecutionTimeInSeconds: <maxExecutionTimeInSeconds>  // Number of seconds
     }
@@ -361,16 +360,6 @@ describe('JobClient', function() {
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][3].maxExecutionTimeInSeconds, fakeMaxExecutionTime);
     });
 
-    it('creates a valid HTTP request, given an array of deviceIds', function() {
-      var fakeQuery = ['device1', 'device2', 'device3'];
-      var fakeRestApiClient = { executeApiCall: sinon.stub() };
-
-      var client = new JobClient(fakeRestApiClient);
-      client.scheduleDeviceMethod('id', fakeQuery, { methodName: 'name' }, new Date(), 7200, function() {});
-      assert.isUndefined(fakeRestApiClient.executeApiCall.args[0][3].queryCondition);
-      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][3].deviceIds, fakeQuery);
-    });
-
     /*Tests_SRS_NODE_JOB_CLIENT_16_018: [If `jobStartTime` is a function, `jobStartTime` shall be considered the callback and a `TypeError` shall be thrown if `maxExecutionTimeInSeconds` and/or `done` are not `undefined`.]*/
     testCallback('scheduleDeviceMethod', ['jobId', 'query', {methodName: 'name'}]);
     /*Tests_SRS_NODE_JOB_CLIENT_16_019: [If `maxExecutionTimeInSeconds` is a function, `maxExecutionTimeInSeconds` shall be considered the callback and a `TypeError` shall be thrown if `done` is not `undefined`.]*/
@@ -390,9 +379,9 @@ describe('JobClient', function() {
       testFalsyArg(new JobClient({}).scheduleTwinUpdate, 'jobId', badValue, [badValue, 'SELECT * FROM devices', goodPatch]);
     });
 
-    /*Tests_SRS_NODE_JOB_CLIENT_16_022: [The `scheduleTwinUpdate` method shall throw a `ReferenceError` if `queryOrDevices` is falsy.]*/
+    /*Tests_SRS_NODE_JOB_CLIENT_16_022: [The `scheduleTwinUpdate` method shall throw a `ReferenceError` if `queryCondition` is falsy.]*/
     [undefined, null, ''].forEach(function(badValue) {
-      testFalsyArg(new JobClient({}).scheduleTwinUpdate, 'queryOrDevices', badValue, ['id', badValue, goodPatch]);
+      testFalsyArg(new JobClient({}).scheduleTwinUpdate, 'queryCondition', badValue, ['id', badValue, goodPatch]);
     });
 
     /*Tests_SRS_NODE_JOB_CLIENT_16_023: [The `scheduleTwinUpdate` method shall throw a `ReferenceError` if `patch` is falsy.]*/
@@ -401,7 +390,7 @@ describe('JobClient', function() {
     });
 
     [42, {}, function() {}].forEach(function(badQueryType) {
-      testBadTypeArg(new JobClient({}).scheduleTwinUpdate, 'queryOrDevices', badQueryType, ['id', badQueryType, { tags: null }, new Date(), 3600]);
+      testBadTypeArg(new JobClient({}).scheduleTwinUpdate, 'queryCondition', badQueryType, ['id', badQueryType, { tags: null }, new Date(), 3600]);
     });
 
     it('throws a TypeError if the callback is not the last parameter', function() {
@@ -427,8 +416,7 @@ describe('JobClient', function() {
       jobId: '<jobId>',
       type: 'scheduleTwinUpdate',
       updateTwin: <patch>                   // Valid JSON object
-      queryCondition: '<queryOrDevices>',   // if the queryOrDevices parameter is a string
-      deviceIds: '<queryOrDevices>',        // if the queryOrDevices parameter is an array
+      queryCondition: '<queryCondition>',   // if the queryCondition parameter is a string
       startTime: <jobStartTime>,            // as an ISO-8601 date string
       maxExecutionTimeInSeconds: <maxExecutionTimeInSeconds>  // Number of seconds
     }
@@ -458,16 +446,6 @@ describe('JobClient', function() {
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][3].queryCondition, fakeQuery);
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][3].startTime, new Date(fakeStartTime).toISOString());
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][3].maxExecutionTimeInSeconds, fakeMaxExecutionTime);
-    });
-
-    it('creates a valid HTTP request, given an array of deviceIds', function() {
-      var fakeQuery = ['device1', 'device2', 'device3'];
-      var fakeRestApiClient = { executeApiCall: sinon.stub() };
-
-      var client = new JobClient(fakeRestApiClient);
-      client.scheduleTwinUpdate('id', fakeQuery, { methodName: 'name' }, new Date(), 7200, function() {});
-      assert.isUndefined(fakeRestApiClient.executeApiCall.args[0][3].queryCondition);
-      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][3].deviceIds, fakeQuery);
     });
 
     /*Tests_SRS_NODE_JOB_CLIENT_16_024: [If `jobStartTime` is a function, `jobStartTime` shall be considered the callback and a `TypeError` shall be thrown if `maxExecutionTimeInSeconds` and/or `done` are not `undefined`.]*/

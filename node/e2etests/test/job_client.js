@@ -72,41 +72,28 @@ var runTests = function(hubConnectionString) {
     }
 
     describe('scheduleTwinUpdate', function() {
-      [
-        { 
-          selectorName: 'device array',
-          selector: [testDeviceId],
-          testTagValue: 'value1'
-        },
-        { 
-          selectorName: 'sql query',
-          selector: 'deviceId = \'' + testDeviceId + '\'',
-          testTagValue: 'value2'
-        },
-      ].forEach(function(testConfig) {
-        it('schedules a twin update job with a ' + testConfig.selectorName + ' and succeeds', function(testCallback) {
-          var jobClient = JobClient.fromConnectionString(hubConnectionString);
-          var testJobId = uuid.v4();
-          var testTwinPatch = {
-            etag: '*',
-            tags: {
-              key: testConfig.testTagValue
-            },
-            properties: { desired: {}, reported: {} }
-          };
+      it('schedules a twin update job with a sql query and succeeds', function(testCallback) {
+        var jobClient = JobClient.fromConnectionString(hubConnectionString);
+        var testJobId = uuid.v4();
+        var testTwinPatch = {
+          etag: '*',
+          tags: {
+            key: 'value2'
+          },
+          properties: { desired: {}, reported: {} }
+        };
 
-          debug('scheduling a twin update job with a ' + testConfig.selectorName + ' with the id: ' + testJobId);
-          debug('Query: ' + testConfig.selector);
-          jobClient.scheduleTwinUpdate(testJobId, testConfig.selector, testTwinPatch, new Date(Date.now()), 120, continueWith(testCallback, function() {
-            waitForJobStatus(jobClient, testJobId, 'completed', continueWith(testCallback, function() {
-              var registry = Registry.fromConnectionString(hubConnectionString);
-              registry.getTwin(testDeviceId, continueWith(testCallback, function(twin) {
-                assert.equal(twin.tags.key, testTwinPatch.tags.key);
-                testCallback();
-              }));
+        debug('scheduling a twin update job with a sql query with the id: ' + testJobId);
+        debug('Query: ' + 'deviceId = \'' + testDeviceId + '\'');
+        jobClient.scheduleTwinUpdate(testJobId, 'deviceId = \'' + testDeviceId + '\'', testTwinPatch, new Date(Date.now()), 120, continueWith(testCallback, function() {
+          waitForJobStatus(jobClient, testJobId, 'completed', continueWith(testCallback, function() {
+            var registry = Registry.fromConnectionString(hubConnectionString);
+            registry.getTwin(testDeviceId, continueWith(testCallback, function(twin) {
+              assert.equal(twin.tags.key, testTwinPatch.tags.key);
+              testCallback();
             }));
           }));
-        });
+        }));
       });
 
       it('schedules a twin update job and cancels it', function(testCallback) {
@@ -120,7 +107,7 @@ var runTests = function(hubConnectionString) {
             reported: {}
           }
         };
-        jobClient.scheduleTwinUpdate(testJobId, [testDeviceId], fakePatch, new Date(Date.now() + 3600000), 120, continueWith(testCallback, function(job) {
+        jobClient.scheduleTwinUpdate(testJobId, 'deviceId = \'' + testDeviceId + '\'', fakePatch, new Date(Date.now() + 3600000), 120, continueWith(testCallback, function(job) {
           assert.strictEqual(job.jobId, testJobId);
           assert.strictEqual(job.status, 'queued');
           debug('cancelling job ' + testJobId);
@@ -140,47 +127,36 @@ var runTests = function(hubConnectionString) {
         timeoutInSeconds: 30
       };
 
-      [
-        { 
-          selectorName: 'device array',
-          selector: [testDeviceId]
-        },
-        { 
-          selectorName: 'sql query',
-          selector: 'deviceId = \'' + testDeviceId + '\''
-        },
-      ].forEach(function(testConfig) {
-        it('schedules a device method job with a ' + testConfig.selectorName + ' and succeeds', function(testCallback) {
-          var jobClient = JobClient.fromConnectionString(hubConnectionString);
-          var testJobId = uuid.v4();
-          var methodResponseWasSent = false;
-          var deviceClient = DeviceClient.fromConnectionString(testDeviceConnectionString, DeviceMqtt);
-          deviceClient.open(continueWith(testCallback, function() {
-            deviceClient.onDeviceMethod(testDeviceMethod.methodName, function(request, response) {
-              response.send(200, continueWith(testCallback, function() {
-                methodResponseWasSent = true;
-              }));
-            });
+      it('schedules a device method job with a sql query and succeeds', function(testCallback) {
+        var jobClient = JobClient.fromConnectionString(hubConnectionString);
+        var testJobId = uuid.v4();
+        var methodResponseWasSent = false;
+        var deviceClient = DeviceClient.fromConnectionString(testDeviceConnectionString, DeviceMqtt);
+        deviceClient.open(continueWith(testCallback, function() {
+          deviceClient.onDeviceMethod(testDeviceMethod.methodName, function(request, response) {
+            response.send(200, continueWith(testCallback, function() {
+              methodResponseWasSent = true;
+            }));
+          });
 
-            debug('scheduling a device method job with a ' + testConfig.selectorName + ' with the id: ' + testJobId);
-            debug('Query: ' + testConfig.selector);
-            jobClient.scheduleDeviceMethod(testJobId, testConfig.selector, testDeviceMethod, new Date(Date.now()), 120, continueWith(testCallback, function() {
-              waitForJobStatus(jobClient, testJobId, 'completed', continueWith(testCallback, function() {
-                var registry = Registry.fromConnectionString(hubConnectionString);
-                registry.getTwin(testDeviceId, continueWith(testCallback, function() {
-                  assert.isTrue(methodResponseWasSent);
-                  testCallback();
-                }));
+          debug('scheduling a device method job with a sql query with the id: ' + testJobId);
+          debug('Query: ' + 'deviceId = \'' + testDeviceId + '\'');
+          jobClient.scheduleDeviceMethod(testJobId, 'deviceId = \'' + testDeviceId + '\'', testDeviceMethod, new Date(Date.now()), 120, continueWith(testCallback, function() {
+            waitForJobStatus(jobClient, testJobId, 'completed', continueWith(testCallback, function() {
+              var registry = Registry.fromConnectionString(hubConnectionString);
+              registry.getTwin(testDeviceId, continueWith(testCallback, function() {
+                assert.isTrue(methodResponseWasSent);
+                testCallback();
               }));
             }));
           }));
-        });
+        }));
       });
 
       it('schedules a device method job and cancels it', function(testCallback) {
         var jobClient = JobClient.fromConnectionString(hubConnectionString);
         var testJobId = uuid.v4();
-        jobClient.scheduleDeviceMethod(testJobId, [testDeviceId], testDeviceMethod, new Date(Date.now() + 3600000), 120, continueWith(testCallback, function(job) {
+        jobClient.scheduleDeviceMethod(testJobId, 'deviceId = \'' + testDeviceId + '\'', testDeviceMethod, new Date(Date.now() + 3600000), 120, continueWith(testCallback, function(job) {
           assert.strictEqual(job.jobId, testJobId);
           assert.strictEqual(job.status, 'queued');
           debug('cancelling job ' + testJobId);
