@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using FastMember;
 using Microsoft.Azure.Devices;
 using Microsoft.Azure.Devices.Common;
 using Microsoft.Azure.Devices.Common.Security;
@@ -78,6 +80,7 @@ namespace DeviceExplorer
             updateDeviceButton.Enabled = false;
             deleteDeviceButton.Enabled = false;
             sasTokenButton.Enabled = false;
+            connectionStateComboBox.SelectedIndex = 0;
         }
 
         /// <summary>
@@ -265,9 +268,14 @@ namespace DeviceExplorer
             var devicesProcessor = new DevicesProcessor(activeIoTHubConnectionString, MAX_COUNT_OF_DEVICES, protocolGatewayHost.Text);
             var devicesList = await devicesProcessor.GetDevices();
             devicesList.Sort();
-            var sortableDevicesBindingList = new SortableBindingList<DeviceEntity>(devicesList);
 
-            devicesGridView.DataSource = sortableDevicesBindingList;
+            var table = new DataTable();
+            using (var reader = ObjectReader.Create(devicesList, "Id", "PrimaryKey", "SecondaryKey", "ConnectionString", "ConnectionState", "LastActivityTime", "LastConnectionStateUpdatedTime", "LastStateUpdatedTime", "MessageCount", "State", "SuspensionReason"))
+            {
+                table.Load(reader);
+            }
+
+            devicesGridView.DataSource = table;
             devicesGridView.ReadOnly = true;
             devicesGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
 
@@ -310,6 +318,7 @@ namespace DeviceExplorer
                 await updateDevicesGridView();
                 devicesListed = true;
                 listDevicesButton.Text = "Refresh";
+                FilterDevicesGridview();
             }
             catch (Exception ex)
             {
@@ -803,6 +812,47 @@ namespace DeviceExplorer
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private void filterListTextBox_KeyUp(object sender, KeyEventArgs e)
+        {
+            FilterDevicesGridview();
+        }
+
+        private void connectionStateComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            FilterDevicesGridview();
+        }
+
+        private void FilterDevicesGridview()
+        {
+            if (devicesGridView.DataSource == null)
+            {
+                return;
+            }
+
+            var rowFilter = string.Empty;
+
+            var idFilter = !string.IsNullOrWhiteSpace(filterListTextBox.Text);
+            var stateFilter = connectionStateComboBox.Text != "All";
+
+            if (idFilter)
+            {
+                rowFilter += $"Id LIKE '%{filterListTextBox.Text}%'";
+
+                if (stateFilter)
+                {
+                    rowFilter += " AND ";
+                }
+            }
+
+            if (stateFilter)
+            {
+                rowFilter += $"ConnectionState = '{connectionStateComboBox.Text}'";
+            }
+
+            ((DataTable)devicesGridView.DataSource).DefaultView.RowFilter = rowFilter;
+            deviceCountLabel.Text = devicesGridView.Rows.Count.ToString();
         }
     }
 }
