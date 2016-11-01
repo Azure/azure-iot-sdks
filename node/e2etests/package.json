@@ -7,6 +7,7 @@
   "license": "MIT",
   "main": "e2etests.js",
   "dependencies": {
+    "async": "^2.1.2",
     "azure-event-hubs": "0.0.3",
     "azure-iot-common": "1.1.0-dtpreview",
     "azure-iot-device": "1.1.0-dtpreview",

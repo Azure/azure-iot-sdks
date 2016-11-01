@@ -10,6 +10,7 @@ var deviceMqtt = require('azure-iot-device-mqtt').Mqtt;
 var uuid = require('uuid');
 var _ = require('lodash');
 var assert = require('chai').assert;
+var async = require('async');
 
 var newProps = {
   foo : 1,
@@ -317,6 +318,36 @@ var runTests = function (hubConnectionString) {
       };
 
       doItAgain();
+    });
+
+    it('can set desired properties while the client is disconnected', function(done) {
+      async.series([
+        function setDesiredProperties(callback) {
+          serviceTwin.update( { properties : { desired : newProps } }, callback);
+        },
+        function closeDeviceClient(callback) {
+          deviceClient.close(callback);
+        },
+        function setDesiredPropertiesAgain(callback) {
+          serviceTwin.update( { properties : { desired : moreNewProps } }, callback);
+        },
+        function openDeviceClientAgain(callback) {
+          deviceClient = deviceSdk.Client.fromConnectionString(deviceDescription.connectionString, deviceMqtt);
+          deviceClient.open(callback);
+        },
+        function getDeviceTwin(callback) {
+          deviceClient.getTwin(function(err, twin) {
+              if (err) return callback(err);
+              deviceTwin = twin;
+              callback();
+          });
+        },
+        function validateProperties(callback) {
+            assertObjectsAreEqual(deviceTwin.properties.desired, mergeResult);
+            callback();
+        }
+      ], done);
+      
     });
 
   });
