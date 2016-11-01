@@ -171,7 +171,7 @@ JobClient.prototype.cancelJob = function(jobId, done) {
  * @description       Schedules a job that will execute a device method on a set of devices.
  * 
  * @param {String}    jobId             The unique identifier that should be used for this job.
- * @param {String}    queryOrDevices    A list of devices or a SQL query used to compute the list of devices
+ * @param {String}    queryCondition    A SQL query WHERE clause used to compute the list of devices
  *                                      on which this job should be run.
  * @param {Object}    methodParams      An object describing the method and shall have the following properties: 
  *                                      - methodName          The name of the method that shall be invoked.
@@ -185,15 +185,15 @@ JobClient.prototype.cancelJob = function(jobId, done) {
  *                                      job object, and a transport-specific response
  *                                      object useful for logging or debugging.
  * 
- * @throws {ReferenceError}   If one or more of the jobId, queryOrDevices or methodParams arguments are falsy.
+ * @throws {ReferenceError}   If one or more of the jobId, queryCondition or methodParams arguments are falsy.
  * @throws {ReferenceError}   If methodParams.methodName is falsy.
  * @throws {TypeError}        If the callback is not the last parameter
  */
-JobClient.prototype.scheduleDeviceMethod = function(jobId, queryOrDevices, methodParams, jobStartTime, maxExecutionTimeInSeconds, done) {
+JobClient.prototype.scheduleDeviceMethod = function(jobId, queryCondition, methodParams, jobStartTime, maxExecutionTimeInSeconds, done) {
   /*Codes_SRS_NODE_JOB_CLIENT_16_013: [The `scheduleDeviceMethod` method shall throw a `ReferenceError` if `jobId` is `null`, `undefined` or an empty string.]*/
   if (jobId === undefined || jobId === null || jobId === '') throw new ReferenceError('jobId cannot be \'' + jobId + '\'');
-  /*Codes_SRS_NODE_JOB_CLIENT_16_014: [The `scheduleDeviceMethod` method shall throw a `ReferenceError` if `queryOrDevices` is falsy.]*/
-  if (!queryOrDevices) throw new ReferenceError('queryOrDevices cannot be \'' + queryOrDevices + '\'');
+  /*Codes_SRS_NODE_JOB_CLIENT_16_014: [The `scheduleDeviceMethod` method shall throw a `ReferenceError` if `queryCondition` is falsy.]*/
+  if (!queryCondition) throw new ReferenceError('queryCondition cannot be \'' + queryCondition + '\'');
 
   /*Codes_SRS_NODE_JOB_CLIENT_16_029: [The `scheduleDeviceMethod` method shall throw a `ReferenceError` if `methodParams` is falsy.*/
   if (!methodParams) throw new ReferenceError('methodParams cannot be \'' + methodParams + '\'');
@@ -244,8 +244,7 @@ JobClient.prototype.scheduleDeviceMethod = function(jobId, queryOrDevices, metho
       payload: <payload>,           // valid JSON object
       timeoutInSeconds: methodTimeoutInSeconds // Number
     },
-    queryCondition: '<queryOrDevices>', // if the queryOrDevices parameter is a string
-    deviceIds: '<queryOrDevices>',      // if the queryOrDevices parameter is an array
+    queryCondition: '<queryCondition>', // if the query parameter is a string
     startTime: <jobStartTime>,          // as an ISO-8601 date string
     maxExecutionTimeInSeconds: <maxExecutionTimeInSeconds>        // format TBD
   }
@@ -258,12 +257,10 @@ JobClient.prototype.scheduleDeviceMethod = function(jobId, queryOrDevices, metho
     maxExecutionTimeInSeconds: maxExecutionTimeInSeconds
   };
 
-  if (typeof queryOrDevices === 'string') {
-    jobDesc.queryCondition = queryOrDevices;
-  } else if (Array.isArray(queryOrDevices)) {
-    jobDesc.deviceIds = queryOrDevices;
+  if (typeof queryCondition === 'string') {
+    jobDesc.queryCondition = queryCondition;
   } else {
-    throw new TypeError('queryOrDevices must either be a sql query string or an array of device id strings');
+    throw new TypeError('queryCondition must be a sql WHERE clause string');
   }
 
   this._scheduleJob(jobDesc, done);
@@ -274,7 +271,7 @@ JobClient.prototype.scheduleDeviceMethod = function(jobId, queryOrDevices, metho
  * @description       Schedule a job that will update a set of twins with the patch provided as a parameter.
  * 
  * @param {String}    jobId             The unique identifier that should be used for this job.
- * @param {String}    queryOrDevices    A list of devices or a SQL query used to compute the list of devices
+ * @param {String}    queryCondition    A SQL query WHERE clause used to compute the list of devices
  *                                      on which this job should be run.
  * @param {Object}    patch             The twin patch that should be applied to the twins.
  * @param {Date}      jobStartTime      Time time at which the job should start
@@ -285,14 +282,14 @@ JobClient.prototype.scheduleDeviceMethod = function(jobId, queryOrDevices, metho
  *                                      job object, and a transport-specific response
  *                                      object useful for logging or debugging.
  * 
- * @throws {ReferenceError}   If one or more of the jobId, queryOrDevices or patch arguments are falsy.
+ * @throws {ReferenceError}   If one or more of the jobId, queryCondition or patch arguments are falsy.
  * @throws {TypeError}        If the callback is not the last parameter
  */
-JobClient.prototype.scheduleTwinUpdate = function (jobId, queryOrDevices, patch, jobStartTime, maxExecutionTimeInSeconds, done) {
+JobClient.prototype.scheduleTwinUpdate = function (jobId, queryCondition, patch, jobStartTime, maxExecutionTimeInSeconds, done) {
   /*Codes_SRS_NODE_JOB_CLIENT_16_021: [The `scheduleTwinUpdate` method shall throw a `ReferenceError` if `jobId` is `null`, `undefined` or an empty string.]*/
   if (jobId === undefined || jobId === null || jobId === '') throw new ReferenceError('jobId cannot be \'' + jobId + '\'');
-  /*Codes_SRS_NODE_JOB_CLIENT_16_022: [The `scheduleTwinUpdate` method shall throw a `ReferenceError` if `queryOrDevices` is falsy.]*/
-  if (!queryOrDevices) throw new ReferenceError('queryOrDevices cannot be \'' + queryOrDevices + '\'');
+  /*Codes_SRS_NODE_JOB_CLIENT_16_022: [The `scheduleTwinUpdate` method shall throw a `ReferenceError` if `query` is falsy.]*/
+  if (!queryCondition) throw new ReferenceError('queryCondition cannot be \'' + queryCondition + '\'');
   /*Codes_SRS_NODE_JOB_CLIENT_16_023: [The `scheduleTwinUpdate` method shall throw a `ReferenceError` if `patch` is falsy.]*/
   if (!patch) throw new ReferenceError('patch cannot be \'' + patch + '\'');
 
@@ -323,12 +320,10 @@ JobClient.prototype.scheduleTwinUpdate = function (jobId, queryOrDevices, patch,
     maxExecutionTimeInSeconds: maxExecutionTimeInSeconds
   };
 
-  if (typeof queryOrDevices === 'string') {
-    jobDesc.queryCondition = queryOrDevices;
-  } else if (Array.isArray(queryOrDevices)) {
-    jobDesc.deviceIds = queryOrDevices;
+  if (typeof queryCondition === 'string') {
+    jobDesc.queryCondition = queryCondition;
   } else {
-    throw new TypeError('queryOrDevices must either be a sql query string or an array of device id strings');
+    throw new TypeError('queryCondition must be a sql WHERE clause string');
   }
 
   /*Codes_SRS_NODE_JOB_CLIENT_16_026: [The `scheduleTwinUpdate` method shall construct the HTTP request as follows:
@@ -343,8 +338,7 @@ JobClient.prototype.scheduleTwinUpdate = function (jobId, queryOrDevices, patch,
     jobId: '<jobId>',
     type: 'scheduleTwinUpdate', // TBC
     updateTwin: <patch>                 // Valid JSON object
-    queryCondition: '<queryOrDevices>', // if the queryOrDevices parameter is a string
-    deviceIds: '<queryOrDevices>',      // if the queryOrDevices parameter is an array
+    queryCondition: '<queryCondition>', // if the query parameter is a string
     startTime: <jobStartTime>,          // as an ISO-8601 date string
     maxExecutionTimeInSeconds: <maxExecutionTimeInSeconds>        // format TBD
   }
