@@ -12,6 +12,7 @@
 #include "iothub_message.h"
 #include "iothub_client_ll.h"
 #include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/umock_c_prod.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -31,7 +32,7 @@ extern "C"
 
 MOCKABLE_FUNCTION(, void, IoTHubClient_LL_SendComplete, IOTHUB_CLIENT_LL_HANDLE, handle, PDLIST_ENTRY, completed, IOTHUB_CLIENT_CONFIRMATION_RESULT, result);
 MOCKABLE_FUNCTION(, IOTHUBMESSAGE_DISPOSITION_RESULT, IoTHubClient_LL_MessageCallback, IOTHUB_CLIENT_LL_HANDLE, handle, IOTHUB_MESSAGE_HANDLE, message);
-MOCKABLE_FUNCTION(, void, IotHubClient_LL_ConnectionStatusCallBack, IOTHUB_CLIENT_LL_HANDLE, handle, PDLIST_ENTRY, connectionStatus);
+MOCKABLE_FUNCTION(, void, IotHubClient_LL_ConnectionStatusCallBack, IOTHUB_CLIENT_LL_HANDLE, handle, IOTHUB_CLIENT_CONNECTION_STATUS, status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason);
 
 typedef struct IOTHUB_MESSAGE_LIST_TAG
 {
@@ -41,7 +42,6 @@ typedef struct IOTHUB_MESSAGE_LIST_TAG
     DLIST_ENTRY entry;
     uint64_t ms_timesOutAfter; /* a value of "0" means "no timeout", if the IOTHUBCLIENT_LL's handle tickcounter > msTimesOutAfer then the message shall timeout*/
 }IOTHUB_MESSAGE_LIST;
-
 
 #ifdef __cplusplus
 }
