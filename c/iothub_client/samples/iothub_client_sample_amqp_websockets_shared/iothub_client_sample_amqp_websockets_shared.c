@@ -15,6 +15,10 @@
 #include "certs.h"
 #endif // MBED_BUILD_TIMESTAMP
 
+// It is NOT a good practice to put device credentials in the code as shown below.
+// This is done in this sample for simplicity purposes.
+// Good practices such as the use of TPM or other secure storage on the device are recommended to store device credentials.
+
 static const char* hubName = "[IoT Hub Name]";
 static const char* hubSuffix = "[IoT Hub Suffix]";
 static const char* deviceId1 = "[device id 1]";

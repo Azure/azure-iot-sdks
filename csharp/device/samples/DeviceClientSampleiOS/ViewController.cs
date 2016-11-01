@@ -11,6 +11,10 @@ namespace DeviceClientSampleiOS
     public partial class ViewController : UIViewController
     {
         int count = 1;
+
+        // It is NOT a good practice to put device credentials in the code as shown below.
+        // This is done in this sample for simplicity purposes.
+        // Good practices such as the use of TPM or other secure storage on the device are recommended to store device credentials.
         private const string DeviceConnectionString = "<replace>";
         DeviceClient deviceClient = DeviceClient.CreateFromConnectionString(DeviceConnectionString, TransportType.Http1);
 

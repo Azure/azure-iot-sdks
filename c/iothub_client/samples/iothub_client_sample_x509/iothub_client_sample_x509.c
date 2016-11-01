@@ -34,6 +34,10 @@ and removing calls to _DoWork will yield the same results. */
 #include "certs.h"
 #endif // MBED_BUILD_TIMESTAMP
 
+// It is NOT a good practice to put device credentials in the code as shown below.
+// This is done in this sample for simplicity purposes.
+// Good practices such as the use of TPM or other secure storage on the device are recommended to store device credentials.
+
 /*String containing Hostname, Device Id in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;x509=true"                      */
 static const char* connectionString = "[device connection string]";

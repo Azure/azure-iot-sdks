@@ -12,6 +12,10 @@
 #include "iothubtransportamqp_websockets.h"
 #include "../../../certs/certs.h"
 
+// It is NOT a good practice to put device credentials in the code as shown below.
+// This is done in this sample for simplicity purposes.
+// Good practices such as the use of TPM or other secure storage on the device are recommended to store device credentials.
+
 static const char* connectionString = "[device connection string]";
 static int callbackCounter;
 

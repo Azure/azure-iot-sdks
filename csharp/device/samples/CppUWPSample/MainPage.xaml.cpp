@@ -27,6 +27,9 @@ MainPage::MainPage()
 {
     InitializeComponent();
 
+    // It is NOT a good practice to put device credentials in the code as shown below.
+    // This is done in this sample for simplicity purposes.
+    // Good practices such as the use of TPM or other secure storage on the device are recommended to store device credentials.
     auto deviceClient = DeviceClient::CreateFromConnectionString(L"<replace>", TransportType::Http1);
     byte dataBuffer[] = { 'H', 'e', 'l', 'l', 'o' };
     auto pbuffer = ref new Platform::Array<byte>(&dataBuffer[0], _countof(dataBuffer));
