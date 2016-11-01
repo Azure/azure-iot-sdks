@@ -28,21 +28,18 @@ DEFINE_ENUM(IOTHUB_CLIENT_CONFIRMATION_RESULT, IOTHUB_CLIENT_CONFIRMATION_RESULT
 DEFINE_ENUM(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
 
 #define IOTHUB_CLIENT_CONNECTION_STATUS_VALUES                                     \
-    IOTHUB_CLIENT_CONNECTION_INPROGRESS,                                           \
-    IOTHUB_CLIENT_CONNECTION_SUCCESS,                                              \
-    IOTHUB_CLIENT_CONNECTION_DISCONNECTED,                                         \
-    IOTHUB_CLIENT_CONNECTION_RETRY,                                                \
-    IOTHUB_CLIENT_CONNECTION_RETRY_TIMEOUT,                                        \
-    IOTHUB_CLIENT_CONNECTION_RECOVERABLE_ERROR,                                    \
-    IOTHUB_CLIENT_CONNECTION_UNRECOVERABLE_ERROR                                   \
+    IOTHUB_CLIENT_CONNECTION_AUTHENTICATED,                \
+    IOTHUB_CLIENT_CONNECTION_UNAUTHENTICATED               \
 
     DEFINE_ENUM(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_STATUS_VALUES);
 
 #define IOTHUB_CLIENT_CONNECTION_STATUS_REASON_VALUES                               \
-    IOTHUB_CLIENT_CONNECTION_UNRECOVERABLE_SERVER_AUTHENTICATION_ERROR,             \
-    IOTHUB_CLIENT_CONNECTION_UNRECOVERABLE_SERVER_QUOTA_EXCEEDED,                   \
-    IOTHUB_CLIENT_CONNECTION_USER_REQUEST,                                          \
-    IOTHUB_CLIENT_CONNECTION_OK                                                     \
+    IOTHUB_CLIENT_CONNECTION_EXPIRED_SAS_TOKEN,            \
+    IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED,              \
+    IOTHUB_CLIENT_CONNECTION_BAD_CREDENTIAL,               \
+    IOTHUB_CLIENT_CONNECTION_RETRY_EXPIRED,                \
+    IOTHUB_CLIENT_CONNECTION_NO_NETWORK,                   \
+    IOTHUB_CLIENT_CONNECTION_OK                            \
 
     DEFINE_ENUM(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, IOTHUB_CLIENT_CONNECTION_STATUS_REASON_VALUES);
 
@@ -349,14 +346,13 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetConnectionStatusCallback(IOTHUB_C
 
 ###IotHubClient_LL_ConnectionStatusCallBack
 ```c
-extern void IotHubClient_LL_ConnectionStatusCallBack(IOTHUB_CLIENT_LL_HANDLE handle, PDLIST_ENTRY connectionStatus);
+extern void IotHubClient_LL_ConnectionStatusCallBack(IOTHUB_CLIENT_LL_HANDLE handle, IOTHUB_CLIENT_CONNECTION_STATUS connectionStatus, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason);
 ```
-**SRS_IOTHUBCLIENT_LL_25_113: [**If parameter connectionStatus is NULL or parameter handle is NULL then IotHubClient_LL_ConnectionStatusCallBack shall return.**]** 
+**SRS_IOTHUBCLIENT_LL_25_113: [**If parameter connectionStatus is NULL or parameter handle is NULL then IotHubClient_LL_ConnectionStatusCallBack shall return.**]**
 
-IotHubClient_LL_ConnectionStatusCallBack is a function that is only called by the lower layers. connectionStatus is a PDLIST containing events which represent the transition of various states in establishing a connection to the IOT Hub.
+IotHubClient_LL_ConnectionStatusCallBack is a function that is only called by the lower layers. connectionStatus represents the authentication state of the client to the IOTHUB with reason for change.
 
-**SRS_IOTHUBCLIENT_LL_25_114: [**If parameter connectionStatus contains a entry which can be published then the callback (if set by the user) along with its context and connection status shall be invoked.**]** 
-**SRS_IOTHUBCLIENT_LL_25_115: [**If any callback is NULL then there shall not be a callback call.**]** 
+**SRS_IOTHUBCLIENT_LL_25_114: [**IotHubClient_LL_ConnectionStatusCallBack shall call non-callback set by the user from IoTHubClient_LL_SetConnectionStatusCallback passing the status, reason and the passed userContextCallback.**]**
 
 ###IoTHubClient_LL_SetRetryPolicy
 ```c

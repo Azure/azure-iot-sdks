@@ -20,10 +20,15 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>com.microsoft.azure.iot</groupId>
-            <artifactId>proton-j-azure-iot-dev</artifactId>
-            <version>0.12.3</version>
+            <groupId>org.apache.qpid</groupId>
+            <artifactId>proton-j</artifactId>
+            <version>0.15.0</version>
             <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.iothub-java-client</groupId>
+            <artifactId>websocket-transport-layer</artifactId>
+            <version>0.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
