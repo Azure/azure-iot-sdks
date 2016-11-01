@@ -12,7 +12,7 @@
     <parent>
         <groupId>com.microsoft.azure.iot.service.sdk</groupId>
         <artifactId>iothub-service-sdk-with-samples</artifactId>
-        <version>1.0.9</version>
+        <version>1.0.10</version>
     </parent>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -49,10 +49,15 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>com.microsoft.azure.iot</groupId>
-            <artifactId>proton-j-azure-iot</artifactId>
-            <version>0.12.2</version>
+            <groupId>org.apache.qpid</groupId>
+            <artifactId>proton-j</artifactId>
+            <version>0.15.0</version>
             <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.iothub-java-client</groupId>
+            <artifactId>websocket-transport-layer</artifactId>
+            <version>0.1.0</version>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure</groupId>

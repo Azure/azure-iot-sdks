@@ -15,6 +15,7 @@
 #include "iothub_message.h"
 #include "iothub_client_ll.h"
 #include "azure_c_shared_utility/macro_utils.h"
+#include "azure_c_shared_utility/umock_c_prod.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -37,7 +38,7 @@ MOCKABLE_FUNCTION(, void, IoTHubClient_LL_ReportedStateComplete, IOTHUB_CLIENT_L
 MOCKABLE_FUNCTION(, IOTHUBMESSAGE_DISPOSITION_RESULT, IoTHubClient_LL_MessageCallback, IOTHUB_CLIENT_LL_HANDLE,  handle, IOTHUB_MESSAGE_HANDLE, message);
 MOCKABLE_FUNCTION(, void, IoTHubClient_LL_RetrievePropertyComplete, IOTHUB_CLIENT_LL_HANDLE, handle, DEVICE_TWIN_UPDATE_STATE, update_state, const unsigned char*, payLoad, size_t, size);
 MOCKABLE_FUNCTION(, int, IoTHubClient_LL_DeviceMethodComplete, IOTHUB_CLIENT_LL_HANDLE, handle, const char*, method_name, const unsigned char*, payLoad, size_t, size, BUFFER_HANDLE, result_payload);
-MOCKABLE_FUNCTION(, void, IotHubClient_LL_ConnectionStatusCallBack, IOTHUB_CLIENT_LL_HANDLE, handle, PDLIST_ENTRY, connectionStatus);
+MOCKABLE_FUNCTION(, void, IotHubClient_LL_ConnectionStatusCallBack, IOTHUB_CLIENT_LL_HANDLE, handle, IOTHUB_CLIENT_CONNECTION_STATUS, status, IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason);
 typedef struct IOTHUB_MESSAGE_LIST_TAG
 {
     IOTHUB_MESSAGE_HANDLE messageHandle;
@@ -56,7 +57,6 @@ typedef struct IOTHUB_DEVICE_TWIN_TAG
     void* context;
     DLIST_ENTRY entry;
 } IOTHUB_DEVICE_TWIN;
-
 union IOTHUB_IDENTITY_INFO_TAG
 {
     IOTHUB_DEVICE_TWIN* device_twin;

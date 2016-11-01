@@ -1003,6 +1003,16 @@ module.exports = [
     },    
 
     ///////////////////////////////////////////////////
+    // Java Websocket Transport Layer files
+    ///////////////////////////////////////////////////
+    {
+        "taskType": "xmlReplaceTask",
+        "filePath": "java/websocket-transport-layer/pom.xml",
+        "search": "//project/version",
+        "replaceString": "java.websocket"
+    },
+
+    ///////////////////////////////////////////////////
     // Java Device SDK files
     ///////////////////////////////////////////////////
     {
