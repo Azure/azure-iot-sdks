@@ -57,6 +57,7 @@ npm link
 
 cd $node_root/device/transport/mqtt
 echo "\n-- Creating links for `pwd` --"
+npm link azure-iot-common
 npm link azure-iot-device
 npm link azure-iothub
 npm link

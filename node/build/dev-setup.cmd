@@ -61,6 +61,7 @@ call npm link
 cd %node-root%\device\transport\mqtt
 echo.
 echo -- Creating links for %cd% --
+call npm link azure-iot-common
 call npm link azure-iot-device
 call npm link azure-iothub
 call npm link
