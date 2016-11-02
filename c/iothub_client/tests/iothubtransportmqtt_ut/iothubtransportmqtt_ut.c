@@ -55,8 +55,14 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
 
+TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
+
 static TEST_MUTEX_HANDLE test_serialize_mutex;
 static TEST_MUTEX_HANDLE g_dllByDll;
+
+#define TEST_RETRY_POLICY IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER
+#define TEST_RETRY_TIMEOUT_SECS 60
 
 //Callbacks for Testing
 static void* g_callbackCtx;
@@ -70,6 +76,7 @@ static pfIotHubTransport_Unregister                 IoTHubTransportMqtt_Unregist
 static pfIoTHubTransport_Subscribe                  IoTHubTransportMqtt_Subscribe;
 static pfIoTHubTransport_Unsubscribe                IoTHubTransportMqtt_Unsubscribe;
 static pfIoTHubTransport_DoWork                     IoTHubTransportMqtt_DoWork;
+static pfIoTHubTransport_SetRetryPolicy             IoTHubTransportMqtt_SetRetryPolicy;
 static pfIoTHubTransport_GetSendStatus              IoTHubTransportMqtt_GetSendStatus;
 static pfIoTHubTransport_Subscribe_DeviceTwin       IoTHubTransportMqtt_Subscribe_DeviceTwin;
 static pfIoTHubTransport_Unsubscribe_DeviceTwin     IoTHubTransportMqtt_Unsubscribe_DeviceTwin;
@@ -112,6 +119,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(MQTT_GET_IO_TRANSPORT, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_DEVICE_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(TRANSPORT_LL_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_RETRY_POLICY, int);
 
     REGISTER_GLOBAL_MOCK_HOOK(IoTHubTransport_MQTT_Common_Create, my_IoTHubTransport_MQTT_Common_Create);
 
@@ -123,6 +131,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin, 0);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod, 0);
     REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_MQTT_Common_ProcessItem, IOTHUB_PROCESS_OK);
+    REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_MQTT_Common_SetRetryPolicy, 0);
 
     REGISTER_GLOBAL_MOCK_RETURN(xio_create, TEST_XIO_HANDLE);
 
@@ -138,6 +147,7 @@ TEST_SUITE_INITIALIZE(suite_init)
     IoTHubTransportMqtt_Subscribe = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_Subscribe;
     IoTHubTransportMqtt_Unsubscribe = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_Unsubscribe;
     IoTHubTransportMqtt_DoWork = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_DoWork;
+    IoTHubTransportMqtt_SetRetryPolicy = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_SetRetryPolicy;
     IoTHubTransportMqtt_GetSendStatus = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_GetSendStatus;
     IoTHubTransportMqtt_Subscribe_DeviceTwin = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_Subscribe_DeviceTwin;
     IoTHubTransportMqtt_Unsubscribe_DeviceTwin = ((TRANSPORT_PROVIDER*)MQTT_Protocol())->IoTHubTransport_Unsubscribe_DeviceTwin;
@@ -284,6 +294,28 @@ TEST_FUNCTION(IoTHubTransportMqtt_Subscribe_success)
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
     //cleanup
+}
+
+/* Tests_SRS_IOTHUB_MQTT_TRANSPORT_25_012: [** IoTHubTransportMqtt_SetRetryPolicy shall call into the IoTHubMqttAbstract_SetRetryPolicy function. ] */
+TEST_FUNCTION(IoTHubTransportMqtt_SetRetryPolicy_success)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+    TRANSPORT_LL_HANDLE handle = IoTHubTransportMqtt_Create(&config);
+    umock_c_reset_all_calls();
+
+    STRICT_EXPECTED_CALL(IoTHubTransport_MQTT_Common_SetRetryPolicy(handle, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS));
+
+    // act
+    int result = IoTHubTransportMqtt_SetRetryPolicy(handle, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, result, 0);
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+
 }
 
 TEST_FUNCTION(IoTHubTransportMqtt_Subscribe_DeviceTwin_success)

@@ -4,6 +4,7 @@
 #ifndef IOTHUB_TRANSPORT_LL_H
 #define IOTHUB_TRANSPORT_LL_H
 
+
 typedef void* TRANSPORT_LL_HANDLE;
 typedef void* IOTHUB_DEVICE_HANDLE;
 
@@ -46,6 +47,7 @@ extern "C"
     typedef int (*pfIoTHubTransport_Subscribe)(IOTHUB_DEVICE_HANDLE handle);
     typedef void (*pfIoTHubTransport_Unsubscribe)(IOTHUB_DEVICE_HANDLE handle);
     typedef void (*pfIoTHubTransport_DoWork)(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle);
+    typedef int(*pfIoTHubTransport_SetRetryPolicy)(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds);
     typedef IOTHUB_CLIENT_RESULT(*pfIoTHubTransport_GetSendStatus)(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus);
     typedef int (*pfIoTHubTransport_Subscribe_DeviceTwin)(IOTHUB_DEVICE_HANDLE handle);
     typedef void (*pfIoTHubTransport_Unsubscribe_DeviceTwin)(IOTHUB_DEVICE_HANDLE handle);
@@ -68,6 +70,7 @@ pfIotHubTransport_Unregister IoTHubTransport_Unregister;                        
 pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;                              \
 pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;                          \
 pfIoTHubTransport_DoWork IoTHubTransport_DoWork;                                    \
+pfIoTHubTransport_SetRetryPolicy IoTHubTransport_SetRetryPolicy;                    \
 pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus  /*there's an intentional missing ; on this line*/
 
     struct TRANSPORT_PROVIDER_TAG
