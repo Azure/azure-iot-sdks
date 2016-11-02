@@ -27,10 +27,10 @@
   },
   "scripts": {
     "lint": "jshint --show-non-errors . && tslint -c ../../tslint.json \"{lib,.}/*.ts\"",
-    "unittest-min": "istanbul cover --report none node_modules/mocha/bin/_mocha -- --reporter dot test/**/_*_test.js",
-    "alltest-min": "istanbul cover --report none node_modules/mocha/bin/_mocha -- --reporter dot test/**/_*_test*.js",
-    "unittest": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter spec test/**/_*_test.js",
-    "alltest": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter spec test/**/_*_test*.js",
+    "unittest-min": "istanbul cover --report none node_modules/mocha/bin/_mocha -- --reporter dot \"test/**/_*_test.js\"",
+    "alltest-min": "istanbul cover --report none node_modules/mocha/bin/_mocha -- --reporter dot \"test/**/_*_test*.js\"",
+    "unittest": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter spec \"test/**/_*_test.js\"",
+    "alltest": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter spec \"test/**/_*_test*.js\"",
     "ci": "npm -s run lint && npm -s run alltest-min && npm -s run check-cover",
     "test": "npm -s run lint && npm -s run unittest",
     "check-cover": "istanbul check-coverage --statements 98 --branches 95 --functions 97 --lines 98"
