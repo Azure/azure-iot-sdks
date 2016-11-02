@@ -425,8 +425,8 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
     ASSERT_IS_NOT_NULL_WITH_MSG(deviceTwinData, "IoTHubDeviceTwin_UpdateTwin failed");
 
     JSON_Value *root_value = NULL;
-    const char *string_property;
-    int integer_property;
+    const char *string_property = NULL;
+    int integer_property = 0;
     time_t beginOperation, nowTime;
     beginOperation = time(NULL);
     while (
@@ -450,7 +450,7 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 				{
 					case DEVICE_TWIN_UPDATE_COMPLETE:
 						string_property = json_object_dotget_string(root_object, "desired.string_property");
-						integer_property = (int)json_object_dotget_number(root_object, "desired.integer_property");
+						integer_property = (int) json_object_dotget_number(root_object, "desired.integer_property");
 						break;
 					case DEVICE_TWIN_UPDATE_PARTIAL:
 						string_property = json_object_get_string(root_object, "string_property");
@@ -461,7 +461,10 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 						break;
 				}
                 Unlock(device->lock);
-                break;
+                if ((string_property != NULL) && (integer_property != 0))
+                {
+                    break;
+                }
             }
             Unlock(device->lock);
         }
