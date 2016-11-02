@@ -83,7 +83,7 @@ function sendEventTests(Transport, registry) {
       /*Tests_SRS_NODE_DEVICE_CLIENT_05_017: [With the exception of receive, when a Client method completes successfully, the callback function (indicated by the done argument) shall be invoked with the following arguments:
       err - null
       response - a transport-specific response object]*/
-      it('#sends the event', function (done) {
+      it('sends the event when the client is opened', function (done) {
         var client = Client.fromConnectionString(sakConnectionString, Transport);
 
         client.open(function (err, res) {
@@ -101,6 +101,22 @@ function sendEventTests(Transport, registry) {
                   done(err);
                 });
               }
+            });
+          }
+        });
+      });
+
+      /*Tests_SRS_NODE_DEVICE_CLIENT_16_048: [The `sendEvent` method shall automatically connect the transport if necessary.]*/
+      it('sends the event and automatically opens the client if necessary', function(done) {
+        var client = Client.fromConnectionString(sakConnectionString, Transport);
+        var message = new Message('hello');
+        client.sendEvent(message, function(err, res) {
+          if (err) {
+            done(err);
+          } else {
+            assert.equal(res.constructor.name, 'MessageEnqueued', 'Type of the result object of the client.sendEvent method is wrong');
+            client.close(function (err) {
+              done(err);
             });
           }
         });
@@ -135,6 +151,27 @@ function sendEventTests(Transport, registry) {
                   done(err);
                 });
               }
+            });
+          }
+        });
+      });
+
+      /*Tests_SRS_NODE_DEVICE_CLIENT_16_048: [The `sendEvent` method shall automatically connect the transport if necessary.]*/
+      it('sends the event and automatically opens the client if necessary', function(done) {
+        var client = Client.fromConnectionString(x509ConnectionString, Transport);
+        var message = new Message('hello');
+        client.setOptions({
+          cert: x509Certificate,
+          key: x509Key,
+          passphrase: x509Passphrase
+        });
+        client.sendEvent(message, function(err, res) {
+          if (err) {
+            done(err);
+          } else {
+            assert.equal(res.constructor.name, 'MessageEnqueued', 'Type of the result object of the client.sendEvent method is wrong');
+            client.close(function (err) {
+              done(err);
             });
           }
         });

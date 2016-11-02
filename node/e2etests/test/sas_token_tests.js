@@ -48,25 +48,14 @@ var runTests = function (hubConnectionString, deviceTransport, provisionedDevice
     var oldSasRenewalInterval;
 
     before(function() {
-      this.timeout(500);
-      
-      // Amqp-ws is broken for this scenario.  It just doesn't work.
-      if (deviceTransport.name === 'AmqpWs') this.skip();
-
-      // Amqp is broken.  It works mostly, but fails intermittently.
-      // Mocha reports "Uncaught Error: AMQP Transport: Could not connect", but 
-      // sometimes, this exception fires during another test, so you see spurious 
-      // failures in other tests because of Amqp exceptions lingering about from
-      // previous tests.
-      if (deviceTransport.name === 'Amqp') this.skip();
-      
       oldSasRenewalInterval = Client.sasRenewalInterval;
-      Client.sasRenewalInterval = 1000;
+      this.timeout(500);
     });
 
     beforeEach(function () {
       this.timeout(500);
-      
+      Client.sasRenewalInterval = 5000;
+
       serviceClient = serviceSdk.Client.fromConnectionString(hubConnectionString);
       deviceClient = createDeviceClient(deviceTransport, provisionedDevice);
       ehClient = eventHubClient.fromConnectionString(hubConnectionString);
@@ -94,7 +83,7 @@ var runTests = function (hubConnectionString, deviceTransport, provisionedDevice
 
     after(function() {
       this.timeout(500);
-      
+
       Client.sasRenewalInterval = oldSasRenewalInterval;
     });
 
@@ -105,6 +94,8 @@ var runTests = function (hubConnectionString, deviceTransport, provisionedDevice
 
       deviceClient.open(function (err) {
         if (err) return done(err);
+        // Immediately resets the interval to avoid piling on renewals
+        Client.sasRenewalInterval = oldSasRenewalInterval;
 
         var foundTheMessage;
         
@@ -135,11 +126,9 @@ var runTests = function (hubConnectionString, deviceTransport, provisionedDevice
       });
     });
 
-    it ('Device renews SAS after connection and is still able to send messages', function(done) {
+    it('Device renews SAS after connection and is still able to send messages', function(done) {
       // For Amqp, the test passes, but deviceClient.sendEvent never calls it's done function
       // and the afterEach function times out.
-      if (deviceTransport.name === 'Amqp') this.skip();
-
       this.timeout(20000);
       var bufferSize = 1024;
       var buffer = new Buffer(bufferSize);
@@ -149,6 +138,8 @@ var runTests = function (hubConnectionString, deviceTransport, provisionedDevice
       deviceClient.open(function (err) {
         if (err) return done(err);
 
+        // Immediately resets the interval to avoid piling on renewals
+        Client.sasRenewalInterval = oldSasRenewalInterval;
         waitForEventHubMessages(ehClient, provisionedDevice.deviceId, function(err, eventData) {
           if (err) return done(err);
           if ((eventData.body.length === bufferSize) && (eventData.body.indexOf(uuidData) === 0)) {

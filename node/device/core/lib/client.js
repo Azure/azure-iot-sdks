@@ -3,17 +3,23 @@
 
 'use strict';
 
+var EventEmitter = require('events').EventEmitter;
+var util = require('util');
+var debug = require('debug')('azure-iot-device.Client');
+var machina = require('machina');
+
 var anHourFromNow = require('azure-iot-common').anHourFromNow;
 var results = require('azure-iot-common').results;
 var errors = require('azure-iot-common').errors;
 var ConnectionString = require('./connection_string.js');
 var SharedAccessSignature = require('./shared_access_signature.js');
-var EventEmitter = require('events').EventEmitter;
-var util = require('util');
-var debug = require('debug')('azure-iot-device.Client');
 var BlobUploadClient = require('./blob_upload').BlobUploadClient;
 var DeviceMethodRequest = require('./device_method').DeviceMethodRequest;
 var DeviceMethodResponse = require('./device_method').DeviceMethodResponse;
+
+function safeCallback(callback, error, result) {
+  if (callback) callback(error, result);
+}
 
 /**
  * @class           module:azure-iot-device.Client
@@ -37,7 +43,7 @@ var Client = function (transport, connStr, blobUploadClient) {
 
   if (this._connectionString && ConnectionString.parse(this._connectionString).SharedAccessKey) {
     /*Codes_SRS_NODE_DEVICE_CLIENT_16_027: [If a connection string argument is provided and is using SharedAccessKey authentication, the Client shall automatically generate and renew SAS tokens.] */
-    this._sharedAccessSignatureRenewalInterval = setInterval(this._renewSharedAccessSignature.bind(this), Client.sasRenewalInterval); 
+    this._sasRenewalTimeout = setTimeout(this._renewSharedAccessSignature.bind(this), Client.sasRenewalInterval); 
   }
 
   this.blobUploadClient = blobUploadClient;
@@ -45,18 +51,234 @@ var Client = function (transport, connStr, blobUploadClient) {
   this._transport = transport;
   this._receiver = null;
   this._methodCallbackMap = {};
+  var thisClient = this;
 
   this.on('removeListener', function (eventName) {
-    if (this._receiver && eventName === 'message' && this.listeners('message').length === 0) {
-      this._disconnectReceiver();
+    if (thisClient._receiver && eventName === 'message' && thisClient.listeners('message').length === 0) {
+      thisClient._disconnectReceiver();
     }
   });
 
   this.on('newListener', function (eventName) {
-    if (!this._receiver && eventName === 'message') {
-      this._connectReceiver();
+    if (eventName === 'message') {
+      /* Schedules the startReceiver() on the next tick because the event handler for the 
+       * 'message' event is only added after this handler (for 'newListener') finishes and
+       * the state machine depends on having an event handler on 'message' to determine if 
+       * it should connect the receiver, depending on its state.
+       */
+      process.nextTick(function() { 
+        thisClient._fsm.handle('startReceiver');
+      });
     }
   });
+
+  function _closeTransport(closeCallback) {
+    function onDisconnected(err, result) {
+      thisClient._fsm.transition('disconnected');
+      /*Codes_SRS_NODE_DEVICE_CLIENT_16_056: [The `close` method shall not throw if the `closeCallback` is not passed.]*/
+      /*Codes_SRS_NODE_DEVICE_CLIENT_16_055: [The `close` method shall call the `closeCallback` function when done with either a single Error object if it failed or null and a results.Disconnected object if successful.]*/
+      safeCallback(closeCallback, err, result);
+    }
+
+    if (thisClient._sasRenewalTimeout) {
+      clearTimeout(thisClient._sasRenewalTimeout);
+    }
+    if (thisClient._transportCanDisconnect()) {
+      /*Codes_SRS_NODE_DEVICE_CLIENT_16_001: [The `close` function shall call the transport's `disconnect` function if it exists.]*/
+      thisClient._transport.disconnect(function(disconnectError, disconnectResult) {
+        /*Codes_SRS_NODE_DEVICE_CLIENT_16_046: [The `close` method shall remove the listener that has been attached to the transport `disconnect` event.]*/
+        thisClient._transport.removeListener('disconnect', thisClient._disconnectHandler);
+        onDisconnected(disconnectError, disconnectResult);
+      });
+    } else {
+      onDisconnected(null, new results.Disconnected());
+    }
+  }
+
+  this._fsm = new machina.Fsm({
+    namespace: 'device-client',
+    initialState: 'disconnected',
+    states: {
+      'disconnected': {
+        open: function(openCallback) {
+          var transportConnectedCallback = function(err, result) {
+            thisClient._fsm.transition(!!err ? 'disconnected' : 'connected');
+            /*Codes_SRS_NODE_DEVICE_CLIENT_16_060: [The `open` method shall call the `openCallback` callback with a null error object and a `results.Connected()` result object if the transport is already connected, doesn't need to connect or has just connected successfully.]*/
+            safeCallback(openCallback, err, result);
+          };
+
+          this.transition('connecting');
+          if (thisClient._transportCanConnect()) {
+            thisClient._transport.connect(function(connectErr, connectResult) {
+              /*Codes_SRS_NODE_DEVICE_CLIENT_16_045: [If the transport successfully establishes a connection the `open` method shall subscribe to the `disconnect` event of the transport.]*/
+              thisClient._transport.removeListener('disconnect', thisClient._disconnectHandler); // remove the old one before adding a new -- this can happen when renewing SAS tokens
+              thisClient._transport.on('disconnect', thisClient._disconnectHandler);
+              transportConnectedCallback(connectErr, connectResult);
+            });
+          } else {
+            transportConnectedCallback(null, new results.Connected());
+          }
+        },
+        close: function(closeCallback) {
+          /*Codes_SRS_NODE_DEVICE_CLIENT_16_058: [The `close` method shall immediately call the `closeCallback` function if provided and the transport is already disconnected.]*/
+          safeCallback(closeCallback, null, new results.Disconnected());
+        },
+        updateSharedAccessSignature: function(newSas, updateSasCallback) {
+          thisClient._transport.updateSharedAccessSignature(newSas, updateSasCallback);
+        },
+        startReceiver: function() {
+          this.deferUntilTransition('connected');
+          this.handle('open', function(err) {
+            if(err) {
+              thisClient.emit('error', err);
+            }
+          });
+        },
+        '*': function(method, message, callback) {
+          this.deferUntilTransition('connected');
+          this.handle('open', function(err) {
+            if(err) {
+              callback(err);
+            }
+          });
+        }
+      },
+      'connecting': {
+        /*Codes_SRS_NODE_DEVICE_CLIENT_16_001: [The `close` function shall call the transport's `disconnect` function if it exists.]*/
+        close: function(closeCallback) {
+          _closeTransport(closeCallback);
+        },
+        '*': function() {
+          this.deferUntilTransition();
+        }
+      },
+      'connected': {
+        _onEnter: function() {
+          /*Codes_SRS_NODE_DEVICE_CLIENT_16_065: [The client shall connect the transport if needed to subscribe receive messages.]*/
+          if (!thisClient._receiver && thisClient.listeners('message').length > 0) {
+            thisClient._connectReceiver();
+          }
+        },
+        _onExit: function() {
+          thisClient._disconnectReceiver();
+          thisClient._receiver = null;
+        },
+        /*Codes_SRS_NODE_DEVICE_CLIENT_16_060: [The `open` method shall call the `openCallback` callback with a null error object and a `results.Connected()` result object if the transport is already connected, doesn't need to connect or has just connected successfully.]*/
+        open: function(openCallback) {
+          /*Codes_SRS_NODE_DEVICE_CLIENT_16_061: [The `open` method shall not throw if the `openCallback` callback has not been provided.]*/
+          safeCallback(openCallback, null, new results.Connected());
+        },
+        close: function (closeCallback) {
+          this.transition('disconnecting');
+          _closeTransport(function(err, result) {
+            this.transition('disconnected');
+            safeCallback(closeCallback, err, result);
+          }.bind(this));
+        },
+        sendEvent: function (msg, sendEventCallback) {
+          thisClient._transport.sendEvent(msg, function(err, result) {
+            safeCallback(sendEventCallback, err, result);
+          });
+        },
+        sendEventBatch: function (msgBatch, sendEventBatchCallback) {
+          thisClient._transport.sendEventBatch(msgBatch, function(err, result) {
+            safeCallback(sendEventBatchCallback, err, result);
+          });
+        },
+        updateSharedAccessSignature: function(sharedAccessSignature, updateSasCallback) {
+          this.transition('updating_sas');
+          function safeUpdateSasCallback(err, result) {
+            if (err) {
+              thisClient._fsm.transition('disconnected');
+            } else {
+              thisClient._fsm.transition('connected');
+            }
+            safeCallback(updateSasCallback, err, result);
+          }
+
+          thisClient.blobUploadClient.updateSharedAccessSignature(sharedAccessSignature);
+          if (thisClient._twin) {
+            thisClient._twin.updateSharedAccessSignature();
+          }
+
+          /*Codes_SRS_NODE_DEVICE_CLIENT_16_032: [The updateSharedAccessSignature method shall call the updateSharedAccessSignature method of the transport currently inuse with the sharedAccessSignature parameter.]*/
+          thisClient._transport.updateSharedAccessSignature(sharedAccessSignature, function (err, result) {
+            if (err) {
+              /*Codes_SRS_NODE_DEVICE_CLIENT_16_035: [The updateSharedAccessSignature method shall call the `updateSasCallback` callback with an error object if an error happened while renewng the token.]*/
+              safeUpdateSasCallback(err);
+            } else {
+              debug('sas token updated: ' + result.constructor.name + ' needToReconnect: ' + result.needToReconnect);
+              /*Codes_SRS_NODE_DEVICE_CLIENT_16_033: [The updateSharedAccessSignature method shall reconnect the transport to the IoTHub service if it was connected before before the method is clled.]*/
+              /*Codes_SRS_NODE_DEVICE_CLIENT_16_034: [The updateSharedAccessSignature method shall not reconnect the transport if the transport was disconnected to begin with.]*/
+              if (result.needToReconnect) {
+                thisClient._fsm.transition('connecting');
+                thisClient._transport.connect(function(connectErr) {
+                  if (connectErr) {
+                    safeUpdateSasCallback(connectErr);
+                  } else {
+                    thisClient._sasRenewalTimeout = setTimeout(thisClient._renewSharedAccessSignature.bind(thisClient), Client.sasRenewalInterval); 
+                    /*Codes_SRS_NODE_DEVICE_CLIENT_16_036: [The updateSharedAccessSignature method shall call the `updateSasCallback` callback with a null error object and a result of type SharedAccessSignatureUpdated if the oken was updated successfully.]*/
+                    safeUpdateSasCallback(null, new results.SharedAccessSignatureUpdated(false));
+                  }
+                });
+              } else {
+                thisClient._sasRenewalTimeout = setTimeout(thisClient._renewSharedAccessSignature.bind(thisClient), Client.sasRenewalInterval); 
+                /*Codes_SRS_NODE_DEVICE_CLIENT_16_036: [The updateSharedAccessSignature method shall call the `updateSasCallback` callback with a null error object and a result of type SharedAccessSignatureUpdated if the oken was updated successfully.]*/
+                safeUpdateSasCallback(null, new results.SharedAccessSignatureUpdated(false));
+              }
+            }
+          });
+        },
+        complete: function(message, completeCallback) {
+          thisClient._transport.complete(message, function(err, result) {
+            safeCallback(completeCallback, err, result);
+          });
+        },
+        abandon: function(message, abandonCallback) {
+          thisClient._transport.abandon(message, function(err, result) {
+            safeCallback(abandonCallback, err, result);
+          });
+        },
+        reject: function(message, rejectCallback) {
+          thisClient._transport.reject(message, function(err, result) {
+            safeCallback(rejectCallback, err, result);
+          });
+        },
+        startReceiver: function() {
+          /*Codes_SRS_NODE_DEVICE_CLIENT_16_065: [The client shall connect the transport if needed to subscribe receive messages.]*/
+          if (!thisClient._receiver) {
+            thisClient._connectReceiver();
+          }
+        }
+      },
+      'disconnecting': {
+        '*': function() {
+          this.deferUntilTransition();
+        }
+      },
+      'updating_sas': {
+        close: function (closeCallback) {
+          this.transition('disconnecting');
+          _closeTransport(function(err, result) {
+            this.transition('disconnected');
+            closeCallback(err, result);
+          }.bind(this));
+        },
+        '*': function() {
+          this.deferUntilTransition();
+        }
+      }
+    }
+  });
+  
+  this._fsm.on('transition', function (action, oldState, newState) {
+    debug('Client state change: ' + oldState + ' -> ' + newState + ' (action: ' + action + ')');
+  });
+
+  this._disconnectHandler = function (err) {
+    thisClient._fsm.transition('disconnected');
+    thisClient.emit('disconnect', new results.Disconnected(err));
+  };
 };
 
 util.inherits(Client, EventEmitter);
@@ -192,6 +414,14 @@ Client.prototype._renewSharedAccessSignature = function () {
   }.bind(this));
 };
 
+Client.prototype._transportCanConnect = function() {
+  return !!this._transport.connect && typeof this._transport.connect === 'function';
+};
+
+Client.prototype._transportCanDisconnect = function() {
+  return !!this._transport.disconnect && typeof this._transport.disconnect === 'function';
+};
+
 /**
  * @method            module:azure-iot-device.Client.fromConnectionString
  * @description       Creates an IoT Hub device client from the given
@@ -268,45 +498,10 @@ Client.fromSharedAccessSignature = function (sharedAccessSignature, Transport) {
  *
  * @throws {ReferenceError}     If the sharedAccessSignature parameter is falsy.
  */
-Client.prototype.updateSharedAccessSignature = function (sharedAccessSignature, done) {
+Client.prototype.updateSharedAccessSignature = function (sharedAccessSignature, updateSasCallback) {
   /*Codes_SRS_NODE_DEVICE_CLIENT_16_031: [The updateSharedAccessSignature method shall throw a ReferenceError if the sharedAccessSignature parameter is falsy.]*/
   if (!sharedAccessSignature) throw new ReferenceError('sharedAccessSignature is falsy');
-
-  this.blobUploadClient.updateSharedAccessSignature(sharedAccessSignature);
-  if (this._twin) {
-    this._twin.updateSharedAccessSignature();
-  }
-
-  /*Codes_SRS_NODE_DEVICE_CLIENT_16_032: [The updateSharedAccessSignature method shall call the updateSharedAccessSignature method of the transport currently inuse with the sharedAccessSignature parameter.]*/
-  this._transport.updateSharedAccessSignature(sharedAccessSignature, function (err, result) {
-    if (err) {
-      /*Codes_SRS_NODE_DEVICE_CLIENT_16_035: [The updateSharedAccessSignature method shall call the `done` callback with an error object if an error happened while renewng the token.]*/
-      done(err);
-    } else {
-      debug('sas token updated: ' + result.constructor.name + ' needToReconnect: ' + result.needToReconnect);
-      /*Codes_SRS_NODE_DEVICE_CLIENT_16_033: [The updateSharedAccessSignature method shall reconnect the transport to the IoTHub service if it was connected before before the method is clled.]*/
-      /*Codes_SRS_NODE_DEVICE_CLIENT_16_034: [The updateSharedAccessSignature method shall not reconnect the transport if the transport was disconnected to begin with.]*/
-      if (result.needToReconnect) {
-        if (this._receiver) this._disconnectReceiver();
-        this.open(function (openErr) { // open will also automatically reconnect the receiver if still subscribed to the 'message' event
-          if (openErr) {
-            /*Codes_SRS_NODE_DEVICE_CLIENT_16_035: [The updateSharedAccessSignature method shall call the `done` callback with an error object if an error happened while renewng the token.]*/
-            done(openErr);
-          } else {
-            /*Codes_SRS_NODE_DEVICE_CLIENT_16_036: [The updateSharedAccessSignature method shall call the `done` callback with a null error object and a result of type SharedAccessSignatureUpdated if the oken was updated successfully.]*/
-            done(null, new results.SharedAccessSignatureUpdated(false));
-          }
-        });
-      } else {
-        /*Codes_SRS_NODE_DEVICE_CLIENT_16_036: [The updateSharedAccessSignature method shall call the `done` callback with a null error object and a result of type SharedAccessSignatureUpdated if the oken was updated successfully.]*/
-        done(null, new results.SharedAccessSignatureUpdated(false));
-      }
-    }
-  }.bind(this));
-};
-
-Client.prototype._disconnectHandler = function (err) {
-  this.emit('disconnect', new results.Disconnected(err));
+  this._fsm.handle('updateSharedAccessSignature', sharedAccessSignature, updateSasCallback);
 };
 
 /**
@@ -314,37 +509,11 @@ Client.prototype._disconnectHandler = function (err) {
  * @description       Call the transport layer CONNECT function if the
  *                    transport layer implements it
  *
- * @param {Function} done       The callback to be invoked when `open`
- *                              completes execution.
+ * @param {Function} openCallback  The callback to be invoked when `open`
+ *                                 completes execution.
  */
-Client.prototype.open = function (done) {
-  var self = this;
-  var connectReceiverIfListening = function () {
-    if (self.listeners('message').length > 0) {
-      debug('Connecting the receiver since there\'s already someone listening on the \'message\' event');
-      self._connectReceiver();
-    }
-  };
-
-  /* Codes_SRS_NODE_DEVICE_CLIENT_12_001: [The open function shall call the transport’s connect function, if it exists.] */
-  if (typeof self._transport.connect === 'function') {
-    self._transport.connect(function (err, res) {
-      if (err) {
-        done(err);
-      } else {
-        debug('Open transport successful');
-        /*Codes_SRS_NODE_DEVICE_CLIENT_16_045: [If the transport successfully establishes a connection the `open` method shall subscribe to the `disconnect` event of the transport.]*/
-        self._transport.removeAllListeners('disconnect'); // remove the old one before adding a new -- this can happen when renewing SAS tokens
-        self._transport.on('disconnect', self._disconnectHandler.bind(self));
-        connectReceiverIfListening();
-        done(null, res);
-      }
-    });
-  } else {
-    /*Codes_SRS_NODE_DEVICE_CLIENT_16_020: [The ‘open’ function should start listening for C2D messages if there are listeners on the ‘message’ event] */
-    connectReceiverIfListening();
-    done(null, new results.Connected());
-  }
+Client.prototype.open = function (openCallback) {
+  this._fsm.handle('open', openCallback);
 };
 
 /*Codes_SRS_NODE_DEVICE_CLIENT_05_016: [When a Client method encounters an error in the transport, the callback function (indicated by the done argument) shall be invoked with the following arguments:
@@ -360,15 +529,15 @@ response - a transport-specific response object]*/
  *                    to the IoT Hub as the device indicated by the connection string passed
  *                    via the constructor.
  *
- * @param {Message}  message    The [message]{@linkcode module:common/message.Message}
- *                              to be sent.
- * @param {Function} done       The callback to be invoked when `sendEvent`
- *                              completes execution.
+ * @param {Message}  message            The [message]{@linkcode module:common/message.Message}
+ *                                      to be sent.
+ * @param {Function} sendEventCallback  The callback to be invoked when `sendEvent`
+         *                              completes execution.
  * @see [Message]{@linkcode module:common/message.Message}
  */
-Client.prototype.sendEvent = function (message, done) {
+Client.prototype.sendEvent = function (message, sendEventCallback) {
   /*Codes_SRS_NODE_DEVICE_CLIENT_05_007: [The sendEvent method shall send the event indicated by the message argument via the transport associated with the Client instance.]*/
-  this._transport.sendEvent(message, done);
+  this._fsm.handle('sendEvent', message, sendEventCallback);
 };
 
 /**
@@ -377,40 +546,24 @@ Client.prototype.sendEvent = function (message, done) {
  *                    of event messages to the IoT Hub as the device indicated by the connection
  *                    string passed via the constructor.
  *
- * @param {array<Message>} messages Array of [Message]{@linkcode module:common/message.Message}
- *                                  objects to be sent as a batch.
- * @param {Function}      done      The callback to be invoked when
- *                                  `sendEventBatch` completes execution.
+ * @param {array<Message>} messages               Array of [Message]{@linkcode module:common/message.Message}
+ *                                                objects to be sent as a batch.
+ * @param {Function}      sendEventBatchCallback  The callback to be invoked when
+ *                                                `sendEventBatch` completes execution.
  */
-Client.prototype.sendEventBatch = function (messages, done) {
+Client.prototype.sendEventBatch = function (messages, sendEventBatchCallback) {
   /*Codes_SRS_NODE_DEVICE_CLIENT_05_008: [The sendEventBatch method shall send the list of events (indicated by the messages argument) via the transport associated with the Client instance.]*/
-  this._transport.sendEventBatch(messages, done);
+  this._fsm.handle('sendEventBatch', messages, sendEventBatchCallback);
 };
 
 /**
  * @method           module:azure-iot-device.Client#close
  * @description      The `close` method directs the transport to close the current connection to the IoT Hub instance
 
- * @param {Function} done    The callback to be invoked when the connection has been closed.
+ * @param {Function} closeCallback    The callback to be invoked when the connection has been closed.
  */
-Client.prototype.close = function (done) {
-  if (this._sharedAccessSignatureRenewalInterval) clearInterval(this._sharedAccessSignatureRenewalInterval);
-  /* Codes_SRS_NODE_DEVICE_CLIENT_16_001: [The close function shall call the transport’s disconnect function if it exists.] */
-  if (typeof this._transport.disconnect === 'function') {
-    var self = this;
-    this._transport.disconnect(function (err, result) {
-      if (err) {
-        done(err);
-      } else {
-        /*Codes_SRS_NODE_DEVICE_CLIENT_16_046: [The `close` method shall remove the listener that has been attached to the transport `disconnect` event.]*/
-        self._transport.removeAllListeners('disconnect');
-        done(null, result);
-      }
-    }.bind(this));
-  } else {
-    this._disconnectReceiver();
-    done(null, new results.Disconnected());
-  }
+Client.prototype.close = function (closeCallback) {
+  this._fsm.handle('close', closeCallback);
 };
 
 /**
@@ -470,75 +623,48 @@ Client.prototype.setOptions = function (options, done) {
  * @method           module:azure-iot-device.Client#complete
  * @description      The `complete` method directs the transport to settle the message passed as argument as 'completed'.
  *
- * @param {Message}  message    The message to settle.
- * @param {Function} done       The callback to call when the message is completed.
+ * @param {Message}  message           The message to settle.
+ * @param {Function} completeCallback  The callback to call when the message is completed.
  *
  * @throws {ReferenceError} If the message is falsy.
  */
-Client.prototype.complete = function (message, done) {
+Client.prototype.complete = function (message, completeCallback) {
   /*Codes_SRS_NODE_DEVICE_CLIENT_16_016: [The ‘complete’ method shall throw a ReferenceError if the ‘message’ parameter is falsy.] */
   if (!message) throw new ReferenceError('message is \'' + message + '\'');
 
-  /*Codes_SRS_NODE_DEVICE_CLIENT_16_007: [The ‘complete’ method shall call the ‘complete’ method of the transport with the message as an argument]*/
-  this._transport.complete(message, function (err, result) {
-    /*Codes_SRS_NODE_DEVICE_CLIENT_16_008: [The ‘done’ callback shall be called with a null error object and a ‘MessageCompleted’ result once the transport has completed the message.]*/
-    /*Codes_SRS_NODE_DEVICE_CLIENT_16_009: [The ‘done’ callback shall be called with a standard javascript Error object and no result object if the transport could not complete the message.]*/
-    if (err) {
-      done(err);
-    } else {
-      done(null, result);
-    }
-  });
+  this._fsm.handle('complete', message, completeCallback);
 };
 
 /**
  * @method           module:azure-iot-device.Client#reject
  * @description      The `reject` method directs the transport to settle the message passed as argument as 'rejected'.
  *
- * @param {Message}  message    The message to settle.
- * @param {Function} done       The callback to call when the message is rejected.
+ * @param {Message}  message         The message to settle.
+ * @param {Function} rejectCallback  The callback to call when the message is rejected.
  *
  * @throws {ReferenceException} If the message is falsy.
  */
-Client.prototype.reject = function (message, done) {
+Client.prototype.reject = function (message, rejectCallback) {
   /*Codes_SRS_NODE_DEVICE_CLIENT_16_018: [The reject method shall throw a ReferenceError if the ‘message’ parameter is falsy.] */
   if (!message) throw new ReferenceError('message is \'' + message + '\'');
 
-  /*Codes_SRS_NODE_DEVICE_CLIENT_16_010: [The reject method shall call the reject method of the transport with the message as an argument]*/
-  this._transport.reject(message, function (err, result) {
-    /*Codes_SRS_NODE_DEVICE_CLIENT_16_011: [The ‘done’ callback shall be called with a null error object and a ‘MessageRejected’ result once the transport has rejected the message.]*/
-    /*Codes_SRS_NODE_DEVICE_CLIENT_16_012: [The ‘done’ callback shall be called with a standard javascript Error object and no result object if the transport could not reject the message.]*/
-    if (err) {
-      done(err);
-    } else {
-      done(null, result);
-    }
-  });
+  this._fsm.handle('reject', message, rejectCallback);
 };
 
 /**
  * @method           module:azure-iot-device.Client#abandon
  * @description      The `abandon` method directs the transport to settle the message passed as argument as 'abandoned'.
  *
- * @param {Message}  message    The message to settle.
- * @param {Function} done       The callback to call when the message is abandoned.
+ * @param {Message}  message          The message to settle.
+ * @param {Function} abandonCallback  The callback to call when the message is abandoned.
  *
  * @throws {ReferenceException} If the message is falsy.
  */
-Client.prototype.abandon = function (message, done) {
+Client.prototype.abandon = function (message, abandonCallback) {
   /*Codes_SRS_NODE_DEVICE_CLIENT_16_017: [The abandon method shall throw a ReferenceError if the ‘message’ parameter is falsy.] */
   if (!message) throw new ReferenceError('message is \'' + message + '\'');
 
-  /*Codes_SRS_NODE_DEVICE_CLIENT_16_013: [The abandon method shall call the abandon method of the transport with the message as an argument]*/
-  this._transport.abandon(message, function (err, result) {
-    /*Codes_SRS_NODE_DEVICE_CLIENT_16_014: [The ‘done’ callback shall be called with a null error object and a ‘MessageAbandoned’ result once the transport has abandoned the message.]*/
-    /*Codes_SRS_NODE_DEVICE_CLIENT_16_015: [The ‘done’ callback shall be called with a standard javascript Error object and no result object if the transport could not abandon the message.]*/
-    if (err) {
-      done(err);
-    } else {
-      done(null, result);
-    }
-  });
+  this._fsm.handle('abandon', message, abandonCallback);
 };
 
 /**

@@ -13,7 +13,8 @@
     "debug": "^2.2.0",
     "lodash": "^4.15.0",
     "traverse": "^0.6.6",
-    "es5-shim": "^4.5.9"
+    "es5-shim": "^4.5.9",
+    "machina": "^2.0.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
@@ -32,7 +33,7 @@
     "alltest": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter spec test/**/_*_test*.js",
     "ci": "npm -s run lint && npm -s run alltest-min && npm -s run check-cover",
     "test": "npm -s run lint && npm -s run unittest",
-    "check-cover": "istanbul check-coverage --statements 96 --branches 91 --functions 96 --lines 96"
+    "check-cover": "istanbul check-coverage --statements 98 --branches 95 --functions 97 --lines 98"
   },
   "engines": {
     "node": ">= 0.10"
