@@ -134,6 +134,14 @@ var Client = function (transport, connStr, blobUploadClient) {
             }
           });
         },
+        getTwin: function(callback) {
+          this.deferUntilTransition('connected');
+          this.handle('open', function(err) {
+            if(err) {
+              callback(err);
+            }
+          });
+        },
         '*': function(method, message, callback) {
           this.deferUntilTransition('connected');
           this.handle('open', function(err) {
@@ -249,6 +257,12 @@ var Client = function (transport, connStr, blobUploadClient) {
           if (!thisClient._receiver) {
             thisClient._connectReceiver();
           }
+        },
+        getTwin: function(done, twin) {
+          /* Codes_SRS_NODE_DEVICE_CLIENT_18_001: [** The `getTwin` method shall call the `azure-iot-device-core!Twin.fromDeviceClient` method to create the device client object. **]** */
+          /* Codes_SRS_NODE_DEVICE_CLIENT_18_002: [** The `getTwin` method shall pass itself as the first parameter to `fromDeviceClient` and it shall pass the `done` method as the second parameter. **]**  */
+          /* Codes_SRS_NODE_DEVICE_CLIENT_18_003: [** The `getTwin` method shall use the second parameter (if it is not falsy) to call `fromDeviceClient` on. **]**    */
+          (twin || require('./twin.js')).fromDeviceClient(thisClient, done);
         }
       },
       'disconnecting': {
@@ -699,11 +713,7 @@ Client.prototype.uploadToBlob = function (blobName, stream, streamLength, done) 
  *
  */
 Client.prototype.getTwin = function(done, twin) {
-
-  /* Codes_SRS_NODE_DEVICE_CLIENT_18_001: [** The `getTwin` method shall call the `azure-iot-device-core!Twin.fromDeviceClient` method to create the device client object. **]** */
-  /* Codes_SRS_NODE_DEVICE_CLIENT_18_002: [** The `getTwin` method shall pass itself as the first parameter to `fromDeviceClient` and it shall pass the `done` method as the second parameter. **]**  */
-  /* Codes_SRS_NODE_DEVICE_CLIENT_18_003: [** The `getTwin` method shall use the second parameter (if it is not falsy) to call `fromDeviceClient` on. **]**    */
-  (twin || require('./twin.js')).fromDeviceClient(this, done);
+  this._fsm.handle('getTwin', done, twin);
 };
 
 module.exports = Client;
