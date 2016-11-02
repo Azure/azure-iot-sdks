@@ -460,9 +460,9 @@ void dt_e2e_get_complete_desired_test(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 						ASSERT_FAIL("Invalid update_state reported");
 						break;
 				}
-                Unlock(device->lock);
                 if ((string_property != NULL) && (integer_property != 0))
                 {
+                    Unlock(device->lock);
                     break;
                 }
             }
