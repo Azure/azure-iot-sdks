@@ -399,8 +399,8 @@ static int malloc_and_copy_uchar(char** strDestination, BUFFER_HANDLE strSource)
     int result;
     if ((strDestination == NULL) || (strSource == NULL))
     {
-        /* If strDestination or strSource is a NULL pointer[...] function return EINVAL */
-        LogError("invalid parameter source or destination");
+        /* If strDestination or strSource is a NULL pointer[...] function return line number where error is spotted */
+        LogError("invalid parameter strDestination or strSource");
         result = __LINE__;
     }
     else

@@ -26,13 +26,14 @@ set(${theseTestsName}_c_files
 )
 
 set(${theseTestsName}_h_files
+    ../../../certs/certs.h
     ../../../parson/parson.h
     ../common_dt_e2e/iothubclient_common_dt_e2e.h
 )
 
 include_directories(../common_dt_e2e)
 include_directories(../../../parson/)
-include_directories(../../../serializer/inc)
+include_directories(../../../certs/)
 include_directories(${IOTHUB_TEST_INC_FOLDER})
 include_directories(${IOTHUB_SERVICE_CLIENT_INC_FOLDER})
 
@@ -55,7 +56,6 @@ if(WIN32)
             iothub_service_client
             iothub_client_mqtt_transport
             rpcrt4
-            serializer
         )
         linkMqttLibrary(${theseTestsName}_dll)
     endif()
@@ -68,7 +68,6 @@ if(WIN32)
             iothub_service_client
             iothub_client_mqtt_transport
             rpcrt4
-            serializer
         )
         linkMqttLibrary(${theseTestsName}_exe)
     endif()
@@ -82,7 +81,6 @@ else()
             iothub_service_client
             aziotsharedutil
             iothub_client_mqtt_transport
-            serializer
         )
         target_link_libraries(${theseTestsName}_exe pthread uuid)
         linkMqttLibrary(${theseTestsName}_exe)
