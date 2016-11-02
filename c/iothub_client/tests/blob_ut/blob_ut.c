@@ -911,7 +911,7 @@ TEST_FUNCTION(Blob_UploadFromSasUri_64MB_unhappy_path)
         size_t j;
         umock_c_negative_tests_reset();
         
-        for (j = 0;j<sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++) /*not running the tests that have failed that cannot fail*/
+        for (j = 0;j<sizeof(calls_that_cannot_fail) / sizeof(calls_that_cannot_fail[0]);j++) /*not running the tests that cannot fail*/
         {
             if (calls_that_cannot_fail[j] == i)
                 break;

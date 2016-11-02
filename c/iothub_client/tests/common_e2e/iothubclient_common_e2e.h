@@ -1,11 +1,6 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-/** @file base64.h
-*	@brief Prototypes for functions related to encoding/decoding
-*	a @c buffer using standard base64 encoding.
-*/
-
 #ifndef IOTHUBCLIENT_COMMON_E2E_H
 #define IOTHUBCLIENT_COMMON_E2E_H
 

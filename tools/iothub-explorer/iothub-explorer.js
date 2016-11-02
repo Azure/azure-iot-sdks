@@ -25,4 +25,9 @@ program
   .command('monitor-ops', 'listen to the operations monitoring endpoint of your IoT hub instance')
   .command('sas-token <device-id>', 'generate a SAS Token for the given device')
   .command('simulate-device <device-id>', 'simulate a device with the specified id')
+  .command('get-twin <device-id>', 'get the twin of a device')
+  .command('update-twin <device-id> <twin-json>', 'update the twin of a device and return it.')
+  .command('query-twin <sql-query>', 'Gets the twin of a device')
+  .command('query-job [job-type] [job-status]', 'Gets the twin of a device')
+  .command('device-method <device-id> <method-name> [method-payload] [timeout-in-seconds]', 'Gets the twin of a device')
   .parse(process.argv);

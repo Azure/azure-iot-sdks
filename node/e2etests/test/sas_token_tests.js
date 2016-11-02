@@ -42,7 +42,7 @@ function waitForEventHubMessages(ehClient, deviceId, callback) {
  
 
 var runTests = function (hubConnectionString, deviceTransport, provisionedDevice) {
-  describe('Device utilizing ' + provisionedDevice.authenticationDescription + ' authentication and ' + deviceTransport.name, function () {
+  describe.skip('Device utilizing ' + provisionedDevice.authenticationDescription + ' authentication and ' + deviceTransport.name, function () {
 
     var serviceClient, deviceClient, ehClient;
     var oldSasRenewalInterval;

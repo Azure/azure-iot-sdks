@@ -46,8 +46,13 @@ function createCertsAndDevice(done) {
         };
 
         registry.create(deviceDescription, function (err, deviceInfo) {
-          console.log(chalk.green('Device successfully created:'));
-          console.log(JSON.stringify(deviceInfo, null, 2));
+          if(!!err) {
+            console.log(chalk.red('Could not create device: ' + err.message + '\n' + err.responseBody));
+            process.exit(1);
+          } else {
+            console.log(chalk.green('Device successfully created:'));
+            console.log(JSON.stringify(deviceInfo, null, 2));
+          }
         });
       });
     }

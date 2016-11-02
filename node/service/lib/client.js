@@ -11,6 +11,8 @@ var ConnectionString = require('./connection_string.js');
 var DefaultTransport = require('./amqp.js');
 var Message = require('azure-iot-common').Message;
 var SharedAccessSignature = require('./shared_access_signature.js');
+var DeviceMethod = require('./device_method.js');
+var RestApiClient = require('./rest_api_client.js');
 
 /**
  * @class           module:azure-iothub.Client
@@ -24,11 +26,14 @@ var SharedAccessSignature = require('./shared_access_signature.js');
  *                                   {@link module:azure-iothub~Transport|Transport}.
   * @prop {AmqpReceiver} FeedbackReceiver
  */
-function Client(transport) {
+function Client(transport, restApiClient) {
   EventEmitter.call(this);
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_001: [The Client constructor shall throw ReferenceError if the transport argument is falsy.]*/
   if (!transport) throw new ReferenceError('transport is \'' + transport + '\'');
   this._transport = transport;
+
+  this._restApiClient = restApiClient;
+
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_030: [The FeedbackReceiver class shall inherit EventEmitter to provide consumers the ability to listen for (and stop listening for) events.]*/
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_031: [FeedbackReceiver shall expose the 'errorReceived' event, whose handler shall be called with the following arguments:
   err – standard JavaScript Error object (or subclass)]*/
@@ -71,7 +76,7 @@ Client.fromConnectionString = function fromConnectionString(connStr, Transport) 
   };
 
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_004: [The fromConnectionString method shall return a new instance of the Client object, as by a call to new Client(transport).]*/
-  return new Client(new Transport(config));
+  return new Client(new Transport(config), new RestApiClient(config));
 };
 
 /**
@@ -207,6 +212,34 @@ Client.prototype.send = function send(deviceId, message, done) {
   /*Codes_SRS_NODE_IOTHUB_CLIENT_05_020: [If the queue which receives messages on behalf of the device is full, send shall return and instance of DeviceMaximumQueueDepthExceededError.]*/
   this._transport.send(deviceId, message, done);
 };
+
+/**
+ * @method            module:azure-iothub.Client#invokeDeviceMethod
+ * @description       Invokes a method on a particular device.
+ * @param {String}    deviceId            The identifier of an existing device identity.
+ * @param {Object}    params              An object describing the method and shall have the following properties: 
+ *                                        - methodName          The name of the method that shall be invoked.
+ *                                        - payload             [optional] The payload to use for the method call.
+ *                                        - timeoutInSeconds    [optional] The number of seconds IoT Hub shall wait for the device 
+ *                                                              to send a response before deeming the method execution a failure.
+ * @param {Function}  done                The callback to call with the result of the method execution.
+ * 
+ * @throws {ReferenceError}  If one of the required parameters is null, undefined or empty.
+ * @throws {TypeError}       If one of the parameters is of the wrong type.
+ */
+Client.prototype.invokeDeviceMethod = function (deviceId, methodParams, done) {
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_16_014: [The `invokeDeviceMethod` method shall throw a `ReferenceError` if `deviceId` is `null`, `undefined` or an empty string.]*/
+  if (deviceId === undefined || deviceId === null || deviceId === '') throw new ReferenceError('deviceId cannot be \'' + deviceId + '\'');
+
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_16_009: [The `invokeDeviceMethod` method shall initialize a new `DeviceMethod` instance with the `methodName`, `payload` and `timeout` values passed in the arguments.]*/
+  var method = new DeviceMethod(methodParams, this._restApiClient);
+
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_16_010: [The `invokeDeviceMethod` method shall use the newly created instance of `DeviceMethod` to invoke the method on the device specified with the `deviceid` argument .]*/
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_16_012: [The `invokeDeviceMethod` method shall call the `done` callback with a standard javascript `Error` object if the request failed.]*/
+  /*Codes_SRS_NODE_IOTHUB_CLIENT_16_013: [The `invokeDeviceMethod` method shall call the `done` callback with a `null` first argument, the result of the method execution in the second argument, and the transport-specific response object as a third argument.]*/
+  method.invokeOn(deviceId, done);
+};
+
 
 /**
  * @method            module:azure-iothub.Client#getFeedbackReceiver

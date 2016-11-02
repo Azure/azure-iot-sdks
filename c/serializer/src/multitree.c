@@ -18,20 +18,20 @@
 
 DEFINE_ENUM_STRINGS(MULTITREE_RESULT, MULTITREE_RESULT_VALUES);
 
-typedef struct MULTITREE_NODE_TAG
+typedef struct MULTITREE_HANDLE_DATA_TAG
 {
     char* name;
     void* value;
     MULTITREE_CLONE_FUNCTION cloneFunction;
     MULTITREE_FREE_FUNCTION freeFunction;
     size_t nChildren;
-    struct MULTITREE_NODE_TAG** children; /*an array of nChildren count of MULTITREE_NODE*   */
-}MULTITREE_NODE;
+    struct MULTITREE_HANDLE_DATA_TAG** children; /*an array of nChildren count of MULTITREE_HANDLE_DATA*   */
+}MULTITREE_HANDLE_DATA;
 
 
 MULTITREE_HANDLE MultiTree_Create(MULTITREE_CLONE_FUNCTION cloneFunction, MULTITREE_FREE_FUNCTION freeFunction)
 {
-    MULTITREE_NODE* result;
+    MULTITREE_HANDLE_DATA* result;
 
     /* Codes_SRS_MULTITREE_99_052:[If any of the arguments passed to MultiTree_Create is NULL, the call shall return NULL.]*/
     if ((cloneFunction == NULL) ||
@@ -45,14 +45,13 @@ MULTITREE_HANDLE MultiTree_Create(MULTITREE_CLONE_FUNCTION cloneFunction, MULTIT
         /*Codes_SRS_MULTITREE_99_005:[ MultiTree_Create creates a new tree.]*/
         /*Codes_SRS_MULTITREE_99_006:[MultiTree_Create returns a non - NULL pointer if the tree has been successfully created.]*/
         /*Codes_SRS_MULTITREE_99_007:[MultiTree_Create returns NULL if the tree has not been successfully created.]*/
-        result = (MULTITREE_NODE*)malloc(sizeof(MULTITREE_NODE));
+        result = (MULTITREE_HANDLE_DATA*)malloc(sizeof(MULTITREE_HANDLE_DATA));
         if (result != NULL)
         {
             result->name = NULL;
             result->value = NULL;
             result->cloneFunction = cloneFunction;
             result->freeFunction = freeFunction;
-            result->value = NULL;
             result->nChildren = 0;
             result->children = NULL;
         }
@@ -68,9 +67,9 @@ MULTITREE_HANDLE MultiTree_Create(MULTITREE_CLONE_FUNCTION cloneFunction, MULTIT
 
 /*return NULL if a child with the name "name" doesn't exists*/
 /*returns a pointer to the existing child (if any)*/
-static MULTITREE_NODE* getChildByName(MULTITREE_NODE* node, const char* name)
+static MULTITREE_HANDLE_DATA* getChildByName(MULTITREE_HANDLE_DATA* node, const char* name)
 {
-    MULTITREE_NODE* result = NULL;
+    MULTITREE_HANDLE_DATA* result = NULL;
     size_t i;
     for (i = 0; i < node->nChildren; i++)
     {
@@ -108,7 +107,7 @@ static const char* CreateLeaf_ResultAsString[CREATELEAF_RESULT_COUNT] =
 #ifdef _MSC_VER
 #pragma warning(disable: 4701) /* potentially uninitialized local variable 'result' used */ /* the scanner cannot track linked "newNode" and "result" therefore the warning*/
 #endif
-static CREATELEAF_RESULT createLeaf(MULTITREE_NODE* node, const char*name, const char*value, MULTITREE_NODE** childNode)
+static CREATELEAF_RESULT createLeaf(MULTITREE_HANDLE_DATA* node, const char*name, const char*value, MULTITREE_HANDLE_DATA** childNode)
 {
     CREATELEAF_RESULT result;
     /*can only create it if it doesn't exist*/
@@ -125,7 +124,7 @@ static CREATELEAF_RESULT createLeaf(MULTITREE_NODE* node, const char*name, const
     }
     else
     {
-        MULTITREE_NODE* newNode = (MULTITREE_NODE*)malloc(sizeof(MULTITREE_NODE));
+        MULTITREE_HANDLE_DATA* newNode = (MULTITREE_HANDLE_DATA*)malloc(sizeof(MULTITREE_HANDLE_DATA));
         if (newNode == NULL)
         {
             result = CREATELEAF_ERROR;
@@ -171,7 +170,7 @@ static CREATELEAF_RESULT createLeaf(MULTITREE_NODE* node, const char*name, const
             if (newNode!=NULL)
             {
                 /*allocate space in the father node*/
-                MULTITREE_NODE** newChildren = (MULTITREE_NODE**)realloc(node->children, (node->nChildren + 1)*sizeof(MULTITREE_NODE*));
+                MULTITREE_HANDLE_DATA** newChildren = (MULTITREE_HANDLE_DATA**)realloc(node->children, (node->nChildren + 1)*sizeof(MULTITREE_HANDLE_DATA*));
                 if (newChildren == NULL)
                 {
                     /*no space for the new node*/
@@ -235,7 +234,7 @@ MULTITREE_RESULT MultiTree_AddLeaf(MULTITREE_HANDLE treeHandle, const char* dest
     {
         /*break the path into components*/
         /*find the first child name*/
-        MULTITREE_NODE * node = (MULTITREE_NODE *)treeHandle;
+        MULTITREE_HANDLE_DATA * node = (MULTITREE_HANDLE_DATA *)treeHandle;
         char * whereIsDelimiter;
         /*if first character is / then skip it*/
         /*Codes_SRS_MULTITREE_99_014:[DestinationPath is a string in the following format: /child1/child12 or child1/child12] */
@@ -293,7 +292,7 @@ MULTITREE_RESULT MultiTree_AddLeaf(MULTITREE_HANDLE treeHandle, const char* dest
             }
             else
             {
-                MULTITREE_NODE *child = getChildByName(node, firstInnerNodeName);
+                MULTITREE_HANDLE_DATA *child = getChildByName(node, firstInnerNodeName);
                 if (child == NULL)
                 {
                     /*Codes_SRS_MULTITREE_99_022:[ If a child along the path does not exist, it shall be created.] */
@@ -316,7 +315,7 @@ MULTITREE_RESULT MultiTree_AddLeaf(MULTITREE_HANDLE treeHandle, const char* dest
                         }
                         case(CREATELEAF_OK):
                         {
-                            MULTITREE_NODE *createdChild = getChildByName(node, firstInnerNodeName);
+                            MULTITREE_HANDLE_DATA *createdChild = getChildByName(node, firstInnerNodeName);
                             result = MultiTree_AddLeaf(createdChild, whereIsDelimiter, value);
                             break;
                         }
@@ -346,10 +345,10 @@ MULTITREE_RESULT MultiTree_AddChild(MULTITREE_HANDLE treeHandle, const char* chi
     }
     else
     {
-        MULTITREE_NODE* childNode;
+        MULTITREE_HANDLE_DATA* childNode;
 
         /* Codes_SRS_MULTITREE_99_060:[ The value associated with the new node shall be NULL.] */
-        CREATELEAF_RESULT res = createLeaf((MULTITREE_NODE*)treeHandle, childName, NULL, &childNode);
+        CREATELEAF_RESULT res = createLeaf((MULTITREE_HANDLE_DATA*)treeHandle, childName, NULL, &childNode);
         switch (res)
         {
             default:
@@ -405,7 +404,7 @@ MULTITREE_RESULT MultiTree_GetChildCount(MULTITREE_HANDLE treeHandle, size_t* co
     else
     {
         /*Codes_SRS_MULTITREE_99_029:[ This function writes in *count the number of direct children for a tree node specified by the parameter treeHandle]*/
-        *count = ((MULTITREE_NODE*)treeHandle)->nChildren;
+        *count = ((MULTITREE_HANDLE_DATA*)treeHandle)->nChildren;
         /*Codes_SRS_MULTITREE_99_035:[ The function shall return MULTITREE_OK when *count contains the number of children of the node pointed to be parameter treeHandle.]*/
         result = MULTITREE_OK;
     }
@@ -429,7 +428,7 @@ MULTITREE_RESULT MultiTree_GetChild(MULTITREE_HANDLE treeHandle, size_t index, M
     }
     else 
     {
-        MULTITREE_NODE * node = (MULTITREE_NODE *)treeHandle;
+        MULTITREE_HANDLE_DATA * node = (MULTITREE_HANDLE_DATA *)treeHandle;
         /*Codes_SRS_MULTITREE_99_032:[If parameter index is out of range, the function shall return MULTITREE_OUT_OF_RANGE_INDEX]*/
         if (node->nChildren <= index)
         {
@@ -464,7 +463,7 @@ MULTITREE_RESULT MultiTree_GetName(MULTITREE_HANDLE treeHandle, STRING_HANDLE de
     }
     else
     {
-        MULTITREE_NODE *node = (MULTITREE_NODE*)treeHandle;
+        MULTITREE_HANDLE_DATA *node = (MULTITREE_HANDLE_DATA*)treeHandle;
         /*Codes_SRS_MULTITREE_99_051:[ The function returns MULTITREE_EMPTY_CHILD_NAME when used with the root of the tree.]*/
         if (node->name == NULL)
         {
@@ -503,7 +502,7 @@ MULTITREE_RESULT MultiTree_GetChildByName(MULTITREE_HANDLE treeHandle, const cha
     }
     else
     {
-        MULTITREE_NODE * node = (MULTITREE_NODE *)treeHandle;
+        MULTITREE_HANDLE_DATA * node = (MULTITREE_HANDLE_DATA *)treeHandle;
         size_t i;
 
         for (i = 0; i < node->nChildren; i++)
@@ -549,7 +548,7 @@ MULTITREE_RESULT MultiTree_GetValue(MULTITREE_HANDLE treeHandle, const void** de
     }
     else
     {
-        MULTITREE_NODE * node = (MULTITREE_NODE*)treeHandle;
+        MULTITREE_HANDLE_DATA * node = (MULTITREE_HANDLE_DATA*)treeHandle;
         /*Codes_SRS_MULTITREE_99_044:[ If there is no value in the node then MULTITREE_EMPTY_VALUE shall be returned.]*/
         if (node->value == NULL)
         {
@@ -579,7 +578,7 @@ MULTITREE_RESULT MultiTree_SetValue(MULTITREE_HANDLE treeHandle, void* value)
     }
     else
     {
-        MULTITREE_NODE * node = (MULTITREE_NODE*)treeHandle;
+        MULTITREE_HANDLE_DATA * node = (MULTITREE_HANDLE_DATA*)treeHandle;
         if (node->value != NULL)
         {
             /* Codes_SRS_MULTITREE_99_076:[ If the node already has a value then MultiTree_SetValue shall return MULTITREE_ALREADY_HAS_A_VALUE.] */
@@ -609,7 +608,7 @@ void MultiTree_Destroy(MULTITREE_HANDLE treeHandle)
 {
     if (treeHandle != NULL)
     {
-        MULTITREE_NODE* node = (MULTITREE_NODE*)treeHandle;
+        MULTITREE_HANDLE_DATA* node = (MULTITREE_HANDLE_DATA*)treeHandle;
         size_t i;
         for (i = 0; i < node->nChildren;i++)
         {
@@ -664,7 +663,7 @@ MULTITREE_RESULT MultiTree_GetLeafValue(MULTITREE_HANDLE treeHandle, const char*
     {
         /*break the path into components*/
         /*find the first child name*/
-        MULTITREE_NODE* node = (MULTITREE_NODE *)treeHandle;
+        MULTITREE_HANDLE_DATA* node = (MULTITREE_HANDLE_DATA *)treeHandle;
         const char* pos = leafPath;
         const char * whereIsDelimiter;
 

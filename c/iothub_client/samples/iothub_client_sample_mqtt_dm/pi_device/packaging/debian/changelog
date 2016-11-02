@@ -1,0 +1,8 @@
+iothub-client-sample-firmware-update (0.1.0-4) vivid; urgency=low
+
+  * Initial release
+
+  * Fixed the prerm script to remove the proper file
+
+ -- AzureIoT User <aziotsdklinux@outlook.com>  Tue, 11 Oct 2016 17:00:00 +0000
+

@@ -3,11 +3,17 @@
 
 'use strict';
 
+require('es5-shim');
 var Base = require('./mqtt_base.js');
 var results = require('azure-iot-common').results;
 var errors = require('azure-iot-common').errors;
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
+var debug = require('debug')('device:mqtt');
+var translateError = require('../lib/mqtt-translate-error.js');
+var MqttTwinReceiver = require('../lib/mqtt-twin-receiver.js');
+
+var TOPIC_RESPONSE_PUBLISH_FORMAT = "$iothub/%s/res/%d/?$rid=%s";
 
 /**
  * @class        module:azure-iot-device-mqtt.Mqtt
@@ -15,15 +21,22 @@ var util = require('util');
  *
  * @param   {Object}    config  Configuration object derived from the connection string by the client.
  */
-/*Codes_SRS_NODE_DEVICE_MQTT_12_001: [The constructor shall accept the transport configuration structure.]*/
-/*Codes_SRS_NODE_DEVICE_MQTT_12_002: [The constructor shall store the configuration structure in a member variable.]*/
-/*Codes_SRS_NODE_DEVICE_MQTT_12_003: [The constructor shall create an base transport object and store it in a member variable.]*/
-function Mqtt(config) {
+/*
+ Codes_SRS_NODE_DEVICE_MQTT_12_001: [The `Mqtt` constructor shall accept the transport configuration structure
+ Codes_SRS_NODE_DEVICE_MQTT_12_002: [The `Mqtt` constructor shall store the configuration structure in a member variable
+ Codes_SRS_NODE_DEVICE_MQTT_12_003: [The Mqtt constructor shall create an base transport object and store it in a member variable.]
+*/
+function Mqtt(config, provider) {
   EventEmitter.call(this);
   this._config = config;
-  /*Codes_SRS_NODE_DEVICE_MQTT_16_016: [The `Mqtt` constructor shall initialize the `uri` property of the `config` object to `mqtts://<host>`.]*/
+  /*Codes_SRS_NODE_DEVICE_MQTT_16_016: [The Mqtt constructor shall initialize the `uri` property of the `config` object to `mqtts://<host>`.]*/  
   this._config.uri = "mqtts://" + config.host;
-  this._mqtt = new Base();
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_025: [ If the Mqtt constructor receives a second parameter, it shall be used as a provider in place of mqtt.js ]   */
+  if (provider) {
+    this._mqtt = new Base(provider);
+  } else {
+    this._mqtt = new Base();
+  }
 }
 
 util.inherits(Mqtt, EventEmitter);
@@ -34,8 +47,9 @@ util.inherits(Mqtt, EventEmitter);
  *
  * @param {Function}    done   callback that shall be called when the connection is established.
  */
-/* Codes_SRS_NODE_DEVICE_HTTP_12_004: [The connect method shall call the connect method on MqttTransport */
+/* Codes_SRS_NODE_DEVICE_MQTT_12_004: [The connect method shall call the connect method on MqttTransport */
 Mqtt.prototype.connect = function (done) {
+  this._twinReceiver = null;
   this._mqtt.connect(this._config, function (err, result) {
     if (err) {
       if (done) done(err);
@@ -43,6 +57,7 @@ Mqtt.prototype.connect = function (done) {
       this._mqtt.client.on('disconnect', function (err) {
         this.emit('disconnect', err);
       }.bind(this));
+
       if (done) done(null, result);
     }
   }.bind(this));
@@ -54,7 +69,7 @@ Mqtt.prototype.connect = function (done) {
  *
  * @param {Function}    done      Callback that shall be called when the connection is terminated.
  */
-/* Codes_SRS_NODE_DEVICE_HTTP_16_001: [The disconnect method should call the disconnect method on MqttTransport.] */
+/* Codes_SRS_NODE_DEVICE_MQTT_16_001: [The disconnect method should call the disconnect method on MqttTransport.] */
 Mqtt.prototype.disconnect = function (done) {
   this._mqtt.disconnect(function (err, result) {
     if (done) done(err, result);
@@ -67,7 +82,7 @@ Mqtt.prototype.disconnect = function (done) {
  *
  * @param {Message}     message   Message used for the content of the event sent to the server.
  */
-/* Codes_SRS_NODE_DEVICE_HTTP_12_005: [The sendEvent method shall call the publish method on MqttTransport */
+/* Codes_SRS_NODE_DEVICE_MQTT_12_005: [The sendEvent method shall call the publish method on MqttTransport */
 Mqtt.prototype.sendEvent = function (message, done) {
   this._mqtt.publish(message, done);
 };
@@ -165,5 +180,165 @@ Mqtt.prototype.setOptions = function (options, done) {
   /*Codes_SRS_NODE_DEVICE_MQTT_16_014: [The `setOptions` method shall not throw if the `done` argument is not passed.]*/
   if (done) done(null);
 };
+
+/**
+ * @method          module:azure-iot-device-mqtt.Mqtt#sendTwinRequest
+ * @description     Send a device-twin specific messager to the IoT Hub instance
+ *
+ * @param {String}        method    name of the method to invoke ('PUSH', 'PATCH', etc)
+ * @param {String}        resource  name of the resource to act on (e.g. '/properties/reported/') with beginning and ending slashes
+ * @param {Object}        properties  object containing name value pairs for request properties (e.g. { 'rid' : 10, 'index' : 17 })
+ * @param {String}        body  body of request
+ * @param {Function}      done  the callback to be invoked when this function completes.
+ *
+ * @throws {ReferenceError}   One of the required parameters is falsy
+ * @throws {ArgumentError}  One of the parameters is an incorrect type
+ */
+Mqtt.prototype.sendTwinRequest = function(method, resource, properties, body, done) {
+
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_008: [** The `sendTwinRequest` method shall not throw `ReferenceError` if the `done` callback is falsy. **]** */
+
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_009: [** The `sendTwinRequest` method shall throw an `ReferenceError` if the `method` argument is falsy. **]** */
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_019: [** The `sendTwinRequest` method shall throw an `ReferenceError` if the `resource` argument is falsy. **]** */
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_011: [** The `sendTwinRequest` method shall throw an `ReferenceError` if the `properties` argument is falsy. **]** */
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_013: [** The `sendTwinRequest` method shall throw an `ReferenceError` if the `body` argument is falsy. **]** */
+  if (!method || !resource || !properties ||  !body)
+  {
+    throw new ReferenceError('required parameter is missing');
+  }
+
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_010: [** The `sendTwinRequest` method shall throw an `ArgumentError` if the `method` argument is not a string. **]** */
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_020: [** The `sendTwinRequest` method shall throw an `ArgumentError` if the `resource` argument is not a string. **]** */
+  if (!util.isString(method) || !util.isString(resource))
+  {
+    throw new errors.ArgumentError('required string parameter is not a string');
+  }
+
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_012: [** The `sendTwinRequest` method shall throw an `ArgumentError` if the `properties` argument is not a an object. **]** */
+  if (!util.isObject(properties))  {
+    throw new errors.ArgumentError('required properties parameter is not an object');
+  }
+  
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_022: [** The `propertyQuery` string shall be construced from the `properties` object. **]**   */
+  var propString = '';
+  Object.keys(properties).forEach(function(key) {
+    /* Codes_SRS_NODE_DEVICE_MQTT_18_018: [** The `sendTwinRequest` method shall throw an `ArgumentError` if any members of the `properties` object fails to serialize to a string **]** */
+    if (!util.isString(properties[key]) && !util.isNumber(properties[key]) && !util.isBoolean(properties[key])) {
+      throw new errors.ArgumentError('required properties object has non-string properties');
+    }
+    
+    /* Codes_SRS_NODE_DEVICE_MQTT_18_023: [** Each member of the `properties` object shall add another 'name=value&' pair to the `propertyQuery` string. **]**   */
+    propString += (propString === '') ? '?' : '&';
+    propString += key + '=' + properties[key];
+  });
+
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_021: [** The topic name passed to the publish method shall be $iothub/twin/`method`/`resource`/?`propertyQuery` **]** */
+  var topic = '$iothub/twin/' + method + resource + propString;
+
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_001: [** The `sendTwinRequest` method shall call the publish method on `MqttTransport`. **]** */
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_015: [** The `sendTwinRequest` shall publish the request with QOS=0, DUP=0, and Retain=0 **]** */
+  this._mqtt.client.publish(topic, body.toString(), { qos: 0, retain: false }, function (err, puback) {
+    if (done) {
+      if (err) {
+        /* Codes_SRS_NODE_DEVICE_MQTT_18_016: [** If an error occurs in the `sendTwinRequest` method, the `done` callback shall be called with the error as the first parameter. **]** */
+        /* Codes_SRS_NODE_DEVICE_MQTT_18_024: [** If an error occurs, the `sendTwinRequest` shall use the MQTT `translateError` module to convert the mqtt-specific error to a transport agnostic error before passing it into the `done` callback. **]** */
+        done(translateError(err));
+      } else {
+        /* Codes_SRS_NODE_DEVICE_MQTT_18_004: [** If a `done` callback is passed as an argument, The `sendTwinRequest` method shall call `done` after the body has been published. **]** */
+        /* Codes_SRS_NODE_DEVICE_MQTT_18_017: [** If the `sendTwinRequest` method is successful, the first parameter to the `done` callback shall be null and the second parameter shall be a MessageEnqueued object. **]** */
+        done(null, new results.MessageEnqueued(puback));
+      }
+    }
+  }.bind(this));
+};
+
+function validateResponse(response) {
+  if(!response) {
+    throw new Error('Parameter \'response\' is falsy');
+  }
+  if(!(response.requestId)) {
+    throw new Error('Parameter \'response.requestId\' is falsy');
+  }
+  if(typeof(response.requestId) === 'string' && response.requestId.length === 0) {
+    throw new Error('Parameter \'response.requestId\' is an empty string');
+  }
+  if(typeof(response.requestId) !== 'string') {
+    throw new Error('Parameter \'response.requestId\' is not a string.');
+  }
+  if(!(response.status)) {
+    throw new Error('Parameter \'response.status\' is falsy');
+  }
+  if(typeof(response.status) !== 'number') {
+    throw new Error('Parameter \'response.status\' is not a number');
+  }
+}
+
+/**
+ * @method            module:azure-iot-device-mqtt.Mqtt.Mqtt#sendMethodResponse
+ * @description       Sends the response for a device method call to the service.
+ *
+ * @param {Object}   response     This is the `response` object that was
+ *                                produced by the device client object when a
+ *                                C2D device method call was received.
+ * @param {Function} done         The callback to be invoked when the response
+ *                                has been sent to the service.
+ *
+ * @throws {Error}                If the `response` parameter is falsy or does
+ *                                not have the expected shape.
+ */
+Mqtt.prototype.sendMethodResponse = function(response, done) {
+  // Codes_SRS_NODE_DEVICE_MQTT_13_001: [ sendMethodResponse shall throw an Error if response is falsy or does not conform to the shape defined by DeviceMethodResponse. ]
+  validateResponse(response);
+
+  // Codes_SRS_NODE_DEVICE_MQTT_13_002: [ sendMethodResponse shall build an MQTT topic name in the format: $iothub/methods/res/<STATUS>/?$rid=<REQUEST ID>&<PROPERTIES> where <STATUS> is response.status. ]
+  // Codes_SRS_NODE_DEVICE_MQTT_13_003: [ sendMethodResponse shall build an MQTT topic name in the format: $iothub/methods/res/<STATUS>/?$rid=<REQUEST ID>&<PROPERTIES> where <REQUEST ID> is response.requestId. ]
+  // Codes_SRS_NODE_DEVICE_MQTT_13_004: [ sendMethodResponse shall build an MQTT topic name in the format: $iothub/methods/res/<STATUS>/?$rid=<REQUEST ID>&<PROPERTIES> where <PROPERTIES> is URL encoded. ]
+
+  var topicName = util.format(
+    TOPIC_RESPONSE_PUBLISH_FORMAT,
+    'methods',
+    response.status,
+    response.requestId
+  );
+
+  debug('sending response using topic: ' + topicName);
+  // publish the response message
+  this._mqtt.client.publish(topicName, JSON.stringify(response.payload), { qos: 0, retain: false }, function(err) {
+    if(!!done && typeof(done) === 'function') {
+      // Codes_SRS_NODE_DEVICE_MQTT_13_006: [ If the MQTT publish fails then an error shall be returned via the done callback's first parameter. ]
+      // Codes_SRS_NODE_DEVICE_MQTT_13_007: [ If the MQTT publish is successful then the done callback shall be invoked passing null for the first parameter. ]
+      done(!!err ? translateError(err) : null);
+    }
+  });
+};
+
+/**
+ * @method          module:azure-iot-device-mqtt.Mqtt#getTwinReceiver
+ * @description     Get a receiver object that handles C2D device-twin traffic
+ *
+ * @param {Function}  done      the callback to be invoked when this function completes.
+ *
+ * @throws {ReferenceError}   One of the required parameters is falsy
+ */
+Mqtt.prototype.getTwinReceiver = function(done) {
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_014: [** The `getTwinReceiver` method shall throw an `ReferenceError` if done is falsy **]**  */
+  if (!done) {
+    throw new ReferenceError('required parameter is missing');
+  }
+
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_003: [** If a twin receiver for this endpoint doesn't exist, the `getTwinReceiver` method should create a new `MqttTwinReceiver` object. **]** */
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_002: [** If a twin receiver for this endpoint has already been created, the `getTwinReceiver` method should not create a new `MqttTwinReceiver` object. **]** */
+  if (!this._twinReceiver) {
+    this._twinReceiver = new MqttTwinReceiver(this._mqtt.client);
+  }
+
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_005: [** The `getTwinReceiver` method shall call the `done` method after it completes **]** */
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_006: [** If a twin receiver for this endpoint did not previously exist, the `getTwinReceiver` method should return the a new `MqttTwinReceiver` object as the second parameter of the `done` function with null as the first parameter. **]** */
+  /* Codes_SRS_NODE_DEVICE_MQTT_18_007: [** If a twin receiver for this endpoint previously existed, the `getTwinReceiver` method should return the preexisting `MqttTwinReceiver` object as the second parameter of the `done` function with null as the first parameter. **]** */
+  done(null, this._twinReceiver);
+  
+};
+
+
 
 module.exports = Mqtt;

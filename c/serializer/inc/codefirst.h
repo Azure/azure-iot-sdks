@@ -24,6 +24,8 @@ typedef char* ascii_char_ptr_no_quotes;
 
 typedef enum REFLECTION_TYPE_TAG
 {
+    REFLECTION_DESIRED_PROPERTY_TYPE,
+    REFLECTION_REPORTED_PROPERTY_TYPE,
     REFLECTION_STRUCT_TYPE,
     REFLECTION_FIELD_TYPE,
     REFLECTION_PROPERTY_TYPE,
@@ -71,6 +73,30 @@ typedef struct REFLECTION_PROPERTY_TAG
     const char* modelName;
 } REFLECTION_PROPERTY;
 
+
+typedef struct REFLECTION_REPORTED_PROPERTY_TAG
+{
+    const char* name;
+    const char* type;
+    int(*Create_AGENT_DATA_TYPE_from_Ptr)(void* param, AGENT_DATA_TYPE* dest);
+    size_t offset;
+    size_t size;
+    const char* modelName;
+} REFLECTION_REPORTED_PROPERTY;
+
+typedef struct REFLECTION_DESIRED_PROPERTY_TAG
+{
+    pfOnDesiredProperty onDesiredProperty;
+    void(*desiredPropertInitialize)(void* destination);
+    void(*desiredPropertDeinitialize)(void* destination);
+    const char* name;
+    const char* type;
+    int(*FromAGENT_DATA_TYPE)(const AGENT_DATA_TYPE* source, void* dest); /*destination is "something" everytime. When the DESIRED_PROPERTY is a MODEL, the function is empty*/
+    size_t offset;
+    size_t size;
+    const char* modelName;
+} REFLECTION_DESIRED_PROPERTY;
+
 typedef struct REFLECTION_MODEL_TAG
 {
     const char* name;
@@ -82,6 +108,8 @@ typedef struct REFLECTED_SOMETHING_TAG
     const struct REFLECTED_SOMETHING_TAG* next;
     struct what
     {
+        REFLECTION_DESIRED_PROPERTY desiredProperty;
+        REFLECTION_REPORTED_PROPERTY reportedProperty;
         REFLECTION_STRUCT structure;
         REFLECTION_FIELD field;
         REFLECTION_PROPERTY property;
@@ -100,7 +128,7 @@ typedef struct REFLECTED_DATA_FROM_DATAPROVIDER_TAG
 #define ADDRESS_OF_ALL_REFLECTED(schemaNamespace) & C2(schemaNamespace, _allReflected),
 #define DECLARE_EXTERN_CONST_DATAPROVIDER_DATA(x) extern const REFLECTED_DATA_FROM_DATAPROVIDER ALL_REFLECTED(x);
 
-#define CODEFIRST_ENUM_VALUES                  \
+#define CODEFIRST_RESULT_VALUES                \
 CODEFIRST_OK,                                  \
 CODEFIRST_INVALID_ARG,                         \
 CODEFIRST_ALREADY_INIT,                        \
@@ -116,22 +144,26 @@ CODEFIRST_DEVICE_FAILED,                       \
 CODEFIRST_DEVICE_PUBLISH_FAILED,               \
 CODEFIRST_NOT_A_PROPERTY
 
-DEFINE_ENUM(CODEFIRST_RESULT, CODEFIRST_ENUM_VALUES)
+DEFINE_ENUM(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES)
 
-extern CODEFIRST_RESULT CodeFirst_Init(const char* overrideSchemaNamespace);
-extern void CodeFirst_Deinit(void);
-extern SCHEMA_HANDLE CodeFirst_RegisterSchema(const char* schemaNamespace, const REFLECTED_DATA_FROM_DATAPROVIDER* metadata);
+#include "azure_c_shared_utility/umock_c_prod.h"
+MOCKABLE_FUNCTION(, CODEFIRST_RESULT, CodeFirst_Init, const char*, overrideSchemaNamespace);
+MOCKABLE_FUNCTION(, void, CodeFirst_Deinit);
+MOCKABLE_FUNCTION(, SCHEMA_HANDLE, CodeFirst_RegisterSchema, const char*, schemaNamespace, const REFLECTED_DATA_FROM_DATAPROVIDER*, metadata);
 
-extern EXECUTE_COMMAND_RESULT CodeFirst_InvokeAction(void* deviceHandle, void* callbackUserContext, const char* relativeActionPath, const char* actionName, size_t parameterCount, const AGENT_DATA_TYPE* parameterValues);
+MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, CodeFirst_InvokeAction, DEVICE_HANDLE, deviceHandle, void*, callbackUserContext, const char*, relativeActionPath, const char*, actionName, size_t, parameterCount, const AGENT_DATA_TYPE*, parameterValues);
 
-extern EXECUTE_COMMAND_RESULT CodeFirst_ExecuteCommand(void* device, const char* command);
+MOCKABLE_FUNCTION(, EXECUTE_COMMAND_RESULT, CodeFirst_ExecuteCommand, void*, device, const char*, command);
 
-extern void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DATA_FROM_DATAPROVIDER* metadata, size_t dataSize, bool includePropertyPath);
-extern void CodeFirst_DestroyDevice(void* device);
+MOCKABLE_FUNCTION(, void*, CodeFirst_CreateDevice, SCHEMA_MODEL_TYPE_HANDLE, model, const REFLECTED_DATA_FROM_DATAPROVIDER*, metadata, size_t, dataSize, bool, includePropertyPath);
+MOCKABLE_FUNCTION(, void, CodeFirst_DestroyDevice, void*, device);
 
 extern CODEFIRST_RESULT CodeFirst_SendAsync(unsigned char** destination, size_t* destinationSize, size_t numProperties, ...);
+extern CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t* destinationSize, size_t numReportedProperties, ...);
 
-extern AGENT_DATA_TYPE_TYPE CodeFirst_GetPrimitiveType(const char* typeName);
+MOCKABLE_FUNCTION(, CODEFIRST_RESULT, CodeFirst_IngestDesiredProperties, void*, device, const char*, desiredProperties);
+
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPE_TYPE, CodeFirst_GetPrimitiveType, const char*, typeName);
 
 #ifdef __cplusplus
 }

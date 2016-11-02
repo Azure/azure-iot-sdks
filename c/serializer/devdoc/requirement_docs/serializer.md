@@ -11,6 +11,8 @@ These macros are:
 #define WITH_DATA (type, name) /*...*/
 #define WITH_ACTION(name, param1Type, param1Name, ...) /*...*/
 
+#define WITH_REPORTED_PROPERTY(type,name)
+
 #define END_NAMESPACE(schemaNamespace) /*...*/
 
 #define CREATE_MODEL_INSTANCE(schemaNamespace, modelName, serializerIncludePropertyPath) /*...*/
@@ -19,6 +21,7 @@ These macros are:
 #define GET_MODEL_HANDLE(modelName) /*...*/
 
 #define SERIALIZE(destination, destinationSize, property2, ...) /*...*/
+#define SERIALIZE_REPORTED_DATA(destination, reported_property1, reported_property2, ...)
 
 #define EXECUTE_COMMAND(device, commandBuffer, commandBufferSize)
 ```
@@ -38,11 +41,11 @@ A struct in the IOT Agent is a complex type composed of primitive types and othe
 
 **SRS_SERIALIZER_H_99_080: [**  The DECLARE_STRUCT declaration shall insert metadata describing a complex data type. **]**
 
-**SRS_SERIALIZER_H_99_081: [**  DECLARE_STRUCT’s name argument shall uniquely identify the struct within the schema. **]**
+**SRS_SERIALIZER_H_99_081: [**  DECLARE_STRUCT's name argument shall uniquely identify the struct within the schema. **]**
 
-**SRS_SERIALIZER_H_99_082: [**  DECLARE_STRUCT’s field<n>Name argument shall uniquely name a field within the struct. **]**
+**SRS_SERIALIZER_H_99_082: [**  DECLARE_STRUCT's field<n>Name argument shall uniquely name a field within the struct. **]**
 
-**SRS_SERIALIZER_H_99_083: [**  DECLARE_STRUCT’s field<n>Type argument, which describes the type of the corresponding field, shall be one of the data types permitted for model properties. **]**
+**SRS_SERIALIZER_H_99_083: [**  DECLARE_STRUCT's field<n>Type argument, which describes the type of the corresponding field, shall be one of the data types permitted for model properties. **]**
 
 **SRS_SERIALIZER_H_99_096: [**  DECLARE_STRUCT shall declare a matching C struct data type named name, which can be referenced from any code that can access the declaration. **]**
 
@@ -52,7 +55,7 @@ A model in the IOT Agent describes the type and structure of data captured for a
 
 **SRS_SERIALIZER_H_99_077: [**  The DECLARE_MODEL declaration shall insert metadata describing the data to be captured for a device. **]**
 
-**SRS_SERIALIZER_H_99_078: [**  DECLARE_MODEL’s name argument shall uniquely identify the model within the schema namespace. **]**
+**SRS_SERIALIZER_H_99_078: [**  DECLARE_MODEL's name argument shall uniquely identify the model within the schema namespace. **]**
 
 **SRS_SERIALIZER_H_99_097: [**  DECLARE_MODEL shall declare a matching C struct data type named name, which can be referenced from any code that can access the declaration. **]**
 
@@ -62,9 +65,9 @@ A model in the IOT Agent describes the type and structure of data captured for a
 
 **SRS_SERIALIZER_H_99_087: [**  The WITH_DATA declaration shall insert metadata describing a property in the model. **]**
 
-**SRS_SERIALIZER_H_99_088: [**  WITH_DATA’s name argument shall uniquely identify the property within the model. **]**
+**SRS_SERIALIZER_H_99_088: [**  WITH_DATA's name argument shall uniquely identify the property within the model. **]**
 
-WITH_DATA’s name argument shall be one of the following data types: 
+WITH_DATA's name argument shall be one of the following data types: 
 **SRS_SERIALIZER_H_99_004: [** double **]**
  
 **SRS_SERIALIZER_H_99_005: [**  int **]**
@@ -105,17 +108,17 @@ An action defines a command which the IOT service can invoke on any device that 
 
 **SRS_SERIALIZER_H_99_090: [**  The WITH_ACTION declaration shall insert metadata describing an action in the model. **]**
 
-**SRS_SERIALIZER_H_99_091: [**  WITH_ACTION’s name argument shall uniquely identify the action within the set of all actions in the model. **]**
+**SRS_SERIALIZER_H_99_091: [**  WITH_ACTION's name argument shall uniquely identify the action within the set of all actions in the model. **]**
 
-**SRS_SERIALIZER_H_99_092: [**  WITH_ACTION’s param<n>Name argument shall uniquely name the nth parameter in the action’s function prototype. **]**
+**SRS_SERIALIZER_H_99_092: [**  WITH_ACTION's param<n>Name argument shall uniquely name the nth parameter in the action's function prototype. **]**
 
-**SRS_SERIALIZER_H_99_042: [**  WITH_ACTIONS’s field<n>Type argument, which describes the type of the nth parameter in the action’s function prototype, shall be one of the data types permitted for model properties. **]**
+**SRS_SERIALIZER_H_99_042: [**  WITH_ACTIONS's field<n>Type argument, which describes the type of the nth parameter in the action's function prototype, shall be one of the data types permitted for model properties. **]**
 
-**SRS_SERIALIZER_H_99_039: [**  WITH_ACTION shall declare a function with the signature ‘void name(param1Type param1Name, ...)’, which the developer can define to receive corresponding commands from the IOT service. **]**
+**SRS_SERIALIZER_H_99_039: [**  WITH_ACTION shall declare a function with the signature 'void name(param1Type param1Name, ...)', which the developer can define to receive corresponding commands from the IOT service. **]**
 
 **SRS_SERIALIZER_H_99_043: [**  It is valid for an action function not to have any parameters. **]**
 
-**SRS_SERIALIZER_H_99_040: [**  WITH_ACTION shall result in the declaration of a conversion function with the prototype DATAPROVIDER_RESULT nameWRAPPER(size_t ParameterCount, const AGENT_DATA_TYPE* values)’. **]**
+**SRS_SERIALIZER_H_99_040: [**  WITH_ACTION shall result in the declaration of a conversion function with the prototype DATAPROVIDER_RESULT nameWRAPPER(size_t ParameterCount, const AGENT_DATA_TYPE* values)'. **]**
 
 **SRS_SERIALIZER_H_99_041: [**  The function shall convert the input arguments to the types declared in the action parameter list and then call the developer-defined action function. **]**
 
@@ -172,4 +175,27 @@ command is a null terminated string containing the command to execute in JSON fo
 
 **SRS_SERIALIZER_H_02_018: [** EXECUTE_COMMAND macro shall call CodeFirst_ExecuteCommand passing device, command. **]**
 
+### WITH_REPORTED_PROPERTY
+```c
+WITH_REPORTED_PROPERTY(type, name)
+```
 
+WITH_REPORTED_PROPERTY introduces a property having a type and a name in a model. This property takes part in the reported property section of DeviceTwin JSON.
+It supports the same types as WITH_DATA.
+
+**SRS_SERIALIZER_H_02_019: [** The WITH_REPORTED_PROPERTY declaration shall insert metadata describing a reported property in the model. **]**
+
+ **SRS_SERIALIZER_H_02_020: [** WITH_REPORTED_PROPERTY's name argument shall uniquely identify the reported property within the model. **]**
+
+### SERIALIZE_REPORTED_PROPERTIES
+```c
+SERIALIZE_REPORTED_PROPERTIES(destination, destinationSize, reported_property1, reported_property2, ...)
+```
+
+SERIALIZE_REPORTED_PROPERTIES produced a serialized form (JSON) of the reported properties indicated as arguments. 
+A complete model instance can be passed as parameter in which case all the reported properties shall be serialized.
+
+**SRS_SERIALIZER_H_02_021: [** SERIALIZE_REPORTED_PROPERTIES shall call CodeFirst_SendAsyncReportedProperties, passing a destination, destinationSize, the number of reported properties to publish, and pointers to the values for each reported property. **]**
+**SRS_SERIALIZER_H_02_022: [** If CodeFirst_SendAsyncReportedProperties fails, SERIALIZE_REPORTED_PROPERTIES shall return SERIALIZER_SERIALIZE_FAILED. **]**
+**SRS_SERIALIZER_H_02_023: [** If CodeFirst_SendAsyncReportedProperties succeeds, SERIALIZE_REPORTED_PROPERTIES will return SERIALIZER_OK. **]**
+**SRS_SERIALIZER_H_02_024: [** If SERIALIZE_REPORTED_PROPERTIES is invoked with no arguments then it shall not compile. **]** 

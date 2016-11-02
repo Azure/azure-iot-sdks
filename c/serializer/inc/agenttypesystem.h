@@ -642,73 +642,74 @@ struct AGENT_DATA_TYPE_TAG
     } value;
 };
 
+#include "azure_c_shared_utility/umock_c_prod.h"
 
-extern AGENT_DATA_TYPES_RESULT AgentDataTypes_ToString(STRING_HANDLE destination, const AGENT_DATA_TYPE* value);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, AgentDataTypes_ToString, STRING_HANDLE, destination, const AGENT_DATA_TYPE*, value);
 
 /*Create/Destroy work in pairs. For some data type not calling Uncreate might be ok. For some, it will lead to memory leaks*/
 
 /*creates an AGENT_DATA_TYPE containing a EDM_BOOLEAN from a int*/
-extern AGENT_DATA_TYPES_RESULT Create_EDM_BOOLEAN_from_int(AGENT_DATA_TYPE* agentData, int v);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_EDM_BOOLEAN_from_int, AGENT_DATA_TYPE*, agentData, int, v);
 
 /*creates an AGENT_DATA_TYPE containing a UINT8*/
-extern AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_UINT8(AGENT_DATA_TYPE* agentData, uint8_t v);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_UINT8, AGENT_DATA_TYPE*, agentData, uint8_t, v);
 
 /*creates an AGENT_DATA_TYPE containing a EDM_DATE */
-extern AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_date(AGENT_DATA_TYPE* agentData, int16_t year, uint8_t month, uint8_t day);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_date, AGENT_DATA_TYPE*, agentData, int16_t, year, uint8_t, month, uint8_t, day);
 
 /*create an AGENT_DATA_TYPE containing an EDM_DECIMAL from a string representation*/
-extern AGENT_DATA_TYPES_RESULT Create_EDM_DECIMAL_from_charz(AGENT_DATA_TYPE* agentData, const char* v);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_EDM_DECIMAL_from_charz, AGENT_DATA_TYPE*, agentData, const char*, v);
 
 /*create an AGENT_DATA_TYPE containing an EDM_DOUBLE from a double*/
-extern AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_DOUBLE(AGENT_DATA_TYPE* agentData, double v);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_DOUBLE, AGENT_DATA_TYPE*, agentData, double, v);
 
 /*create an AGENT_DATA_TYPE from INT16_T*/
-extern AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_SINT16(AGENT_DATA_TYPE* agentData, int16_t v);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_SINT16, AGENT_DATA_TYPE*, agentData, int16_t, v);
 
 /*create an AGENT_DATA_TYPE from INT32_T*/
-extern AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_SINT32(AGENT_DATA_TYPE* agentData, int32_t v);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_SINT32, AGENT_DATA_TYPE*, agentData, int32_t, v);
 
 /*create an AGENT_DATA_TYPE from INT64_T*/
-extern AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_SINT64(AGENT_DATA_TYPE* agentData, int64_t v);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_SINT64, AGENT_DATA_TYPE*, agentData, int64_t, v);
 
 /*create an AGENT_DATA_TYPE from int8_t*/
-extern AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_SINT8(AGENT_DATA_TYPE* agentData, int8_t v);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_SINT8, AGENT_DATA_TYPE*, agentData, int8_t, v);
 
 /*Codes_SRS_AGENT_TYPE_SYSTEM_99_091:[Creates an AGENT_DATA_TYPE containing an Edm.DateTimeOffset from an EDM_DATE_TIME_OFFSET.]*/
-extern AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET(AGENT_DATA_TYPE* agentData, EDM_DATE_TIME_OFFSET v);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_EDM_DATE_TIME_OFFSET, AGENT_DATA_TYPE*, agentData, EDM_DATE_TIME_OFFSET, v);
 
 /*creates an AGENT_DATA_TYPE containing a EDM_GUID*/
-extern AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_EDM_GUID(AGENT_DATA_TYPE* agentData, EDM_GUID v);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_EDM_GUID, AGENT_DATA_TYPE*, agentData, EDM_GUID, v);
 
 /*creates an AGENT_DATA_TYPE containing a EDM_BINARY*/
-extern AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_EDM_BINARY(AGENT_DATA_TYPE* agentData, EDM_BINARY v);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_EDM_BINARY, AGENT_DATA_TYPE*, agentData, EDM_BINARY, v);
 
 /*create an AGENT_DATA_TYPE from SINGLE*/
-extern AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_FLOAT(AGENT_DATA_TYPE* agentData, float v);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_FLOAT, AGENT_DATA_TYPE*, agentData, float, v);
 
 /*create an AGENT_DATA_TYPE from ANSI zero terminated string*/
-extern AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_charz(AGENT_DATA_TYPE* agentData, const char* v);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_charz, AGENT_DATA_TYPE*, agentData, const char*, v);
 
 /*create an AGENT_DATA_TYPE from ANSI zero terminated string (no quotes)*/
-extern AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_charz_no_quotes(AGENT_DATA_TYPE* agentData, const char* v);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_charz_no_quotes, AGENT_DATA_TYPE*, agentData, const char*, v);
 
 /*create an AGENT_DATA_TYPE of type EDM_NULL_TYPE */
-extern AGENT_DATA_TYPES_RESULT Create_NULL_AGENT_DATA_TYPE(AGENT_DATA_TYPE* agentData);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_NULL_AGENT_DATA_TYPE, AGENT_DATA_TYPE*, agentData);
 
 /*create an AGENT_DATA_TYPE that holds a structs from its fields*/
-extern AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_Members(AGENT_DATA_TYPE* agentData, const char* typeName, size_t nMembers, const char* const * memberNames, const AGENT_DATA_TYPE*memberValues);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_Members, AGENT_DATA_TYPE*,agentData, const char*, typeName, size_t, nMembers, const char* const *, memberNames, const AGENT_DATA_TYPE*, memberValues);
 
 /*create a complex AGENT_DATA_TYPE from pointers to AGENT_DATA_TYPE fields*/
-extern AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_MemberPointers(AGENT_DATA_TYPE* agentData, const char* typeName, size_t nMembers, const char* const * memberNames, const AGENT_DATA_TYPE** memberPointerValues);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_MemberPointers, AGENT_DATA_TYPE*, agentData, const char*, typeName, size_t, nMembers, const char* const *, memberNames, const AGENT_DATA_TYPE** ,memberPointerValues);
 
 /*creates a copy of the AGENT_DATA_TYPE*/
-extern AGENT_DATA_TYPES_RESULT Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(AGENT_DATA_TYPE* dest, const AGENT_DATA_TYPE* src);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE, AGENT_DATA_TYPE*, dest, const AGENT_DATA_TYPE*, src);
 
-extern void Destroy_AGENT_DATA_TYPE(AGENT_DATA_TYPE* agentData);
+MOCKABLE_FUNCTION(, void, Destroy_AGENT_DATA_TYPE, AGENT_DATA_TYPE*, agentData);
 
-extern AGENT_DATA_TYPES_RESULT CreateAgentDataType_From_String(const char* source, AGENT_DATA_TYPE_TYPE type, AGENT_DATA_TYPE* agentData);
+MOCKABLE_FUNCTION(, AGENT_DATA_TYPES_RESULT, CreateAgentDataType_From_String, const char*, source, AGENT_DATA_TYPE_TYPE, type, AGENT_DATA_TYPE*, agentData);
 
-extern COMPLEX_TYPE_FIELD_TYPE* AgentDataType_GetComplexTypeField(AGENT_DATA_TYPE* agentData, size_t index);;
+MOCKABLE_FUNCTION(, COMPLEX_TYPE_FIELD_TYPE*, AgentDataType_GetComplexTypeField, AGENT_DATA_TYPE*, agentData, size_t, index);
 
 #ifdef __cplusplus
 }

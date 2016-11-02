@@ -70,7 +70,7 @@ var deviceMetaData = {
     }]
 };
 
-client.open(function (err, result) {
+client.open(function (err) {
   if (err) {
     printErrorFor('open')(err);
   } else {

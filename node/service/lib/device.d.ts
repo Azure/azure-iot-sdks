@@ -26,6 +26,7 @@ declare namespace Device {
 
     interface Authentication {
         SymmetricKey?: _SymmetricKey;
+        symmetricKey?: _SymmetricKey;
         x509Thumbprint?: string;
     }
 }

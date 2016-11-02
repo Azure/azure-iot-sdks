@@ -157,6 +157,56 @@ The `sendEventBatch` method sends a list of event messages to the IoT Hub as the
 
 **SRS_NODE_DEVICE_CLIENT_16_041: [** The `uploadToBlob` method shall call the `done` callback no parameters if the upload succeeds. **]**
 
+#### getTwin(done)
+
+**SRS_NODE_DEVICE_CLIENT_18_001: [** The `getTwin` method shall call the `azure-iot-device-core!Twin.fromDeviceClient` method to create the device twin object. **]**
+
+**SRS_NODE_DEVICE_CLIENT_18_002: [** The `getTwin` method shall pass itself as the first parameter to `fromDeviceClient` and it shall pass the `done` method as the second parameter. **]**
+
+**SRS_NODE_DEVICE_CLIENT_18_003: [** The `getTwin` method shall use the second parameter (if it is not falsy) to call `fromDeviceClient` on. **]**    
+
+#### onDeviceMethod(methodName, callback)
+
+The `onDeviceMethod` method's `callback` parameter is a function that is expected to conform to the signature of the interface `DeviceMethodEventHandler` as defined below (specified here using TypeScript syntax for expository purposes):
+
+```
+interface StringMap {
+  [key: string]: string;
+}
+
+interface DeviceMethodRequest {
+  methodName: string;
+  properties: StringMap;
+  body: Buffer;
+}
+
+interface DeviceMethodResponse {
+  properties: StringMap;
+  write(data: Buffer | string): void;
+  end(status: number, done?: (err: any): void); 
+}
+
+interface DeviceMethodEventHandler {
+  (request: DeviceMethodRequest, response: DeviceMethodResponse): void;
+}
+```
+
+**SRS_NODE_DEVICE_CLIENT_13_020: [** `onDeviceMethod` shall throw a `ReferenceError` if `methodName` is falsy. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_024: [** `onDeviceMethod` shall throw a `TypeError` if `methodName` is not a string. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_022: [** `onDeviceMethod` shall throw a `ReferenceError` if `callback` is falsy. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_025: [** `onDeviceMethod` shall throw a `TypeError` if `callback` is not a `Function`. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_001: [** The `onDeviceMethod` method shall cause the `callback` function to be invoked when a cloud-to-device *method* invocation signal is received from the IoT Hub service. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_003: [** The client shall start listening for method calls from the service whenever there is a listener subscribed for a method callback. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_023: [** `onDeviceMethod` shall throw an `Error` if a listener is already subscribed for a given method call. **]**
+
+**SRS_NODE_DEVICE_CLIENT_13_021: [** `onDeviceMethod` shall throw an `Error` if the underlying transport does not support device methods. **]**
+
 ### Events
 #### message
 

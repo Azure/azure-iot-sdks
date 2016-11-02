@@ -212,7 +212,7 @@ java/**/*.crt
 **/typings/**
 **/.vscode/**
 # C/C++ extension for VS Code
-browse.VC.db
+.browse.VC.db*
 
 csharp/device/NuGet/*.exe
 csharp/device/NuGet/*.nupkg

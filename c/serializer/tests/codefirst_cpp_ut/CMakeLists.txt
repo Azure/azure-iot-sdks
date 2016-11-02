@@ -7,20 +7,26 @@ cmake_minimum_required(VERSION 2.8.11)
 compileAsC99()
 set(theseTestsName codefirst_cpp_ut)
 
-set(${theseTestsName}_cpp_files
+set(${theseTestsName}_test_files
 ${theseTestsName}.cpp
 )
 
 set(${theseTestsName}_c_files
-c_bool_size.c
-../../src/codefirst.c
-${SHARED_UTIL_SRC_FOLDER}/gballoc.c
-${LOCK_C_FILE}
-${SHARED_UTIL_SRC_FOLDER}/crt_abstractions.c
-${SHARED_UTIL_SRC_FOLDER}/strings.c
+    ../../src/codefirst.c
+    ./c_bool_size.c
+    ${SHARED_UTIL_SRC_FOLDER}/gballoc.c
+    ${SHARED_UTIL_SRC_FOLDER}/crt_abstractions.c
+    ${LOCK_C_FILE}
 )
 
 set(${theseTestsName}_h_files
+    ./c_bool_size.h
 )
 
-build_test_artifacts(${theseTestsName} ON)
+#CPP compiler on windows likes to complain about unused local function removed (C4505)
+#C compiler doesn't like to complain about the same thing
+if(WIN32)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4505")
+endif()
+
+build_c_test_artifacts(${theseTestsName} ON "tests/UnitTests")

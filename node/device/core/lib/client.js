@@ -12,6 +12,8 @@ var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var debug = require('debug')('azure-iot-device.Client');
 var BlobUploadClient = require('./blob_upload').BlobUploadClient;
+var DeviceMethodRequest = require('./device_method').DeviceMethodRequest;
+var DeviceMethodResponse = require('./device_method').DeviceMethodResponse;
 
 /**
  * @class           module:azure-iot-device.Client
@@ -42,6 +44,7 @@ var Client = function (transport, connStr, blobUploadClient) {
 
   this._transport = transport;
   this._receiver = null;
+  this._methodCallbackMap = {};
 
   this.on('removeListener', function (eventName) {
     if (this._receiver && eventName === 'message' && this.listeners('message').length === 0) {
@@ -58,26 +61,114 @@ var Client = function (transport, connStr, blobUploadClient) {
 
 util.inherits(Client, EventEmitter);
 
+Client.prototype._validateDeviceMethodInputs = function(methodName, callback) {
+  // Codes_SRS_NODE_DEVICE_CLIENT_13_020: [ onDeviceMethod shall throw a ReferenceError if methodName is falsy. ]
+  if(!methodName) {
+    throw new ReferenceError('methodName cannot be \'' + methodName + '\'');
+  }
+  // Codes_SRS_NODE_DEVICE_CLIENT_13_024: [ onDeviceMethod shall throw a TypeError if methodName is not a string. ]
+  if(typeof(methodName) !== 'string') {
+    throw new TypeError('methodName\'s type is \'' + typeof(methodName) + '\'. A string was expected.');
+  }
+
+  // Codes_SRS_NODE_DEVICE_CLIENT_13_022: [ onDeviceMethod shall throw a ReferenceError if callback is falsy. ]
+  if(!callback) {
+    throw new ReferenceError('callback cannot be \'' + callback + '\'');
+  }
+
+  // Codes_SRS_NODE_DEVICE_CLIENT_13_025: [ onDeviceMethod shall throw a TypeError if callback is not a Function. ]
+  if(typeof(callback) !== 'function') {
+    throw new TypeError('callback\'s type is \'' + typeof(callback) + '\'. A function reference was expected.');
+  }
+
+  // Codes_SRS_NODE_DEVICE_CLIENT_13_021: [ onDeviceMethod shall throw an Error if the underlying transport does not support device methods. ]
+  if(!(this._transport.sendMethodResponse)) {
+    throw new Error('The transport for this client does not support device methods');
+  }
+
+  // Codes_SRS_NODE_DEVICE_CLIENT_13_023: [ onDeviceMethod shall throw an Error if a listener is already subscribed for a given method call. ]
+  if(!!(this._methodCallbackMap[methodName])) {
+    throw new Error('A handler for this method has already been registered with the client.');
+  }
+};
+
+/**
+ * @method            module:azure-iot-device.Client#onDeviceMethod
+ * @description       Registers the `callback` to be invoked when a
+ *                    cloud-to-device method call is received by the client
+ *                    for the given `methodName`.
+ *
+ * @param {String}   methodName   The name of the method for which the callback
+ *                                is to be registered.
+ * @param {Function} callback     The callback to be invoked when the C2D method
+ *                                call is received.
+ *
+ * @throws {ReferenceError}       If the `methodName` or `callback` parameter
+ *                                is falsy.
+ * @throws {TypeError}            If the `methodName` parameter is not a string
+ *                                or if the `callback` is not a function.
+ */
+Client.prototype.onDeviceMethod = function(methodName, callback) {
+  // validate input args
+  this._validateDeviceMethodInputs(methodName, callback);
+
+  // Codes_SRS_NODE_DEVICE_CLIENT_13_003: [ The client shall start listening for method calls from the service whenever there is a listener subscribed for a method callback. ]
+  this._methodCallbackMap[methodName] = callback;
+  if(!this._receiver) {
+    this._connectReceiver();
+  } else {
+    this._addMethodCallback(methodName, callback);
+  }
+};
+
+Client.prototype._addMethodCallback = function(methodName, callback) {
+  var self = this;
+  this._receiver.onDeviceMethod(methodName, function(message) {
+    // build the request object
+    var request = new DeviceMethodRequest(
+      message.requestId,
+      message.methods.methodName,
+      message.body
+    );
+
+    // build the response object
+    var response = new DeviceMethodResponse(message.requestId, self._transport);
+
+    // Codes_SRS_NODE_DEVICE_CLIENT_13_001: [ The onDeviceMethod method shall cause the callback function to be invoked when a cloud-to-device method invocation signal is received from the IoT Hub service. ]
+    callback(request, response);
+  });
+};
+
 // SAS token created by the client have a lifetime of 60 minutes, renew every 45 minutes
 Client.sasRenewalInterval = 2700000;
 
 Client.prototype._connectReceiver = function () {
   debug('Getting receiver object from the transport');
+  var self = this;
   this._transport.getReceiver(function (err, receiver) {
     if (!err) {
       debug('Subscribing to message events from the receiver object of the transport');
-      this._receiver = receiver;
-      this._receiver.on('message', function (msg) {
-        this.emit('message', msg);
-      }.bind(this));
+      self._receiver = receiver;
+      self._receiver.on('message', function (msg) {
+        self.emit('message', msg);
+      });
+
+      // add listeners for all existing method callbacks
+      for (var methodName in self._methodCallbackMap) {
+        if (self._methodCallbackMap.hasOwnProperty(methodName)) {
+          var callback = self._methodCallbackMap[methodName];
+          self._addMethodCallback(methodName, callback);
+        }
+      }
+
       /*Codes_SRS_NODE_DEVICE_CLIENT_16_006: [The ‘error’ event shall be emitted when an error occurred within the client code.] */
-      this._receiver.on('errorReceived', function (err) {
-        this.emit('error', err);
-      }.bind(this));
+      self._receiver.on('errorReceived', function (err) {
+        self.emit('error', err);
+      });
     } else {
       throw new Error('Transport failed to start receiving messages: ' + err.message);
     }
-  }.bind(this));
+  });
 };
 
 Client.prototype._disconnectReceiver = function () {
@@ -182,6 +273,9 @@ Client.prototype.updateSharedAccessSignature = function (sharedAccessSignature, 
   if (!sharedAccessSignature) throw new ReferenceError('sharedAccessSignature is falsy');
 
   this.blobUploadClient.updateSharedAccessSignature(sharedAccessSignature);
+  if (this._twin) {
+    this._twin.updateSharedAccessSignature();
+  }
 
   /*Codes_SRS_NODE_DEVICE_CLIENT_16_032: [The updateSharedAccessSignature method shall call the updateSharedAccessSignature method of the transport currently inuse with the sharedAccessSignature parameter.]*/
   this._transport.updateSharedAccessSignature(sharedAccessSignature, function (err, result) {
@@ -469,6 +563,21 @@ Client.prototype.uploadToBlob = function (blobName, stream, streamLength, done) 
   /*Codes_SRS_NODE_DEVICE_CLIENT_16_040: [The `uploadToBlob` method shall call the `done` callback with an `Error` object if the upload fails.]*/
   /*Codes_SRS_NODE_DEVICE_CLIENT_16_041: [The `uploadToBlob` method shall call the `done` callback no parameters if the upload succeeds.]*/
   this.blobUploadClient.uploadToBlob(blobName, stream, streamLength, done);
+};
+
+/**
+ * @method           module:azure-iot-device.Client#getTwin
+ * @description      The `getTwin` method creates a Twin object and establishes a connection with the Twin service.
+ *
+ * @param {Function} done             The callback to call when the connection is established.
+ *
+ */
+Client.prototype.getTwin = function(done, twin) {
+
+  /* Codes_SRS_NODE_DEVICE_CLIENT_18_001: [** The `getTwin` method shall call the `azure-iot-device-core!Twin.fromDeviceClient` method to create the device client object. **]** */
+  /* Codes_SRS_NODE_DEVICE_CLIENT_18_002: [** The `getTwin` method shall pass itself as the first parameter to `fromDeviceClient` and it shall pass the `done` method as the second parameter. **]**  */
+  /* Codes_SRS_NODE_DEVICE_CLIENT_18_003: [** The `getTwin` method shall use the second parameter (if it is not falsy) to call `fromDeviceClient` on. **]**    */
+  (twin || require('./twin.js')).fromDeviceClient(this, done);
 };
 
 module.exports = Client;

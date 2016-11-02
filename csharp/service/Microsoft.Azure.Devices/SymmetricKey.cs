@@ -16,6 +16,9 @@ namespace Microsoft.Azure.Devices
         string primaryKey;
         string secondaryKey;
 
+        /// <summary>
+        /// Gets or sets the PrimaryKey
+        /// </summary>
         [JsonProperty(PropertyName = "primaryKey")]
         public string PrimaryKey
         {
@@ -31,6 +34,9 @@ namespace Microsoft.Azure.Devices
             }
         }
 
+        /// <summary>
+        /// Gets or sets the SecondaryKey
+        /// </summary>
         [JsonProperty(PropertyName = "secondaryKey")]
         public string SecondaryKey
         {

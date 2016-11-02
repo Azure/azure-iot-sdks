@@ -30,6 +30,7 @@ extern EXECUTE_COMMAND_RESULT CommandDecoder_ExecuteCommand(COMMAND_DECODER_HAND
 
 extern void CommandDecoder_Destroy(COMMAND_DECODER_HANDLE commandDecoderHandle);
  
+extern EXECUTE_COMMAND_RESULT CommandDecoder_IngestDesiredProperties( void* startAddress, COMMAND_DECODER_HANDLE handle, const char* desiredProperties);
 
 #ifdef __cplusplus
 }
@@ -135,3 +136,37 @@ Miscellaneous
 **SRS_COMMAND_DECODER_99_019: [**  For all exposed APIs argument validity checks shall precede other checks. **]**
 
 If any parameter is NULL then CommandDecoder_ExecuteCommand shall return EXECUTE_COMMAND_ERROR.
+
+### CommandDecoder_IngestDesiredProperties
+```c
+extern EXECUTE_COMMAND_RESULT CommandDecoder_IngestDesiredProperties( void* startAddress, COMMAND_DECODER_HANDLE handle, const char* desiredProperties);
+```
+
+`CommandDecoder_IngestDesiredProperties` applies `desiredProperties` to the device at `startAddress` in memory. It is not transactional (so far).
+
+**SRS_COMMAND_DECODER_02_001: [** If `startAddress` is NULL then `CommandDecoder_IngestDesiredProperties` shall fail and return `EXECUTE_COMMAND_ERROR`. **]**
+
+**SRS_COMMAND_DECODER_02_002: [** If `handle` is NULL then `CommandDecoder_IngestDesiredProperties` shall fail and return `EXECUTE_COMMAND_ERROR`. **]**
+
+**SRS_COMMAND_DECODER_02_003: [** If `desiredProperties` is NULL then `CommandDecoder_IngestDesiredProperties` shall fail and return `EXECUTE_COMMAND_ERROR`. **]**
+
+**SRS_COMMAND_DECODER_02_004: [** `CommandDecoder_IngestDesiredProperties` shall clone `desiredProperties`. **]**
+
+**SRS_COMMAND_DECODER_02_005: [** `CommandDecoder_IngestDesiredProperties` shall create a MULTITREE_HANDLE ouf of the clone of `desiredProperties`. **]**
+
+**SRS_COMMAND_DECODER_02_006: [** `CommandDecoder_IngestDesiredProperties` shall parse the MULTITREEE recursively. **]**
+
+**SRS_COMMAND_DECODER_02_007: [** If the child name corresponds to a desired property then an AGENT_DATA_TYPE shall be constructed from the MULTITREE node. **]**
+
+**SRS_COMMAND_DECODER_02_008: [** The desired property shall be constructed in memory by calling pfDesiredPropertyFromAGENT_DATA_TYPE. **]**
+
+**SRS_COMMAND_DECODER_02_013: [** If the desired property has a non-`NULL` `pfOnDesiredProperty` then it shall be called. **]**
+
+**SRS_COMMAND_DECODER_02_009: [** If the child name corresponds to a model in model then the function shall call itself recursively. **]**
+
+**SRS_COMMAND_DECODER_02_012: [** If the child model in model has a non-`NULL` `pfOnDesiredProperty` then `pfOnDesiredProperty` shall be called. **]** 
+
+**SRS_COMMAND_DECODER_02_010: [** If the complete MULTITREE has been parsed then `CommandDecoder_IngestDesiredProperties` shall succeed and return `EXECUTE_COMMAND_SUCCESS`. **]**
+
+**SRS_COMMAND_DECODER_02_011: [** Otherwise `CommandDecoder_IngestDesiredProperties` shall fail and return `EXECUTE_COMMAND_FAILED`. **]**
+

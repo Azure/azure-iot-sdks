@@ -16,11 +16,14 @@ ${theseTestsName}.c
 )
 
 set(${theseTestsName}_c_files
+../../../c-utility/src/buffer.c
 ../../src/iothubtransport_mqtt_common.c
+real_constbuffer.c
 real_doublylinkedlist.c
 )
 
 set(${theseTestsName}_h_files
+real_constbuffer.h
 )
 
 build_c_test_artifacts(${theseTestsName} ON "tests/UnitTests")

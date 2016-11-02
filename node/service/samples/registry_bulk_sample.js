@@ -64,14 +64,14 @@ blobSvc.createContainerIfNotExists(inputContainerName, function (error) {
                     //            console.error('Could not create export job: ' + error.message);
                     //        } else {
                     //            console.log('--------------\r\nDevices Export Job Identifier:--------------\r\n' + result);
-                    //            var jobId = JSON.parse(result).jobId;
+                    //            var jobId = result.jobId;
                     //            var interval = setInterval(function () {
                     //                registry.getJob(jobId, function (error, result) {
                     //                   if (error) {
                     //                       console.error('Could not get job status: ' + error.message + ' : ' + error.responseBody);
                     //                   } else {
                     //                       console.log('--------------\r\njob ' + jobId + ' status:\r\n--------------\r\n' + result);
-                    //                       var status = JSON.parse(result).status;
+                    //                       var status = result.status;
                     //                       if (status === "completed") {
                     //                           clearInterval(interval);
                     //                       }
@@ -87,7 +87,7 @@ blobSvc.createContainerIfNotExists(inputContainerName, function (error) {
                               console.error('Could not create import devices: ' + error.message + ' : ' + error.responseBody);
                           } else {
                               console.log('--------------\r\nDevices Import Job Identifier:--------------\r\n' + result);
-                              var jobId = JSON.parse(result).jobId;
+                              var jobId = result.jobId;
                               var interval = setInterval(function () {
                                   /**
                                    * Uncomment this code to test cancelling a job.
@@ -106,7 +106,7 @@ blobSvc.createContainerIfNotExists(inputContainerName, function (error) {
                                           console.error('Could not get job status: ' + error.message + ' : ' + error.responseBody);
                                       } else {
                                           console.log('--------------\r\njob ' + jobId + ' status:\r\n--------------\r\n' + result);
-                                          var status = JSON.parse(result).status;
+                                          var status = result.status;
                                           if (status === "completed") {
                                               clearInterval(interval);
                                           }

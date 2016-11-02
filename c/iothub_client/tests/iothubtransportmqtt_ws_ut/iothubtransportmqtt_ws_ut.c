@@ -71,6 +71,11 @@ static pfIoTHubTransport_Subscribe                  IoTHubTransportMqtt_WS_Subsc
 static pfIoTHubTransport_Unsubscribe                IoTHubTransportMqtt_WS_Unsubscribe;
 static pfIoTHubTransport_DoWork                     IoTHubTransportMqtt_WS_DoWork;
 static pfIoTHubTransport_GetSendStatus              IoTHubTransportMqtt_WS_GetSendStatus;
+static pfIoTHubTransport_Subscribe_DeviceTwin       IoTHubTransportMqtt_WS_Subscribe_DeviceTwin;
+static pfIoTHubTransport_Unsubscribe_DeviceTwin     IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin;
+static pfIoTHubTransport_Subscribe_DeviceMethod     IoTHubTransportMqtt_WS_Subscribe_DeviceMethod;
+static pfIoTHubTransport_Unsubscribe_DeviceMethod   IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod;
+static pfIoTHubTransport_ProcessItem                IoTHubTransportMqtt_WS_ProcessItem;
 
 static TRANSPORT_LL_HANDLE my_IoTHubTransport_MQTT_Common_Create(const IOTHUBTRANSPORT_CONFIG* config, MQTT_GET_IO_TRANSPORT get_io_transport)
 {
@@ -129,7 +134,12 @@ TEST_SUITE_INITIALIZE(suite_init)
     IoTHubTransport_Subscribe = IoTHubTransportMqtt_WS_Subscribe
     IoTHubTransport_Unsubscribe = IoTHubTransportMqtt_WS_Unsubscribe
     IoTHubTransport_DoWork = IoTHubTransportMqtt_WS_DoWork
-    IoTHubTransport_SetOption = IoTHubTransportMqtt_WS_SetOption ] */
+    IoTHubTransport_SetOption = IoTHubTransportMqtt_WS_SetOption
+    IoTHubTransport_Subscribe_DeviceTwin = IoTHubTransportMqtt_WS_Subscribe_DeviceTwin
+    IoTHubTransport_Unsubscribe_DeviceTwin = IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin
+    IoTHubTransport_Subscribe_DeviceMethod = IoTHubTransportMqtt_WS_Subscribe_DeviceMethod
+    IoTHubTransport_Unsubscribe_DeviceMethod = IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod
+    IoTHubTransport_ProcessItem = IoTHubTransportMqtt_WS_ProcessItem ] */
     IoTHubTransportMqtt_WS_GetHostname = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_GetHostname;
     IoTHubTransportMqtt_WS_SetOption = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_SetOption;
     IoTHubTransportMqtt_WS_Create = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_Create;
@@ -140,6 +150,11 @@ TEST_SUITE_INITIALIZE(suite_init)
     IoTHubTransportMqtt_WS_Unsubscribe = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_Unsubscribe;
     IoTHubTransportMqtt_WS_DoWork = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_DoWork;
     IoTHubTransportMqtt_WS_GetSendStatus = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_GetSendStatus;
+    IoTHubTransportMqtt_WS_Subscribe_DeviceTwin = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_Subscribe_DeviceTwin;
+    IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_Unsubscribe_DeviceTwin;
+    IoTHubTransportMqtt_WS_Subscribe_DeviceMethod = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_Subscribe_DeviceMethod;
+    IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_Unsubscribe_DeviceMethod;
+    IoTHubTransportMqtt_WS_ProcessItem = ((TRANSPORT_PROVIDER*)MQTT_WebSocket_Protocol())->IoTHubTransport_ProcessItem;
 }
 
 TEST_SUITE_CLEANUP(suite_cleanup)

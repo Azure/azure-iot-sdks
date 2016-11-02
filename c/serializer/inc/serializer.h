@@ -67,27 +67,16 @@ extern "C"
 {
 #endif
 
-#define IOT_AGENT_RESULT_ENUM_VALUES \
-    IOT_AGENT_OK, \
-    IOT_AGENT_AGENT_DATA_TYPES_ERROR, \
-    IOT_AGENT_COMMAND_EXECUTION_ERROR, \
-    IOT_AGENT_ERROR, \
-    IOT_AGENT_SERIALIZE_FAILED, \
-    IOT_AGENT_INVALID_ARG
+    /* IOT Agent Macros */
 
-DEFINE_ENUM(IOT_AGENT_RESULT, IOT_AGENT_RESULT_ENUM_VALUES);
-
-
-/* IOT Agent Macros */
-
-/**
- * @def BEGIN_NAMESPACE(schemaNamespace)
- * This macro marks the start of a section that declares IOT model
- * elements (like complex types, etc.). Declarations are typically
- * placed in header files, so that they can be shared between
- * translation units.
- */
-/* Codes_SRS_SERIALIZER_99_001:[For each completed schema declaration block, a unique storage container for schema metadata shall be available in the translation unit at runtime.] */
+    /**
+     * @def BEGIN_NAMESPACE(schemaNamespace)
+     * This macro marks the start of a section that declares IOT model
+     * elements (like complex types, etc.). Declarations are typically
+     * placed in header files, so that they can be shared between
+     * translation units.
+     */
+     /* Codes_SRS_SERIALIZER_99_001:[For each completed schema declaration block, a unique storage container for schema metadata shall be available in the translation unit at runtime.] */
 #define BEGIN_NAMESPACE(schemaNamespace) \
     REFLECTED_END_OF_LIST
 
@@ -99,11 +88,13 @@ DEFINE_ENUM(IOT_AGENT_RESULT, IOT_AGENT_RESULT_ENUM_VALUES);
 #define END_NAMESPACE(schemaNamespace) \
     REFLECTED_LIST_HEAD(schemaNamespace)
 
+#define GLOBAL_INITIALIZE_STRUCT_FIELD(structType, destination, type, name) GlobalInitialize_##type((char*)destination+offsetof(structType, name));
+#define GLOBAL_DEINITIALIZE_STRUCT_FIELD(structType, destination, type, name) GlobalDeinitialize_##type((char*)destination+offsetof(structType, name));
 /**
 * @def DECLARE_STRUCT(name, ...)
 * This macro allows the definition of a struct type that can then be used as
 * part of a model definition.
-* 
+*
 * @param name                      Name of the struct
 * @param element1, element2...     Specifies a list of struct members
 */
@@ -141,30 +132,68 @@ DEFINE_ENUM(IOT_AGENT_RESULT, IOT_AGENT_RESULT_ENUM_VALUES);
     static void C2(destroyLocalParameter, name)(name * value) \
     { \
         FOR_EACH_2_KEEP_1(UNBUILD_DESTINATION_FIELD, value, __VA_ARGS__); \
-    }
+    } \
+    static void C2(GlobalInitialize_, name)(void* destination) \
+    { \
+        FOR_EACH_2_KEEP_2(GLOBAL_INITIALIZE_STRUCT_FIELD, name, destination, __VA_ARGS__); \
+    } \
+    static void C2(GlobalDeinitialize_, name)(void* destination) \
+    { \
+        FOR_EACH_2_KEEP_2(GLOBAL_DEINITIALIZE_STRUCT_FIELD, name, destination, __VA_ARGS__); \
+    } \
+
 
 /**
  * @def     DECLARE_MODEL(name, ...)
  * This macro allows declaring a model that can be later used to instantiate
  * a device.
- * 		    
+ *
  * @param   name                        Specifies the model name
  * @param   element1, element2...       Specifies a model element which can be
  * 		                                a property or an action.
- * 		                                    - A property is described in a  
+ * 		                                    - A property is described in a
  * 		                                      model by using the WITH_DATA
- * 		                                    - An action is described in a  
+ * 		                                    - An action is described in a
  * 		                                      model by using the ::WITH_ACTION
  * 		                                      macro.
  *
  */
-/* WITH_DATA's name argument shall be one of the following data types: */
-/* Codes_SRS_SERIALIZER_99_133:[a model type introduced previously by DECLARE_MODEL] */
-#define DECLARE_MODEL(name, ...) \
-    REFLECTED_MODEL(name) \
-    typedef struct name { int :1; FOR_EACH_1(BUILD_MODEL_STRUCT, __VA_ARGS__) } name; \
-    FOR_EACH_1_KEEP_1(CREATE_MODEL_ELEMENT, name, __VA_ARGS__) \
-    TO_AGENT_DATA_TYPE(name, DROP_FIRST_COMMA_FROM_ARGS(EXPAND_MODEL_ARGS(__VA_ARGS__)))
+ /* WITH_DATA's name argument shall be one of the following data types: */
+ /* Codes_SRS_SERIALIZER_99_133:[a model type introduced previously by DECLARE_MODEL] */
+
+#define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_ACTION(...)
+#define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_DESIRED_PROPERTY(type, name, ...) IF(COUNT_ARG(__VA_ARGS__), void __VA_ARGS__ (void*);, )
+#define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_PROPERTY(...)
+#define CREATE_DESIRED_PROPERTY_CALLBACK_MODEL_REPORTED_PROPERTY(...) 
+
+#define CREATE_DESIRED_PROPERTY_CALLBACK(...) CREATE_DESIRED_PROPERTY_CALLBACK_##__VA_ARGS__
+
+#define SERIALIZER_REGISTER_NAMESPACE(NAMESPACE) CodeFirst_RegisterSchema(#NAMESPACE, & ALL_REFLECTED(NAMESPACE))
+
+#define DECLARE_MODEL(name, ...)                                                             \
+    REFLECTED_MODEL(name)                                                                    \
+    FOR_EACH_1(CREATE_DESIRED_PROPERTY_CALLBACK, __VA_ARGS__)                                \
+    typedef struct name { int :1; FOR_EACH_1(BUILD_MODEL_STRUCT, __VA_ARGS__) } name;        \
+    FOR_EACH_1_KEEP_1(CREATE_MODEL_ELEMENT, name, __VA_ARGS__)                               \
+    TO_AGENT_DATA_TYPE(name, DROP_FIRST_COMMA_FROM_ARGS(EXPAND_MODEL_ARGS(__VA_ARGS__)))     \
+    int FromAGENT_DATA_TYPE_##name(const AGENT_DATA_TYPE* source, void* destination)         \
+    {                                                                                        \
+        (void)(source, destination);                                                         \
+        LogError("SHOULD NOT GET CALLED... EVER");                                           \
+        return 0;                                                                            \
+    }                                                                                        \
+    static void C2(GlobalInitialize_, name)(void* destination)                               \
+    {                                                                                        \
+        (void)destination;                                                                   \
+        FOR_EACH_1_KEEP_1(CREATE_MODEL_ELEMENT_GLOBAL_INITIALIZE, name, __VA_ARGS__)         \
+    }                                                                                        \
+    static void C2(GlobalDeinitialize_, name)(void* destination)                             \
+    {                                                                                        \
+        (void)destination;                                                                   \
+        FOR_EACH_1_KEEP_1(CREATE_MODEL_ELEMENT_GLOBAL_DEINITIALIZE, name, __VA_ARGS__)       \
+    }                                                                                        \
+
+    
 
 /**
  * @def   WITH_DATA(type, name)
@@ -193,6 +222,11 @@ DEFINE_ENUM(IOT_AGENT_RESULT, IOT_AGENT_RESULT_ENUM_VALUES);
  */
 #define WITH_DATA(type, name) MODEL_PROPERTY(type, name)
 
+
+#define WITH_REPORTED_PROPERTY(type, name) MODEL_REPORTED_PROPERTY(type, name)
+
+#define WITH_DESIRED_PROPERTY(type, name, ...) MODEL_DESIRED_PROPERTY(type, name, __VA_ARGS__)
+
 /**
  * @def   WITH_ACTION(name, ...)
  * The ::WITH_ACTION macro allows declaring a model action.
@@ -204,6 +238,7 @@ DEFINE_ENUM(IOT_AGENT_RESULT, IOT_AGENT_RESULT_ENUM_VALUES);
  */
 /*Codes_SRS_SERIALIZER_99_039:[WITH_ACTION shall declare an action of the current data provider called as the first macro parameter(name) and having the first parameter called parameter1Name of type parameter1Type, the second parameter named parameter2Name having the type parameter2Type and so on.]*/
 #define WITH_ACTION(name, ...)  MODEL_ACTION(name, __VA_ARGS__)
+
 
 /**
  * @def   GET_MODEL_HANDLE(schemaNamespace, modelName)
@@ -257,7 +292,9 @@ DEFINE_ENUM(IOT_AGENT_RESULT, IOT_AGENT_RESULT_ENUM_VALUES);
 /*Codes_SRS_SERIALIZER_99_113:[ SERIALIZE shall call CodeFirst_SendAsync, passing a destination, destinationSize, the number of properties to publish, and pointers to the values for each property.] */
 /*Codes_SRS_SERIALIZER_99_117:[ If CodeFirst_SendAsync succeeds, SEND will return IOT_AGENT_OK.] */
 /*Codes_SRS_SERIALIZER_99_114:[ If CodeFirst_SendAsync fails, SEND shall return IOT_AGENT_SERIALIZE_FAILED.] */
-#define SERIALIZE(destination, destinationSize,...) ((CodeFirst_SendAsync(destination, destinationSize, COUNT_ARG(__VA_ARGS__) FOR_EACH_1(ADDRESS_MACRO, __VA_ARGS__)) == CODEFIRST_OK) ? IOT_AGENT_OK : IOT_AGENT_SERIALIZE_FAILED)
+#define SERIALIZE(destination, destinationSize,...) CodeFirst_SendAsync(destination, destinationSize, COUNT_ARG(__VA_ARGS__) FOR_EACH_1(ADDRESS_MACRO, __VA_ARGS__))
+
+#define SERIALIZE_REPORTED_PROPERTIES(destination, destinationSize,...) CodeFirst_SendAsyncReported(destination, destinationSize, COUNT_ARG(__VA_ARGS__) FOR_EACH_1(ADDRESS_MACRO, __VA_ARGS__))
 
 /**
  * @def   EXECUTE_COMMAND(device, command)
@@ -270,6 +307,14 @@ DEFINE_ENUM(IOT_AGENT_RESULT, IOT_AGENT_RESULT_ENUM_VALUES);
  */
 /*Codes_SRS_SERIALIZER_02_018: [EXECUTE_COMMAND macro shall call CodeFirst_ExecuteCommand passing device, commandBuffer and commandBufferSize.]*/
 #define EXECUTE_COMMAND(device, command) (CodeFirst_ExecuteCommand(device, command))
+
+/**
+* @def   INGEST_DESIRED_PROPERTIES(device, desiredProperties)
+*
+* @param   device                return of CodeFirst_CreateDevice.
+* @param   desiredProperties     a null terminated string containing in JSON format the desired properties
+*/
+#define INGEST_DESIRED_PROPERTIES(device, desiredProperties) (CodeFirst_IngestDesiredProperties(device, desiredProperties))
 
 /* Helper macros */
 
@@ -310,6 +355,11 @@ WITH_DATA(x, y), WITH_DATA(x2, y2) to a list of arguments consumed by the macro 
 x, y, x2, y2
 Actions are discarded, since no marshalling will be done for those when sending state data */
 #define TO_AGENT_DT_EXPAND_MODEL_PROPERTY(x, y) ,x,y
+
+#define TO_AGENT_DT_EXPAND_MODEL_REPORTED_PROPERTY(x, y) ,x,y
+
+#define TO_AGENT_DT_EXPAND_MODEL_DESIRED_PROPERTY(x, y, ...) ,x,y
+
 #define TO_AGENT_DT_EXPAND_MODEL_ACTION(...) 
 
 #define TO_AGENT_DT_EXPAND_ELEMENT_ARGS(N, ...) TO_AGENT_DT_EXPAND_##__VA_ARGS__
@@ -327,10 +377,10 @@ Actions are discarded, since no marshalling will be done for those when sending 
         size_t memberCount = sizeof(memberNames) / sizeof(memberNames[0]); \
         (void)value; \
         if (memberCount == 0) \
-                { \
+        { \
             result = AGENT_DATA_TYPES_OK; \
-                } \
-                else \
+        } \
+        else \
         { \
             AGENT_DATA_TYPE members[sizeof(memberNames) / sizeof(memberNames[0])]; \
             DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(phantomName, 2); \
@@ -358,19 +408,37 @@ Actions are discarded, since no marshalling will be done for those when sending 
 #define REFLECTED_LIST_HEAD(name) \
     static const REFLECTED_DATA_FROM_DATAPROVIDER ALL_REFLECTED(name) = { &C2(REFLECTED_, C1(DEC(__COUNTER__))) };
 #define REFLECTED_STRUCT(name) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_STRUCT_TYPE,   &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {TOSTRING(name)}, {0}, {0}, {0}, {0}} };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_STRUCT_TYPE,               &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {TOSTRING(name)}, {0}, {0}, {0}, {0}} };
 #define REFLECTED_FIELD(XstructName, XfieldType, XfieldName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_FIELD_TYPE,    &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {TOSTRING(XfieldName), TOSTRING(XfieldType), TOSTRING(XstructName)}, {0}, {0}, {0} } };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_FIELD_TYPE,                &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {TOSTRING(XfieldName), TOSTRING(XfieldType), TOSTRING(XstructName)}, {0}, {0}, {0} } };
 #define REFLECTED_MODEL(name) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_MODEL_TYPE,    &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {TOSTRING(name)} } };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_MODEL_TYPE,                &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {0}, {0}, {TOSTRING(name)} } };
 #define REFLECTED_PROPERTY(type, name, modelName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_PROPERTY_TYPE, &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {TOSTRING(name), TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##name, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0}} };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_PROPERTY_TYPE,             &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {TOSTRING(name), TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##modelName##name, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0} } };
+#define REFLECTED_REPORTED_PROPERTY(type, name, modelName) \
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_REPORTED_PROPERTY_TYPE,    &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {TOSTRING(name), TOSTRING(type), Create_AGENT_DATA_TYPE_From_Ptr_##modelName##name, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0} } };
+
+
+#define REFLECTED_DESIRED_PROPERTY_WITH_ON_DESIRED_PROPERTY_CHANGE(type, name, modelName, COUNTER, onDesiredPropertyChange) \
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(COUNTER))) =      { REFLECTION_DESIRED_PROPERTY_TYPE,     &C2(REFLECTED_, C1(DEC(COUNTER))),         { {onDesiredPropertyChange, DesiredPropertyInitialize_##modelName##name, DesiredPropertyDeinitialize_##modelName##name, TOSTRING(name), TOSTRING(type), (int(*)(const AGENT_DATA_TYPE*, void*))FromAGENT_DATA_TYPE_##type, offsetof(modelName, name), sizeof(type), TOSTRING(modelName)}, {0}, {0}, {0}, {0}, {0}, {0}} };
+
+#define REFLECTED_DESIRED_PROPERTY(type, name, modelName, ...)                                                              \
+    IF(COUNT_ARG(__VA_ARGS__),                                                                                              \
+        DELAY(REFLECTED_DESIRED_PROPERTY_WITH_ON_DESIRED_PROPERTY_CHANGE)(type, name, modelName,__COUNTER__, __VA_ARGS__),  \
+        DELAY(REFLECTED_DESIRED_PROPERTY_WITH_ON_DESIRED_PROPERTY_CHANGE)(type, name, modelName,DEC(__COUNTER__), NULL)     \
+    )                                                                                                                       \
+
 #define REFLECTED_ACTION(name, argc, argv, fn, modelName) \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_ACTION_TYPE,   &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {TOSTRING(name), (0 ? (uintptr_t)("", "") : argc), argv, fn, TOSTRING(modelName)}, {0}} };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, C1(INC(__COUNTER__))) = { REFLECTION_ACTION_TYPE,               &C2(REFLECTED_, C1(DEC(DEC(__COUNTER__)))), { {0}, {0}, {0}, {0}, {0}, {TOSTRING(name), (0 ? (uintptr_t)("", "") : argc), argv, fn, TOSTRING(modelName)}, {0}} };
 #define REFLECTED_END_OF_LIST \
-    static const REFLECTED_SOMETHING C2(REFLECTED_, __COUNTER__) = { REFLECTION_NOTHING, NULL, { {0}, {0}, {0}, {0}, {0}} };
+    static const REFLECTED_SOMETHING C2(REFLECTED_, __COUNTER__) = {          REFLECTION_NOTHING,                   NULL,                                       { {0}, {0}, {0}, {0}, {0}, {0}, {0}} };
 
 #define EXPAND_MODEL_PROPERTY(type, name) EXPAND_ARGS(MODEL_PROPERTY, type, name)
+
+#define EXPAND_MODEL_REPORTED_PROPERTY(type, name) EXPAND_ARGS(MODEL_REPORTED_PROPERTY, type, name)
+
+#define EXPAND_MODEL_DESIRED_PROPERTY(type, name, ...) EXPAND_ARGS(MODEL_DESIRED_PROPERTY, type, name, __VA_ARGS__)
+
 #define EXPAND_MODEL_ACTION(...) EXPAND_ARGS(MODEL_ACTION, __VA_ARGS__)
 
 #define BUILD_MODEL_STRUCT(elem) INSERT_FIELD_FOR_##elem
@@ -381,19 +449,71 @@ Actions are discarded, since no marshalling will be done for those when sending 
 
 #define CREATE_MODEL_ELEMENT(modelName, elem) EXPAND_ARGS(CREATE_ELEMENT(modelName, elem))
 
+
+#define CREATE_MODEL_ENTITY_GLOBAL_INITIALIZATION(modelName, callType, ...) EXPAND_ARGS(CREATE_GLOBAL_INITIALIZE_##callType(modelName, __VA_ARGS__))
+#define CREATE_SOMETHING_GLOBAL_INITIALIZATION(modelName, ...) EXPAND_ARGS(CREATE_MODEL_ENTITY_GLOBAL_INITIALIZATION(modelName, __VA_ARGS__))
+#define CREATE_ELEMENT_GLOBAL_INITIALIZATION(modelName, elem) EXPAND_ARGS(CREATE_SOMETHING_GLOBAL_INITIALIZATION(modelName, EXPAND_ARGS(EXPAND_##elem)))
+#define CREATE_MODEL_ELEMENT_GLOBAL_INITIALIZE(modelName, elem) EXPAND_ARGS(CREATE_ELEMENT_GLOBAL_INITIALIZATION(modelName, elem))
+
+#define CREATE_MODEL_ENTITY_GLOBAL_DEINITIALIZATION(modelName, callType, ...) EXPAND_ARGS(CREATE_GLOBAL_DEINITIALIZE_##callType(modelName, __VA_ARGS__))
+#define CREATE_SOMETHING_GLOBAL_DEINITIALIZATION(modelName, ...) EXPAND_ARGS(CREATE_MODEL_ENTITY_GLOBAL_DEINITIALIZATION(modelName, __VA_ARGS__))
+#define CREATE_ELEMENT_GLOBAL_DEINITIALIZATION(modelName, elem) EXPAND_ARGS(CREATE_SOMETHING_GLOBAL_DEINITIALIZATION(modelName, EXPAND_ARGS(EXPAND_##elem)))
+#define CREATE_MODEL_ELEMENT_GLOBAL_DEINITIALIZE(modelName, elem) EXPAND_ARGS(CREATE_ELEMENT_GLOBAL_DEINITIALIZATION(modelName, elem))
+
 #define INSERT_FIELD_INTO_STRUCT(x, y) x y;
+
+
 #define INSERT_FIELD_FOR_MODEL_PROPERTY(type, name) INSERT_FIELD_INTO_STRUCT(type, name)
+#define CREATE_GLOBAL_INITIALIZE_MODEL_PROPERTY(modelName, type, name) /*do nothing, this is written by user*/
+#define CREATE_GLOBAL_DEINITIALIZE_MODEL_PROPERTY(modelName, type, name) /*do nothing, this is user's stuff*/
+
+/*REPORTED_PROPERTY is not different than regular WITH_DATA*/
+#define INSERT_FIELD_FOR_MODEL_REPORTED_PROPERTY(type, name) INSERT_FIELD_INTO_STRUCT(type, name)
+#define CREATE_GLOBAL_INITIALIZE_MODEL_REPORTED_PROPERTY(modelName, type,name) GlobalInitialize_##type((char*)destination+offsetof(modelName, name));
+#define CREATE_GLOBAL_DEINITIALIZE_MODEL_REPORTED_PROPERTY(modelName, type,name) GlobalDeinitialize_##type((char*)destination+offsetof(modelName, name));
+
+/*DESIRED_PROPERTY is not different than regular WITH_DATA*/
+#define INSERT_FIELD_FOR_MODEL_DESIRED_PROPERTY(type, name, ...) INSERT_FIELD_INTO_STRUCT(type, name)
+#define CREATE_GLOBAL_INITIALIZE_MODEL_DESIRED_PROPERTY(modelName, type, name, ...) /*do nothing*/
+#define CREATE_GLOBAL_DEINITIALIZE_MODEL_DESIRED_PROPERTY(modelName, type, name, ...) /*do nothing*/
+
 #define INSERT_FIELD_FOR_MODEL_ACTION(name, ...) /* action isn't a part of the model struct */
+#define CREATE_GLOBAL_INITIALIZE_MODEL_ACTION(...) /*do nothing*/
+#define CREATE_GLOBAL_DEINITIALIZE_MODEL_ACTION(...) /*do nothing*/
 
 #define CREATE_MODEL_PROPERTY(modelName, type, name) \
     IMPL_PROPERTY(type, name, modelName)
 
+#define CREATE_MODEL_REPORTED_PROPERTY(modelName, type, name) \
+    IMPL_REPORTED_PROPERTY(type, name, modelName)
+
+#define CREATE_MODEL_DESIRED_PROPERTY(modelName, type, name, ...) \
+    IMPL_DESIRED_PROPERTY(type, name, modelName, __VA_ARGS__)
+
 #define IMPL_PROPERTY(propertyType, propertyName, modelName) \
-    static int Create_AGENT_DATA_TYPE_From_Ptr_##propertyName(void* param, AGENT_DATA_TYPE* dest) \
+    static int Create_AGENT_DATA_TYPE_From_Ptr_##modelName##propertyName(void* param, AGENT_DATA_TYPE* dest) \
     { \
         return C1(ToAGENT_DATA_TYPE_##propertyType)(dest, *(propertyType*)param); \
     } \
     REFLECTED_PROPERTY(propertyType, propertyName, modelName)
+
+#define IMPL_REPORTED_PROPERTY(propertyType, propertyName, modelName) \
+    static int Create_AGENT_DATA_TYPE_From_Ptr_##modelName##propertyName(void* param, AGENT_DATA_TYPE* dest) \
+    { \
+        return C1(ToAGENT_DATA_TYPE_##propertyType)(dest, *(propertyType*)param); \
+    } \
+    REFLECTED_REPORTED_PROPERTY(propertyType, propertyName, modelName)
+
+#define IMPL_DESIRED_PROPERTY(propertyType, propertyName, modelName, ...)           \
+    static void DesiredPropertyInitialize_##modelName##propertyName(void* destination)                             \
+    {                                                                                                   \
+        GlobalInitialize_##propertyType(destination);                                                   \
+    }                                                                                                   \
+    static void DesiredPropertyDeinitialize_##modelName##propertyName(void* destination)                           \
+    {                                                                                                   \
+       GlobalDeinitialize_##propertyType(destination);                                                  \
+    }                                                                                                   \
+    REFLECTED_DESIRED_PROPERTY(propertyType, propertyName, modelName, __VA_ARGS__)          \
 
 #define CREATE_MODEL_ACTION(modelName, actionName, ...) \
     DEFINITION_THAT_CAN_SUSTAIN_A_COMMA_STEAL(modelName##actionName, 1); \
@@ -430,7 +550,7 @@ Actions are discarded, since no marshalling will be done for those when sending 
             FOR_EACH_2(START_BUILD_LOCAL_PARAMETER, __VA_ARGS__) \
             INSTRUCTION_THAT_CAN_SUSTAIN_A_COMMA_STEAL; \
             result = actionName((modelName*)device FOR_EACH_2(PUSH_LOCAL_PARAMETER, __VA_ARGS__)); \
-            FOR_EACH_2(END_BUILD_LOCAL_PARAMETER, __VA_ARGS__) \
+            FOR_EACH_2_REVERSE(END_BUILD_LOCAL_PARAMETER, __VA_ARGS__) \
         } \
         return result; \
     }
@@ -574,7 +694,7 @@ Actions are discarded, since no marshalling will be done for those when sending 
 #define IFCOMMA_126 ,
 #define IFCOMMA_128 ,
 
-#define DEFINE_LOCAL_PARAMETER(type, name) type C2(name,_local);
+#define DEFINE_LOCAL_PARAMETER(type, name) type C2(name,_local); GlobalInitialize_##type(& C2(name, _local));
 
 #define START_BUILD_LOCAL_PARAMETER(type, name) \
     if (C2(FromAGENT_DATA_TYPE_, type)(&values[iParameter], &C2(name, _local)) != AGENT_DATA_TYPES_OK) \
@@ -634,6 +754,16 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, double)(const AGENT_DATA
     return result;
 }
 
+static void C2(GlobalInitialize_, double)(void* dest)
+{
+    *(double*)dest = 0.0;
+}
+
+static void C2(GlobalDeinitialize_, double)(void* dest)
+{
+    (void)(dest);
+}
+
 /*Codes_SRS_SERIALIZER_99_021:[ Create_AGENT_DATA_TYPE_from_FLOAT]*/
 /*Codes_SRS_SERIALIZER_99_006:[ float]*/
 static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, float)(AGENT_DATA_TYPE* dest, float source)
@@ -654,6 +784,16 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, float)(const AGENT_DATA_
         result = AGENT_DATA_TYPES_OK;
     }
     return result;
+}
+
+static void C2(GlobalInitialize_, float)(void* dest)
+{
+    *(float*)dest = 0.0f;
+}
+
+static void C2(GlobalDeinitialize_, float)(void* dest)
+{
+    (void)(dest);
 }
 
 
@@ -679,6 +819,16 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, int)(const AGENT_DATA_TY
     return result;
 }
 
+static void C2(GlobalInitialize_, int)(void* dest)
+{
+    *(int*)dest = 0;
+}
+
+static void C2(GlobalDeinitialize_, int)(void* dest)
+{
+    (void)(dest);
+}
+
 /*Codes_SRS_SERIALIZER_99_022:[ Create_AGENT_DATA_TYPE_from_SINT64]*/
 /*Codes_SRS_SERIALIZER_99_007:[ long]*/
 static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, long)(AGENT_DATA_TYPE* dest, long source)
@@ -701,6 +851,17 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, long)(const AGENT_DATA_T
     return result;
 }
 
+static void C2(GlobalInitialize_, long)(void* dest)
+{
+    *(long*)dest = 0;
+}
+
+static void C2(GlobalDeinitialize_, long)(void* dest)
+{
+    (void)(dest);
+}
+
+
 /*Codes_SRS_SERIALIZER_99_023:[ Create_AGENT_DATA_TYPE_from_SINT8]*/
 /*Codes_SRS_SERIALIZER_99_008:[ int8_t]*/
 static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, int8_t)(AGENT_DATA_TYPE* dest, int8_t source)
@@ -721,6 +882,16 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, int8_t)(const AGENT_DATA
         result = AGENT_DATA_TYPES_OK;
     }
     return result;
+}
+
+static void C2(GlobalInitialize_, int8_t)(void* dest)
+{
+    *(int8_t*)dest = 0;
+}
+
+static void C2(GlobalDeinitialize_, int8_t)(void* dest)
+{
+    (void)(dest);
 }
 
 /*Codes_SRS_SERIALIZER_99_024:[ Create_AGENT_DATA_TYPE_from_UINT8]*/
@@ -745,6 +916,17 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, uint8_t)(const AGENT_DAT
     return result;
 }
 
+static void C2(GlobalInitialize_, uint8_t)(void* dest)
+{
+    *(uint8_t*)dest = 0;
+}
+
+static void C2(GlobalDeinitialize_, uint8_t)(void* dest)
+{
+    (void)(dest);
+}
+
+
 /*Codes_SRS_SERIALIZER_99_025:[ Create_AGENT_DATA_TYPE_from_SINT16]*/
 /*Codes_SRS_SERIALIZER_99_010:[ int16_t]*/
 static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, int16_t)(AGENT_DATA_TYPE* dest, int16_t source)
@@ -765,6 +947,16 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, int16_t)(const AGENT_DAT
         result = AGENT_DATA_TYPES_OK;
     }
     return result;
+}
+
+static void C2(GlobalInitialize_, int16_t)(void* dest)
+{
+    *(int16_t*)dest = 0;
+}
+
+static void C2(GlobalDeinitialize_, int16_t)(void* dest)
+{
+    (void)(dest);
 }
 
 /*Codes_SRS_SERIALIZER_99_026:[ Create_AGENT_DATA_TYPE_from_SINT32]*/
@@ -789,6 +981,16 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, int32_t)(const AGENT_DAT
     return result;
 }
 
+static void C2(GlobalInitialize_, int32_t)(void* dest)
+{
+    *(int32_t*)dest = 0;
+}
+
+static void C2(GlobalDeinitialize_, int32_t)(void* dest)
+{
+    (void)(dest);
+}
+
 /*Codes_SRS_SERIALIZER_99_027:[ Create_AGENT_DATA_TYPE_from_SINT64]*/
 /*Codes_SRS_SERIALIZER_99_012:[ int64_t]*/
 static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, int64_t)(AGENT_DATA_TYPE* dest, int64_t source)
@@ -809,6 +1011,16 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, int64_t)(const AGENT_DAT
         result = AGENT_DATA_TYPES_OK;
     }
     return result;
+}
+
+static void C2(GlobalInitialize_, int64_t)(void* dest)
+{
+    *(int64_t*)dest = 0;
+}
+
+static void C2(GlobalDeinitialize_, int64_t)(void* dest)
+{
+    (void)(dest);
 }
 
 /*Codes_SRS_SERIALIZER_99_013:[ bool]*/
@@ -832,6 +1044,16 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, bool)(const AGENT_DATA_T
     return result;
 }
 
+static void C2(GlobalInitialize_, bool)(void* dest)
+{
+    *(bool*)dest = false;
+}
+
+static void C2(GlobalDeinitialize_, bool)(void* dest)
+{
+    (void)(dest);
+}
+
 /*Codes_SRS_SERIALIZER_99_014:[ ascii_char_ptr]*/
 static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, ascii_char_ptr)(AGENT_DATA_TYPE* dest, ascii_char_ptr source)
 {
@@ -847,10 +1069,37 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, ascii_char_ptr)(const AG
     }
     else
     {
-        *dest = agentData->value.edmString.chars;
-        result = AGENT_DATA_TYPES_OK;
+        if (*dest != NULL)
+        {
+            free(*dest);
+            *dest = NULL;
+        }
+
+        if (mallocAndStrcpy_s(dest, agentData->value.edmString.chars) != 0)
+        {
+            LogError("failure in mallocAndStrcpy_s");
+            result = AGENT_DATA_TYPES_ERROR;
+        }
+        else
+        {
+            result = AGENT_DATA_TYPES_OK;
+        }
+        
     }
     return result;
+}
+
+static void C2(GlobalInitialize_, ascii_char_ptr)(void* dest)
+{
+    *(ascii_char_ptr*)dest = NULL;
+}
+
+static void C2(GlobalDeinitialize_, ascii_char_ptr)(void* dest)
+{
+    if (*(ascii_char_ptr*)dest != NULL)
+    {
+        free(*(ascii_char_ptr*)dest);
+    }
 }
 
 static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, ascii_char_ptr_no_quotes)(AGENT_DATA_TYPE* dest, ascii_char_ptr_no_quotes source)
@@ -867,10 +1116,36 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, ascii_char_ptr_no_quotes
     }
     else
     {
-        *dest = agentData->value.edmStringNoQuotes.chars;
-        result = AGENT_DATA_TYPES_OK;
+        if (*dest != NULL)
+        {
+            free(*dest);
+            *dest = NULL;
+        }
+
+        if (mallocAndStrcpy_s(dest, agentData->value.edmStringNoQuotes.chars) != 0)
+        {
+            LogError("failure in mallocAndStrcpy_s");
+            result = AGENT_DATA_TYPES_ERROR;
+        }
+        else
+        {
+            result = AGENT_DATA_TYPES_OK;
+        }
     }
     return result;
+}
+
+static void C2(GlobalInitialize_, ascii_char_ptr_no_quotes)(void* dest)
+{
+    *(ascii_char_ptr_no_quotes*)dest = NULL;
+}
+
+static void C2(GlobalDeinitialize_, ascii_char_ptr_no_quotes)(void* dest)
+{
+    if (*(ascii_char_ptr_no_quotes*)dest != NULL)
+    {
+        free(*(ascii_char_ptr_no_quotes*)dest);
+    }
 }
 
 /*Codes_SRS_SERIALIZER_99_051:[ EDM_DATE_TIME_OFFSET*/
@@ -895,6 +1170,16 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, EDM_DATE_TIME_OFFSET)(co
     return result;
 }
 
+static void C2(GlobalInitialize_, EDM_DATE_TIME_OFFSET)(void* dest)
+{
+    memset(dest, 0, sizeof(EDM_DATE_TIME_OFFSET));
+}
+
+static void C2(GlobalDeinitialize_, EDM_DATE_TIME_OFFSET)(void* dest)
+{
+    (void)(dest);
+}
+
 /*Codes_SRS_SERIALIZER_99_072:[ EDM_GUID]*/
 /*Codes_SRS_SERIALIZER_99_073:[ Create_AGENT_DATA_TYPE_from_EDM_GUID]*/
 static AGENT_DATA_TYPES_RESULT C2(ToAGENT_DATA_TYPE_, EDM_GUID)(AGENT_DATA_TYPE* dest, EDM_GUID guid)
@@ -916,6 +1201,17 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, EDM_GUID)(const AGENT_DA
     }
     return result;
 }
+
+static void C2(GlobalInitialize_, EDM_GUID)(void* dest)
+{
+    memset(dest, 0, sizeof(EDM_GUID));
+}
+
+static void C2(GlobalDeinitialize_, EDM_GUID)(void* dest)
+{
+    (void)(dest);
+}
+
 
 /*Codes_SRS_SERIALIZER_99_074:[ EDM_BINARY]*/
 /*Codes_SRS_SERIALIZER_99_075:[ Create_AGENT_DATA_TYPE_from_EDM_BINARY]*/
@@ -945,6 +1241,20 @@ static AGENT_DATA_TYPES_RESULT C2(FromAGENT_DATA_TYPE_, EDM_BINARY)(const AGENT_
         }
     }
     return result;
+}
+
+static void C2(GlobalInitialize_, EDM_BINARY)(void* dest)
+{
+    ((EDM_BINARY*)dest)->data = NULL;
+    ((EDM_BINARY*)dest)->size = 0;
+}
+
+static void C2(GlobalDeinitialize_, EDM_BINARY)(void* dest)
+{
+    if ((((EDM_BINARY*)dest)->data) != NULL)
+    {
+        free(((EDM_BINARY*)dest)->data);
+    }
 }
 
 static void C2(destroyLocalParameter, EDM_BINARY)(EDM_BINARY* value)
@@ -1094,12 +1404,19 @@ static void C2(destroyLocalParameter, bool)(bool* value)
 
 static void C2(destroyLocalParameter, ascii_char_ptr)(ascii_char_ptr* value)
 {
-    (void)value;
+    if (value != NULL)
+    {
+        free(*value);
+    }
+    
 }
 
 static void C2(destroyLocalParameter, ascii_char_ptr_no_quotes)(ascii_char_ptr_no_quotes* value)
 {
-    (void)value;
+    if (value != NULL)
+    {
+        free(*value);
+    }
 }
 
 #ifdef __cplusplus

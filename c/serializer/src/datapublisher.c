@@ -15,6 +15,7 @@
 #include "schema.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/xlogging.h"
+#include "azure_c_shared_utility/vector.h"
 
 DEFINE_ENUM_STRINGS(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES)
 
@@ -26,23 +27,28 @@ DEFINE_ENUM_STRINGS(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES)
 /* Codes_SRS_DATA_PUBLISHER_99_067:[ Before any call to DataPublisher_SetMaxBufferSize, the default max buffer size shall be equal to 10KB.] */
 static size_t maxBufferSize_ = DEFAULT_MAX_BUFFER_SIZE;
 
-typedef struct DATA_PUBLISHER_INSTANCE_TAG
+typedef struct DATA_PUBLISHER_HANDLE_DATA_TAG
 {
     DATA_MARSHALLER_HANDLE DataMarshallerHandle;
     SCHEMA_MODEL_TYPE_HANDLE ModelHandle;
-} DATA_PUBLISHER_INSTANCE;
+} DATA_PUBLISHER_HANDLE_DATA;
 
-typedef struct TRANSACTION_TAG
+typedef struct TRANSACTION_HANDLE_DATA_TAG
 {
-    DATA_PUBLISHER_INSTANCE* DataPublisherInstance;
+    DATA_PUBLISHER_HANDLE_DATA* DataPublisherInstance;
     size_t ValueCount;
     DATA_MARSHALLER_VALUE* Values;
-} TRANSACTION;
+} TRANSACTION_HANDLE_DATA;
+
+typedef struct REPORTED_PROPERTIES_TRANSACTION_HANDLE_DATA_TAG
+{
+    DATA_PUBLISHER_HANDLE_DATA* DataPublisherInstance;
+    VECTOR_HANDLE value; /*holds (DATA_MARSHALLER_VALUE*) */
+}REPORTED_PROPERTIES_TRANSACTION_HANDLE_DATA;
 
 DATA_PUBLISHER_HANDLE DataPublisher_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, bool includePropertyPath)
 {
-    DATA_PUBLISHER_HANDLE result;
-    DATA_PUBLISHER_INSTANCE* dataPublisherInstance;
+    DATA_PUBLISHER_HANDLE_DATA* result;
 
     /* Codes_SRS_DATA_PUBLISHER_99_042:[ If a NULL argument is passed to it, DataPublisher_Create shall return NULL.] */
     if (
@@ -52,7 +58,7 @@ DATA_PUBLISHER_HANDLE DataPublisher_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle,
         result = NULL;
         LogError("(result = %s)", ENUM_TO_STRING(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_INVALID_ARG));
     }
-    else if ((dataPublisherInstance = (DATA_PUBLISHER_INSTANCE*)malloc(sizeof(DATA_PUBLISHER_INSTANCE))) == NULL)
+    else if ((result = (DATA_PUBLISHER_HANDLE_DATA*)malloc(sizeof(DATA_PUBLISHER_HANDLE_DATA))) == NULL)
     {
         /* Codes_SRS_DATA_PUBLISHER_99_047:[ For any other error not specified here, DataPublisher_Create shall return NULL.] */
         result = NULL;
@@ -62,9 +68,9 @@ DATA_PUBLISHER_HANDLE DataPublisher_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle,
     {
         /* Codes_SRS_DATA_PUBLISHER_99_043:[ DataPublisher_Create shall initialize and hold a handle to a DataMarshaller instance.] */
         /* Codes_SRS_DATA_PUBLISHER_01_001: [DataPublisher_Create shall pass the includePropertyPath argument to DataMarshaller_Create.] */
-        if ((dataPublisherInstance->DataMarshallerHandle = DataMarshaller_Create(modelHandle, includePropertyPath)) == NULL)
+        if ((result->DataMarshallerHandle = DataMarshaller_Create(modelHandle, includePropertyPath)) == NULL)
         {
-            free(dataPublisherInstance);
+            free(result);
 
             /* Codes_SRS_DATA_PUBLISHER_99_044:[ If the creation of the DataMarshaller instance fails, DataPublisher_Create shall return NULL.] */
             result = NULL;
@@ -72,10 +78,8 @@ DATA_PUBLISHER_HANDLE DataPublisher_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle,
         }
         else
         {
-            dataPublisherInstance->ModelHandle = modelHandle;
-
             /* Codes_SRS_DATA_PUBLISHER_99_041:[ DataPublisher_Create shall create a new DataPublisher instance and return a non-NULL handle in case of success.] */
-            result = dataPublisherInstance;
+            result->ModelHandle = modelHandle;
         }
     }
 
@@ -86,7 +90,7 @@ void DataPublisher_Destroy(DATA_PUBLISHER_HANDLE dataPublisherHandle)
 {
     if (dataPublisherHandle != NULL)
     {
-        DATA_PUBLISHER_INSTANCE* dataPublisherInstance = (DATA_PUBLISHER_INSTANCE*)dataPublisherHandle;
+        DATA_PUBLISHER_HANDLE_DATA* dataPublisherInstance = (DATA_PUBLISHER_HANDLE_DATA*)dataPublisherHandle;
         DataMarshaller_Destroy(dataPublisherInstance->DataMarshallerHandle);
         
         free(dataPublisherHandle);
@@ -95,7 +99,7 @@ void DataPublisher_Destroy(DATA_PUBLISHER_HANDLE dataPublisherHandle)
 
 TRANSACTION_HANDLE DataPublisher_StartTransaction(DATA_PUBLISHER_HANDLE dataPublisherHandle)
 {
-    TRANSACTION* transaction;
+    TRANSACTION_HANDLE_DATA* transaction;
 
     /* Codes_SRS_DATA_PUBLISHER_99_038:[ If DataPublisher_StartTransaction is called with a NULL argument it shall return NULL.] */
     if (dataPublisherHandle == NULL)
@@ -106,7 +110,7 @@ TRANSACTION_HANDLE DataPublisher_StartTransaction(DATA_PUBLISHER_HANDLE dataPubl
     else
     {
         /* Codes_SRS_DATA_PUBLISHER_99_007:[ A call to DataPublisher_StartTransaction shall start a new transaction.] */
-        transaction = (TRANSACTION*)malloc(sizeof(TRANSACTION));
+        transaction = (TRANSACTION_HANDLE_DATA*)malloc(sizeof(TRANSACTION_HANDLE_DATA));
         if (transaction == NULL)
         {
             LogError("Allocating transaction failed (Error code: %s)", ENUM_TO_STRING(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_ERROR));
@@ -115,7 +119,7 @@ TRANSACTION_HANDLE DataPublisher_StartTransaction(DATA_PUBLISHER_HANDLE dataPubl
         {
             transaction->ValueCount = 0;
             transaction->Values = NULL;
-            transaction->DataPublisherInstance = (DATA_PUBLISHER_INSTANCE*)dataPublisherHandle;
+            transaction->DataPublisherInstance = (DATA_PUBLISHER_HANDLE_DATA*)dataPublisherHandle;
         }
     }
 
@@ -145,7 +149,7 @@ DATA_PUBLISHER_RESULT DataPublisher_PublishTransacted(TRANSACTION_HANDLE transac
     }
     else
     {
-        TRANSACTION* transaction = (TRANSACTION*)transactionHandle;
+        TRANSACTION_HANDLE_DATA* transaction = (TRANSACTION_HANDLE_DATA*)transactionHandle;
         AGENT_DATA_TYPE* propertyValue;
 
         if (!Schema_ModelPropertyByPathExists(transaction->DataPublisherInstance->ModelHandle, propertyPath))
@@ -243,7 +247,7 @@ DATA_PUBLISHER_RESULT DataPublisher_EndTransaction(TRANSACTION_HANDLE transactio
     /*Codes_SRS_DATA_PUBLISHER_02_006: [If the destination argument is NULL, DataPublisher_EndTransaction shall return DATA_PUBLISHER_INVALID_ARG.] */
     /*Codes_SRS_DATA_PUBLISHER_02_007: [If the destinationSize argument is NULL, DataPublisher_EndTransaction shall return DATA_PUBLISHER_INVALID_ARG.] */
     if (
-        (transactionHandle == NULL) || 
+        (transactionHandle == NULL) ||
         (destination == NULL) ||
         (destinationSize == NULL)
         )
@@ -254,7 +258,7 @@ DATA_PUBLISHER_RESULT DataPublisher_EndTransaction(TRANSACTION_HANDLE transactio
     }
     else
     {
-        TRANSACTION* transaction = (TRANSACTION*)transactionHandle;
+        TRANSACTION_HANDLE_DATA* transaction = (TRANSACTION_HANDLE_DATA*)transactionHandle;
 
         if (transaction->ValueCount == 0)
         {
@@ -295,7 +299,7 @@ DATA_PUBLISHER_RESULT DataPublisher_CancelTransaction(TRANSACTION_HANDLE transac
     }
     else
     {
-        TRANSACTION* transaction = (TRANSACTION*)transactionHandle;
+        TRANSACTION_HANDLE_DATA* transaction = (TRANSACTION_HANDLE_DATA*)transactionHandle;
         size_t i;
 
         /* Codes_SRS_DATA_PUBLISHER_99_015:[ DataPublisher_CancelTransaction shall dispose of any resources associated with the transaction.] */
@@ -310,7 +314,7 @@ DATA_PUBLISHER_RESULT DataPublisher_CancelTransaction(TRANSACTION_HANDLE transac
         free(transaction->Values);
         free(transaction);
 
-        /* Codes_SRS_DATA_PUBLISHER_99_013:[ A call to DataPublisher_CancelTransaction shall dispose of the transaction without dispatching 
+        /* Codes_SRS_DATA_PUBLISHER_99_013:[ A call to DataPublisher_CancelTransaction shall dispose of the transaction without dispatching
                                         the data to the DataMarshaller module and it shall return DATA_PUBLISHER_OK.] */
         result = DATA_PUBLISHER_OK;
     }
@@ -328,4 +332,245 @@ void DataPublisher_SetMaxBufferSize(size_t value)
 size_t DataPublisher_GetMaxBufferSize(void)
 {
     return maxBufferSize_;
+}
+
+REPORTED_PROPERTIES_TRANSACTION_HANDLE DataPublisher_CreateTransaction_ReportedProperties(DATA_PUBLISHER_HANDLE dataPublisherHandle)
+{
+    REPORTED_PROPERTIES_TRANSACTION_HANDLE_DATA* result;
+    /*Codes_SRS_DATA_PUBLISHER_02_027: [ If argument dataPublisherHandle is NULL then DataPublisher_CreateTransaction_ReportedProperties shall fail and return NULL. ]*/
+    if (dataPublisherHandle == NULL)
+    {
+        LogError("invalid argument DATA_PUBLISHER_HANDLE dataPublisherHandle=%p", dataPublisherHandle);
+        result = NULL;
+    }
+    else
+    {
+        /*Codes_SRS_DATA_PUBLISHER_02_028: [ DataPublisher_CreateTransaction_ReportedProperties shall create a VECTOR_HANDLE holding the individual elements of the transaction (DATA_MARSHALLER_VALUE). ]*/
+        result = (REPORTED_PROPERTIES_TRANSACTION_HANDLE_DATA*)malloc(sizeof(REPORTED_PROPERTIES_TRANSACTION_HANDLE_DATA));
+        if (result == NULL)
+        {
+            /*Codes_SRS_DATA_PUBLISHER_02_029: [ If any error occurs then DataPublisher_CreateTransaction_ReportedProperties shall fail and return NULL. ]*/
+            LogError("unable to malloc");
+            /*return as is */
+        }
+        else
+        {
+            result->value = VECTOR_create(sizeof(DATA_MARSHALLER_VALUE*));
+            if (result->value == NULL)
+            {
+                /*Codes_SRS_DATA_PUBLISHER_02_029: [ If any error occurs then DataPublisher_CreateTransaction_ReportedProperties shall fail and return NULL. ]*/
+                LogError("unable to VECTOR_create");
+                free(result);
+                result = NULL;
+            }
+            else
+            {
+                /*Codes_SRS_DATA_PUBLISHER_02_030: [ Otherwise DataPublisher_CreateTransaction_ReportedProperties shall succeed and return a non-NULL handle. ]*/
+                result->DataPublisherInstance = dataPublisherHandle;
+            }
+        }
+    }
+
+    return result;
+}
+
+static bool reportedPropertyExistsByPath(const void* element, const void* value)
+{
+    DATA_MARSHALLER_VALUE* dataMarshallerValue = *(DATA_MARSHALLER_VALUE**)element;
+    return (strcmp(dataMarshallerValue->PropertyPath, (const char*)value) == 0);
+}
+
+DATA_PUBLISHER_RESULT DataPublisher_PublishTransacted_ReportedProperty(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle, const char* reportedPropertyPath, const AGENT_DATA_TYPE* data)
+{
+    DATA_PUBLISHER_RESULT result;
+    /*Codes_SRS_DATA_PUBLISHER_02_009: [ If argument transactionHandle is NULL then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
+    /*Codes_SRS_DATA_PUBLISHER_02_010: [ If argument reportedPropertyPath is NULL then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
+    /*Codes_SRS_DATA_PUBLISHER_02_011: [ If argument data is NULL then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
+    if (
+        (transactionHandle == NULL) ||
+        (reportedPropertyPath == NULL) || 
+        (data == NULL)
+        )
+    {
+        LogError("invalid argument REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle=%p, const char* reportedPropertyPath=%p, const AGENT_DATA_TYPE* data=%p", transactionHandle, reportedPropertyPath, data);
+        result = DATA_PUBLISHER_INVALID_ARG;
+    }
+    else
+    {
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE_DATA* handleData = (REPORTED_PROPERTIES_TRANSACTION_HANDLE_DATA*)transactionHandle;
+        /*Codes_SRS_DATA_PUBLISHER_02_012: [ DataPublisher_PublishTransacted_ReportedProperty shall verify that a reported property having the path reportedPropertyPath exists in the model by calling Schema_ModelReportedPropertyByPathExists ]*/
+        if (!Schema_ModelReportedPropertyByPathExists(handleData->DataPublisherInstance->ModelHandle, reportedPropertyPath))
+        {
+            /*Codes_SRS_DATA_PUBLISHER_02_013: [ If a reported property with path reportedPropertyPath does not exist in the model then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
+            LogError("unable to find a reported property by path \"%s\"", reportedPropertyPath);
+            result = DATA_PUBLISHER_INVALID_ARG;
+        }
+        else
+        {
+            DATA_MARSHALLER_VALUE** existingValue = VECTOR_find_if(handleData->value, reportedPropertyExistsByPath, reportedPropertyPath);
+            if(existingValue != NULL)
+            {
+                /*Codes_SRS_DATA_PUBLISHER_02_014: [ If the same (by reportedPropertypath) reported property has already been added to the transaction, then DataPublisher_PublishTransacted_ReportedProperty shall overwrite the previous reported property. ]*/
+                AGENT_DATA_TYPE *clone = (AGENT_DATA_TYPE *)malloc(sizeof(AGENT_DATA_TYPE));
+                if(clone == NULL)
+                {
+                    /*Codes_SRS_DATA_PUBLISHER_02_016: [ If any error occurs then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_ERROR. ]*/
+                    LogError("unable to malloc");
+                    result = DATA_PUBLISHER_ERROR;
+                }
+                else
+                {
+                    if (Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE(clone, data) != AGENT_DATA_TYPES_OK)
+                    {
+                        /*Codes_SRS_DATA_PUBLISHER_02_016: [ If any error occurs then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_ERROR. ]*/
+                        LogError("unable to Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE");
+                        free(clone);
+                        result = DATA_PUBLISHER_ERROR;
+                    }
+                    else
+                    {
+                        /*Codes_SRS_DATA_PUBLISHER_02_017: [ Otherwise DataPublisher_PublishTransacted_ReportedProperty shall succeed and return DATA_PUBLISHER_OK. ]*/
+                        Destroy_AGENT_DATA_TYPE((AGENT_DATA_TYPE*)((*existingValue)->Value));
+                        free((void*)((*existingValue)->Value));
+                        (*existingValue)->Value = clone;
+                        result = DATA_PUBLISHER_OK;
+                    }
+                }
+            }
+            else
+            {
+                /*totally new reported property*/
+                DATA_MARSHALLER_VALUE* newValue = (DATA_MARSHALLER_VALUE*)malloc(sizeof(DATA_MARSHALLER_VALUE));
+                if (newValue == NULL)
+                {
+                    /*Codes_SRS_DATA_PUBLISHER_02_016: [ If any error occurs then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_ERROR. ]*/
+                    LogError("unable to malloc");
+                    result = DATA_PUBLISHER_ERROR;
+                }
+                else
+                {
+                    if (mallocAndStrcpy_s((char**)&(newValue->PropertyPath), reportedPropertyPath) != 0)
+                    {
+                        /*Codes_SRS_DATA_PUBLISHER_02_016: [ If any error occurs then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_ERROR. ]*/
+                        LogError("unable to mallocAndStrcpy_s");
+                        free(newValue);
+                        result = DATA_PUBLISHER_ERROR;
+                    }
+                    else
+                    {
+                        if ((newValue->Value = (AGENT_DATA_TYPE*)malloc(sizeof(AGENT_DATA_TYPE))) == NULL)
+                        {
+                            LogError("unable to malloc");
+                            free((void*)newValue->PropertyPath);
+                            free(newValue);
+                            result = DATA_PUBLISHER_ERROR;
+                        }
+                        else
+                        {
+                            if (Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE((AGENT_DATA_TYPE*)newValue->Value, data) != AGENT_DATA_TYPES_OK)
+                            {
+                                /*Codes_SRS_DATA_PUBLISHER_02_016: [ If any error occurs then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_ERROR. ]*/
+                                LogError("unable to Create_AGENT_DATA_TYPE_from_AGENT_DATA_TYPE");
+                                free((void*)newValue->Value);
+                                free((void*)newValue->PropertyPath);
+                                free(newValue);
+                                result = DATA_PUBLISHER_ERROR;
+                            }
+                            else
+                            {
+                                /*Codes_SRS_DATA_PUBLISHER_02_015: [ DataPublisher_PublishTransacted_ReportedProperty shall add a new DATA_MARSHALLER_VALUE to the VECTOR_HANDLE. ]*/
+                                if (VECTOR_push_back(handleData->value, &newValue, 1) != 0)
+                                {
+                                    /*Codes_SRS_DATA_PUBLISHER_02_016: [ If any error occurs then DataPublisher_PublishTransacted_ReportedProperty shall fail and return DATA_PUBLISHER_ERROR. */
+                                    LogError("unable to VECTOR_push_back");
+                                    Destroy_AGENT_DATA_TYPE((AGENT_DATA_TYPE*)newValue->Value);
+                                    free((void*)newValue->Value);
+                                    free((void*)newValue->PropertyPath);
+                                    free(newValue);
+                                    result = DATA_PUBLISHER_ERROR;
+                                }
+                                else
+                                {
+                                    /*Codes_SRS_DATA_PUBLISHER_02_017: [ Otherwise DataPublisher_PublishTransacted_ReportedProperty shall succeed and return DATA_PUBLISHER_OK. ]*/
+                                    result = DATA_PUBLISHER_OK;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return result;
+}
+
+DATA_PUBLISHER_RESULT DataPublisher_CommitTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle, unsigned char** destination, size_t* destinationSize)
+{
+    DATA_PUBLISHER_RESULT result;
+    /*Codes_SRS_DATA_PUBLISHER_02_019: [ If argument transactionHandle is NULL then DataPublisher_CommitTransaction_ReportedProperties shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
+    /*Codes_SRS_DATA_PUBLISHER_02_020: [ If argument destination is NULL then DataPublisher_CommitTransaction_ReportedProperties shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
+    /*Codes_SRS_DATA_PUBLISHER_02_021: [ If argument destinationSize NULL then DataPublisher_CommitTransaction_ReportedProperties shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
+    if (
+        (transactionHandle == NULL) ||
+        (destination == NULL) ||
+        (destinationSize == NULL)
+        )
+    {
+        LogError("invalid argument REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle=%p, unsigned char** destination=%p, size_t* destinationSize=%p", transactionHandle, destination, destinationSize);
+        result = DATA_PUBLISHER_INVALID_ARG;
+    }
+    else
+    {
+        /*Codes_SRS_DATA_PUBLISHER_02_031: [ If the transaction contains zero elements then DataPublisher_CommitTransaction_ReportedProperties shall fail and return DATA_PUBLISHER_INVALID_ARG. ]*/
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE_DATA* handle = (REPORTED_PROPERTIES_TRANSACTION_HANDLE_DATA*)transactionHandle;
+        if (VECTOR_size(handle->value) == 0)
+        {
+            LogError("cannot commit empty transaction");
+            result = DATA_PUBLISHER_INVALID_ARG;
+        }
+        else
+        {
+            /*Codes_SRS_DATA_PUBLISHER_02_022: [ DataPublisher_CommitTransaction_ReportedProperties shall call DataMarshaller_SendData_ReportedProperties providing the VECTOR_HANDLE holding the transacted reported properties, destination and destinationSize. ]*/
+            if (DataMarshaller_SendData_ReportedProperties(handle->DataPublisherInstance->DataMarshallerHandle, handle->value, destination, destinationSize) != DATA_MARSHALLER_OK)
+            {
+                /*Codes_SRS_DATA_PUBLISHER_02_023: [ If any error occurs then DataPublisher_CommitTransaction_ReportedProperties shall fail and return DATA_PUBLISHER_ERROR. ]*/
+                LogError("unable to DataMarshaller_SendData_ReportedProperties");
+                result = DATA_PUBLISHER_ERROR;
+            }
+            else
+            {
+                /*Codes_SRS_DATA_PUBLISHER_02_024: [ Otherwise DataPublisher_CommitTransaction_ReportedProperties shall succeed and return DATA_PUBLISHER_OK. ]*/
+                result = DATA_PUBLISHER_OK;
+            }
+        }
+    }
+
+    return result;
+}
+
+void DataPublisher_DestroyTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle)
+{
+    /*Codes_SRS_DATA_PUBLISHER_02_025: [ If argument transactionHandle is NULL then DataPublisher_DestroyTransaction_ReportedProperties shall return. ]*/
+    if (transactionHandle == NULL)
+    {
+        LogError("invalig argument REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle=%p", transactionHandle);
+    }
+    else
+    {
+        /*Codes_SRS_DATA_PUBLISHER_02_026: [ Otherwise DataPublisher_DestroyTransaction_ReportedProperties shall free all resources associated with the reported properties transactionHandle. ]*/
+        REPORTED_PROPERTIES_TRANSACTION_HANDLE_DATA* handleData = (REPORTED_PROPERTIES_TRANSACTION_HANDLE_DATA*)transactionHandle;
+        size_t i, nReportedProperties;
+        nReportedProperties = VECTOR_size(handleData->value);
+        for (i = 0;i < nReportedProperties;i++)
+        {
+            DATA_MARSHALLER_VALUE *value = *(DATA_MARSHALLER_VALUE**)VECTOR_element(handleData->value, i);
+            Destroy_AGENT_DATA_TYPE((AGENT_DATA_TYPE*)value->Value);
+            free((void*)value->Value);
+            free((void*)value->PropertyPath);
+            free((void*)value);
+        }
+        VECTOR_destroy(handleData->value);
+        free(handleData);
+    }
+    return;
 }

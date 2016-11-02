@@ -94,6 +94,73 @@ This function is intended to remove a device as registered with the transport.  
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_17_005: [** `IoTHubTransport_MQTT_Common_Unregister` shall return. **]**  
 
+
+### IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin
+
+```c
+int IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
+```
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_042: [**If the parameter `handle` is `NULL` than `IoTHubTransport_MQTT_Common_Subscribe` shall return a non-zero value. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_044: [**`IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin` shall construct the get state topic string and the notify state topic string. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_046: [**Upon failure `IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin` shall return a non-zero value. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_047: [**On success `IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin` shall return 0. **]**
+
+
+### IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin
+
+```c
+void IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
+```
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_048: [** If the parameter `handle` is `NULL` than `IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin` shall do nothing. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_049: [** If `subscribe_state` is set to `IOTHUB_DEVICE_TWIN_DESIRED_STATE` then `IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin` shall remove the get state topic from the subscription flag. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_07_050: [** If `subscribe_state` is set to `IOTHUB_DEVICE_TWIN_NOTIFICATION_STATE` then `IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin` shall remove the get state topic from the subscription flag. **]**
+
+
+### IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod
+
+```c
+int IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+```
+
+**SRS_IOTHUB_MQTT_TRANSPORT_12_001: [** If the parameter `handle` is `NULL` than `IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod` shall return a non-zero value. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_12_002: [** If the MQTT transport has been previously subscribed to DEVICE_METHOD topic `IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod` shall do nothing and return 0. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_12_003: [** `IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod` shall set the signaling flag for DEVICE_METHOD topic for the receiver's topic list. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_12_004: [** `IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod` shall construct the DEVICE_METHOD topic string for subscribe. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_12_005: [** `IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod` shall schedule the send of the subscription. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_12_006: [** Upon failure `IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod` shall return a non-zero value. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_12_007: [** On success `IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod` shall return 0. **]**
+
+
+### IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod
+
+```c
+void IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+```
+
+**SRS_IOTHUB_MQTT_TRANSPORT_12_008: [** If the parameter `handle` is `NULL` than `IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod` shall do nothing and return. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_12_009: [** If the MQTT transport has not been subscribed to DEVICE_METHOD topic `IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod` shall do nothing and return. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_12_010: [** `IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod` shall construct the DEVICE_METHOD topic string for unsubscribe. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_12_011: [** `IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod` shall send the unsubscribe. **]**
+
+**SRS_IOTHUB_MQTT_TRANSPORT_12_012: [** `IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod` shall removes the signaling flag for DEVICE_METHOD topic from the receiver's topic list. **]**
+
+
 ### IoTHubTransport_MQTT_Common_Subscribe
 
 ```c
@@ -119,6 +186,25 @@ void IoTHubTransport_MQTT_Common_Unsubscribe(TRANSPORT_LL_HANDLE handle)
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_019: [**If parameter handle is NULL then IoTHubTransport_MQTT_Common_Unsubscribe shall do nothing.**]**  
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_020: [**IoTHubTransport_MQTT_Common_Unsubscribe shall call mqtt_client_unsubscribe to unsubscribe the mqtt message topic.**]**  
+
+### IoTHubTransport_MQTT_Common_ProcessItem
+
+```c
+IOTHUB_PROCESS_ITEM_RESULT IoTHubTransport_MQTT_Common_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item)
+```
+
+**SRS_IOTHUBCLIENT_LL_07_001: [** If `handle` or `iothub_item` are `NULL` then `IoTHubTransport_MQTT_Common_ProcessItem` shall return `IOTHUB_PROCESS_ERROR`. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_002: [** If the mqtt is not ready to publish messages `IoTHubTransport_MQTT_Common_ProcessItem` shall return `IOTHUB_PROCESS_NOT_CONNECTED`. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_003: [** `IoTHubTransport_MQTT_Common_ProcessItem` shall publish a message to the mqtt protocol with the message topic for the message type. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_004: [** If any errors are encountered `IoTHubTransport_MQTT_Common_ProcessItem` shall return `IOTHUB_PROCESS_ERROR`. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_005: [** If successful `IoTHubTransport_MQTT_Common_ProcessItem` shall add mqtt info structure acknowledgement queue. **]**
+
+**SRS_IOTHUBCLIENT_LL_07_006: [** If the `item_type` is not a supported type `IoTHubTransport_MQTT_Common_ProcessItem` shall return `IOTHUB_PROCESS_CONTINUE`. **]**
+
 
 ### IoTHubTransport_MQTT_Common_DoWork
 
@@ -184,18 +270,3 @@ IoTHubTransport_MQTT_Common_GetHostname returns a STRING_HANDLE for the hostname
 
 **SRS_IOTHUB_TRANSPORT_MQTT_COMMON_02_002: [** Otherwise `IoTHubTransport_MQTT_Common_GetHostname` shall return a non-NULL STRING_HANDLE containg the hostname. **]**
 
-### MQTT_Protocol
-
-```c
-const TRANSPORT_PROVIDER* MQTT_Protocol(void)
-```
-
-**SRS_IOTHUB_TRANSPORT_MQTT_COMMON_07_022: [**This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for it’s fields:
-
-IoTHubTransport_GetHostname = IoTHubTransport_MQTT_Common_GetHostname  
-IoTHubTransport_Create = IoTHubTransport_MQTT_Common_Create  
-IoTHubTransport_Destroy = IoTHubTransport_MQTT_Common_Destroy  
-IoTHubTransport_Subscribe = IoTHubTransport_MQTT_Common_Subscribe  
-IoTHubTransport_Unsubscribe = IoTHubTransport_MQTT_Common_Unsubscribe  
-IoTHubTransport_DoWork = IoTHubTransport_MQTT_Common_DoWork  
-IoTHubTransport_SetOption = IoTHubTransport_MQTT_Common_SetOption**]**

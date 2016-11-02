@@ -4,7 +4,6 @@ const config = require('../config');
 const logger = require('../lib').logger;
 const iothub = require('azure-iothub');
 const Registry = iothub.Registry;
-const Device = iothub.Device;
 
 var registry = Registry.fromConnectionString(config.iotHubInfo.connectionString);
 
@@ -25,7 +24,7 @@ function createDevice(deviceId, done) {
    logger.trace('Device creation status code: ' + res.statusCode + ' ' + res.statusMessage);
    logger.trace('Created device: ' + JSON.stringify(deviceInfo));
 
-   var deviceConnectionString = 'HostName=' + config.iotHubInfo.hostName + ';DeviceId=' + deviceInfo.deviceId + ';SharedAccessKey=' + deviceInfo.authentication.SymmetricKey.primaryKey;
+   var deviceConnectionString = 'HostName=' + config.iotHubInfo.hostName + ';DeviceId=' + deviceInfo.deviceId + ';SharedAccessKey=' + deviceInfo.authentication.symmetricKey.primaryKey;
    logger.trace('Connectionstring: ' + deviceConnectionString);
 
    return done(null, deviceConnectionString);
