@@ -171,7 +171,7 @@ void device_method_function_cleanup()
 
 void device_method_e2e_method_call_with_string(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)
 {
-    test_device_method_with_string(protocol, "I'm a happy little string");
+    test_device_method_with_string(protocol, "\"I'm a happy little string\"");
 }
 
 void device_method_e2e_method_call_with_double_quoted_json(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol)

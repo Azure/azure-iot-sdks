@@ -40,7 +40,7 @@ DEFINE_ENUM(IOTHUB_DEVICEMETHOD_REQUEST_MODE, IOTHUB_DEVICE_METHOD_REQUEST_MODE_
 
 static const char* URL_API_VERSION = "?api-version=2016-09-30-preview";
 static const char* RELATIVE_PATH_FMT_DEVICEMETHOD = "/twins/%s/methods%s";
-static const char* RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD = "{\"methodName\":\"%s\",\"timeout\":%d,\"payload\":\"%s\"}";
+static const char* RELATIVE_PATH_FMT_DEVIECMETHOD_PAYLOAD = "{\"methodName\":\"%s\",\"timeout\":%d,\"payload\":%s}";
 
 /** @brief Structure to store IoTHub authentication information
 */
