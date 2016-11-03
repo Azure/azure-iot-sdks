@@ -189,7 +189,7 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
     }
 }
 
-void device_twin_simple_sample_run(void)
+void device_twin_config_update_run(void)
 {
     /*prepare the platform*/
     if (platform_init() != 0)
@@ -304,7 +304,7 @@ void device_twin_simple_sample_run(void)
 
 int main(void)
 {
-    device_twin_simple_sample_run();
+    device_twin_config_update_run();
     return 0;
 }
 
