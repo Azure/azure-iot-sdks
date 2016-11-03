@@ -25,6 +25,6 @@ endif()
 if(${use_mqtt} AND (NOT DEFINED use_mqtt_kit OR NOT ${use_mqtt_kit}))
     add_sample_directory(simplesample_mqtt)
     add_sample_directory(devicetwin_simplesample)
-    add_sample_directory(mvp_simplesample)
+    add_sample_directory(devicetwin_configupdate)
 endif()
 
