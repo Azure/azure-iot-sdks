@@ -189,6 +189,29 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
     }
 }
 
+static void sendReported(IOTHUB_CLIENT_HANDLE iotHubClientHandle, Configuration *config)
+{
+    unsigned char *buffer;
+    size_t         bufferSize;
+    if (SERIALIZE_REPORTED_PROPERTIES(&buffer, &bufferSize, *config) != CODEFIRST_OK)
+    {
+        (void)printf("Failed serializing reported state\n");
+    }
+    else
+    {
+        /*sending the serialized reported properties to IoTHub*/
+        if (IoTHubClient_SendReportedState(iotHubClientHandle, buffer, bufferSize, reportedCallback, NULL) != IOTHUB_CLIENT_OK)
+        {
+            (void)printf("Failure sending data\n");
+        }
+        else
+        {
+            (void)printf("reported state has been delivered to IoTHub\n");
+        }
+        free((void *)buffer);
+    }
+}
+
 void device_twin_config_update_run(void)
 {
     /*prepare the platform*/
@@ -237,60 +260,43 @@ void device_twin_config_update_run(void)
                         }
                         else
                         {
-                            unsigned char *buffer;
-                            size_t         bufferSize;
                             config->telemetryConfig.sendFrequency = 3000;
-                            if (SERIALIZE_REPORTED_PROPERTIES(&buffer, &bufferSize, *config) != CODEFIRST_OK)
+                            if (IoTHubClient_SetDeviceTwinCallback(iotHubClientHandle, deviceTwinCallback, device) != IOTHUB_CLIENT_OK)
                             {
-                                (void) printf("Failed serializing reported state\n");
+                                (void) printf("IoTHubClient_SetDeviceTwinCallback failed\n");
                             }
                             else
                             {
-                                /*sending the serialized reported properties to IoTHub*/
-                                if (IoTHubClient_SendReportedState(iotHubClientHandle, buffer, bufferSize, reportedCallback, NULL) != IOTHUB_CLIENT_OK)
+                                srand((unsigned int) time(NULL));
+                                while (true)
                                 {
-                                    (void) printf("Failure sending data\n");
-                                }
-                                else
-                                {
-                                    (void) printf("reported state has been delivered to IoTHub\n");
-                                }
-                                free((void *) buffer);
+                                    sendReported(iotHubClientHandle, config);
 
-                                if (IoTHubClient_SetDeviceTwinCallback(iotHubClientHandle, deviceTwinCallback, device) != IOTHUB_CLIENT_OK)
-                                {
-                                    (void) printf("IoTHubClient_SetDeviceTwinCallback failed\n");
-                                }
-                                else
-                                {
-                                    srand((unsigned int) time(NULL));
-                                    while (true)
+                                    /*setting values for reported properties*/
+                                    data->humidity = (uint8_t) (rand() % 100);
+                                    data->temperature = (uint8_t) (rand() % 100);
+
+                                    if (!sendMessage(iotHubClientHandle, data))
                                     {
-                                        /*setting values for reported properties*/
-                                        data->humidity = (uint8_t) (rand() % 100);
-                                        data->temperature = (uint8_t) (rand() % 100);
+                                        break;
+                                    }
 
-                                        if (!sendMessage(iotHubClientHandle, data))
-                                        {
-                                            break;
-                                        }
-
-                                        if (Lock(device->lock) == LOCK_ERROR)
-                                        {
-                                            (void) printf("failed to lock device data\n");
-                                            break;
-                                        }
+                                    if (Lock(device->lock) == LOCK_ERROR)
+                                    {
+                                        (void) printf("failed to lock device data\n");
+                                        break;
+                                    }
                                     
-                                        else
-                                        {
-                                            int32_t to = device->config->telemetryConfig.sendFrequency;
-                                            (void) Unlock(device->lock);
-                                            ThreadAPI_Sleep(to);
-                                        }
+                                    else
+                                    {
+                                        int32_t to = device->config->telemetryConfig.sendFrequency;
+                                        (void) Unlock(device->lock);
+                                        ThreadAPI_Sleep(to);
                                     }
                                 }
                             }
                         }
+                        destroyDevice(device);
                     }
                     IoTHubDeviceTwin_DestroyConfiguration(config);
                     DESTROY_MODEL_INSTANCE(data);
