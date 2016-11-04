@@ -212,7 +212,7 @@ static void sendReported(IOTHUB_CLIENT_HANDLE iotHubClientHandle, Configuration 
     }
 }
 
-void device_twin_config_update_run(void)
+static void device_twin_config_update_run(void)
 {
     /*prepare the platform*/
     if (platform_init() != 0)
