@@ -1,16 +1,16 @@
 ---
 platform: raspbian
-device: raspberrypi3
+device: raspberrypi3/raspberrypi2
 language: c
 ---
 
-Run a C configuration update sample to demonstrate the use of Device Twins on a RaspberryPi 3 device
+Run a configuration update sample to demonstrate the use of Device Twins on a RaspberryPi 3 (or 2) device. 
 ===
 ---
 
 # Table of Contents
 
--   [Introduction](#Introduction)
+-   [Step 0: Introduction](#Introduction)
 -   [Step 1: Prerequisites](#Step-1-Prerequisites)
 -   [Step 2: Prepare your Device](#Step-2-PrepareDevice)
 -   [Step 3: Build and run the device twin sample](#Step-3-Build)
@@ -20,8 +20,8 @@ Run a C configuration update sample to demonstrate the use of Device Twins on a 
 <a name="Introduction"></a>
 # Introduction
 
-**Description of the scenario**
-Your device on the field sends temperature and humidity telemetry data every 3 seconds. You are troubleshooting a temperature anomaly and want to receive the telemetry on a higher rate to detect if you are losing some data points, for example every 500 ms. In order to do this, you will have to issue a remote cloud to device command using device twin desired properties to request a change in the frequency rate of sending telemetry. 
+**Description of the scenario**: Your device on the field sends temperature and humidity telemetry data every 3 seconds. You are troubleshooting a temperature anomaly and want to receive the telemetry on a higher rate to detect if you are losing some data points, for example every 500 ms. In order to do this, you will have to issue a remote cloud to device command using device twin desired properties to request a change in the frequency rate of sending telemetry.
+
 Here is the multi-step process that helps you achieve this:
 1.	Device sends telemetry data every 3000 ms. You have to connect to the device to start the app which sends telemetry. The 3000 ms is the default configured value using a Device Twin desired property called sendFrequency.  
 2.	Telemetry data and frequency could be observed in Device Explorer Twin on Data tab
@@ -158,7 +158,7 @@ This device twin sample application sends temperature and humidity to your IoT H
     ```
     "desired": {
         "telemetryConfig": {
-            "sendFrequency": "500"
+            "sendFrequency": 500
         },
     }
      ```     
@@ -167,7 +167,7 @@ This device twin sample application sends temperature and humidity to your IoT H
     ```
     "reported": {
         "telemetryConfig": {
-            "sendFrequency": "500",
+            "sendFrequency": 500,
             "status": "success"
         }
     }
@@ -178,6 +178,10 @@ This device twin sample application sends temperature and humidity to your IoT H
 -   The application backend can keep track the results of the configuration operation across many devices, by querying twins. You can learn how to query twins by reading this [ tutorial ](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-devguide-query-language/)
 
 
-[lnk-setup-iot-hub]: ../setup_iothub.md
-[lnk-manage-iot-hub]: ../manage_iot_hub.md
+[lnk-setup-iot-hub]: ../../../../doc/setup_iothub.md
+[lnk-manage-iot-hub]: ../../../../doc/manage_iot_hub.md
+[devbox-setup]: ../../../doc/devbox_setup.md
+[lnk-device-twin-intro]: https://azure.microsoft.com/en-us/documentation/articles/iot-hub-devguide-device-twins/
+[lnk-device-twin-get-started]: https://azure.microsoft.com/en-us/documentation/articles/iot-hub-node-node-twin-getstarted/
+[lnk-device-twin-properties]: https://azure.microsoft.com/en-us/documentation/articles/iot-hub-devguide-device-twins/
 
