@@ -68,12 +68,13 @@ You should have the following items ready before beginning the process:
 	    includes some of these hardware requirements.
 -   [Setup your IoT hub][lnk-setup-iot-hub] Note: Make sure you create an IoT Hub which has enabled Device Management (Check "Enable Device Management")
 -   [Provision your device and get its credentials][lnk-manage-iot-hub]
--   [Set up Device Explorer with Twin][lnk-device-explorer-twin]
+-   [Set up Device Explorer with Twin][lnk-device-explorer-twin] or download it from [ here ](https://cdnx.azureedge.net/files/Device%20Explorer.zip)
 
 <a name="Step-2-PrepareDevice"></a>
 # Step 2: Prepare your Device
 
--   Install the latest Raspbian operating system on your Raspberry Pi 2 by
+Note: Skip next two steps if you already have an SD card with Raspbian OS image
+-   Install the latest Raspbian operating system on your Raspberry Pi 3/2 by
 following the instructions in the [NOOBS setup guide](http://www.raspberrypi.org/help/noobs-setup/).
 -   When the installation process is complete, the Raspberry Pi configuration menu
 (raspi-config) loads. Here you are able to set the time and date for your region
@@ -117,7 +118,7 @@ Run the following commands in the terminal window connected to your Raspberry Pi
     ```
 
 -   Edit the file ./c/serializer/samples/devicetwin_configupdate/devicetwin_configupdate.c and replace connection string placeholder with the device connection string you obtained when you [provisioned your device]([lnk-manage-iot-hub]).The device connection string should be in this format "`HostName=<iothub-name>.azure-devices.net;DeviceId=<device-name>;SharedAccessKey=<device-key>`".  
-You can use the console-based text editor **nano** to edit the file 
+    You can use the console-based text editor **nano** to edit the file 
 
     ```
     nano ./c/serializer/samples/devicetwin_configupdate/devicetwin_configupdate.c
@@ -145,7 +146,7 @@ This device twin sample application sends temperature and humidity to your IoT H
 <a name="Step-4-Monitor"></a>
 # Step 4:  Monitor Device Twin by changing desired property from the cloud
 
--   You could observe telemetry data and 3000 ms rate frequency in [Device Explorer Twin][lnk-device-explorer-twin]. Click on your device, then on Data tab, then push Monitor button to observe received events from raspberrypi3
+-   You could observe telemetry data and 3000 ms rate frequency in [ Device Explorer Twin ](https://cdnx.azureedge.net/files/Device%20Explorer.zip). Click on your device, then on Data tab, then push Monitor button to observe received events from raspberrypi3
 
   ![](./media/ObserveTelemetry.png)
 
@@ -171,6 +172,11 @@ This device twin sample application sends temperature and humidity to your IoT H
 -   Notice the frequency of telemetry data has changed to 500 ms in Device Explorer -> Data -> Monitor like in following image 
 
     ![](./media/ObserveTelemetryChanged.png)
+-   Stop the devicetwin_configupdate app which is running on your device to simulate a disconnected device. Set a new value for desired property "sendFrequency" (let's say 7000) while the app is not running (see above step). 
+    Notice the desire property "sendFrequency" is changed, but reported property "sendFrequency" is not because the device is disconnected. 
+-   Start the device app again on the RaspberryPi by running  c/cmake/iotsdk_linux/serializer/samples/devicetwin_configupdate/devicetwin_configupdate
+-   Go to Device Twin and just refresh the screen; you should notice reported property being changed to the same value as desired property without setting the desired property again. 
+-   Here is one of the great value of the device twin: it stores the state of the device while the device is offline and when it wakes up, it's phoning home to IoTHub to get the latest desired state and execute it.
 
 Note: You can learn more about how to use twins and how to implement methods by reading below tutorials:
 -   You can read more about how to use desired properties to update configuration of the devices by reading [ how to configure devices using twins ](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-node-node-twin-how-to-configure/)
