@@ -542,7 +542,7 @@ static int subscribe_methods(AMQP_TRANSPORT_DEVICE_STATE* deviceState)
     return result;
 }
 
-void set_session_options(SESSION_HANDLE session)
+static void set_session_options(SESSION_HANDLE session)
 {
 	// Codes_SRS_IOTHUBTRANSPORTAMQP_09_065: [IoTHubTransportAMQP_DoWork shall apply a default value of UINT_MAX for the parameter 'AMQP incoming window'] 
 	if (session_set_incoming_window(session, (uint32_t)DEFAULT_INCOMING_WINDOW_SIZE) != 0)
