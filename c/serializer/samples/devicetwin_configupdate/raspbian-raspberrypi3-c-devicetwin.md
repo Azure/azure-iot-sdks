@@ -64,7 +64,6 @@ You should have the following items ready before beginning the process:
 	-   HDMI cable
 	-   TV/ Monitor that supports HDMI
 	-   Ethernet cable or Wi-Fi dongle
-	    
 	    You may wish to consider a Starter Kit such as [CanaKit](https://www.amazon.com/CanaKit-Raspberry-Complete-Starter-Kit/dp/B01C6Q2GSY/ref=sxts_k2p_hero2?pf_rd_m=ATVPDKIKX0DER&pf_rd_p=2668835642&pf_rd_r=ZNN3EEA1V2FNMVX4M6KH&pd_rd_wg=NKs7X&pf_rd_s=desktop-sx-top-slot&pf_rd_t=301&pd_rd_w=LjWyi&pf_rd_i=CanaKit+Raspberry+Pi+3&pd_rd_r=K2H6B8XEDVHTE4J35TN1&ie=UTF8&qid=1478205900&sr=2) that
 	    includes some of these hardware requirements.
 -   [Setup your IoT hub][lnk-setup-iot-hub] Note: Make sure you create an IoT Hub which has enabled Device Management (Check "Enable Device Management")
@@ -123,11 +122,10 @@ You can use the console-based text editor **nano** to edit the file
     ```
     nano ./c/serializer/samples/devicetwin_configupdate/devicetwin_configupdate.c
     ```
+    This is the line that you need to change in devicetwin_configupdate.c
     ```
     static const char* connectionString = "[device connection string]";
     ```
-    > Note: You can skip this step if you only want to build the samples without running them.
-
 -   Finally, build the sample applications:
 
     ```
@@ -147,7 +145,7 @@ This device twin sample application sends temperature and humidity to your IoT H
 <a name="Step-4-Monitor"></a>
 # Step 4:  Monitor Device Twin by changing desired property from the cloud
 
--   You could observe telemetry data and 3000 ms rate frequency in Device Explorer Twin. Click on your device, then on Data tab, then push Monitor button to observe received events from raspberrypi3
+-   You could observe telemetry data and 3000 ms rate frequency in [Device Explorer Twin][lnk-device-explorer-twin]. Click on your device, then on Data tab, then push Monitor button to observe received events from raspberrypi3
 
   ![](./media/ObserveTelemetry.png)
 
@@ -156,27 +154,29 @@ This device twin sample application sends temperature and humidity to your IoT H
     for example every 500 ms. In order to do this, you will have to issue a clone command using device twin desired properties to request a change of the frequency rate of sending telemetry. 
 -   Set a new value for desired property "sendFrequency" to be 500 ms in Device Twin window, then click "Send (use Json format)" button, like following
     ```
-    "desired": {
         "telemetryConfig": {
             "sendFrequency": 500
-        },
-    }
+        }
      ```     
     ![](./media/DeviceTwinProperties.png)  
--   The device app is notified of the change immediately if connected, or at the first reconnect. The device app then reports the updated configuration on reported properties, like in the following
+-   The device app is notified of the change immediately if connected, or at the first reconnect. The device app then reports the updated configuration on reported properties, like following
     ```
     "reported": {
         "telemetryConfig": {
-            "sendFrequency": 500,
-            "status": "success"
+            "sendFrequency": 500
         }
     }
     ``` 
--   You can read more about how to use desired properties to update configuration of the devices by reading this [ tutorial ](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-node-node-twin-how-to-configure/)
--   You can implement a reboot method by reading this [ tutorial ](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-devguide-direct-methods/) 
-    or you can implement any other method (writeLine) reading this [ tutorial ](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-devguide-direct-methods/)
--   The application backend can keep track the results of the configuration operation across many devices, by querying twins. You can learn how to query twins by reading this [ tutorial ](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-devguide-query-language/)
+    ![](./media/DeviceTwinPropertiesChanged.png)  
+-   Notice the frequency of telemetry data has changed to 500 ms in Device Explorer -> Data -> Monitor like in following image 
 
+    ![](./media/ObserveTelemetryChanged.png)
+
+Note: You can learn more about how to use twins and how to implement methods by reading below tutorials:
+-   You can read more about how to use desired properties to update configuration of the devices by reading [ how to configure devices using twins ](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-node-node-twin-how-to-configure/)
+-   You can implement a reboot method by reading [ how to invoke direct methods ](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-devguide-direct-methods/)
+-   The application backend can keep track the results of the configuration operation across many devices, by querying twins. You can learn how to query twins by reading [ how to query twins ](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-devguide-query-language/)
+-   You can learn [ how to schedule jobs ](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-devguide-jobs/) on multiple devices to update desired properties or tags or to invoke direct methods.
 
 [lnk-setup-iot-hub]: ../../../../doc/setup_iothub.md
 [lnk-manage-iot-hub]: ../../../../doc/manage_iot_hub.md
