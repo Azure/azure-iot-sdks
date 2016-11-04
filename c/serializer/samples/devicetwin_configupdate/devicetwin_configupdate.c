@@ -13,7 +13,7 @@
 
 /*String containing Hostname, Device Id & Device Key in the format:             */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"    */
-static const char* connectionString = "HostName=firmwareupdatedemo.azure-devices.net;DeviceId=mvp_summit;SharedAccessKey=cSQcHPcPWKEysKy1dc2cr8IHjzQ1/hil/G32QJe4wxM=";
+static const char* connectionString = "HostName=....";
 
 // Define the Model - it is a car.
 BEGIN_NAMESPACE(Contoso);
