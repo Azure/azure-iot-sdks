@@ -13,8 +13,9 @@ Run a C configuration update sample to demonstrate the use of Device Twins on a 
 -   [Introduction](#Introduction)
 -   [Step 1: Prerequisites](#Step-1-Prerequisites)
 -   [Step 2: Prepare your Device](#Step-2-PrepareDevice)
--   [Step 3: Build and Run the Sample](#Step-3-Build)
--   [Tips](#tips)
+-   [Step 3: Build and run the device twin sample](#Step-3-Build)
+-   [Step 4: Monitor Device Twin by changing desired property](#Step-4-Monitor)
+
 
 <a name="Introduction"></a>
 # Introduction
