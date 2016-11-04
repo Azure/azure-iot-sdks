@@ -20,7 +20,7 @@ var runTests = function (hubConnectionString, storageConnectionString) {
   var deviceIdWithKeys = {
     deviceId: uuid.v4(),
     authentication: {
-      SymmetricKey: {
+      symmetricKey: {
         primaryKey: new Buffer("1234567890qwerty").toString('base64'),
         secondaryKey: new Buffer("ytrewq0987654321").toString('base64')
       }
@@ -74,8 +74,8 @@ var runTests = function (hubConnectionString, storageConnectionString) {
               done(getErr);
             } else {
               assert.equal(getResult.deviceId, deviceIdWithKeys.deviceId);
-              assert.equal(getResult.authentication.SymmetricKey.primaryKey, deviceIdWithKeys.authentication.SymmetricKey.primaryKey);
-              assert.equal(getResult.authentication.SymmetricKey.secondaryKey, deviceIdWithKeys.authentication.SymmetricKey.secondaryKey);
+              assert.equal(getResult.authentication.symmetricKey.primaryKey, deviceIdWithKeys.authentication.symmetricKey.primaryKey);
+              assert.equal(getResult.authentication.symmetricKey.secondaryKey, deviceIdWithKeys.authentication.symmetricKey.secondaryKey);
               assert.equal(getResult.disabled, deviceIdWithKeys.disabled);
               done();
             }
@@ -190,17 +190,17 @@ var runTests = function (hubConnectionString, storageConnectionString) {
 
     it('Updates the device and gets it', function (done) {
       var registry = Registry.fromConnectionString(hubConnectionString);
-      deviceIdWithKeys.authentication.SymmetricKey.secondaryKey = new Buffer('qwertyuiopasdfghjkl').toString('base64');
+      deviceIdWithKeys.authentication.symmetricKey.secondaryKey = new Buffer('qwertyuiopasdfghjkl').toString('base64');
       registry.update(deviceIdWithKeys, function (updateErr, updatedDevice) {
         if (updateErr) {
           done(updateErr);
         } else {
-          assert.equal(updatedDevice.authentication.SymmetricKey.secondaryKey, deviceIdWithKeys.authentication.SymmetricKey.secondaryKey);
+          assert.equal(updatedDevice.authentication.symmetricKey.secondaryKey, deviceIdWithKeys.authentication.symmetricKey.secondaryKey);
           registry.get(deviceIdWithKeys.deviceId, function(getErr, getResult) {
             if (getErr) {
               done(getErr);
             } else {
-              assert.equal(getResult.authentication.SymmetricKey.secondaryKey, deviceIdWithKeys.authentication.SymmetricKey.secondaryKey);
+              assert.equal(getResult.authentication.symmetricKey.secondaryKey, deviceIdWithKeys.authentication.symmetricKey.secondaryKey);
               done();
             }
           });
@@ -390,14 +390,14 @@ var runTests = function (hubConnectionString, storageConnectionString) {
               reject(new Error('Could not create export job: ' + err.message));
             } else {
               debug('Export job created');
-              var exportJobId = JSON.parse(result).jobId;
+              var exportJobId = result.jobId;
               var jobFinished = false;
               var exportInterval = setInterval(function() {
                 registry.getJob(exportJobId, function (err, result) {
                   if (err) {
                     reject(new Error('Could not get export job status: ' + err.message));
                   } else {
-                    var status = JSON.parse(result).status;
+                    var status = result.status;
                     if (status === "completed" && !jobFinished) {
                       jobFinished = true;
                       debug('Export job completed');
@@ -423,14 +423,14 @@ var runTests = function (hubConnectionString, storageConnectionString) {
                 if(err) {
                   reject(new Error('Could not create import job: ' + err.message));
                 } else {
-                  var importJobId = JSON.parse(result).jobId;
+                  var importJobId = result.jobId;
                   var jobFinished = false;
                   var importInterval = setInterval(function () {
                     registry.getJob(importJobId, function (err, result) {
                       if (err) {
                         reject(new Error('Could not get import job status: ' + err.message));
                       } else {
-                        var status = JSON.parse(result).status;
+                        var status = result.status;
                         if (status === "completed" && !jobFinished) {
                           jobFinished = true;
                           debug('Import job completed');

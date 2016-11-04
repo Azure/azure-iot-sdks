@@ -8,7 +8,7 @@
 #include "agenttypesystem.h"
 #include "schema.h"
 #include "azure_c_shared_utility/macro_utils.h"
-
+#include "azure_c_shared_utility/vector.h"
 #ifdef __cplusplus
 extern "C"
 {
@@ -35,11 +35,14 @@ typedef struct DATA_MARSHALLER_VALUE_TAG
     const AGENT_DATA_TYPE* Value;
 } DATA_MARSHALLER_VALUE;
 
-typedef void* DATA_MARSHALLER_HANDLE;
+typedef struct DATA_MARSHALLER_HANDLE_DATA_TAG* DATA_MARSHALLER_HANDLE;
+#include "azure_c_shared_utility/umock_c_prod.h"
 
-extern DATA_MARSHALLER_HANDLE DataMarshaller_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, bool includePropertyPath);
-extern void DataMarshaller_Destroy(DATA_MARSHALLER_HANDLE dataMarshallerHandle);
-extern DATA_MARSHALLER_RESULT DataMarshaller_SendData(DATA_MARSHALLER_HANDLE dataMarshallerHandle, size_t valueCount, const DATA_MARSHALLER_VALUE* values, unsigned char** destination, size_t* destinationSize);
+MOCKABLE_FUNCTION(,DATA_MARSHALLER_HANDLE, DataMarshaller_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, bool, includePropertyPath);
+MOCKABLE_FUNCTION(,void, DataMarshaller_Destroy, DATA_MARSHALLER_HANDLE, dataMarshallerHandle);
+MOCKABLE_FUNCTION(,DATA_MARSHALLER_RESULT, DataMarshaller_SendData, DATA_MARSHALLER_HANDLE, dataMarshallerHandle, size_t, valueCount, const DATA_MARSHALLER_VALUE*, values, unsigned char**, destination, size_t*, destinationSize);
+
+MOCKABLE_FUNCTION(, DATA_MARSHALLER_RESULT, DataMarshaller_SendData_ReportedProperties, DATA_MARSHALLER_HANDLE, dataMarshallerHandle, VECTOR_HANDLE, values, unsigned char**, destination, size_t*, destinationSize);
 
 #ifdef __cplusplus
 }

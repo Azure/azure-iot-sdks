@@ -179,7 +179,7 @@ void simplesample_mqtt_run(void)
                         {
                             unsigned char* destination;
                             size_t destinationSize;
-                            if (SERIALIZE(&destination, &destinationSize, myWeather->DeviceId, myWeather->WindSpeed) != IOT_AGENT_OK)
+                            if (SERIALIZE(&destination, &destinationSize, myWeather->DeviceId, myWeather->WindSpeed) != CODEFIRST_OK)
                             {
                                 (void)printf("Failed to serialize\r\n");
                             }

@@ -118,5 +118,22 @@ namespace Microsoft.Azure.Devices
         /// </param>
         /// <returns>returns ServiceStatistics object containing current service statistics</returns>
         public abstract Task<ServiceStatistics> GetServiceStatisticsAsync(CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Interactively invokes a method on device
+        /// </summary>
+        /// <param name="deviceId">Device Id</param>
+        /// <param name="cloudToDeviceMethod">Device method parameters (passthrough to device)</param>
+        /// <returns>Method result</returns>
+        public abstract Task<CloudToDeviceMethodResult> InvokeDeviceMethodAsync(string deviceId, CloudToDeviceMethod cloudToDeviceMethod);
+
+        /// <summary>
+        /// Interactively invokes a method on device
+        /// </summary>
+        /// <param name="deviceId">Device Id</param>
+        /// <param name="cloudToDeviceMethod">Device method parameters (passthrough to device)</param>
+        /// <param name="cancellationToken">Cancellation Token</param>
+        /// <returns>Method result</returns>
+        public abstract Task<CloudToDeviceMethodResult> InvokeDeviceMethodAsync(string deviceId, CloudToDeviceMethod cloudToDeviceMethod, CancellationToken cancellationToken);
     }
 }

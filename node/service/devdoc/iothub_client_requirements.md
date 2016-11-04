@@ -123,6 +123,25 @@ The `close` method closes the connection opened by open.
 
 **SRS_NODE_IOTHUB_CLIENT_16_005: [** The `close` method should not throw if the `done` callback is not specified. **]**
 
+### invokeDeviceMethod(deviceId, methodParams, done)
+The `invokeDeviceMethod` method calls a device method on a specific device and calls back with the result of this method's execution.
+
+The `invokeDeviceMethod` method shall throw a `ReferenceError` if `methodParams` is falsy.
+
+**SRS_NODE_IOTHUB_CLIENT_16_014: [** The `invokeDeviceMethod` method shall throw a `ReferenceError` if `deviceId` is `null`, `undefined` or an empty string. **]**
+
+**SRS_NODE_IOTHUB_CLIENT_16_006: [** The `invokeDeviceMethod` method shall throw a `ReferenceError` if `methodParams.methodName` is `null`, `undefined` or an empty string. **]**
+
+**SRS_NODE_IOTHUB_CLIENT_16_007: [** The `invokeDeviceMethod` method shall throw a `TypeError` if `methodParams.methodName` is not a `string`. **]**
+
+**SRS_NODE_IOTHUB_CLIENT_16_009: [** The `invokeDeviceMethod` method shall initialize a new instance of `DeviceMethod` with the `methodParam` argument. **]**
+
+**SRS_NODE_IOTHUB_CLIENT_16_010: [** The `invokeDeviceMethod` method shall use the newly created instance of `DeviceMethod` to invoke the method on the device specified with the `deviceid` argument . **]**
+
+**SRS_NODE_IOTHUB_CLIENT_16_012: [** The `invokeDeviceMethod` method shall call the `done` callback with a standard javascript `Error` object if the request failed. **]**
+
+**SRS_NODE_IOTHUB_CLIENT_16_013: [** The `invokeDeviceMethod` method shall call the `done` callback with a `null` first argument, the result of the method execution in the second argument, and the transport-specific response object as a third argument. **]**
+
 ### Events
 #### disconnect
 **SRS_NODE_IOTHUB_CLIENT_16_004: [** The `disconnect` event shall be emitted when the client is disconnected from the server. **]**

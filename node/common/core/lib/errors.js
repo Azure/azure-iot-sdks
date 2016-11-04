@@ -203,6 +203,71 @@ InvalidEtagError.prototype = Object.create(Error.prototype);
 InvalidEtagError.prototype.constructor = InvalidEtagError;
 InvalidEtagError.prototype.name = 'InvalidEtagError';
 
+/**
+ * @class       module:azure-iot-common.TimeoutError
+ * @classdesc   Error thrown when a timeout occurs
+ *
+ * @augments {Error}
+ */
+function TimeoutError(message) {
+  this.message = message;
+  this.stack = (new Error()).stack;
+  Error.call(this, message);
+}
+
+TimeoutError.prototype = Object.create(Error.prototype);
+TimeoutError.prototype.constructor = TimeoutError;
+TimeoutError.prototype.name = 'TimeoutError';
+
+/**
+ * @class       module:azure-iot-common.BadDeviceResponseError
+ * @classdesc   Error thrown when a device sends a bad response to a device method call.
+ *
+ * @augments {Error}
+ */
+function BadDeviceResponseError(message) {
+  this.message = message;
+  this.stack = (new Error()).stack;
+  Error.call(this, message);
+}
+
+BadDeviceResponseError.prototype = Object.create(Error.prototype);
+BadDeviceResponseError.prototype.constructor = BadDeviceResponseError;
+BadDeviceResponseError.prototype.name = 'BadDeviceResponseError';
+
+
+/**
+ * @class       module:azure-iot-common.GatewayTimeoutError
+ * @classdesc   Error thrown when the IoT Hub instance doesn't process the device method call in time.
+ *
+ * @augments {Error}
+ */
+function GatewayTimeoutError(message) {
+  this.message = message;
+  this.stack = (new Error()).stack;
+  Error.call(this, message);
+}
+
+GatewayTimeoutError.prototype = Object.create(Error.prototype);
+GatewayTimeoutError.prototype.constructor = GatewayTimeoutError;
+GatewayTimeoutError.prototype.name = 'GatewayTimeoutError';
+
+/**
+ * @class       module:azure-iot-common.DeviceTimeoutError
+ * @classdesc   Error thrown when the device doesn't process the method call in time.
+ *
+ * @augments {Error}
+ */
+function DeviceTimeoutError(message) {
+  this.message = message;
+  this.stack = (new Error()).stack;
+  Error.call(this, message);
+}
+
+DeviceTimeoutError.prototype = Object.create(Error.prototype);
+DeviceTimeoutError.prototype.constructor = DeviceTimeoutError;
+DeviceTimeoutError.prototype.name = 'DeviceTimeoutError';
+
 module.exports = {
   ArgumentError: ArgumentError,
   DeviceMaximumQueueDepthExceededError: DeviceMaximumQueueDepthExceededError,
@@ -220,5 +285,9 @@ module.exports = {
   TooManyDevicesError: TooManyDevicesError,
   ThrottlingError: ThrottlingError,
   DeviceAlreadyExistsError: DeviceAlreadyExistsError,
-  InvalidEtagError: InvalidEtagError
+  InvalidEtagError: InvalidEtagError,
+  TimeoutError : TimeoutError,
+  BadDeviceResponseError: BadDeviceResponseError,
+  GatewayTimeoutError: GatewayTimeoutError,
+  DeviceTimeoutError: DeviceTimeoutError
 };

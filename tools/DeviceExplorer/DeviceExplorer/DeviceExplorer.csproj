@@ -47,7 +47,14 @@
       <DependentUpon>DeviceCreatedForm.cs</DependentUpon>
     </Compile>
     <Compile Include="DeviceEntity.cs" />
+    <Compile Include="DeviceTwinAndMethod.cs" />
     <Compile Include="DevicesProcessor.cs" />
+    <Compile Include="DeviceTwinPropertiesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DeviceTwinPropertiesForm.Designer.cs">
+      <DependentUpon>DeviceTwinPropertiesForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="DeviceUpdateForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -76,6 +83,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DeviceCreatedForm.resx">
       <DependentUpon>DeviceCreatedForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DeviceTwinPropertiesForm.resx">
+      <DependentUpon>DeviceTwinPropertiesForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DeviceUpdateForm.resx">
       <DependentUpon>DeviceUpdateForm.cs</DependentUpon>
@@ -120,9 +130,10 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Azure.Devices, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Azure.Devices.1.0.11\lib\net451\Microsoft.Azure.Devices.dll</HintPath>
+      <HintPath>..\packages\Microsoft.Azure.Devices.1.1.0-preview-004\lib\net451\Microsoft.Azure.Devices.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.Owin, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Owin.3.0.1\lib\net45\Microsoft.Owin.dll</HintPath>
       <Private>True</Private>

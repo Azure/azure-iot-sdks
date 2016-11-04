@@ -25,18 +25,27 @@ DATA_PUBLISHER_ERROR
 
 DEFINE_ENUM(DATA_PUBLISHER_RESULT, DATA_PUBLISHER_RESULT_VALUES);
 
-typedef void* TRANSACTION_HANDLE;
-typedef void* DATA_PUBLISHER_HANDLE;
+#include "azure_c_shared_utility/umock_c_prod.h"
 
-extern DATA_PUBLISHER_HANDLE DataPublisher_Create(SCHEMA_MODEL_TYPE_HANDLE modelHandle, bool includePropertyPath);
-extern void DataPublisher_Destroy(DATA_PUBLISHER_HANDLE dataPublisherHandle);
+typedef struct TRANSACTION_HANDLE_DATA_TAG* TRANSACTION_HANDLE;
+typedef struct REPORTED_PROPERTIES_TRANSACTION_HANDLE_DATA_TAG* REPORTED_PROPERTIES_TRANSACTION_HANDLE;
+typedef struct DATA_PUBLISHER_HANDLE_DATA_TAG* DATA_PUBLISHER_HANDLE;
 
-extern TRANSACTION_HANDLE DataPublisher_StartTransaction(DATA_PUBLISHER_HANDLE dataPublisherHandle);
-extern DATA_PUBLISHER_RESULT DataPublisher_PublishTransacted(TRANSACTION_HANDLE transactionHandle, const char* propertyPath, const AGENT_DATA_TYPE* data);
-extern DATA_PUBLISHER_RESULT DataPublisher_EndTransaction(TRANSACTION_HANDLE transactionHandle, unsigned char** destination, size_t* destinationSize);
-extern DATA_PUBLISHER_RESULT DataPublisher_CancelTransaction(TRANSACTION_HANDLE transactionHandle);
-extern void DataPublisher_SetMaxBufferSize(size_t value);
-extern size_t DataPublisher_GetMaxBufferSize(void);
+MOCKABLE_FUNCTION(,DATA_PUBLISHER_HANDLE, DataPublisher_Create, SCHEMA_MODEL_TYPE_HANDLE, modelHandle, bool, includePropertyPath);
+MOCKABLE_FUNCTION(,void, DataPublisher_Destroy, DATA_PUBLISHER_HANDLE, dataPublisherHandle);
+
+MOCKABLE_FUNCTION(,TRANSACTION_HANDLE, DataPublisher_StartTransaction, DATA_PUBLISHER_HANDLE, dataPublisherHandle);
+MOCKABLE_FUNCTION(,DATA_PUBLISHER_RESULT, DataPublisher_PublishTransacted, TRANSACTION_HANDLE, transactionHandle, const char*, propertyPath, const AGENT_DATA_TYPE*, data);
+MOCKABLE_FUNCTION(,DATA_PUBLISHER_RESULT, DataPublisher_EndTransaction, TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize);
+MOCKABLE_FUNCTION(,DATA_PUBLISHER_RESULT, DataPublisher_CancelTransaction, TRANSACTION_HANDLE, transactionHandle);
+MOCKABLE_FUNCTION(,void, DataPublisher_SetMaxBufferSize, size_t, value);
+MOCKABLE_FUNCTION(,size_t, DataPublisher_GetMaxBufferSize);
+
+MOCKABLE_FUNCTION(, REPORTED_PROPERTIES_TRANSACTION_HANDLE, DataPublisher_CreateTransaction_ReportedProperties, DATA_PUBLISHER_HANDLE, dataPublisherHandle);
+MOCKABLE_FUNCTION(, DATA_PUBLISHER_RESULT, DataPublisher_PublishTransacted_ReportedProperty, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, const char*, reportedPropertyPath, const AGENT_DATA_TYPE*, data);
+MOCKABLE_FUNCTION(, DATA_PUBLISHER_RESULT, DataPublisher_CommitTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle, unsigned char**, destination, size_t*, destinationSize);
+MOCKABLE_FUNCTION(, void, DataPublisher_DestroyTransaction_ReportedProperties, REPORTED_PROPERTIES_TRANSACTION_HANDLE, transactionHandle);
+
 
 #ifdef __cplusplus
 }

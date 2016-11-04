@@ -1,18 +1,25 @@
-IoTHubMQTTTransport Requirements
+
+# IoTHubMQTTTransport Requirements
 ================
 
 ## Overview
 
-IoTHubMQTTTransport is the library that enables communications with the iothub system using the MQTT protocol. 
+IoTHubMQTTTransport is the library that enables communications with the iothub system using the MQTT protocol.
+
 
 ## Exposed API
 
 ```c
 extern const TRANSPORT_PROVIDER* MQTT_Protocol(void);
 ```
-
   The following static functions are provided in the fields of the TRANSPORT_PROVIDER structure:
-	  - IoTHubTransportMqtt_GetHostname,
+
+    - IoTHubTransportMqtt_Subscribe_DeviceMethod,
+    - IoTHubTransportMqtt_Unsubscribe_DeviceMethod,
+    - IoTHubTransportMqtt_Subscribe_DeviceTwin,
+    - IoTHubTransportMqtt_Unsubscribe_DeviceTwin,
+    - IoTHubTransportMqtt_ProcessItem,
+    - IoTHubTransportMqtt_GetHostname,
     - IoTHubTransportMqtt_SetOption,
     - IoTHubTransportMqtt_Create,
     - IoTHubTransportMqtt_Destroy,
@@ -33,7 +40,6 @@ static XIO_HANDLE getIoTransportProvider(const char* fqdn)
 **SRS_IOTHUB_MQTT_TRANSPORT_07_013: [** If platform_get_default_tlsio returns NULL getIoTransportProvider shall return NULL. **]**
 
 ## IoTHubTransportMqtt_Create
-
 ```c
 TRANSPORT_LL_HANDLE IoTHubTransportMqtt_Create(const IOTHUBTRANSPORT_CONFIG* config)
 ```
@@ -64,6 +70,39 @@ extern void IoTHubTransportMqtt_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle);
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_004: [** IoTHubTransportMqtt_Unregister shall register the TRANSPORT_LL_HANDLE by calling into the IoTHubMqttAbstract_Unregister function. **]**
 
+
+### IoTHubTransportMqtt_Subscribe_DeviceTwin
+
+```c
+int IoTHubTransportMqtt_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
+```
+
+
+
+### IoTHubTransportMqtt_Unsubscribe_DeviceTwin
+
+```c
+void IoTHubTransportMqtt_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
+```
+
+
+
+### IoTHubTransportMqtt_Subscribe_DeviceMethod
+
+```c
+int IoTHubTransportMqtt_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+```
+
+
+
+### IoTHubTransportMqtt_Unsubscribe_DeviceMethod
+
+```c
+void IoTHubTransportMqtt_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+```
+
+
+
 ### IoTHubTransportMqtt_Subscribe
 
 ```c
@@ -79,6 +118,15 @@ void IoTHubTransportMqtt_Unsubscribe(TRANSPORT_LL_HANDLE handle)
 ```
 
 **SRS_IOTHUB_MQTT_TRANSPORT_07_006: [** IoTHubTransportMqtt_Unsubscribe shall unsubscribe the TRANSPORT_LL_HANDLE by calling into the IoTHubMqttAbstract_Unsubscribe function. **]**
+
+
+### IoTHubTransportMqtt_ProcessItem
+
+```c
+IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportMqtt_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item)
+```
+
+
 
 ### IoTHubTransportMqtt_DoWork
 
@@ -116,12 +164,17 @@ STRING_HANDLE IoTHubTransportMqtt_GetHostname(TRANSPORT_LL_HANDLE handle)
 const TRANSPORT_PROVIDER* MQTT_Protocol(void)
 ```
 
-**SRS_IOTHUB_MQTT_TRANSPORT_07_011: [** This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:
+**SRS_IOTHUB_MQTT_TRANSPORT_07_022: [**This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for it's fields:
 
-IoTHubTransport_GetHostname = IoTHubTransportMqtt_GetHostname  
-IoTHubTransport_Create = IoTHubTransportMqtt_Create  
-IoTHubTransport_Destroy = IoTHubTransportMqtt_Destroy  
-IoTHubTransport_Subscribe = IoTHubTransportMqtt_Subscribe  
-IoTHubTransport_Unsubscribe = IoTHubTransportMqtt_Unsubscribe  
-IoTHubTransport_DoWork = IoTHubTransportMqtt_DoWork  
-IoTHubTransport_SetOption = IoTHubTransportMqtt_SetOption **]**
+IoTHubTransport_Subscribe_DeviceMethod = IoTHubTransportMqtt_Subscribe_DeviceMethod
+IoTHubTransport_Unsubscribe_DeviceMethod = IoTHubTransportMqtt_Unsubscribe_DeviceMethod
+IoTHubTransport_Subscribe_DeviceTwin = IoTHubTransportMqtt_Subscribe_DeviceTwin
+IoTHubTransport_Unsubscribe_DeviceTwin = IoTHubTransportMqtt_Unsubscribe_DeviceTwin
+IoTHubTransport_ProcessItem - IoTHubTransportMqtt_ProcessItem
+IoTHubTransport_GetHostname = IoTHubTransportMqtt_GetHostname
+IoTHubTransport_Create = IoTHubTransportMqtt_Create
+IoTHubTransport_Destroy = IoTHubTransportMqtt_Destroy
+IoTHubTransport_Subscribe = IoTHubTransportMqtt_Subscribe
+IoTHubTransport_Unsubscribe = IoTHubTransportMqtt_Unsubscribe
+IoTHubTransport_DoWork = IoTHubTransportMqtt_DoWork
+IoTHubTransport_SetOption = IoTHubTransportMqtt_SetOption**]**

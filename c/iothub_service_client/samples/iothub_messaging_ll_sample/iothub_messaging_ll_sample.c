@@ -30,25 +30,28 @@ static const char* connectionString = "[IoTHub Connection String]";
 static const char* deviceId = "[Device Id]";
 
 #define MESSAGE_COUNT 10
+static size_t feedbackCount = 0;
 
-void openCompleteCallback(void* context)
+static void openCompleteCallback(void* context)
 {
     (void)printf("Open completed, context: %s\n", (char*)context);
 }
 
-void sendCompleteCallback(void* context, IOTHUB_MESSAGING_RESULT messagingResult)
+static void sendCompleteCallback(void* context, IOTHUB_MESSAGING_RESULT messagingResult)
 {
+    (void)context;
     if (messagingResult == IOTHUB_MESSAGING_OK)
     {
-        (void)printf("Message %d has been sent successfully\n", *(int*)(context));
+        (void)printf("Message has been sent successfully\n");
     }
     else
     {
         (void)printf("Send failed\n");
     }
+    feedbackCount++;
 }
 
-void feedbackReceivedCallback(void* context, IOTHUB_SERVICE_FEEDBACK_BATCH* feedbackBatch)
+static void feedbackReceivedCallback(void* context, IOTHUB_SERVICE_FEEDBACK_BATCH* feedbackBatch)
 {
     printf("Feedback received, context: %s\n", (char*)context);
 
@@ -78,9 +81,9 @@ void feedbackReceivedCallback(void* context, IOTHUB_SERVICE_FEEDBACK_BATCH* feed
     }
 }
 
-IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle;
-IOTHUB_MESSAGING_HANDLE iotHubMessagingHandle;
-IOTHUB_MESSAGING_RESULT iotHubMessagingResult;
+static IOTHUB_SERVICE_CLIENT_AUTH_HANDLE iotHubServiceClientHandle;
+static IOTHUB_MESSAGING_HANDLE iotHubMessagingHandle;
+static IOTHUB_MESSAGING_RESULT iotHubMessagingResult;
 
 void iothub_messaging_ll_sample_run(void)
 {
@@ -92,7 +95,7 @@ void iothub_messaging_ll_sample_run(void)
     }
     else
     {
-        (void)printf("Calling IoTHubServiceClientAuth_CreateFromConnectionString with the connection string\n");
+        (void)printf("Calling IoTHubServiceClientAuth_CreateFromConnectionString with connection string\n");
         iotHubServiceClientHandle = IoTHubServiceClientAuth_CreateFromConnectionString(connectionString);
         if (iotHubServiceClientHandle == NULL)
         {
@@ -100,52 +103,79 @@ void iothub_messaging_ll_sample_run(void)
         }
         else
         {
-            (void)printf("iotHubServiceClientHandle has been created successfully\n");
+            (void)printf("Service Client Authentication handle has been created successfully\n");
 
             (void)printf("Creating Messaging...\n");
             iotHubMessagingHandle = IoTHubMessaging_LL_Create(iotHubServiceClientHandle);
-
-            if (iotHubMessagingHandle != NULL)
+            if (iotHubMessagingHandle == NULL)
+            {
+                (void)printf("IoTHubMessaging_LL_Create failed\n");
+            }
+            else
             {
                 (void)printf("Messaging has been created successfully\n");
                 (void)printf("Opening Messaging...\n");
 
                 iotHubMessagingResult = IoTHubMessaging_LL_SetFeedbackMessageCallback(iotHubMessagingHandle, feedbackReceivedCallback, "Context string for feedback");
-
-                iotHubMessagingResult = IoTHubMessaging_LL_Open(iotHubMessagingHandle, openCompleteCallback, "Context string for open");
-                if (iotHubMessagingResult == IOTHUB_MESSAGING_OK)
+                if (iotHubMessagingResult != IOTHUB_MESSAGING_OK)
                 {
-                    for (int i = 0; i < MESSAGE_COUNT; i++)
+                    (void)printf("IoTHubMessaging_LL_SetFeedbackMessageCallback failed\n");
+                }
+                else
+                {
+                    iotHubMessagingResult = IoTHubMessaging_LL_Open(iotHubMessagingHandle, openCompleteCallback, "Context string for open");
+                    if (iotHubMessagingResult != IOTHUB_MESSAGING_OK)
                     {
-                        double avgWindSpeed = 10.0;
-                        static char msgText[1024];
-                        sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":%s,\"windSpeed\":%.2f}", deviceId, avgWindSpeed + (rand() % 4 + 2));
-                        IOTHUB_MESSAGE_HANDLE messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText));
-
-                        iotHubMessagingResult = IoTHubMessaging_LL_Send(iotHubMessagingHandle, deviceId, messageHandle, sendCompleteCallback, (void*)&i);
-                        if (iotHubMessagingResult == IOTHUB_MESSAGING_OK)
+                        (void)printf("IoTHubMessaging_LL_Open failed\n");
+                    }
+                    else
+                    {
+                        for (int i = 0; i < MESSAGE_COUNT; i++)
                         {
-                            int j;
-                            for (j = 0; j < 100; j++)
+                            double avgWindSpeed = 10.0;
+                            static char msgText[1024];
+                            sprintf_s(msgText, sizeof(msgText), "{\"deviceId\":%s,\"windSpeed\":%.2f, \"i\":%d}", deviceId, avgWindSpeed + (rand() % 4 + 2), i);
+                            IOTHUB_MESSAGE_HANDLE messageHandle = IoTHubMessage_CreateFromByteArray((const unsigned char*)msgText, strlen(msgText));
+                            if (messageHandle == NULL)
                             {
-                                IoTHubMessaging_LL_DoWork(iotHubMessagingHandle);
-                                ThreadAPI_Sleep(50);
+                                (void)printf("IoTHubMessage_CreateFromByteArray failed\n");
+                                break;
                             }
+                            else
+                            {
+                                iotHubMessagingResult = IoTHubMessaging_LL_Send(iotHubMessagingHandle, deviceId, messageHandle, sendCompleteCallback, NULL);
+                                if (iotHubMessagingResult != IOTHUB_MESSAGING_OK)
+                                {
+                                    (void)printf("IoTHubMessaging_LL_Send failed\n");
+                                }
+                                else
+                                {
+                                    (void)printf("IoTHubMessaging_LL_Send accepted data for transmission to IoT Hub.\r\n");
+                                }
+                            }
+                            IoTHubMessage_Destroy(messageHandle);
                         }
+
+                        feedbackCount = 0;
+                        while (feedbackCount < MESSAGE_COUNT)
+                        {
+                            IoTHubMessaging_LL_DoWork(iotHubMessagingHandle);
+                            ThreadAPI_Sleep(1);
+                        }
+
+                        /* Wait for user to press a key. */
+                        (void)printf("Press any key to exit the application. \r\n");
+                        (void)getchar();
+
+                        IoTHubMessaging_LL_Close(iotHubMessagingHandle);
                     }
                 }
-                IoTHubMessaging_LL_Close(iotHubMessagingHandle);
+                (void)printf("Calling IoTHubMessaging_LL_Destroy...\n");
+                IoTHubMessaging_LL_Destroy(iotHubMessagingHandle);
             }
-            (void)printf("Calling IoTHubMessaging_LL_Destroy...\n");
-            IoTHubMessaging_LL_Destroy(iotHubMessagingHandle);
-
             (void)printf("Calling IoTHubServiceClientAuth_Destroy...\n");
             IoTHubServiceClientAuth_Destroy(iotHubServiceClientHandle);
         }
         platform_deinit();
     }
-
-    /* Wait for Commands. */
-    (void)printf("Press any key to exit the application. \r\n");
-    (void)getchar();
 }

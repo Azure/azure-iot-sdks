@@ -1,0 +1,3 @@
+shlibs:Depends=libc6 (>= 2.15), libcurl3 (>= 7.16.2), libssl1.0.0 (>= 1.0.1)
+misc:Depends=
+misc:Pre-Depends=

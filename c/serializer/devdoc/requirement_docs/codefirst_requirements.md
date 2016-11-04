@@ -38,13 +38,18 @@ extern void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLEC
  
 extern CODEFIRST_RESULT CodeFirst_SendAsync(unsigned char** destination, size_t* destinationSize, size_t numProperties, ...);
  
+extern CODEFIRST_RESULT CodeFirst_IngestDesiredProperties(void* device, const char* desiredProperties);
+
 extern AGENT_DATA_TYPE_TYPE CodeFirst_GetPrimitiveType(const char* typeName);
 ```
 
 ### CodeFirst_Init
 ```c
-CODEFIRST_RESULT CodeFirst_Init(void);
+CODEFIRST_RESULT CodeFirst_Init(const char* overrideSchemaNamespace);
 ```
+
+`CodeFirst_Init` is a lazy-init style function called by all the other public APIs of this module. 
+By default, the APIs of CodeFirst call this API with `NULL` for `overrideSchemaNamespace`.
 
 **SRS_CODEFIRST_99_002: [**  CodeFirst_Init shall initialize the CodeFirst module. If initialization is successful, it shall return CODEFIRST_OK. **]**
 
@@ -58,6 +63,8 @@ CODEFIRST_RESULT CodeFirst_Init(void);
 void CodeFirst_Deinit(void);
 ```
 
+`CodeFirst_Deinit` deinitializes CodeFirst.
+
 **SRS_CODEFIRST_99_005: [**  CodeFirst_Deinit shall deinitialize the module, freeing all the resources and placing the module in an uninitialized state. **]**
 
 **SRS_CODEFIRST_99_006: [**  If the module is not previously initialed, CodeFirst_Deinit shall do nothing. **]**
@@ -67,6 +74,10 @@ void CodeFirst_Deinit(void);
 ```c
 SCHEMA_HANDLE CodeFirst_RegisterSchema(const char* schemaNamespace, const REFLECTED_DATA_FROM_DATAPROVIDER* metadata);
 ```
+
+**SRS_CODEFIRST_02_048: [** If `schemaNamespace` is `NULL` then `CodeFirst_RegisterSchema` shall fail and return `NULL`. **]**
+
+**SRS_CODEFIRST_02_049: [** If `metadata` is `NULL` then `CodeFirst_RegisterSchema` shall fail and return `NULL`. **]**
 
 **SRS_CODEFIRST_99_002: [**  CodeFirst_RegisterSchema shall create the schema information and give it to the Schema module for one schema, identified by the metadata argument. On success, it shall return a handle to the schema. **]**
 
@@ -80,6 +91,10 @@ SCHEMA_HANDLE CodeFirst_RegisterSchema(const char* schemaNamespace, const REFLEC
 extern void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLECTED_DATA_FROM_DATAPROVIDER* metadata, size_t dataSize, bool includePropertyPath);
 ```
 
+`CodeFirst_CreateDevice` creates a device.
+
+**SRS_CODEFIRST_02_037: [** `CodeFirst_CreateDevice` shall call `CodeFirst_Init`, passing `NULL` for `overrideSchemaNamespace`. **]**
+
 **SRS_CODEFIRST_99_079: [** CodeFirst_CreateDevice shall create a device and allocate a memory block that should hold the device data. **]**
 
 **SRS_CODEFIRST_99_101: [** On success, CodeFirst_CreateDevice shall return a non NULL pointer to the device data. **]**
@@ -87,6 +102,8 @@ extern void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLEC
 **SRS_CODEFIRST_99_080: [** If CodeFirst_CreateDevice is invoked with a NULL model, it shall return NULL. **]**
 
 **SRS_CODEFIRST_99_081: [** CodeFirst_CreateDevice shall use Device_Create to create a device handle. **]**
+
+**SRS_CODEFIRST_02_036: [** `CodeFirst_CreateDevice` shall initialize all the desired properties to their default values. **]**
 
 **SRS_CODEFIRST_01_001: [** CodeFirst_CreateDevice shall pass the includePropertyPath argument to Device_Create. **]**
 
@@ -102,6 +119,7 @@ extern void* CodeFirst_CreateDevice(SCHEMA_MODEL_TYPE_HANDLE model, const REFLEC
 ```c
 extern void CodeFirst_DestroyDevice(void* device);
 ```
+`CodeFirst_DestroyDevice` destroys a device, freeing all used resources.
 
 **SRS_CODEFIRST_99_085: [** CodeFirst_DestroyDevice shall free all resources associated with a device. **]**
 
@@ -109,12 +127,16 @@ extern void CodeFirst_DestroyDevice(void* device);
 
 **SRS_CODEFIRST_99_087: [** In order to release the device handle, CodeFirst_DestroyDevice shall call Device_Destroy. **]**
 
+**SRS_CODEFIRST_02_039: [** If the current device count is zero then `CodeFirst_DestroyDevice` shall deallocate all other used resources. **]**
+
 ### CodeFirst_SendAsync
 ```c 
 extern CODEFIRST_RESULT CodeFirst_SendAsync(unsigned char** destination, size_t* destinationSize, size_t numProperties, ...);
 ```
 
-**SRS_CODEFIRST_99_088: [** CodeFirst_SendAsync shall send to the Device module a set of properties, a destination and a destinationSize. **]**
+`CodeFirst_SendAsync` shall send to the Device module a set of properties, a `destination` and a `destinationSize`.
+
+**SRS_CODEFIRST_02_040: [** `CodeFirst_SendAsync` shall call `CodeFirst_Init`, passing `NULL` for `overrideSchemaNamespace`. **]**
 
 **SRS_CODEFIRST_99_117: [** On success, CodeFirst_SendAsync shall return CODEFIRST_OK. **]**
 
@@ -210,7 +232,7 @@ ParentModel
 extern EXECUTE_COMMAND_RESULT CodeFirst_ExecuteCommand(void* device, const char* command);
 ```
 
-CodeFirst_ExecuteCommand executes a command.
+`CodeFirst_ExecuteCommand` executes a command.
 
 **SRS_CODEFIRST_02_014: [** If parameter device or command is NULL then CodeFirst_ExecuteCommand shall return EXECUTE_COMMAND_ERROR. **]**
 
@@ -219,3 +241,55 @@ CodeFirst_ExecuteCommand executes a command.
 **SRS_CODEFIRST_02_016: [** If finding the device fails, then CodeFirst_ExecuteCommand shall return EXECUTE_COMMAND_ERROR. **]**
 
 **SRS_CODEFIRST_02_017: [** Otherwise CodeFirst_ExecuteCommand shall call Device_ExecuteCommand and return what Device_ExecuteCommand is returning. **]**
+
+### CodeFirst_SendAsyncReported
+```c 
+extern CODEFIRST_RESULT CodeFirst_SendAsyncReported(unsigned char** destination, size_t* destinationSize, size_t numProperties, ...);
+```
+
+`CodeFirst_SendAsyncReported` starts, publishes and finishes a device transaction.
+
+**SRS_CODEFIRST_02_046: [** `CodeFirst_SendAsyncReported` shall call `CodeFirst_Init`, passing `NULL` for `overrideSchemaNamespace`. **]**
+
+**SRS_CODEFIRST_02_018: [** If parameter `destination`, `destinationSize` or any of the values passed through va_args is `NULL` then `CodeFirst_SendAsyncReported` shall fail and return `CODEFIRST_INVALID_ARG`. **]**
+
+**SRS_CODEFIRST_02_019: [** If values passed through va_args do not belong to the same device then `CodeFirst_SendAsyncReported` shall fail and return `CODEFIRST_VALUES_FROM_DIFFERENT_DEVICES_ERROR`. **]**
+
+**SRS_CODEFIRST_02_020: [** If values passed through va_args are not all of type REFLECTED_REPORTED_PROPERTY then `CodeFirst_SendAsyncReported` shall fail and return `CODEFIRST_INVALID_ARG`. **]**
+
+**SRS_CODEFIRST_02_021: [** If the value passed through va_args is a complete model instance, then `CodeFirst_SendAsyncReported` shall send all the reported properties of that device. **]**
+
+**SRS_CODEFIRST_02_022: [** `CodeFirst_SendAsyncReported` shall start a transaction by calling `Device_CreateTransaction_ReportedProperties`. **]**
+
+**SRS_CODEFIRST_02_023: [** `CodeFirst_SendAsyncReported` shall convert all `REPORTED_PROPERTY` model components to `AGENT_DATA_TYPE`. **]** 
+
+**SRS_CODEFIRST_02_024: [** `CodeFirst_SendAsyncReported` shall call `Device_PublishTransacted_ReportedProperty` for every `AGENT_DATA_TYPE` converted from `REPORTED_PROPERTY`. **]**
+
+**SRS_CODEFIRST_02_025: [** `CodeFirst_SendAsyncReported` shall compute for every `AGENT_DATA_TYPE` the valuePath. **]**
+
+**SRS_CODEFIRST_02_026: [** `CodeFirst_SendAsyncReported` shall call `Device_CommitTransaction_ReportedProperties` to commit the transaction. **]**
+
+**SRS_CODEFIRST_02_029: [** `CodeFirst_SendAsyncReported` shall call `Device_DestroyTransaction_ReportedProperties` to destroy the transaction. **]**
+
+**SRS_CODEFIRST_02_027: [** If any error occurs, `CodeFirst_SendAsyncReported` shall fail and return `CODEFIRST_ERROR`. **]**
+
+**SRS_CODEFIRST_02_028: [** `CodeFirst_SendAsyncReported` shall return `CODEFIRST_OK` when it succeeds. **]**
+
+### CODEFIRST_RESULT CodeFirst_IngestDesiredProperties
+```c
+extern CODEFIRST_RESULT CodeFirst_IngestDesiredProperties(void* device, const char* desiredProperties);
+```
+
+`CodeFirst_IngestDesiredProperties` applies desired properties to a device.
+
+**SRS_CODEFIRST_02_030: [** If argument `device` is `NULL` then `CodeFirst_IngestDesiredProperties` shall fail and return `CODEFIRST_INVALID_ARG`. **]**
+
+**SRS_CODEFIRST_02_031: [** If argument `desiredProperties` is `NULL` then `CodeFirst_IngestDesiredProperties` shall fail and return `CODEFIRST_INVALID_ARG`. **]**
+
+**SRS_CODEFIRST_02_032: [** `CodeFirst_IngestDesiredProperties` shall locate the device associated with `device`. **]**
+
+**SRS_CODEFIRST_02_033: [** `CodeFirst_IngestDesiredProperties` shall call `Device_IngestDesiredProperties`. **]**
+
+**SRS_CODEFIRST_02_034: [** If there is any failure, then `CodeFirst_IngestDesiredProperties` shall fail and return `CODEFIRST_ERROR`. **]**
+
+**SRS_CODEFIRST_02_035: [** Otherwise, `CodeFirst_IngestDesiredProperties` shall return `CODEFIRST_OK`. **]**

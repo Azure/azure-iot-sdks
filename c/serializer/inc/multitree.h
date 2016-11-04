@@ -15,7 +15,7 @@ extern "C"
 #include <stddef.h>
 #endif
 
-typedef void* MULTITREE_HANDLE;
+typedef struct MULTITREE_HANDLE_DATA_TAG* MULTITREE_HANDLE;
 
 #define MULTITREE_RESULT_VALUES           \
     MULTITREE_OK,                         \
@@ -32,17 +32,18 @@ DEFINE_ENUM(MULTITREE_RESULT, MULTITREE_RESULT_VALUES);
 typedef void (*MULTITREE_FREE_FUNCTION)(void* value);
 typedef int (*MULTITREE_CLONE_FUNCTION)(void** destination, const void* source);
 
-extern MULTITREE_HANDLE MultiTree_Create(MULTITREE_CLONE_FUNCTION cloneFunction, MULTITREE_FREE_FUNCTION freeFunction);
-extern MULTITREE_RESULT MultiTree_AddLeaf(MULTITREE_HANDLE treeHandle, const char* destinationPath, const void* value);
-extern MULTITREE_RESULT MultiTree_AddChild(MULTITREE_HANDLE treeHandle, const char* childName, MULTITREE_HANDLE* childHandle);
-extern MULTITREE_RESULT MultiTree_GetChildCount(MULTITREE_HANDLE treeHandle, size_t* count);
-extern MULTITREE_RESULT MultiTree_GetChild(MULTITREE_HANDLE treeHandle, size_t index, MULTITREE_HANDLE* childHandle);
-extern MULTITREE_RESULT MultiTree_GetChildByName(MULTITREE_HANDLE treeHandle, const char* childName, MULTITREE_HANDLE* childHandle);
-extern MULTITREE_RESULT MultiTree_GetName(MULTITREE_HANDLE treeHandle, STRING_HANDLE destination);
-extern MULTITREE_RESULT MultiTree_GetValue(MULTITREE_HANDLE treeHandle, const void** destination);
-extern MULTITREE_RESULT MultiTree_GetLeafValue(MULTITREE_HANDLE treeHandle, const char* leafPath, const void** destination);
-extern MULTITREE_RESULT MultiTree_SetValue(MULTITREE_HANDLE treeHandle, void* value);
-extern void MultiTree_Destroy(MULTITREE_HANDLE treeHandle);
+#include "azure_c_shared_utility/umock_c_prod.h"
+MOCKABLE_FUNCTION(, MULTITREE_HANDLE, MultiTree_Create, MULTITREE_CLONE_FUNCTION, cloneFunction, MULTITREE_FREE_FUNCTION, freeFunction);
+MOCKABLE_FUNCTION(, MULTITREE_RESULT, MultiTree_AddLeaf, MULTITREE_HANDLE, treeHandle, const char*, destinationPath, const void*, value);
+MOCKABLE_FUNCTION(, MULTITREE_RESULT, MultiTree_AddChild, MULTITREE_HANDLE, treeHandle, const char*, childName, MULTITREE_HANDLE*, childHandle);
+MOCKABLE_FUNCTION(, MULTITREE_RESULT, MultiTree_GetChildCount, MULTITREE_HANDLE, treeHandle, size_t*, count);
+MOCKABLE_FUNCTION(, MULTITREE_RESULT, MultiTree_GetChild, MULTITREE_HANDLE, treeHandle, size_t, index, MULTITREE_HANDLE*, childHandle);
+MOCKABLE_FUNCTION(, MULTITREE_RESULT, MultiTree_GetChildByName, MULTITREE_HANDLE, treeHandle, const char*, childName, MULTITREE_HANDLE*, childHandle);
+MOCKABLE_FUNCTION(, MULTITREE_RESULT, MultiTree_GetName, MULTITREE_HANDLE, treeHandle, STRING_HANDLE, destination);
+MOCKABLE_FUNCTION(, MULTITREE_RESULT, MultiTree_GetValue, MULTITREE_HANDLE, treeHandle, const void**, destination);
+MOCKABLE_FUNCTION(, MULTITREE_RESULT, MultiTree_GetLeafValue, MULTITREE_HANDLE, treeHandle, const char*, leafPath, const void**, destination);
+MOCKABLE_FUNCTION(, MULTITREE_RESULT, MultiTree_SetValue, MULTITREE_HANDLE, treeHandle, void*, value);
+MOCKABLE_FUNCTION(, void, MultiTree_Destroy, MULTITREE_HANDLE, treeHandle);
 
 #ifdef __cplusplus
 }

@@ -557,7 +557,6 @@ public class AmqpsIotHubConnectionTest {
         Deencapsulation.setField(connection, "receiver", mockReceiver);
         Deencapsulation.setField(connection, "session", mockSession);
         Deencapsulation.setField(connection, "connection", mockConnection);
-        Deencapsulation.setField(connection, "reactorFuture", mockReactorFuture);
         Deencapsulation.setField(connection, "executorService", mockExecutorService);
 
         connection.close();
@@ -575,8 +574,6 @@ public class AmqpsIotHubConnectionTest {
                 mockSession.close();
                 times = 1;
                 mockConnection.close();
-                times = 1;
-                mockReactorFuture.cancel(true);
                 times = 1;
                 mockExecutorService.shutdown();
                 times = 1;

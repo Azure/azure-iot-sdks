@@ -6,6 +6,7 @@
 #include <crtdbg.h>
 #endif
 
+#include "macro_utils.h"
 #include "testrunnerswitcher.h"
 #include "micromock.h"
 #include "micromockcharstararenullterminatedstrings.h"
@@ -39,6 +40,7 @@ static IOTHUB_ACCOUNT_INFO_HANDLE g_iothubAcctInfo = NULL;
 DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_TEST_CLIENT_RESULT, IOTHUB_TEST_CLIENT_RESULT_VALUES);
 DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_MESSAGE_RESULT, IOTHUB_MESSAGE_RESULT_VALUES);
 DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
+DEFINE_MICROMOCK_ENUM_TO_STRING(CODEFIRST_RESULT, CODEFIRST_RESULT_VALUES);
 
 static const char* TEST_SEND_DATA_FMT = "{\"ExampleData\": { \"SendDate\": \"%.24s\", \"UniqueId\":%d} }";
 static const char* TEST_RECV_DATA_FMT = "{\\\"Name\\\": \\\"testaction\\\", \\\"Parameters\\\": { \\\"property1\\\": \\\"%.24s\\\", \\\"UniqueId\\\":%d}}";
@@ -554,8 +556,8 @@ BEGIN_TEST_SUITE(serializer_e2e)
             devModel->UniqueId = (int)g_uniqueTestId;
             unsigned char* destination;
             size_t destinationSize;
-            IOT_AGENT_RESULT nResult = SERIALIZE(&destination, &destinationSize, *devModel);
-            ASSERT_ARE_EQUAL(int, IOT_AGENT_OK, nResult);
+            CODEFIRST_RESULT nResult = SERIALIZE(&destination, &destinationSize, *devModel);
+            ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, nResult);
             auto iothubMessageHandle = IoTHubMessage_CreateFromByteArray(destination, destinationSize);
             ASSERT_IS_NOT_NULL(iothubMessageHandle);
             free(destination);
@@ -738,8 +740,8 @@ BEGIN_TEST_SUITE(serializer_e2e)
             devModel->UniqueId = (int)g_uniqueTestId;
             unsigned char* destination;
             size_t destinationSize;
-            IOT_AGENT_RESULT nResult = SERIALIZE(&destination, &destinationSize, *devModel);
-            ASSERT_ARE_EQUAL(int, IOT_AGENT_OK, nResult);
+            CODEFIRST_RESULT nResult = SERIALIZE(&destination, &destinationSize, *devModel);
+            ASSERT_ARE_EQUAL(CODEFIRST_RESULT, CODEFIRST_OK, nResult);
             auto iothubMessageHandle = IoTHubMessage_CreateFromByteArray(destination, destinationSize);
             ASSERT_IS_NOT_NULL(iothubMessageHandle);
             free(destination);

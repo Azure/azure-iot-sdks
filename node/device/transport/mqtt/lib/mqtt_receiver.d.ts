@@ -10,9 +10,21 @@ declare class MqttReceiver extends EventEmitter implements Receiver {
     // tslint:disable-next-line:variable-name
     constructor(mqttClient: MqttClient, topic_subscribe: string);
 
+    onDeviceMethod(methodName: string, callback: (message: MqttReceiver.MethodMessage) => void): void;
+
     on(type: 'message', func: (msg: Message) => void): this;
     on(type: 'errorReceived', func: (err: Error) => void): this;
     on(type: string, func: Function): this;
+}
+
+declare namespace MqttReceiver {
+    interface MethodMessage {
+        methods: { methodName: string; };
+        requestId: string;
+        properties: { [key: string]: string; };
+        body: Buffer;
+        verb: string;
+    }
 }
 
 export = MqttReceiver;

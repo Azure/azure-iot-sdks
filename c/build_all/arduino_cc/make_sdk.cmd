@@ -50,8 +50,6 @@ mkdir %SharedUtility_path%
 mkdir %Adapters_path%
 copy %AzureIoTSDKs_path%c\c-utility\inc\azure_c_shared_utility %SharedUtility_path%
 copy %AzureIoTSDKs_path%c\c-utility\src\ %SharedUtility_path%
-del %SharedUtility_path%\constbuffer.*
-del %SharedUtility_path%\constmap.*
 
 copy %AzureIoTSDKs_path%c\c-utility\adapters\agenttime.c %Adapters_path%
 copy %AzureIoTSDKs_path%c\c-utility\adapters\tickcounter_tirtos.c %Adapters_path%

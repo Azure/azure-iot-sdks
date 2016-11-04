@@ -2,7 +2,8 @@
  
 ## Overview
 The IoTDevice module shall create a handle to a device associated with a specified model. It will provide a way for consumers to access properties of the device (e.g., its name), and to free device resources when they're done with it.
-Exposed API
+
+## Exposed API
 ```c
 #define DEVICE_RESULT_VALUES			\
     DEVICE_OK,							\
@@ -27,6 +28,12 @@ extern TRANSACTION_HANDLE Device_StartTransaction(DEVICE_HANDLE deviceHandle);
 extern DEVICE_RESULT Device_PublishTransacted(TRANSACTION_HANDLE transactionHandle, const char* propertyPath, const AGENT_DATA_TYPE* data);
 extern DEVICE_RESULT Device_EndTransaction(TRANSACTION_HANDLE transactionHandle, unsigned char** destination, size_t* destinationSize);
 extern DEVICE_RESULT Device_CancelTransaction(TRANSACTION_HANDLE transactionHandle);
+
+extern REPORTED_PROPERTIES_TRANSACTION_HANDLE Device_CreateTransaction_ReportedProperties(DEVICE_HANDLE deviceHandle);
+extern DEVICE_RESULT Device_PublishTransacted_ReportedProperty(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle, const char* reportedPropertyPath, const AGENT_DATA_TYPE*, data);
+extern DEVICE_RESULT Device_CommitTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle, unsigned char** destination, size_t* destinationSize);
+extern void Device_DestroyTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle);
+extern DEVICE_RESULT Device_IngestDesiredProperties(void* startAddress, DEVICE_HANDLE deviceHandle, const char* desiredProperties);
 
 extern EXECUTE_COMMAND_RESULT Device_ExecuteCommand(DEVICE_HANDLE deviceHandle, const char* command);
 ```c
@@ -130,3 +137,85 @@ Device_ExecuteCommand extern EXECUTE_COMMAND_RESULT Device_ExecuteCommand(DEVICE
 
 **SRS_DEVICE_02_013: [** Otherwise, Device_ExecuteCommand shall call CommandDecoder_ExecuteCommand and return what CommandDecoder_ExecuteCommand is returning. **]**
 
+### Device_CreateTransaction_ReportedProperties
+```c
+REPORTED_PROPERTIES_TRANSACTION_HANDLE Device_CreateTransaction_ReportedProperties(DEVICE_HANDLE deviceHandle);
+```
+
+`Device_CreateTransaction_ReportedProperties` creates a handle to be used to transact reported properties.
+
+**SRS_DEVICE_02_014: [** If argument `deviceHandle` is `NULL` then `Device_CreateTransaction_ReportedProperties` shall fail and return `NULL`. **]**
+
+**SRS_DEVICE_02_015: [** Otherwise, `Device_CreateTransaction_ReportedProperties` shall call `DataPublisher_CreateTransaction_ReportedProperties`. **]**
+
+**SRS_DEVICE_02_016: [** If `DataPublisher_CreateTransaction_ReportedProperties` fails then `Device_CreateTransaction_ReportedProperties` shall fail and return `NULL`. **]**
+
+**SRS_DEVICE_02_017: [** Otherwise `Device_CreateTransaction_ReportedProperties` shall succeed and return a non-`NULL` value. **]**
+
+### Device_PublishTransacted_ReportedProperty
+```c
+DEVICE_RESULT Device_PublishTransacted_ReportedProperty(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle, const char* reportedPropertyPath, const AGENT_DATA_TYPE* data)
+```
+
+`Device_PublishTransacted_ReportedProperty` adds an individual reported property to a transaction of reported properties.
+
+**SRS_DEVICE_02_018: [** If argument `transactionHandle` is `NULL` then `Device_PublishTransacted_ReportedProperty` shall fail and return `DEVICE_INVALID_ARG`. **]**
+
+**SRS_DEVICE_02_019: [** If argument `reportedPropertyPath` is `NULL` then `Device_PublishTransacted_ReportedProperty` shall fail and return `DEVICE_INVALID_ARG`. **]**
+
+**SRS_DEVICE_02_020: [** If argument `data` is `NULL` then `Device_PublishTransacted_ReportedProperty` shall fail and return `DEVICE_INVALID_ARG`. **]**
+
+**SRS_DEVICE_02_021: [** `Device_PublishTransacted_ReportedProperty` shall call `DataPublisher_PublishTransacted_ReportedProperty`. **]**
+
+**SRS_DEVICE_02_022: [** If `DataPublisher_PublishTransacted_ReportedProperty` fails then `Device_PublishTransacted_ReportedProperty` shall fail and return `DEVICE_DATA_PUBLISHER_FAILED`. **]**
+
+**SRS_DEVICE_02_023: [** Otherwise, `Device_PublishTransacted_ReportedProperty` shall succeed and return `DEVICE_OK`. **]**
+
+### Device_CommitTransaction_ReportedProperties
+```c
+DEVICE_RESULT Device_CommitTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle, unsigned char** destination, size_t* destinationSize)
+```
+
+Device_CommitTransaction_ReportedProperties commits a transaction thus filling the parameters `destination` and `destinationSize`.
+
+**SRS_DEVICE_02_024: [** If argument `transactionHandle` is `NULL` then `Device_CommitTransaction_ReportedProperties` shall fail and return `DEVICE_INVALID_ARG`. **]**
+
+**SRS_DEVICE_02_025: [** If argument `destination` is `NULL` then `Device_CommitTransaction_ReportedProperties` shall fail and return `DEVICE_INVALID_ARG`. **]**
+
+**SRS_DEVICE_02_026: [** If argument `destinationSize` is `NULL`then `Device_CommitTransaction_ReportedProperties` shall fail and return `DEVICE_INVALID_ARG`. **]**
+
+**SRS_DEVICE_02_027: [** `Device_CommitTransaction_ReportedProperties` shall call `DataPublisher_CommitTransaction_ReportedProperties`. **]**
+
+**SRS_DEVICE_02_028: [** If `DataPublisher_CommitTransaction_ReportedProperties` fails then `Device_CommitTransaction_ReportedProperties` shall fail and return `DEVICE_DATA_PUBLISHER_FAILED`. **]**
+
+**SRS_DEVICE_02_029: [** Otherwise `Device_CommitTransaction_ReportedProperties` shall succeed and return `DEVICE_OK`. **]**
+
+### Device_DestroyTransaction_ReportedProperties
+```c
+void Device_DestroyTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle)
+```
+
+`Device_DestroyTransaction_ReportedProperties` frees all resources used by `transactionHandle`.
+
+**SRS_DEVICE_02_030: [** If argument `transactionHandle` is `NULL` then `Device_DestroyTransaction_ReportedProperties` shall return. **]**
+
+**SRS_DEVICE_02_031: [** Otherwise `Device_DestroyTransaction_ReportedProperties` shall free all used resources. **]**
+
+### Device_IngestDesiredProperties
+```c
+DEVICE_RESULT Device_IngestDesiredProperties(void* startAddress, DEVICE_HANDLE deviceHandle, const char* desiredProperties);
+```
+
+`Device_IngestDesiredProperties` acts as a passthrough for desired properties towards CommandDecoder module.
+
+**SRS_DEVICE_02_032: [** If `deviceHandle` is `NULL` then `Device_IngestDesiredProperties` shall fail and return `DEVICE_INVALID_ARG`. **]**
+
+**SRS_DEVICE_02_033: [** If `desiredProperties` is `NULL` then `Device_IngestDesiredProperties` shall fail and return `DEVICE_INVALID_ARG`. **]**
+
+**SRS_DEVICE_02_037: [** If `startAddress` is `NULL` then `Device_IngestDesiredProperties` shall fail and return `DEVICE_INVALID_ARG`. **]**
+
+**SRS_DEVICE_02_034: [** `Device_IngestDesiredProperties` shall call `CommandDecoder_IngestDesiredProperties`. **]**
+
+**SRS_DEVICE_02_035: [** If any failure happens then `Device_IngestDesiredProperties` shall fail and return `DEVICE_ERROR`. **]**
+
+**SRS_DEVICE_02_036: [** Otherwise, `Device_IngestDesiredProperties` shall succeed and return `DEVICE_OK`. **]**

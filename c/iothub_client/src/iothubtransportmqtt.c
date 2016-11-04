@@ -57,6 +57,32 @@ static void IoTHubTransportMqtt_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
     IoTHubTransport_MQTT_Common_Unsubscribe(handle);
 }
 
+static int IoTHubTransportMqtt_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+{
+    return IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod(handle);
+}
+
+static void IoTHubTransportMqtt_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+{
+    IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod(handle);
+}
+
+static int IoTHubTransportMqtt_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
+{
+    return IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin(handle);
+}
+
+static void IoTHubTransportMqtt_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
+{
+    IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin(handle);
+}
+
+static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportMqtt_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item)
+{
+    return IoTHubTransport_MQTT_Common_ProcessItem(handle, item_type, iothub_item);
+}
+
+/* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_054: [ IoTHubTransportMqtt_DoWork shall subscribe to the Notification and get_state Topics if they are defined. ] */
 static void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
 {
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_007: [ IoTHubTransportMqtt_DoWork shall call into the IoTHubMqttAbstract_DoWork function. ] */
@@ -93,28 +119,27 @@ static STRING_HANDLE IoTHubTransportMqtt_GetHostname(TRANSPORT_LL_HANDLE handle)
     return IoTHubTransport_MQTT_Common_GetHostname(handle);
 }
 
-static TRANSPORT_PROVIDER myfunc = {
-    IoTHubTransportMqtt_GetHostname,
-    IoTHubTransportMqtt_SetOption,
-    IoTHubTransportMqtt_Create,
-    IoTHubTransportMqtt_Destroy,
-    IoTHubTransportMqtt_Register,
-    IoTHubTransportMqtt_Unregister,
-    IoTHubTransportMqtt_Subscribe,
-    IoTHubTransportMqtt_Unsubscribe,
-    IoTHubTransportMqtt_DoWork,
-    IoTHubTransportMqtt_GetSendStatus
+static TRANSPORT_PROVIDER myfunc = 
+{
+    IoTHubTransportMqtt_Subscribe_DeviceMethod,     /*pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;*/
+    IoTHubTransportMqtt_Unsubscribe_DeviceMethod,   /*pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMethod;*/
+    IoTHubTransportMqtt_Subscribe_DeviceTwin,       /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;*/
+    IoTHubTransportMqtt_Unsubscribe_DeviceTwin,     /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;*/
+    IoTHubTransportMqtt_ProcessItem,                /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;*/
+    IoTHubTransportMqtt_GetHostname,                /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;*/
+    IoTHubTransportMqtt_SetOption,                  /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;*/
+    IoTHubTransportMqtt_Create,                     /*pfIoTHubTransport_Create IoTHubTransport_Create;*/
+    IoTHubTransportMqtt_Destroy,                    /*pfIoTHubTransport_Destroy IoTHubTransport_Destroy;*/
+    IoTHubTransportMqtt_Register,                   /*pfIotHubTransport_Register IoTHubTransport_Register;*/
+    IoTHubTransportMqtt_Unregister,                 /*pfIotHubTransport_Unregister IoTHubTransport_Unegister;*/
+    IoTHubTransportMqtt_Subscribe,                  /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;*/
+    IoTHubTransportMqtt_Unsubscribe,                /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;*/
+    IoTHubTransportMqtt_DoWork,                     /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;*/
+    IoTHubTransportMqtt_GetSendStatus               /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
 };
 
-/* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_011: [ This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:
-IoTHubTransport_GetHostname = IoTHubTransportMqtt_GetHostname
-IoTHubTransport_Create = IoTHubTransportMqtt_Create
-IoTHubTransport_Destroy = IoTHubTransportMqtt_Destroy
-IoTHubTransport_Subscribe = IoTHubTransportMqtt_Subscribe
-IoTHubTransport_Unsubscribe = IoTHubTransportMqtt_Unsubscribe
-IoTHubTransport_DoWork = IoTHubTransportMqtt_DoWork
-IoTHubTransport_SetOption = IoTHubTransportMqtt_SetOption ] */
-const TRANSPORT_PROVIDER* MQTT_Protocol(void)
+/* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_022: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER */
+extern const TRANSPORT_PROVIDER* MQTT_Protocol(void)
 {
     return &myfunc;
 }

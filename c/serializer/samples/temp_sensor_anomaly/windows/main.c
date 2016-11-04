@@ -194,7 +194,7 @@ int main(void)
                                 frdmDevice->Commands = (char*)STRING_c_str(commandsMetadata);
 
                                 /* Send the device information and commands metadata to the cloud */
-                                if (SERIALIZE(&destination, &size, frdmDevice->ObjectName, frdmDevice->ObjectType, frdmDevice->SystemProperties, frdmDevice->Version, frdmDevice->Commands) != IOT_AGENT_OK)
+                                if (SERIALIZE(&destination, &size, frdmDevice->ObjectName, frdmDevice->ObjectType, frdmDevice->SystemProperties, frdmDevice->Version, frdmDevice->Commands) != CODEFIRST_OK)
                                 {
                                     (void)printf("Failed serializing commands metadata\r\n");
                                 }
@@ -228,7 +228,7 @@ int main(void)
 
                             frdmDevice->temp = ((float)38.0 * 9 / 5) + 32;
 
-                            if (SERIALIZE(&destination, &size, frdmDevice->ObjectName, frdmDevice->ObjectType, frdmDevice->Version, frdmDevice->TargetAlarmDevice, frdmDevice->temp) != IOT_AGENT_OK)
+                            if (SERIALIZE(&destination, &size, frdmDevice->ObjectName, frdmDevice->ObjectType, frdmDevice->Version, frdmDevice->TargetAlarmDevice, frdmDevice->temp) != CODEFIRST_OK)
                             {
                                 (void)printf("Failed serializing commands metadata\r\n");
                             }

@@ -59,6 +59,36 @@ static void IoTHubTransportMqtt_WS_Unsubscribe(IOTHUB_DEVICE_HANDLE handle)
     IoTHubTransport_MQTT_Common_Unsubscribe(handle);
 }
 
+/* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_015: [ IoTHubTransportMqtt_WS_Subscribe_DeviceMethod shall call into the IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod function ] */
+static int IoTHubTransportMqtt_WS_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+{
+    return IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod(handle);
+}
+
+/* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_016: [ IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod shall call into the IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod ] */
+static void IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE handle)
+{
+    IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin(handle);
+}
+
+/* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_017: [ IoTHubTransportMqtt_WS_Subscribe_DeviceTwin shall call into the IoTHubTransport_MQTT_Common_Subscribe_DeviceTwin ] */
+static int IoTHubTransportMqtt_WS_Subscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
+{
+    return IoTHubTransport_MQTT_Common_Subscribe_DeviceMethod(handle);
+}
+
+/* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_018: [ IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin shall call into the IoTHubTransport_MQTT_Common_Unsubscribe_DeviceTwin ] */
+static void IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin(IOTHUB_DEVICE_HANDLE handle)
+{
+    IoTHubTransport_MQTT_Common_Unsubscribe_DeviceMethod(handle);
+}
+
+/* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_014: [ IoTHubTransportMqtt_WS_ProcessItem shall call into the IoTHubTransport_MQTT_Common_DoWork function ] */
+static IOTHUB_PROCESS_ITEM_RESULT IoTHubTransportMqtt_WS_ProcessItem(TRANSPORT_LL_HANDLE handle, IOTHUB_IDENTITY_TYPE item_type, IOTHUB_IDENTITY_INFO* iothub_item)
+{
+    return IoTHubTransport_MQTT_Common_ProcessItem(handle, item_type, iothub_item);
+}
+
 /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_007: [ IoTHubTransportMqtt_WS_DoWork shall call into the IoTHubMqttAbstract_DoWork function. ] */
 static void IoTHubTransportMqtt_WS_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle)
 {
@@ -96,7 +126,10 @@ static STRING_HANDLE IoTHubTransportMqtt_WS_GetHostname(TRANSPORT_LL_HANDLE hand
 }
 
 /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_011: [ This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:
-
+IoTHubTransport_Subscribe_DeviceMethod = IoTHubTransport_WS_Subscribe_DeviceMethod
+IoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_WS_Unsubscribe_DeviceMethod
+IoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_WS_Subscribe_DeviceTwin
+IoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_WS_Unsubscribe_DeviceTwin
 IoTHubTransport_GetHostname = IoTHubTransportMqtt_WS_GetHostname
 IoTHubTransport_Create = IoTHubTransportMqtt_WS_Create
 IoTHubTransport_Destroy = IoTHubTransportMqtt_WS_Destroy
@@ -105,6 +138,11 @@ IoTHubTransport_Unsubscribe = IoTHubTransportMqtt_WS_Unsubscribe
 IoTHubTransport_DoWork = IoTHubTransportMqtt_WS_DoWork
 IoTHubTransport_SetOption = IoTHubTransportMqtt_WS_SetOption ] */
 static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
+    IoTHubTransportMqtt_WS_Subscribe_DeviceMethod,
+    IoTHubTransportMqtt_WS_Unsubscribe_DeviceMethod,
+    IoTHubTransportMqtt_WS_Subscribe_DeviceTwin,
+    IoTHubTransportMqtt_WS_Unsubscribe_DeviceTwin,
+    IoTHubTransportMqtt_WS_ProcessItem,
     IoTHubTransportMqtt_WS_GetHostname,
     IoTHubTransportMqtt_WS_SetOption,
     IoTHubTransportMqtt_WS_Create,

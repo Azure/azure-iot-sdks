@@ -7,6 +7,7 @@ var MqttReceiver = require('./mqtt_receiver.js');
 var debug = require('debug')('mqtt-common');
 var PackageJson = require('../package.json');
 var results = require('azure-iot-common').results;
+var endpoint = require('azure-iot-common').endpoint;
 
 /**
  * @class           module:azure-iot-device-mqtt.MqttBase
@@ -39,10 +40,10 @@ MqttBase.prototype.connect = function (config, done) {
 
   this._receiver = null;
   var uri = config.uri || 'mqtts://' + config.host;
-  this._topic_publish = "devices/" + config.deviceId + "/messages/events/";
-  this._topic_subscribe = "devices/" + config.deviceId + "/messages/devicebound/#";
-  debug('topic publish: ' + this._topic_publish);
-  debug('topic subscribe: ' + this._topic_subscribe);
+  this._topicTelemetryPublish = "devices/" + config.deviceId + "/messages/events/";
+  this._topicMessageSubscribe = "devices/" + config.deviceId + "/messages/devicebound/#";
+  debug('topic publish: ' + this._topicTelemetryPublish);
+  debug('topic subscribe: ' + this._topicMessageSubscribe);
   var versionString = encodeURIComponent('azure-iot-device/' + PackageJson.version);
 
   /*Codes_SRS_NODE_COMMON_MQTT_BASE_16_002: [The `connect` method shall use the authentication parameters contained in the `config` argument to connect to the server.]*/
@@ -54,14 +55,16 @@ MqttBase.prototype.connect = function (config, done) {
     clean: false,
     clientId: config.deviceId,
     rejectUnauthorized: true,
-    username: config.host + '/' + config.deviceId + '/DeviceClientType=' + versionString,
+    username: config.host + '/' + config.deviceId +
+              '/DeviceClientType=' + versionString +
+              '&' + endpoint.versionQueryString().substr(1),
     reconnectPeriod: 0  // Client will handle reconnection at the higher level.
   };
 
   if (config.sharedAccessSignature) {
     this._options.password = new Buffer(config.sharedAccessSignature);
     debug('username: ' + this._options.username);
-    debug('hostname: ' + this._hostName);
+    debug('uri:      ' + uri);
   } else {
     this._options.cert = config.x509.cert;
     this._options.key = config.x509.key;
@@ -128,7 +131,7 @@ MqttBase.prototype.publish = function (message, done) {
     throw new ReferenceError('Invalid message');
   }
 
-  this.client.publish(this._topic_publish, message.data.toString(), { qos: 1, retain: false }, function (err, puback) {
+  this.client.publish(this._topicTelemetryPublish, message.data.toString(), { qos: 1, retain: false }, function (err, puback) {
     if (done) {
       if (err) {
         done(err);
@@ -150,7 +153,10 @@ MqttBase.prototype.publish = function (message, done) {
 /*Codes_SRS_NODE_DEVICE_MQTT_BASE_16_003: [If a receiver for this endpoint doesn’t exist, the getReceiver method should create a new MqttReceiver object and then call the done() method with the object that was just created as an argument.] */
 MqttBase.prototype.getReceiver = function (done) {
   if (!this._receiver) {
-    this._receiver = new MqttReceiver(this.client, this._topic_subscribe);
+    this._receiver = new MqttReceiver(
+      this.client,
+      this._topicMessageSubscribe
+    );
   }
 
   done(null, this._receiver);

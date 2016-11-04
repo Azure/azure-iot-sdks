@@ -40,6 +40,11 @@ extern DATA_PUBLISHER_RESULT DataPublisher_CancelTransaction(TRANSACTION_HANDLE 
 
 extern void DataPublisher_SetMaxBufferSize(size_t value);
 extern size_t DataPublisher_GetMaxBufferSize(void);
+
+extern REPORTED_PROPERTIES_TRANSACTION_HANDLE DataPublisher_CreateTransaction_ReportedProperties(DATA_PUBLISHER_HANDLE dataPublisherHandle);
+extern DATA_PUBLISHER_RESULT DataPublisher_PublishTransacted_ReportedProperty(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle, const char* reportedPropertyPath, const AGENT_DATA_TYPE* data);
+extern DATA_PUBLISHER_RESULT DataPublisher_CommitTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle, unsigned char** destination, size_t* destinationSize);
+extern void DataPublisher_DestroyTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle);
 ```c
 
 ### DataPublisher_Create
@@ -155,6 +160,96 @@ size_t DataPublisher_GetMaxBufferSize(void);
 
 Miscellaneous
 **SRS_DATA_PUBLISHER_99_020: [**  For any errors not explicitly mentioned here the DataPublisher APIs shall return DATA_PUBLISHER_ERROR. **]**
+
+
+### DataPublisher_CreateTransaction_ReportedProperties
+```c
+extern REPORTED_PROPERTIES_TRANSACTION_HANDLE DataPublisher_CreateTransaction_ReportedProperties(DATA_PUBLISHER_HANDLE dataPublisherHandle);
+```
+
+`DataPublisher_CreateTransaction_ReportedProperties` creates a transaction that can hold only REPORTED_PROPERTIES.
+
+**SRS_DATA_PUBLISHER_02_027: [** If argument `dataPublisherHandle` is `NULL` then `DataPublisher_CreateTransaction_ReportedProperties` shall fail and return `NULL`. **]**
+
+**SRS_DATA_PUBLISHER_02_028: [** `DataPublisher_CreateTransaction_ReportedProperties` shall create a `VECTOR_HANDLE` holding the individual elements of the transaction (`DATA_MARSHALLER_VALUE`). **]**
+
+**SRS_DATA_PUBLISHER_02_029: [** If any error occurs then `DataPublisher_CreateTransaction_ReportedProperties` shall fail and return `NULL`. **]**
+
+**SRS_DATA_PUBLISHER_02_030: [** Otherwise `DataPublisher_CreateTransaction_ReportedProperties` shall succeed and return a non-`NULL` handle. **]**
+
+
+### DataPublisher_PublishTransacted_ReportedProperty
+```c
+extern DATA_PUBLISHER_RESULT DataPublisher_PublishTransacted_ReportedProperty(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle, const char* reportedPropertyPath, const AGENT_DATA_TYPE* data)
+```
+
+`DataPublisher_PublishTransacted_ReportedProperty` adds a new reported property to the transaction.
+
+**SRS_DATA_PUBLISHER_02_009: [** If argument `transactionHandle` is `NULL` then `DataPublisher_PublishTransacted_ReportedProperty` 
+shall fail and return `DATA_PUBLISHER_INVALID_ARG`. **]**
+
+**SRS_DATA_PUBLISHER_02_010: [** If argument `reportedPropertyPath` is `NULL` then `DataPublisher_PublishTransacted_ReportedProperty` 
+shall fail and return `DATA_PUBLISHER_INVALID_ARG`. **]**
+
+**SRS_DATA_PUBLISHER_02_011: [** If argument `data` is `NULL` then `DataPublisher_PublishTransacted_ReportedProperty` shall fail and 
+return `DATA_PUBLISHER_INVALID_ARG`. **]**
+
+**SRS_DATA_PUBLISHER_02_012: [** `DataPublisher_PublishTransacted_ReportedProperty` shall verify that a reported property having the 
+path `reportedPropertyPath` exists in the model by calling `Schema_ModelReportedPropertyByPathExists` **]**
+
+**SRS_DATA_PUBLISHER_02_013: [** If a reported property with path `reportedPropertyPath` does not exist in the model then 
+`DataPublisher_PublishTransacted_ReportedProperty` shall fail and return `DATA_PUBLISHER_INVALID_ARG`. **]**
+
+**SRS_DATA_PUBLISHER_02_014: [** If the same (by `reportedPropertypath`) reported property has already been added to the transaction, 
+then `DataPublisher_PublishTransacted_ReportedProperty` shall overwrite the previous reported property. **]**
+
+**SRS_DATA_PUBLISHER_02_015: [** `DataPublisher_PublishTransacted_ReportedProperty` shall add a new `DATA_MARSHALLER_VALUE` to 
+the `VECTOR_HANDLE`. **]**
+
+**SRS_DATA_PUBLISHER_02_016: [** If any error occurs then `DataPublisher_PublishTransacted_ReportedProperty` shall fail 
+and return `DATA_PUBLISHER_ERROR`. **]**
+
+**SRS_DATA_PUBLISHER_02_017: [** Otherwise `DataPublisher_PublishTransacted_ReportedProperty` shall succeed and return `DATA_PUBLISHER_OK`. **]**
+
+
+### DataPublisher_CommitTransaction_ReportedProperties
+```c
+extern DATA_PUBLISHER_RESULT DataPublisher_CommitTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle, unsigned char** destination, size_t* destinationSize);
+```
+
+`DataPublisher_CommitTransaction_ReportedProperties` attempts to commit the transaction 
+by filling `destination` and `destinationSize`.
+
+**SRS_DATA_PUBLISHER_02_019: [** If argument `transactionHandle` is `NULL` then `DataPublisher_CommitTransaction_ReportedProperties` shall 
+fail and return `DATA_PUBLISHER_INVALID_ARG`. **]**
+
+**SRS_DATA_PUBLISHER_02_020: [** If argument `destination` is `NULL` then `DataPublisher_CommitTransaction_ReportedProperties` shall 
+fail and return `DATA_PUBLISHER_INVALID_ARG`. **]**
+
+**SRS_DATA_PUBLISHER_02_021: [** If argument `destinationSize` `NULL` then `DataPublisher_CommitTransaction_ReportedProperties` shall 
+fail and return `DATA_PUBLISHER_INVALID_ARG`. **]**
+
+**SRS_DATA_PUBLISHER_02_031: [** If the transaction contains zero elements then `DataPublisher_CommitTransaction_ReportedProperties` shall 
+fail and return `DATA_PUBLISHER_INVALID_ARG`. **]**  
+
+**SRS_DATA_PUBLISHER_02_022: [** `DataPublisher_CommitTransaction_ReportedProperties` shall call `DataMarshaller_SendData_ReportedProperties` 
+providing the `VECTOR_HANDLE` holding the transacted reported properties, `destination` and `destinationSize`. **]**
+
+**SRS_DATA_PUBLISHER_02_023: [** If any error occurs then `DataPublisher_CommitTransaction_ReportedProperties` shall fail and 
+return `DATA_PUBLISHER_ERROR`. **]**
+
+**SRS_DATA_PUBLISHER_02_024: [** Otherwise `DataPublisher_CommitTransaction_ReportedProperties` shall succeed and return `DATA_PUBLISHER_OK`. **]**
+
+### DataPublisher_DestroyTransaction_ReportedProperties
+```c
+extern void DataPublisher_DestroyTransaction_ReportedProperties(REPORTED_PROPERTIES_TRANSACTION_HANDLE transactionHandle);
+```
+
+`DataPublisher_DestroyTransaction_ReportedProperties` frees all resources used by the reported properties `transactionHandle`.
+
+**SRS_DATA_PUBLISHER_02_025: [** If argument `transactionHandle` is `NULL` then `DataPublisher_DestroyTransaction_ReportedProperties` shall return. **]**
+
+**SRS_DATA_PUBLISHER_02_026: [** Otherwise `DataPublisher_DestroyTransaction_ReportedProperties` shall free all resources associated with the reported properties `transactionHandle`. **]**
 
 
 

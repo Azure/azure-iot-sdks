@@ -14,15 +14,32 @@ var FakeMqtt = function() {
 
   this.publish = function(topic, message, options, callback) {
     this.publishoptions = options;
+    this.topicString = topic;
     if (this._publishSucceeds) {
       callback(null, {puback: 'success'});
     } else {
-      callback(new Error('publish failed'));
+      callback(new Error('Invalid topic'));
     }
   };
 
   this.connect = function() {
     return this;
+  };
+
+  this.subscribe = function(topicName, param, done) {
+    if (this.subscribeShouldFail) {
+      done (new Error('Not authorized'));
+    } else {
+      done(null, 'fake_object');
+    }
+  };
+
+  this.unsubscribe = function(topicName, done) {
+    done();
+  };
+
+  this.fakeMessageFromService = function(topic, message) {
+    this.emit('message', topic, message);
   };
 };
 

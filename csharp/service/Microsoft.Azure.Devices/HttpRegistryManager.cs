@@ -8,12 +8,14 @@ namespace Microsoft.Azure.Devices
     using System.Linq;
     using System.Net;
     using System.Net.Http;
+    using System.Net.Http.Headers;
     using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
 
     using Microsoft.Azure.Devices.Common;
     using Microsoft.Azure.Devices.Common.Exceptions;
+    using Newtonsoft.Json;
 
     class HttpRegistryManager : RegistryManager, IDisposable
     {
@@ -22,10 +24,16 @@ namespace Microsoft.Azure.Devices
         const string JobsUriFormat = "/jobs{0}?{1}";
         const string StatisticsUriFormat = "/statistics/devices?" + ClientApiVersionHelper.ApiVersionQueryString;
         const string DevicesRequestUriFormat = "/devices/?top={0}&{1}";
+        const string DevicesQueryUriFormat = "/devices/query?" + ClientApiVersionHelper.ApiVersionQueryString;
+        const string WildcardEtag = "*";
+
+        const string TwinUriFormat = "/twins/{0}?{1}";
+        const string TwinTagsUriFormat = "/twins/{0}/tags?{1}";
+        const string TwinDesiredPropertiesUriFormat = "/twins/{0}/properties/desired?{1}";
 
         static readonly Regex DeviceIdRegex = new Regex(@"^[A-Za-z0-9\-:.+%_#*?!(),=@;$']{1,128}$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         static readonly TimeSpan DefaultOperationTimeout = TimeSpan.FromSeconds(100);
-        
+
         IHttpClientHelper httpClientHelper;
         readonly string iotHubName;
 
@@ -92,7 +100,15 @@ namespace Microsoft.Azure.Devices
                 device.Authentication = new AuthenticationMechanism();
             }
 
-            return this.httpClientHelper.PutAsync(GetRequestUri(device.Id), device, PutOperationType.CreateEntity, null, cancellationToken);
+            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>
+            {
+                {
+                    HttpStatusCode.PreconditionFailed,
+                    async responseMessage => new PreconditionFailedException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage))
+                }
+            };
+
+            return this.httpClientHelper.PutAsync(GetRequestUri(device.Id), device, PutOperationType.CreateEntity, errorMappingOverrides, cancellationToken);
         }
 
         public override Task<string[]> AddDevicesAsync(IEnumerable<Device> devices)
@@ -202,7 +218,7 @@ namespace Microsoft.Azure.Devices
         {
             return this.RemoveDeviceAsync(deviceId, CancellationToken.None);
         }
-        
+
         public override Task RemoveDeviceAsync(string deviceId, CancellationToken cancellationToken)
         {
             this.EnsureInstanceNotClosed();
@@ -314,7 +330,21 @@ namespace Microsoft.Azure.Devices
                 null,
                 cancellationToken);
         }
-        
+
+        public override IQuery CreateQuery(string sqlQueryString)
+        {
+            return CreateQuery(sqlQueryString, null);
+        }
+
+        public override IQuery CreateQuery(string sqlQueryString, int? pageSize)
+        {
+            return new Query((token) => this.ExecuteQueryAsync(
+                sqlQueryString,
+                pageSize,
+                token,
+                CancellationToken.None));
+        }
+
         /// <inheritdoc/>
         public void Dispose()
         {
@@ -402,6 +432,7 @@ namespace Microsoft.Azure.Devices
 
             var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>
             {
+                { HttpStatusCode.PreconditionFailed, async responseMessage => new PreconditionFailedException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage)) },
                 { HttpStatusCode.RequestEntityTooLarge, async responseMessage => new TooManyDevicesException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage)) },
                 { HttpStatusCode.BadRequest, async responseMessage => new ArgumentException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage)) }
             };
@@ -574,7 +605,7 @@ namespace Microsoft.Azure.Devices
         public override Task<JobProperties> GetJobAsync(string jobId, CancellationToken cancellationToken)
         {
             this.EnsureInstanceNotClosed();
-            
+
             var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>
             {
                 { HttpStatusCode.NotFound, responseMessage => Task.FromResult((Exception)new JobNotFoundException(jobId)) }
@@ -619,7 +650,87 @@ namespace Microsoft.Azure.Devices
                 null,
                 cancellationToken);
         }
-        
+
+        public override Task<Twin> GetTwinAsync(string deviceId)
+        {
+            return this.GetTwinAsync(deviceId, CancellationToken.None);
+        }
+
+        public override Task<Twin> GetTwinAsync(string deviceId, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(deviceId))
+            {
+                throw new ArgumentException(IotHubApiResources.GetString(ApiResources.ParameterCannotBeNullOrWhitespace, "deviceId"));
+            }
+
+            this.EnsureInstanceNotClosed();
+            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>()
+            {
+                { HttpStatusCode.NotFound, async responseMessage => new DeviceNotFoundException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage)) }
+            };
+
+            return this.httpClientHelper.GetAsync<Twin>(GetTwinUri(deviceId), errorMappingOverrides, null, false, cancellationToken);
+        }
+
+        public override Task<Twin> UpdateTwinAsync(string deviceId, string jsonTwinPatch, string etag)
+        {
+            return this.UpdateTwinAsync(deviceId, jsonTwinPatch, etag, CancellationToken.None);
+        }
+
+        public override Task<Twin> UpdateTwinAsync(string deviceId, string jsonTwinPatch, string etag, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(jsonTwinPatch))
+            {
+                throw new ArgumentNullException(nameof(jsonTwinPatch));
+            }
+
+            // TODO: Do we need to deserialize Twin, only to serialize it again?
+            var twin = JsonConvert.DeserializeObject<Twin>(jsonTwinPatch);
+            return this.UpdateTwinAsync(deviceId, twin, etag, cancellationToken);
+        }
+
+        public override Task<Twin> UpdateTwinAsync(string deviceId, Twin twinPatch, string etag)
+        {
+            return this.UpdateTwinAsync(deviceId, twinPatch, etag, CancellationToken.None);
+        }
+
+        public override Task<Twin> UpdateTwinAsync(string deviceId, Twin twinPatch, string etag, CancellationToken cancellationToken)
+        {
+            this.EnsureInstanceNotClosed();
+
+            if (twinPatch != null)
+            {
+                twinPatch.DeviceId = deviceId;
+            }
+
+            ValidateTwinId(twinPatch);
+
+            if (string.IsNullOrEmpty(etag))
+            {
+                throw new ArgumentNullException(nameof(etag));
+            }
+
+            var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>
+            {
+                {
+                    HttpStatusCode.PreconditionFailed,
+                    async responseMessage => new PreconditionFailedException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage))
+                },
+                {
+                    HttpStatusCode.NotFound,
+                    async responseMessage => new DeviceNotFoundException(await ExceptionHandlingHelper.GetExceptionMessageAsync(responseMessage), (Exception)null)
+                }
+            };
+
+            return this.httpClientHelper.PatchAsync<Twin, Twin>(
+                GetTwinUri(deviceId),
+                twinPatch,
+                etag,
+                etag == WildcardEtag ? PutOperationType.ForceUpdateEntity : PutOperationType.UpdateEntity,
+                errorMappingOverrides,
+                cancellationToken);
+        }
+
         Task RemoveDeviceAsync(string deviceId, IETagHolder eTagHolder, CancellationToken cancellationToken)
         {
             var errorMappingOverrides = new Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>
@@ -646,7 +757,7 @@ namespace Microsoft.Azure.Devices
         {
             return new Uri(RequestUriFormat.FormatInvariant(string.Empty, apiVersionQueryString), UriKind.Relative);
         }
-
+        
         static Uri GetJobUri(string jobId)
         {
             return new Uri(JobsUriFormat.FormatInvariant(jobId, ClientApiVersionHelper.ApiVersionQueryString), UriKind.Relative);
@@ -657,6 +768,11 @@ namespace Microsoft.Azure.Devices
             return new Uri(DevicesRequestUriFormat.FormatInvariant(maxCount, ClientApiVersionHelper.ApiVersionQueryString), UriKind.Relative);
         }
 
+        static Uri QueryDevicesRequestUri()
+        {
+            return new Uri(DevicesQueryUriFormat, UriKind.Relative);
+        }
+
         static Uri GetAdminUri(string operation)
         {
             return new Uri(AdminUriFormat.FormatInvariant(operation, ClientApiVersionHelper.ApiVersionQueryString), UriKind.Relative);
@@ -665,6 +781,24 @@ namespace Microsoft.Azure.Devices
         static Uri GetStatisticsUri()
         {
             return new Uri(StatisticsUriFormat, UriKind.Relative);
+        }
+
+        private static Uri GetTwinUri(string deviceId)
+        {
+            deviceId = WebUtility.UrlEncode(deviceId);
+            return new Uri(TwinUriFormat.FormatInvariant(deviceId, ClientApiVersionHelper.ApiVersionQueryString), UriKind.Relative);
+        }
+
+        private static Uri GetTwinTagsUri(string deviceId)
+        {
+            deviceId = WebUtility.UrlEncode(deviceId);
+            return new Uri(TwinTagsUriFormat.FormatInvariant(deviceId, ClientApiVersionHelper.ApiVersionQueryString), UriKind.Relative);
+        }
+
+        private static Uri GetTwinDesiredPropertiesUri(string deviceId)
+        {
+            deviceId = WebUtility.UrlEncode(deviceId);
+            return new Uri(TwinDesiredPropertiesUriFormat.FormatInvariant(deviceId, ClientApiVersionHelper.ApiVersionQueryString), UriKind.Relative);
         }
 
         static void ValidateDeviceId(Device device)
@@ -682,6 +816,24 @@ namespace Microsoft.Azure.Devices
             if (!DeviceIdRegex.IsMatch(device.Id))
             {
                 throw new ArgumentException(ApiResources.DeviceIdInvalid.FormatInvariant(device.Id));
+            }
+        }
+
+        static void ValidateTwinId(Twin twin)
+        {
+            if (twin == null)
+            {
+                throw new ArgumentNullException(nameof(twin));
+            }
+
+            if (string.IsNullOrWhiteSpace(twin.DeviceId))
+            {
+                throw new ArgumentException("twin.DeviceId");
+            }
+
+            if (!DeviceIdRegex.IsMatch(twin.DeviceId))
+            {
+                throw new ArgumentException(ApiResources.DeviceIdInvalid.FormatInvariant(twin.DeviceId));
             }
         }
 
@@ -716,6 +868,30 @@ namespace Microsoft.Azure.Devices
             {
                 throw new ObjectDisposedException("RegistryManager", ApiResources.RegistryManagerInstanceAlreadyClosed);
             }
+        }
+
+        Task<QueryResult> ExecuteQueryAsync(string sqlQueryString, int? pageSize, string continuationToken, CancellationToken cancellationToken)
+        {
+            this.EnsureInstanceNotClosed();
+
+            if (string.IsNullOrWhiteSpace(sqlQueryString))
+            {
+                throw new ArgumentException(IotHubApiResources.GetString(ApiResources.ParameterCannotBeNullOrEmpty, nameof(sqlQueryString)));
+            }
+
+            return this.httpClientHelper.PostAsync<QuerySpecification, QueryResult>(
+                QueryDevicesRequestUri(),
+                new QuerySpecification()
+                {
+                    Sql = sqlQueryString,
+                    PageSize = pageSize,
+                    ContinuationToken = continuationToken
+                },
+                null,
+                null,
+                new MediaTypeHeaderValue("application/json") { CharSet = "utf-8" },
+                null,
+                cancellationToken);
         }
     }
 }

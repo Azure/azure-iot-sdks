@@ -9,6 +9,7 @@ using Microsoft.Azure.Devices;
 using Microsoft.Azure.Devices.Common;
 using Microsoft.Azure.Devices.Common.Security;
 using Microsoft.ServiceBus.Messaging;
+using System.Reflection;
 
 namespace DeviceExplorer
 {
@@ -33,9 +34,11 @@ namespace DeviceExplorer
 
         private static int deviceSelectedIndexForEvent = 0;
         private static int deviceSelectedIndexForC2DMessage = 0;
+        private static int deviceSelectedIndexForDeviceMethod = 0;
 
         private static CancellationTokenSource ctsForDataMonitoring;
         private static CancellationTokenSource ctsForFeedbackMonitoring;
+        private static CancellationTokenSource ctsForDeviceMethod;
 
         private const string DEFAULT_CONSUMER_GROUP = "$Default";
         #endregion
@@ -120,6 +123,7 @@ namespace DeviceExplorer
                 string iotHubName = builder.HostName.Split('.')[0];
                 iotHubNameTextBox.Text = iotHubName;
                 eventHubNameTextBoxForDataTab.Text = iotHubName;
+                iotHubNameTextBoxForDeviceMethod.Text = iotHubName;
 
                 activeIoTHubConnectionString = connectionString;
             }
@@ -138,6 +142,7 @@ namespace DeviceExplorer
             {
                 List<string> deviceIdsForEvent = new List<string>();
                 List<string> deviceIdsForC2DMessage = new List<string>();
+                List<string> deviceIdsForDeviceMethod = new List<string>();
                 RegistryManager registryManager = RegistryManager.CreateFromConnectionString(activeIoTHubConnectionString);
 
                 var devices = await registryManager.GetDevicesAsync(MAX_COUNT_OF_DEVICES);
@@ -145,13 +150,16 @@ namespace DeviceExplorer
                 {
                     deviceIdsForEvent.Add(device.Id);
                     deviceIdsForC2DMessage.Add(device.Id);
+                    deviceIdsForDeviceMethod.Add(device.Id);
                 }
                 await registryManager.CloseAsync();
-                this.deviceIDsComboBoxForEvent.DataSource = deviceIdsForEvent.OrderBy(c => c).ToList();
-                this.deviceIDsComboBoxForCloudToDeviceMessage.DataSource = deviceIdsForC2DMessage.OrderBy(c => c).ToList();
+                deviceIDsComboBoxForEvent.DataSource = deviceIdsForEvent.OrderBy(c => c).ToList();
+                deviceIDsComboBoxForCloudToDeviceMessage.DataSource = deviceIdsForC2DMessage.OrderBy(c => c).ToList();
+                deviceIDsComboBoxForDeviceMethod.DataSource = deviceIdsForDeviceMethod.OrderBy(c => c).ToList();
 
                 deviceIDsComboBoxForEvent.SelectedIndex = deviceSelectedIndexForEvent;
                 deviceIDsComboBoxForCloudToDeviceMessage.SelectedIndex = deviceSelectedIndexForC2DMessage;
+                deviceIDsComboBoxForDeviceMethod.SelectedIndex = deviceSelectedIndexForDeviceMethod;
             }
         }
         private void persistSettingsToAppConfig()
@@ -609,11 +617,59 @@ namespace DeviceExplorer
         }
         #endregion
 
+        #region CallDeviceMethod
+
+        private async void callDeviceMethodButton_Click(object sender, EventArgs e)
+        {
+            returnStatusTextBox.Text = "";
+            returnPayloadTextBox.Text = "";
+
+            string deviceId = deviceIDsComboBoxForDeviceMethod.SelectedItem.ToString();
+
+            string methodName = methodNameTextBox.Text;
+            string payload = methodPayloadTextBox.Text;
+            payload = "'" + payload + "'";
+
+            double timeout = System.Convert.ToDouble(callDeviceMethodNumericUpDown.Value);
+
+            DeviceTwinAndMethod deviceMethod = new DeviceTwinAndMethod(activeIoTHubConnectionString, deviceId);
+
+            ctsForDeviceMethod = new CancellationTokenSource();
+            try
+            {
+                callDeviceMethodButton.Enabled = false;
+                callDeviceMethodCancelButton.Enabled = true;
+                DeviceMethodReturnValue deviceMethodReturnValue = await deviceMethod.CallDeviceMethod(methodName, payload, TimeSpan.FromSeconds(timeout), ctsForDeviceMethod.Token);
+                returnStatusTextBox.Text = deviceMethodReturnValue.Status;
+                returnPayloadTextBox.Text = deviceMethodReturnValue.Payload;
+            }
+            catch (Exception exc)
+            {
+                MessageBox.Show(exc.Message, "Device Method", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                callDeviceMethodButton.Enabled = true;
+                callDeviceMethodCancelButton.Enabled = false;
+            }
+        }
+
+        private void callDeviceMethodCancelButton_Click(object sender, EventArgs e)
+        {
+            ctsForDeviceMethod.Cancel();
+        }
+
+        private void deviceIDsComboBoxForDeviceMethod_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+            deviceSelectedIndexForDeviceMethod = ((ComboBox)sender).SelectedIndex;
+        }
+        #endregion
+
         private async void tabControl1_Selected(object sender, TabControlEventArgs e)
         {
             try
             {
-                if (e.TabPage == tabData || e.TabPage == tabMessagesToDevice)
+                if (e.TabPage == tabData || e.TabPage == tabMessagesToDevice || e.TabPage == tabDeviceMethod)
                 {
                     await updateDeviceIdsComboBoxes(runIfNullOrEmpty: false);
                 }
@@ -803,6 +859,27 @@ namespace DeviceExplorer
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private void showDevicePropertiesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DeviceTwinPropertiesForm deviceTwinPropertiesForm = new DeviceTwinPropertiesForm();
+
+            if (devicesGridView.SelectedRows.Count > 0)
+            {
+                String deviceName = devicesGridView.Rows[devicesGridView.SelectedRows[0].Index].Cells[0].Value.ToString();
+                List<string> deviceList = new List<string>();
+                for (int i = 0; i < devicesGridView.RowCount - 1; i++)
+                {
+                    deviceList.Add(devicesGridView.Rows[i].Cells[0].Value.ToString());
+                }
+                deviceTwinPropertiesForm.Execute(activeIoTHubConnectionString, deviceName, deviceList);
+            }
+        }
+
+        private void deviceTwinPropertiesBtn_Click(object sender, EventArgs e)
+        {
+            showDevicePropertiesToolStripMenuItem_Click(this, null);
         }
     }
 }

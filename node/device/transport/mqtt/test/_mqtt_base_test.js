@@ -9,6 +9,7 @@ var MqttBase = require('../lib/mqtt_base.js');
 var PackageJson = require('../package.json');
 var FakeMqtt = require('./_fake_mqtt.js');
 var Message = require('azure-iot-common').Message;
+var endpoint = require('azure-iot-common').endpoint;
 
 describe('MqttBase', function () {
   describe('#connect', function() {
@@ -89,7 +90,13 @@ describe('MqttBase', function () {
 
       fakemqtt.connect = function(host, options) {
         assert.equal(options.clientId, config.deviceId);
-        assert.equal(options.username, config.host + '/' + config.deviceId + '/DeviceClientType=' + encodeURIComponent('azure-iot-device/' + PackageJson.version));
+        assert.equal(options.username, config.host + '/' +
+                                       config.deviceId +
+                                       '/DeviceClientType=' +
+                                       encodeURIComponent(
+                                         'azure-iot-device/' + PackageJson.version
+                                       ) +
+                                       '&' + endpoint.versionQueryString().substr(1));
         assert.equal(options.password, config.sharedAccessSignature);
 
         assert.equal(options.cmd, 'connect');
@@ -118,7 +125,13 @@ describe('MqttBase', function () {
 
       fakemqtt.connect = function(host, options) {
         assert.equal(options.clientId, config.deviceId);
-        assert.equal(options.username, config.host + '/' + config.deviceId + '/DeviceClientType=' + encodeURIComponent('azure-iot-device/' + PackageJson.version));
+        assert.equal(options.username, config.host + '/' +
+                                       config.deviceId +
+                                       '/DeviceClientType=' +
+                                       encodeURIComponent(
+                                         'azure-iot-device/' + PackageJson.version
+                                       ) +
+                                       '&' + endpoint.versionQueryString().substr(1));
         assert.equal(options.cert, config.x509.cert);
         assert.equal(options.key, config.x509.key);
         assert.equal(options.passphrase, config.x509.passphrase);

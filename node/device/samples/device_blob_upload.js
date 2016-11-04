@@ -18,7 +18,7 @@ fs.stat(filePath, function (err, fileStats) {
     if (err) {
       console.error('error uploading file: ' + err.constructor.name + ': ' + err.message);
     } else {
-      console.log('Upload successful');
+      console.log('Upload successful - ' + result);
     }
     fileStream.destroy();
   });

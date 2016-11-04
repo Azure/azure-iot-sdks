@@ -68,7 +68,6 @@ public final class AmqpsIotHubConnection extends BaseHandler
     private int maxWaitTimeForOpeningClosingConnection = 3*60*1000;
     private int maxWaitTimeForTerminateExecutor = 30;
     protected State state;
-    private Future reactorFuture;
 
     private static final String sendTag = "sender";
     private static final String receiveTag = "receiver";
@@ -288,8 +287,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
         IotHubReactor iotHubReactor = new IotHubReactor(reactor);
         ReactorRunner reactorRunner = new ReactorRunner(iotHubReactor);
-        this.reactorFuture = executorService.submit(reactorRunner);
-        iotHubReactor.IotHubReactorSetFutureReactor(this.reactorFuture);
+        executorService.submit(reactorRunner);
     }
 
     private void closeAsync()
@@ -310,8 +308,8 @@ public final class AmqpsIotHubConnection extends BaseHandler
             this.connection.close();
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_014: [The function shall stop the Proton reactor.]
-        if (this.reactorFuture != null)
-            this.reactorFuture.cancel(true);
+
+        this.reactor.stop();
     }
 
     /**

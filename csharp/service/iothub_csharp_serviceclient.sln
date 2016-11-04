@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Azure.Devices.Api
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{A722A278-A765-4C69-A2FF-898FFE2DBE17}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{2F39C202-A202-4831-B112-62C90751D6C8}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Azure.Devices.Uwp", "Microsoft.Azure.Devices.Uwp\Microsoft.Azure.Devices.Uwp.csproj", "{8C408658-3797-4F57-9F37-DE1C086A0685}"
 EndProject
 Global

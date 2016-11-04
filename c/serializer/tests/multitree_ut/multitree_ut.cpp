@@ -1871,7 +1871,7 @@ TEST_FUNCTION(MultiTree_GetChildByName_When_The_Child_Exists_Succeeds)
 
     ///assert
     ASSERT_ARE_EQUAL(MULTITREE_RESULT, MULTITREE_OK, result);
-    ASSERT_ARE_EQUAL(MULTITREE_HANDLE, actualChildHandle, expectedChildHandle);
+    ASSERT_ARE_EQUAL(void_ptr, actualChildHandle, expectedChildHandle);
 
     MultiTree_Destroy(treeHandle);
     mocks.ResetAllCalls();
