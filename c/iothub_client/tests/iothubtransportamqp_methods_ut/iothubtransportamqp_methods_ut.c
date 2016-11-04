@@ -91,6 +91,8 @@ MOCK_FUNCTION_END(0)
 #define LINK_ATTACH_PROPERTIES_MAP		(AMQP_VALUE)0x4260
 #define CHANNEL_CORRELATION_ID_KEY		(AMQP_VALUE)0x4261
 #define CHANNEL_CORRELATION_ID_VALUE	(AMQP_VALUE)0x4262
+#define API_VERSION_KEY					(AMQP_VALUE)0x4263
+#define API_VERSION_VALUE				(AMQP_VALUE)0x4264
 
 #define TEST_METHOD_NAME            "test_method_name"
 
@@ -375,8 +377,15 @@ static void setup_subscribe_expected_calls(void)
 	STRICT_EXPECTED_CALL(amqpvalue_create_string("testdevice"))
 		.SetReturn(CHANNEL_CORRELATION_ID_VALUE);
 	STRICT_EXPECTED_CALL(amqpvalue_set_map_value(LINK_ATTACH_PROPERTIES_MAP, CHANNEL_CORRELATION_ID_KEY, CHANNEL_CORRELATION_ID_VALUE));
+	STRICT_EXPECTED_CALL(amqpvalue_create_symbol("com.microsoft:api-version"))
+		.SetReturn(API_VERSION_KEY);
+	STRICT_EXPECTED_CALL(amqpvalue_create_string("2016-11-14"))
+		.SetReturn(API_VERSION_VALUE);
+	STRICT_EXPECTED_CALL(amqpvalue_set_map_value(LINK_ATTACH_PROPERTIES_MAP, API_VERSION_KEY, API_VERSION_VALUE));
 	STRICT_EXPECTED_CALL(link_set_attach_properties(TEST_SENDER_LINK, LINK_ATTACH_PROPERTIES_MAP));
 	STRICT_EXPECTED_CALL(link_set_attach_properties(TEST_RECEIVER_LINK, LINK_ATTACH_PROPERTIES_MAP));
+	STRICT_EXPECTED_CALL(amqpvalue_destroy(API_VERSION_VALUE));
+	STRICT_EXPECTED_CALL(amqpvalue_destroy(API_VERSION_KEY));
 	STRICT_EXPECTED_CALL(amqpvalue_destroy(CHANNEL_CORRELATION_ID_VALUE));
 	STRICT_EXPECTED_CALL(amqpvalue_destroy(CHANNEL_CORRELATION_ID_KEY));
 	STRICT_EXPECTED_CALL(amqpvalue_destroy(LINK_ATTACH_PROPERTIES_MAP));
@@ -779,6 +788,9 @@ TEST_FUNCTION(iothubtransportamqp_methods_destroy_frees_2_tracked_handles)
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_141: [ A property key which shall be a symbol named `com.microsoft:channel-correlation-id` shall be created by calling `amqp_create_symbol`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_142: [ A property value of type string that shall contain the device id shall be created by calling `amqpvalue_create_string`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_143: [ The `com.microsoft:channel-correlation-id` shall be added to the link attach properties by calling `amqpvalue_set_map_value`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_150: [ A property key which shall be a symbol named `com.microsoft:api-version` shall be created by calling `amqp_create_symbol`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_151: [ A property value of type string that shall contain the `2016-11-14` shall be created by calling `amqpvalue_create_string`. ]*/
+/* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_152: [ The `com.microsoft:api-version` shall be added to the link attach properties by calling `amqpvalue_set_map_value`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_144: [ The link attach properties shall be set on the receiver and sender link by calling `link_set_attach_properties`. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_146: [ The link attach properties and all associated values shall be freed by calling `amqpvalue_destroy` after setting the link attach properties. ]*/
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_033: [ `iothubtransportamqp_methods_subscribe` shall create a message receiver associated with the receiver link by calling `messagereceiver_create` and passing the receiver link handle to it. ]*/
@@ -993,10 +1005,18 @@ TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_subscribe_fails)
 		.SetReturn(CHANNEL_CORRELATION_ID_VALUE).SetFailReturn(NULL);
 	STRICT_EXPECTED_CALL(amqpvalue_set_map_value(LINK_ATTACH_PROPERTIES_MAP, CHANNEL_CORRELATION_ID_KEY, CHANNEL_CORRELATION_ID_VALUE))
 		.SetFailReturn(42);
+	STRICT_EXPECTED_CALL(amqpvalue_create_symbol("com.microsoft:api-version"))
+		.SetReturn(API_VERSION_KEY).SetFailReturn(NULL);
+	STRICT_EXPECTED_CALL(amqpvalue_create_string("2016-11-14"))
+		.SetReturn(API_VERSION_VALUE).SetFailReturn(NULL);
+	STRICT_EXPECTED_CALL(amqpvalue_set_map_value(LINK_ATTACH_PROPERTIES_MAP, API_VERSION_KEY, API_VERSION_VALUE))
+		.SetFailReturn(42);
 	STRICT_EXPECTED_CALL(link_set_attach_properties(TEST_SENDER_LINK, LINK_ATTACH_PROPERTIES_MAP))
 		.SetFailReturn(42);
 	STRICT_EXPECTED_CALL(link_set_attach_properties(TEST_RECEIVER_LINK, LINK_ATTACH_PROPERTIES_MAP))
 		.SetFailReturn(43);
+	STRICT_EXPECTED_CALL(amqpvalue_destroy(API_VERSION_VALUE));
+	STRICT_EXPECTED_CALL(amqpvalue_destroy(API_VERSION_KEY));
 	STRICT_EXPECTED_CALL(amqpvalue_destroy(CHANNEL_CORRELATION_ID_VALUE));
 	STRICT_EXPECTED_CALL(amqpvalue_destroy(CHANNEL_CORRELATION_ID_KEY));
 	STRICT_EXPECTED_CALL(amqpvalue_destroy(LINK_ATTACH_PROPERTIES_MAP));
@@ -1022,10 +1042,12 @@ TEST_FUNCTION(when_a_failure_occurs_iothubtransportamqp_methods_subscribe_fails)
     {
         if ((i != 0) && // STRING_c_str
             (i != 5) && // STRING_c_str
-			(i != 14) && // amqpvalue_destroy
-			(i != 15) && // amqpvalue_destroy
-			(i != 16) && // amqpvalue_destroy
-			(i != 21)) // STRING_delete
+			(i != 17) && // amqpvalue_destroy
+			(i != 18) && // amqpvalue_destroy
+			(i != 19) && // amqpvalue_destroy
+			(i != 20) && // amqpvalue_destroy
+			(i != 21) && // amqpvalue_destroy
+			(i != 26)) // STRING_delete
 		{
             umock_c_negative_tests_reset();
             umock_c_negative_tests_fail_call(i);

@@ -116,6 +116,12 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_143: [** The `com.microsoft:channel-correlation-id` shall be added to the link attach properties by calling `amqpvalue_set_map_value`. **]**
 
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_150: [** A property key which shall be a symbol named `com.microsoft:api-version` shall be created by calling `amqp_create_symbol`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_151: [** A property value of type string that shall contain the `2016-11-14` shall be created by calling `amqpvalue_create_string`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_152: [** The `com.microsoft:api-version` shall be added to the link attach properties by calling `amqpvalue_set_map_value`. **]**
+
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_144: [** The link attach properties shall be set on the receiver and sender link by calling `link_set_attach_properties`. **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [** If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**  

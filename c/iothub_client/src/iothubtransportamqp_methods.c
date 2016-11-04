@@ -459,56 +459,94 @@ static int set_link_attach_properties(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE iothub
 	else
 	{
 		/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_141: [ A property key which shall be a symbol named `com.microsoft:channel-correlation-id` shall be created by calling `amqp_create_symbol`. ]*/
-		AMQP_VALUE property_key = amqpvalue_create_symbol("com.microsoft:channel-correlation-id");
-		if (property_key == NULL)
+		AMQP_VALUE channel_correlation_id_property_key = amqpvalue_create_symbol("com.microsoft:channel-correlation-id");
+		if (channel_correlation_id_property_key == NULL)
 		{
 			/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
-			LogError("Cannot create the property key for the link attach properties");
+			LogError("Cannot create the channel correlation id property key for the link attach properties");
 			result = __LINE__;
 		}
 		else
 		{
 			/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_142: [ A property value of type string that shall contain the device id shall be created by calling `amqpvalue_create_string`. ]*/
-			AMQP_VALUE property_value = amqpvalue_create_string(iothubtransport_amqp_methods_handle->device_id);
-			if (property_value == NULL)
+			AMQP_VALUE channel_correlation_id_property_value = amqpvalue_create_string(iothubtransport_amqp_methods_handle->device_id);
+			if (channel_correlation_id_property_value == NULL)
 			{
 				/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
-				LogError("Cannot create the property key for the link attach properties");
+				LogError("Cannot create the channel correlation id property key for the link attach properties");
 				result = __LINE__;
 			}
 			else
 			{
 				/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_143: [ The `com.microsoft:channel-correlation-id` shall be added to the link attach properties by calling `amqpvalue_set_map_value`. ]*/
-				if (amqpvalue_set_map_value(link_attach_properties, property_key, property_value) != 0)
+				if (amqpvalue_set_map_value(link_attach_properties, channel_correlation_id_property_key, channel_correlation_id_property_value) != 0)
 				{
 					/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
 					LogError("Cannot set the property for channel correlation on the link attach properties");
 					result = __LINE__;
 				}
-				/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_144: [ The link attach properties shall be set on the receiver and sender link by calling `link_set_attach_properties`. ]*/
-				else if (link_set_attach_properties(iothubtransport_amqp_methods_handle->sender_link, link_attach_properties) != 0)
-				{
-					/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
-					LogError("Cannot set the link attach properties on the sender link");
-					result = __LINE__;
-				}
-				else if (link_set_attach_properties(iothubtransport_amqp_methods_handle->receiver_link, link_attach_properties) != 0)
-				{
-					/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
-					LogError("Cannot set the link attach properties on the receiver link");
-					result = __LINE__;
-				}
 				else
 				{
-					result = 0;
+					/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_150: [ A property key which shall be a symbol named `com.microsoft:api-version` shall be created by calling `amqp_create_symbol`. ]*/
+					AMQP_VALUE api_version_property_key = amqpvalue_create_symbol("com.microsoft:api-version");
+					if (api_version_property_key == NULL)
+					{
+						/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+						LogError("Cannot create the API version property key for the link attach properties");
+						result = __LINE__;
+					}
+					else
+					{
+						/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_151: [ A property value of type string that shall contain the `2016-11-14` shall be created by calling `amqpvalue_create_string`. ]*/
+						AMQP_VALUE api_version_property_value = amqpvalue_create_string("2016-11-14");
+						if (api_version_property_value == NULL)
+						{
+							/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+							LogError("Cannot create the API version property value for the link attach properties");
+							result = __LINE__;
+						}
+						else
+						{
+							/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_152: [ The `com.microsoft:api-version` shall be added to the link attach properties by calling `amqpvalue_set_map_value`. ]*/
+							if (amqpvalue_set_map_value(link_attach_properties, api_version_property_key, api_version_property_value) != 0)
+							{
+								/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+								LogError("Cannot set the property for API version on the link attach properties");
+								result = __LINE__;
+							}
+							/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_144: [ The link attach properties shall be set on the receiver and sender link by calling `link_set_attach_properties`. ]*/
+							else if (link_set_attach_properties(iothubtransport_amqp_methods_handle->sender_link, link_attach_properties) != 0)
+							{
+								/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+								LogError("Cannot set the link attach properties on the sender link");
+								result = __LINE__;
+							}
+							else if (link_set_attach_properties(iothubtransport_amqp_methods_handle->receiver_link, link_attach_properties) != 0)
+							{
+								/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_145: [ If any call for creating or setting the link attach properties fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+								LogError("Cannot set the link attach properties on the receiver link");
+								result = __LINE__;
+							}
+							else
+							{
+								result = 0;
+							}
+
+							/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_146: [ The link attach properties and all associated values shall be freed by calling `amqpvalue_destroy` after setting the link attach properties. ]*/
+							amqpvalue_destroy(api_version_property_value);
+						}
+
+						/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_146: [ The link attach properties and all associated values shall be freed by calling `amqpvalue_destroy` after setting the link attach properties. ]*/
+						amqpvalue_destroy(api_version_property_key);
+					}
 				}
 
 				/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_146: [ The link attach properties and all associated values shall be freed by calling `amqpvalue_destroy` after setting the link attach properties. ]*/
-				amqpvalue_destroy(property_value);
+				amqpvalue_destroy(channel_correlation_id_property_value);
 			}
 
 			/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_146: [ The link attach properties and all associated values shall be freed by calling `amqpvalue_destroy` after setting the link attach properties. ]*/
-			amqpvalue_destroy(property_key);
+			amqpvalue_destroy(channel_correlation_id_property_key);
 		}
 
 		/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_146: [ The link attach properties and all associated values shall be freed by calling `amqpvalue_destroy` after setting the link attach properties. ]*/
