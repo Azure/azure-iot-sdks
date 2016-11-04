@@ -120,7 +120,7 @@ To satisfy optimistic concurrency requirements, the HTTP request `If-Match` head
 **]**
 
 ### All twin methods calling to a Registry API
-**SRS_NODE_IOTHUB_TWIN_16_021: [** The method shall merge the twin returned in the callback of the `Registry` method call with its parent object. **]**  
+**SRS_NODE_IOTHUB_TWIN_16_021: [** The method shall copy properties, tags, and etag in the twin returned in the callback of the `Registry` method call into its parent object. **]**  
 **SRS_NODE_IOTHUB_TWIN_16_022: [** The method shall call the `done` callback with an `Error` object if the request failed **]**  
 **SRS_NODE_IOTHUB_TWIN_16_023: [** The method shall call the `done` callback with a `null` error object, its parent instance as a second argument and the transport `response` object as a third argument if the request succeeded. **]**  
 

@@ -30,6 +30,15 @@ var moreNewProps = {
 
 var mergeResult =  _.merge(JSON.parse(JSON.stringify(newProps)), moreNewProps);
 
+var nullIndividualProps = {
+  bar : {
+    tweedle: null
+  }
+};
+
+var nullMergeResult = JSON.parse(JSON.stringify(newProps));
+delete nullMergeResult.tweedle; 
+
 var runTests = function (hubConnectionString) {
   describe('Twin', function() {
 
@@ -149,7 +158,7 @@ var runTests = function (hubConnectionString) {
       });
     };
 
-    it ('sends and receives reported properties', sendsAndReceiveReportedProperties);
+    it('sends and receives reported properties', sendsAndReceiveReportedProperties);
 
     var mergeReportedProperties =  function(first, second, result, done) {
       deviceTwin.properties.reported.update(first, function(err) {
@@ -165,7 +174,7 @@ var runTests = function (hubConnectionString) {
       });
     };
 
-    it ('sends and receives merged reported properties', function(done) {
+    it('sends and receives merged reported properties', function(done) {
       mergeReportedProperties(newProps, moreNewProps, mergeResult, done);
     });
 
@@ -189,7 +198,7 @@ var runTests = function (hubConnectionString) {
       });
     };
 
-    it ('sends and receives desired properties', sendsAndReceivesDesiredProperties);
+    it('sends and receives desired properties', sendsAndReceivesDesiredProperties);
       
     var mergeDesiredProperties = function(first, second, newEtag, result, done) {
       serviceTwin.update( { properties : { desired : first } }, function(err) {
@@ -219,15 +228,15 @@ var runTests = function (hubConnectionString) {
       });
     };
 
-    it ('sends and receives merged desired properties', function(done) {
+    it('sends and receives merged desired properties', function(done) {
       mergeDesiredProperties(newProps, moreNewProps, null, mergeResult, done);
     });
 
-    it ('sends and receives merged desired properties using etag *', function(done) {
+    it('sends and receives merged desired properties using etag *', function(done) {
       mergeDesiredProperties(newProps, moreNewProps, "*", mergeResult, done);
     });
 
-    it ('can get and set tags', function(done) {
+    it('can get and set tags', function(done) {
       assertObjectIsEmpty(serviceTwin.tags);
 
       serviceTwin.update( { tags : newProps }, function(err) {
@@ -258,7 +267,7 @@ var runTests = function (hubConnectionString) {
       });
     };
 
-    it ('can merge tags', function(done) {
+    it('can merge tags', function(done) {
       mergeTags(newProps, moreNewProps, null, mergeResult, done);
     });
 
@@ -283,27 +292,47 @@ var runTests = function (hubConnectionString) {
       deviceClient._renewSharedAccessSignature();
     });
 
-    it.skip('call null out reported properties', function(done) {
+    it.skip('call null out all reported properties', function(done) {
       mergeReportedProperties(newProps, null, {}, done);
     });
 
-    it.skip('can null out desired properties', function(done) {
+    it('can null out individual reported properties', function(done) {
+      mergeReportedProperties(newProps, nullIndividualProps, nullMergeResult, done);
+    });
+
+    it('can null out all desired properties', function(done) {
       mergeDesiredProperties(newProps, null, null, {}, done);
     });
 
-    it.skip('can null out desired properties with etag *', function(done) {
+    it('can null out individual desired properties', function(done) {
+      mergeDesiredProperties(newProps, nullIndividualProps, null, nullMergeResult, done);
+    });
+
+    it('can null out all desired properties with etag *', function(done) {
       mergeDesiredProperties(newProps, null, "*", {}, done);
     });
 
-    it.skip('can null out tags', function(done) {
+    it('can null out individual desired properties with etag *', function(done) {
+      mergeDesiredProperties(newProps, nullIndividualProps, "*", nullMergeResult, done);
+    });
+
+    it('can null out all tags', function(done) {
       mergeTags(newProps, null, null, {}, done);
-        });
+    });
 
-    it.skip('can null out tags with etag *', function(done) {
+    it('can null out individual tags', function(done) {
+      mergeTags(newProps, nullIndividualProps, null, nullMergeResult, done);
+    });
+
+    it('can null out all tags with etag *', function(done) {
       mergeTags(newProps, null, "*", {}, done);
-      });
+    });
 
-    it ('can renew SAS 20 times without failure', function(done) 
+    it('can null out individual tags with etag *', function(done) {
+      mergeTags(newProps, nullIndividualProps, "*", nullMergeResult, done);
+    });
+
+    it('can renew SAS 20 times without failure', function(done) 
     {
       this.timeout(60000);
       var iteration = 0;
