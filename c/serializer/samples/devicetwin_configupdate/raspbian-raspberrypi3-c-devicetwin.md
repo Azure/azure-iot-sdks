@@ -23,12 +23,12 @@ Run a configuration update sample to demonstrate the use of Device Twins on a Ra
 **Description of the scenario**: Your device on the field sends temperature and humidity telemetry data every 3 seconds. You are troubleshooting a temperature anomaly and want to receive the telemetry on a higher rate to detect if you are losing some data points, for example every 500 ms. In order to do this, you will have to issue a remote cloud to device command using device twin desired properties to request a change in the frequency rate of sending telemetry.
 
 Here is the multi-step process that helps you achieve this:
-1. Device sends telemetry data every 3000 ms. You have to connect to the device to start the app which sends telemetry. The 3000 ms is the default configured value using a Device Twin desired property called sendFrequency. 
-2. Telemetry data and frequency could be observed in Device Explorer Twin on Data tab 
-3. User sets the desired property sendFrequency to 500 ms to change the frequency of sending telemetry. You could do this by using Device Explorer Twin -> Management tab -> Twin Props. 
-4. Device receives event notification of new desired property, changes the frequency rate for sending telemetry data. 
-5. Device sets reported property sendFrequency to 500ms indicating the newly applied frequency. 
-6. User is noticing the data flowing every 500 ms into Device Explorer -> Data tab 
+1.  Device sends telemetry data every 3000 ms. You have to connect to the device to start the app which sends telemetry. The 3000 ms is the default configured value using a Device Twin desired property called sendFrequency. 
+2.  Telemetry data and frequency could be observed in Device Explorer Twin on Data tab 
+3.  User sets the desired property sendFrequency to 500 ms to change the frequency of sending telemetry. You could do this by using Device Explorer Twin -> Management tab -> Twin Props. 
+4.  Device receives event notification of new desired property, changes the frequency rate for sending telemetry data. 
+5.  Device sets reported property sendFrequency to 500ms indicating the newly applied frequency. 
+6.  User is noticing the data flowing every 500 ms into Device Explorer -> Data tab 
 
 Device Twins is a feature of Azure IoT Hub that allows synchronization between a device's configuration and cloud representation of the device, named Device Twin. Device Twin stores device 
 specific metadata in the cloud and reports the current state such as available capabilities and conditions from your device app. You can query device twin to get your metadata, configuration or state.
@@ -43,10 +43,10 @@ This document describes the process of setting up a [Raspberry Pi 3/2](https://w
 and how to monitor device twin to change the desire state on the device.
 
 This multi-step process includes:
-1. Prerequisites 
-2. Prepare your device 
-3. Build and run the device twin sample 
-4. Monitor Device Twin by changing desired property 
+1.  Prerequisites 
+2.  Prepare your device 
+3.  Build and run the device twin sample 
+4.  Monitor Device Twin by changing desired property 
 
 <a name="Step-1-Prerequisites"></a>
 # Step 1: Prerequisites
