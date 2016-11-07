@@ -228,6 +228,7 @@ static int reboot_async(void *arg)
 
 #else
 
+#include <unistd.h>
 #include <sys/reboot.h>
 
 static int reboot_async(void *arg)
@@ -235,7 +236,6 @@ static int reboot_async(void *arg)
     (void) arg;
     ThreadAPI_Sleep(2000);
     setuid(0);
-    sync();
     reboot(RB_AUTOBOOT);
     return 0;
 }
