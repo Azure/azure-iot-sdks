@@ -41,7 +41,7 @@ static int DeviceMethodCallback(const char* method_name, const unsigned char* pa
     printf("Device Method payload: %.*s\r\n", (int)size, (const char*)payload);
 
     int status = 200;
-    char* RESPONSE_STRING = "This is the response from the device";
+    char* RESPONSE_STRING = "{ \"Response\": \"This is the response from the device\" }";
     printf("\r\nResponse status: %d\r\n", status);
     printf("Response payload: %s\r\n\r\n", RESPONSE_STRING);
 
