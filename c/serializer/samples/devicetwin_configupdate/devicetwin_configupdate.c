@@ -212,6 +212,84 @@ static void sendReported(IOTHUB_CLIENT_HANDLE iotHubClientHandle, Configuration 
     }
 }
 
+#if defined(WIN32)
+#define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
+
+#include <windows.h>
+#include <reason.h>
+
+static int reboot_async(void *arg)
+{
+    (void) arg;
+    ThreadAPI_Sleep(2000);
+    (void) ExitWindowsEx(EWX_REBOOT | EWX_FORCEIFHUNG, SHTDN_REASON_MINOR_INSTALLATION);
+    return 0;
+}
+
+#else
+
+#include <sys/reboot.h>
+
+static int reboot_async(void *arg)
+{
+    (void) arg;
+    ThreadAPI_Sleep(2000);
+    setuid(0);
+    sync();
+    reboot(RB_AUTOBOOT);
+    return 0;
+}
+#endif
+
+
+#define SERVER_ERROR 500
+#define NOT_IMPLEMENTED 501
+#define NOT_VALID 400
+#define SERVER_SUCCESS 200
+
+static int deviceMethodCallback(const char* method_name, const unsigned char* payload, size_t size, unsigned char** response, size_t* resp_size, void* userContextCallback)
+{
+    (void)userContextCallback;
+    (void)payload;
+    (void)size;
+
+    int retValue;
+    if (method_name == NULL)
+    {
+        (void) printf("method name is NULL\n");
+        retValue = NOT_VALID;
+    }
+    else if ((response == NULL) || (resp_size == NULL))
+    {
+        (void) printf("response parameters are NULL\n");
+        retValue = NOT_VALID;
+    }
+    else if (strcmp(method_name, "reboot") == 0)
+    {
+        *response = NULL;
+        *resp_size = 0;
+
+        (void) printf("reboot device\n");
+
+        THREAD_HANDLE th;
+        if (ThreadAPI_Create(&th, reboot_async, NULL) == THREADAPI_ERROR)
+        {
+            (void) printf("ThreadAPI_Create failed\n");
+            retValue = SERVER_ERROR;
+        }
+        else
+        {
+            retValue = SERVER_SUCCESS;
+        }
+    }
+    else
+    {
+        (void) printf("Invalid method call\n");
+        retValue = NOT_VALID;
+    }
+    return retValue;
+}
+
 static void device_twin_config_update_run(void)
 {
     /*prepare the platform*/
@@ -267,6 +345,11 @@ static void device_twin_config_update_run(void)
                             }
                             else
                             {
+                                if (IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle, deviceMethodCallback, device) != IOTHUB_CLIENT_OK)
+                                {
+                                    (void) printf("IoTHubClient_SetDeviceTwinCallback failed\n");
+                                }
+
                                 srand((unsigned int) time(NULL));
                                 while (true)
                                 {
