@@ -767,7 +767,7 @@ static void destroyEventSender(AMQP_TRANSPORT_DEVICE_STATE* device_state)
     }
 }
 
-void on_event_sender_state_changed(void* context, MESSAGE_SENDER_STATE new_state, MESSAGE_SENDER_STATE previous_state)
+static void on_event_sender_state_changed(void* context, MESSAGE_SENDER_STATE new_state, MESSAGE_SENDER_STATE previous_state)
 {
     if (context != NULL)
     {
@@ -899,7 +899,7 @@ static int destroyMessageReceiver(AMQP_TRANSPORT_DEVICE_STATE* device_state)
     return result;
 }
 
-void on_message_receiver_state_changed(const void* context, MESSAGE_RECEIVER_STATE new_state, MESSAGE_RECEIVER_STATE previous_state)
+static void on_message_receiver_state_changed(const void* context, MESSAGE_RECEIVER_STATE new_state, MESSAGE_RECEIVER_STATE previous_state)
 {
     if (context != NULL)
     {
