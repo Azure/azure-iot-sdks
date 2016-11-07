@@ -62,7 +62,9 @@ else()
 endif()
 
 if (NOT ${ARCHITECTURE} STREQUAL "ARM")
+    if (NOT ${skip_samples})
 	add_subdirectory(samples)
+	endif()
 endif()
 
 if(NOT IN_OPENWRT)

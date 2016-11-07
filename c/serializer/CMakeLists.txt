@@ -69,12 +69,14 @@ add_library(
 serializer ${serializer_c_files} ${serializer_h_files}
 )
 
+if (NOT ${skip_samples})
 if(WIN32)
 	if (NOT ${ARCHITECTURE} STREQUAL "ARM")
 		add_subdirectory(samples)
 	endif()
 else()
 	add_subdirectory(samples)
+	endif()
 endif()
 
 if(NOT IN_OPENWRT)
