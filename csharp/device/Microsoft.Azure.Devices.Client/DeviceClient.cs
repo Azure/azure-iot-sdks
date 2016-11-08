@@ -25,6 +25,8 @@ namespace Microsoft.Azure.Devices.Client
     using AsyncTaskOfMessage = System.Threading.Tasks.Task<Message>;
 #endif
 
+    public delegate string MethodCallback(string payload, ref DeviceMethodStatusType status);
+
     /*
      * Class Diagramm and Chain of Responsibility in Device Client 
                              +--------------------+
@@ -117,7 +119,6 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// Stores Methods supported by the client device and their associated delegate.
         /// </summary>
-        public delegate string MethodCallback(string payload, ref DeviceMethodStatusType status);
         Dictionary<string, MethodCallback> deviceMethods;
 
 #if !PCL
