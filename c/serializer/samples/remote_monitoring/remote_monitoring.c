@@ -154,6 +154,7 @@ void remote_monitoring_run(void)
             config.deviceKey = deviceKey;
             config.iotHubName = hubName;
             config.iotHubSuffix = hubSuffix;
+            config.protocolGatewayHostName = NULL;
 #ifndef WINCE
             config.protocol = AMQP_Protocol;
 #else
