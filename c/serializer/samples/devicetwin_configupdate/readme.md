@@ -190,14 +190,19 @@ This device twin sample application sends temperature and humidity to your IoT H
 # Step 5:  Reboot device by calling direct methods
 Imagine a decision is taken on the cloud side to issue a reboot method agaist the device to refresh the device working state.
 -   Start the device app with root permissions by running below command in SSH session
+-   Notice events coming in Device Explorer -> Data -> Monitor
+
     ```
     sudo c/cmake/iotsdk_linux/serializer/samples/devicetwin_configupdate/devicetwin_configupdate
     ```
 -   Open Device Explorer Twin and make a direct method call from "Call Method on Device" tab -> Call Method button as showing in the following image
--   [TBD: Image to be added]
--   Your SSH session should end, device will reboot and you could notice the telemetry events are no longer coming (Device Explorer -> Data -> Monitor); also in device will show as Disconnected on Device Explorer -> Management tab.
+
+![](./media/Reboot.png)  
+
+-   Your SSH session should end with message "The system is going down for reboot NOW!", device will reboot and you could notice the telemetry events are no longer coming (Device Explorer -> Data -> Monitor); 
+    Device will show as Disconnected on Device Explorer -> Management tab.
 -   Connect on a new SSH session and notice that the device has rebooted
--   Learn more on reboot was implemented by reading c/serializer/samples/devicetwin_configupdate/devicetwin_configupdate.c source code. deviceMethodCallback is implemented and being called in device_twin_config_update_run function.The reboot will start after 2 seconds ThreadAPI_Sleep(2000)
+-   Learn more on how reboot was implemented by reading c/serializer/samples/devicetwin_configupdate/devicetwin_configupdate.c source code. deviceMethodCallback is implemented and being called in device_twin_config_update_run function.The reboot will start after 2 seconds ThreadAPI_Sleep(2000)
 
 
 Note: You can learn more about how to use twins and how to implement methods by reading below tutorials:
