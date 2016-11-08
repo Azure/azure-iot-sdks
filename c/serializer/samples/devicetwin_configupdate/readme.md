@@ -227,7 +227,8 @@ While doing your investigation you have determined that you'd like to reboot the
 -   Your SSH session will end with message "The system is going down for reboot NOW!", device will reboot and you will notice the telemetry events are no longer coming (Device Explorer -> Data -> Monitor); 
     Device will show as Disconnected on Device Explorer -> Management tab.
 -   Connect on a new SSH session and notice that the device has rebooted
--   Learn more on how reboot was implemented by reading `c/serializer/samples/devicetwin_configupdate/devicetwin_configupdate.c` source code. deviceMethodCallback is implemented and being called in `device_twin_config_update_run` function. The reboot will start after 2 seconds `ThreadAPI_Sleep(2000)`
+-   Learn more on how reboot was implemented by reading `c/serializer/samples/devicetwin_configupdate/devicetwin_configupdate.c` source code. deviceMethodCallback is implemented and being called in `device_twin_config_update_run` function. The reboot will start after 2 seconds `ThreadAPI_Sleep(2000)
+-   Learn how to implement a [ firmware upgrade of a RaspberryPi ](https://github.com/Azure/azure-iot-sdks/tree/develop/c/iothub_client/samples/iothub_client_sample_mqtt_dm/pi_device) using Azure IoTHub Device Management
 
 ## Additional Resources
 You can learn more about how to use Device Twins and how to implement Direct Methods by reading below tutorials:
