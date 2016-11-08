@@ -25,7 +25,7 @@ namespace Microsoft.Azure.Devices.Client
     using AsyncTaskOfMessage = System.Threading.Tasks.Task<Message>;
 #endif
 
-    public delegate string MethodCallback(string payload, ref DeviceMethodStatusType status);
+    public delegate string MethodCallback(string payload, out DeviceMethodStatusType status);
 
     /*
      * Class Diagramm and Chain of Responsibility in Device Client 
@@ -766,7 +766,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 /* codes_SRS_DEVICECLIENT_10_011: [** The OnMethodCalled shall invoke the specified delegate. ]*/
                 DeviceMethodStatusType status = DeviceMethodStatusType.NotImplemented;
-                method.Result = this.deviceMethods[method.Name](method.Payload, ref status);
+                method.Result = this.deviceMethods[method.Name](method.Payload, out status);
                 method.Status = status;
             }
             else
