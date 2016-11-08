@@ -12,98 +12,290 @@
     <DeviceClientDir>..\Microsoft.Azure.Devices.Client</DeviceClientDir>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\AuthenticationMethodFactory.cs"> <Link>AuthenticationMethodFactory.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Api\ClientApiVersionHelper.cs"> <Link>ClientApiVersionHelper.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\AsyncResult.cs"> <Link>AsyncResult.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\BufferedInputStream.cs"> <Link>BufferedInputStream.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\CommonConstants.cs"> <Link>CommonConstants.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\CommonResources.cs"> <Link>CommonResources.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\CompletedAsyncResult.cs"> <Link>CompletedAsyncResult.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Data\AccessRights.cs"> <Link>AccessRights.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Data\SharedAccessSignatureAuthorizationRule.cs"> <Link>SharedAccessSignatureAuthorizationRule.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\ErrorCode.cs"> <Link>ErrorCode.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\ETagHolder.cs"> <Link>ETagHolder.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\ExceptionDispatcher.cs"> <Link>ExceptionDispatcher.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\AssertionFailedException.cs"> <Link>AssertionFailedException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\CallbackException.cs"> <Link>CallbackException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\DeviceAlreadyExistsException.cs"> <Link>DeviceAlreadyExistsException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\DeviceDisabledException.cs"> <Link>DeviceDisabledException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\DeviceMaximumQueueDepthExceededException.cs"> <Link>DeviceMaximumQueueDepthExceededException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\DeviceMessageLockLostException.cs"> <Link>DeviceMessageLockLostException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\DeviceNotFoundException.cs"> <Link>DeviceNotFoundException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\ExceptionHandlingHelper.cs"> <Link>ExceptionHandlingHelper.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\FatalException.cs"> <Link>FatalException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\IotHubAmqpErrorCode.cs"> <Link>IotHubAmqpErrorCode.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\IotHubClientException.cs"> <Link>IotHubClientException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\IotHubClientTransientException.cs"> <Link>IotHubClientTransientException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\IotHubCommunicationException.cs"> <Link>IotHubCommunicationException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\IotHubException.cs"> <Link>IotHubException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\IotHubNotFoundException.cs"> <Link>IotHubNotFoundException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\IotHubSuspendedException.cs"> <Link>IotHubSuspendedException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\IotHubThrottledException.cs"> <Link>IotHubThrottledException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\MessageTooLargeException.cs"> <Link>MessageTooLargeException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\QuotaExceededException.cs"> <Link>QuotaExceededException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\ServerBusyException.cs"> <Link>ServerBusyException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\ServerErrorException.cs"> <Link>ServerErrorException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\UnauthorizedException.cs"> <Link>UnauthorizedException.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\ExceptionTrace.cs"> <Link>ExceptionTrace.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Extensions\CommonExtensions.cs"> <Link>CommonExtensions.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Extensions\ExceptionExtensions.cs"> <Link>ExceptionExtensions.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Extensions\StringFormattingExtensions.cs"> <Link>StringFormattingExtensions.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Fx.cs"> <Link>Fx.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\FxCop.cs"> <Link>FxCop.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\FxTrace.cs"> <Link>FxTrace.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\IETagHolder.cs"> <Link>IETagHolder.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\InternalBufferManager.cs"> <Link>InternalBufferManager.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Interop\SafeEventLogWriteHandle.cs"> <Link>SafeEventLogWriteHandle.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\PartialTrustHelpers.cs"> <Link>PartialTrustHelpers.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\ReadOnlyDictionary45.cs"> <Link>ReadOnlyDictionary45.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Security\ISharedAccessSignatureCredential.cs"> <Link>ISharedAccessSignatureCredential.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Security\SecurityConstants.cs"> <Link>SecurityConstants.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Security\SecurityHelper.cs"> <Link>SecurityHelper.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Security\SharedAccessSignature.cs"> <Link>SharedAccessSignature.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Security\SharedAccessSignatureBuilder.cs"> <Link>SharedAccessSignatureBuilder.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Security\SharedAccessSignatureConstants.cs"> <Link>SharedAccessSignatureConstants.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Security\StringValidationHelper.cs"> <Link>StringValidationHelper.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\SerializationUtilities.cs"> <Link>SerializationUtilities.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\SignalGate.cs"> <Link>SignalGate.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Singleton.cs"> <Link>Singleton.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\SynchronizedPool.cs"> <Link>SynchronizedPool.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\TaskConstants.cs"> <Link>TaskConstants.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\TaskHelpers.cs"> <Link>TaskHelpers.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Ticks.cs"> <Link>Ticks.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\TimeoutHelper.cs"> <Link>TimeoutHelper.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Tracing\EventTraceActivity.cs"> <Link>EventTraceActivity.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\TrackingHelper.cs"> <Link>TrackingHelper.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Utils.cs"> <Link>Utils.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\WaitCallbackActionItem.cs"> <Link>WaitCallbackActionItem.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\WebApi\CustomHeaderConstants.cs"> <Link>CustomHeaderConstants.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\DeliveryAcknowledgement.cs"> <Link>DeliveryAcknowledgement.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\DeviceAuthenticationWithRegistrySymmetricKey.cs"> <Link>DeviceAuthenticationWithRegistrySymmetricKey.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\DeviceAuthenticationWithSharedAccessPolicyKey.cs"> <Link>DeviceAuthenticationWithSharedAccessPolicyKey.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\DeviceAuthenticationWithToken.cs"> <Link>DeviceAuthenticationWithToken.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\DeviceClient.cs"> <Link>DeviceClient.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Http1TransportSettings.cs"> <Link>Http1TransportSettings.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\IAuthenticationMethod.cs"> <Link>IAuthenticationMethod.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\IAuthorizationHeaderProvider.cs" > <Link>IAuthorizationHeaderProvider.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\IDelegatingHandler.cs"> <Link>IDelegatingHandler.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\IotHubConnectionCache.cs"> <Link>IotHubConnectionCache.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\IotHubConnectionString.cs"> <Link>IotHubConnectionString.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\IotHubConnectionStringBuilder.cs"> <Link>IotHubConnectionStringBuilder.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\ITransportSettings.cs"> <Link>ITransportSettings.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\MappingType.cs"> <Link>MappingType.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Message.cs"> <Link>Message.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\MessageConverter.cs"> <Link>MessageConverter.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\MessageSystemPropertyNames.cs"> <Link>MessageSystemPropertyNames.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\PutOperationType.cs"> <Link>PutOperationType.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Transport\DefaultDelegatingHandler.cs"> <Link>DefaultDelegatingHandler.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Transport\ErrorDelegatingHandler.cs"> <Link>ErrorDelegatingHandler.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Transport\GateKeeperDelegatingHandler.cs"> <Link>GateKeeperDelegatingHandler.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Transport\HttpClientHelper.cs"> <Link>HttpClientHelper.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Transport\HttpTransportHandler.cs"> <Link>HttpTransportHandler.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Transport\IHttpClientHelper.cs"> <Link>IHttpClientHelper.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Transport\TransportHandlerBase.cs"> <Link>TransportHandlerBase.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\TransportType.cs"> <Link>TransportType.cs</Link> </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\RetryPolicyType.cs"> <Link>RetryPolicyType.cs</Link> </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\AuthenticationMethodFactory.cs">
+      <Link>AuthenticationMethodFactory.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Api\ClientApiVersionHelper.cs">
+      <Link>ClientApiVersionHelper.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\AsyncResult.cs">
+      <Link>AsyncResult.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\BufferedInputStream.cs">
+      <Link>BufferedInputStream.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\CommonConstants.cs">
+      <Link>CommonConstants.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\CommonResources.cs">
+      <Link>CommonResources.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\CompletedAsyncResult.cs">
+      <Link>CompletedAsyncResult.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Data\AccessRights.cs">
+      <Link>AccessRights.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Data\SharedAccessSignatureAuthorizationRule.cs">
+      <Link>SharedAccessSignatureAuthorizationRule.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\ErrorCode.cs">
+      <Link>ErrorCode.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\ETagHolder.cs">
+      <Link>ETagHolder.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\ExceptionDispatcher.cs">
+      <Link>ExceptionDispatcher.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\AssertionFailedException.cs">
+      <Link>AssertionFailedException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\CallbackException.cs">
+      <Link>CallbackException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\DeviceAlreadyExistsException.cs">
+      <Link>DeviceAlreadyExistsException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\DeviceDisabledException.cs">
+      <Link>DeviceDisabledException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\DeviceMaximumQueueDepthExceededException.cs">
+      <Link>DeviceMaximumQueueDepthExceededException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\DeviceMessageLockLostException.cs">
+      <Link>DeviceMessageLockLostException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\DeviceNotFoundException.cs">
+      <Link>DeviceNotFoundException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\ExceptionHandlingHelper.cs">
+      <Link>ExceptionHandlingHelper.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\FatalException.cs">
+      <Link>FatalException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\IotHubAmqpErrorCode.cs">
+      <Link>IotHubAmqpErrorCode.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\IotHubClientException.cs">
+      <Link>IotHubClientException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\IotHubClientTransientException.cs">
+      <Link>IotHubClientTransientException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\IotHubCommunicationException.cs">
+      <Link>IotHubCommunicationException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\IotHubException.cs">
+      <Link>IotHubException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\IotHubNotFoundException.cs">
+      <Link>IotHubNotFoundException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\IotHubSuspendedException.cs">
+      <Link>IotHubSuspendedException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\IotHubThrottledException.cs">
+      <Link>IotHubThrottledException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\MessageTooLargeException.cs">
+      <Link>MessageTooLargeException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\QuotaExceededException.cs">
+      <Link>QuotaExceededException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\ServerBusyException.cs">
+      <Link>ServerBusyException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\ServerErrorException.cs">
+      <Link>ServerErrorException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Exceptions\UnauthorizedException.cs">
+      <Link>UnauthorizedException.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\ExceptionTrace.cs">
+      <Link>ExceptionTrace.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Extensions\CommonExtensions.cs">
+      <Link>CommonExtensions.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Extensions\ExceptionExtensions.cs">
+      <Link>ExceptionExtensions.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Extensions\StringFormattingExtensions.cs">
+      <Link>StringFormattingExtensions.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Fx.cs">
+      <Link>Fx.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\FxCop.cs">
+      <Link>FxCop.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\FxTrace.cs">
+      <Link>FxTrace.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\IETagHolder.cs">
+      <Link>IETagHolder.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\InternalBufferManager.cs">
+      <Link>InternalBufferManager.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Interop\SafeEventLogWriteHandle.cs">
+      <Link>SafeEventLogWriteHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\PartialTrustHelpers.cs">
+      <Link>PartialTrustHelpers.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\ReadOnlyDictionary45.cs">
+      <Link>ReadOnlyDictionary45.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Security\ISharedAccessSignatureCredential.cs">
+      <Link>ISharedAccessSignatureCredential.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Security\SecurityConstants.cs">
+      <Link>SecurityConstants.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Security\SecurityHelper.cs">
+      <Link>SecurityHelper.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Security\SharedAccessSignature.cs">
+      <Link>SharedAccessSignature.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Security\SharedAccessSignatureBuilder.cs">
+      <Link>SharedAccessSignatureBuilder.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Security\SharedAccessSignatureConstants.cs">
+      <Link>SharedAccessSignatureConstants.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Security\StringValidationHelper.cs">
+      <Link>StringValidationHelper.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\SerializationUtilities.cs">
+      <Link>SerializationUtilities.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\SignalGate.cs">
+      <Link>SignalGate.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Singleton.cs">
+      <Link>Singleton.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\SynchronizedPool.cs">
+      <Link>SynchronizedPool.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\TaskConstants.cs">
+      <Link>TaskConstants.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\TaskHelpers.cs">
+      <Link>TaskHelpers.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Ticks.cs">
+      <Link>Ticks.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\TimeoutHelper.cs">
+      <Link>TimeoutHelper.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Tracing\EventTraceActivity.cs">
+      <Link>EventTraceActivity.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\TrackingHelper.cs">
+      <Link>TrackingHelper.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\Utils.cs">
+      <Link>Utils.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\WaitCallbackActionItem.cs">
+      <Link>WaitCallbackActionItem.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Common\WebApi\CustomHeaderConstants.cs">
+      <Link>CustomHeaderConstants.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\DeliveryAcknowledgement.cs">
+      <Link>DeliveryAcknowledgement.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\DeviceAuthenticationWithRegistrySymmetricKey.cs">
+      <Link>DeviceAuthenticationWithRegistrySymmetricKey.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\DeviceAuthenticationWithSharedAccessPolicyKey.cs">
+      <Link>DeviceAuthenticationWithSharedAccessPolicyKey.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\DeviceAuthenticationWithToken.cs">
+      <Link>DeviceAuthenticationWithToken.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\DeviceClient.cs">
+      <Link>DeviceClient.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Http1TransportSettings.cs">
+      <Link>Http1TransportSettings.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\IAuthenticationMethod.cs">
+      <Link>IAuthenticationMethod.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\IAuthorizationHeaderProvider.cs">
+      <Link>IAuthorizationHeaderProvider.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\IDelegatingHandler.cs">
+      <Link>IDelegatingHandler.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\IotHubConnectionCache.cs">
+      <Link>IotHubConnectionCache.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\IotHubConnectionString.cs">
+      <Link>IotHubConnectionString.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\IotHubConnectionStringBuilder.cs">
+      <Link>IotHubConnectionStringBuilder.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\ITransportSettings.cs">
+      <Link>ITransportSettings.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\MappingType.cs">
+      <Link>MappingType.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Message.cs">
+      <Link>Message.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\MessageConverter.cs">
+      <Link>MessageConverter.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\MessageSystemPropertyNames.cs">
+      <Link>MessageSystemPropertyNames.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\DeviceMethod.cs">
+      <Link>DeviceMethod.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\DeviceMethodResponseType.cs">
+      <Link>DeviceMethodStatusType.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\PutOperationType.cs">
+      <Link>PutOperationType.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Transport\DefaultDelegatingHandler.cs">
+      <Link>DefaultDelegatingHandler.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Transport\ErrorDelegatingHandler.cs">
+      <Link>ErrorDelegatingHandler.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Transport\GateKeeperDelegatingHandler.cs">
+      <Link>GateKeeperDelegatingHandler.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Transport\HttpClientHelper.cs">
+      <Link>HttpClientHelper.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Transport\HttpTransportHandler.cs">
+      <Link>HttpTransportHandler.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Transport\IHttpClientHelper.cs">
+      <Link>IHttpClientHelper.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Transport\TransportHandlerBase.cs">
+      <Link>TransportHandlerBase.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\TransportType.cs">
+      <Link>TransportType.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\RetryPolicyType.cs">
+      <Link>RetryPolicyType.cs</Link>
+    </Compile>
   </ItemGroup>
 </Project>

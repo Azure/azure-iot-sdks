@@ -63,25 +63,26 @@ namespace Microsoft.Azure.Devices.Client
 |  Close     |       |  SendEvent  |      |   SendEvent |       |            |       |              |
 |            |       |  SendEvents |      |   SendEvents|       +------------+       +--^--^---^----+
 +------------+       |  Receive    |      |   Receive   |                               |  |   |
-             |  Reject     |      |   Reject    |                               |  |   |
-             |  Abandon    |      |   Abandon   |                               |  |   |
-             |  Complete   |      |   Complete  |                               |  |   |
-             |             |      |             |                               |  |   |
-             +-------------+      +-------------+     +-------------+-+inherits-+  |   +---inherits-+-------------+
-                                                      |             |              |                |             |
-                                                      | AMQP        |              inherits         | HTTP        |
-                                                      | Transport   |              |                | Transport   |
-                                                      | Handler     |          +---+---------+      | Handler     |
-                                                      |             |          |             |      |             |
-                                                      | overrides:  |          | MQTT        |      | overrides:  |
-                                                      |  everything |          | Transport   |      |  everything |
-                                                      |             |          | Handler     |      |             |
-                                                      +-------------+          |             |      +-------------+
-                                                                               | overrides:  |
-                                                                               |  everything |
-                                                                               |             |
-                                                                               +-------------+
+                     |  Reject     |      |   Reject    |                               |  |   |
+                     |  Abandon    |      |   Abandon   |                               |  |   |
+                     |  Complete   |      |   Complete  |                               |  |   |
+                     |             |      |             |                               |  |   |
+                     +-------------+      +-------------+     +-------------+-+inherits-+  |   +---inherits-+-------------+
+                                                              |             |              |                |             |
+                                                              | AMQP        |              inherits         | HTTP        |
+                                                              | Transport   |              |                | Transport   |
+                                                              | Handler     |          +---+---------+      | Handler     |
+                                                              |             |          |             |      |             |
+                                                              | overrides:  |          | MQTT        |      | overrides:  |
+                                                              |  everything |          | Transport   |      |  everything |
+                                                              |             |          | Handler     |      |             |
+                                                              +-------------+          |             |      +-------------+
+                                                                                       | overrides:  |
+                                                                                       |  everything |
+                                                                                       |             |
+                                                                                       +-------------+
 */
+
     /// <summary>
     /// Contains methods that a device can use to send messages to and receive from the service.
     /// </summary>
@@ -112,6 +113,12 @@ namespace Microsoft.Azure.Devices.Client
         /// Stores the retry strategy used in the operation retries.
         /// </summary>
         public RetryPolicyType RetryPolicy { get; set; }
+
+        /// <summary>
+        /// Stores Methods supported by the client device and their associated delegate.
+        /// </summary>
+        public delegate string MethodCallback(string payload, ref DeviceMethodStatusType status);
+        Dictionary<string, MethodCallback> deviceMethods;
 
 #if !PCL
         DeviceClient(IotHubConnectionString iotHubConnectionString, ITransportSettings[] transportSettings)
@@ -510,6 +517,8 @@ namespace Microsoft.Azure.Devices.Client
             return ApplyTimeout(operationTimeoutCancellationToken => this.InnerHandler.ReceiveAsync(timeout, operationTimeoutCancellationToken));
         }
 
+
+
 #if WINDOWS_UWP
         [Windows.Foundation.Metadata.DefaultOverloadAttribute()]
 #endif
@@ -708,6 +717,66 @@ namespace Microsoft.Azure.Devices.Client
             return httpTransport.UploadToBlobAsync(blobName, source);
         }
 #endif
+
+        /// <summary>
+        /// This method will initialize the transport layer internal Method handling processing. The
+        /// user must call this method at least once before method calls will be enabled.
+        /// </summary>
+        public AsyncTask EnableMethodsAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Registers a new delgate for the named method. If a delegate is already associated with
+        /// the named method, it will be replaced with the new delegate.
+        /// <param name="methodName"></param>
+        /// <param name="methodDelegate"></param>
+        /// </summary>
+        public void SetMethodDelegate(string methodName, MethodCallback methodDelegate)
+        {
+            /* codes_SRS_DEVICECLIENT_10_001: [ The SetMethodDelegate shall lazy-initialize the deviceMethods property. ]*/
+            if (this.deviceMethods == null)
+            {
+                this.deviceMethods = new Dictionary<string, MethodCallback>();
+            }
+
+            /* codes_SRS_DEVICECLIENT_10_002: [** If the given methodName already has an associated delegate, the existing delegate shall be removed. ]*/
+            /* codes_SRS_DEVICECLIENT_10_003: [** The given delegate will only be added if it is not null. ]*/
+            if (methodDelegate == null)
+            {
+                this.deviceMethods.Remove(methodName);
+            }
+            else
+            {
+                this.deviceMethods[methodName] = methodDelegate;
+            }
+
+            /* codes_SRS_DEVICECLIENT_10_004: [** The deviceMethods property shall be deleted if the last delegate has been removed. ]*/
+            if (this.deviceMethods.Count == 0)
+            {
+                this.deviceMethods = null;
+            }
+        }
+
+        internal void OnMethodCalled(DeviceMethod method)
+        {
+            if (this.deviceMethods.ContainsKey(method.Name))
+            {
+                /* codes_SRS_DEVICECLIENT_10_011: [** The OnMethodCalled shall invoke the specified delegate. ]*/
+                DeviceMethodStatusType status = DeviceMethodStatusType.NotImplemented;
+                method.Result = this.deviceMethods[method.Name](method.Payload, ref status);
+                method.Status = status;
+            }
+            else
+            {
+                /* codes_SRS_DEVICECLIENT_10_012: [ If the given method does not have a delegate, the respose shall be set to Unsupported. ]*/
+                method.Result = null;
+                method.Status = DeviceMethodStatusType.NotSupported;
+            }
+
+            // ArgumentNullException is percolated to the caller.
+        }
 
         public void Dispose()
         {

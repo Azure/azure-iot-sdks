@@ -130,6 +130,26 @@ public AsyncTask SendEventBatchAsync(IEnumerable<Message> messages)
 **SRS_DEVICECLIENT_28_019: [** The async operation shall retry until time specified in OperationTimeoutInMilliseconds property expire or unrecoverable error (authentication or quota exceed) occurs. **]**
 
 
+### OnMethodCalled
+```csharp
+internal void OnMethodCalled(DeviceMethod method)
+```
+
+**SRS_DEVICECLIENT_10_011: [** The OnMethodCalled shall invoke the specified delegate. **]**
+**SRS_DEVICECLIENT_10_012: [** If the given method does not have a delegate, the respose shall be set to Unsupported. **]**
+
+
+### SetMethodDelegate
+```csharp
+public void SetMethodDelegate(string methodName, Delegate methodDelegate)
+```
+
+**SRS_DEVICECLIENT_10_001: [** The SetMethodDelegate shall lazy-initialize the DeviceMethods property. **]**
+**SRS_DEVICECLIENT_10_002: [** If the given methodName already has an associated delegate, the existing delegate shall be removed. **]**
+**SRS_DEVICECLIENT_10_003: [** The given delegate will only be added if it is not null. **]**
+**SRS_DEVICECLIENT_10_004: [** The DeviceMethods property shall be deleted if the last delegate has been removed. **]**
+
+
 ### RetryStrategy
 ```csharp
 public RetryStrategyType RetryStrategy
