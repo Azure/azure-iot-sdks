@@ -90,9 +90,11 @@ Options**, enable **ssh** so you can access the device remotely with
 PuTTY or WinSCP. For more information, see <https://www.raspberrypi.org/documentation/remote-access/ssh/>.
 -   Connect your Raspberry Pi to your network using an ethernet cable or a WiFi dongle.
 -   You need to determine the IP address of your Raspberry Pi in order to connect to it over the network. Open Terminal and run the following command to find the IP address of your device.
+
     ```
     hostname -I
     ```
+
 -   Once you see that your board is working, open an SSH terminal program such as [PuTTY](http://www.putty.org/) on your desktop machine.
 -   Use the IP address from the previous step as the Host name, Port=22, and Connection type=SSH to complete the connection.
 -   When prompted, log in with username **pi**, and password **raspberry**.
@@ -102,6 +104,7 @@ PuTTY or WinSCP. For more information, see <https://www.raspberrypi.org/document
 
 Run the following commands in the SSH Terminal window connected to your Raspberry Pi.
 -   Install git by running
+
     ```
     sudo apt-get install git
     ```
@@ -119,6 +122,7 @@ Run the following commands in the SSH Terminal window connected to your Raspberr
     ```
 
 -   Prepare your environment by running. (Answer **y** when you are prompted to install the additional components needed to run the samples):
+
     ```
     sudo c/build_all/linux/setup.sh
     ```
@@ -130,7 +134,9 @@ Run the following commands in the SSH Terminal window connected to your Raspberr
     ```
     nano ./c/serializer/samples/devicetwin_configupdate/devicetwin_configupdate.c
     ```
+
     This is the line that you need to change in devicetwin_configupdate.c
+
     ```
     static const char* connectionString = "[device connection string]";
     ```
@@ -150,6 +156,7 @@ Run the following commands in the SSH Terminal window connected to your Raspberr
     ```
     c/cmake/iotsdk_linux/serializer/samples/devicetwin_configupdate/devicetwin_configupdate
     ```
+
 You will now be sending temperature and humidity to your IoT Hub every 3000ms.
 
 <a name="Step-4-Monitor"></a>
@@ -162,9 +169,6 @@ You will now be sending temperature and humidity to your IoT Hub every 3000ms.
 -   To view your Device Twins object, Open the Management tab, click Twin Props, select your device and you'll see the JSON object. Notice the "sendFrequency" Reported Property is 3000 ms.
 -   Let's now use the following use case: You are troubleshooting a temperature anomaly and want to receive the telemetry on a higher rate to detect if you are losing some data points, 
     for example every 500 ms. In order to do this, you will have to issue a clone command using Device Twins Desired Properties to request a change of the frequency rate of sending telemetry. 
-
-- Here's a pointer to app code that receives the event:
-    
 
 -   Set a new value for Desired Property "sendFrequency" to be 500 ms in Device Twins window, then click "Send (use Json format)" button, like following
 
@@ -197,7 +201,9 @@ You will now be sending temperature and humidity to your IoT Hub every 3000ms.
     ![](./media/ObserveTelemetryChanged.png)
 -   To simulate a disconnected device, stop the devicetwin_configupdate app by typing CTRL+C in the SSH Terminal window. 
 - Set a new value for Desired Property "sendFrequency" (let's say 7000) while the app is not running (see above step). 
+
     > Notice the desire property "sendFrequency" is changed, but reported property "sendFrequency" is not because the device is disconnected. 
+    
 -   Start the device app again on the RaspberryPi by running  `c/cmake/iotsdk_linux/serializer/samples/devicetwin_configupdate/devicetwin_configupdate`
 -   Go to Device Twins and click the Refresh button. You will notice that the Reported Property is now changed to the same value as Desired Property without setting the Desired Property again. 
 -   This is one of the great values of the Device Twins: it stores the state of the device while the device is offline and when it wakes up, it will phone home to IoTHub to get the latest state.
@@ -213,6 +219,7 @@ While doing your investigation you have determined that you'd like to reboot the
     ```
     sudo c/cmake/iotsdk_linux/serializer/samples/devicetwin_configupdate/devicetwin_configupdate
     ```
+
 -   Open Device Explorer Twin and make a direct method call from "Call Method on Device" tab -> Call Method button as showing in the following image
 
 ![](./media/Reboot.png)  
