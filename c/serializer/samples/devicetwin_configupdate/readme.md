@@ -3,7 +3,7 @@ platform: raspbian
 device: raspberrypi3/raspberrypi2
 language: c
 ---
-How to Update and Reboot an IoT Device with Azure IoT Device Twins
+How to Update Configuration and Reboot an IoT Device with Azure IoT Device Twins
 ===
 ---
 
@@ -24,15 +24,15 @@ specific metadata in the cloud and reports the current state, such as available 
 You can learn more about Device Twins by reading the following articles:
 
 -   [Understand Device Twins][lnk-device-twin-intro]
--   [How to use Device Twins][lnk-device-twin-get-started]
--   [How to use Device Twins Desired Properties][lnk-device-twin-properties]
+-   [How to Use Device Twins][lnk-device-twin-get-started]
+-   [How to Use Device Twins Properties][lnk-device-twin-properties]
 
 ## Device Methods
 Device Methods represent a request-reply interaction with a device similar to an HTTP call in that they succeed or fail immediately (after a user-specified timeout) to let the user know the status of the call. This is useful for scenarios where the course of immediate action is different depending on whether the device was able to respond, such as sending an SMS wake-up to a device if a device is offline (SMS being more expensive than a method call).
 
 You can think of a method as a remote procedure call directly to the device. Only methods which have been implemented on a device may be called from the cloud. If the cloud attempts to invoke a method on a device which does not have that method defined, the method call fails.
 
-You can learn more about Device Methods by reading the following articles:
+You can learn more about Device Methods by reading the following article:
 
 -   [How to Invoke Direct Methods][lnk-device-methods]
 
@@ -40,7 +40,8 @@ You can learn more about Device Methods by reading the following articles:
 
 
 ## Scenario Description
-Your field device sends temperature and humidity telemetry data every 3 seconds. You are troubleshooting a temperature anomaly and want to receive the telemetry at a higher rate, 500ms instead of 3s, to detect if you are losing some data points. In order to do this, you will have to issue a remote cloud-to-device command using a Device Twins "Desired Property" to request a change in the telemetry send frequncy. During that investigation you decide to remotely reboot the device to refresh its state.
+Your field device sends temperature and humidity telemetry data every 3 seconds. You are troubleshooting a temperature anomaly and want to receive the telemetry at a higher rate, 500ms instead of 3s, to detect if you are losing some data points. In order to do this, you will have to issue a remote cloud-to-device command using a Device Twins "Desired Property" to request a change in the telemetry send frequncy. During that investigation, you decide to remotely reboot the device to refresh its state.
+
 Here is the overall process you will follow to achieve this:
 -   You will connect to the device and start the app that sends telemetry. The send frequency value of 3000 ms is the default configured value via a Device Twins Desired Property called sendFrequency. 
 -   You will observe telemetry data via the Device Explorer's Data tab. 
@@ -77,7 +78,7 @@ You should have the following items ready before beginning this tutorial:
 <a name="Step-2-PrepareDevice"></a>
 # Step 2: Prepare your Device
 
->Note: You can skip the Raspbian install if you already have it on your SD card.
+>Note: You can skip the Raspbian install step if you already have it on your SD card.
 
 -   Install the latest Raspbian operating system on your Raspberry Pi 3/2 by
 following the instructions in the [NOOBS setup guide](http://www.raspberrypi.org/help/noobs-setup/). 
@@ -154,7 +155,7 @@ You should now be sending temperature and humidity to your IoT Hub every 3000ms.
 
   ![](./media/ObserveTelemetry.png)
 
--   Open the Management tab, Twin Props and observe the entire twin object, with desired and reported properties. Notice desired "sendFrequency" is 3000 ms and reported "sendFrequency" is 3000 ms.
+-   Open the Management tab, Twin Props and observe the entire Device Twins object, with desired and reported properties. Notice desired "sendFrequency" is 3000 ms and reported "sendFrequency" is 3000 ms.
 -   Let's assume now the following use case: You are troubleshooting a temperature anomaly and want to receive the telemetry on a higher rate to detect if you are losing some data points, 
     for example every 500 ms. In order to do this, you will have to issue a clone command using Device Twins Desired Properties to request a change of the frequency rate of sending telemetry. 
 -   Set a new value for Desired Property "sendFrequency" to be 500 ms in Device Twins window, then click "Send (use Json format)" button, like following
@@ -202,7 +203,7 @@ Imagine a decision is taken on the cloud side to issue a reboot method agaist th
 -   Learn more on how reboot was implemented by reading c/serializer/samples/devicetwin_configupdate/devicetwin_configupdate.c source code. deviceMethodCallback is implemented and being called in device_twin_config_update_run function.The reboot will start after 2 seconds ThreadAPI_Sleep(2000)
 
 
-Note: You can learn more about how to use Device Tins and how to implement methods by reading below tutorials:
+Note: You can learn more about how to use Device Twins and how to implement methods by reading below tutorials:
 -   You can read more about how to use Desired Properties to update configuration of the devices by reading [ how to configure devices using twins ](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-node-node-twin-how-to-configure/)
 -   You can implement a reboot method by reading [ how to invoke direct methods ](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-devguide-direct-methods/)
 -   The application backend can keep track the results of the configuration operation across many devices, by querying twins. You can learn how to query twins by reading [ how to query twins ](https://azure.microsoft.com/en-us/documentation/articles/iot-hub-devguide-query-language/)
