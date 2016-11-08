@@ -876,25 +876,26 @@ static int createEventSender(AMQP_TRANSPORT_DEVICE_STATE* device_state)
 
 static int destroyMessageReceiver(AMQP_TRANSPORT_DEVICE_STATE* device_state)
 {
-    int result;
+    int result = RESULT_OK;
 
-    if (messagereceiver_close(device_state->message_receiver) != RESULT_OK)
+    if (NULL != device_state->message_receiver)
     {
-        LogError("Failed closing the AMQP message receiver.");
-		result = __LINE__;
+        if (messagereceiver_close(device_state->message_receiver) != RESULT_OK)
+        {
+            LogError("Failed closing the AMQP message receiver.");
+            result = __LINE__;
+        }
+        else
+        {
+            messagereceiver_destroy(device_state->message_receiver);
+
+           device_state->message_receiver = NULL;
+
+           link_destroy(device_state->receiver_link);
+
+           device_state->receiver_link = NULL;
+        }
     }
-	else
-	{
-		messagereceiver_destroy(device_state->message_receiver);
-
-		device_state->message_receiver = NULL;
-
-		link_destroy(device_state->receiver_link);
-
-		device_state->receiver_link = NULL;
-
-		result = RESULT_OK;
-	}
 
     return result;
 }
