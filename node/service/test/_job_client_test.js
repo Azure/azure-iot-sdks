@@ -214,7 +214,7 @@ describe('JobClient', function() {
     
     it('creates a valid HTTP request with a continuationToken', function(testCallback) {
       var fakeToken = 'testToken';
-      var fakeRestApiClient = { executeApiCall: sinon.stub().callsArgWith(4, null, { continuationToken: fakeToken})};
+      var fakeRestApiClient = { executeApiCall: sinon.stub().callsArgWith(4, null, [], { statusCode: 200, headers: { 'x-ms-continuation': fakeToken }})};
 
       var client = new JobClient(fakeRestApiClient);
       var query = client.createQuery();

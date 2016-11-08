@@ -35,15 +35,15 @@ Query.prototype.next = function(done) {
       /*Codes_SRS_NODE_SERVICE_QUERY_16_008: [The `next` method shall call the `done` callback with a single argument that is an instance of the standard Javascript `Error` object if the request failed.]*/
       done(err);
     } else {
-      /*Codes_SRS_NODE_SERVICE_QUERY_16_006: [The `next` method shall set the `Query.continuationToken` property to the `continuationToken` value of the query result.]*/
-      self._continuationToken = result.continuationToken;
+      /*Codes_SRS_NODE_SERVICE_QUERY_16_006: [The `next` method shall set the `Query._continuationToken` property to the `continuationToken` value of the query result.]*/
+      self._continuationToken = response.headers['x-ms-continuation'];
 
       /*Codes_SRS_NODE_SERVICE_QUERY_16_013: [The `next` method shall set the `Query.hasMoreResults` property to `true` if the `continuationToken` property of the result object is not `null`.]*/
       /*Codes_SRS_NODE_SERVICE_QUERY_16_014: [The `next` method shall set the `Query.hasMoreResults` property to `false` if the `continuationToken` property of the result object is `null`.]*/
       self.hasMoreResults = self._continuationToken !== null;
 
       /*Codes_SRS_NODE_SERVICE_QUERY_16_007: [The `next` method shall call the `done` callback with a `null` error object, the results of the query and the response of the underlying transport if the request was successful.]*/
-      done(null, result.items, response);
+      done(null, result, response);
     }
   });
 };

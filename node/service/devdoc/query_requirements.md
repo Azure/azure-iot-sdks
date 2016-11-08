@@ -61,7 +61,7 @@ The `nextAsTwin` method runs the query and call the `done` callback with an erro
 ```
 **]**
 
-**SRS_NODE_SERVICE_QUERY_16_006: [** The `next` method shall set the `Query.continuationToken` property to the `continuationToken` value of the query result. **]**
+**SRS_NODE_SERVICE_QUERY_16_006: [** The `next` method shall set the `Query._continuationToken` property to the `continuationToken` value of the query result. **]**
 
 **SRS_NODE_SERVICE_QUERY_16_013: [** The `next` method shall set the `Query.hasMoreResults` property to `true` if the `continuationToken` property of the result object is not `null`. **]**
 

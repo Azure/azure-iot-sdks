@@ -647,28 +647,58 @@ describe('Registry', function() {
     POST /devices/query?api-version=<version> HTTP/1.1
     Authorization: <config.sharedAccessSignature>
     Content-Type: application/json; charset=utf-8
+    x-ms-continuation: <continuationToken>
+    x-ms-max-item-count: <pageSize>
     Request-Id: <guid>
 
     <query>
     ```]*/
-    it('constructs a valid HTTP request', function() {
-      var fakeSql = 'sql';
-      var fakePageSize = 42;
-      var fakeQuery = {
-        sql: fakeSql,
-        pageSize: fakePageSize,
-        continuationToken: null
-      };
+    [{
+      fakePageSize: 42,
+      fakeContinuationToken: null
+    },{
+      fakePageSize: undefined,
+      fakeContinuationToken: null
+    },{
+      fakePageSize: undefined,
+      fakeContinuationToken: 'continuation'
+    },{
+      fakePageSize: 42,
+      fakeContinuationToken: 'continuation'
+    }].forEach(function(testConfig){
+      it('constructs a valid HTTP request with pageSize: \'' + testConfig.fakePageSize + '\' and continuation token: \'' + testConfig.fakeContinuationToken + '\'', function() {
+        var fakeSql = 'sql';
+        var fakePageSize = testConfig.fakePageSize;
+        var fakeQuery = {
+          query: fakeSql
+        };
 
-      var fakeHttpHelper = { executeApiCall: sinon.stub() };
+        var fakeHttpHelper = { executeApiCall: sinon.stub().callsArgWith(4, null, [], { statusCode: 200, headers: { 'x-ms-continuation': testConfig.fakeContinuationToken }}) };
 
-      var registry = new Registry(fakeConfig, fakeHttpHelper);
-      var query = registry.createQuery(fakeSql, fakePageSize);
-      query.next(function() {});
-      assert.strictEqual(fakeHttpHelper.executeApiCall.args[0][0], 'POST');
-      assert.strictEqual(fakeHttpHelper.executeApiCall.args[0][1], '/devices/query' + endpoint.versionQueryString());
-      assert.strictEqual(fakeHttpHelper.executeApiCall.args[0][2]['Content-Type'], 'application/json; charset=utf-8');
-      assert.deepEqual(fakeHttpHelper.executeApiCall.args[0][3], fakeQuery);
+        var registry = new Registry(fakeConfig, fakeHttpHelper);
+        var query = registry.createQuery(fakeSql, fakePageSize);
+        query.next(function() {
+          query.next(function() {});
+        });
+        assert.strictEqual(fakeHttpHelper.executeApiCall.args[0][0], 'POST');
+        assert.strictEqual(fakeHttpHelper.executeApiCall.args[0][1], '/devices/query' + endpoint.versionQueryString());
+        assert.strictEqual(fakeHttpHelper.executeApiCall.args[0][2]['Content-Type'], 'application/json; charset=utf-8');
+
+        if (testConfig.fakePageSize) {
+          assert.strictEqual(fakeHttpHelper.executeApiCall.args[0][2]['x-ms-max-item-count'], testConfig.fakePageSize);
+        } else {
+          assert.isUndefined(fakeHttpHelper.executeApiCall.args[0][2]['x-ms-max-item-count']);
+        }
+
+
+        if (testConfig.fakeContinuationToken) {
+          assert.strictEqual(fakeHttpHelper.executeApiCall.args[1][2]['x-ms-continuation'], testConfig.fakeContinuationToken);
+        } else {
+          assert.isUndefined(fakeHttpHelper.executeApiCall.args[1][2]['x-ms-continuation']);
+        }
+
+        assert.deepEqual(fakeHttpHelper.executeApiCall.args[0][3], fakeQuery);
+      });
     });
   });
 });

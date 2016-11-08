@@ -27,7 +27,7 @@ declare class Registry {
     updateTwin(deviceId: string, patch: any, etag: string, done: Registry.ResponseCallback): void;
 
     // Queries
-    createQuery(sqlQuery: string, pageSize: number): Query;
+    createQuery(sqlQuery: string, pageSize?: number): Query;
 
     // Factory methods
     static fromConnectionString(value: string): Registry;
@@ -44,9 +44,7 @@ declare namespace Registry {
     }
 
     interface QueryDescription {
-        sql: string;
-        pageSize: number;
-        continuationToken: string;
+        query: string;
     }
 
     type DeviceCallback = (err: Error, device: Device) => void;

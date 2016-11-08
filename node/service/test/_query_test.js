@@ -38,7 +38,13 @@ describe('Query', function() {
   var nextCommonTests = function(nextName) {
     it('uses the previous continuationToken in the following query', function(testCallback) {
       var fakeContinuationToken = 'continuationToken';
-      var fakeExecuteFn = sinon.stub().callsArgWith(1, null, { items: [], continuationToken: fakeContinuationToken }, { statusCode: 200 });
+      var fakeResponse = { 
+        statusCode: 200,
+        headers: { 
+          'x-ms-continuation': fakeContinuationToken 
+        }
+      };
+      var fakeExecuteFn = sinon.stub().callsArgWith(1, null, [], fakeResponse);
 
       var query = new Query(fakeExecuteFn);
 
@@ -55,7 +61,7 @@ describe('Query', function() {
     /*Tests_SRS_NODE_SERVICE_QUERY_16_014: [The `next` method shall set the `Query.hasMoreResults` property to `false` if the `continuationToken` property of the result object is `null`.]*/
     [{ token: 'a string', more: true }, { token: null, more: false }].forEach(function(testConfig) {
       it('sets hasMoreResults to \'' + testConfig.more + '\' if the continuationToken is \'' + testConfig.token + '\'', function(testCallback) {
-        var fakeExecuteFn = sinon.stub().callsArgWith(1, null, { items: [], continuationToken: testConfig.token }, { statusCode: 200 });
+        var fakeExecuteFn = sinon.stub().callsArgWith(1, null, [], { statusCode: 200, headers: { 'x-ms-continuation': testConfig.token } });
 
         var query = new Query(fakeExecuteFn);
         query[nextName](function() {
@@ -90,8 +96,13 @@ describe('Query', function() {
         { deviceId: 'deviceId2' },
         { deviceId: 'deviceId3' }
       ];
-      var fakeResponse = { statusCode: 200 };
-      var fakeExecuteFn = sinon.stub().callsArgWith(1, null, { items: fakeResults, continuationToken: null }, fakeResponse);
+      var fakeResponse = { 
+        statusCode: 200,
+        headers: { 
+          'x-ms-continuation': null 
+        }
+      };
+      var fakeExecuteFn = sinon.stub().callsArgWith(1, null, fakeResults, fakeResponse);
 
       var query = new Query(fakeExecuteFn);
       query.next(function(err, result, response) {
@@ -113,8 +124,14 @@ describe('Query', function() {
         fakeResults.push({ deviceId: 'deviceId' + i });
       }
 
-      var fakeResponse = { statusCode: 200 };
-      var fakeExecuteFn = sinon.stub().callsArgWith(1, null, { items: fakeResults, continuationToken: null }, fakeResponse);
+      var fakeResponse = { 
+        statusCode: 200,
+        headers: { 
+          'x-ms-continuation': null 
+        }
+      };
+
+      var fakeExecuteFn = sinon.stub().callsArgWith(1, null, fakeResults, fakeResponse);
 
       var query = new Query(fakeExecuteFn, {});
       query.nextAsTwin(function(err, result, response) {
@@ -134,8 +151,14 @@ describe('Query', function() {
         fakeResults.push({ deviceId: 'deviceId' + i });
       }
 
-      var fakeResponse = { statusCode: 200 };
-      var fakeExecuteFn = sinon.stub().callsArgWith(1, null, { items: null, continuationToken: null }, fakeResponse);
+      var fakeResponse = { 
+        statusCode: 200,
+        headers: { 
+          'x-ms-continuation': null 
+        }
+      };
+
+      var fakeExecuteFn = sinon.stub().callsArgWith(1, null, null, fakeResponse);
 
       var query = new Query(fakeExecuteFn, {});
       query.nextAsTwin(function(err, result, response) {

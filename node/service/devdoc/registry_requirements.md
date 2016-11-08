@@ -260,12 +260,12 @@ The `_executeQueryFunc` method runs a SQL query against the device databases and
 POST /devices/query?api-version=<version> HTTP/1.1
 Authorization: <config.sharedAccessSignature>
 Content-Type: application/json; charset=utf-8
+x-ms-continuation: continuationToken
+x-ms-max-item-count: pageSize
 Request-Id: <guid>
 
 {
-  sql: <sqlQuery>,
-  pageSize: <pageSize>,
-  continuationToken: <continuationToken>
+  query: <sqlQuery>
 }
 ```
 **]**

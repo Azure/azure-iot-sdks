@@ -5,6 +5,7 @@ declare interface DeviceMethodParams {
     name: string;
     payload?: any;
     timeoutInSeconds?: number;
+    connectTimeoutInSeconds?: number; // default is 0
 }
 
 export = DeviceMethodParams;

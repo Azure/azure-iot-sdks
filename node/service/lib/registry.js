@@ -507,7 +507,7 @@ Registry.prototype.updateTwin = function(deviceId, patch, etag, done) {
  * @method              module:azure-iothub.Registry#createQuery
  * @description         Creates a query that can be run on the IoT Hub instance to find information about devices or jobs.
  * @param {String}      sqlQuery   The query written as an SQL string.
- * @param {Number}      pageSize   The desired number of results per page.
+ * @param {Number}      pageSize   The desired number of results per page (optional. default: 1000, max: 10000).
  * 
  * @throws {ReferenceError}        If the sqlQuery argument is falsy.
  * @throws {TypeError}             If the sqlQuery argument is not a string or the pageSize argument not a number, null or undefined.
@@ -533,12 +533,12 @@ Registry.prototype._executeQueryFunc = function (sqlQuery, pageSize) {
     POST /devices/query?api-version=<version> HTTP/1.1
     Authorization: <config.sharedAccessSignature>
     Content-Type: application/json; charset=utf-8
+    x-ms-continuation: continuationToken
+    x-ms-max-item-count: pageSize
     Request-Id: <guid>
 
     {
-      sql: <sqlQuery>,
-      pageSize: <pageSize>,
-      continuationToken: <continuationToken>
+      query: <sqlQuery>
     }
     ```]*/
     var path = '/devices/query' + endpoint.versionQueryString();
@@ -546,10 +546,16 @@ Registry.prototype._executeQueryFunc = function (sqlQuery, pageSize) {
       'Content-Type': 'application/json; charset=utf-8'
     };
 
+    if (continuationToken) {
+      headers['x-ms-continuation'] = continuationToken;
+    }
+
+    if (pageSize) {
+      headers['x-ms-max-item-count'] = pageSize;
+    }
+
     var query = {
-      sql: sqlQuery,
-      pageSize: pageSize,
-      continuationToken: continuationToken
+      query: sqlQuery
     };
 
     self._restApiClient.executeApiCall('POST', path, headers, query, done);
