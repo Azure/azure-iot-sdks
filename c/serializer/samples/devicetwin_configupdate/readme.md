@@ -56,7 +56,13 @@ Here is the overall process you will follow to achieve this:
 # Step 1: Prerequisites
 
 You will need the following items ready before beginning this tutorial:
--   A computer with [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) client installed.
+-   A computer with [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) client installed. 
+    This is optional step if you are not building the Device Explorer Twin or you want to explore samples from RaspberryPi itself. Otherwise, clone the repo locally on your machine
+    
+    ```
+    git clone --recursive https://github.com/azure/azure-iot-sdks -b mvp_summit 
+    ```
+
 -   SSH client on your desktop computer, such as [PuTTY](http://www.putty.org/), so you can remotely access the command line on the Raspberry Pi.
 -   Required hardware:
 	-   [Raspberry Pi 3/2](https://www.adafruit.com/products/3055)
@@ -72,7 +78,7 @@ You will need the following items ready before beginning this tutorial:
 	    includes some of these hardware requirements.
 -   [Provision][lnk-setup-iot-hub] an Azure IoT Hub. 
     >Note: Make sure you create an IoT Hub which has Device Management enabled. (Check "Enable Device Management" when you create the IoT Hub)
--   [Download](https://cdnx.azureedge.net/files/Device%20Explorer.zip) Azure IoT Device Explorer. To monitor IoT Hub messages and manage devices.
+-   [Download](https://cdnx.azureedge.net/files/Device%20Explorer.zip) Azure IoT Device Explorer Twin. To monitor IoT Hub messages, manage devices and device twins.
 -   [Provision][lnk-manage-iot-hub] a device with Device Explorer and get its connection string.
 
 
