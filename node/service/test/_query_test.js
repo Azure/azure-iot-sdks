@@ -59,7 +59,7 @@ describe('Query', function() {
 
     /*Tests_SRS_NODE_SERVICE_QUERY_16_013: [The `next` method shall set the `Query.hasMoreResults` property to `true` if the `continuationToken` property of the result object is not `null`.]*/
     /*Tests_SRS_NODE_SERVICE_QUERY_16_014: [The `next` method shall set the `Query.hasMoreResults` property to `false` if the `continuationToken` property of the result object is `null`.]*/
-    [{ token: 'a string', more: true }, { token: null, more: false }].forEach(function(testConfig) {
+    [{ token: 'a string', more: true }, { token: undefined, more: false }].forEach(function(testConfig) {
       it('sets hasMoreResults to \'' + testConfig.more + '\' if the continuationToken is \'' + testConfig.token + '\'', function(testCallback) {
         var fakeExecuteFn = sinon.stub().callsArgWith(1, null, [], { statusCode: 200, headers: { 'x-ms-continuation': testConfig.token } });
 

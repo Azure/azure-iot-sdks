@@ -154,7 +154,7 @@ describe('JobClient', function() {
       query.next(function() {});
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][0], 'GET');
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/query' + endpoint.versionQueryString());
-      assert.isNull(fakeRestApiClient.executeApiCall.args[0][2]);
+      assert.deepEqual(fakeRestApiClient.executeApiCall.args[0][2], {});
       assert.isNull(fakeRestApiClient.executeApiCall.args[0][3]);
     });
 
@@ -167,7 +167,7 @@ describe('JobClient', function() {
       query.next(function() {});
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][0], 'GET');
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/query' + endpoint.versionQueryString() + '&jobType=' + fakeJobType);
-      assert.isNull(fakeRestApiClient.executeApiCall.args[0][2]);
+      assert.deepEqual(fakeRestApiClient.executeApiCall.args[0][2], {});
       assert.isNull(fakeRestApiClient.executeApiCall.args[0][3]);
     });
 
@@ -180,7 +180,7 @@ describe('JobClient', function() {
       query.next(function() {});
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][0], 'GET');
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/query' + endpoint.versionQueryString() + '&jobStatus=' + fakeJobStatus);
-      assert.isNull(fakeRestApiClient.executeApiCall.args[0][2]);
+      assert.deepEqual(fakeRestApiClient.executeApiCall.args[0][2], {});
       assert.isNull(fakeRestApiClient.executeApiCall.args[0][3]);
     });
 
@@ -192,8 +192,8 @@ describe('JobClient', function() {
       var query = client.createQuery(null, null, fakePageSize);
       query.next(function() {});
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][0], 'GET');
-      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/query' + endpoint.versionQueryString() + '&pageSize=' + fakePageSize);
-      assert.isNull(fakeRestApiClient.executeApiCall.args[0][2]);
+      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/query' + endpoint.versionQueryString());
+      assert.deepEqual(fakeRestApiClient.executeApiCall.args[0][2], { 'x-ms-max-item-count': fakePageSize });
       assert.isNull(fakeRestApiClient.executeApiCall.args[0][3]);
     });
 
@@ -207,8 +207,8 @@ describe('JobClient', function() {
       var query = client.createQuery(fakeJobType, fakeJobStatus, fakePageSize);
       query.next(function() {});
       assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][0], 'GET');
-      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/query' + endpoint.versionQueryString() + '&jobStatus=' + fakeJobStatus + '&jobType=' + fakeJobType + '&pageSize=' + fakePageSize);
-      assert.isNull(fakeRestApiClient.executeApiCall.args[0][2]);
+      assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/query' + endpoint.versionQueryString() + '&jobStatus=' + fakeJobStatus + '&jobType=' + fakeJobType);
+      assert.deepEqual(fakeRestApiClient.executeApiCall.args[0][2], { 'x-ms-max-item-count': fakePageSize });
       assert.isNull(fakeRestApiClient.executeApiCall.args[0][3]);
     });
     
@@ -221,12 +221,12 @@ describe('JobClient', function() {
       query.next(function() {
         assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][0], 'GET');
         assert.strictEqual(fakeRestApiClient.executeApiCall.args[0][1], '/jobs/v2/query' + endpoint.versionQueryString());
-        assert.isNull(fakeRestApiClient.executeApiCall.args[0][2]);
+        assert.deepEqual(fakeRestApiClient.executeApiCall.args[0][2], {});
         assert.isNull(fakeRestApiClient.executeApiCall.args[0][3]);
         query.next(function() {
           assert.strictEqual(fakeRestApiClient.executeApiCall.args[1][0], 'GET');
-          assert.strictEqual(fakeRestApiClient.executeApiCall.args[1][1], '/jobs/v2/query' + endpoint.versionQueryString() + '&continuationToken=' + fakeToken);
-          assert.isNull(fakeRestApiClient.executeApiCall.args[1][2]);
+          assert.strictEqual(fakeRestApiClient.executeApiCall.args[1][1], '/jobs/v2/query' + endpoint.versionQueryString());
+          assert.deepEqual(fakeRestApiClient.executeApiCall.args[1][2], { 'x-ms-continuation': fakeToken });
           assert.isNull(fakeRestApiClient.executeApiCall.args[1][3]);
           testCallback();
         });

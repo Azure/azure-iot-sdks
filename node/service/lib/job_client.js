@@ -132,10 +132,18 @@ JobClient.prototype._getJobsFunc = function(jobType, jobStatus, pageSize) {
     ```]*/
     var jobStatusQueryParam = jobStatus ? '&jobStatus=' + encodeURIComponent(jobStatus) : '';
     var jobTypeQueryParam = jobType ? '&jobType=' + encodeURIComponent(jobType) : '';
-    var continuationTokenParam = continuationToken ? '&continuationToken=' + encodeURIComponent(continuationToken) : '';
-    var pageSizeParam = pageSize ? '&pageSize=' + encodeURIComponent(pageSize) : '';
-    var path = '/jobs/v2/query' + endpoint.versionQueryString() + jobStatusQueryParam + jobTypeQueryParam + pageSizeParam + continuationTokenParam;
-    self._restApiClient.executeApiCall('GET', path, null, null, done);
+    var path = '/jobs/v2/query' + endpoint.versionQueryString() + jobStatusQueryParam + jobTypeQueryParam;
+
+    var headers = {};
+    if (continuationToken) {
+      headers['x-ms-continuation'] = continuationToken;
+    }
+
+    if (pageSize) {
+      headers['x-ms-max-item-count'] = pageSize;
+    }
+
+    self._restApiClient.executeApiCall('GET', path, headers, null, done);
     };
 };
 
