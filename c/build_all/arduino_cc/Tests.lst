@@ -16,6 +16,21 @@ CPUParameters=-fqbn=esp8266:esp8266:huzzah:CpuFrequency=80,UploadSpeed=115200,Fl
 Build=Enable
 Execution=Enable
 
+[huzzah_command_center]
+Target=command_center.ino
+RelativePath=\iot-hub-c-huzzah-getstartedkit\command_center
+RelativeWorkingDir=\arduino_cc_Work\Results\huzzah_command_center
+CloneURL=https://github.com/Azure-Samples/iot-hub-c-huzzah-getstartedkit
+MaxAllowedDurationSeconds=100
+LogLines=300
+MinimumHeap=7000
+Categories=IoTHub
+Hardware=Adafruit_Huzzah
+SerialPort=COM4
+CPUParameters=-fqbn=esp8266:esp8266:huzzah:CpuFrequency=80,UploadSpeed=115200,FlashSize=4M3M -ide-version=10609
+Build=Enable
+Execution=Disable
+
 [huzzah_simplesample_http]
 Target=simplesample_http.ino
 RelativePath=\arduino\libraries\AzureIoTHub\examples\simplesample_http
@@ -35,6 +50,21 @@ Execution=Disable
 Target=remote_monitoring.ino
 RelativePath=\iot-hub-c-m0wifi-getstartedkit\remote_monitoring
 RelativeWorkingDir=\arduino_cc_Work\Results\m0wifi_remote_monitoring
+CloneURL=https://github.com/Azure-Samples/iot-hub-c-m0wifi-getstartedkit
+MaxAllowedDurationSeconds=100
+LogLines=300
+MinimumHeap=7000
+Categories=IoTHub
+Hardware=Adafruit_FeatherM0
+SerialPort=COM9
+CPUParameters=-fqbn=adafruit:samd:adafruit_feather_m0 -vid-pid=0X239A_0X800B -ide-version=10609
+Build=Enable
+Execution=Disable
+
+[m0wifi_command_center]
+Target=command_center.ino
+RelativePath=\iot-hub-c-m0wifi-getstartedkit\command_center
+RelativeWorkingDir=\arduino_cc_Work\Results\m0wifi_command_center
 CloneURL=https://github.com/Azure-Samples/iot-hub-c-m0wifi-getstartedkit
 MaxAllowedDurationSeconds=100
 LogLines=300
@@ -75,6 +105,21 @@ SerialPort=COM7
 CPUParameters=-fqbn=esp8266:esp8266:thing:CpuFrequency=80,UploadSpeed=115200 -vid-pid=0X239A_0X800B -ide-version=10609
 Build=Enable
 Execution=Enable
+
+[thingdev_command_center]
+Target=command_center.ino
+RelativePath=\iot-hub-c-thingdev-getstartedkit\command_center
+RelativeWorkingDir=\arduino_cc_Work\Results\thingdev_command_center
+CloneURL=https://github.com/Azure-Samples/iot-hub-c-thingdev-getstartedkit.git
+MaxAllowedDurationSeconds=100
+LogLines=300
+MinimumHeap=7000
+Categories=IoTHub
+Hardware=SparkFun_ESP8266_Thing 
+SerialPort=COM7
+CPUParameters=-fqbn=esp8266:esp8266:thing:CpuFrequency=80,UploadSpeed=115200 -vid-pid=0X239A_0X800B -ide-version=10609
+Build=Enable
+Execution=Disable
 
 [thingdev_simplesample_http]
 Target=simplesample_http.ino
