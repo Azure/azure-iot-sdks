@@ -11,7 +11,7 @@ function(linkUAMQP whatExecutableIsBuilding)
 
         target_link_libraries(${whatExecutableIsBuilding} uamqp aziotsharedutil ws2_32 secur32)
 
-        if($<BOOL:${use_openssl}> OR $<BOOL:${use_wsio}>)
+        if(${use_openssl} OR ${use_wsio})
             target_link_libraries(${whatExecutableIsBuilding} $ENV{OpenSSLDir}/lib/ssleay32.lib $ENV{OpenSSLDir}/lib/libeay32.lib)
         
             file(COPY $ENV{OpenSSLDir}/bin/libeay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
@@ -21,7 +21,7 @@ function(linkUAMQP whatExecutableIsBuilding)
         target_link_libraries(${whatExecutableIsBuilding} uamqp aziotsharedutil ssl crypto)
     endif()
     
-    if($<BOOL:${use_wsio}>)
+    if(${use_wsio})
         target_link_libraries(${whatExecutableIsBuilding} websockets)
     endif()
 endfunction(linkUAMQP)
@@ -53,7 +53,7 @@ function(linkHttp whatExecutableIsBuilding)
 endfunction(linkHttp)
 
 function(linkWebSockets whatExecutableIsBuilding)
-    if($<BOOL:${use_wsio}>)
+    if(${use_wsio})
         target_link_libraries(${whatExecutableIsBuilding} websockets)
     endif()
 endfunction(linkWebSockets)
