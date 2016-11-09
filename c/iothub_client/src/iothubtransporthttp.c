@@ -1650,7 +1650,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
 {
     /*Codes_SRS_TRANSPORTMULTITHTTP_17_097: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
     -requestType: POST
-    -relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon?api-version=2016-02-03"
+    -relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon?api-version=2016-11-14"
     - requestHttpHeadersHandle: an HTTP headers instance containing the following
     Authorization: " "
     If-Match: value of ETag
@@ -1660,7 +1660,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
     - responseContent: NULL]*/
     /*Codes_SRS_TRANSPORTMULTITHTTP_17_099: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
     -requestType: DELETE
-    -relativePath: abandon relative path begin + value of ETag + "?api-version=2016-02-03"
+    -relativePath: abandon relative path begin + value of ETag + "?api-version=2016-11-14"
     - requestHttpHeadersHandle: an HTTP headers instance containing the following
     Authorization: " "
     If-Match: value of ETag
@@ -1670,7 +1670,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
     - responseContent: NULL]*/
     /*Codes_SRS_TRANSPORTMULTITHTTP_17_101: [_DoWork shall call HTTPAPIEX_SAS_ExecuteRequest with the following parameters:
     -requestType: DELETE
-    -relativePath: abandon relative path begin + value of ETag +"?api-version=2016-02-03" + "&reject"
+    -relativePath: abandon relative path begin + value of ETag +"?api-version=2016-11-14" + "&reject"
     - requestHttpHeadersHandle: an HTTP headers instance containing the following
     Authorization: " "
     If-Match: value of ETag
@@ -1748,7 +1748,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
                             else if ((r = HTTPAPIEX_ExecuteRequest(
                                 handleData->httpApiExHandle,
                                 (action == ABANDON) ? HTTPAPI_REQUEST_POST : HTTPAPI_REQUEST_DELETE,                               /*-requestType: POST                                                                                                       */
-                                STRING_c_str(fullAbandonRelativePath),              /*-relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon?api-version=2016-02-03"   */
+                                STRING_c_str(fullAbandonRelativePath),              /*-relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon?api-version=2016-11-14"   */
                                 abandonRequestHttpHeaders,                          /*- requestHttpHeadersHandle: an HTTP headers instance containing the following                                            */
                                 NULL,                                               /*- requestContent: NULL                                                                                                   */
                                 &statusCode,                                         /*- statusCode: a pointer to unsigned int which might be examined for logging                                              */
@@ -1766,7 +1766,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
                             deviceData->sasObject,
                             handleData->httpApiExHandle,
                             (action == ABANDON) ? HTTPAPI_REQUEST_POST : HTTPAPI_REQUEST_DELETE,                               /*-requestType: POST                                                                                                       */
-                            STRING_c_str(fullAbandonRelativePath),              /*-relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon?api-version=2016-02-03"   */
+                            STRING_c_str(fullAbandonRelativePath),              /*-relativePath: abandon relative path begin (as created by _Create) + value of ETag + "/abandon?api-version=2016-11-14"   */
                             abandonRequestHttpHeaders,                          /*- requestHttpHeadersHandle: an HTTP headers instance containing the following                                            */
                             NULL,                                               /*- requestContent: NULL                                                                                                   */
                             &statusCode,                                         /*- statusCode: a pointer to unsigned int which might be examined for logging                                              */

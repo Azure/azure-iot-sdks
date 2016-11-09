@@ -61,7 +61,7 @@ static const char* TOPIC_DEVICE_DEVICE = "devices/%s/messages/events/";
 static const char* TOPIC_DEVICE_METHOD_SUBSCRIBE = "$iothub/methods/POST/#";
 static const char* TOPIC_DEVICE_METHOD_RESPONSE = "$iothub/methods/res";
 
-static const char* IOTHUB_API_VERSION = "2016-09-30-preview";
+static const char* IOTHUB_API_VERSION = "2016-11-14";
 
 static const char* PROPERTY_SEPARATOR = "&";
 static const char* REPORTED_PROPERTIES_TOPIC = "$iothub/twin/PATCH/properties/reported/?$rid=%"PRIu16;
