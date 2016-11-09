@@ -169,9 +169,7 @@ EXECUTE_COMMAND_RESULT actionName(modelName* model, arg1Type arg1Name, arg2Type 
 ## WITH_METHOD(methodName, arg1Type, arg1, arg2Type, arg2, ...)
 
 `WITH_METHOD` introduces a Device Method in the model. `WITH_METHOD` is similar to `WITH_ACTION`: it will result in a user-supplied C function being called.
-The differences are: 
-    - return value (Methods return numbers, Actions return values of an enum). 
-    - Methods can return an optional JSON value.
+The main difference is in return value (Methods return a number and a JSON value, Actions return values of an enum).
 
 Arguments:
 -	`methodName` – specifies the method name.
@@ -452,7 +450,7 @@ __Arguments:__
 In order to better support Device Twin features by providing a stronger cohesion, serializer has been enhanced 
 with a layer specially crafted for Device Twin. The new functionality is accesibile by #include "serializer_devicetwin.h".
 
-`DECLARE_MODEL` becomes `DECLARE_DEVICETWIN_MODEL`. All the semantics are preserved.  Model instances
+`DECLARE_MODEL` becomes `DECLARE_DEVICETWIN_MODEL`. All the semantics are preserved. Model instances
 are created by a C function, and not a by `CREATE_MODEL_INSTANCE` macro.
 
 __Example:__
