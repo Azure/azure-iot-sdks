@@ -35,7 +35,7 @@ const size_t IoTHubTransport_ThreadTerminationOffset = offsetof(TRANSPORT_HANDLE
 
 TRANSPORT_HANDLE  IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol, const char* iotHubName, const char* iotHubSuffix)
 {
-	TRANSPORT_HANDLE_DATA * result;
+	TRANSPORT_HANDLE_DATA *result;
 
 	if (protocol == NULL || iotHubName == NULL || iotHubSuffix == NULL)
 	{
@@ -118,6 +118,7 @@ TRANSPORT_HANDLE  IoTHubTransport_Create(IOTHUB_CLIENT_TRANSPORT_PROVIDER protoc
 						result->IoTHubTransport_Subscribe = transportProtocol->IoTHubTransport_Subscribe;
 						result->IoTHubTransport_Unsubscribe = transportProtocol->IoTHubTransport_Unsubscribe;
 						result->IoTHubTransport_DoWork = transportProtocol->IoTHubTransport_DoWork;
+                        result->IoTHubTransport_SetRetryPolicy = transportProtocol->IoTHubTransport_SetRetryPolicy;
 						result->IoTHubTransport_GetSendStatus = transportProtocol->IoTHubTransport_GetSendStatus;
 					}
 				}

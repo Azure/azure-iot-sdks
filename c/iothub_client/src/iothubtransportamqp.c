@@ -112,6 +112,11 @@ static void IoTHubTransportAMQP_Destroy(TRANSPORT_LL_HANDLE handle)
 	IoTHubTransport_AMQP_Common_Destroy(handle);
 }
 
+static int IoTHubTransportAMQP_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)
+{
+	return IoTHubTransport_AMQP_Common_SetRetryPolicy(handle, retryPolicy, retryTimeoutLimitInSeconds);
+}
+
 static STRING_HANDLE IoTHubTransportAMQP_GetHostname(TRANSPORT_LL_HANDLE handle)
 {
 	// Codes_SRS_IOTHUBTRANSPORTAMQP_09_018: [IoTHubTransportAMQP_GetHostname shall get the hostname by calling into the IoTHubTransport_AMQP_Common_GetHostname()]
@@ -134,6 +139,7 @@ static TRANSPORT_PROVIDER thisTransportProvider =
     IoTHubTransportAMQP_Subscribe,                  /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;*/
     IoTHubTransportAMQP_Unsubscribe,                /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;*/
     IoTHubTransportAMQP_DoWork,                     /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;*/
+    IoTHubTransportAMQP_SetRetryPolicy,             /*pfIoTHubTransport_DoWork IoTHubTransport_SetRetryPolicy;*/
     IoTHubTransportAMQP_GetSendStatus               /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
 };
 

@@ -109,6 +109,11 @@ static void IoTHubTransportAMQP_WS_Destroy(TRANSPORT_LL_HANDLE handle)
 	IoTHubTransport_AMQP_Common_Destroy(handle);
 }
 
+static int IoTHubTransportAMQP_WS_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)
+{
+	return IoTHubTransport_AMQP_Common_SetRetryPolicy(handle, retryPolicy, retryTimeoutLimitInSeconds);
+}
+
 static STRING_HANDLE IoTHubTransportAMQP_WS_GetHostname(TRANSPORT_LL_HANDLE handle)
 {
 	// Codes_SRS_IoTHubTransportAMQP_WS_09_018: [IoTHubTransportAMQP_WS_GetHostname shall get the hostname by calling into the IoTHubTransport_AMQP_Common_GetHostname()]
@@ -117,20 +122,21 @@ static STRING_HANDLE IoTHubTransportAMQP_WS_GetHostname(TRANSPORT_LL_HANDLE hand
 
 static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = 
 {
-    IoTHubTransportAMQP_WS_Subscribe_DeviceMethod,   /*pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;*/
-    IoTHubTransportAMQP_WS_Unsubscribe_DeviceMethod, /*pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMethod;*/
-    IoTHubTransportAMQP_WS_Subscribe_DeviceTwin,     /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;*/
-    IoTHubTransportAMQP_WS_Unsubscribe_DeviceTwin,   /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;*/
-    IoTHubTransportAMQP_WS_ProcessItem,              /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;*/
+    IoTHubTransportAMQP_WS_Subscribe_DeviceMethod,                     /*pfIoTHubTransport_Subscribe_DeviceMethod IoTHubTransport_Subscribe_DeviceMethod;*/
+    IoTHubTransportAMQP_WS_Unsubscribe_DeviceMethod,                   /*pfIoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_Unsubscribe_DeviceMethod;*/
+    IoTHubTransportAMQP_WS_Subscribe_DeviceTwin,                       /*pfIoTHubTransport_Subscribe_DeviceTwin IoTHubTransport_Subscribe_DeviceTwin;*/
+    IoTHubTransportAMQP_WS_Unsubscribe_DeviceTwin,                     /*pfIoTHubTransport_Unsubscribe_DeviceTwin IoTHubTransport_Unsubscribe_DeviceTwin;*/
+    IoTHubTransportAMQP_WS_ProcessItem,                                /*pfIoTHubTransport_ProcessItem IoTHubTransport_ProcessItem;*/
     IoTHubTransportAMQP_WS_GetHostname,                                /*pfIoTHubTransport_GetHostname IoTHubTransport_GetHostname;*/
     IoTHubTransportAMQP_WS_SetOption,                                  /*pfIoTHubTransport_SetOption IoTHubTransport_SetOption;*/
-    IoTHubTransportAMQP_WS_Create,                   /*pfIoTHubTransport_Create IoTHubTransport_Create;*/
+    IoTHubTransportAMQP_WS_Create,                                     /*pfIoTHubTransport_Create IoTHubTransport_Create;*/
     IoTHubTransportAMQP_WS_Destroy,                                    /*pfIoTHubTransport_Destroy IoTHubTransport_Destroy;*/
     IoTHubTransportAMQP_WS_Register,                                   /*pfIotHubTransport_Register IoTHubTransport_Register;*/
     IoTHubTransportAMQP_WS_Unregister,                                 /*pfIotHubTransport_Unregister IoTHubTransport_Unegister;*/
     IoTHubTransportAMQP_WS_Subscribe,                                  /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;*/
     IoTHubTransportAMQP_WS_Unsubscribe,                                /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;*/
     IoTHubTransportAMQP_WS_DoWork,                                     /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;*/
+    IoTHubTransportAMQP_WS_SetRetryPolicy,                             /*pfIoTHubTransport_SetRetryLogic IoTHubTransport_SetRetryPolicy;*/
     IoTHubTransportAMQP_WS_GetSendStatus                               /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
 };
 
@@ -148,6 +154,7 @@ IoTHubTransport_Unregister = IoTHubTransportAMQP_WS_Unregister
 IoTHubTransport_Subscribe = IoTHubTransportAMQP_WS_Subscribe
 IoTHubTransport_Unsubscribe = IoTHubTransportAMQP_WS_Unsubscribe
 IoTHubTransport_DoWork = IoTHubTransportAMQP_WS_DoWork
+IoTHubTransport_SetRetryLogic = IoTHubTransportAMQP_WS_SetRetryLogic
 IoTHubTransport_SetOption = IoTHubTransportAMQP_WS_SetOption
 IoTHubTransport_GetSendStatus = IoTHubTransportAMQP_WS_GetSendStatus] */
 extern const TRANSPORT_PROVIDER* AMQP_Protocol_over_WebSocketsTls(void)

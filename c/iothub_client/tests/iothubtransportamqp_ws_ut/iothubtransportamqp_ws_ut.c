@@ -145,6 +145,7 @@ IoTHubTransport_Destroy = IoTHubTransportAMQP_WS_Destroy
 IoTHubTransport_Subscribe = IoTHubTransportAMQP_WS_Subscribe
 IoTHubTransport_Unsubscribe = IoTHubTransportAMQP_WS_Unsubscribe
 IoTHubTransport_DoWork = IoTHubTransportAMQP_WS_DoWork
+IoTHubTransport_SetRetryLogic = IoTHubTransportAMQP_WS_SetRetryLogic
 IoTHubTransport_SetOption = IoTHubTransportAMQP_WS_SetOption]*/
 TEST_FUNCTION(AMQP_Create)
 {

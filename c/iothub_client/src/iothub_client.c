@@ -633,22 +633,22 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetConnectionStatusCallback(IOTHUB_CLIENT_LL_H
     
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_SetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitinSeconds)
+IOTHUB_CLIENT_RESULT IoTHubClient_SetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     (void)iotHubClientHandle;
     (void)retryPolicy;
-    (void)retryTimeoutLimitinSeconds;
+    (void)retryTimeoutLimitInSeconds;
 
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_GetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY * retryPolicy, size_t * retryTimeoutLimitinSeconds)
+IOTHUB_CLIENT_RESULT IoTHubClient_GetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY * retryPolicy, size_t * retryTimeoutLimitInSeconds)
 {
     IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
     (void)iotHubClientHandle;
     (void)retryPolicy;
-    (void)retryTimeoutLimitinSeconds;
+    (void)retryTimeoutLimitInSeconds;
 
     return result;
 }

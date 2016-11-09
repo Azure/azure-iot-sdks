@@ -1917,6 +1917,18 @@ void IoTHubTransport_AMQP_Common_Destroy(TRANSPORT_LL_HANDLE handle)
 	}
 }
 
+int IoTHubTransport_AMQP_Common_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)
+{
+    int result;
+    (void)handle;
+    (void)retryPolicy;
+    (void)retryTimeoutLimitInSeconds;
+
+    LogError("Not implemented for AMQP");
+    result = __LINE__;
+    return result;
+}
+
 STRING_HANDLE IoTHubTransport_AMQP_Common_GetHostname(TRANSPORT_LL_HANDLE handle)
 {
     STRING_HANDLE result;

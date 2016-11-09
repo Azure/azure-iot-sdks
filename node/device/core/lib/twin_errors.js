@@ -50,7 +50,7 @@ var translateError = function translateError(response, status) {
       break;
     default:
       /*Codes_SRS_NODE_DEVICE_TWIN_ERRORS_18_002: [If the error code is unknown, `translateError` should return a generic Javascript `Error` object.]*/
-      error = new Error();
+      error = new Error("server returned error " + status);
   }
   
   error.response = response;

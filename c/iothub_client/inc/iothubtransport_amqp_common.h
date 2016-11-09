@@ -25,6 +25,7 @@ MOCKABLE_FUNCTION(, int, IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod, IOT
 MOCKABLE_FUNCTION(, void, IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod, IOTHUB_DEVICE_HANDLE, handle);
 MOCKABLE_FUNCTION(, IOTHUB_PROCESS_ITEM_RESULT, IoTHubTransport_AMQP_Common_ProcessItem, TRANSPORT_LL_HANDLE, handle, IOTHUB_IDENTITY_TYPE, item_type, IOTHUB_IDENTITY_INFO*, iothub_item);
 MOCKABLE_FUNCTION(, void, IoTHubTransport_AMQP_Common_DoWork, TRANSPORT_LL_HANDLE, handle, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle);
+MOCKABLE_FUNCTION(, int, IoTHubTransport_AMQP_Common_SetRetryPolicy, TRANSPORT_LL_HANDLE, handle, IOTHUB_CLIENT_RETRY_POLICY, retryPolicy, size_t, retryTimeoutLimitInSeconds);
 MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_AMQP_Common_GetSendStatus, IOTHUB_DEVICE_HANDLE, handle, IOTHUB_CLIENT_STATUS*, iotHubClientStatus);
 MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubTransport_AMQP_Common_SetOption, TRANSPORT_LL_HANDLE, handle, const char*, option, const void*, value);
 MOCKABLE_FUNCTION(, IOTHUB_DEVICE_HANDLE, IoTHubTransport_AMQP_Common_Register, TRANSPORT_LL_HANDLE, handle, const IOTHUB_DEVICE_CONFIG*, device, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, PDLIST_ENTRY, waitingToSend);

@@ -26,6 +26,7 @@ extern const TRANSPORT_PROVIDER* MQTT_Protocol(void);
     - IoTHubTransportMqtt_WS_Subscribe,  
     - IoTHubTransportMqtt_WS_Unsubscribe,  
     - IoTHubTransportMqtt_WS_DoWork,  
+    - IoTHubTransportMqtt_WS_SetRetryPolicy,
     - IoTHubTransportMqtt_WS_GetSendStatus
 
 ## typedef XIO_HANDLE(*MQTT_GET_IO_TRANSPORT)(const char* fully_qualified_name);
@@ -133,6 +134,15 @@ void IoTHubTransportMqtt_WS_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_LL_
 ```
 
 **SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_007: [** IoTHubTransportMqtt_WS_DoWork shall call into the IoTHubTransport_MQTT_Common_DoWork function. **]**
+
+### IoTHubTransportMqtt_WS_SetRetryPolicy
+
+```c
+int IoTHubTransportMqtt_WS_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitinSeconds)
+```
+
+**SRS_IOTHUB_MQTT_TRANSPORT_25_012: [** IoTHubTransportMqtt_WS_SetRetryPolicy shall call into the IoTHubMqttAbstract_SetRetryPolicy function. **]**
+
 
 ### IoTHubTransportMqtt_WS_GetSendStatus
 

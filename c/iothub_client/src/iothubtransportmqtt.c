@@ -89,6 +89,12 @@ static void IoTHubTransportMqtt_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT
     IoTHubTransport_MQTT_Common_DoWork(handle, iotHubClientHandle);
 }
 
+static int IoTHubTransportMqtt_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)
+{
+    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_25_012: [** IoTHubTransportMqtt_SetRetryPolicy shall call into the IoTHubMqttAbstract_SetRetryPolicy function. ] */ 
+    return IoTHubTransport_MQTT_Common_SetRetryPolicy(handle, retryPolicy, retryTimeoutLimitInSeconds);
+}
+
 static IOTHUB_CLIENT_RESULT IoTHubTransportMqtt_GetSendStatus(IOTHUB_DEVICE_HANDLE handle, IOTHUB_CLIENT_STATUS *iotHubClientStatus)
 {
     /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_07_008: [ IoTHubTransportMqtt_GetSendStatus shall get the send status by calling into the IoTHubMqttAbstract_GetSendStatus function. ] */
@@ -135,6 +141,7 @@ static TRANSPORT_PROVIDER myfunc =
     IoTHubTransportMqtt_Subscribe,                  /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;*/
     IoTHubTransportMqtt_Unsubscribe,                /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;*/
     IoTHubTransportMqtt_DoWork,                     /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;*/
+    IoTHubTransportMqtt_SetRetryPolicy,             /*pfIoTHubTransport_DoWork IoTHubTransport_SetRetryPolicy;*/
     IoTHubTransportMqtt_GetSendStatus               /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
 };
 

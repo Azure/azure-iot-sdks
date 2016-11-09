@@ -81,8 +81,8 @@ describe('Twin', function() {
       assert(registry.getTwin.calledWith(fakeDeviceId));
     });
 
-    /*Tests_SRS_NODE_IOTHUB_TWIN_16_021: [The method shall merge the twin returned in the callback of the `Registry` method call with its parent object.]*/
-    it('merges the result of the getTwin call with the current instance', function(testCallback) {
+    /*Tests_SRS_NODE_IOTHUB_TWIN_16_021: [The method shall copy properties, tags, and etag in the twin returned in the callback of the `Registry` method call into its parent object.]*/
+    it('copies the result of the getTwin call into the current instance', function(testCallback) {
       var fakeDeviceId = 'deviceId';
       var registry = new Registry(fakeConfig, {});
       var twin = new Twin(fakeDeviceId, registry);
@@ -167,8 +167,8 @@ describe('Twin', function() {
     });
 
     
-    /*Tests_SRS_NODE_IOTHUB_TWIN_16_021: [The method shall merge the twin returned in the callback of the `Registry` method call with its parent object.]*/
-    it('merges the result of the updateTwin call with the current instance', function(testCallback) {
+    /*Tests_SRS_NODE_IOTHUB_TWIN_16_021: [The method shall copy properties, tags, and etag in the twin returned in the callback of the `Registry` method call into its parent object.]*/
+    it('copy the result of the updateTwin call into the current instance', function(testCallback) {
       var fakeDeviceId = 'deviceId';
       var registry = new Registry(fakeConfig, {});
       var twin = new Twin(fakeDeviceId, registry);

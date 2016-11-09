@@ -29,6 +29,7 @@ static const TRANSPORT_PROVIDER* AMQP_Protocol_over_WebSocketsTls(void);
     - IoTHubTransportAMQP_WS_SetOption,
     - IoTHubTransportAMQP_WS_Create,
     - IoTHubTransportAMQP_WS_Destroy,
+    - IoTHubTransportAMQP_WS_SetRetryLogic,
     - IoTHubTransportAMQP_WS_Register,
     - IoTHubTransportAMQP_WS_Unregister,
     - IoTHubTransportAMQP_WS_Subscribe,
@@ -201,4 +202,5 @@ IoTHubTransport_Destroy = IoTHubTransportAMQP_WS_Destroy
 IoTHubTransport_Subscribe = IoTHubTransportAMQP_WS_Subscribe
 IoTHubTransport_Unsubscribe = IoTHubTransportAMQP_WS_Unsubscribe
 IoTHubTransport_DoWork = IoTHubTransportAMQP_WS_DoWork
+IoTHubTransport_SetRetryLogic = IoTHubTransportAMQP_WS_SetRetryLogic
 IoTHubTransport_SetOption = IoTHubTransportAMQP_WS_SetOption**]**

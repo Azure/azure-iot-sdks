@@ -150,7 +150,15 @@ static uint64_t g_current_ms = 0;
 static size_t g_tokenizerIndex;
 
 #define TEST_TIME_T ((time_t)-1)
-
+#define TEST_DIFF_TIME TEST_DIFF_TIME_POSITIVE
+#define TEST_DIFF_TIME_POSITIVE 12
+#define TEST_DIFF_TIME_NEGATIVE -12
+#define TEST_DIFF_WITHIN_ERROR  5
+#define TEST_DIFF_GREATER_THAN_WAIT  5
+#define TEST_DIFF_LESS_THAN_WAIT  1
+#define TEST_DIFF_GREATER_THAN_ERROR 10
+#define TEST_BIG_TIME_T (TEST_RETRY_TIMEOUT_SECS - TEST_DIFF_WITHIN_ERROR)
+#define TEST_SMALL_TIME_T ((time_t)(TEST_DIFF_WITHIN_ERROR - 1))
 static APP_PAYLOAD TEST_APP_PAYLOAD;
 
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
@@ -159,8 +167,14 @@ IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
 IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
 
+TEST_DEFINE_ENUM_TYPE(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
+IMPLEMENT_UMOCK_C_ENUM_TYPE(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
+
 static TEST_MUTEX_HANDLE test_serialize_mutex;
 static TEST_MUTEX_HANDLE g_dllByDll;
+
+#define TEST_RETRY_POLICY IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER
+#define TEST_RETRY_TIMEOUT_SECS 60
 
 //Callbacks for Testing
 static ON_MQTT_MESSAGE_RECV_CALLBACK g_fnMqttMsgRecv;
@@ -423,6 +437,11 @@ static void my_BUFFER_delete(BUFFER_HANDLE handle)
     free(handle);
 }
 
+double my_get_difftime(time_t stopTime, time_t startTime)
+{
+    return (double)(stopTime - startTime);
+}
+
 DEFINE_ENUM_STRINGS(UMOCK_C_ERROR_CODE, UMOCK_C_ERROR_CODE_VALUES)
 
 static void on_umock_c_error(UMOCK_C_ERROR_CODE error_code)
@@ -474,6 +493,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_UMOCK_ALIAS_TYPE(BUFFER_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_CONNECTION_STATUS, unsigned int);
     REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_CONNECTION_STATUS_REASON, unsigned int);
+    REGISTER_UMOCK_ALIAS_TYPE(IOTHUB_CLIENT_RETRY_POLICY, int);
+    REGISTER_UMOCK_ALIAS_TYPE(time_t, uint64_t);
 
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(gballoc_malloc, NULL);
@@ -579,6 +600,8 @@ TEST_SUITE_INITIALIZE(suite_init)
     REGISTER_GLOBAL_MOCK_FAIL_RETURN(SASToken_Create, NULL);
 
     REGISTER_GLOBAL_MOCK_RETURN(get_time, TEST_TIME_T);
+
+    REGISTER_GLOBAL_MOCK_HOOK(get_difftime, my_get_difftime);
 
     REGISTER_GLOBAL_MOCK_HOOK(xio_create, my_xio_create);
 
@@ -703,6 +726,8 @@ static void setup_IoTHubTransport_MQTT_Common_Create_mocks(bool use_gateway)
 
     EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
     EXPECTED_CALL(DList_InitializeListHead(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG))
+        .IgnoreArgument(1).SetReturn(TEST_SMALL_TIME_T);
 }
 
 static void setup_message_recv_with_properties_mocks()
@@ -742,6 +767,50 @@ static void setup_message_recv_with_properties_mocks()
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(IoTHubClient_LL_MessageCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_IOTHUB_MSG_BYTEARRAY));
     STRICT_EXPECTED_CALL(IoTHubMessage_Destroy(TEST_IOTHUB_MSG_BYTEARRAY));
+}
+
+static void setup_start_retry_timer_mocks()
+{
+    STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG))
+        .IgnoreArgument(1).SetReturn(TEST_SMALL_TIME_T);
+}
+
+static void setup_stop_retry_timer_mocks()
+{
+    STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+}
+
+static void setup_connection_success_mocks()
+{
+    setup_stop_retry_timer_mocks();
+    STRICT_EXPECTED_CALL(IotHubClient_LL_ConnectionStatusCallBack(TEST_IOTHUB_CLIENT_LL_HANDLE, IOTHUB_CLIENT_CONNECTION_AUTHENTICATED, IOTHUB_CLIENT_CONNECTION_OK))
+        .IgnoreArgument(1);
+}
+
+static void setup_initialize_reconnection_mocks()
+{
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2);
+    STRICT_EXPECTED_CALL(STRING_new());
+    STRICT_EXPECTED_CALL(get_time(IGNORED_PTR_ARG))
+        .IgnoreArgument(1);
+    EXPECTED_CALL(SASToken_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG));
+    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_DEVICE_ID);
+    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_STRING_VALUE);
+    EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_SAS_TOKEN);
+    EXPECTED_CALL(mqtt_client_connect(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2);
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
+    STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2);
+
+
 }
 
 static void setup_initialize_connection_mocks()
@@ -787,6 +856,7 @@ static void setup_subscribe_devicetwin_dowork_mocks()
 
 static void setup_IoTHubTransport_MQTT_Common_DoWork_mocks()
 {
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
     setup_initialize_connection_mocks();
 
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG)).SetReturn(TEST_MQTT_MSG_TOPIC);
@@ -1303,7 +1373,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_validConfig_fail)
 
     umock_c_negative_tests_snapshot();
 
-    size_t calls_cannot_fail[] = { 5, 6 };
+    size_t calls_cannot_fail[] = { 5, 6, 7 };
 
     // act
     size_t count = umock_c_negative_tests_call_count();
@@ -1319,7 +1389,6 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Create_validConfig_fail)
 
         char tmp_msg[64];
         sprintf(tmp_msg, "IoTHubTransport_MQTT_Common_Create failure in test %zu/%zu", index, count);
-
         TRANSPORT_LL_HANDLE result = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
 
         // assert
@@ -1631,6 +1700,84 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_Subscribe_set_subscribe_after_publish_
     // assert
     ASSERT_ARE_EQUAL(int, result, 0);
     ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/* Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_041: [**If any handle is NULL then IoTHubTransport_MQTT_Common_SetRetryPolicy shall return resultant line.] */
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetRetryPolicy_parameter_NULL_fail)
+{
+    // arrange
+
+    // act
+    int res = IoTHubTransport_MQTT_Common_SetRetryPolicy(NULL, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS);
+
+    // assert
+    ASSERT_ARE_NOT_EQUAL(int, 0, res);
+}
+
+/*Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_044: [**If retry logic for specified parameters of retry policy and retryTimeoutLimitInSeconds cannot be created then IoTHubTransport_MQTT_Common_SetRetryPolicy shall return resultant line]*/
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetRetryPolicy_failure_malloc)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument_size().SetReturn(NULL);
+
+    // act
+    int res = IoTHubTransport_MQTT_Common_SetRetryPolicy(handle, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS);
+
+    // assert
+    ASSERT_ARE_NOT_EQUAL(int, 0, res);
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/*Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_042: [**If the retry logic is not already created then IoTHubTransport_MQTT_Common_SetRetryPolicy shall create retry logic by calling CreateRetryLogic with retry policy and retryTimeout as parameters]*/
+/*Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_045: [**If retry logic for specified parameters of retry policy and retryTimeoutLimitInSeconds is created successfully then IoTHubTransport_MQTT_Common_SetRetryPolicy shall return 0]*/
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetRetryPolicy_success)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument_size();
+
+    // act
+    int res = IoTHubTransport_MQTT_Common_SetRetryPolicy(handle, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, 0, res);
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+/*Tests_SRS_IOTHUB_TRANSPORT_MQTT_COMMON_25_043: [**If the retry logic is already created then IoTHubTransport_MQTT_Common_SetRetryPolicy shall destroy existing retry logic and create retry logic by calling CreateRetryLogic with retry policy and retryTimeout as parameters]*/
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_SetRetryPolicy_change_policy_success)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument_size();
+    STRICT_EXPECTED_CALL(gballoc_free(NULL)).IgnoreArgument_ptr();
+    STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG)).IgnoreArgument_size();
+
+    // act
+    int res = IoTHubTransport_MQTT_Common_SetRetryPolicy(handle, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS);
+    res = IoTHubTransport_MQTT_Common_SetRetryPolicy(handle, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS);
+
+    // assert
+    ASSERT_ARE_EQUAL(int, 0, res);
 
     //cleanup
     IoTHubTransport_MQTT_Common_Destroy(handle);
@@ -2131,6 +2278,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_mqtt_client_connect_fail)
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
     umock_c_reset_all_calls();
 
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -2177,6 +2325,387 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_mqtt_client_connect_fail)
     IoTHubTransport_MQTT_Common_Destroy(handle);
 }
 
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_First_connect_succeed)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    IoTHubTransport_MQTT_Common_SetRetryPolicy(handle, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS);
+    umock_c_reset_all_calls();
+
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    setup_start_retry_timer_mocks();
+    setup_initialize_connection_mocks();
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE))
+        .IgnoreArgument(1);
+
+    // act
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_First_connect_succeed_calls_StopRetry_pass)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    IoTHubTransport_MQTT_Common_SetRetryPolicy(handle, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS);
+    CONNECT_ACK connack = { true, CONNECTION_ACCEPTED };
+    umock_c_reset_all_calls();
+
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    setup_start_retry_timer_mocks();
+    setup_initialize_connection_mocks();
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE))
+        .IgnoreArgument(1);
+    setup_connection_success_mocks();
+
+    // act
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_First_Connect_Failed_Retry_Success)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    IoTHubTransport_MQTT_Common_SetRetryPolicy(handle, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS);
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    CONNECT_ACK connack;
+    connack.isSessionPresent = false;
+    connack.returnCode = CONN_REFUSED_SERVER_UNAVAIL;
+
+    umock_c_reset_all_calls();
+    STRICT_EXPECTED_CALL(mqtt_client_disconnect(TEST_MQTT_CLIENT_HANDLE))
+        .IgnoreArgument(1);
+    // setup retry-setup mocks
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .SetReturn(TEST_DIFF_GREATER_THAN_ERROR);
+    /* Evaluate retry Logic */
+    /*Check retry */
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .SetReturn(TEST_DIFF_GREATER_THAN_WAIT);
+    /* Attempt to connect again*/
+    setup_initialize_reconnection_mocks();
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE))
+        .IgnoreArgument(1);
+
+    // act
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_Connection_Break_First_Retry_Pass)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    IoTHubTransport_MQTT_Common_SetRetryPolicy(handle, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS);
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    CONNECT_ACK connack;
+    connack.isSessionPresent = true;
+    connack.returnCode = CONNECTION_ACCEPTED;
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+
+    umock_c_reset_all_calls();
+    /*First Do_Work*/
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    setup_start_retry_timer_mocks();
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE))
+        .IgnoreArgument(1);
+    /*Second Do_Work*/
+    // setup retry-setup mocks
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .SetReturn(TEST_DIFF_GREATER_THAN_ERROR);;
+    /* Evaluate retry Logic */
+    /*Check retry */
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .SetReturn(TEST_DIFF_GREATER_THAN_WAIT);
+    /* Attempt to connect again*/
+    setup_initialize_reconnection_mocks();
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE))
+        .IgnoreArgument(1);
+
+    // act
+    /* Break Connection */
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_DISCONNECT, NULL, g_callbackCtx);
+    /* Retry connecting */
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_Connection_Break_Second_Retry_Pass)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    IoTHubTransport_MQTT_Common_SetRetryPolicy(handle, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS);
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    CONNECT_ACK connack;
+    connack.isSessionPresent = true;
+    connack.returnCode = CONNECTION_ACCEPTED;
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    connack.isSessionPresent = false;
+    connack.returnCode = CONN_REFUSED_SERVER_UNAVAIL;
+    /* Break Connection */
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_DISCONNECT, NULL, g_callbackCtx);
+
+    umock_c_reset_all_calls();
+
+    /*First Do_Work*/
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    setup_start_retry_timer_mocks();
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE))
+        .IgnoreArgument(1);
+    /*Second Do_Work*/
+    // setup retry-setup mocks
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2);
+    /* Evaluate retry Logic */
+    /*Check retry */
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .SetReturn(TEST_DIFF_WITHIN_ERROR);
+    /* Attempt to connect again*/
+    setup_initialize_reconnection_mocks();
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE))
+        .IgnoreArgument(1);
+
+    /* Fail connection */
+    STRICT_EXPECTED_CALL(mqtt_client_disconnect(TEST_MQTT_CLIENT_HANDLE))
+        .IgnoreArgument(1);
+
+    /* Second Retry */
+    // setup retry-setup mocks
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .SetReturn(TEST_DIFF_GREATER_THAN_WAIT);
+
+    /* Attempt to connect again*/
+    setup_initialize_reconnection_mocks();
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE))
+        .IgnoreArgument(1);
+
+    // act
+    /* Retry connecting */
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    /* Connect fail */
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    /*Second Retry connecting */
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_Connection_Break_Second_Retry_Within_WaitTime_Fail)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    IoTHubTransport_MQTT_Common_SetRetryPolicy(handle, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS);
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    CONNECT_ACK connack;
+    connack.isSessionPresent = true;
+    connack.returnCode = CONNECTION_ACCEPTED;
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    connack.isSessionPresent = false;
+    connack.returnCode = CONN_REFUSED_SERVER_UNAVAIL;
+    /* Break Connection */
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_DISCONNECT, NULL, g_callbackCtx);
+
+    umock_c_reset_all_calls();
+
+    /*First Do_Work*/
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    setup_start_retry_timer_mocks();
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE))
+        .IgnoreArgument(1);
+    /*Second Do_Work*/
+    // setup retry-setup mocks
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2);
+    /* Evaluate retry Logic */
+    /*Check retry */
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .SetReturn(TEST_DIFF_WITHIN_ERROR);
+    /* Attempt to connect again*/
+    setup_initialize_reconnection_mocks();
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE))
+        .IgnoreArgument(1);
+
+    /* Fail connection */
+    STRICT_EXPECTED_CALL(mqtt_client_disconnect(TEST_MQTT_CLIENT_HANDLE))
+        .IgnoreArgument(1);
+
+    /* Second Retry */
+    // setup retry-setup mocks
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .SetReturn(TEST_DIFF_LESS_THAN_WAIT);
+    /* Attempt to connect again*/
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE))
+        .IgnoreArgument(1);
+
+    // act
+    /* Retry connecting */
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    /* Connect fail */
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    /*Second Retry connecting */
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
+TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_Retry_Policy_Connection_Break_Retry_Kicks_Retry_Delay_By_Policy)
+{
+    // arrange
+    IOTHUBTRANSPORT_CONFIG config = { 0 };
+    SetupIothubTransportConfig(&config, TEST_DEVICE_ID, TEST_DEVICE_KEY, TEST_IOTHUB_NAME, TEST_IOTHUB_SUFFIX, TEST_PROTOCOL_GATEWAY_HOSTNAME);
+
+    TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
+    IoTHubTransport_MQTT_Common_SetRetryPolicy(handle, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS);
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    CONNECT_ACK connack;
+    connack.isSessionPresent = true;
+    connack.returnCode = CONNECTION_ACCEPTED;
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    connack.isSessionPresent = false;
+    connack.returnCode = CONN_REFUSED_SERVER_UNAVAIL;
+    /* Break Connection */
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_DISCONNECT, NULL, g_callbackCtx);
+
+    umock_c_reset_all_calls();
+
+    /*First Do_Work - Set up retry*/
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    setup_start_retry_timer_mocks();
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE))
+        .IgnoreArgument(1);
+    /*Second Do_Work - Evaluate retry and attempt connect*/
+    // setup retry-setup mocks
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2);
+    /* Evaluate retry Logic */
+    /* Check retry */
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .SetReturn(TEST_DIFF_WITHIN_ERROR);
+    /*Attempt connection*/
+    setup_initialize_reconnection_mocks();
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE))
+        .IgnoreArgument(1);
+
+    /*Reconnect failed */
+    STRICT_EXPECTED_CALL(mqtt_client_disconnect(TEST_MQTT_CLIENT_HANDLE))
+        .IgnoreArgument(1);
+
+    /* Third Do Work - Evaluate Exponential Backoff Delay */
+    // setup retry-setup mocks
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .SetReturn(TEST_DIFF_GREATER_THAN_ERROR);
+    /* Evaluate retry Logic */
+    /* Check retry */
+    STRICT_EXPECTED_CALL(get_difftime(IGNORED_NUM_ARG, IGNORED_NUM_ARG))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .SetReturn(TEST_DIFF_WITHIN_ERROR);
+    /*Attempt connection*/
+    setup_initialize_reconnection_mocks();
+    STRICT_EXPECTED_CALL(mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE))
+        .IgnoreArgument(1);
+
+    // act
+    /* Retry connecting */
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+    g_fnMqttOperationCallback(TEST_MQTT_CLIENT_HANDLE, MQTT_CLIENT_ON_CONNACK, &connack, g_callbackCtx);
+    IoTHubTransport_MQTT_Common_DoWork(handle, TEST_IOTHUB_CLIENT_LL_HANDLE);
+
+    //assert
+    ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
+    //cleanup
+    IoTHubTransport_MQTT_Common_Destroy(handle);
+}
+
 /* Tests_SRS_IOTHUB_MQTT_TRANSPORT_07_027: [IoTHubTransport_MQTT_Common_DoWork shall inspect the “waitingToSend” DLIST passed in config structure.] */
 TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_no_messages_succeed)
 {
@@ -2187,6 +2716,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_no_messages_succeed)
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
     umock_c_reset_all_calls();
 
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
     setup_initialize_connection_mocks();
     STRICT_EXPECTED_CALL(mqtt_client_dowork(TEST_MQTT_CLIENT_HANDLE))
         .IgnoreArgument(1);
@@ -2254,6 +2784,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_SAS_token_from_user_succeed)
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
     umock_c_reset_all_calls();
 
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -2294,6 +2825,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_SAS_token_from_user_invalid_cal
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
     umock_c_reset_all_calls();
 
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -2327,6 +2859,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_x509_succeed)
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
     umock_c_reset_all_calls();
 
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG));
     STRICT_EXPECTED_CALL(tickcounter_get_current_ms(TEST_COUNTER_HANDLE, IGNORED_PTR_ARG))
         .IgnoreArgument(1)
         .IgnoreArgument(2);
@@ -2760,6 +3293,7 @@ TEST_FUNCTION(IoTHubTransport_MQTT_Common_DoWork_connectFailCount_exceed_succeed
     TRANSPORT_LL_HANDLE handle = IoTHubTransport_MQTT_Common_Create(&config, get_IO_transport);
     umock_c_reset_all_calls();
 
+    EXPECTED_CALL(get_time(IGNORED_PTR_ARG)).SetReturn(TEST_BIG_TIME_T);
     setup_initialize_connection_mocks();
 
     for (size_t index = 0; index < iterationCount-1; index++)

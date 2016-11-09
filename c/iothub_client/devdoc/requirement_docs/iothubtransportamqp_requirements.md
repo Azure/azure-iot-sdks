@@ -34,6 +34,7 @@ static const TRANSPORT_PROVIDER* AMQP_Protocol(void);
     - IoTHubTransportAMQP_Subscribe,
     - IoTHubTransportAMQP_Unsubscribe,
     - IoTHubTransportAMQP_DoWork,
+    - IoTHubTransportAMQP_SetRetryLogic,
     - IoTHubTransportAMQP_GetSendStatus
 
 
@@ -201,4 +202,5 @@ IoTHubTransport_Destroy = IoTHubTransportAMQP_Destroy
 IoTHubTransport_Subscribe = IoTHubTransportAMQP_Subscribe
 IoTHubTransport_Unsubscribe = IoTHubTransportAMQP_Unsubscribe
 IoTHubTransport_DoWork = IoTHubTransportAMQP_DoWork
+IoTHubTransport_SetRetryLogic = IoTHubTransportAMQP_SetRetryLogic
 IoTHubTransport_SetOption = IoTHubTransportAMQP_SetOption**]**

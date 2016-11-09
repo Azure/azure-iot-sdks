@@ -38,6 +38,21 @@
 
 DEFINE_ENUM(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUES);
 
+#define IOTHUB_CLIENT_RETRY_POLICY_VALUES     \
+    IOTHUB_CLIENT_RETRY_NONE,                   \
+    IOTHUB_CLIENT_RETRY_IMMEDIATE,                  \
+    IOTHUB_CLIENT_RETRY_INTERVAL,      \
+    IOTHUB_CLIENT_RETRY_LINEAR_BACKOFF,      \
+    IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF,                 \
+    IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER,                 \
+    IOTHUB_CLIENT_RETRY_RANDOM
+
+/** @brief Enumeration passed in by the IoT Hub when the event confirmation
+*		   callback is invoked to indicate status of the event processing in
+*		   the hub.
+*/
+DEFINE_ENUM(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
+
 struct IOTHUBTRANSPORT_CONFIG_TAG;
 typedef struct IOTHUBTRANSPORT_CONFIG_TAG IOTHUBTRANSPORT_CONFIG;
 
@@ -142,21 +157,6 @@ extern "C"
 #define DEVICE_TWIN_UPDATE_STATE_VALUES \
     DEVICE_TWIN_UPDATE_COMPLETE, \
     DEVICE_TWIN_UPDATE_PARTIAL
-#define IOTHUB_CLIENT_RETRY_POLICY_VALUES     \
-    IOTHUB_CLIENT_RETRY_NONE,                   \
-    IOTHUB_CLIENT_RETRY_IMMEDIATE,                  \
-    IOTHUB_CLIENT_RETRY_INTERVAL,      \
-    IOTHUB_CLIENT_RETRY_LINEAR_BACKOFF,      \
-    IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF,                 \
-    IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER,                 \
-    IOTHUB_CLIENT_RETRY_RANDOM
-
-    /** @brief Enumeration passed in by the IoT Hub when the event confirmation
-    *		   callback is invoked to indicate status of the event processing in
-    *		   the hub.
-    */
-    DEFINE_ENUM(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
-
 
     DEFINE_ENUM(DEVICE_TWIN_UPDATE_STATE, DEVICE_TWIN_UPDATE_STATE_VALUES);
 
@@ -351,7 +351,7 @@ extern "C"
     *
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetConnectionStatusCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void* userContextCallback);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetConnectionStatusCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK, connectionStatusCallback, void*, userContextCallback);
 
     /**
     * @brief	Sets up the connection status callback to be invoked representing the status of
@@ -360,7 +360,7 @@ extern "C"
     * @param	iotHubClientHandle		   	        The handle created by a call to the create function.
     * @param	retryPolicy                  	   	The policy to use to reconnect to IoT Hub when a
     *                                               connection drops.
-    * @param	retryTimeoutLimitinSeconds			Maximum amount of time(seconds) to attempt reconnection when a
+    * @param	retryTimeoutLimitInSeconds			Maximum amount of time(seconds) to attempt reconnection when a
     *                                               connection drops to IOT Hub.
     *
     *			@b NOTE: The application behavior is undefined if the user calls
@@ -368,7 +368,7 @@ extern "C"
     *
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitinSeconds);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetRetryPolicy, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY, retryPolicy, size_t, retryTimeoutLimitInSeconds);
 
 
     /**
@@ -377,7 +377,7 @@ extern "C"
     *
     * @param	iotHubClientHandle		   	        The handle created by a call to the create function.
     * @param	retryPolicy                  	   	Out parameter containing the policy to use to reconnect to IoT Hub.
-    * @param	retryTimeoutLimitinSeconds			Out parameter containing maximum amount of time in seconds to attempt reconnection
+    * @param	retryTimeoutLimitInSeconds			Out parameter containing maximum amount of time in seconds to attempt reconnection
                                                     to IOT Hub.
     *
     *			@b NOTE: The application behavior is undefined if the user calls
@@ -385,7 +385,7 @@ extern "C"
     *
     * @return	IOTHUB_CLIENT_OK upon success or an error code upon failure.
     */
-    extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY* retryPolicy, size_t* retryTimeoutLimitinSeconds);
+     MOCKABLE_FUNCTION(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_GetRetryPolicy, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY*, retryPolicy, size_t*, retryTimeoutLimitInSeconds);
 
     /**
     * @brief	This function returns in the out parameter @p lastMessageReceiveTime

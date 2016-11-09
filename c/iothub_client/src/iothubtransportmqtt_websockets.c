@@ -125,6 +125,12 @@ static STRING_HANDLE IoTHubTransportMqtt_WS_GetHostname(TRANSPORT_LL_HANDLE hand
     return IoTHubTransport_MQTT_Common_GetHostname(handle);
 }
 
+static int IoTHubTransportMqtt_WS_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitinSeconds)
+{
+    /* Codes_SRS_IOTHUB_MQTT_TRANSPORT_25_012: [** IoTHubTransportMqtt_WS_SetRetryPolicy shall call into the IoTHubMqttAbstract_SetRetryPolicy function.]*/
+    return IoTHubTransport_MQTT_Common_SetRetryPolicy(handle, retryPolicy, retryTimeoutLimitinSeconds);
+}
+
 /* Codes_SRS_IOTHUB_MQTT_WEBSOCKET_TRANSPORT_07_011: [ This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for its fields:
 IoTHubTransport_Subscribe_DeviceMethod = IoTHubTransport_WS_Subscribe_DeviceMethod
 IoTHubTransport_Unsubscribe_DeviceMethod IoTHubTransport_WS_Unsubscribe_DeviceMethod
@@ -152,6 +158,7 @@ static TRANSPORT_PROVIDER thisTransportProvider_WebSocketsOverTls = {
     IoTHubTransportMqtt_WS_Subscribe,
     IoTHubTransportMqtt_WS_Unsubscribe,
     IoTHubTransportMqtt_WS_DoWork,
+    IoTHubTransportMqtt_WS_SetRetryPolicy,
     IoTHubTransportMqtt_WS_GetSendStatus
 };
 

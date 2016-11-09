@@ -251,11 +251,14 @@ public:
 
         MOCK_STATIC_METHOD_2(, void, FAKE_IoTHubTransport_DoWork, TRANSPORT_LL_HANDLE, handle, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle)
         doWorkCallCount++;
-    MOCK_VOID_METHOD_END()
+        MOCK_VOID_METHOD_END()
+
+        MOCK_STATIC_METHOD_3(, int, FAKE_IoTHubTransport_SetRetryPolicy, TRANSPORT_LL_HANDLE, handle, IOTHUB_CLIENT_RETRY_POLICY, retryPolicy, size_t, retryTimeoutLimitinSeconds)
+        MOCK_METHOD_END(int, 0)
 
         MOCK_STATIC_METHOD_2(, IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_GetSendStatus, TRANSPORT_LL_HANDLE, handle, IOTHUB_CLIENT_STATUS*, iotHubClientStatus)
         *iotHubClientStatus = currentIotHubClientStatus;
-    MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK)
+        MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK)
 
         MOCK_STATIC_METHOD_2(, void, eventConfirmationCallback, IOTHUB_CLIENT_CONFIRMATION_RESULT, result2, void*, userContextCallback)
         MOCK_VOID_METHOD_END()
@@ -395,6 +398,7 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIotHubTransportMocks, , void, FAKE_IoTHubTransport
 DECLARE_GLOBAL_MOCK_METHOD_1(CIotHubTransportMocks, , int, FAKE_IoTHubTransport_Subscribe, TRANSPORT_LL_HANDLE, handle);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIotHubTransportMocks, , void, FAKE_IoTHubTransport_Unsubscribe, TRANSPORT_LL_HANDLE, handle);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIotHubTransportMocks, , void, FAKE_IoTHubTransport_DoWork, TRANSPORT_LL_HANDLE, handle, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle);
+DECLARE_GLOBAL_MOCK_METHOD_3(CIotHubTransportMocks, , int, FAKE_IoTHubTransport_SetRetryPolicy, TRANSPORT_LL_HANDLE, handle, IOTHUB_CLIENT_RETRY_POLICY, retryPolicy, size_t, retryTimeoutLimitInSeconds);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIotHubTransportMocks, , IOTHUB_CLIENT_RESULT, FAKE_IoTHubTransport_GetSendStatus, TRANSPORT_LL_HANDLE, handle, IOTHUB_CLIENT_STATUS*, iotHubClientStatus);
 
 DECLARE_GLOBAL_MOCK_METHOD_2(CIotHubTransportMocks, , void, eventConfirmationCallback, IOTHUB_CLIENT_CONFIRMATION_RESULT, result2, void*, userContextCallback);
@@ -453,6 +457,7 @@ static TRANSPORT_PROVIDER FAKE_transport_provider =
     FAKE_IoTHubTransport_Subscribe,                 /*pfIoTHubTransport_Subscribe IoTHubTransport_Subscribe;*/
     FAKE_IoTHubTransport_Unsubscribe,               /*pfIoTHubTransport_Unsubscribe IoTHubTransport_Unsubscribe;*/
     FAKE_IoTHubTransport_DoWork,                    /*pfIoTHubTransport_DoWork IoTHubTransport_DoWork;*/
+    FAKE_IoTHubTransport_SetRetryPolicy,            /*pfIoTHubTransport_DoWork IoTHubTransport_SetRetryPolicy;      */
     FAKE_IoTHubTransport_GetSendStatus              /*pfIoTHubTransport_GetSendStatus IoTHubTransport_GetSendStatus;*/
 };
 
