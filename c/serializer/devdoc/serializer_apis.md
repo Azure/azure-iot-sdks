@@ -141,7 +141,9 @@ void OnMaxSpeed(void* v)
 ```
 
 ## WITH_ACTION(actionName, arg1Type, arg1Name, ...)
-The `WITH_ACTION` macro allows declaring a model action.
+
+The `WITH_ACTION` macro allows declaring a model action. Once the action is declared, it will have to be complemented by 
+a C function that defines the action. The C function prototype is the following:
 
 Arguments:
 -	`actionName` – specifies the action name.
@@ -153,9 +155,47 @@ DECLARE_MODEL(FunkyTV,
     WITH_ACTION(channelChange, ascii_char_ptr, Property1),
     ...
 );
+
+The following is the C function definition:
+
+```c
+EXECUTE_COMMAND_RESULT actionName(modelName* model, arg1Type arg1Name, arg2Type arg2Name) /*more arguments can follow if more are declared in `WITH_ACTION` */
+{
+    
+}
 ```
 
-### GET_MODEL_HANDLE(schemaNamespace, modelName)
+
+## WITH_METHOD(methodName, arg1Type, arg1, arg2Type, arg2, ...)
+
+`WITH_METHOD` introduces a Device Method in the model. `WITH_METHOD` is similar to `WITH_ACTION`: it will result in a user-supplied C function being called.
+The main difference is in return value (Methods return a number and a JSON value, Actions return values of an enum).
+
+Arguments:
+-	`methodName` – specifies the method name.
+-	`argXtype`, `argXName` – defines the type and name for the Xth argument of the method. The type can be any of the primitive types or a struct type.
+
+```c
+DECLARE_MODEL(FunkyTV,
+    ...
+    WITH_METHOD(channelChange, ascii_char_ptr, Property1),
+    ...
+);
+```
+
+The following is the C function definition of a method:
+
+```c
+METHOD_RETURN_HANDLE methodName(modelName* model, arg1Type arg1, arg2Type arg2)
+```
+
+`METHOD_RETURN_HANDLE` is an abstract type around the following data:
+-   int result; /\*the result of the method call\*/
+-   char* jsonValue; /\*the JSON value to be returned, can be `NULL`. \*/
+
+
+
+## GET_MODEL_HANDLE(schemaNamespace, modelName)
 
 The GET_MODEL_HANDLE macro returns the model handle for the model with type `modelName` inside the namespace called `schemaNamespace`.
 
@@ -410,7 +450,7 @@ __Arguments:__
 In order to better support Device Twin features by providing a stronger cohesion, serializer has been enhanced 
 with a layer specially crafted for Device Twin. The new functionality is accesibile by #include "serializer_devicetwin.h".
 
-`DECLARE_MODEL` becomes `DECLARE_DEVICETWIN_MODEL`. All the semantics are preserved, in addition, model instances
+`DECLARE_MODEL` becomes `DECLARE_DEVICETWIN_MODEL`. All the semantics are preserved. Model instances
 are created by a C function, and not a by `CREATE_MODEL_INSTANCE` macro.
 
 __Example:__
