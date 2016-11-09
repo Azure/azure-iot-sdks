@@ -170,7 +170,7 @@ You will now be sending temperature and humidity to your IoT Hub every 3000ms.
 -   Let's now use the following use case: You are troubleshooting a temperature anomaly and want to receive the telemetry on a higher rate to detect if you are losing some data points, 
     for example every 500 ms. In order to do this, you will have to issue a clone command using Device Twins Desired Properties to request a change of the frequency rate of sending telemetry. 
 
--   Set a new value for Desired Property "sendFrequency" to be 500 ms in Device Twins window, then click "Send (use Json format)" button, like following
+-   Set a new value for Desired Property "sendFrequency" to be 500 ms in Device Twins window, then click "Send (use Json format)" button, like following. Please make sure you have proper spelling on "sendFrequency", otherwise a new property will be created.
 
     ```
        {  
