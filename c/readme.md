@@ -96,3 +96,44 @@ Contains tools that are currently used in testing the client libraries: Mocking 
 ### /tools
 
 Miscellaneous tools: compilembed, mbed_build, traceabilitytool (checks spec requirements vs code implementation).
+
+## Installation and Use
+- Clone azure-iot-sdks by:
+```
+git clone --recursive https://github.com/Azure/azure-iot-sdks.git
+```
+- Create a folder build under azure-iot-sdks
+- Switch to the build folder and run
+   cmake ..
+
+Optionally, you may choose to install azure-iot-sdks on your machine:
+
+1. Switch to the *cmake* folder and run
+    ```
+    cmake -Duse_installed_dependencies=ON ../
+    ```
+    ```
+    cmake --build . --target install
+    ```
+    
+    or install using the follow commands for each platform:
+
+    On Linux:
+    ```
+    sudo make install
+    ```
+
+    On Windows:
+    ```
+    msbuild /m INSTALL.vcxproj
+    ```
+
+2. Use it in your project (if installed)
+    ```
+    find_package(azure_iot_sdks REQUIRED CONFIG)
+    target_link_library(yourlib iothub_client iothub_service_client serializer)
+    ```
+
+_This requires that azure-c-shared-utility, azure-uamqp-c, and azure-umqtt-c are installed (through CMake) on your machine._
+
+_If running tests, this requires that umock-c, azure-ctest, and azure-c-testrunnerswitcher are installed (through CMake) on your machine._

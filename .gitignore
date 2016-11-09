@@ -230,6 +230,7 @@ OnBoardFlash.dat
 OnBoardFlash.dat.smd
 DOTNETMF_FS_EMULATION*/
 /c/cmake
+/c/build
 javawrapper/device/iothub_client_javawrapper/target
 javawrapper/device/samples/direct_call_of_wrapped_functions/target
 javawrapper/device/samples/send-receive-sample/target
