@@ -80,7 +80,7 @@ static const char* DEVICE_JSON_DEFAULT_VALUE_TIME = "0001-01-01T00:00:00";
 static const char* DEVICE_JSON_DEFAULT_VALUE_TRUE = "true";
 static const char* DEVICE_JSON_DEFAULT_VALUE_FALSE = "false";
 
-static const char* URL_API_VERSION = "api-version=2016-02-03";
+static const char* URL_API_VERSION = "api-version=2016-11-14";
 
 static const char* RELATIVE_PATH_FMT_CRUD = "/devices/%s?%s";
 static const char* RELATIVE_PATH_FMT_LIST = "/devices/?top=%s&%s";
@@ -1082,7 +1082,7 @@ static IOTHUB_REGISTRYMANAGER_RESULT sendHttpRequestCRUD(IOTHUB_REGISTRYMANAGER_
         }
         else
         {
-            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_026: [ IoTHubRegistryManager_GetDevice shall create HTTP GET request URL using the given deviceId using the following format: url/devices/[deviceId]?api-version=2016-02-03  ] */
+            /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_026: [ IoTHubRegistryManager_GetDevice shall create HTTP GET request URL using the given deviceId using the following format: url/devices/[deviceId]?api-version=2016-11-14  ] */
             /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_053: [ IoTHubRegistryManager_DeleteDevice shall create HTTP DELETE request URL using the given deviceId using the following format : url/devices/[deviceId]?api-version ] */
             if (createRelativePath(iotHubRequestMode, deviceName, numberOfDevices, relativePath) != IOTHUB_REGISTRYMANAGER_OK)
             {
@@ -1380,7 +1380,7 @@ IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDevice(IOTHUB_REGISTRYMAN
             LogError("BUFFER_new failed for responseBuffer");
             result = IOTHUB_REGISTRYMANAGER_ERROR;
         }
-        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_026: [ IoTHubRegistryManager_GetDevice shall create HTTP GET request URL using the given deviceId using the following format: url/devices/[deviceId]?api-version=2016-02-03  ] */
+        /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_026: [ IoTHubRegistryManager_GetDevice shall create HTTP GET request URL using the given deviceId using the following format: url/devices/[deviceId]?api-version=2016-11-14  ] */
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_027: [ IoTHubRegistryManager_GetDevice shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 ] */
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_028: [ IoTHubRegistryManager_GetDevice shall create an HTTPAPIEX_SAS_HANDLE handle by calling HTTPAPIEX_SAS_Create ] */
         /*Codes_SRS_IOTHUBREGISTRYMANAGER_12_029: [ IoTHubRegistryManager_GetDevice shall create an HTTPAPIEX_HANDLE handle by calling HTTPAPIEX_Create ] */

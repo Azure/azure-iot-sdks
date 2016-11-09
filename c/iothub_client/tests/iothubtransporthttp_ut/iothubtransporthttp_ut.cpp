@@ -1960,7 +1960,7 @@ TEST_FUNCTION(IotHubTransportHttp_MESSAGE_ENDPOINT_HTTP_ETAG_constant_is_expecte
 //Tests_SRS_TRANSPORTMULTITHTTP_17_019: [ IoTHubTransportHttp_Register shall create an immutable string (further called "message HTTP relative path") from the following pieces: "/devices/" + URL_ENCODED(config->deviceConfig->deviceId) + "/messages/devicebound" + APIVERSION. ]
 TEST_FUNCTION(IotHubTransportHttp_API_VERSION_constant_is_expected_value)
 {
-    ASSERT_ARE_EQUAL(char_ptr, "?api-version=2016-02-03", API_VERSION);
+    ASSERT_ARE_EQUAL(char_ptr, "?api-version=2016-11-14", API_VERSION);
 }
 
 

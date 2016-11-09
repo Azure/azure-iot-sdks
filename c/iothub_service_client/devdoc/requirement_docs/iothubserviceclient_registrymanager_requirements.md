@@ -192,7 +192,7 @@ extern IOTHUB_REGISTRYMANAGER_RESULT IoTHubRegistryManager_GetDevice(IOTHUB_REGI
 ```
 **SRS_IOTHUBREGISTRYMANAGER_12_025: [** IoTHubRegistryManager_GetDevice shall verify the registryManagerHandle and deviceId input parameters and if any of them are NULL then return IOTHUB_REGISTRYMANAGER_INVALID_ARG **]**
 
-**SRS_IOTHUBREGISTRYMANAGER_12_026: [** IoTHubRegistryManager_GetDevice shall create HTTP GET request URL using the given deviceId using the following format: url/devices/[deviceId]?api-version=2016-02-03  **]**
+**SRS_IOTHUBREGISTRYMANAGER_12_026: [** IoTHubRegistryManager_GetDevice shall create HTTP GET request URL using the given deviceId using the following format: url/devices/[deviceId]?api-version=2016-11-14  **]**
 
 **SRS_IOTHUBREGISTRYMANAGER_12_027: [** IoTHubRegistryManager_GetDevice shall add the following headers to the created HTTP GET request: authorization=sasToken,Request-Id=1001,Accept=application/json,Content-Type=application/json,charset=utf-8 **]**
 

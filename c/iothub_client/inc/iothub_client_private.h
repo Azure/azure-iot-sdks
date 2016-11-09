@@ -30,7 +30,7 @@ extern "C"
 #define CLIENT_DEVICE_BACKSLASH "/"
 #define CBS_REPLY_TO "cbs"
 #define CBS_ENDPOINT "/$" CBS_REPLY_TO
-#define API_VERSION "?api-version=2016-02-03"
+#define API_VERSION "?api-version=2016-11-14"
 #define REJECT_QUERY_PARAMETER "&reject"
 
 MOCKABLE_FUNCTION(, void, IoTHubClient_LL_SendComplete, IOTHUB_CLIENT_LL_HANDLE, handle, PDLIST_ENTRY, completed, IOTHUB_CLIENT_CONFIRMATION_RESULT, result);
