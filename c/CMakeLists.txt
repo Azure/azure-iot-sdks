@@ -46,6 +46,7 @@ option(build_python "builds the Python native iothub_client module" OFF)
 option(build_javawrapper "builds the native iothub_client library for java C wrapper" OFF)
 option(dont_use_uploadtoblob "set dont_use_uploadtoblob to ON if the functionality of upload to blob is to be excluded, OFF otherwise. It requires HTTP" OFF)
 option(no_logging "disable logging" OFF)
+option(use_installed_dependencies "set use_installed_dependencies to ON to use installed packages instead of building dependencies from submodules" OFF)
 option(use_firmware_update "build the Raspberry PI firmware_update sample" OFF)
 
 #setting nuget_e2e_tests will only generate e2e tests to run with nuget packages.  Install-packages from Package Manager Console in VS before building the projects
@@ -77,11 +78,9 @@ endif()
 
 if (LINUX)
     if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-        if((NOT "${build_python}" STREQUAL "OFF") OR ("${build_javawrapper}" STREQUAL "ON"))
-            # now all static libraries use PIC flag for Python shared lib
-            set(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
-            set(CMAKE_CXX_FLAGS "-fPIC ${CMAKE_CXX_FLAGS}")
-        endif()
+        # now all static libraries use PIC flag for Python shared lib
+        set(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
+        set(CMAKE_CXX_FLAGS "-fPIC ${CMAKE_CXX_FLAGS}")
     endif()
 endif()
 
@@ -94,14 +93,13 @@ if(NOT "${compileOption_CXX}" STREQUAL "OFF")
     set(CMAKE_CXX_FLAGS "${compileOption_CXX} ${CMAKE_CXX_FLAGS}")
 endif()
 
-add_subdirectory(c-utility)
-add_subdirectory(uamqp)
-add_subdirectory(umqtt)
+include("dependencies.cmake")
+
+if(NOT ${skip_unittests})
+    include("dependencies-test.cmake")
+endif()
 
 enable_testing()
-
-
-include_directories(${SHARED_UTIL_INC_FOLDER}/azure_c_shared_utility)
 
 #this project uses several other projects that are build not by these CMakeFiles
 #this project also targets several OSes
@@ -136,66 +134,7 @@ if (NOT DEFINED ARCHITECTURE OR ARCHITECTURE STREQUAL "")
 endif()
 message(STATUS "iothub architecture: ${ARCHITECTURE}")
 
-function(linkUAMQP whatExecutableIsBuilding)
-    include_directories(${UAMQP_INC_FOLDER})
-
-    if(WIN32)
-        #windows needs this define
-        add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-        add_definitions(-DGB_MEASURE_MEMORY_FOR_THIS -DGB_DEBUG_ALLOC)
-
-        target_link_libraries(${whatExecutableIsBuilding} uamqp aziotsharedutil ws2_32 secur32)
-
-        if(${use_openssl} OR ${use_wsio})
-            target_link_libraries(${whatExecutableIsBuilding} $ENV{OpenSSLDir}/lib/ssleay32.lib $ENV{OpenSSLDir}/lib/libeay32.lib)
-
-            file(COPY $ENV{OpenSSLDir}/bin/libeay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-            file(COPY $ENV{OpenSSLDir}/bin/ssleay32.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
-        endif()
-    else()
-        target_link_libraries(${whatExecutableIsBuilding} uamqp aziotsharedutil ssl crypto)
-    endif()
-
-    if(${use_wsio})
-        target_link_libraries(${whatExecutableIsBuilding} websockets)
-    endif()
-endfunction(linkUAMQP)
-
-function(includeMqtt)
-    include_directories(${MQTT_INC_FOLDER})
-endfunction(includeMqtt)
-
-function(linkMqttLibrary whatExecutableIsBuilding)
-    includeMqtt()
-    target_link_libraries(${whatExecutableIsBuilding} umqtt)
-endfunction(linkMqttLibrary)
-
-function(includeHttp)
-endfunction(includeHttp)
-
-function(linkHttp whatExecutableIsBuilding)
-    includeHttp()
-    if(WIN32)
-        if(WINCE)
-              target_link_libraries(${whatExecutableIsBuilding} crypt32.lib)
-          target_link_libraries(${whatExecutableIsBuilding} ws2.lib)
-        else()
-            target_link_libraries(${whatExecutableIsBuilding} winhttp.lib)
-        endif()
-    else()
-        target_link_libraries(${whatExecutableIsBuilding} curl)
-    endif()
-endfunction(linkHttp)
-
-function(linkWebSockets whatExecutableIsBuilding)
-    if(${use_wsio})
-        target_link_libraries(${whatExecutableIsBuilding} websockets)
-    endif()
-endfunction(linkWebSockets)
-
-function(linkSharedUtil whatIsBuilding)
-    target_link_libraries(${whatIsBuilding} aziotsharedutil)
-endfunction(linkSharedUtil)
+include("configs/azure_iot_sdksFunctions.cmake")
 
 macro(compileAsC99)
   if (CMAKE_VERSION VERSION_LESS "3.1")
@@ -246,4 +185,38 @@ endif()
 
 if("${build_javawrapper}" STREQUAL "ON")
      add_subdirectory(../javawrapper/device/iothub_client_javawrapper javawrapper)
+endif()
+
+
+if(${use_installed_dependencies})
+    #Set CMAKE_INSTALL_LIBDIR if not defined
+    include(GNUInstallDirs)
+
+    #Install azure_iot_sdks
+    set(package_location "cmake")
+
+    include(CMakePackageConfigHelpers)
+
+    configure_file("configs/${PROJECT_NAME}Config.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake"
+        COPYONLY
+    )
+
+    install(EXPORT azure_iot_sdksTargets
+        FILE
+            "${PROJECT_NAME}Targets.cmake"
+        DESTINATION
+            ${package_location}
+    )
+
+    install(
+        FILES
+            "configs/${PROJECT_NAME}Config.cmake"
+            "configs/${PROJECT_NAME}Functions.cmake"
+        DESTINATION
+            ${package_location}
+    )
+
+else()
+    message(WARNING "This package may only be installed when 'use_installed_dependencies' is ON")
 endif()

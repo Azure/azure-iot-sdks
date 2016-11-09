@@ -59,6 +59,7 @@ set(SERIALIZER_INC_FOLDER ${CMAKE_CURRENT_LIST_DIR}/inc CACHE INTERNAL "this is 
 
 include_directories(../parson)
 include_directories(${SERIALIZER_INC_FOLDER} ${SHARED_UTIL_INC_FOLDER})
+include_directories(${AZURE_C_SHARED_UTILITY_INCLUDES})
 
 IF(WIN32)
 	#windows needs this define
@@ -80,12 +81,28 @@ else()
 endif()
 
 if(NOT IN_OPENWRT)
-# Disable tests and samples for OpenWRT
-add_subdirectory(tests)
+	# Disable tests and samples for OpenWRT
+	if(NOT ${skip_unittests})
+		add_subdirectory(tests)
+	endif()
 endif()
 
-if(WIN32)
+if(${use_installed_dependencies})
+    include(GNUInstallDirs)
+
+	#Set CMAKE_INSTALL_LIBDIR if not defined
+	if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
+        set(CMAKE_INSTALL_LIBDIR "lib")
+    endif()
+
+    install(TARGETS serializer EXPORT azure_iot_sdksTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot 
+    )
+    install(FILES ${serializer_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
+
 else()
-    install (TARGETS serializer DESTINATION lib)
-    install (FILES ${serializer_h_files} DESTINATION include/azureiot)
-endif (WIN32)
+    message(WARNING "This package may only be installed when 'use_installed_dependencies' is ON")
+endif()
