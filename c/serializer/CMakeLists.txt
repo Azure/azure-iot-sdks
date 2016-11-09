@@ -86,6 +86,6 @@ endif()
 
 if(WIN32)
 else()
-    install (TARGETS serializer DESTINATION lib)
-    install (FILES ${serializer_h_files} DESTINATION include/azureiot)
+    install (TARGETS serializer DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    install (FILES ${serializer_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
 endif (WIN32)

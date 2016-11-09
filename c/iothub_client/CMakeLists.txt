@@ -293,8 +293,8 @@ if(WIN32)
 else()
     install (TARGETS 
         ${iothub_client_libs} 
-        DESTINATION lib)
+        DESTINATION ${CMAKE_INSTALL_LIBDIR})
     install (FILES 
         ${iothub_client_h_install_files} 
-        DESTINATION include/azureiot)
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
 endif (WIN32)
