@@ -1,0 +1,7 @@
+azure-iot-sdk-c (0.1.0.0-3) xenial; urgency=low
+
+  * Initial release
+
+  * Add support for MQTT over websockets and bug fixes.
+
+ -- AzureIoT User <aziotsdklinux@outlook.com>  Tue, 27 Sep 2016 17:00:00 +0000
