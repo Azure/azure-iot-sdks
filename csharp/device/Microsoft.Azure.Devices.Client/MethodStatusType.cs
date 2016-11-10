@@ -4,7 +4,7 @@
 namespace Microsoft.Azure.Devices.Client
 {
     /// <summary>
-    /// Specifies the different acknowledgement levels for DeviceMethod calls.
+    /// Specifies the different acknowledgement levels for Method calls.
     /// </summary>
     public enum MethodStatusType
     {

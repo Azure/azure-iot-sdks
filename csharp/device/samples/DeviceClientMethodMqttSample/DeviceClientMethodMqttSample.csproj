@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3E20AF65-DC5F-4EC9-856B-81C71B870A3A}</ProjectGuid>
+    <ProjectGuid>{600C7096-00A3-4092-BC4E-61234FC4C11E}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DeviceClientMethodMqttSample</RootNamespace>
