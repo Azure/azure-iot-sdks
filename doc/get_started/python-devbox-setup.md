@@ -38,7 +38,8 @@ The Python iothub_client supports python versions 2.7.x, 3.4.x or 3.5.x. Know th
 5. After a successful build, the `iothub_client.so` Python extension module is copied to the **python/device/samples** folder. Please follow instructions in [Sample applications](#samplecode) to run the Python samples.
 
 ###Known build issues: 
-1.On building the Python library on Linux devices that have less than **1 GB RAM**, you may see build getting stuck at **98%** while building `iothub_client_python.cpp`.  Example below
+
+1. On building the Python library on Linux devices that have less than **1 GB RAM**, you may see build getting stuck at **98%** while building `iothub_client_python.cpp` as shown below
 
 `[ 98%] Building CXX object python/src/CMakeFiles/iothub_client_python.dir/iothub_client_python.cpp.o`
 
