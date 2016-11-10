@@ -615,117 +615,141 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
                 }
                 else
                 {
-                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_010: [ `iothubtransportamqp_methods_subscribe` shall create a receiver link by calling `link_create` with the following arguments: ]*/
-                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_011: [ - `session_handle` shall be the session_handle argument passed to iothubtransportamqp_methods_subscribe ]*/
-                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_012: [ - `name` shall be `methods_requests_link` ]*/
-                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_013: [ - `role` shall be role_receiver. ]*/
-                    iothubtransport_amqp_methods_handle->receiver_link = link_create(session_handle, "methods_requests_link", role_receiver, receiver_source, receiver_target);
-                    if (iothubtransport_amqp_methods_handle->receiver_link == NULL)
-                    {
-                        /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_020: [ If creating the receiver link fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
-                        LogError("Cannot create receiver link");
-                        result = __LINE__;
-                    }
-                    else
-                    {
-                        /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_025: [ - `source` shall be the a source value created by calling `messaging_create_source`. ]*/
-                        /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_026: [ The address string used to create the target shall be `responses`. ]*/
-                        AMQP_VALUE sender_source = messaging_create_source("responses");
-                        if (sender_source == NULL)
-                        {
-                            /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_031: [ If creating the target or source values fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
-                            LogError("Cannot create sender source");
-                            result = __LINE__;
-                        }
-                        else
-                        {
-                            /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_027: [ - `target` shall be the a target value created by calling `messaging_create_target`. ]*/
-                            AMQP_VALUE sender_target = messaging_create_target(STRING_c_str(peer_endpoint_string));
-                            if (sender_target == NULL)
-                            {
-                                /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_031: [ If creating the target or source values fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
-                                LogError("Cannot create sender target");
-                                result = __LINE__;
-                            }
-                            else
-                            {
-                                /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_021: [ `iothubtransportamqp_methods_subscribe` shall create a sender link by calling `link_create` with the following arguments: ]*/
-                                /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_022: [ - `session_handle` shall be the session_handle argument passed to iothubtransportamqp_methods_subscribe ]*/
-                                /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_023: [ - `name` shall be `methods_responses_link` ]*/
-                                /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_024: [ - `role` shall be role_sender. ]*/
-                                iothubtransport_amqp_methods_handle->sender_link = link_create(session_handle, "methods_responses_link", role_sender, sender_source, sender_target);
-                                if (iothubtransport_amqp_methods_handle->sender_link == NULL)
-                                {
-                                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_032: [ If creating the receiver link fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
-                                    LogError("Cannot create sender link");
-                                    result = __LINE__;
-                                }
-                                else
-                                {
-									if (set_link_attach_properties(iothubtransport_amqp_methods_handle) != 0)
+					/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_012: [ - `name` shall be in the format `methods_requests_link-{device_id}`, where device_id is the `device_id` argument passed to `iothubtransportamqp_methods_create`. ]*/
+					STRING_HANDLE requests_link_name = STRING_construct_sprintf("methods_requests_link-%s", iothubtransport_amqp_methods_handle->device_id);
+					if (requests_link_name == NULL)
+					{
+						/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_153: [ If constructing the requests link name fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+						LogError("Cannot create methods requests link name.");
+						result = __LINE__;
+					}
+					else
+					{
+						/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_010: [ `iothubtransportamqp_methods_subscribe` shall create a receiver link by calling `link_create` with the following arguments: ]*/
+						/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_011: [ - `session_handle` shall be the session_handle argument passed to iothubtransportamqp_methods_subscribe ]*/
+						/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_013: [ - `role` shall be role_receiver. ]*/
+						iothubtransport_amqp_methods_handle->receiver_link = link_create(session_handle, STRING_c_str(requests_link_name), role_receiver, receiver_source, receiver_target);
+						if (iothubtransport_amqp_methods_handle->receiver_link == NULL)
+						{
+							/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_020: [ If creating the receiver link fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+							LogError("Cannot create receiver link");
+							result = __LINE__;
+						}
+						else
+						{
+							/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_025: [ - `source` shall be the a source value created by calling `messaging_create_source`. ]*/
+							/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_026: [ The address string used to create the target shall be `responses`. ]*/
+							AMQP_VALUE sender_source = messaging_create_source("responses");
+							if (sender_source == NULL)
+							{
+								/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_031: [ If creating the target or source values fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+								LogError("Cannot create sender source");
+								result = __LINE__;
+							}
+							else
+							{
+								/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_027: [ - `target` shall be the a target value created by calling `messaging_create_target`. ]*/
+								AMQP_VALUE sender_target = messaging_create_target(STRING_c_str(peer_endpoint_string));
+								if (sender_target == NULL)
+								{
+									/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_031: [ If creating the target or source values fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+									LogError("Cannot create sender target");
+									result = __LINE__;
+								}
+								else
+								{
+									/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_023: [ - `name` shall be format `methods_responses_link-{device_id}`, where device_id is the `device_id` argument passed to `iothubtransportamqp_methods_create`. ]*/
+									STRING_HANDLE responses_link_name = STRING_construct_sprintf("methods_responses_link-%s", iothubtransport_amqp_methods_handle->device_id);
+									if (responses_link_name == NULL)
 									{
+										/* CodeS_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_154: [ If constructing the responses link name fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+										LogError("Cannot create methods responses link name.");
 										result = __LINE__;
 									}
 									else
 									{
-										/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_033: [ `iothubtransportamqp_methods_subscribe` shall create a message receiver associated with the receiver link by calling `messagereceiver_create` and passing the receiver link handle to it. ]*/
-										/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_118: [ An `on_message_receiver_state_changed` callback together with its context shall be passed to `messagereceiver_create`. ]*/
-										iothubtransport_amqp_methods_handle->message_receiver = messagereceiver_create(iothubtransport_amqp_methods_handle->receiver_link, on_message_receiver_state_changed, iothubtransport_amqp_methods_handle);
-										if (iothubtransport_amqp_methods_handle->message_receiver == NULL)
+										/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_021: [ `iothubtransportamqp_methods_subscribe` shall create a sender link by calling `link_create` with the following arguments: ]*/
+										/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_022: [ - `session_handle` shall be the session_handle argument passed to iothubtransportamqp_methods_subscribe ]*/
+										/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_024: [ - `role` shall be role_sender. ]*/
+										iothubtransport_amqp_methods_handle->sender_link = link_create(session_handle, STRING_c_str(responses_link_name), role_sender, sender_source, sender_target);
+										if (iothubtransport_amqp_methods_handle->sender_link == NULL)
 										{
-											/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_034: [ If `messagereceiver_create` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
-											LogError("Cannot create message receiver");
+											/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_032: [ If creating the receiver link fails `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+											LogError("Cannot create sender link");
 											result = __LINE__;
 										}
 										else
 										{
-											/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_035: [ `iothubtransportamqp_methods_subscribe` shall create a message sender associated with the sender link by calling `messagesender_create` and passing the sender link handle to it. ]*/
-											/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_106: [ An `on_message_sender_state_changed` callback together with its context shall be passed to `messagesender_create`. ]*/
-											iothubtransport_amqp_methods_handle->message_sender = messagesender_create(iothubtransport_amqp_methods_handle->sender_link, on_message_sender_state_changed, iothubtransport_amqp_methods_handle);
-											if (iothubtransport_amqp_methods_handle->message_sender == NULL)
+											if (set_link_attach_properties(iothubtransport_amqp_methods_handle) != 0)
 											{
-												/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_036: [ If `messagesender_create` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
-												LogError("Cannot create message sender");
 												result = __LINE__;
 											}
 											else
 											{
-												/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_037: [ `iothubtransportamqp_methods_subscribe` shall open the message sender by calling `messagesender_open`. ]*/
-												if (messagesender_open(iothubtransport_amqp_methods_handle->message_sender) != 0)
+												/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_033: [ `iothubtransportamqp_methods_subscribe` shall create a message receiver associated with the receiver link by calling `messagereceiver_create` and passing the receiver link handle to it. ]*/
+												/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_118: [ An `on_message_receiver_state_changed` callback together with its context shall be passed to `messagereceiver_create`. ]*/
+												iothubtransport_amqp_methods_handle->message_receiver = messagereceiver_create(iothubtransport_amqp_methods_handle->receiver_link, on_message_receiver_state_changed, iothubtransport_amqp_methods_handle);
+												if (iothubtransport_amqp_methods_handle->message_receiver == NULL)
 												{
-													/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_038: [ If `messagesender_open` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
-													LogError("Cannot open the message sender");
+													/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_034: [ If `messagereceiver_create` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+													LogError("Cannot create message receiver");
 													result = __LINE__;
 												}
 												else
 												{
-													/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_039: [ `iothubtransportamqp_methods_subscribe` shall open the message sender by calling `messagereceiver_open`. ]*/
-													/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_104: [ An `on_message_received` callback together with its context shall be passed to `messagereceiver_open`. ]*/
-													if (messagereceiver_open(iothubtransport_amqp_methods_handle->message_receiver, on_message_received, iothubtransport_amqp_methods_handle) != 0)
+													/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_035: [ `iothubtransportamqp_methods_subscribe` shall create a message sender associated with the sender link by calling `messagesender_create` and passing the sender link handle to it. ]*/
+													/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_106: [ An `on_message_sender_state_changed` callback together with its context shall be passed to `messagesender_create`. ]*/
+													iothubtransport_amqp_methods_handle->message_sender = messagesender_create(iothubtransport_amqp_methods_handle->sender_link, on_message_sender_state_changed, iothubtransport_amqp_methods_handle);
+													if (iothubtransport_amqp_methods_handle->message_sender == NULL)
 													{
-														/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_040: [ If `messagereceiver_open` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
-														LogError("Cannot open the message receiver");
+														/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_036: [ If `messagesender_create` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+														LogError("Cannot create message sender");
 														result = __LINE__;
 													}
 													else
 													{
-														iothubtransport_amqp_methods_handle->subscribe_state = SUBSCRIBE_STATE_SUBSCRIBED;
+														/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_037: [ `iothubtransportamqp_methods_subscribe` shall open the message sender by calling `messagesender_open`. ]*/
+														if (messagesender_open(iothubtransport_amqp_methods_handle->message_sender) != 0)
+														{
+															/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_038: [ If `messagesender_open` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+															LogError("Cannot open the message sender");
+															result = __LINE__;
+														}
+														else
+														{
+															/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_039: [ `iothubtransportamqp_methods_subscribe` shall open the message sender by calling `messagereceiver_open`. ]*/
+															/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_104: [ An `on_message_received` callback together with its context shall be passed to `messagereceiver_open`. ]*/
+															if (messagereceiver_open(iothubtransport_amqp_methods_handle->message_receiver, on_message_received, iothubtransport_amqp_methods_handle) != 0)
+															{
+																/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_040: [ If `messagereceiver_open` fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. ]*/
+																LogError("Cannot open the message receiver");
+																result = __LINE__;
+															}
+															else
+															{
+																iothubtransport_amqp_methods_handle->subscribe_state = SUBSCRIBE_STATE_SUBSCRIBED;
 
-														/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_008: [ On success it shall return 0. ]*/
-														result = 0;
+																/* Codes_SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_008: [ On success it shall return 0. ]*/
+																result = 0;
+															}
+														}
 													}
 												}
 											}
 										}
+
+										STRING_delete(responses_link_name);
 									}
-                                }
 
-                                amqpvalue_destroy(sender_target);
-                            }
+									amqpvalue_destroy(sender_target);
+								}
 
-                            amqpvalue_destroy(sender_source);
-                        }
-                    }
+								amqpvalue_destroy(sender_source);
+							}
+						}
+
+						STRING_delete(requests_link_name);
+					}
 
                     amqpvalue_destroy(receiver_target);
                 }

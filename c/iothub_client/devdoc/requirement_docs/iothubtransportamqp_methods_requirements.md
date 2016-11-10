@@ -78,7 +78,9 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_011: [** - `session_handle` shall be the session_handle argument passed to iothubtransportamqp_methods_subscribe **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_012: [** - `name` shall be `methods_requests_link` **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_012: [** - `name` shall be in the format `methods_requests_link-{device_id}`, where device_id is the `device_id` argument passed to `iothubtransportamqp_methods_create`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_153: [** If constructing the requests link name fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_013: [** - `role` shall be role_receiver. **]**
 
@@ -96,7 +98,9 @@ int iothubtransportamqp_methods_subscribe(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE io
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_022: [** - `session_handle` shall be the session_handle argument passed to iothubtransportamqp_methods_subscribe **]**
 
-**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_023: [** - `name` shall be `methods_responses_link` **]**
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_023: [** - `name` shall be format `methods_responses_link-{device_id}`, where device_id is the `device_id` argument passed to `iothubtransportamqp_methods_create`. **]**
+
+**SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_154: [** If constructing the responses link name fails, `iothubtransportamqp_methods_subscribe` shall fail and return a non-zero value. **]**
 
 **SRS_IOTHUBTRANSPORT_AMQP_METHODS_01_024: [** - `role` shall be role_sender. **]**
 
