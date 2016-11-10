@@ -7,7 +7,7 @@
   "main": "main.js",
   "typings": "index.d.ts",
   "dependencies": {
-    "amqp10": "3.2.5",
+    "amqp10": "3.3.2",
     "amqp10-transport-ws": "^0.0.5",
     "azure-iot-common": "1.1.0-dtpreview",
     "debug": "^2.2.0",
