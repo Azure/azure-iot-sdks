@@ -47,6 +47,7 @@ if(${use_amqp})
     
     if (${run_e2e_tests} OR ${nuget_e2e_tests})
         add_subdirectory(iothubclient_amqp_e2e)
+        add_subdirectory(iothubclient_amqp_device_method_e2e)
         if(${use_wsio})
             add_subdirectory(iothubclient_amqp_ws_e2e)
         endif()
