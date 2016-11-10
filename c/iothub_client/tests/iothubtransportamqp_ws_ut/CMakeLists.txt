@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 
 compileAsC11()
-set(theseTestsName iothubtransportamqp_ut )
+set(theseTestsName iothubtransportamqp_ws_ut )
 
 if(WIN32)
     if (ARCHITECTURE STREQUAL "x86_64")
@@ -18,7 +18,7 @@ set(${theseTestsName}_test_files
 )
 
 set(${theseTestsName}_c_files
-	../../src/iothubtransportamqp.c
+	../../src/iothubtransportamqp_websockets.c
 )
 
 set(${theseTestsName}_h_files

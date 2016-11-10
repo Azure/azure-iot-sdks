@@ -1,11 +1,15 @@
 #Copyright (c) Microsoft. All rights reserved.
 #Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#this is CMakeLists.txt for iothubclient_amqp_e2e
+#this is CMakeLists.txt for iothubclient_amqp_ws_e2e
 cmake_minimum_required(VERSION 2.8.11)
 
 if(NOT (${use_amqp}))
-	message(FATAL_ERROR "iothubclient_amqp_e2e being generated without AMQP support")
+	message(FATAL_ERROR "iothubclient_amqp_ws_e2e being generated without AMQP support")
+endif()
+
+if(NOT (${use_wsio}))
+	message(FATAL_ERROR "iothubclient_amqp_ws_e2e being generated without WebSockets support")
 endif()
 
 compileAsC11()
@@ -41,7 +45,7 @@ if(WIN32)
 		target_link_libraries(${theseTestsName}_dll
 			iothub_test
 			iothub_client
-			iothub_client_amqp_transport
+			iothub_client_amqp_ws_transport
 			iothub_service_client
 			aziotsharedutil
 			rpcrt4			
@@ -54,7 +58,7 @@ if(WIN32)
 		target_link_libraries(${theseTestsName}_exe
 			iothub_test
 			iothub_client
-			iothub_client_amqp_transport
+			iothub_client_amqp_ws_transport
 			iothub_service_client
 			aziotsharedutil
 			rpcrt4			
@@ -75,7 +79,7 @@ else()
 		target_link_libraries(${theseTestsName}_exe
 			iothub_test
 			iothub_client
-			iothub_client_amqp_transport
+			iothub_client_amqp_ws_transport
 			iothub_service_client
 			aziotsharedutil
 		)

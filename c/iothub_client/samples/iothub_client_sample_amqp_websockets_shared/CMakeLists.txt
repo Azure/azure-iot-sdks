@@ -31,7 +31,7 @@ add_executable(iothub_client_sample_amqp_websockets_shared ${iothub_client_sampl
 
 target_link_libraries(iothub_client_sample_amqp_websockets_shared
 		iothub_client
-		iothub_client_amqp_transport)
+		iothub_client_amqp_ws_transport)
 
 linkSharedUtil(iothub_client_sample_amqp_websockets_shared)
 linkUAMQP(iothub_client_sample_amqp_websockets_shared)

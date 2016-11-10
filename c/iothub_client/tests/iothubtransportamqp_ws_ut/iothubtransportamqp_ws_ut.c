@@ -17,15 +17,16 @@
 #include "umocktypes.h"
 #include "umocktypes_c.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
+#include "azure_c_shared_utility/xlogging.h"
 
 #define ENABLE_MOCKS
-#include "azure_c_shared_utility/xio.h"
-#include "azure_c_shared_utility/tlsio.h"
-#include "azure_c_shared_utility/platform.h"
+#include "azure_c_shared_utility\xio.h"
+#include "azure_c_shared_utility\wsio.h"
+#include "azure_c_shared_utility\platform.h"
 #include "iothubtransport_amqp_common.h"
 #undef ENABLE_MOCKS
 
-#include "iothubtransportamqp.h"
+#include "iothubtransportamqp_websockets.h"
 
 
 static TEST_MUTEX_HANDLE g_testByTest;
@@ -66,7 +67,7 @@ static TRANSPORT_LL_HANDLE TEST_IoTHubTransport_AMQP_Common_Create(const IOTHUBT
 	return TEST_TRANSPORT_LL_HANDLE;
 }
 
-BEGIN_TEST_SUITE(iothubtransportamqp_ut)
+BEGIN_TEST_SUITE(iothubtransportamqp_ws_ut)
 
 TEST_SUITE_INITIALIZE(TestClassInitialize)
 {
@@ -95,7 +96,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 
 	REGISTER_GLOBAL_MOCK_HOOK(IoTHubTransport_AMQP_Common_Create, TEST_IoTHubTransport_AMQP_Common_Create);
 
-    REGISTER_GLOBAL_MOCK_RETURN(platform_get_default_tlsio, TEST_XIO_INTERFACE);
+    REGISTER_GLOBAL_MOCK_RETURN(wsio_get_interface_description, TEST_XIO_INTERFACE);
     REGISTER_GLOBAL_MOCK_RETURN(xio_create, TEST_XIO_HANDLE);
 	REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_GetHostname, TEST_STRING_HANDLE);
 	REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_SetOption, IOTHUB_CLIENT_OK);
@@ -105,7 +106,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 	REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod, 0);
 	REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_ProcessItem, IOTHUB_PROCESS_OK);
 	REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_GetSendStatus, IOTHUB_CLIENT_OK);
-	REGISTER_GLOBAL_MOCK_RETURN(platform_get_default_tlsio, TEST_IO_INTERFACE_DESCRIPTION_HANDLE);
+	REGISTER_GLOBAL_MOCK_RETURN(wsio_get_interface_description, TEST_IO_INTERFACE_DESCRIPTION_HANDLE);
 }
 
 TEST_SUITE_CLEANUP(TestClassCleanup)
@@ -131,25 +132,25 @@ TEST_FUNCTION_CLEANUP(TestMethodCleanup)
     TEST_MUTEX_RELEASE(g_testByTest);
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_001: [IoTHubTransportAMQP_Create shall create a TRANSPORT_LL_HANDLE by calling into the IoTHubTransport_AMQP_Common_Create function, passing `config` and getTLSIOTransport.]
-/* Tests_SRS_IOTHUBTRANSPORTAMQP_09_019: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for it's fields:
-IoTHubTransport_Subscribe_DeviceMethod = IoTHubTransportAMQP_Subscribe_DeviceMethod
-IoTHubTransport_Unsubscribe_DeviceMethod = IoTHubTransportAMQP_Unsubscribe_DeviceMethod
-IoTHubTransport_Subscribe_DeviceTwin = IoTHubTransportAMQP_Subscribe_DeviceTwin
-IoTHubTransport_Unsubscribe_DeviceTwin = IoTHubTransportAMQP_Unsubscribe_DeviceTwin
-IoTHubTransport_ProcessItem - IoTHubTransportAMQP_ProcessItem
-IoTHubTransport_GetHostname = IoTHubTransportAMQP_GetHostname
-IoTHubTransport_Create = IoTHubTransportAMQP_Create
-IoTHubTransport_Destroy = IoTHubTransportAMQP_Destroy
-IoTHubTransport_Subscribe = IoTHubTransportAMQP_Subscribe
-IoTHubTransport_Unsubscribe = IoTHubTransportAMQP_Unsubscribe
-IoTHubTransport_DoWork = IoTHubTransportAMQP_DoWork
-IoTHubTransport_SetRetryLogic = IoTHubTransportAMQP_SetRetryLogic
-IoTHubTransport_SetOption = IoTHubTransportAMQP_SetOption]*/
+// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_001: [IoTHubTransportAMQP_WS_Create shall create a TRANSPORT_LL_HANDLE by calling into the IoTHubTransport_AMQP_Common_Create function, passing `config` and getWebSocketsIOTransport.]
+/* Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_019: [This function shall return a pointer to a structure of type TRANSPORT_PROVIDER having the following values for it's fields:
+IoTHubTransport_Subscribe_DeviceMethod = IoTHubTransportAMQP_WS_Subscribe_DeviceMethod
+IoTHubTransport_Unsubscribe_DeviceMethod = IoTHubTransportAMQP_WS_Unsubscribe_DeviceMethod
+IoTHubTransport_Subscribe_DeviceTwin = IoTHubTransportAMQP_WS_Subscribe_DeviceTwin
+IoTHubTransport_Unsubscribe_DeviceTwin = IoTHubTransportAMQP_WS_Unsubscribe_DeviceTwin
+IoTHubTransport_ProcessItem - IoTHubTransportAMQP_WS_ProcessItem
+IoTHubTransport_GetHostname = IoTHubTransportAMQP_WS_GetHostname
+IoTHubTransport_Create = IoTHubTransportAMQP_WS_Create
+IoTHubTransport_Destroy = IoTHubTransportAMQP_WS_Destroy
+IoTHubTransport_Subscribe = IoTHubTransportAMQP_WS_Subscribe
+IoTHubTransport_Unsubscribe = IoTHubTransportAMQP_WS_Unsubscribe
+IoTHubTransport_DoWork = IoTHubTransportAMQP_WS_DoWork
+IoTHubTransport_SetRetryLogic = IoTHubTransportAMQP_WS_SetRetryLogic
+IoTHubTransport_SetOption = IoTHubTransportAMQP_WS_SetOption]*/
 TEST_FUNCTION(AMQP_Create)
 {
 	// arrange
-	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
 	umock_c_reset_all_calls();
 	STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE, NULL)).IgnoreArgument_get_io_transport();
@@ -168,18 +169,18 @@ TEST_FUNCTION(AMQP_Create)
 }
 
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_002: [getTLSIOTransport shall get `io_interface_description` using platform_get_default_tlsio())]
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_003: [If `io_interface_description` is NULL getTLSIOTransport shall return NULL.]
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_004: [getTLSIOTransport shall return the XIO_HANDLE created using xio_create().]
-TEST_FUNCTION(AMQP_Create_getTLSIOTransport)
+// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_002: [getWebSocketsIOTransport shall get `io_interface_description` using wsio_get_interface_description())]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_003: [If `io_interface_description` is NULL getWebSocketsIOTransport shall return NULL.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_004: [getWebSocketsIOTransport shall return the XIO_HANDLE created using xio_create().]
+TEST_FUNCTION(AMQP_Create_getWebSocketsIOTransport)
 {
 	// arrange
-	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
 	(void)provider->IoTHubTransport_Create(TEST_IOTHUBTRANSPORT_CONFIG_HANDLE);
 
 	umock_c_reset_all_calls();
-	STRICT_EXPECTED_CALL(platform_get_default_tlsio());
+	STRICT_EXPECTED_CALL(wsio_get_interface_description());
 	STRICT_EXPECTED_CALL(xio_create(TEST_IO_INTERFACE_DESCRIPTION_HANDLE, IGNORED_PTR_ARG)).IgnoreArgument_io_create_parameters();
 
 	// act
@@ -192,11 +193,11 @@ TEST_FUNCTION(AMQP_Create_getTLSIOTransport)
 	// cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_015: [IoTHubTransportAMQP_DoWork shall call into the IoTHubTransport_AMQP_Common_DoWork()]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_015: [IoTHubTransportAMQP_WS_DoWork shall call into the IoTHubTransport_AMQP_Common_DoWork()]
 TEST_FUNCTION(AMQP_DoWork)
 {
 	// arrange
-	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
 	umock_c_reset_all_calls();
 	STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_DoWork(TEST_TRANSPORT_LL_HANDLE, TEST_IOTHUB_CLIENT_LL_HANDLE));
@@ -210,11 +211,11 @@ TEST_FUNCTION(AMQP_DoWork)
 	// cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_006: [IoTHubTransportAMQP_Register shall register the device by calling into the IoTHubTransport_AMQP_Common_Register().]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_006: [IoTHubTransportAMQP_WS_Register shall register the device by calling into the IoTHubTransport_AMQP_Common_Register().]
 TEST_FUNCTION(AMQP_Register)
 {
 	// arrange
-	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
 	umock_c_reset_all_calls();
 	STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_Register(TEST_TRANSPORT_LL_HANDLE, TEST_IOTHUB_DEVICE_CONFIG_HANDLE, TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_WAITING_TO_SEND_LIST));
@@ -229,11 +230,11 @@ TEST_FUNCTION(AMQP_Register)
 	// cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_007: [IoTHubTransportAMQP_Unregister shall unregister the device by calling into the IoTHubTransport_AMQP_Common_Unregister().]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_007: [IoTHubTransportAMQP_WS_Unregister shall unregister the device by calling into the IoTHubTransport_AMQP_Common_Unregister().]
 TEST_FUNCTION(AMQP_Unregister)
 {
 	// arrange
-	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
 	umock_c_reset_all_calls();
 	STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_Unregister(TEST_IOTHUB_DEVICE_HANDLE));
@@ -247,11 +248,11 @@ TEST_FUNCTION(AMQP_Unregister)
 	// cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_008: [IoTHubTransportAMQP_Subscribe_DeviceTwin shall invoke IoTHubTransport_AMQP_Common_Subscribe_DeviceTwin() and return its result.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_008: [IoTHubTransportAMQP_WS_Subscribe_DeviceTwin shall invoke IoTHubTransport_AMQP_Common_Subscribe_DeviceTwin() and return its result.]
 TEST_FUNCTION(AMQP_Subscribe_DeviceTwin)
 {
 	// arrange
-	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
 	umock_c_reset_all_calls();
 	STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_Subscribe_DeviceTwin(TEST_IOTHUB_DEVICE_HANDLE));
@@ -266,11 +267,11 @@ TEST_FUNCTION(AMQP_Subscribe_DeviceTwin)
 	// cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_009: [IoTHubTransportAMQP_Unsubscribe_DeviceTwin shall invoke IoTHubTransport_AMQP_Common_Unsubscribe_DeviceTwin()]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_009: [IoTHubTransportAMQP_WS_Unsubscribe_DeviceTwin shall invoke IoTHubTransport_AMQP_Common_Unsubscribe_DeviceTwin()]
 TEST_FUNCTION(AMQP_Unsubscribe_DeviceTwin)
 {
 	// arrange
-	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
 	umock_c_reset_all_calls();
 	STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_Unsubscribe_DeviceTwin(TEST_IOTHUB_DEVICE_HANDLE));
@@ -284,11 +285,11 @@ TEST_FUNCTION(AMQP_Unsubscribe_DeviceTwin)
 	// cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_010: [IoTHubTransportAMQP_Subscribe_DeviceMethod shall invoke IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod() and return its result.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_010: [IoTHubTransportAMQP_WS_Subscribe_DeviceMethod shall invoke IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod() and return its result.]
 TEST_FUNCTION(AMQP_Subscribe_DeviceMethod)
 {
 	// arrange
-	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
 	umock_c_reset_all_calls();
 	STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod(TEST_IOTHUB_DEVICE_HANDLE));
@@ -303,11 +304,11 @@ TEST_FUNCTION(AMQP_Subscribe_DeviceMethod)
 	// cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_011: [IoTHubTransportAMQP_Unsubscribe_DeviceMethod shall invoke IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod()]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_011: [IoTHubTransportAMQP_WS_Unsubscribe_DeviceMethod shall invoke IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod()]
 TEST_FUNCTION(AMQP_Unsubscribe_DeviceMethod)
 {
 	// arrange
-	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
 	umock_c_reset_all_calls();
 	STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod(TEST_IOTHUB_DEVICE_HANDLE));
@@ -321,11 +322,11 @@ TEST_FUNCTION(AMQP_Unsubscribe_DeviceMethod)
 	// cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_012: [IoTHubTransportAMQP_Subscribe shall subscribe for D2C messages by calling into the IoTHubTransport_AMQP_Common_Subscribe().]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_012: [IoTHubTransportAMQP_WS_Subscribe shall subscribe for D2C messages by calling into the IoTHubTransport_AMQP_Common_Subscribe().]
 TEST_FUNCTION(AMQP_Subscribe)
 {
 	// arrange
-	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
 	umock_c_reset_all_calls();
 	STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_Subscribe(TEST_IOTHUB_DEVICE_HANDLE));
@@ -340,11 +341,11 @@ TEST_FUNCTION(AMQP_Subscribe)
 	// cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_013: [IoTHubTransportAMQP_Unsubscribe shall subscribe for D2C messages by calling into the IoTHubTransport_AMQP_Common_Unsubscribe().]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_013: [IoTHubTransportAMQP_WS_Unsubscribe shall subscribe for D2C messages by calling into the IoTHubTransport_AMQP_Common_Unsubscribe().]
 TEST_FUNCTION(AMQP_Unsubscribe)
 {
 	// arrange
-	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
 	umock_c_reset_all_calls();
 	STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_Unsubscribe(TEST_IOTHUB_DEVICE_HANDLE));
@@ -358,11 +359,11 @@ TEST_FUNCTION(AMQP_Unsubscribe)
 	// cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_014: [IoTHubTransportAMQP_ProcessItem shall invoke IoTHubTransport_AMQP_Common_ProcessItem() and return its result.]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_014: [IoTHubTransportAMQP_WS_ProcessItem shall invoke IoTHubTransport_AMQP_Common_ProcessItem() and return its result.]
 TEST_FUNCTION(AMQP_ProcessItem)
 {
 	// arrange
-	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
 	umock_c_reset_all_calls();
 	STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_ProcessItem(TEST_TRANSPORT_LL_HANDLE, TEST_IOTHUB_IDENTITY_TYPE, TEST_IOTHUB_IDENTITY_INFO_HANDLE));
@@ -377,11 +378,11 @@ TEST_FUNCTION(AMQP_ProcessItem)
 	// cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_017: [IoTHubTransportAMQP_SetOption shall set the options by calling into the IoTHubTransport_AMQP_Common_SetOption()]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_017: [IoTHubTransportAMQP_WS_SetOption shall set the options by calling into the IoTHubTransport_AMQP_Common_SetOption()]
 TEST_FUNCTION(AMQP_SetOption)
 {
 	// arrange
-	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
 	umock_c_reset_all_calls();
 	STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_SetOption(TEST_TRANSPORT_LL_HANDLE, TEST_STRING, TEST_STRING_HANDLE));
@@ -396,11 +397,11 @@ TEST_FUNCTION(AMQP_SetOption)
 	// cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_016: [IoTHubTransportAMQP_GetSendStatus shall get the send status by calling into the IoTHubTransport_AMQP_Common_GetSendStatus()]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_016: [IoTHubTransportAMQP_WS_GetSendStatus shall get the send status by calling into the IoTHubTransport_AMQP_Common_GetSendStatus()]
 TEST_FUNCTION(AMQP_GetSendStatus)
 {
 	// arrange
-	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
 	IOTHUB_CLIENT_STATUS client_status;
 
@@ -418,11 +419,11 @@ TEST_FUNCTION(AMQP_GetSendStatus)
 }
 
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_018: [IoTHubTransportAMQP_GetHostname shall get the hostname by calling into the IoTHubTransport_AMQP_Common_GetHostname()]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_018: [IoTHubTransportAMQP_WS_GetHostname shall get the hostname by calling into the IoTHubTransport_AMQP_Common_GetHostname()]
 TEST_FUNCTION(AMQP_GetHostname)
 {
 	// arrange
-	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
 	umock_c_reset_all_calls();
 	STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_GetHostname(TEST_TRANSPORT_LL_HANDLE));
@@ -437,11 +438,11 @@ TEST_FUNCTION(AMQP_GetHostname)
 	// cleanup
 }
 
-// Tests_SRS_IOTHUBTRANSPORTAMQP_09_005: [IoTHubTransportAMQP_Destroy shall destroy the TRANSPORT_LL_HANDLE by calling into the IoTHubTransport_AMQP_Common_Destroy().]
+// Tests_SRS_IOTHUBTRANSPORTAMQP_WS_09_005: [IoTHubTransportAMQP_WS_Destroy shall destroy the TRANSPORT_LL_HANDLE by calling into the IoTHubTransport_AMQP_Common_Destroy().]
 TEST_FUNCTION(AMQP_Destroy)
 {
     // arrange
-	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol();
+	TRANSPORT_PROVIDER* provider = (TRANSPORT_PROVIDER*)AMQP_Protocol_over_WebSocketsTls();
 
 	umock_c_reset_all_calls();
 	STRICT_EXPECTED_CALL(IoTHubTransport_AMQP_Common_Destroy(TEST_TRANSPORT_LL_HANDLE));
@@ -455,4 +456,4 @@ TEST_FUNCTION(AMQP_Destroy)
 	// cleanup
 }
 
-END_TEST_SUITE(iothubtransportamqp_ut)
+END_TEST_SUITE(iothubtransportamqp_ws_ut)

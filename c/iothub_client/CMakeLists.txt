@@ -84,38 +84,53 @@ if(${use_http})
 endif()
 
 if(${use_amqp})
-    set(iothub_client_amqp_transport_c_files
+    set(iothub_client_amqp_transport_common_c_files
         ${iothub_client_ll_transport_c_files}
-		./src/iothubtransportamqp.c
-		./src/iothubtransportamqp_auth.c
-		./src/iothubtransportamqp_methods.c
+        ./src/iothubtransport_amqp_common.c
+        ./src/iothubtransportamqp_auth.c
+        ./src/iothubtransportamqp_methods.c
         ./src/uamqp_messaging.c
     )
 
-    set(iothub_client_amqp_transport_h_files
+    set(iothub_client_amqp_transport_common_h_files
         ${iothub_client_ll_transport_h_files}
-		./inc/iothubtransportamqp.h
-		./inc/iothubtransportamqp_auth.h
-		./inc/iothubtransportamqp_methods.h
+        ./inc/iothubtransport_amqp_common.h
+        ./inc/iothubtransportamqp_auth.h
+        ./inc/iothubtransportamqp_methods.h
         ./inc/uamqp_messaging.h
-    )	
+    )
 
-    if (${use_wsio})
-        set(iothub_client_amqp_transport_c_files
-            ${iothub_client_amqp_transport_c_files}
-            ./src/iothubtransportamqp_websockets.c
-        )
-        
-        set(iothub_client_amqp_transport_h_files
-            ${iothub_client_amqp_transport_h_files}
-            ./inc/iothubtransportamqp_websockets.h
-        )
-    endif()
+    set(iothub_client_amqp_transport_c_files
+        ${iothub_client_amqp_transport_common_c_files}
+        ./src/iothubtransportamqp.c
+    )
+
+    set(iothub_client_amqp_transport_h_files
+        ${iothub_client_amqp_transport_common_h_files}
+        ./inc/iothubtransportamqp.h
+    )    
     
     set(iothub_client_h_install_files
         ${iothub_client_h_install_files}
         ${iothub_client_amqp_transport_h_files}
     )
+
+    if (${use_wsio})
+        set(iothub_client_amqp_ws_transport_c_files
+            ${iothub_client_amqp_transport_common_c_files}
+            ./src/iothubtransportamqp_websockets.c
+        )
+        
+        set(iothub_client_amqp_ws_transport_h_files
+            ${iothub_client_amqp_transport_common_h_files}
+            ./inc/iothubtransportamqp_websockets.h
+        )
+        
+        set(iothub_client_h_install_files
+            ${iothub_client_h_install_files}
+            ./inc/iothubtransportamqp_websockets.h
+        )
+    endif()
 endif()
 
 if(${use_mqtt})
@@ -220,6 +235,21 @@ if(${use_amqp})
         ${iothub_client_libs}
         iothub_client_amqp_transport
     )
+	
+	if (${use_wsio})
+	    include_directories(${iothub_client_amqp_ws_transport_INC_FOLDER} ${UAMQP_INC_FOLDER})
+		add_library(iothub_client_amqp_ws_transport 
+			${iothub_client_amqp_ws_transport_c_files} 
+			${iothub_client_amqp_ws_transport_h_files}
+		)
+		linkSharedUtil(iothub_client_amqp_ws_transport)
+		linkWebSockets(iothub_client_amqp_ws_transport)
+		target_link_libraries(iothub_client_amqp_ws_transport)
+		set(iothub_client_libs
+			${iothub_client_libs}
+			iothub_client_amqp_ws_transport
+		)
+	endif()
 endif()
 
 if(${use_mqtt})
