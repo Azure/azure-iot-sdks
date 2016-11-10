@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#ifndef IOTHUB_MQTT_ABSTRACTION_H
-#define IOTHUB_TRANSPORTMQTT_COMMON_H
+#ifndef IOTHUBTRANSPORT_MQTT_COMMON_H
+#define IOTHUBTRANSPORT_MQTT_COMMON_H
 
 #include "iothub_transport_ll.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
@@ -35,4 +35,4 @@ MOCKABLE_FUNCTION(, STRING_HANDLE, IoTHubTransport_MQTT_Common_GetHostname, TRAN
 }
 #endif
 
-#endif /* IOTHUB_MQTT_ABSTRACTION_H */
+#endif /* IOTHUBTRANSPORT_MQTT_COMMON_H */
