@@ -614,41 +614,139 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHub
             }
 
             /* Codes_SRS_IOTHUBCLIENT_01_027: [IoTHubClient_SetMessageCallback shall be made thread-safe by using the lock created in IoTHubClient_Create.] */
-            Unlock(iotHubClientInstance->LockHandle);
+            (void)Unlock(iotHubClientInstance->LockHandle);
         }
     }
 
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_SetConnectionStatusCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void * userContextCallback)
+IOTHUB_CLIENT_RESULT IoTHubClient_SetConnectionStatusCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void * userContextCallback)
 {
-    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    (void)iotHubClientHandle;
-    (void)connectionStatusCallback;
-    (void)userContextCallback;
+    IOTHUB_CLIENT_RESULT result;
 
+    if (iotHubClientHandle == NULL)
+    {
+        /* Codes_SRS_IOTHUBCLIENT_25_076: [** If `iotHubClientHandle` is `NULL`, `IoTHubClient_SetRetryPolicy` shall return `IOTHUB_CLIENT_INVALID_ARG`. ] */
+        result = IOTHUB_CLIENT_INVALID_ARG;
+        LogError("NULL iothubClientHandle");
+    }
+    else
+    {
+        IOTHUB_CLIENT_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_INSTANCE*)iotHubClientHandle;
+
+        /* Codes_SRS_IOTHUBCLIENT_25_087: [ `IoTHubClient_SetConnectionStatusCallback` shall be made thread-safe by using the lock created in `IoTHubClient_Create`. ] */
+        if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
+        {
+            /* Codes_SRS_IOTHUBCLIENT_25_088: [ If acquiring the lock fails, `IoTHubClient_SetConnectionStatusCallback` shall return `IOTHUB_CLIENT_ERROR`. ]*/
+            result = IOTHUB_CLIENT_ERROR;
+            LogError("Could not acquire lock");
+        }
+        else
+        {
+            /* Codes_SRS_IOTHUBCLIENT_25_081: [ `IoTHubClient_SetConnectionStatusCallback` shall start the worker thread if it was not previously started. ]*/
+            if ((result = StartWorkerThreadIfNeeded(iotHubClientInstance)) != IOTHUB_CLIENT_OK)
+            {
+                /* Codes_SRS_IOTHUBCLIENT_25_083: [ If starting the thread fails, `IoTHubClient_SetConnectionStatusCallback` shall return `IOTHUB_CLIENT_ERROR`. ]*/
+                result = IOTHUB_CLIENT_ERROR;
+                LogError("Could not start worker thread");
+            }
+            else
+            {
+                /* Codes_SRS_IOTHUBCLIENT_25_085: [ `IoTHubClient_SetConnectionStatusCallback` shall call `IoTHubClient_LL_SetConnectionStatusCallback`, while passing the `IoTHubClient_LL` handle created by `IoTHubClient_Create` and the parameters `connectionStatusCallback` and `userContextCallback`. ]*/
+                result = IoTHubClient_LL_SetConnectionStatusCallback(iotHubClientInstance->IoTHubClientLLHandle, connectionStatusCallback, userContextCallback);
+            }
+
+            (void)Unlock(iotHubClientInstance->LockHandle);
+        }
+    }
 
     return result;
-    
+
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_SetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)
+IOTHUB_CLIENT_RESULT IoTHubClient_SetRetryPolicy(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitInSeconds)
 {
-    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    (void)iotHubClientHandle;
-    (void)retryPolicy;
-    (void)retryTimeoutLimitInSeconds;
+    IOTHUB_CLIENT_RESULT result;
+
+    if (iotHubClientHandle == NULL)
+    {
+        /* Codes_SRS_IOTHUBCLIENT_25_076: [** If `iotHubClientHandle` is `NULL`, `IoTHubClient_SetRetryPolicy` shall return `IOTHUB_CLIENT_INVALID_ARG`. ] */
+        result = IOTHUB_CLIENT_INVALID_ARG;
+        LogError("NULL iothubClientHandle");
+    }
+    else
+    {
+        IOTHUB_CLIENT_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_INSTANCE*)iotHubClientHandle;
+
+        /* Codes_SRS_IOTHUBCLIENT_25_079: [ `IoTHubClient_SetRetryPolicy` shall be made thread-safe by using the lock created in `IoTHubClient_Create`.] */
+        if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
+        {
+            /* Codes_SRS_IOTHUBCLIENT_25_080: [ If acquiring the lock fails, `IoTHubClient_SetRetryPolicy` shall return `IOTHUB_CLIENT_ERROR`. ]*/
+            result = IOTHUB_CLIENT_ERROR;
+            LogError("Could not acquire lock");
+        }
+        else
+        {
+            /* Codes_SRS_IOTHUBCLIENT_25_073: [ `IoTHubClient_SetRetryPolicy` shall start the worker thread if it was not previously started. ] */
+            if ((result = StartWorkerThreadIfNeeded(iotHubClientInstance)) != IOTHUB_CLIENT_OK)
+            {
+                /* Codes_SRS_IOTHUBCLIENT_25_075: [ If starting the thread fails, `IoTHubClient_SetRetryPolicy` shall return `IOTHUB_CLIENT_ERROR`. ]*/
+                result = IOTHUB_CLIENT_ERROR;
+                LogError("Could not start worker thread");
+            }
+            else
+            {
+                /* Codes_SRS_IOTHUBCLIENT_25_077: [ `IoTHubClient_SetRetryPolicy` shall call `IoTHubClient_LL_SetRetryPolicy`, while passing the `IoTHubClient_LL` handle created by `IoTHubClient_Create` and the parameters `retryPolicy` and `retryTimeoutLimitinSeconds`.]*/
+                result = IoTHubClient_LL_SetRetryPolicy(iotHubClientInstance->IoTHubClientLLHandle, retryPolicy, retryTimeoutLimitInSeconds);
+            }
+
+            (void)Unlock(iotHubClientInstance->LockHandle);
+        }
+    }
 
     return result;
 }
 
-IOTHUB_CLIENT_RESULT IoTHubClient_GetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY * retryPolicy, size_t * retryTimeoutLimitInSeconds)
+IOTHUB_CLIENT_RESULT IoTHubClient_GetRetryPolicy(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY * retryPolicy, size_t * retryTimeoutLimitInSeconds)
 {
-    IOTHUB_CLIENT_RESULT result = IOTHUB_CLIENT_OK;
-    (void)iotHubClientHandle;
-    (void)retryPolicy;
-    (void)retryTimeoutLimitInSeconds;
+    IOTHUB_CLIENT_RESULT result;
+
+    if (iotHubClientHandle == NULL)
+    {
+        /* Codes_SRS_IOTHUBCLIENT_25_092: [ If `iotHubClientHandle` is `NULL`, `IoTHubClient_GetRetryPolicy` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+        result = IOTHUB_CLIENT_INVALID_ARG;
+        LogError("NULL iothubClientHandle");
+    }
+    else
+    {
+        IOTHUB_CLIENT_INSTANCE* iotHubClientInstance = (IOTHUB_CLIENT_INSTANCE*)iotHubClientHandle;
+
+        /* Codes_SRS_IOTHUBCLIENT_25_095: [ `IoTHubClient_GetRetryPolicy` shall be made thread-safe by using the lock created in `IoTHubClient_Create`. ]*/
+        if (Lock(iotHubClientInstance->LockHandle) != LOCK_OK)
+        {
+            /* Codes_SRS_IOTHUBCLIENT_25_096: [ If acquiring the lock fails, `IoTHubClient_GetRetryPolicy` shall return `IOTHUB_CLIENT_ERROR`. ]*/
+            result = IOTHUB_CLIENT_ERROR;
+            LogError("Could not acquire lock");
+        }
+        else
+        {
+            /* Codes_SRS_IOTHUBCLIENT_25_089: [ `IoTHubClient_GetRetryPolicy` shall start the worker thread if it was not previously started.]*/
+            if ((result = StartWorkerThreadIfNeeded(iotHubClientInstance)) != IOTHUB_CLIENT_OK)
+            {
+                /* Codes_SRS_IOTHUBCLIENT_25_091: [ If starting the thread fails, `IoTHubClient_GetRetryPolicy` shall return `IOTHUB_CLIENT_ERROR`.]*/
+                result = IOTHUB_CLIENT_ERROR;
+                LogError("Could not start worker thread");
+            }
+            else
+            {
+                /* Codes_SRS_IOTHUBCLIENT_25_093: [ `IoTHubClient_GetRetryPolicy` shall call `IoTHubClient_LL_GetRetryPolicy`, while passing the `IoTHubClient_LL` handle created by `IoTHubClient_Create` and the parameters `connectionStatusCallback` and `userContextCallback`.]*/
+                result = IoTHubClient_LL_GetRetryPolicy(iotHubClientInstance->IoTHubClientLLHandle, retryPolicy, retryTimeoutLimitInSeconds);
+            }
+
+            (void)Unlock(iotHubClientInstance->LockHandle);
+        }
+    }
 
     return result;
 }
@@ -681,7 +779,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_GetLastMessageReceiveTime(IOTHUB_CLIENT_HANDLE
             result = IoTHubClient_LL_GetLastMessageReceiveTime(iotHubClientInstance->IoTHubClientLLHandle, lastMessageReceiveTime);
 
             /* Codes_SRS_IOTHUBCLIENT_01_035: [IoTHubClient_GetLastMessageReceiveTime shall be made thread-safe by using the lock created in IoTHubClient_Create.] */
-            Unlock(iotHubClientInstance->LockHandle);
+            (void)Unlock(iotHubClientInstance->LockHandle);
         }
     }
 
@@ -723,7 +821,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetOption(IOTHUB_CLIENT_HANDLE iotHubClientHan
                 LogError("IoTHubClient_LL_SetOption failed");
             }
 
-            Unlock(iotHubClientInstance->LockHandle);
+            (void)Unlock(iotHubClientInstance->LockHandle);
         }
     }
     return result;
@@ -769,7 +867,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceTwinCallback(IOTHUB_CLIENT_HANDLE iot
                 }
             }
 
-            Unlock(iotHubClientInstance->LockHandle);
+            (void)Unlock(iotHubClientInstance->LockHandle);
         }
     }
     return result;
@@ -816,7 +914,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE iotHubC
                 }
             }
 
-            Unlock(iotHubClientInstance->LockHandle);
+            (void)Unlock(iotHubClientInstance->LockHandle);
         }
     }
     return result;
@@ -863,7 +961,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceMethodCallback(IOTHUB_CLIENT_HANDLE i
                 }
             }
 
-            Unlock(iotHubClientInstance->LockHandle);
+            (void)Unlock(iotHubClientInstance->LockHandle);
         }
     }
     return result;
@@ -1060,7 +1158,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_UploadToBlobAsync(IOTHUB_CLIENT_HANDLE iotHubC
                                 }
                             }
                         }
-                        Unlock(iotHubClientHandleData->LockHandle);
+                        (void)Unlock(iotHubClientHandleData->LockHandle);
                     }
                 }
             }

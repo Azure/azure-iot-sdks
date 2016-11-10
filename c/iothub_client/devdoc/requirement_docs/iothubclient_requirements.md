@@ -211,31 +211,66 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE
 **SRS_IOTHUBCLIENT_01_027: [** `IoTHubClient_SetMessageCallback` shall be made thread-safe by using the lock created in `IoTHubClient_Create`. **]**
 
 **SRS_IOTHUBCLIENT_01_028: [** If acquiring the lock fails, `IoTHubClient_SetMessageCallback` shall return `IOTHUB_CLIENT_ERROR`. **]**
+
 ###IoTHubClient_SetConnectionStatusCallback
 ```c
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SetConnectionStatusCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void* userContextCallback);
 ```
-**SRS_IOTHUBCLIENT_25_71: [**IoTHubClient_SetConnectionStatusCallback shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter iotHubClientHandle**]**
-**SRS_IOTHUBCLIENT_25_72: [**IoTHubClient_SetConnectionStatusCallback shall return IOTHUB_CLIENT_OK and save the callback and userContext as a member of the handle.**]**
+**SRS_IOTHUBCLIENT_25_081: [** `IoTHubClient_SetConnectionStatusCallback` shall start the worker thread if it was not previously started. **]**
+
+**SRS_IOTHUBCLIENT_25_082: [** If the transport connection is shared, the thread shall be started by calling `IoTHubTransport_StartWorkerThread`. **]**
+
+**SRS_IOTHUBCLIENT_25_083: [** If starting the thread fails, `IoTHubClient_SetConnectionStatusCallback` shall return `IOTHUB_CLIENT_ERROR`. **]**
+
+**SRS_IOTHUBCLIENT_25_084: [** If `iotHubClientHandle` is `NULL`, `IoTHubClient_SetConnectionStatusCallback` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+
+**SRS_IOTHUBCLIENT_25_085: [** `IoTHubClient_SetConnectionStatusCallback` shall call `IoTHubClient_LL_SetConnectionStatusCallback`, while passing the `IoTHubClient_LL` handle created by `IoTHubClient_Create` and the parameters `connectionStatusCallback` and `userContextCallback`. **]**
+
+**SRS_IOTHUBCLIENT_25_086: [** When `IoTHubClient_LL_SetConnectionStatusCallback` is called, `IoTHubClient_SetConnectionStatusCallback` shall return the result of `IoTHubClient_LL_SetConnectionStatusCallback`. **]**
+
+**SRS_IOTHUBCLIENT_25_087: [** `IoTHubClient_SetConnectionStatusCallback` shall be made thread-safe by using the lock created in `IoTHubClient_Create`. **]**
+
+**SRS_IOTHUBCLIENT_25_088: [** If acquiring the lock fails, `IoTHubClient_SetConnectionStatusCallback` shall return `IOTHUB_CLIENT_ERROR`. **]**
 
 ###IoTHubClient_SetRetryPolicy
 ```c
 extern IOTHUB_CLIENT_RESULT IoTHubClient_SetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitinSeconds);
 ```
-**SRS_IOTHUBCLIENT_25_73: [**IoTHubClient_SetRetryPolicy shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL iotHubClientHandle**]**
-**SRS_IOTHUBCLIENT_25_74: [**For any policy other then IOTHUB_CLIENT_RETRY_NONE if retryTimeoutLimitinSeconds is zero then IoTHubClient_SetRetryPolicy shall return IOTHUB_CLIENT_INVALID_ARG**]**
-**SRS_IOTHUBCLIENT_25_75: [**IoTHubClient_SetRetryPolicy shall save connection retry policies specified by the user to retryPolicy in struct IOTHUB_CLIENT_LL_HANDLE_DATA**]**
-**SRS_IOTHUBCLIENT_25_76: [**IoTHubClient_SetRetryPolicy shall save retryTimeoutLimitinSeconds to retryTimeoutinSeconds in struct IOTHUB_CLIENT_LL_HANDLE_DATA**]**
+**SRS_IOTHUBCLIENT_25_073: [** `IoTHubClient_SetRetryPolicy` shall start the worker thread if it was not previously started. **]**
+
+**SRS_IOTHUBCLIENT_25_074: [** If the transport connection is shared, the thread shall be started by calling `IoTHubTransport_StartWorkerThread`. **]**
+
+**SRS_IOTHUBCLIENT_25_075: [** If starting the thread fails, `IoTHubClient_SetRetryPolicy` shall return `IOTHUB_CLIENT_ERROR`. **]**
+
+**SRS_IOTHUBCLIENT_25_076: [** If `iotHubClientHandle` is `NULL`, `IoTHubClient_SetRetryPolicy` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+
+**SRS_IOTHUBCLIENT_25_077: [** `IoTHubClient_SetRetryPolicy` shall call `IoTHubClient_LL_SetRetryPolicy`, while passing the `IoTHubClient_LL` handle created by `IoTHubClient_Create` and the parameters `retryPolicy` and `retryTimeoutLimitinSeconds`. **]**
+
+**SRS_IOTHUBCLIENT_25_078: [** When `IoTHubClient_LL_SetRetryPolicy` is called, `IoTHubClient_SetRetryPolicy` shall return the result of `IoTHubClient_LL_SetRetryPolicy`. **]**
+
+**SRS_IOTHUBCLIENT_25_079: [** `IoTHubClient_SetRetryPolicy` shall be made thread-safe by using the lock created in `IoTHubClient_Create`. **]**
+
+**SRS_IOTHUBCLIENT_25_080: [** If acquiring the lock fails, `IoTHubClient_SetRetryPolicy` shall return `IOTHUB_CLIENT_ERROR`. **]**
 
 ###IoTHubClient_GetRetryPolicy
 ```c
 extern IOTHUB_CLIENT_RESULT IoTHubClient_GetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY* retryPolicy, size_t* retryTimeoutLimitinSeconds);
 ```
-**SRS_IOTHUBCLIENT_25_77: [**IoTHubClient_GetRetryPolicy shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL iotHubClientHandle or retryPolicy or retryTimeoutLimitinSeconds parameters**]**
-**SRS_IOTHUBCLIENT_25_78: [**IoTHubClient_GetRetryPolicy shall retrieve connection retry policy from retryPolicy in struct IOTHUB_CLIENT_LL_HANDLE_DATA**]**
-**SRS_IOTHUBCLIENT_25_79: [**IoTHubClient_GetRetryPolicy shall retrieve retryTimeoutLimitinSeconds in seconds from retryTimeout in struct IOTHUB_CLIENT_LL_HANDLE_DATA**]**
-**SRS_IOTHUBCLIENT_25_80: [**If user did not set the policy and timeout values by calling IoTHubClient_SetRetryPolicy then IoTHubClient_GetRetryPolicy shall return default values**]**
+**SRS_IOTHUBCLIENT_25_089: [** `IoTHubClient_GetRetryPolicy` shall start the worker thread if it was not previously started. **]**
 
+**SRS_IOTHUBCLIENT_25_090: [** If the transport connection is shared, the thread shall be started by calling `IoTHubTransport_StartWorkerThread`. **]**
+
+**SRS_IOTHUBCLIENT_25_091: [** If starting the thread fails, `IoTHubClient_GetRetryPolicy` shall return `IOTHUB_CLIENT_ERROR`. **]**
+
+**SRS_IOTHUBCLIENT_25_092: [** If `iotHubClientHandle` is `NULL`, `IoTHubClient_GetRetryPolicy` shall return `IOTHUB_CLIENT_INVALID_ARG`. **]**
+
+**SRS_IOTHUBCLIENT_25_093: [** `IoTHubClient_GetRetryPolicy` shall call `IoTHubClient_LL_GetRetryPolicy`, while passing the `IoTHubClient_LL` handle created by `IoTHubClient_Create` and the parameters `connectionStatusCallback` and `userContextCallback`. **]**
+
+**SRS_IOTHUBCLIENT_25_094: [** When `IoTHubClient_LL_GetRetryPolicy` is called, `IoTHubClient_GetRetryPolicy` shall return the result of `IoTHubClient_LL_GetRetryPolicy`. **]**
+
+**SRS_IOTHUBCLIENT_25_095: [** `IoTHubClient_GetRetryPolicy` shall be made thread-safe by using the lock created in `IoTHubClient_Create`. **]**
+
+**SRS_IOTHUBCLIENT_25_096: [** If acquiring the lock fails, `IoTHubClient_GetRetryPolicy` shall return `IOTHUB_CLIENT_ERROR`. **]**
 
 
 ## IoTHubClient_GetLastMessageReceiveTime
@@ -253,7 +288,6 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_GetLastMessageReceiveTime(IOTHUB_CLIENT
 **SRS_IOTHUBCLIENT_01_035: [** `IoTHubClient_GetLastMessageReceiveTime` shall be made thread-safe by using the lock created in `IoTHubClient_Create`. **]**
 
 **SRS_IOTHUBCLIENT_01_036: [** If acquiring the lock fails, `IoTHubClient_GetLastMessageReceiveTime` shall return `IOTHUB_CLIENT_ERROR`. **]**
-
 
 
 ## IoTHubClient_GetSendStatus

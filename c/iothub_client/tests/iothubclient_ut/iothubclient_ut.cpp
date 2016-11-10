@@ -28,6 +28,7 @@ extern "C" void* gballoc_realloc(void* ptr, size_t size);
 extern "C" void gballoc_free(void* ptr);
 
 DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_CLIENT_STATUS, IOTHUB_CLIENT_STATUS_VALUES);
+DEFINE_MICROMOCK_ENUM_TO_STRING(IOTHUB_CLIENT_RETRY_POLICY, IOTHUB_CLIENT_RETRY_POLICY_VALUES);
 
 namespace BASEIMPLEMENTATION
 {
@@ -62,6 +63,8 @@ static size_t doWorkCallCount = 0;
 static THREAD_START_FUNC threadFunc;
 static void* threadFuncArg;
 static const TRANSPORT_PROVIDER* provideFAKE(void);
+static IOTHUB_CLIENT_RETRY_POLICY saved_retry_policy;
+static size_t saved_retry_timeout_in_secs;
 extern "C" const size_t IoTHubClient_ThreadTerminationOffset;
 
 static const IOTHUB_CLIENT_CONFIG TEST_CONFIG =
@@ -82,6 +85,8 @@ static IOTHUB_CLIENT_HANDLE current_iothub_client;
 #define TEST_IOTHUBTRANSPORT_LOCK (TRANSPORT_HANDLE)0xDEAF
 #define TEST_IOTHUBTRANSPORT_LL (TRANSPORT_HANDLE)0xDEDE
 #define TEST_LIST_HANDLE				(SINGLYLINKEDLIST_HANDLE)0x4246
+#define TEST_RETRY_POLICY      IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER
+#define TEST_RETRY_TIMEOUT_SECS      60
 typedef struct TEST_LIST_ITEM_TAG
 {
     const void* item_value;
@@ -105,6 +110,16 @@ public:
     MOCK_STATIC_METHOD_4(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SendEventAsync, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback)
     MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK);
     MOCK_STATIC_METHOD_3(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetMessageCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC, messageCallback, void*, userContextCallback)
+    MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK);
+    MOCK_STATIC_METHOD_3(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetRetryPolicy, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY, retryPolicy, size_t, retryTimeoutLimitInSeconds)
+        saved_retry_policy = retryPolicy;
+        saved_retry_timeout_in_secs = retryTimeoutLimitInSeconds;
+    MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK);
+    MOCK_STATIC_METHOD_3(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetConnectionStatusCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK, connectionStatusCallback, void*, userContextCallback)
+    MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK);
+    MOCK_STATIC_METHOD_3(, IOTHUB_CLIENT_RESULT, IoTHubClient_LL_GetRetryPolicy, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY*, retryPolicy, size_t*, retryTimeoutLimitInSeconds)
+        *retryPolicy = saved_retry_policy;
+        *retryTimeoutLimitInSeconds = saved_retry_timeout_in_secs;
     MOCK_METHOD_END(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK);
     MOCK_STATIC_METHOD_1(, void, IoTHubClient_LL_DoWork, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle)
         doWorkCallCount++;
@@ -198,6 +213,8 @@ public:
     MOCK_STATIC_METHOD_2(, IOTHUBMESSAGE_DISPOSITION_RESULT, messageCallback, IOTHUB_MESSAGE_HANDLE, message, void*, userContextCallback)
     MOCK_METHOD_END(IOTHUBMESSAGE_DISPOSITION_RESULT, IOTHUBMESSAGE_ACCEPTED);
 
+    MOCK_STATIC_METHOD_3(, void, connectionStatusCallback, IOTHUB_CLIENT_CONNECTION_STATUS, result3, IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason, void*, userContextCallback)
+    MOCK_VOID_METHOD_END()
     /* TRANSPORT mocks*/
 
     MOCK_STATIC_METHOD_1(, LOCK_HANDLE, IoTHubTransport_GetLock, TRANSPORT_HANDLE, transportHlHandle)
@@ -329,6 +346,9 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientMocks, , IOTHUB_CLIENT_LL_HANDLE, IoTH
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientMocks, , void, IoTHubClient_LL_Destroy, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle);
 DECLARE_GLOBAL_MOCK_METHOD_4(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SendEventAsync, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_MESSAGE_HANDLE, eventMessageHandle, IOTHUB_CLIENT_EVENT_CONFIRMATION_CALLBACK, eventConfirmationCallback, void*, userContextCallback)
 DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetMessageCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_MESSAGE_CALLBACK_ASYNC, messageCallback, void*, userContextCallback)
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetConnectionStatusCallback, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK, connectionStatusCallback, void*, userContextCallback)
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_SetRetryPolicy, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY, retryPolicy, size_t, retryTimeoutLimitInSeconds)
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_GetRetryPolicy, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY*, retryPolicy, size_t*, retryTimeoutLimitInSeconds)
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientMocks, , void, IoTHubClient_LL_DoWork, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle)
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_GetSendStatus, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, IOTHUB_CLIENT_STATUS*, iotHubClientStatus)
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , IOTHUB_CLIENT_RESULT, IoTHubClient_LL_GetLastMessageReceiveTime, IOTHUB_CLIENT_LL_HANDLE, iotHubClientHandle, time_t*, lastMessageReceiveTime)
@@ -350,6 +370,7 @@ DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientMocks, , void, gballoc_free, void*, pt
 
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , void, eventConfirmationCallback, IOTHUB_CLIENT_CONFIRMATION_RESULT, result2, void*, userContextCallback);
 DECLARE_GLOBAL_MOCK_METHOD_2(CIoTHubClientMocks, , IOTHUBMESSAGE_DISPOSITION_RESULT, messageCallback, IOTHUB_MESSAGE_HANDLE, message, void*, userContextCallback);
+DECLARE_GLOBAL_MOCK_METHOD_3(CIoTHubClientMocks, , void, connectionStatusCallback, IOTHUB_CLIENT_CONNECTION_STATUS, result3, IOTHUB_CLIENT_CONNECTION_STATUS_REASON, reason, void*, userContextCallback);
 
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientMocks, , LOCK_HANDLE, IoTHubTransport_GetLock, TRANSPORT_HANDLE, transportHlHandle);
 DECLARE_GLOBAL_MOCK_METHOD_1(CIoTHubClientMocks, , TRANSPORT_LL_HANDLE, IoTHubTransport_GetLLTransport, TRANSPORT_HANDLE, transportHlHandle);
@@ -1460,6 +1481,198 @@ BEGIN_TEST_SUITE(iothubclient_ut)
         // cleanup
         IoTHubClient_Destroy(iotHubClient);
     }
+
+    /* Tests_SRS_IOTHUBCLIENT_25_084: [ If `iotHubClientHandle` is `NULL`, `IoTHubClient_SetConnectionStatusCallback` shall return `IOTHUB_CLIENT_INVALID_ARG`.]*/
+    TEST_FUNCTION(IoTHubClient_SetConnectionStatusCallback_with_NULL_handle_fails)
+    {
+        // arrange
+        CIoTHubClientMocks mocks;
+
+        // act
+        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetConnectionStatusCallback(NULL, connectionStatusCallback, (void*)0x42);
+
+        // assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG);
+    }
+
+    /* Tests_SRS_IOTHUBCLIENT_25_087: [ `IoTHubClient_SetConnectionStatusCallback` shall be made thread-safe by using the lock created in `IoTHubClient_Create`. ]*/
+    /* Tests_SRS_IOTHUBCLIENT_25_086: [ When `IoTHubClient_LL_SetConnectionStatusCallback` is called, `IoTHubClient_SetConnectionStatusCallback` shall return the result of `IoTHubClient_LL_SetConnectionStatusCallback`.]*/
+    TEST_FUNCTION(IoTHubClient_SetConnectionStatusCallback_returns_the_result_of_calling_IoTHubClient_LL_SetConnectionStatusCallback)
+    {
+        // arrange
+        CIoTHubClientMocks mocks;
+        IOTHUB_CLIENT_HANDLE iotHubClient = IoTHubClient_Create(&TEST_CONFIG);
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
+        EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_SetConnectionStatusCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, connectionStatusCallback, (void*)0x42))
+            .SetReturn(IOTHUB_CLIENT_INVALID_SIZE);
+        STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
+
+        // act
+        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetConnectionStatusCallback(iotHubClient, connectionStatusCallback, (void*)0x42);
+
+        // assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_SIZE);
+        mocks.AssertActualAndExpectedCalls();
+
+        // cleanup
+        IoTHubClient_Destroy(iotHubClient);
+    }
+
+    TEST_FUNCTION(IoTHubClient_SetConnectionStatusCallback_starts_the_worker_thread_and_calls_the_underlayer)
+    {
+        // arrange
+        CIoTHubClientMocks mocks;
+        IOTHUB_CLIENT_HANDLE iotHubClient = IoTHubClient_Create(&TEST_CONFIG);
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
+        EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_SetConnectionStatusCallback(TEST_IOTHUB_CLIENT_LL_HANDLE, connectionStatusCallback, (void*)0x42));
+        STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
+
+        // act
+        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetConnectionStatusCallback(iotHubClient, connectionStatusCallback, (void*)0x42);
+
+        // assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        // cleanup
+        IoTHubClient_Destroy(iotHubClient);
+    }
+
+    /* Tests_SRS_IOTHUBCLIENT_25_092: [ If `iotHubClientHandle` is `NULL`, `IoTHubClient_GetRetryPolicy` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+    TEST_FUNCTION(IoTHubClient_GetRetryPolicy_with_NULL_handle_fails)
+    {
+        // arrange
+        CIoTHubClientMocks mocks;
+
+        // act
+        IOTHUB_CLIENT_RESULT result = IoTHubClient_GetRetryPolicy(NULL, IGNORED_PTR_ARG, IGNORED_PTR_ARG);
+
+        // assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG);
+    }
+
+    /* Tests_SRS_IOTHUBCLIENT_25_094: [ When `IoTHubClient_LL_GetRetryPolicy` is called, `IoTHubClient_GetRetryPolicy` shall return the result of `IoTHubClient_LL_GetRetryPolicy`.]*/
+    TEST_FUNCTION(IoTHubClient_GetRetryPolicy_returns_the_result_of_calling_IoTHubClient_LL_GetRetryPolicy)
+    {
+        // arrange
+        CIoTHubClientMocks mocks;
+        IOTHUB_CLIENT_HANDLE iotHubClient = IoTHubClient_Create(&TEST_CONFIG);
+        IoTHubClient_SetRetryPolicy(iotHubClient, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS);
+        IOTHUB_CLIENT_RETRY_POLICY policy;
+        size_t retryTimeout;
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
+        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_GetRetryPolicy(TEST_IOTHUB_CLIENT_LL_HANDLE, &policy, &retryTimeout))
+            .SetReturn(IOTHUB_CLIENT_INVALID_SIZE);
+        STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
+
+        // act
+        IOTHUB_CLIENT_RESULT result = IoTHubClient_GetRetryPolicy(iotHubClient, &policy, &retryTimeout);
+
+        // assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_SIZE);
+        mocks.AssertActualAndExpectedCalls();
+
+        // cleanup
+        IoTHubClient_Destroy(iotHubClient);
+    }
+
+    TEST_FUNCTION(IoTHubClient_GetRetryPolicy_starts_the_worker_thread_and_calls_the_underlayer)
+    {
+        // arrange
+        CIoTHubClientMocks mocks;
+        IOTHUB_CLIENT_HANDLE iotHubClient = IoTHubClient_Create(&TEST_CONFIG);
+        IoTHubClient_SetRetryPolicy(iotHubClient, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS);
+        IOTHUB_CLIENT_RETRY_POLICY policy;
+        size_t retryTimeout;
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
+        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_GetRetryPolicy(TEST_IOTHUB_CLIENT_LL_HANDLE, &policy, &retryTimeout));
+        STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
+
+        // act
+        IOTHUB_CLIENT_RESULT result = IoTHubClient_GetRetryPolicy(iotHubClient, &policy, &retryTimeout);
+
+        // assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RETRY_POLICY, policy, TEST_RETRY_POLICY);
+        ASSERT_ARE_EQUAL(size_t, retryTimeout, TEST_RETRY_TIMEOUT_SECS);
+        mocks.AssertActualAndExpectedCalls();
+
+        // cleanup
+        IoTHubClient_Destroy(iotHubClient);
+    }
+
+    /* Tests_SRS_IOTHUBCLIENT_25_076: [ If `iotHubClientHandle` is `NULL`, `IoTHubClient_SetRetryPolicy` shall return `IOTHUB_CLIENT_INVALID_ARG`. ]*/
+    TEST_FUNCTION(IoTHubClient_SetRetryPolicy_with_NULL_handle_fails)
+    {
+        // arrange
+        CIoTHubClientMocks mocks;
+
+        // act
+        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetRetryPolicy(NULL, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS);
+
+        // assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_ARG);
+    }
+
+    /* Tests_SRS_IOTHUBCLIENT_25_078: [ When `IoTHubClient_LL_SetRetryPolicy` is called, `IoTHubClient_SetRetryPolicy` shall return the result of `IoTHubClient_LL_SetRetryPolicy`. ]*/
+    TEST_FUNCTION(IoTHubClient_SetRetryPolicy_returns_the_result_of_calling_IoTHubClient_LL_SetRetryPolicy)
+    {
+        // arrange
+        CIoTHubClientMocks mocks;
+        IOTHUB_CLIENT_HANDLE iotHubClient = IoTHubClient_Create(&TEST_CONFIG);
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
+        EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_SetRetryPolicy(TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS))
+            .SetReturn(IOTHUB_CLIENT_INVALID_SIZE);
+        STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
+
+        // act
+        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetRetryPolicy(iotHubClient, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS);
+
+        // assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, result, IOTHUB_CLIENT_INVALID_SIZE);
+        mocks.AssertActualAndExpectedCalls();
+
+        // cleanup
+        IoTHubClient_Destroy(iotHubClient);
+    }
+
+
+    TEST_FUNCTION(IoTHubClient_SetRetryPolicy_starts_the_worker_thread_and_calls_the_underlayer)
+    {
+        // arrange
+        CIoTHubClientMocks mocks;
+        IOTHUB_CLIENT_HANDLE iotHubClient = IoTHubClient_Create(&TEST_CONFIG);
+        mocks.ResetAllCalls();
+
+        STRICT_EXPECTED_CALL(mocks, Lock(TEST_LOCK_HANDLE));
+        EXPECTED_CALL(mocks, ThreadAPI_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        STRICT_EXPECTED_CALL(mocks, IoTHubClient_LL_SetRetryPolicy(TEST_IOTHUB_CLIENT_LL_HANDLE, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS));
+        STRICT_EXPECTED_CALL(mocks, Unlock(TEST_LOCK_HANDLE));
+
+        // act
+        IOTHUB_CLIENT_RESULT result = IoTHubClient_SetRetryPolicy(iotHubClient, TEST_RETRY_POLICY, TEST_RETRY_TIMEOUT_SECS);
+
+        // assert
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+        mocks.AssertActualAndExpectedCalls();
+
+        // cleanup
+        IoTHubClient_Destroy(iotHubClient);
+    }
+
 
     /* Tests_SRS_IOTHUBCLIENT_01_015: [If starting the thread fails, IoTHubClient_SetMessageCallback shall return IOTHUB_CLIENT_ERROR.] */
     TEST_FUNCTION(When_Thread_API_Create_fails_then_IoTHubClient_SetMessageCallback_fails)
