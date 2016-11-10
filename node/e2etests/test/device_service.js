@@ -35,6 +35,7 @@ var runTests = function (hubConnectionString, deviceTransport, provisionedDevice
 
     it('Service sends ' + numberOfc2dMessages + ' C2D messages and they are all received by the device', function (done) {
       this.timeout(180000);
+      var foundTheMessage = false;
       var messageToSend = new Message(uuid.v4());
       messageToSend.expiryTimeUtc = Date.now() + 60000; // Expire 60s from now, to reduce the chance of us hitting the 50-message limit on the IoT Hub
       deviceClient.open(function (openErr) {
@@ -45,7 +46,6 @@ var runTests = function (hubConnectionString, deviceTransport, provisionedDevice
           var myInterval = {};
           debug('about to connect a listener.');
           deviceClient.on('message', function (msg) {
-            var foundTheMessage = false;
             debug('msg delivered with payload: '+msg.data.toString());
             //
             // Make sure that the message we are looking at is one of the messages that we just sent.
@@ -79,7 +79,8 @@ var runTests = function (hubConnectionString, deviceTransport, provisionedDevice
                 var msgSentCounter = 0;
                 myInterval = setInterval(function () {
                   serviceClient.send(provisionedDevice.deviceId, messageToSend, function (sendErr) {
-                    if (sendErr) {
+                    // If the message has been found already, these errors are from unsent "retry" messages so we can safely ignore them.
+                    if (sendErr && !foundTheMessage) {
                       clearInterval(myInterval);
                       done(sendErr);
                     } else {
