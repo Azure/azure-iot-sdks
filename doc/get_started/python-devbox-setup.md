@@ -39,7 +39,7 @@ The Python iothub_client supports python versions 2.7.x, 3.4.x or 3.5.x. Know th
 
 ###Known build issues: 
 
-1.) On building the Python client library (iothub_client.so) on Linux devices that have less than **1GB RAM**, you may see build getting stuck at **98%** while building `iothub_client_python.cpp` as shown below
+1.) On building the Python client library (`iothub_client.so`) on Linux devices that have less than **1GB** RAM, you may see build getting **stuck** at **98%** while building `iothub_client_python.cpp` as shown below
 
 ``[ 98%] Building CXX object python/src/CMakeFiles/iothub_client_python.dir/iothub_client_python.cpp.o``
 
