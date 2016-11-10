@@ -43,7 +43,7 @@ The Python iothub_client supports python versions 2.7.x, 3.4.x or 3.5.x. Know th
 
 ``[ 98%] Building CXX object python/src/CMakeFiles/iothub_client_python.dir/iothub_client_python.cpp.o``
 
-Check the **memory consumption** of the device using `free -m command` in another terminal window. If you are running out of memory while compiling this .CPP file, you may have to temporarily increase the **swap space** to get more available memory to successfully build the Python client side device SDK Library.
+If you run into this issue, check the **memory consumption** of the device using `free -m command` in another terminal window during that time. If you are running out of memory while compiling iothub_client_python.cpp file, you may have to temporarily increase the **swap space** to get more available memory to successfully build the Python client side device SDK Library.
 
 2.) CentOS7: Only Python 2.7 is supported due to a missing boost-python3 library package
 
