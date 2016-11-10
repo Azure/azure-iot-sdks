@@ -296,6 +296,7 @@ void iothub_client_sample_amqp_websockets_shared_run(void)
 			IoTHubClient_LL_Destroy(iotHubClientHandle1);
 			IoTHubClient_LL_Destroy(iotHubClientHandle2);
         }
+        IoTHubTransport_Destroy(transport_handle);
         platform_deinit();
     }
 }

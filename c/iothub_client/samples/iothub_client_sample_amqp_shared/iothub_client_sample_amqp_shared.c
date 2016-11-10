@@ -229,7 +229,7 @@ void iothub_client_sample_amqp_shared_hl_run(void)
         }
 		else if ((iotHubClientHandle2 = IoTHubClient_CreateWithTransport(transport_handle, &client_config2)) == NULL)
 		{
-			(void)printf("ERROR: iotHubClientHandle1 is NULL!\r\n");
+			(void)printf("ERROR: iotHubClientHandle2 is NULL!\r\n");
 		}
         else
         {
@@ -289,6 +289,8 @@ void iothub_client_sample_amqp_shared_hl_run(void)
 			IoTHubClient_Destroy(iotHubClientHandle1);
 			IoTHubClient_Destroy(iotHubClientHandle2);
         }
+
+	IoTHubTransport_Destroy(transport_handle);
 
         platform_deinit();
     }
