@@ -17,12 +17,11 @@
 #include "umocktypes.h"
 #include "umocktypes_c.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/xlogging.h"
 
 #define ENABLE_MOCKS
-#include "azure_c_shared_utility\xio.h"
-#include "azure_c_shared_utility\tlsio.h"
-#include "azure_c_shared_utility\platform.h"
+#include "azure_c_shared_utility/xio.h"
+#include "azure_c_shared_utility/tlsio.h"
+#include "azure_c_shared_utility/platform.h"
 #include "iothubtransport_amqp_common.h"
 #undef ENABLE_MOCKS
 
@@ -99,7 +98,7 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_RETURN(platform_get_default_tlsio, TEST_XIO_INTERFACE);
     REGISTER_GLOBAL_MOCK_RETURN(xio_create, TEST_XIO_HANDLE);
 	REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_GetHostname, TEST_STRING_HANDLE);
-	REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_SetOption, 0);
+	REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_SetOption, IOTHUB_CLIENT_OK);
 	REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_Register, TEST_IOTHUB_DEVICE_HANDLE);
 	REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_Subscribe, 0);
 	REGISTER_GLOBAL_MOCK_RETURN(IoTHubTransport_AMQP_Common_Subscribe_DeviceTwin, 0);

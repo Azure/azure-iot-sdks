@@ -27,7 +27,6 @@ void real_free(void* ptr)
 #include "umocktypes.h"
 #include "umocktypes_c.h"
 #include "azure_c_shared_utility/crt_abstractions.h"
-#include "azure_c_shared_utility/xlogging.h"
 
 #ifdef __cplusplus
 extern "C"
@@ -663,9 +662,6 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Unregister_destroys_the_methods_handle
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
     EXPECTED_CALL(VECTOR_find_if(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
-    EXPECTED_CALL(messagereceiver_close(IGNORED_PTR_ARG));
-    EXPECTED_CALL(messagereceiver_destroy(IGNORED_PTR_ARG));
-    EXPECTED_CALL(link_destroy(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
