@@ -337,7 +337,4 @@ if(${use_installed_dependencies})
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot 
     )
     install(FILES ${iothub_client_h_install_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
-
-else()
-    message(WARNING "This package may only be installed when 'use_installed_dependencies' is ON")
 endif()

@@ -36,3 +36,20 @@ if(NOT ${nuget_e2e_tests})
 else()
     target_link_libraries(iothub_test iothub_service_client)
 endif()
+
+if(${use_installed_dependencies})
+    #Set CMAKE_INSTALL_LIBDIR if not defined
+    include(GNUInstallDirs)
+
+    if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
+        set(CMAKE_INSTALL_LIBDIR "lib")
+    endif()
+
+    install(TARGETS iothub_test EXPORT azure_iot_sdksTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/../bin
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot 
+    )
+    install(FILES ${iothub_test_h_files} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/azureiot)
+endif()
