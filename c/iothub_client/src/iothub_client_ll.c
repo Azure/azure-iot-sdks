@@ -523,6 +523,13 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG* confi
                             handleData->currentMessageTimeout = 0;
                             handleData->current_device_twin_timeout = 0;
                             result = handleData;
+                            /*Codes_SRS_IOTHUBCLIENT_LL_25_124: [ `IoTHubClient_LL_Create` shall set the default retry policy as Exponential backoff with jitter and if succeed and return a `non-NULL` handle. ]*/
+                            if (IoTHubClient_LL_SetRetryPolicy(handleData, IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, 0) != IOTHUB_CLIENT_OK)
+                            {
+                                LogError("Setting default retry policy in transport failed");
+                                IoTHubClient_LL_Destroy(handleData);
+                                result = NULL;
+                            }
                         }
                     }
                 }
@@ -666,6 +673,13 @@ IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(const IOTHUB_CLIENT_
                                 handleData->currentMessageTimeout = 0;
                                 handleData->current_device_twin_timeout = 0;
                                 result = handleData;
+                                /*Codes_SRS_IOTHUBCLIENT_LL_25_125: [ `IoTHubClient_LL_CreateWithTransport` shall set the default retry policy as Exponential backoff with jitter and if succeed and return a `non-NULL` handle. ]*/
+                                if (IoTHubClient_LL_SetRetryPolicy(handleData, IOTHUB_CLIENT_RETRY_EXPONENTIAL_BACKOFF_WITH_JITTER, 0) != IOTHUB_CLIENT_OK)
+                                {
+                                    LogError("Setting default retry policy in transport failed");
+                                    IoTHubClient_LL_Destroy(handleData);
+                                    result = NULL;
+                                }
                             }
                         }
                     }
@@ -1183,13 +1197,7 @@ IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotH
         }
         else
         {
-            /*Codes_SRS_IOTHUBCLIENT_LL_25_117: [**For any policy other then IOTHUB_CLIENT_RETRY_NONE if retryTimeoutLimitInSeconds is zero then IoTHubClient_LL_SetRetryPolicy shall return IOTHUB_CLIENT_INVALID_ARG]*/
-            if (retryPolicy != IOTHUB_CLIENT_RETRY_NONE && retryTimeoutLimitInSeconds == 0)
-            {
-                result = IOTHUB_CLIENT_INVALID_ARG;
-                LOG_ERROR_RESULT;
-            }
-            else if (handleData->IoTHubTransport_SetRetryPolicy(handleData->transportHandle, retryPolicy, retryTimeoutLimitInSeconds) != 0)
+            if (handleData->IoTHubTransport_SetRetryPolicy(handleData->transportHandle, retryPolicy, retryTimeoutLimitInSeconds) != 0)
             {
                 result = IOTHUB_CLIENT_ERROR;
                 LOG_ERROR_RESULT;
