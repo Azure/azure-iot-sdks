@@ -49,6 +49,12 @@ option(no_logging "disable logging" OFF)
 option(use_installed_dependencies "set use_installed_dependencies to ON to use installed packages instead of building dependencies from submodules" OFF)
 option(use_firmware_update "build the Raspberry PI firmware_update sample" OFF)
 
+if(WIN32)
+    option(use_openssl "set use_openssl to ON to use OpenSSL." OFF)
+else()
+    option(use_openssl "set use_openssl to ON to use OpenSSL." ON)
+endif()
+
 #setting nuget_e2e_tests will only generate e2e tests to run with nuget packages.  Install-packages from Package Manager Console in VS before building the projects
 option(nuget_e2e_tests "set nuget_e2e_tests to ON to generate e2e tests to run with nuget packages (default is OFF)" OFF)
 
