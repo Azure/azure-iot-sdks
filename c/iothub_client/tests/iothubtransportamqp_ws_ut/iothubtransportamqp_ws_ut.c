@@ -20,9 +20,9 @@
 #include "azure_c_shared_utility/xlogging.h"
 
 #define ENABLE_MOCKS
-#include "azure_c_shared_utility\xio.h"
-#include "azure_c_shared_utility\wsio.h"
-#include "azure_c_shared_utility\platform.h"
+#include "azure_c_shared_utility/xio.h"
+#include "azure_c_shared_utility/wsio.h"
+#include "azure_c_shared_utility/platform.h"
 #include "iothubtransport_amqp_common.h"
 #undef ENABLE_MOCKS
 
