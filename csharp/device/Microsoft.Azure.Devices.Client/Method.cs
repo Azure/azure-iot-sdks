@@ -6,14 +6,14 @@ namespace Microsoft.Azure.Devices.Client
     /// <summary>
     /// The data structure represent the Device Twin Method that is used for triggering an activity on the device
     /// </summary>
-    internal sealed class DeviceMethod
+    internal sealed class Method
     {
         /// <summary>
         /// Constructor which uses the input byte array as the body
         /// </summary>
         /// <param name="methodName">a string containing the method name, e.g. 'Reboot'</param>
         /// <param name="methodPayload">a string containing the method data as a JSON document</param>
-        internal DeviceMethod(string methodName, string methodPayload)
+        internal Method(string methodName, string methodPayload)
         {
             this.Name = methodName;
             this.Payload = methodPayload;
@@ -38,7 +38,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// contains the response of the device client application method handler.
         /// </summary>
-        internal DeviceMethodStatusType Status
+        internal MethodStatusType Status
         {
             get; set;
         }
@@ -54,7 +54,7 @@ namespace Microsoft.Azure.Devices.Client
         /// <summary>
         /// the request ID for the transport layer
         /// </summary>
-        internal string RequestID
+        internal string RequestId
         {
             get; set;
         }

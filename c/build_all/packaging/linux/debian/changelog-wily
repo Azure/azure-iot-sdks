@@ -1,4 +1,4 @@
-azure-iot-sdk-c (0.1.0.1-17) wily; urgency=low
+azure-iot-sdk-c (0.1.0.1-18) wily; urgency=low
 
   * Initial release
 
@@ -45,6 +45,8 @@ azure-iot-sdk-c (0.1.0.1-17) wily; urgency=low
   * Add messageId and correlationId to uAMQP messages on D2C messages
 
   * Remove extra trusted_ca field from the wsio config for AMQP over WS
+
+  * Add support for MQTT over websockets and bug fixes.
 
  -- AzureIoT User <aziotsdklinux@outlook.com>  Tue, 27 Sep 2016 17:00:00 +0000
 

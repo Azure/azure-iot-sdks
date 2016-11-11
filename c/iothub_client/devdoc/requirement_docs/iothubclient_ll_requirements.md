@@ -185,6 +185,8 @@ extern IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_Create(const IOTHUB_CLIENT_CONFIG
 
 **SRS_IOTHUBCLIENT_LL_02_008: [** Otherwise, `IoTHubClient_LL_Create` shall succeed and return a `non-NULL` handle.** ]** 
 
+**SRS_IOTHUBCLIENT_LL_25_124: [** `IoTHubClient_LL_Create` shall set the default retry policy as Exponential backoff with jitter and if succeed and return a `non-NULL` handle.** ]**
+
 
 
 ## IoTHubClient_LL_CreateWithTransport
@@ -216,6 +218,8 @@ extern  IOTHUB_CLIENT_LL_HANDLE IoTHubClient_LL_CreateWithTransport(IOTHUB_CLIEN
 **SRS_IOTHUBCLIENT_LL_17_006: [** `IoTHubClient_LL_CreateWithTransport` shall call the transport _Register function with the `IOTHUB_DEVICE_CONFIG` populated structure and waitingToSend list.** ]**
 
 **SRS_IOTHUBCLIENT_LL_17_007: [** If the _Register function fails, this function shall fail and return `NULL`.** ]** 
+
+**SRS_IOTHUBCLIENT_LL_25_125: [** `IoTHubClient_LL_CreateWithTransport` shall set the default retry policy as Exponential backoff with jitter and if succeed and return a `non-NULL` handle.** ]**
 
 
 
@@ -342,6 +346,7 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetSendStatus(IOTHUB_CLIENT_LL_HANDL
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetConnectionStatusCallback(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_CONNECTION_STATUS_CALLBACK connectionStatusCallback, void* userContextCallback);
 ```
 **SRS_IOTHUBCLIENT_LL_25_111: [**IoTHubClient_LL_SetConnectionStatusCallback shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL parameter iotHubClientHandle**]**
+
 **SRS_IOTHUBCLIENT_LL_25_112: [**IoTHubClient_LL_SetConnectionStatusCallback shall return IOTHUB_CLIENT_OK and save the callback and userContext as a member of the handle.**]**
 
 ###IotHubClient_LL_ConnectionStatusCallBack
@@ -359,8 +364,9 @@ IotHubClient_LL_ConnectionStatusCallBack is a function that is only called by th
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY retryPolicy, size_t retryTimeoutLimitinSeconds);
 ```
 **SRS_IOTHUBCLIENT_LL_25_116: [**IoTHubClient_LL_SetRetryPolicy shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL iotHubClientHandle**]**
-**SRS_IOTHUBCLIENT_LL_25_117: [**For any policy other then IOTHUB_CLIENT_RETRY_NONE if retryTimeoutLimitinSeconds is zero then IoTHubClient_LL_SetRetryPolicy shall return IOTHUB_CLIENT_INVALID_ARG**]**
+
 **SRS_IOTHUBCLIENT_LL_25_118: [**IoTHubClient_LL_SetRetryPolicy shall save connection retry policies specified by the user to retryPolicy in struct IOTHUB_CLIENT_LL_HANDLE_DATA**]**
+
 **SRS_IOTHUBCLIENT_LL_25_119: [**IoTHubClient_LL_SetRetryPolicy shall save retryTimeoutLimitinSeconds in seconds to retryTimeout in struct IOTHUB_CLIENT_LL_HANDLE_DATA**]**
 
 ###IoTHubClient_LL_GetRetryPolicy
@@ -368,8 +374,11 @@ extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_SetRetryPolicy(IOTHUB_CLIENT_LL_HAND
 extern IOTHUB_CLIENT_RESULT IoTHubClient_LL_GetRetryPolicy(IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle, IOTHUB_CLIENT_RETRY_POLICY* retryPolicy, size_t* retryTimeoutLimitinSeconds);
 ```
 **SRS_IOTHUBCLIENT_LL_25_120: [**IoTHubClient_LL_GetRetryPolicy shall return IOTHUB_CLIENT_INVALID_ARG if called with NULL iotHubClientHandle or retryPolicy or retryTimeoutLimitinSeconds parameters**]**
+
 **SRS_IOTHUBCLIENT_LL_25_121: [**IoTHubClient_LL_GetRetryPolicy shall retrieve connection retry policy from retryPolicy in struct IOTHUB_CLIENT_LL_HANDLE_DATA**]**
+
 **SRS_IOTHUBCLIENT_LL_25_122: [**IoTHubClient_LL_GetRetryPolicy shall retrieve retryTimeoutLimit in seconds from retryTimeoutinSeconds in struct IOTHUB_CLIENT_LL_HANDLE_DATA**]**
+
 **SRS_IOTHUBCLIENT_LL_25_123: [**If user did not set the policy and timeout values by calling IoTHubClient_LL_SetRetryPolicy then IoTHubClient_LL_GetRetryPolicy shall return default values**]**
 
 

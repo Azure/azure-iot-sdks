@@ -25,7 +25,7 @@ namespace Microsoft.Azure.Devices.Client
     using AsyncTaskOfMessage = System.Threading.Tasks.Task<Message>;
 #endif
 
-    public delegate string MethodCallback(string payload, out DeviceMethodStatusType status);
+    public delegate string MethodCallback(string payload, out MethodStatusType status);
 
     /*
      * Class Diagramm and Chain of Responsibility in Device Client 
@@ -760,12 +760,12 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-        internal void OnMethodCalled(DeviceMethod method)
+        internal void OnMethodCalled(Method method)
         {
             if (this.deviceMethods.ContainsKey(method.Name))
             {
                 /* codes_SRS_DEVICECLIENT_10_011: [** The OnMethodCalled shall invoke the specified delegate. ]*/
-                DeviceMethodStatusType status = DeviceMethodStatusType.NotImplemented;
+                MethodStatusType status = MethodStatusType.NotImplemented;
                 method.Result = this.deviceMethods[method.Name](method.Payload, out status);
                 method.Status = status;
             }
@@ -773,7 +773,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 /* codes_SRS_DEVICECLIENT_10_012: [ If the given method does not have a delegate, the respose shall be set to Unsupported. ]*/
                 method.Result = null;
-                method.Status = DeviceMethodStatusType.NotSupported;
+                method.Status = MethodStatusType.NotSupported;
             }
 
             // ArgumentNullException is percolated to the caller.

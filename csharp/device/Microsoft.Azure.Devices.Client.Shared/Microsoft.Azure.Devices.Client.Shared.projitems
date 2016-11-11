@@ -261,11 +261,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\MessageSystemPropertyNames.cs">
       <Link>MessageSystemPropertyNames.cs</Link>
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\DeviceMethod.cs">
-      <Link>DeviceMethod.cs</Link>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\Method.cs">
+      <Link>Method.cs</Link>
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\DeviceMethodResponseType.cs">
-      <Link>DeviceMethodStatusType.cs</Link>
+    <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\MethodStatusType.cs">
+      <Link>MethodStatusType.cs</Link>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)$(DeviceClientDir)\PutOperationType.cs">
       <Link>PutOperationType.cs</Link>

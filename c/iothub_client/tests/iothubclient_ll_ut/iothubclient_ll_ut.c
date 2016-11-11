@@ -309,7 +309,7 @@ static IOTHUB_DEVICE_HANDLE my_FAKE_IoTHubTransport_Register(TRANSPORT_LL_HANDLE
     return (IOTHUB_DEVICE_HANDLE)my_gballoc_malloc(1);
 }
 
-static void my_FAKE_IoTHubTransport_Unregister(IOTHUB_DEVICE_HANDLE handle)
+static void my_FAKE_IoTHubTransport_Unregister(TRANSPORT_LL_HANDLE handle)
 {
     my_gballoc_free(handle);
 }
@@ -572,6 +572,8 @@ static void setup_iothubclient_ll_create_mocks()
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
+
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetRetryPolicy(TEST_TRANSPORT_LL_HANDLE, TEST_RETRY_POLICY, 0));
 }
 
 static void setup_iothubclient_ll_sendreportedstate_mocks()
@@ -678,10 +680,15 @@ static void setup_iothubclient_ll_createwithtransport_mocks()
         .IgnoreArgument(2)
         .IgnoreArgument(3)
         .IgnoreArgument(4);
+    STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetRetryPolicy(TEST_TRANSPORT_LL_HANDLE, TEST_RETRY_POLICY, 0))
+        .IgnoreArgument(1)
+        .IgnoreArgument(2)
+        .IgnoreArgument(3);
 #ifndef DONT_USE_UPLOADTOBLOB
     STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
         .IgnoreArgument(1);
 #endif
+
 }
 
 /*Tests_SRS_IOTHUBCLIENT_LL_05_001: [IoTHubClient_LL_CreateFromConnectionString shall obtain the version string by a call to IoTHubClient_GetVersionString.]*/
@@ -721,7 +728,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateFromConnectionString_with_DeviceKey_fail)
     umock_c_negative_tests_snapshot();
 
     // act
-    size_t calls_cannot_fail[] = { 0, 10, 12, 13, 16, 19, 21, 24, 27, 28, 29, 30, 31, 32, 33, 36, 37, 38, 39, 40, 41, 42, 43, 44 };
+    size_t calls_cannot_fail[] = { 0, 10, 12, 13, 16, 19, 21, 24, 27, 28, 29, 30, 31, 32, 33, 37, 38, 39, 40, 41, 42, 43, 44, 45 };
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
     {
@@ -1223,7 +1230,7 @@ TEST_FUNCTION(IoTHubClient_LL_CreateWithTransport_fail)
 
     // act
 #ifndef DONT_USE_UPLOADTOBLOB
-    size_t calls_cannot_fail[] = { 1, 2, 6, 7, 8, 10 };
+    size_t calls_cannot_fail[] = { 1, 2, 6, 7, 8, 11};
 #endif
     size_t count = umock_c_negative_tests_call_count();
     for (size_t index = 0; index < count; index++)
@@ -1764,8 +1771,7 @@ TEST_FUNCTION(IoTHubClient_LL_SetRetryPolicy_with_NULL_iotHubClientHandle_fails)
 
 }
 
-/*Tests_SRS_IOTHUBCLIENT_LL_25_117: [**For any policy other then IOTHUB_CLIENT_RETRY_NONE if retryTimeoutLimitinSeconds is zero then IoTHubClient_LL_SetRetryPolicy shall return IOTHUB_CLIENT_INVALID_ARG]*/
-TEST_FUNCTION(IoTHubClient_LL_SetRetryPolicy_Retrytimeout_0_fails)
+TEST_FUNCTION(IoTHubClient_LL_SetRetryPolicy_Retrytimeout_0_pass)
 {
     ///arrange
     IOTHUB_CLIENT_LL_HANDLE handle = IoTHubClient_LL_Create(&TEST_CONFIG);
@@ -1774,23 +1780,15 @@ TEST_FUNCTION(IoTHubClient_LL_SetRetryPolicy_Retrytimeout_0_fails)
     ///act
     for (int policy = 0; policy <= 6; policy++)
     {
-        if (policy == 0)
-        {
-            STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetRetryPolicy(IGNORED_PTR_ARG, (IOTHUB_CLIENT_RETRY_POLICY)policy, 0))
+        STRICT_EXPECTED_CALL(FAKE_IoTHubTransport_SetRetryPolicy(IGNORED_PTR_ARG, (IOTHUB_CLIENT_RETRY_POLICY)policy, 0))
                 .IgnoreArgument(1);
-        }
+
         IOTHUB_CLIENT_RESULT result = IoTHubClient_LL_SetRetryPolicy(handle, (IOTHUB_CLIENT_RETRY_POLICY)policy, 0);
         ///assert
-        if (policy != 0)
-        {
-            ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_INVALID_ARG, result);
-            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-        }
-        else
-        {
-            ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
-            ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
-        }
+
+        ASSERT_ARE_EQUAL(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_OK, result);
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
+
     }
 
     ///cleanup

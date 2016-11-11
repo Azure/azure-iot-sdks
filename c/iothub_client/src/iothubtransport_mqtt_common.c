@@ -479,11 +479,11 @@ static bool CanRetry(RETRY_LOGIC *retryLogic)
 
                 if (retryLogic->fnRetryPolicy != NULL && (retryLogic->fnRetryPolicy(&permit, &delay, retryLogic) == 0))
                 {
-                    if ((permit == true) && retryLogic->retryTimeoutLimitInSeconds >= (delay + get_difftime(now, retryLogic->start)))
+                    if ((permit == true) && ((retryLogic->retryTimeoutLimitInSeconds == 0) || retryLogic->retryTimeoutLimitInSeconds >= (delay + get_difftime(now, retryLogic->start))))
                     {
                         retryLogic->delayFromLastConnectToRetry = delay;
 
-                        LogInfo("Evaluated delay %d at %d attempt\n", delay, retryLogic->retrycount);
+                        LogInfo("Evaluated delay %d at %d attempt to retry\n", delay, retryLogic->retrycount);
 
                         if (retryLogic->delayFromLastConnectToRetry <= ERROR_TIME_FOR_RETRY_SECS)
                         {
