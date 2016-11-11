@@ -58,3 +58,8 @@ The following steps describe adding a new requirement in a Word document:
 ![](media/add_requirement/add_requirement_step4.png)
 
 When contributing to markdown requirement docs, you can also use `99` for a developer id, and just increment the last number of the requirement to be unique.
+
+## Adding new files
+If your contribution is not part of an already existed code, you must create a new requirement file and a new unit test project. Our team created a template to help you on it. For the requirements you can copy the [template_requirements.md](https://github.com/Azure/azure-c-shared-utility/blob/develop/devdoc/template_requirements.md) to the appropriate `devdoc` directory and change it to fits your needs.
+
+For the unit test, copy the directory [template_ut](https://github.com/Azure/azure-c-shared-utility/tree/develop/tests/template_ut) to the appropriate `tests` directory and change it to fits your needs. To include your new test suite in the `cmake`, add your new test suite in `test/CMakeLists.txt` with the command `add_subdirectory(template_ut)`.
