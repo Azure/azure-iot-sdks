@@ -25,6 +25,11 @@
 #include "iothubtransportamqp.h"
 #include "iothubtransportmqtt.h"
 
+#ifdef USE_WEBSOCKETS
+#include "iothubtransportamqp_websockets.h"
+#include "iothubtransportmqtt_websockets.h"
+#endif
+
 #ifndef IMPORT_NAME
 #define IMPORT_NAME iothub_client
 #endif
@@ -85,10 +90,17 @@ private:
 // iothubtransportxxxx.h
 //
 
-enum IOTHUB_TRANSPORT_PROVIDER
-{
-    HTTP, AMQP, MQTT
-};
+#ifdef USE_WEBSOCKETS
+    enum IOTHUB_TRANSPORT_PROVIDER
+    {
+        HTTP, AMQP, MQTT, AMQP_WS, MQTT_WS
+    };
+#else
+    enum IOTHUB_TRANSPORT_PROVIDER
+    {
+        HTTP, AMQP, MQTT
+    };
+#endif
 
 //
 //  IotHubError exception handler base class
@@ -830,6 +842,137 @@ ReceiveMessageCallback(
 
 typedef struct
 {
+    boost::python::object deviceTwinCallback;
+    boost::python::object userContext;
+} DeviceTwinContext;
+
+extern "C"
+void
+DeviceTwinCallback(
+    DEVICE_TWIN_UPDATE_STATE updateState,
+    const unsigned char* payLoad, 
+    size_t size, 
+    void* userContextCallback
+    )
+{
+    DeviceTwinContext *deviceTwinContext = (DeviceTwinContext *)userContextCallback;
+    boost::python::object userContext = deviceTwinContext->userContext;
+    boost::python::object deviceTwinCallback = deviceTwinContext->deviceTwinCallback;
+
+    std::string payload_std_string(reinterpret_cast<const char *>(payLoad), size);
+
+    ScopedGILAcquire acquire;
+    try
+    {
+        deviceTwinCallback(updateState, payload_std_string, userContext);
+    }
+    catch (const boost::python::error_already_set)
+    {
+        // Catch and ignore exception that is thrown in Python callback.
+        // There is nothing we can do about it here.
+        PyErr_Print();
+    }
+}
+
+typedef struct
+{
+    boost::python::object sendReportedStateCallback;
+    boost::python::object userContext;
+} SendReportedStateContext;
+
+extern "C"
+void
+SendReportedStateCallback(
+    int status_code,
+    void* userContextCallback
+    )
+{
+    (void*)userContextCallback;
+
+    SendReportedStateContext *sendReportedStateContext = (SendReportedStateContext *)userContextCallback;
+    boost::python::object userContext = sendReportedStateContext->userContext;
+    boost::python::object sendReportedStateCallback = sendReportedStateContext->sendReportedStateCallback;
+
+    ScopedGILAcquire acquire;
+    try
+    {
+        sendReportedStateCallback(status_code, userContext);
+    }
+    catch (const boost::python::error_already_set)
+    {
+        // Catch and ignore exception that is thrown in Python callback.
+        // There is nothing we can do about it here.
+        PyErr_Print();
+    }
+}
+
+typedef struct
+{
+    boost::python::object deviceMethodCallback;
+    boost::python::object userContext;
+} DeviceMethodContext;
+
+class DeviceMethodReturnValue
+{
+public:
+    std::string response;
+    int status;
+};
+
+extern "C"
+int
+DeviceMethodCallback(
+    const char* method_name, 
+    const unsigned char* payLoad, 
+    size_t size, 
+    unsigned char** response, 
+    size_t* resp_size,
+    void* userContextCallback
+    )
+{
+    int retVal = -1;
+
+    DeviceMethodContext *deviceMethodContext = (DeviceMethodContext *)userContextCallback;
+    boost::python::object userContext = deviceMethodContext->userContext;
+    boost::python::object deviceMethodCallback = deviceMethodContext->deviceMethodCallback;
+
+    std::string method_name_std_string(method_name, sizeof(method_name));
+    std::string payload_std_string(reinterpret_cast<const char *>(payLoad), size);
+
+    ScopedGILAcquire acquire;
+    try
+    {
+        boost::python::object user_response_obj = deviceMethodCallback(method_name_std_string, payload_std_string, userContext);
+
+        DeviceMethodReturnValue user_response_value = boost::python::extract<DeviceMethodReturnValue>(user_response_obj)();
+
+        retVal = user_response_value.status;
+
+        printf("Response: %s", user_response_value.response.c_str());
+        printf("Status: %d", user_response_value.status);
+
+        *resp_size = strlen(user_response_value.response.c_str());
+        if ((*response = (unsigned char*)malloc(*resp_size)) == NULL)
+        {
+            *resp_size = 0;
+        }
+        else
+        {
+            memcpy(*response, user_response_value.response.c_str(), *resp_size);
+        }
+    }
+    catch (const boost::python::error_already_set)
+    {
+        // Catch and ignore exception that is thrown in Python callback.
+        // There is nothing we can do about it here.
+        PyErr_Print();
+    }
+
+    return retVal;
+}
+
+typedef struct
+{
     boost::python::object blobUploadCallback;
     boost::python::object userContext;
 } BlobUploadContext;
@@ -877,6 +1020,14 @@ class IoTHubClient
         case MQTT:
             protocol = MQTT_Protocol;
             break;
+#ifdef USE_WEBSOCKETS
+        case AMQP_WS:
+            protocol = AMQP_Protocol_over_WebSocketsTls;
+            break;
+        case MQTT_WS:
+            protocol = MQTT_WebSocket_Protocol;
+            break;
+#endif
         default:
             PyErr_SetString(PyExc_TypeError, "IoTHubTransportProvider set to unknown protocol");
             boost::python::throw_error_already_set();
@@ -1053,6 +1204,84 @@ public:
         {
             ScopedGILRelease release;
             result = IoTHubClient_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, receiveContext);
+        }
+        if (result != IOTHUB_CLIENT_OK)
+        {
+            throw IoTHubClientError(__func__, result);
+        }
+    }
+
+    void SetDeviceTwinCallback(
+        boost::python::object& deviceTwinCallback,
+        boost::python::object& userContext
+        )
+    {
+        if (!PyCallable_Check(deviceTwinCallback.ptr()))
+        {
+            PyErr_SetString(PyExc_TypeError, "set_device_twin_callback expected type callable");
+            boost::python::throw_error_already_set();
+            return;
+        }
+        DeviceTwinContext *deviceTwinContext = new DeviceTwinContext();
+        deviceTwinContext->deviceTwinCallback = deviceTwinCallback;
+        deviceTwinContext->userContext = userContext;
+        IOTHUB_CLIENT_RESULT result;
+        {
+            ScopedGILRelease release;
+            result = IoTHubClient_SetDeviceTwinCallback(iotHubClientHandle, DeviceTwinCallback, deviceTwinContext);
+        }
+        if (result != IOTHUB_CLIENT_OK)
+        {
+            throw IoTHubClientError(__func__, result);
+        }
+    }
+
+    void SendReportedState(
+        std::string reportedState,
+        size_t size,
+        boost::python::object& reportedStateCallback,
+        boost::python::object& userContext
+        )
+    {
+        if (!PyCallable_Check(reportedStateCallback.ptr()))
+        {
+            PyErr_SetString(PyExc_TypeError, "send_reported_state expected type callable");
+            boost::python::throw_error_already_set();
+            return;
+        }
+        SendReportedStateContext *sendReportedStateContext = new SendReportedStateContext();
+        sendReportedStateContext->sendReportedStateCallback = reportedStateCallback;
+        sendReportedStateContext->userContext = userContext;
+
+        IOTHUB_CLIENT_RESULT result;
+        {
+            ScopedGILRelease release;
+            result = IoTHubClient_SendReportedState(iotHubClientHandle, (const unsigned char*)reportedState.c_str(), size, SendReportedStateCallback, sendReportedStateContext);
+        }
+        if (result != IOTHUB_CLIENT_OK)
+        {
+            throw IoTHubClientError(__func__, result);
+        }
+    }
+
+    void SetDeviceMethodCallback(
+        boost::python::object& deviceMethodCallback,
+        boost::python::object& userContext
+        )
+    {
+        if (!PyCallable_Check(deviceMethodCallback.ptr()))
+        {
+            PyErr_SetString(PyExc_TypeError, "set_device_method_callback expected type callable");
+            boost::python::throw_error_already_set();
+            return;
+        }
+        DeviceMethodContext *deviceMethodContext = new DeviceMethodContext();
+        deviceMethodContext->deviceMethodCallback = deviceMethodCallback;
+        deviceMethodContext->userContext = userContext;
+        IOTHUB_CLIENT_RESULT result;
+        {
+            ScopedGILRelease release;
+            result = IoTHubClient_SetDeviceMethodCallback(iotHubClientHandle, DeviceMethodCallback, deviceMethodContext);
         }
         if (result != IOTHUB_CLIENT_OK)
         {
@@ -1275,10 +1504,19 @@ BOOST_PYTHON_MODULE(IMPORT_NAME)
         .value("UNKNOWN", IOTHUBMESSAGE_UNKNOWN)
         ;
 
+    enum_<DEVICE_TWIN_UPDATE_STATE>("IoTHubTwinUpdateState")
+        .value("COMPLETE", DEVICE_TWIN_UPDATE_COMPLETE)
+        .value("PARTIAL", DEVICE_TWIN_UPDATE_PARTIAL)
+        ;
+
     enum_<IOTHUB_TRANSPORT_PROVIDER>("IoTHubTransportProvider")
         .value("HTTP", HTTP)
         .value("AMQP", AMQP)
         .value("MQTT", MQTT)
+#ifdef USE_WEBSOCKETS
+        .value("AMQP_WS", AMQP_WS)
+        .value("MQTT_WS", MQTT_WS)
+#endif
         ;
 
     enum_<IOTHUB_CLIENT_FILE_UPLOAD_RESULT>("IoTHubClientFileUploadResult")
@@ -1320,10 +1558,22 @@ BOOST_PYTHON_MODULE(IMPORT_NAME)
 #endif
         ;
 
+    class_<DeviceMethodReturnValue, boost::noncopyable>("DeviceMethodReturnValue")
+        .def_readwrite("response", &DeviceMethodReturnValue::response)
+        .def_readwrite("status", &DeviceMethodReturnValue::status)
+#ifdef SUPPORT___STR__
+        .def("__str__", &DeviceMethodReturnValue::str)
+        .def("__repr__", &DeviceMethodReturnValue::repr)
+#endif
+        ;
+
     class_<IoTHubClient, boost::noncopyable>("IoTHubClient", no_init)
         .def(init<std::string, IOTHUB_TRANSPORT_PROVIDER>())
         .def("send_event_async", &IoTHubClient::SendEventAsync)
         .def("set_message_callback", &IoTHubClient::SetMessageCallback)
+        .def("set_device_twin_callback", &IoTHubClient::SetDeviceTwinCallback)
+        .def("send_reported_state", &IoTHubClient::SendReportedState)
+        .def("set_device_method_callback", &IoTHubClient::SetDeviceMethodCallback)
         .def("set_option", &IoTHubClient::SetOption)
         .def("get_send_status", &IoTHubClient::GetSendStatus)
         .def("get_last_message_receive_time", &IoTHubClient::GetLastMessageReceiveTime)

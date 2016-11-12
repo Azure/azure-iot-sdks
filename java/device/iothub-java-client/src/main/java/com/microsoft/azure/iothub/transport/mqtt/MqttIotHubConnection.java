@@ -291,7 +291,7 @@ public class MqttIotHubConnection implements MqttCallback
 
                         // Codes_SRS_MQTTIOTHUBCONNECTION_15_018: [The maximum wait interval
                         // until a reconnect is attempted shall be 60 seconds.]
-                        Thread.sleep(TransportUtils.generateSleepInterval(currentReconnectionAttempt) * 1000);
+                        Thread.sleep(TransportUtils.generateSleepInterval(currentReconnectionAttempt));
                     } catch (InterruptedException exception)
                     {
                         // do nothing, reconnection attempts will continue

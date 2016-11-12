@@ -27,6 +27,7 @@ set build-config=Release
 set build-python=2.7
 set wheel=0
 set platname=win32
+set use-websockets=OFF
 
 python python_version_check.py >pyenv.bat
 if errorlevel 1 goto :NeedPython
@@ -43,6 +44,8 @@ exit /b 1
 if "%1" equ "" goto args-done
 if "%1" equ "--config" goto arg-build-config
 if "%1" equ "--wheel" goto arg-build-wheel
+if "%1" equ "--use-websockets" goto arg-use-websockets
+
 call :usage && exit /b 1
 
 :arg-build-config
@@ -53,6 +56,10 @@ goto args-continue
 
 :arg-build-wheel
 set wheel=1
+goto args-continue
+
+:arg-use-websockets
+set use-websockets=ON
 goto args-continue
 
 :args-continue
@@ -67,7 +74,13 @@ set cmake-output=cmake_%build-platform%
 
 REM -- C --
 cd %build-root%..\..\..\c\build_all\windows
+
+if %use-websockets% == ON (
+call build_client.cmd --platform %build-platform% --buildpython %build-python% --config %build-config% --use-websockets
+) else (
 call build_client.cmd --platform %build-platform% --buildpython %build-python% --config %build-config%
+)
+
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 cd %build-root%
 
@@ -110,3 +123,14 @@ if %wheel%==1 (
     dir dist
     echo Yet another Python wheel done
 )
+goto :eof
+
+:usage
+echo build_client.cmd [options]
+echo options:
+echo  --config ^<value^>         [Debug] build configuration (e.g. Debug, Release)
+echo  --platform ^<value^>       [Win32] build platform (e.g. Win32, x64, ...)
+echo  --buildpython ^<value^>    [2.7]   build python extension (e.g. 2.7, 3.4, ...)
+echo  --no-logging               Disable logging
+echo  --use-websockets           Enable websocket support for AMQP and MQTT
+goto :eof

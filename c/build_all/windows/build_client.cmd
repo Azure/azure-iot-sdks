@@ -103,7 +103,7 @@ if %build-platform% == Win32 (
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else (
 	echo ***Running CMAKE for Win64***
-	cmake %build-root% -G "Visual Studio 14 Win64" -Dbuild_python:STRING=%CMAKE_build_python% -Dbuild_javawrapper:BOOL=%CMAKE_build_javawrapper% -Dno_logging:BOOL=%CMAKE_no_logging%
+	cmake %build-root% -G "Visual Studio 14 Win64" -Duse_wsio:BOOL=%CMAKE_use_wsio% -Dbuild_python:STRING=%CMAKE_build_python% -Dbuild_javawrapper:BOOL=%CMAKE_build_javawrapper% -Dno_logging:BOOL=%CMAKE_no_logging%
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
@@ -130,4 +130,5 @@ echo  --config ^<value^>         [Debug] build configuration (e.g. Debug, Releas
 echo  --platform ^<value^>       [Win32] build platform (e.g. Win32, x64, ...)
 echo  --buildpython ^<value^>    [2.7]   build python extension (e.g. 2.7, 3.4, ...)
 echo  --no-logging               Disable logging
+echo  --use-websockets           Enable websocket support for AMQP and MQTT
 goto :eof

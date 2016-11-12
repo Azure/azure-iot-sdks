@@ -40,8 +40,22 @@ def receive_message_callback(message, counter):
 def send_confirmation_callback(message, result, userContext):
     return
 
+
+def device_twin_callback(updateState, payLoad, user_context):
+    return
+
+
+def send_reported_state_callback(status_code, userContext):
+    return
+
+
+def device_method_callback(updateState, payLoad, user_context):
+    return
+
+
 def blob_upload_callback(result, userContext):
     return
+
 
 class TestExceptionDefinitions(unittest.TestCase):
 
@@ -223,17 +237,22 @@ class TestEnumDefinitions(unittest.TestCase):
         self.assertEqual(len(dispositionResult.values), lastEnum)
 
     def test_IoTHubTransportProvider(self):
-        self.assertEqual(IoTHubTransportProvider.HTTP, 0)
-        self.assertEqual(IoTHubTransportProvider.AMQP, 1)
-        self.assertEqual(IoTHubTransportProvider.MQTT, 2)
-        lastEnum = IoTHubTransportProvider.MQTT + 1
-        with self.assertRaises(AttributeError):
-            self.assertEqual(IoTHubTransportProvider.ANY, 0)
-        transportProvider = IoTHubTransportProvider()
-        self.assertEqual(transportProvider, 0)
-        self.assertEqual(len(transportProvider.names), lastEnum)
-        self.assertEqual(len(transportProvider.values), lastEnum)
-
+        if hasattr(IoTHubTransportProvider, "MQTT_WS"):
+            self.assertEqual(IoTHubTransportProvider.HTTP, 0)
+            self.assertEqual(IoTHubTransportProvider.AMQP, 1)
+            self.assertEqual(IoTHubTransportProvider.MQTT, 2)
+            self.assertEqual(IoTHubTransportProvider.AMQP_WS, 3)
+            self.assertEqual(IoTHubTransportProvider.MQTT_WS, 4)
+            lastEnum = IoTHubTransportProvider.MQTT_WS + 1
+            with self.assertRaises(AttributeError):
+                self.assertEqual(IoTHubTransportProvider.ANY, 0)
+        else:
+            self.assertEqual(IoTHubTransportProvider.HTTP, 0)
+            self.assertEqual(IoTHubTransportProvider.AMQP, 1)
+            self.assertEqual(IoTHubTransportProvider.MQTT, 2)
+            lastEnum = IoTHubTransportProvider.MQTT + 1
+            with self.assertRaises(AttributeError):
+                self.assertEqual(IoTHubTransportProvider.ANY, 0)
 
 class TestClassDefinitions(unittest.TestCase):
 
@@ -489,25 +508,47 @@ class TestClassDefinitions(unittest.TestCase):
             client = IoTHubClient(connectionString)
         with self.assertRaises(Exception):
             client = IoTHubClient(connectionString, 1)
-        client = IoTHubClient(connectionString, IoTHubTransportProvider.HTTP)
-        self.assertIsInstance(client, IoTHubClient)
-        self.assertEqual(client.protocol, IoTHubTransportProvider.HTTP)
-        with self.assertRaises(AttributeError):
-            client.protocol = IoTHubTransportProvider.AMQP
-        client = IoTHubClient(connectionString, IoTHubTransportProvider.AMQP)
-        self.assertIsInstance(client, IoTHubClient)
-        self.assertEqual(client.protocol, IoTHubTransportProvider.AMQP)
-        with self.assertRaises(AttributeError):
-            client.protocol = IoTHubTransportProvider.AMQP
-        client = IoTHubClient(connectionString, IoTHubTransportProvider.MQTT)
-        self.assertIsInstance(client, IoTHubClient)
-        self.assertEqual(client.protocol, IoTHubTransportProvider.MQTT)
-        with self.assertRaises(AttributeError):
-            client.protocol = IoTHubTransportProvider.AMQP
+
+        if hasattr(IoTHubTransportProvider, "HTTP"):
+            client = IoTHubClient(connectionString, IoTHubTransportProvider.HTTP)
+            self.assertIsInstance(client, IoTHubClient)
+            self.assertEqual(client.protocol, IoTHubTransportProvider.HTTP)
+            with self.assertRaises(AttributeError):
+                client.protocol = IoTHubTransportProvider.AMQP
+
+        if hasattr(IoTHubTransportProvider, "AMQP"):
+            client = IoTHubClient(connectionString, IoTHubTransportProvider.AMQP)
+            self.assertIsInstance(client, IoTHubClient)
+            self.assertEqual(client.protocol, IoTHubTransportProvider.AMQP)
+            with self.assertRaises(AttributeError):
+                client.protocol = IoTHubTransportProvider.AMQP
+
+        if hasattr(IoTHubTransportProvider, "MQTT"):
+            client = IoTHubClient(connectionString, IoTHubTransportProvider.MQTT)
+            self.assertIsInstance(client, IoTHubClient)
+            self.assertEqual(client.protocol, IoTHubTransportProvider.MQTT)
+            with self.assertRaises(AttributeError):
+                client.protocol = IoTHubTransportProvider.AMQP
+
+        if hasattr(IoTHubTransportProvider, "AMQP_WS"):
+            client = IoTHubClient(connectionString, IoTHubTransportProvider.AMQP_WS)
+            self.assertIsInstance(client, IoTHubClient)
+            self.assertEqual(client.protocol, IoTHubTransportProvider.AMQP_WS)
+            with self.assertRaises(AttributeError):
+                client.protocol = IoTHubTransportProvider.AMQP
+
+        if hasattr(IoTHubTransportProvider, "MQTT_WS"):
+            client = IoTHubClient(connectionString, IoTHubTransportProvider.MQTT_WS)
+            self.assertIsInstance(client, IoTHubClient)
+            self.assertEqual(client.protocol, IoTHubTransportProvider.MQTT_WS)
+            with self.assertRaises(AttributeError):
+                client.protocol = IoTHubTransportProvider.AMQP
+
         with self.assertRaises(AttributeError):
             client.protocol = IoTHubTransportProvider.AMQP
         with self.assertRaises(AttributeError):
             client.protocol = 1
+
         # set_message_callback
         counter = 1
         context = {"a": "b"}
@@ -526,6 +567,7 @@ class TestClassDefinitions(unittest.TestCase):
         self.assertIsNone(result)
         result = client.set_message_callback(receive_message_callback, context)
         self.assertIsNone(result)
+
         # send_event_async
         counter = 1
         message = IoTHubMessage("myMessage")
@@ -543,6 +585,7 @@ class TestClassDefinitions(unittest.TestCase):
         result = client.send_event_async(
             message, send_confirmation_callback, counter)
         self.assertIsNone(result)
+
         # get_send_status
         with self.assertRaises(AttributeError):
             client.GetSendStatus()
@@ -552,6 +595,7 @@ class TestClassDefinitions(unittest.TestCase):
             client.get_send_status(counter)
         result = client.get_send_status()
         self.assertIsNotNone(result)
+
         # get_last_message_receive_time
         with self.assertRaises(AttributeError):
             result = client.GetLastMessageReceiveTime()
@@ -561,6 +605,7 @@ class TestClassDefinitions(unittest.TestCase):
             client.get_last_message_receive_time(counter)
         with self.assertRaises(IoTHubClientError):
             result = client.get_last_message_receive_time()
+
         # set_option
         timeout = 241000
         with self.assertRaises(AttributeError):
@@ -575,6 +620,73 @@ class TestClassDefinitions(unittest.TestCase):
         self.assertIsNone(result)
         result = client.set_option("timeout", timeout)
         self.assertIsNone(result)
+
+        # set_device_twin_callback
+        counter = 1
+        context = {"a": "b"}
+        with self.assertRaises(AttributeError):
+            client.SetDeviceTwinCallback()
+        with self.assertRaises(Exception):
+            client.set_device_twin_callback()
+        with self.assertRaises(Exception):
+            client.set_device_twin_callback(device_twin_callback)
+        with self.assertRaises(Exception):
+            client.set_device_twin_callback(counter, device_twin_callback)
+        with self.assertRaises(Exception):
+            client.set_device_twin_callback(
+                device_twin_callback, counter, context)
+        result = client.set_device_twin_callback(device_twin_callback, counter)
+        self.assertIsNone(result)
+        result = client.set_device_twin_callback(device_twin_callback, context)
+        self.assertIsNone(result)
+
+        # send_reported_state
+        counter = 1
+        reportedState = "{}"
+        size = 2
+        with self.assertRaises(AttributeError):
+            client.SendReportedState()
+        with self.assertRaises(Exception):
+            client.send_reported_state()
+        with self.assertRaises(Exception):
+            client.send_reported_state(send_reported_state_callback)
+        with self.assertRaises(Exception):
+            client.send_reported_state(send_reported_state_callback, reportedState)
+        with self.assertRaises(Exception):
+            client.send_reported_state(send_reported_state_callback, size)
+        with self.assertRaises(Exception):
+            client.send_reported_state(send_reported_state_callback, reportedState, size)
+        with self.assertRaises(Exception):
+            client.send_reported_state(reportedState)
+        with self.assertRaises(Exception):
+            client.send_reported_state(reportedState, size)
+        with self.assertRaises(Exception):
+            client.send_reported_state(reportedState, send_reported_state_callback)
+        with self.assertRaises(Exception):
+            client.send_reported_state(reportedState, size, send_reported_state_callback)
+        result = client.send_reported_state(
+            reportedState, size, send_reported_state_callback, counter)
+        self.assertIsNone(result)
+
+        # set_device_method_callback
+        counter = 1
+        context = {"a": "b"}
+        with self.assertRaises(AttributeError):
+            client.SetDeviceMethodCallback()
+        with self.assertRaises(Exception):
+            client.set_device_method_callback()
+        with self.assertRaises(Exception):
+            client.set_device_method_callback(device_method_callback)
+        with self.assertRaises(Exception):
+            client.set_device_method_callback(counter, device_method_callback)
+        with self.assertRaises(Exception):
+            client.set_device_method_callback(
+                device_method_callback, counter, context)
+        result = client.set_device_method_callback(device_method_callback, counter)
+        self.assertIsNone(result)
+        result = client.set_device_method_callback(device_method_callback, context)
+        self.assertIsNone(result)
+
         # upload_blob_async
         destinationFileName = "fname"
         source = "src"
