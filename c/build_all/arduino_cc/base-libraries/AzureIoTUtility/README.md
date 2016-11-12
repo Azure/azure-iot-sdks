@@ -1,6 +1,6 @@
-# AzureIoTHub - Azure IoT Hub library for Arduino
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-[![Build Status](https://travis-ci.org/arduino-libraries/AzureIoTHub.svg?branch=master)](https://travis-ci.org/arduino-libraries/AzureIoTHub)
+# AzureIoTHub - Azure IoT Hub library for Arduino
 
 This library is a port of the [Microsoft Azure C Shared Utility](https://github.com/Azure/azure-c-shared-utility/blob/master/c/readme.md) to Arduino. It allows you to use several Arduino compatible boards with Azure IoT Hub. Please submit any contribution directly to [azure-c-shared-utility](https://github.com/Azure/azure-c-shared-utility).
 

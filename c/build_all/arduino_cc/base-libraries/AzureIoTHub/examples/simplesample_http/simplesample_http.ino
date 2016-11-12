@@ -40,6 +40,8 @@ Adafruit_WINC1500 WiFi(WINC_CS, WINC_IRQ, WINC_RST);
 #endif
 
 #include <AzureIoTHub.h>
+#include <AzureIoTUtility.h>
+#include <AzureIoTProtocol_HTTP.h>
 
 #include "simplesample_http.h"
 
@@ -70,20 +72,9 @@ void loop() {
 }
 
 void initSerial() {
-    //Initialize serial and wait for port to open:
-  
-#ifdef ARDUINO_ARCH_ESP8266
-    // The next two lines For ESP8266 boards
+    // Start serial and initialize stdout
     Serial.begin(115200);
     Serial.setDebugOutput(true);
-#else
-    // For SAMD boards (e.g. MKR1000, Adafruit WINC1500 based)
-    Serial.begin(9600);
-#endif
-
-    while (!Serial) {
-        ; // wait for serial port to connect. Needed for native USB port only
-    }
 }
 
 void initWifi() {

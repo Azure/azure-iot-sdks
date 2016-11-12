@@ -55,6 +55,38 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
+        "filePath": "c/build_all/arduino_cc/base-libraries/AzureIoTProtocol_HTTP/library.properties",
+        "search": "(version\\=)(.*)",
+        "replaceString": function (versions) {
+            return '$1' + versions.c_arduino.device;
+        }
+    },
+    {
+        "taskType": "regexReplaceTask",
+        "filePath": "c/build_all/arduino_cc/base-libraries/AzureIoTProtocol_HTTP/src/AzureIoTProtocol_HTTP.h",
+        "search": "(AzureIoTProtocolHTTPVersion\\=)([ ]+)(\".*\")",
+        "replaceString": function (versions) {
+            return '$1' + '$2' + '"' + versions.c_arduino.device + '"';
+        }
+    },
+    {
+        "taskType": "regexReplaceTask",
+        "filePath": "c/build_all/arduino_cc/base-libraries/AzureIoTUtility/library.properties",
+        "search": "(version\\=)(.*)",
+        "replaceString": function (versions) {
+            return '$1' + versions.c_arduino.device;
+        }
+    },
+    {
+        "taskType": "regexReplaceTask",
+        "filePath": "c/build_all/arduino_cc/base-libraries/AzureIoTUtility/src/AzureIoTUtility.h",
+        "search": "(AzureIoTUtilityVersion\\=)([ ]+)(\".*\")",
+        "replaceString": function (versions) {
+            return '$1' + '$2' + '"' + versions.c_arduino.device + '"';
+        }
+    },
+    {
+        "taskType": "regexReplaceTask",
         "filePath": "c/iothub_client/tests/version_ut/version_ut.cpp",
         "search": "(\\\".*\\\")([ \t]*\\,[ \t]*IOTHUB\\_SDK\\_VERSION)",
         "replaceString": function(versions) {
