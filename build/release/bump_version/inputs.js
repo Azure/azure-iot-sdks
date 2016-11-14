@@ -31,6 +31,22 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
+        "filePath": "c/iothub_service_client/inc/iothub_sc_version.h",
+        "search": "(IOTHUB\\_SERVICE\\_CLIENT\\_VERSION)([ ]+)(\".*\")",
+        "replaceString": function(versions) {
+            return '$1' + '$2' + '"' + versions.c.service + '"';
+        }
+    },
+    {
+        "taskType": "regexReplaceTask",
+        "filePath": "c/iothub_service_client/tests/iothub_rm_ut/iothub_rm_ut.c",
+        "search": "(TEST\\_HTTP\\_HEADER\\_VAL\\_USER\\_AGENT)([ ]+\\=[ ]+)(\".*\")",
+        "replaceString": function(versions) {
+            return '$1' + '$2' + '"' + 'iothubserviceclient/'+ versions.c.service + '"';
+        }
+    },
+    {
+        "taskType": "regexReplaceTask",
         "filePath": "c/iothub_client/inc/iothub_client_version.h",
         "search": "(IOTHUB\\_SDK\\_VERSION)([ ]+)(\".*\")",
         "replaceString": function(versions) {
@@ -87,7 +103,7 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
-        "filePath": "c/iothub_client/tests/version_ut/version_ut.cpp",
+        "filePath": "c/iothub_client/tests/version_ut/version_ut.c",
         "search": "(\\\".*\\\")([ \t]*\\,[ \t]*IOTHUB\\_SDK\\_VERSION)",
         "replaceString": function(versions) {
             return '"' + versions.c.device + '"$2';
@@ -1032,7 +1048,7 @@ module.exports = [
         "replaceString": function(versions) {
             return '$1' + versions.csharp.service + '$2';
         }
-    },    
+    },
 
     ///////////////////////////////////////////////////
     // Java Websocket Transport Layer files
