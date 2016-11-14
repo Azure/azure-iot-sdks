@@ -10,10 +10,16 @@ once created, it can never be modified.
 ## APIs
 
 ```c
-MOCKABLE_FUNCTION(, METHODRETURN_HANDLE, MethodReturn_Create, int, statusCode, const char*, jsonValue);
-MOCKABLE_FUNCTION(, void, MethodReturn_Destroy, METHODRETURN_HANDLE, handle);
-MOCKABLE_FUNCTION(, int, MethodReturn_GetStatusCode, METHODRETURN_HANDLE, handle);
-MOCKABLE_FUNCTION(, const char*, MethodReturn_GetJsonValue, METHODRETURN_HANDLE, handle);
+
+typedef struct METHODRETURN_DATA_TAG
+{
+    const int statusCode;
+    const char* jsonValue;
+}METHODRETURN_DATA;
+
+extern METHODRETURN_HANDLE MethodReturn_Create(int statusCode, const char* jsonValue);
+extern void, MethodReturn_Destroy(METHODRETURN_HANDLE handle);
+extern const METHODRETURN_DATA* MethodReturn_GetReturn(METHODRETURN_HANDLE handle);
 ```
 
 
@@ -26,6 +32,9 @@ METHODRETURN_HANDLE MethodReturn_Create(int statusCode, const char* jsonValue)
 be `NULL`.
 
 **SRS_METHODRETURN_02_001: [** `MethodReturn_Create` shall create a non-NULL handle containing `statusCode` and a clone of `jsonValue`. **]**
+
+**SRS_METHODRETURN_02_009: [** If `jsonValue` is not a JSON value then `MethodReturn_Create` shall fail and return `NULL`. **]**
+
 **SRS_METHODRETURN_02_002: [** If any failure is encountered then `MethodReturn_Create` shall return `NULL` **]**
 
 ### MethodReturn_Destroy
@@ -36,24 +45,16 @@ void MethodReturn_Destroy(METHODRETURN_HANDLE handle)
 `MethodReturn_Destroy` frees all resources used by `handle`.
 
 **SRS_METHODRETURN_02_003: [** If `handle` is `NULL` then `MethodReturn_Destroy` shall return. **]**
+
 **SRS_METHODRETURN_02_004: [** Otherwise,  `MethodReturn_Destroy` shall free all used resources by `handle`. **]**
+ 
+ ### MethodReturn_GetReturn
+ ```c
+ const METHODRETURN_DATA* MethodReturn_GetReturn(METHODRETURN_HANDLE handle)
+ ```
 
-### MethodReturn_GetStatusCode
-```c
-int MethodReturn_GetStatusCode(METHODRETURN_HANDLE handle)
-```
+ `MethodReturn_GetReturn` returns the return value (made of an `int` and a JSON value as string) from a Method.
 
-`MethodReturn_GetStatusCode` returns the stored status code for a method return.
-
-**SRS_METHODRETURN_02_005: [** If `handle` is `NULL` then `MethodReturn_GetStatusCode` shall return `MIN_INT`+1. **]**
-**SRS_METHODRETURN_02_006: [** Otherwise, `MethodReturn_GetStatusCode` shall return the stored status code. **]**
-
-### MethodReturn_GetJsonValue
-```c
-const char* MethodReturn_GetJsonValue(METHODRETURN_HANDLE handle)
-```
-
-`MethodReturn_GetJsonValue` returns the stored JSON value for a method return.
-
-**SRS_METHODRETURN_02_007: [** If `handle` is `NULL` then `MethodReturn_GetJsonValue` shall return `NULL`. **]**
-**SRS_METHODRETURN_02_008: [** Otherwise, `MethodReturn_GetJsonValue` shall return the stored JSON value. **]**
+ **SRS_METHODRETURN_02_010: [** If `handle` is `NULL` then `MethodReturn_GetReturn` shall fail and return `NULL`. **]**
+ 
+ **SRS_METHODRETURN_02_011: [** Otherwise, `MethodReturn_GetReturn` shall return a non-`NULL` const pointer to a `METHODRETURN_DATA`. **]** 
