@@ -8,7 +8,7 @@ typedef struct METHODRETURN_HANDLE_DATA_TAG* METHODRETURN_HANDLE;
 
 #include "azure_c_shared_utility/macro_utils.h"
 
-/*the following macro expands to "const" if X is defined. If x is not defined, then it expands to nothing*/
+/*the following macro expands to "const" if X is defined. If X is not defined, then it expands to nothing*/
 #define CONST_BY_COMPILATION_UNIT(X) IF(COUNT_ARG(X),const,)
 
 typedef struct METHODRETURN_DATA_TAG
