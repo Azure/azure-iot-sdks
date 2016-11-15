@@ -26,6 +26,7 @@
 #include "parson.h"
 
 #include "iothub_messaging_ll.h"
+#include "iothub_sc_version.h"
 
 typedef struct CALLBACK_DATA_TAG
 {
@@ -62,6 +63,7 @@ typedef struct IOTHUB_MESSAGING_TAG
 
     CALLBACK_DATA* callback_data;
 } IOTHUB_MESSAGING;
+
 
 static const char* FEEDBACK_RECORD_KEY_DEVICE_ID = "deviceId";
 static const char* FEEDBACK_RECORD_KEY_DEVICE_GENERATION_ID = "deviceGenerationId";
@@ -670,6 +672,59 @@ void IoTHubMessaging_LL_Destroy(IOTHUB_MESSAGING_HANDLE messagingHandle)
     }
 }
 
+static int attachServiceClientTypeToLink(LINK_HANDLE link)
+{
+    fields attach_properties;
+    AMQP_VALUE serviceClientTypeKeyName;
+    AMQP_VALUE serviceClientTypeValue;
+    int result;
+
+    if ((attach_properties = amqpvalue_create_map()) == NULL)
+    {
+        LogError("Failed to create the map for service client type.");
+        result = __LINE__;
+    }
+    else
+    {
+        if ((serviceClientTypeKeyName = amqpvalue_create_symbol("com.microsoft:client-version")) == NULL)
+        {
+            LogError("Failed to create the key name for the service client type.");
+            result = __LINE__;
+        }
+        else
+        {
+            if ((serviceClientTypeValue = amqpvalue_create_string(IOTHUB_SERVICE_CLIENT_TYPE_PREFIX IOTHUB_SERVICE_CLIENT_BACKSLASH IOTHUB_SERVICE_CLIENT_VERSION)) == NULL)
+            {
+                LogError("Failed to create the key value for the service client type.");
+                result = __LINE__;
+            }
+            else
+            {
+                if ((result = amqpvalue_set_map_value(attach_properties, serviceClientTypeKeyName, serviceClientTypeValue)) != 0)
+                {
+                    LogError("Failed to set the property map for the service client type.  Error code is: %d", result);
+                }
+                else if ((result = link_set_attach_properties(link, attach_properties)) != 0)
+                {
+                    LogError("Unable to attach the service client type to the link properties. Error code is: %d", result);
+                }
+                else
+                {
+                    result = 0;
+                }
+
+                amqpvalue_destroy(serviceClientTypeValue);
+            }
+
+            amqpvalue_destroy(serviceClientTypeKeyName);
+        }
+
+        amqpvalue_destroy(attach_properties);
+    }
+    return result;
+}
+
+
 IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagingHandle, IOTHUB_OPEN_COMPLETE_CALLBACK openCompleteCallback, void* userContextCallback)
 {
     IOTHUB_MESSAGING_RESULT result;
@@ -876,6 +931,15 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                         free((char*)messagingHandle->sasl_plain_config.passwd);
                         result = IOTHUB_MESSAGING_ERROR;
                     }
+                    /*Codes_SRS_IOTHUBMESSAGING_06_001: [ IoTHubMessaging_LL_Open shall add the version property to the sender link by calling the link_set_attach_properties ] */
+                    else if (attachServiceClientTypeToLink(messagingHandle->sender_link) != 0)
+                    {
+                        /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
+                        LogError("Could not set the sender attach properties.");
+                        free((char*)messagingHandle->sasl_plain_config.authcid);
+                        free((char*)messagingHandle->sasl_plain_config.passwd);
+                        result = IOTHUB_MESSAGING_ERROR;
+                    }
                     /*Codes_SRS_IOTHUBMESSAGING_12_019: [ IoTHubMessaging_LL_Open shall set the AMQP sender link settle mode to sender_settle_mode_unsettled  by calling link_set_snd_settle_mode ] */
                     else if (link_set_snd_settle_mode(messagingHandle->sender_link, sender_settle_mode_unsettled) != 0)
                     {
@@ -923,6 +987,15 @@ IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE messagin
                     }
                     /*Codes_SRS_IOTHUBMESSAGING_12_024: [ IoTHubMessaging_LL_Open shall create uAMQP receiver link by calling the link_create ] */
                     else if ((messagingHandle->receiver_link = link_create(messagingHandle->session, "receiver-link", role_receiver, receiveSource, receiveTarget)) == NULL)
+                    {
+                        /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
+                        LogError("Could not create link.");
+                        free((char*)messagingHandle->sasl_plain_config.authcid);
+                        free((char*)messagingHandle->sasl_plain_config.passwd);
+                        result = IOTHUB_MESSAGING_ERROR;
+                    }
+                    /*Codes_SRS_IOTHUBMESSAGING_06_002: [ IoTHubMessaging_LL_Open shall add the version property to the receiver by calling the link_set_attach_properties ] */
+                    else if (attachServiceClientTypeToLink(messagingHandle->receiver_link) != 0)
                     {
                         /*Codes_SRS_IOTHUBMESSAGING_12_030: [ If any of the uAMQP call fails IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_ERROR ] */
                         LogError("Could not create link.");

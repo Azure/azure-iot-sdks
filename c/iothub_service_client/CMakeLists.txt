@@ -32,6 +32,7 @@ set(iothub_service_client_h_files
 ./inc/iothub_devicetwin.h
 ./inc/iothub_devicemethod.h
 ./inc/iothub_service_client_auth.h
+./inc/iothub_sc_version.h
 ../iothub_client/inc/iothub_message.h
 )
 

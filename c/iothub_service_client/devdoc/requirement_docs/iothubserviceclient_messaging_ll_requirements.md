@@ -24,7 +24,7 @@ DEFINE_ENUM(IOTHUB_FEEDBACK_STATUS_CODE, IOTHUB_FEEDBACK_STATUS_CODE_VALUES);
     IOTHUB_MESSAGE_SEND_STATE_SEND_IN_PROGRESS,          \
     IOTHUB_MESSAGE_SEND_STATE_SENT_OK,                   \
     IOTHUB_MESSAGE_SEND_STATE_SEND_FAILED                \
-    
+
 DEFINE_ENUM(IOTHUB_MESSAGE_SEND_STATE, IOTHUB_MESSAGE_SEND_STATE_VALUES);
 
 #define IOTHUB_MESSAGING_RESULT_VALUES       \
@@ -149,6 +149,8 @@ extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE m
 
 **SRS_IOTHUBMESSAGING_12_018: [** IoTHubMessaging_LL_Open shall create uAMQP sender link by calling the link_create **]**
 
+**SRS_IOTHUBMESSAGING_06_001: [** IoTHubMessaging_LL_Open shall add the version property to the sender link by calling the link_set_attach_properties **]**
+
 **SRS_IOTHUBMESSAGING_12_019: [** IoTHubMessaging_LL_Open shall set the AMQP sender link settle mode to sender_settle_mode_unsettled  by calling link_set_snd_settle_mode **]**
 
 **SRS_IOTHUBMESSAGING_12_021: [** IoTHubMessaging_LL_Open shall create uAMQP messaging source for sender by calling the messaging_create_source **]**
@@ -158,6 +160,8 @@ extern IOTHUB_MESSAGING_RESULT IoTHubMessaging_LL_Open(IOTHUB_MESSAGING_HANDLE m
 **SRS_IOTHUBMESSAGING_12_023: [** IoTHubMessaging_LL_Open shall create uAMQP message sender by calling the messagesender_create with the created sender link and the local IoTHubMessaging_LL_SenderStateChanged callback **]**
 
 **SRS_IOTHUBMESSAGING_12_024: [** IoTHubMessaging_LL_Open shall create uAMQP receiver link by calling the link_create **]**
+
+**SRS_IOTHUBMESSAGING_06_002: [** IoTHubMessaging_LL_Open shall add the version property to the receiver by calling the link_set_attach_properties **]**
 
 **SRS_IOTHUBMESSAGING_12_025: [** IoTHubMessaging_LL_Open shall set the AMQP receiver link settle mode to receiver_settle_mode_first by calling link_set_rcv_settle_mode **]**
 
@@ -230,7 +234,7 @@ extern void IoTHubMessaging_LL_DoWork();
 
 
 ## IoTHubMessaging_LL_SenderStateChanged
-```c 
+```c
 static void IoTHubMessaging_LL_SenderStateChanged(void* context, MESSAGE_SENDER_STATE new_state, MESSAGE_SENDER_STATE previous_state);
 ```
 **SRS_IOTHUBMESSAGING_12_049: [** IoTHubMessaging_LL_SenderStateChanged shall save the new_state to local variable **]**
@@ -242,7 +246,7 @@ static void IoTHubMessaging_LL_SenderStateChanged(void* context, MESSAGE_SENDER_
 
 
 ## IoTHubMessaging_LL_ReceiverStateChanged
-```c 
+```c
 static void IoTHubMessaging_LL_ReceiverStateChanged(const void* context, MESSAGE_RECEIVER_STATE new_state, MESSAGE_RECEIVER_STATE previous_state);
 ```
 **SRS_IOTHUBMESSAGING_12_052: [** IoTHubMessaging_LL_ReceiverStateChanged shall save the new_state to local variable **]**
@@ -254,7 +258,7 @@ static void IoTHubMessaging_LL_ReceiverStateChanged(const void* context, MESSAGE
 
 
 ## IoTHubMessaging_LL_SendMessageComplete
-```c 
+```c
 static void IoTHubMessaging_LL_SendMessageComplete(void* context, MESSAGE_SEND_RESULT send_result);
 ```
 **SRS_IOTHUBMESSAGING_12_055: [** If context is not NULL and IoTHubMessaging_LL_SendMessageComplete shall call user callback with user context and messaging result **]**
@@ -263,7 +267,7 @@ static void IoTHubMessaging_LL_SendMessageComplete(void* context, MESSAGE_SEND_R
 
 
 ## IoTHubMessaging_LL_FeedbackMessageReceived
-```c 
+```c
 static AMQP_VALUE IoTHubMessaging_LL_FeedbackMessageReceived(const void* context, MESSAGE_HANDLE message);
 ```
 **SRS_IOTHUBMESSAGING_12_057: [** If context is NULL IoTHubMessaging_LL_FeedbackMessageReceived shall do nothing and return delivery_accepted **]**

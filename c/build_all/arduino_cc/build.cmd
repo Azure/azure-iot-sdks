@@ -14,6 +14,7 @@ for %%i in ("%build_root%") do set build_root=%%~fi
 
 set work_root=%build_root%\arduino_cc_Work
 set test_root=%build_root%\arduino_cc_Work
+set tests_list_file=tests.lst
 set compiler_path=%build_root%\%IOTHUB_ARDUINO_VERSION%
 
 set compiler_hardware_path=%compiler_path%\hardware
@@ -38,6 +39,8 @@ if "%1" equ "" goto args_done
 if "%1" equ "-c" goto arg_build_clean
 if "%1" equ "--clean" goto arg_build_clean
 if "%1" equ "--root" goto arg_test_root
+if "%1" equ "--tests" goto arg_test_tests
+if "%1" equ "-t" goto arg_test_tests
 if "%1" equ "-b" goto arg_build_only
 if "%1" equ "--build-only" goto arg_build_only
 if "%1" equ "-r" goto arg_run_only
@@ -53,6 +56,11 @@ goto args_continue
 :arg_test_root
 set clone_test=OFF
 set test_root=%2
+shift
+goto args_continue
+
+:arg_test_tests
+set tests_list_file=%2
 shift
 goto args_continue
 
@@ -214,11 +222,10 @@ rem ----------------------------------------------------------------------------
 
 REM Parser tests.lst
 :ExecuteAllTests
-set buildlog=tests.lst
 set testName=false
 set projectName=
 
-for /F "tokens=*" %%F in (%buildlog%) do (
+for /F "tokens=*" %%F in (%tests_list_file%) do (
     if /i "%%F"=="" (
         REM ignore empty line.
     ) else ( 
