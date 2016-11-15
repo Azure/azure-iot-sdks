@@ -19,6 +19,9 @@ namespace Microsoft.Azure.Devices
         const string JobsQueryFormat = "/jobs/v2/query?{0}";
         const string CancelJobUriFormat = "/jobs/v2/{0}/cancel?{1}";
 
+        const string ContinuationTokenHeader = "x-ms-continuation";
+        const string PageSizeHeader = "x-ms-max-item-count";
+
         static readonly TimeSpan DefaultOperationTimeout = TimeSpan.FromSeconds(100);
 
         IHttpClientHelper httpClientHelper;
@@ -103,12 +106,12 @@ namespace Microsoft.Azure.Devices
             return CreateQuery(null, null, pageSize);
         }
 
-        public override IQuery CreateQuery(DeviceJobType? jobType, DeviceJobStatus? jobStatus)
+        public override IQuery CreateQuery(JobType? jobType, JobStatus? jobStatus)
         {
             return CreateQuery(jobType, jobStatus, null);
         }
 
-        public override IQuery CreateQuery(DeviceJobType? jobType, DeviceJobStatus? jobStatus, int? pageSize)
+        public override IQuery CreateQuery(JobType? jobType, JobStatus? jobStatus, int? pageSize)
         {
             return new Query((token) => this.GetJobsAsync(jobType, jobStatus, pageSize, token, CancellationToken.None));
         }
@@ -184,41 +187,6 @@ namespace Microsoft.Azure.Devices
             return this.CreateJobAsync(jobRequest, cancellationToken);
         }
 
-        /// <inheritdoc/>
-        public override Task<JobResponse> ScheduleDeviceMethodAsync(
-            string jobId, 
-            IEnumerable<string> deviceIds,
-            CloudToDeviceMethod cloudToDeviceMethod, 
-            DateTime startTimeUtc,
-            long maxExecutionTimeInSeconds)
-        {
-            return this.ScheduleDeviceMethodAsync(jobId, deviceIds, cloudToDeviceMethod, startTimeUtc, maxExecutionTimeInSeconds, CancellationToken.None);
-        }
-
-        /// <inheritdoc/>
-        public override Task<JobResponse> ScheduleDeviceMethodAsync(
-            string jobId, 
-            IEnumerable<string> deviceIds,
-            CloudToDeviceMethod cloudToDeviceMethod, 
-            DateTime startTimeUtc,
-            long maxExecutionTimeInSeconds,
-            CancellationToken cancellationToken)
-        {
-            this.EnsureInstanceNotClosed();
-
-            var jobRequest = new JobRequest()
-            {
-                JobId = jobId,
-                JobType = JobType.ScheduleDeviceMethod,
-                CloudToDeviceMethod = cloudToDeviceMethod,
-                DeviceIds = deviceIds,
-                StartTime = startTimeUtc,
-                MaxExecutionTimeInSeconds = maxExecutionTimeInSeconds
-            };
-
-            return this.CreateJobAsync(jobRequest, cancellationToken);
-        }
-
         public override Task<JobResponse> ScheduleTwinUpdateAsync(
             string jobId, 
             string queryCondition,
@@ -245,29 +213,6 @@ namespace Microsoft.Azure.Devices
                 JobType = JobType.ScheduleUpdateTwin,
                 UpdateTwin = twin,
                 QueryCondition = queryCondition,
-                StartTime = startTimeUtc,
-                MaxExecutionTimeInSeconds = maxExecutionTimeInSeconds
-            };
-
-            return this.CreateJobAsync(jobRequest, cancellationToken);
-        }
-
-        public override Task<JobResponse> ScheduleTwinUpdateAsync(string jobId, IEnumerable<string> deviceIds, Twin twin, DateTime startTimeUtc, long maxExecutionTimeInSecondsL)
-        {
-            return this.ScheduleTwinUpdateAsync(jobId, deviceIds, twin, startTimeUtc, maxExecutionTimeInSecondsL, CancellationToken.None);
-        }
-
-        public override Task<JobResponse> ScheduleTwinUpdateAsync(string jobId, IEnumerable<string> deviceIds, Twin twin, DateTime startTimeUtc,
-            long maxExecutionTimeInSeconds, CancellationToken cancellationToken)
-        {
-            this.EnsureInstanceNotClosed();
-
-            var jobRequest = new JobRequest()
-            {
-                JobId = jobId,
-                JobType = JobType.ScheduleUpdateTwin,
-                UpdateTwin = twin,
-                DeviceIds = deviceIds,
                 StartTime = startTimeUtc,
                 MaxExecutionTimeInSeconds = maxExecutionTimeInSeconds
             };
@@ -309,18 +254,31 @@ namespace Microsoft.Azure.Devices
             }
         }
 
-        Task<QueryResult> GetJobsAsync(DeviceJobType? jobType, DeviceJobStatus? jobStatus, int? pageSize, string continuationToken, CancellationToken cancellationToken)
+        async Task<QueryResult> GetJobsAsync(JobType? jobType, JobStatus? jobStatus, int? pageSize, string continuationToken, CancellationToken cancellationToken)
         {
             this.EnsureInstanceNotClosed();
 
-            return this.httpClientHelper.GetAsync<QueryResult>(
-                BuildQueryJobUri(jobType, jobStatus, pageSize, continuationToken),
+            var customHeaders = new Dictionary<string, string>();
+            if (!string.IsNullOrWhiteSpace(continuationToken))
+            {
+                customHeaders.Add(ContinuationTokenHeader, continuationToken);
+            }
+
+            if (pageSize != null)
+            {
+                customHeaders.Add(PageSizeHeader, pageSize.ToString());
+            }
+
+            HttpResponseMessage response = await this.httpClientHelper.GetAsync<HttpResponseMessage>(
+                BuildQueryJobUri(jobType, jobStatus),
                 null,
-                null,
+                customHeaders,
                 cancellationToken);
+
+            return await QueryResult.FromHttpResponseAsync(response);
         }
 
-        Uri BuildQueryJobUri(DeviceJobType? jobType, DeviceJobStatus? jobStatus, int? pageSize, string continuationToken)
+        Uri BuildQueryJobUri(JobType? jobType, JobStatus? jobStatus)
         {
             StringBuilder stringBuilder = new StringBuilder(JobsQueryFormat.FormatInvariant(ClientApiVersionHelper.ApiVersionQueryString));
 
@@ -332,16 +290,6 @@ namespace Microsoft.Azure.Devices
             if (jobStatus != null)
             {
                 stringBuilder.Append("&jobStatus={0}".FormatInvariant(WebUtility.UrlEncode(jobStatus.ToString())));
-            }
-
-            if (pageSize != null)
-            {
-                stringBuilder.Append("&pageSize={0}".FormatInvariant(pageSize));
-            }
-
-            if (!string.IsNullOrWhiteSpace(continuationToken))
-            {
-                stringBuilder.Append("&continuationToken={0}".FormatInvariant(WebUtility.UrlEncode(continuationToken)));
             }
 
             return new Uri(stringBuilder.ToString(), UriKind.Relative);

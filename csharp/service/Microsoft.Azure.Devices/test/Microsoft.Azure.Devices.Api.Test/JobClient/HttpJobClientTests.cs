@@ -40,8 +40,7 @@ namespace Microsoft.Azure.Devices.Api.Test.JobClient
                 It.IsAny<Uri>(),
                 It.Is<JobRequest>(
                     r =>
-                        r.JobId == jobId && r.JobType == jobType &&
-                        r.DeviceIds.Contains(deviceId)),
+                        r.JobId == jobId && r.JobType == jobType),
                 It.IsAny<Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(),
                 It.Is<CancellationToken>(c => c == cancellationToken)))
                 .Returns(Task.FromResult(expectedJobResponse));
@@ -53,8 +52,7 @@ namespace Microsoft.Azure.Devices.Api.Test.JobClient
                 It.IsAny<Uri>(),
                 It.Is<JobRequest>(
                     r =>
-                        r.JobId == jobId && r.JobType == jobType &&
-                        r.DeviceIds.Contains(deviceId)),
+                        r.JobId == jobId && r.JobType == jobType),
                 It.IsAny<Dictionary<HttpStatusCode, Func<HttpResponseMessage, Task<Exception>>>>(),
                 It.Is<CancellationToken>(c => c == cancellationToken)))
                 .Returns(Task.FromResult(expectedJobResponse));

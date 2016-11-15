@@ -27,6 +27,9 @@ namespace Microsoft.Azure.Devices
         const string DevicesQueryUriFormat = "/devices/query?" + ClientApiVersionHelper.ApiVersionQueryString;
         const string WildcardEtag = "*";
 
+        const string ContinuationTokenHeader = "x-ms-continuation";
+        const string PageSizeHeader = "x-ms-max-item-count";
+
         const string TwinUriFormat = "/twins/{0}?{1}";
         const string TwinTagsUriFormat = "/twins/{0}/tags?{1}";
         const string TwinDesiredPropertiesUriFormat = "/twins/{0}/properties/desired?{1}";
@@ -870,7 +873,7 @@ namespace Microsoft.Azure.Devices
             }
         }
 
-        Task<QueryResult> ExecuteQueryAsync(string sqlQueryString, int? pageSize, string continuationToken, CancellationToken cancellationToken)
+        async Task<QueryResult> ExecuteQueryAsync(string sqlQueryString, int? pageSize, string continuationToken, CancellationToken cancellationToken)
         {
             this.EnsureInstanceNotClosed();
 
@@ -879,19 +882,30 @@ namespace Microsoft.Azure.Devices
                 throw new ArgumentException(IotHubApiResources.GetString(ApiResources.ParameterCannotBeNullOrEmpty, nameof(sqlQueryString)));
             }
 
-            return this.httpClientHelper.PostAsync<QuerySpecification, QueryResult>(
+            var customHeaders = new Dictionary<string, string>();
+            if (!string.IsNullOrWhiteSpace(continuationToken))
+            {
+                customHeaders.Add(ContinuationTokenHeader, continuationToken);
+            }
+
+            if (pageSize != null)
+            {
+                customHeaders.Add(PageSizeHeader, pageSize.ToString());
+            }
+
+            HttpResponseMessage response = await this.httpClientHelper.PostAsync<QuerySpecification>(
                 QueryDevicesRequestUri(),
                 new QuerySpecification()
                 {
-                    Sql = sqlQueryString,
-                    PageSize = pageSize,
-                    ContinuationToken = continuationToken
+                    Sql = sqlQueryString
                 },
                 null,
-                null,
+                customHeaders,
                 new MediaTypeHeaderValue("application/json") { CharSet = "utf-8" },
                 null,
                 cancellationToken);
+
+            return await QueryResult.FromHttpResponseAsync(response);
         }
     }
 }

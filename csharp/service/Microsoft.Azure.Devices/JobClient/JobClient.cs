@@ -69,7 +69,7 @@ namespace Microsoft.Azure.Devices
         /// <param name="jobType">The job type to query. Could be null if not querying.</param>
         /// <param name="jobStatus">The job status to query. Could be null if not querying.</param>
         /// <returns></returns>
-        public abstract IQuery CreateQuery(DeviceJobType? jobType, DeviceJobStatus? jobStatus);
+        public abstract IQuery CreateQuery(JobType? jobType, JobStatus? jobStatus);
 
         /// <summary>
         /// Get IQuery through which job responses for specified jobType and jobStatus are retrieved page by page,
@@ -79,7 +79,7 @@ namespace Microsoft.Azure.Devices
         /// <param name="jobStatus">The job status to query. Could be null if not querying.</param>
         /// <param name="pageSize">Number of job responses in a page</param>
         /// <returns></returns>
-        public abstract IQuery CreateQuery(DeviceJobType? jobType, DeviceJobStatus? jobStatus, int? pageSize);
+        public abstract IQuery CreateQuery(JobType? jobType, JobStatus? jobStatus, int? pageSize);
 
         /// <summary>
         /// Cancels/Deletes the job with the specified ID.
@@ -118,29 +118,6 @@ namespace Microsoft.Azure.Devices
         public abstract Task<JobResponse> ScheduleDeviceMethodAsync(string jobId, string queryCondition, CloudToDeviceMethod cloudToDeviceMethod, DateTime startTimeUtc, long maxExecutionTimeInSeconds, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Creates a new Job to run a device method on one or multiple devices
-        /// </summary>
-        /// <param name="jobId">Unique Job Id for this job</param>
-        /// <param name="deviceIds">List of devices to run the job on</param>
-        /// <param name="cloudToDeviceMethod">Method call parameters</param>
-        /// <param name="startTimeUtc">Date time in Utc to start the job</param>
-        /// <param name="maxExecutionTimeInSeconds">Max execution time in seconds, i.e., ttl duration the job can run</param>
-        /// <returns>A JobResponse object</returns>
-        public abstract Task<JobResponse> ScheduleDeviceMethodAsync(string jobId, IEnumerable<string> deviceIds, CloudToDeviceMethod cloudToDeviceMethod, DateTime startTimeUtc, long maxExecutionTimeInSeconds);
-
-        /// <summary>
-        /// Creates a new Job to run a device method on one or multiple devices
-        /// </summary>
-        /// <param name="jobId">Unique Job Id for this job</param>
-        /// <param name="deviceIds">List of devices to run the job on</param>
-        /// <param name="cloudToDeviceMethod">Method call parameters</param>
-        /// <param name="startTimeUtc">Date time in Utc to start the job</param>
-        /// <param name="maxExecutionTimeInSeconds">Max execution time in seconds, i.e., ttl duration the job can run</param>
-        /// <param name="cancellationToken">Task cancellation token</param>
-        /// <returns>A JobResponse object</returns>
-        public abstract Task<JobResponse> ScheduleDeviceMethodAsync(string jobId, IEnumerable<string> deviceIds, CloudToDeviceMethod cloudToDeviceMethod, DateTime startTimeUtc, long maxExecutionTimeInSeconds, CancellationToken cancellationToken);
-
-        /// <summary>
         /// Creates a new Job to update twin tags and desired properties on one or multiple devices
         /// </summary>
         /// <param name="jobId">Unique Job Id for this job</param>
@@ -162,28 +139,5 @@ namespace Microsoft.Azure.Devices
         /// <param name="cancellationToken">Task cancellation token</param>
         /// <returns>A JobResponse object</returns>
         public abstract Task<JobResponse> ScheduleTwinUpdateAsync(string jobId, string queryCondition, Twin twin, DateTime startTimeUtc, long maxExecutionTimeInSeconds, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Creates a new Job to update twin tags and desired properties on one or multiple devices
-        /// </summary>
-        /// <param name="jobId">Unique Job Id for this job</param>
-        /// <param name="deviceIds">List of devices to run the job on</param>
-        /// <param name="twin">Twin object to use for the update</param>
-        /// <param name="startTimeUtc">Date time in Utc to start the job</param>
-        /// <param name="maxExecutionTimeInSeconds">Max execution time in seconds, i.e., ttl duration the job can run</param>
-        /// <returns>A JobResponse object</returns>
-        public abstract Task<JobResponse> ScheduleTwinUpdateAsync(string jobId, IEnumerable<string> deviceIds, Twin twin, DateTime startTimeUtc, long maxExecutionTimeInSeconds);
-
-        /// <summary>
-        /// Creates a new Job to update twin tags and desired properties on one or multiple devices
-        /// </summary>
-        /// <param name="jobId">Unique Job Id for this job</param>
-        /// <param name="deviceIds">List of devices to run the job on</param>
-        /// <param name="twin">Twin object to use for the update</param>
-        /// <param name="startTimeUtc">Date time in Utc to start the job</param>
-        /// <param name="maxExecutionTimeInSeconds">Max execution time in seconds, i.e., ttl duration the job can run</param>
-        /// <param name="cancellationToken">Task cancellation token</param>
-        /// <returns>A JobResponse object</returns>
-        public abstract Task<JobResponse> ScheduleTwinUpdateAsync(string jobId, IEnumerable<string> deviceIds, Twin twin, DateTime startTimeUtc, long maxExecutionTimeInSeconds, CancellationToken cancellationToken);
     }
 }
