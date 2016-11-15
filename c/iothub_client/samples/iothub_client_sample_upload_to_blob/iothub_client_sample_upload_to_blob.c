@@ -22,10 +22,7 @@ and removing calls to _DoWork will yield the same results. */
 #include "iothub_message.h"
 #include "iothubtransporthttp.h"
 #endif
-
-#ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
-#endif // MBED_BUILD_TIMESTAMP
 
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
@@ -40,7 +37,7 @@ void iothub_client_sample_upload_to_blob_run(void)
 
     if (platform_init() != 0)
     {
-        printf("Failed to initialize the platform.\r\n");
+        (void)printf("Failed to initialize the platform.\r\n");
     }
     else
     {
@@ -52,13 +49,19 @@ void iothub_client_sample_upload_to_blob_run(void)
         }
         else
         {
-            if (IoTHubClient_LL_UploadToBlob(iotHubClientHandle, "hello_world.txt", (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD)-1) != IOTHUB_CLIENT_OK)
+			/* Set server certificate so we can validate server authenticity */
+			if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+			{
+				(void)printf("Info: Cannot set the TrustedCerts option. It is possible that your platform already provides the certificate information.\r\n");
+			}
+			
+			if (IoTHubClient_LL_UploadToBlob(iotHubClientHandle, "hello_world.txt", (const unsigned char*)HELLO_WORLD, sizeof(HELLO_WORLD)-1) != IOTHUB_CLIENT_OK)
             {
-                printf("hello world failed to upload\n");
+                (void)printf("hello world failed to upload\n");
             }
             else
             {
-                printf("hello world has been created\n");
+				(void)printf("hello world has been created\n");
             }
 
             IoTHubClient_LL_Destroy(iotHubClientHandle);

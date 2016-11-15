@@ -10,7 +10,8 @@ compileAsC99()
 # endif()
 
 set(iothub_service_client_sample_c_files
-iothub_service_client_sample.c
+	iothub_service_client_sample.c
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.c
 )
 
 if(WIN32)
@@ -21,7 +22,8 @@ endif()
 
 
 set(iothub_service_client_sample_h_files
-iothub_service_client_sample.h
+	iothub_service_client_sample.h
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.h
 )
 
 IF(WIN32)
@@ -31,6 +33,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 include_directories(.)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../certs)
 
 add_executable(iothub_service_client_sample ${iothub_service_client_sample_c_files} ${iothub_service_client_sample_h_files})
 

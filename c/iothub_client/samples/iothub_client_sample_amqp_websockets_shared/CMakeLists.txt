@@ -26,6 +26,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 include_directories(.)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../certs)
 
 add_executable(iothub_client_sample_amqp_websockets_shared ${iothub_client_sample_amqp_websockets_shared_c_files} ${iothub_client_sample_amqp_websockets_shared_h_files})
 

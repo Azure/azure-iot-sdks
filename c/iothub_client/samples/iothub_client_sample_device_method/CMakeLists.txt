@@ -11,9 +11,11 @@ compileAsC99()
 
 set(iothub_client_sample_device_method_c_files
     iothub_client_sample_device_method.c
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.c
 )
 
 set(iothub_client_sample_device_method_h_files
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.h
 )
 
 IF(WIN32)
@@ -23,6 +25,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 include_directories(.)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../certs)
 
 add_executable(iothub_client_sample_device_method ${iothub_client_sample_device_method_c_files} ${iothub_client_sample_device_method_h_files})
 

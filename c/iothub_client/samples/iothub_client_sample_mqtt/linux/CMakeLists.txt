@@ -11,13 +11,16 @@ endif()
 set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot")
 
 include_directories(${AZUREIOT_INC_FOLDER})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../certs)
 
 set(iothub_client_sample_mqtt_c_files
     ../iothub_client_sample_mqtt.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../certs/certs.c
 )
 
 set(iothub_client_sample_mqtt_h_files
     ../iothub_client_sample_mqtt.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../certs/certs.h
 )
 
 add_executable(iothub_client_sample_mqtt ${iothub_client_sample_mqtt_c_files} ${iothub_client_sample_mqtt_h_files})

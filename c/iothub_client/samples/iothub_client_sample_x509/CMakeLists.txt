@@ -6,7 +6,8 @@
 compileAsC99()
 
 set(iothub_client_sample_x509_c_files
-iothub_client_sample_x509.c
+	iothub_client_sample_x509.c
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.c
 )
 
 IF(WIN32)
@@ -16,6 +17,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 include_directories(.)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../certs)
 
 add_executable(iothub_client_sample_x509 ${iothub_client_sample_x509_c_files})
 

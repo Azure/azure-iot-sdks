@@ -18,10 +18,7 @@
 #include "azure_c_shared_utility/platform.h"
 #include "iothubtransporthttp.h"
 #endif
-
-#ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
-#endif // MBED_BUILD_TIMESTAMP
 
 static const char* hubName = "[IoT Hub Name]";
 static const char* hubSuffix = "[IoT Hub Suffix]";
@@ -198,6 +195,13 @@ void iothub_client_sample_http_run(void)
                 else
                 {
                     unsigned int timeout = 241000;
+
+					/* Set server certificate so we can validate server authenticity */
+					if (IoTHubClient_SetOption(iothubClient1, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+					{
+						(void)printf("Info: Cannot set the TrustedCerts option. It is possible that your platform already provides the certificate information.\r\n");
+					}
+
                     // Because it can poll "after 9 seconds" polls will happen effectively // at ~10 seconds.
                     // Note that for scalabilty, the default value of minimumPollingTime
                     // is 25 minutes. For more information, see:

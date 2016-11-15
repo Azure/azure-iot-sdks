@@ -10,7 +10,7 @@
 #include "iothub_client.h"
 #include "iothub_message.h"
 #include "iothubtransportamqp_websockets.h"
-#include "../../../certs/certs.h"
+#include "certs.h"
 
 static const char* connectionString = "[device connection string]";
 static int callbackCounter;
@@ -132,10 +132,10 @@ void iothub_client_sample_amqp_websockets_run(void)
     }
     else
     {
-        // For mbed add the certificate information
-        if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+		/* Set server certificate so we can validate server authenticity */
+		if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
         {
-            printf("failure to set option \"TrustedCerts\"\r\n");
+            printf("Info: Cannot set the TrustedCerts option. It is possible that your platform already provides the certificate information.\r\n");
         }
 
         /* Setting Message call back, so we can receive Commands. */

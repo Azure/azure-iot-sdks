@@ -10,7 +10,7 @@
 #include "azure_c_shared_utility/crt_abstractions.h"
 #include "azure_c_shared_utility/platform.h"
 #include "iothubtransportmqtt_websockets.h"
-#include "../../../certs/certs.h"
+#include "certs.h"
 
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
@@ -113,10 +113,10 @@ void iothub_client_sample_mqtt_run(void)
             bool traceOn = false;
             IoTHubClient_LL_SetOption(iotHubClientHandle, "logtrace", &traceOn);
 
-            // For mbed add the certificate information
-            if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+			/* Set server certificate so we can validate server authenticity */
+			if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
             {
-                printf("failure to set option \"TrustedCerts\"\r\n");
+                (void)printf("Info: Cannot set the TrustedCerts option. It is possible that your platform already provides the certificate information.\r\n");
             }
 
             /* Setting Message call back, so we can receive Commands. */

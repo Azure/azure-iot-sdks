@@ -10,11 +10,13 @@ if(NOT ${use_http})
 endif()
 
 set(iothub_client_sample_http_c_files
-iothub_client_sample_http.c
+	iothub_client_sample_http.c
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.c
 )
 
 set(iothub_client_sample_http_h_files
-iothub_client_sample_http.h
+	iothub_client_sample_http.h
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.h
 )
 
 IF(WIN32)
@@ -29,6 +31,7 @@ ENDIF()
 ENDIF(WIN32)
 
 include_directories(.)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../certs)
 
 add_executable(iothub_client_sample_http ${iothub_client_sample_http_c_files} ${iothub_client_sample_http_h_files})
 

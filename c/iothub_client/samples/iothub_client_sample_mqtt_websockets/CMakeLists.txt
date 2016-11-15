@@ -25,6 +25,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 include_directories(.)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../certs)
 
 add_executable(iothub_client_sample_mqtt_websockets ${iothub_client_sample_mqtt_c_files} ${iothub_client_sample_mqtt_h_files})
 

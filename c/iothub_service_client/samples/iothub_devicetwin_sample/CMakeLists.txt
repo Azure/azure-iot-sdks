@@ -8,7 +8,8 @@ compileAsC99()
 # endif()
 
 set(iothub_devicetwin_sample_c_files
-iothub_devicetwin_sample.c
+	iothub_devicetwin_sample.c
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.c
 )
 
 if(WIN32)
@@ -19,7 +20,8 @@ endif()
 
 
 set(iothub_devicetwin_sample_h_files
-iothub_devicetwin_sample.h
+	iothub_devicetwin_sample.h
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.h
 )
 
 IF(WIN32)
@@ -29,6 +31,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 include_directories(.)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../certs)
 
 add_executable(iothub_devicetwin_sample ${iothub_devicetwin_sample_c_files} ${iothub_devicetwin_sample_h_files})
 
