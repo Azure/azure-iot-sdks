@@ -19,6 +19,18 @@ namespace Microsoft.Azure.Devices
         public string JobId { get; internal set; }
 
         /// <summary>
+        /// Device query condition.
+        /// </summary>
+        [JsonProperty(PropertyName = "queryCondition", NullValueHandling = NullValueHandling.Ignore)]
+        public string QueryCondition { get; internal set; }
+
+        /// <summary>
+        /// Scheduled job start time in UTC.
+        /// </summary>
+        [JsonProperty(PropertyName = "createdTime", NullValueHandling = NullValueHandling.Ignore)]
+        public DateTime? CreatedTimeUtc { get; internal set; }
+
+        /// <summary>
         /// System generated.  Ignored at creation.
         /// </summary>
         [JsonProperty(PropertyName = "startTimeUtc", NullValueHandling = NullValueHandling.Ignore)]
@@ -30,6 +42,12 @@ namespace Microsoft.Azure.Devices
         /// </summary>
         [JsonProperty(PropertyName = "endTimeUtc", NullValueHandling = NullValueHandling.Ignore)]
         public DateTime? EndTimeUtc { get; internal set; }
+
+        /// <summary>
+        /// Max execution time in secounds
+        /// </summary>
+        [JsonProperty(PropertyName = "maxExecutionTimeInSeconds", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
+        public long MaxExecutionTimeInSeconds { get; set; }
 
         /// <summary>
         /// Required.
@@ -45,6 +63,20 @@ namespace Microsoft.Azure.Devices
         [JsonProperty(PropertyName = "status", NullValueHandling = NullValueHandling.Ignore)]
         [JsonConverter(typeof(StringEnumConverter))]
         public JobStatus Status { get; internal set; }
+
+        /// <summary>
+        /// Required if jobType is cloudToDeviceMethod.
+        /// The method type and parameters.
+        /// </summary>
+        [JsonProperty(PropertyName = "cloudToDeviceMethod", NullValueHandling = NullValueHandling.Ignore)]
+        public CloudToDeviceMethod CloudToDeviceMethod { get; set; }
+
+        /// <summary>
+        /// Required if jobType is updateTwin.
+        /// The Update Twin tags and desired properties.
+        /// </summary>
+        [JsonProperty(PropertyName = "updateTwin", NullValueHandling = NullValueHandling.Ignore)]
+        public Twin UpdateTwin { get; set; }
 
         /// <summary>
         /// System generated.  Ignored at creation.

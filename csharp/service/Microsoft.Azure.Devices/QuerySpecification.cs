@@ -10,13 +10,13 @@ namespace Microsoft.Azure.Devices
     /// </summary>
     internal class QuerySpecification
     {
-        [JsonProperty(PropertyName = "sql", Required = Required.Always)]
+        [JsonProperty(PropertyName = "query", Required = Required.Always)]
         public string Sql { get; set; }
 
-        [JsonProperty(PropertyName = "pageSize", Required = Required.AllowNull)]
+        [JsonIgnore]
         public int? PageSize { get; set; }
 
-        [JsonProperty(PropertyName = "continuationToken", Required = Required.AllowNull)]
+        [JsonIgnore]
         public string ContinuationToken { get; set; }
     }
 }

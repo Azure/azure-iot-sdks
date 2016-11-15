@@ -19,7 +19,7 @@ namespace Microsoft.Azure.Devices
         [EnumMember(Value = "jobResponse")]
         JobResponse = 3,
 
-        [EnumMember(Value = "aggregate")]
-        Aggregate = 4 // it means Dictionary<string, object>
+        [EnumMember(Value = "raw")]
+        Raw = 4
     }
 }

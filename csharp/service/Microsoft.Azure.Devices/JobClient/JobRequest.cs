@@ -47,12 +47,6 @@ namespace Microsoft.Azure.Devices
         [JsonProperty(PropertyName = "queryCondition")]
         public string QueryCondition { get; set; }
 
-        /// <summary>
-        /// TEMP: list of devices to execute the job on, needded until condition is supported
-        /// TODO : Remove once we support condition
-        /// </summary>
-        [JsonProperty(PropertyName = "deviceIds")]
-        public IEnumerable<string> DeviceIds { get; set; }
 
         /// <summary>
         /// ISO 8601 date time to start the job

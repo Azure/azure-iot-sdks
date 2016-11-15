@@ -18,9 +18,10 @@ namespace Microsoft.Azure.Devices
         /// Creates an instance of CloudToDeviceMethod type
         /// </summary>
         /// <param name="methodName">Method name</param>
-        /// <param name="timeout">Method timeout</param>
+        /// <param name="responseTimeout">Method timeout</param>
+        /// <param name="connectionTimeout">Device connection timeout</param>
         /// <exception cref="ArgumentException">If <b>methodName</b> is null or whitespace</exception>
-        public CloudToDeviceMethod(string methodName, TimeSpan timeout)
+        public CloudToDeviceMethod(string methodName, TimeSpan responseTimeout, TimeSpan connectionTimeout)
         {
             if (string.IsNullOrWhiteSpace(methodName))
             {
@@ -28,7 +29,19 @@ namespace Microsoft.Azure.Devices
             }
 
             this.MethodName = methodName;
-            this.Timeout = timeout;
+            this.ResponseTimeout = responseTimeout;
+            this.ConnectionTimeout = connectionTimeout;
+        }
+
+        /// <summary>
+        /// Creates an instance of CloudToDeviceMethod type with Zero timeout
+        /// </summary>
+        /// <param name="methodName">Method name</param>
+        /// <param name="responseTimeout">Method timeout</param>
+        /// <exception cref="ArgumentException">If <b>methodName</b> is null or whitespace</exception>
+        public CloudToDeviceMethod(string methodName, TimeSpan responseTimeout)
+            : this(methodName, responseTimeout, TimeSpan.Zero)
+        {
         }
 
         /// <summary>
@@ -37,7 +50,7 @@ namespace Microsoft.Azure.Devices
         /// <param name="methodName">Method name</param>
         /// <exception cref="ArgumentException">If <b>methodName</b> is null or whitespace</exception>
         public CloudToDeviceMethod(string methodName)
-            : this(methodName, TimeSpan.Zero)
+            : this(methodName, TimeSpan.Zero, TimeSpan.Zero)
         {
         }
 
@@ -51,7 +64,13 @@ namespace Microsoft.Azure.Devices
         /// Method timeout
         /// </summary>
         [JsonIgnore]
-        public TimeSpan Timeout { get; set; }
+        public TimeSpan ResponseTimeout { get; set; }
+
+        /// <summary>
+        /// Timeout for device to come online
+        /// </summary>
+        [JsonIgnore]
+        public TimeSpan ConnectionTimeout { get; set; }
 
         /// <summary>
         /// Set payload as json
@@ -92,8 +111,14 @@ namespace Microsoft.Azure.Devices
         /// <summary>
         /// Method timeout in seconds
         /// </summary>
-        [JsonProperty("timeoutInSeconds")]
-        internal int TimeoutInSeconds => (int)this.Timeout.TotalSeconds;
+        [JsonProperty("responseTimeoutInSeconds", NullValueHandling = NullValueHandling.Ignore)]
+        internal int? ResponseTimeoutInSeconds => this.ResponseTimeout <= TimeSpan.Zero ? (int?)null : (int)this.ResponseTimeout.TotalSeconds;
+
+        /// <summary>
+        /// Connection timeout in seconds
+        /// </summary>
+        [JsonProperty("connectTimeoutInSeconds", NullValueHandling = NullValueHandling.Ignore)]
+        internal int? ConnectionTimeoutInSeconds => this.ConnectionTimeout <= TimeSpan.Zero ? (int?)null : (int)this.ConnectionTimeout.TotalSeconds;
 
         [JsonProperty("payload")]
         internal JRaw Payload { get; set; }
