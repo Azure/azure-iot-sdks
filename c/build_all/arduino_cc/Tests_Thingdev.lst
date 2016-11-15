@@ -1,0 +1,49 @@
+# Copyright (c) Microsoft. All rights reserved.
+# Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+[thingdev_remote_monitoring]
+Target=remote_monitoring.ino
+RelativePath=\iot-hub-c-thingdev-getstartedkit\remote_monitoring
+RelativeWorkingDir=\arduino_cc_Work\Results\thingdev_remote_monitoring
+CloneURL=https://github.com/Azure-Samples/iot-hub-c-thingdev-getstartedkit.git
+MaxAllowedDurationSeconds=100
+LogLines=300
+MinimumHeap=7000
+Categories=IoTHub
+Hardware=SparkFun_ESP8266_Thing 
+SerialPort=COM7
+CPUParameters=-fqbn=esp8266:esp8266:thing:CpuFrequency=80,UploadSpeed=115200 -vid-pid=0X239A_0X800B -ide-version=10609
+Build=Enable
+Execution=Enable
+
+[thingdev_command_center]
+Target=command_center.ino
+RelativePath=\iot-hub-c-thingdev-getstartedkit\command_center
+RelativeWorkingDir=\arduino_cc_Work\Results\thingdev_command_center
+CloneURL=https://github.com/Azure-Samples/iot-hub-c-thingdev-getstartedkit.git
+MaxAllowedDurationSeconds=100
+LogLines=300
+MinimumHeap=7000
+Categories=IoTHub
+Hardware=SparkFun_ESP8266_Thing 
+SerialPort=COM7
+CPUParameters=-fqbn=esp8266:esp8266:thing:CpuFrequency=80,UploadSpeed=115200 -vid-pid=0X239A_0X800B -ide-version=10609
+Build=Enable
+Execution=Disable
+
+[thingdev_simplesample_http]
+Target=simplesample_http.ino
+RelativePath=\arduino\libraries\AzureIoTHub\examples\simplesample_http
+RelativeWorkingDir=\arduino_cc_Work\Results\thingdev_simplesample_http
+CloneURL=""
+MaxAllowedDurationSeconds=100
+LogLines=300
+MinimumHeap=7000
+Categories=IoTHub
+Hardware=SparkFun_ESP8266_Thing
+SerialPort=COM7
+CPUParameters=-fqbn=esp8266:esp8266:thing:CpuFrequency=80,UploadSpeed=115200 -vid-pid=0X239A_0X800B -ide-version=10609
+Build=Enable
+Execution=Disable
+
+[End]
