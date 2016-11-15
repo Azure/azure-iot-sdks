@@ -36,6 +36,10 @@ send_callbacks = 0
 
 protocol = IoTHubTransportProvider.HTTP
 
+# It is NOT a good practice to put device credentials in the code as shown below.
+# This is done in this sample for simplicity purposes.
+# Good practices such as the use of TPM or other secure storage on the device are recommended to store device credentials.
+
 # String containing Hostname, Device Id in the format:
 # "HostName=<host_name>;DeviceId=<device_id>;x509=true"
 connection_string = "[device connection string]"

@@ -7,6 +7,9 @@ var Protocol = require('azure-iot-device-amqp').Amqp;
 var Client = require('azure-iot-device').Client;
 var fs = require('fs');
 
+// It is NOT a good practice to put device credentials in the code as shown below.
+// This is done in this sample for simplicity purposes.
+// Good practices such as the use of TPM or other secure storage on the device are recommended to store device credentials.
 var deviceConnectionString = '[Device Connection String]';
 var filePath = '[path/to/file]';
 

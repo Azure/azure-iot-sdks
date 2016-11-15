@@ -12,6 +12,10 @@ var Protocol = require('azure-iot-device-amqp').AmqpWs;
 var Client = require('azure-iot-device').Client;
 var Message = require('azure-iot-device').Message;
 
+// It is NOT a good practice to put device credentials in the code as shown below.
+// This is done in this sample for simplicity purposes.
+// Good practices such as the use of TPM or other secure storage on the device are recommended to store device credentials.
+
 // String containing Hostname and Device Id in the following format:
 //  "HostName=<iothub_host_name>;DeviceId=<device_id>;x509=true"
 var connectionString = '<DEVICE CONNECTION STRING WITH x509=true>';

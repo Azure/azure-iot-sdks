@@ -11,6 +11,10 @@ var Amqp = require('azure-iot-device-amqp').Amqp;
 var Client = require('azure-iot-device').Client;
 var Message = require('azure-iot-device').Message;
 
+// It is NOT a good practice to put device credentials in the code as shown below.
+// This is done in this sample for simplicity purposes.
+// Good practices such as the use of TPM or other secure storage on the device are recommended to store device credentials.
+
 // String SharedAccessSignature in the following formats:
 //  "SharedAccessSignature sr=<iothub_host_name>/devices/<device_id>&sig=<signature>&se=<expiry>"
 var sas = "[SharedAccessSignature]";
