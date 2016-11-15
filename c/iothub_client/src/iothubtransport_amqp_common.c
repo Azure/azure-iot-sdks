@@ -1924,7 +1924,8 @@ int IoTHubTransport_AMQP_Common_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHU
     (void)retryPolicy;
     (void)retryTimeoutLimitInSeconds;
 
-    LogInfo("Retry Policy is currently not available for AMQP");
+    /* Retry Policy is currently not available for AMQP */
+
     result = 0;
     return result;
 }

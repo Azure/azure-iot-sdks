@@ -2218,7 +2218,8 @@ static int IoTHubTransportHttp_SetRetryPolicy(TRANSPORT_LL_HANDLE handle, IOTHUB
     (void)retryPolicy;
     (void)retryTimeoutLimitInSeconds;
 
-    LogInfo("Retry Policy is not currently not available for HTTP");
+    /* Retry Policy is not currently not available for HTTP */
+
     result = 0;
     return result;
 }

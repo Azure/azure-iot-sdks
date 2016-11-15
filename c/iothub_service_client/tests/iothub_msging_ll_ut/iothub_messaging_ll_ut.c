@@ -30,6 +30,7 @@
 #include "azure_uamqp_c/saslclientio.h"
 #include "azure_uamqp_c/sasl_plain.h"
 #include "azure_uamqp_c/cbs.h"
+#include "azure_uamqp_c/link.h"
 #include "azure_uamqp_c/amqp_definitions.h"
 
 #include "parson.h"
@@ -90,9 +91,8 @@ static void my_gballoc_free(void* ptr)
 
 static int my_mallocAndStrcpy_s(char** destination, const char* source)
 {
-    char* p = (char*)malloc(2);
-    p[0] = source[0];
-    p[1] = '\0';
+    char* p = (char*)malloc(strlen(source)+1);
+    memcpy(p, source, strlen(source) + 1);
     *destination = p;
     return 0;
 }
@@ -332,7 +332,7 @@ static char* TEST_IOTHUBNAME = "theIotHubName";
 static char* TEST_IOTHUBSUFFIX = "theIotHubSuffix";
 static char* TEST_SHAREDACCESSKEY = "theSharedAccessKey";
 static char* TEST_SHAREDACCESSKEYNAME = "theSharedAccessKeyName";
-
+      
 static int TEST_ISOPENED = false;
 
 static const char* TEST_FEEDBACK_RECORD_KEY_DEVICE_ID = "deviceId";
@@ -425,6 +425,7 @@ static JSON_Value* TEST_JSON_VALUE = (JSON_Value*)0x5050;
 static JSON_Object* TEST_JSON_OBJECT = (JSON_Object*)0x5151;
 static JSON_Array* TEST_JSON_ARRAY = (JSON_Array*)0x5252;
 static JSON_Status TEST_JSON_STATUS = 0;
+static AMQP_VALUE TEST_AMQP_MAP = ((AMQP_VALUE)0x6258);
 
 BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
@@ -451,6 +452,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         REGISTER_UMOCK_ALIAS_TYPE(STRING_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(AMQP_VALUE, void*);
+        REGISTER_UMOCK_ALIAS_TYPE(fields, void*);
         REGISTER_UMOCK_ALIAS_TYPE(SESSION_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(XIO_HANDLE, void*);
         REGISTER_UMOCK_ALIAS_TYPE(CONNECTION_HANDLE, void*);
@@ -531,6 +533,18 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         REGISTER_GLOBAL_MOCK_RETURN(link_create, TEST_LINK_HANDLE);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(link_create, NULL);
+
+        REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_create_map, TEST_AMQP_VALUE);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_create_map, NULL);
+
+        REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_create_symbol, TEST_AMQP_VALUE);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_create_symbol, NULL);
+
+        REGISTER_GLOBAL_MOCK_RETURN(amqpvalue_set_map_value, 0);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(amqpvalue_set_map_value, 1);
+
+        REGISTER_GLOBAL_MOCK_RETURN(link_set_attach_properties, 0);
+        REGISTER_GLOBAL_MOCK_FAIL_RETURN(link_set_attach_properties, 1);
 
         REGISTER_GLOBAL_MOCK_RETURN(link_set_snd_settle_mode, 0);
         REGISTER_GLOBAL_MOCK_FAIL_RETURN(link_set_snd_settle_mode, 1);
@@ -943,31 +957,20 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_ERROR, result);
     }
 
-    /*Tests_SRS_IOTHUBMESSAGING_12_010: [ IoTHubMessaging_LL_Open shall create uAMQP PLAIN SASL mechanism by calling saslmechanism_create with the sasl plain interface ] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_011: [ IoTHubMessaging_LL_Open shall create uAMQP TLSIO by calling the xio_create ] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_012: [ IoTHubMessaging_LL_Open shall create uAMQP SASL IO by calling the xio_create with the previously created SASL mechanism and TLSIO] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_013: [ IoTHubMessaging_LL_Open shall create uAMQP connection by calling the connection_create with the previously created SASL IO ] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_014: [ IoTHubMessaging_LL_Open shall create uAMQP session by calling the session_create ] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_015: [ IoTHubMessaging_LL_Open shall set the AMQP incoming window to UINT32 maximum value by calling session_set_incoming_window ] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_016: [ IoTHubMessaging_LL_Open shall set the AMQP outgoing window to UINT32 maximum value by calling session_set_outgoing_window ] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_018: [ IoTHubMessaging_LL_Open shall create uAMQP sender link by calling the link_create ] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_019: [ IoTHubMessaging_LL_Open shall set the AMQP sender link settle mode to sender_settle_mode_unsettled  by calling link_set_snd_settle_mode ] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_021: [ IoTHubMessaging_LL_Open shall create uAMQP messaging source for sender by calling the messaging_create_source ] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_022: [ IoTHubMessaging_LL_Open shall create uAMQP messaging target for sender by calling the messaging_create_target ] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_023: [ IoTHubMessaging_LL_Open shall create uAMQP message sender by calling the messagesender_create with the created sender link and the local IoTHubMessaging_LL_SenderStateChanged callback ] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_024: [ IoTHubMessaging_LL_Open shall create uAMQP receiver link by calling the link_create ] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_025: [ IoTHubMessaging_LL_Open shall set the AMQP receiver link settle mode to receiver_settle_mode_first by calling link_set_rcv_settle_mode ] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_027: [ IoTHubMessaging_LL_Open shall create uAMQP messaging source for receiver by calling the messaging_create_source ] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_028: [ IoTHubMessaging_LL_Open shall create uAMQP messaging target for receiver by calling the messaging_create_target ] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_029: [ IoTHubMessaging_LL_Open shall create uAMQP message receiver by calling the messagereceiver_create with the created sender link and the local IoTHubMessaging_LL_ReceiverStateChanged callback ] */
-    /*Tests_SRS_IOTHUBMESSAGING_12_031: [ If all of the uAMQP call return 0 (success) IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_OK ] */
-    TEST_FUNCTION(IoTHubMessaging_LL_Open_happy_path)
+    static void addSetLinkCalls(void)
     {
-        ///arrange
-        IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = IoTHubMessaging_LL_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
-        umock_c_reset_all_calls();
-
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
+        EXPECTED_CALL(amqpvalue_create_map());
+        EXPECTED_CALL(amqpvalue_create_symbol(IGNORED_PTR_ARG));
+        EXPECTED_CALL(amqpvalue_create_string(IGNORED_PTR_ARG));
+        EXPECTED_CALL(amqpvalue_set_map_value(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(link_set_attach_properties(IGNORED_PTR_ARG, IGNORED_PTR_ARG));
+        EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+        EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+        EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG));
+    }
+    static void callsForOpen(void)
+    {
+        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))    // Call #0
             .IgnoreArgument(1);
 
         STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
@@ -978,7 +981,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         STRICT_EXPECTED_CALL(STRING_construct(TEST_HOSTNAME));
         STRICT_EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEY));
-        STRICT_EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEYNAME));
+        STRICT_EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEYNAME));     // Call #5
 
         STRICT_EXPECTED_CALL(SASToken_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
             .IgnoreAllArguments();
@@ -993,7 +996,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
 
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))     // Call #10
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
@@ -1003,7 +1006,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         STRICT_EXPECTED_CALL(saslplain_get_interface());
         STRICT_EXPECTED_CALL(saslmechanism_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(platform_get_default_tlsio());
+        STRICT_EXPECTED_CALL(platform_get_default_tlsio());     // Call #15
 
         STRICT_EXPECTED_CALL(xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreArgument(1)
@@ -1019,7 +1022,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(session_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(session_set_incoming_window(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+        STRICT_EXPECTED_CALL(session_set_incoming_window(IGNORED_PTR_ARG, IGNORED_NUM_ARG))     // Call #21
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(session_set_outgoing_window(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
             .IgnoreAllArguments();
@@ -1028,8 +1031,9 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(link_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, TEST_AMQP_VALUE_NULL, TEST_AMQP_VALUE_NULL))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(link_set_snd_settle_mode(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+            .IgnoreAllArguments();      // Call #25
+        addSetLinkCalls();
+        STRICT_EXPECTED_CALL(link_set_snd_settle_mode(IGNORED_PTR_ARG, IGNORED_NUM_ARG))     // Call #34
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(messagesender_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
@@ -1040,15 +1044,16 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(link_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(link_set_rcv_settle_mode(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
+            .IgnoreAllArguments();      // Call #39
+        addSetLinkCalls();
+        STRICT_EXPECTED_CALL(link_set_rcv_settle_mode(IGNORED_PTR_ARG, IGNORED_NUM_ARG))     // Call #48
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(messagereceiver_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
         STRICT_EXPECTED_CALL(messagereceiver_open(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
             .IgnoreAllArguments();
 
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG))
+        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG))     // Call #51
             .IgnoreArgument(1);
         STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
@@ -1062,13 +1067,41 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
 
         STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
             .IgnoreArgument(1);
+    }
+    /*Tests_SRS_IOTHUBMESSAGING_12_010: [ IoTHubMessaging_LL_Open shall create uAMQP PLAIN SASL mechanism by calling saslmechanism_create with the sasl plain interface ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_011: [ IoTHubMessaging_LL_Open shall create uAMQP TLSIO by calling the xio_create ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_012: [ IoTHubMessaging_LL_Open shall create uAMQP SASL IO by calling the xio_create with the previously created SASL mechanism and TLSIO] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_013: [ IoTHubMessaging_LL_Open shall create uAMQP connection by calling the connection_create with the previously created SASL IO ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_014: [ IoTHubMessaging_LL_Open shall create uAMQP session by calling the session_create ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_015: [ IoTHubMessaging_LL_Open shall set the AMQP incoming window to UINT32 maximum value by calling session_set_incoming_window ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_016: [ IoTHubMessaging_LL_Open shall set the AMQP outgoing window to UINT32 maximum value by calling session_set_outgoing_window ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_018: [ IoTHubMessaging_LL_Open shall create uAMQP sender link by calling the link_create ] */
+    /*Tests_SRS_IOTHUBMESSAGING_06_001: [ IoTHubMessaging_LL_Open shall add the version property to the sender link by calling the link_set_attach_properties ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_019: [ IoTHubMessaging_LL_Open shall set the AMQP sender link settle mode to sender_settle_mode_unsettled  by calling link_set_snd_settle_mode ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_021: [ IoTHubMessaging_LL_Open shall create uAMQP messaging source for sender by calling the messaging_create_source ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_022: [ IoTHubMessaging_LL_Open shall create uAMQP messaging target for sender by calling the messaging_create_target ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_023: [ IoTHubMessaging_LL_Open shall create uAMQP message sender by calling the messagesender_create with the created sender link and the local IoTHubMessaging_LL_SenderStateChanged callback ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_024: [ IoTHubMessaging_LL_Open shall create uAMQP receiver link by calling the link_create ] */
+    /*Tests_SRS_IOTHUBMESSAGING_06_002: [ IoTHubMessaging_LL_Open shall add the version property to the receiver by calling the link_set_attach_properties ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_025: [ IoTHubMessaging_LL_Open shall set the AMQP receiver link settle mode to receiver_settle_mode_first by calling link_set_rcv_settle_mode ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_027: [ IoTHubMessaging_LL_Open shall create uAMQP messaging source for receiver by calling the messaging_create_source ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_028: [ IoTHubMessaging_LL_Open shall create uAMQP messaging target for receiver by calling the messaging_create_target ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_029: [ IoTHubMessaging_LL_Open shall create uAMQP message receiver by calling the messagereceiver_create with the created sender link and the local IoTHubMessaging_LL_ReceiverStateChanged callback ] */
+    /*Tests_SRS_IOTHUBMESSAGING_12_031: [ If all of the uAMQP call return 0 (success) IoTHubMessaging_LL_Open shall return IOTHUB_MESSAGING_OK ] */
+    TEST_FUNCTION(IoTHubMessaging_LL_Open_happy_path)
+    {
+        ///arrange
+        IOTHUB_MESSAGING_HANDLE iothub_messaging_handle = IoTHubMessaging_LL_Create(TEST_IOTHUB_SERVICE_CLIENT_AUTH_HANDLE);
+        umock_c_reset_all_calls();
+
+        callsForOpen();
 
         ///act
         IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_Open(iothub_messaging_handle, TEST_IOTHUB_OPEN_COMPLETE_CALLBACK, (void*)0x4242);
 
         ///assert
+        ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
         ASSERT_ARE_EQUAL(int, IOTHUB_MESSAGING_OK, result);
-        //ASSERT_ARE_EQUAL(char_ptr, umock_c_get_expected_calls(), umock_c_get_actual_calls());
 
         ///cleanup
         if (iothub_messaging_handle != NULL)
@@ -1125,98 +1158,7 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
         ASSERT_ARE_EQUAL(int, 0, umockc_result);
 
         ///arrange
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
-
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
-
-        STRICT_EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG))
-            .IgnoreArgument(1);
-
-        STRICT_EXPECTED_CALL(STRING_construct(TEST_HOSTNAME));
-        STRICT_EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEY));
-        STRICT_EXPECTED_CALL(STRING_construct(TEST_SHAREDACCESSKEYNAME));
-
-        STRICT_EXPECTED_CALL(SASToken_Create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
-
-        STRICT_EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
-            .IgnoreArgument(1)
-            .SetReturn(TEST_CHAR_PTR);
-
-        STRICT_EXPECTED_CALL(mallocAndStrcpy_s(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-        STRICT_EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-
-        STRICT_EXPECTED_CALL(saslplain_get_interface());
-        STRICT_EXPECTED_CALL(saslmechanism_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(platform_get_default_tlsio());
-
-        STRICT_EXPECTED_CALL(xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreArgument(1)
-            .IgnoreArgument(2);
-
-        STRICT_EXPECTED_CALL(saslclientio_get_interface_description());
-
-        STRICT_EXPECTED_CALL(xio_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreArgument(1)
-            .IgnoreArgument(2);
-
-        STRICT_EXPECTED_CALL(connection_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(session_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(session_set_incoming_window(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(session_set_outgoing_window(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(messaging_create_source(IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(link_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(link_set_snd_settle_mode(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(messagesender_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(messagesender_open(IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(messaging_create_source(IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(messaging_create_target(IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(link_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_NUM_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(link_set_rcv_settle_mode(IGNORED_PTR_ARG, IGNORED_NUM_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(messagereceiver_create(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-        STRICT_EXPECTED_CALL(messagereceiver_open(IGNORED_PTR_ARG, IGNORED_PTR_ARG, IGNORED_PTR_ARG))
-            .IgnoreAllArguments();
-
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-
-        STRICT_EXPECTED_CALL(amqpvalue_destroy(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
-
-        STRICT_EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG))
-            .IgnoreArgument(1);
+        callsForOpen();
 
         umock_c_negative_tests_snapshot();
 
@@ -1235,10 +1177,18 @@ BEGIN_TEST_SUITE(iothub_messaging_ll_ut)
                 (i != 10) &&
                 (i != 11) &&
                 (i != 12) &&
-                (i != 35) &&
-                (i != 36) &&
-                (i != 37) &&
-                (i != 38)
+                (i != 31) &&
+                (i != 32) &&
+                (i != 33) &&
+                (i != 45) &&
+                (i != 46) &&
+                (i != 47) &&
+                (i != 51) &&
+                (i != 52) &&
+                (i != 53) &&
+                (i != 54) &&
+                (i != 55) &&
+                (i != 56)
                 )
             {
                 IOTHUB_MESSAGING_RESULT result = IoTHubMessaging_LL_Open(TEST_IOTHUB_MESSAGING_HANDLE, TEST_IOTHUB_OPEN_COMPLETE_CALLBACK, NULL);

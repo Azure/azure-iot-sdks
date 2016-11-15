@@ -41,9 +41,9 @@ Adafruit_WINC1500 WiFi(WINC_CS, WINC_IRQ, WINC_RST);
 
 #include <AzureIoTHub.h>
 #include <AzureIoTUtility.h>
-#include <AzureIoTProtocol_HTTP.h>
+#include <AzureIoTProtocol_MQTT.h>
 
-#include "simplesample_http.h"
+#include "simplesample_mqtt.h"
 
 static char ssid[] = "yourNetwork";     // your network SSID (name)
 static char pass[] = "yourPassword";    // your network password (use for WPA, or use as key for WEP)
@@ -68,7 +68,7 @@ void setup() {
 }
 
 void loop() {
-    simplesample_http_run();
+    simplesample_mqtt_run();
 }
 
 void initSerial() {

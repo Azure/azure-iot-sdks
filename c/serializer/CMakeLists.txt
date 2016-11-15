@@ -29,6 +29,7 @@ set(serializer_c_files
 ./src/schemalib.c
 ./src/schemaserializer.c
 ../parson/parson.c
+./src/methodreturn.c
 )
 
 set(serializer_h_files
@@ -47,6 +48,7 @@ set(serializer_h_files
 ./inc/schemaserializer.h
 ./inc/serializer.h
 ./inc/serializer_devicetwin.h
+./inc/methodreturn.h
 )
 
 if(MSVC)

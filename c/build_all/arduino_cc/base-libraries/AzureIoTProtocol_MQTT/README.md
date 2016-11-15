@@ -1,8 +1,8 @@
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+# AzureIoTProtocol_MQTT - Azure IoT MQTT protocol library for Arduino
 
-# AzureIoTHub - Azure IoT Hub library for Arduino
+[![Build Status](https://travis-ci.org/arduino-libraries/AzureIoTProtocol_MQTT.svg?branch=master)](https://travis-ci.org/arduino-libraries/AzureIoTProtocol_MQTT)
 
-This library is a port of the [Microsoft Azure C Shared Utility](https://github.com/Azure/azure-c-shared-utility/blob/master/c/readme.md) to Arduino. It allows you to use several Arduino compatible boards with Azure IoT Hub. Please submit any contribution directly to [azure-c-shared-utility](https://github.com/Azure/azure-c-shared-utility).
+This library is a port of the compact implementation of the MQTT protocol from [Microsoft Azure IoT device SDK for C](https://github.com/Azure/azure-iot-sdks/blob/master/c/readme.md) to Arduino. Together with the AzureIoTHub, it allows you to use several Arduino compatible boards with Azure IoT Hub. Please submit any contribution directly to [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks).
 
 Currently supported hardware:
 - Atmel SAMD Based boards
@@ -21,18 +21,18 @@ You should have the following ready before beginning with any board:
 -   [Arduino IDE 1.6.8](https://www.arduino.cc/en/Main/Software)
 -   Install the `AzureIoTHub` library via the Arduino IDE Library Manager
 -   Install the `AzureIoTUtility` library via the Arduino IDE Library Manager
--   Install the `AzureIoTProtocol_HTTP` library via the Arduino IDE Library Manager
+-   Install the `AzureIoTProtocol_MQTT` library via the Arduino IDE Library Manager
 
 # Simple Sample Instructions
 
 ## MKR1000 or Zero + Wifi101
-1. Open the `simplesample_http` example from the Arduino IDE File->Examples->AzureIoTHub menu.
+1. Open the `simplesample_mqtt` example from the Arduino IDE File->Examples->AzureIoTHub menu.
 2. Install the `WiFi101` library from the Arduino IDE Library Manager.
 3. Install the `NTPClient` library from the Arduino IDE Library Manager.
 4. Install the `RTCZero` library from the Arduino IDE Library Manager.
-5. Update Wifi SSID/Password in simplesample_http.ino 
+5. Update Wifi SSID/Password in simplesample_mqtt.ino 
     * Ensure you are using a wifi network that does not require additional manual steps after connection, such as opening a web browser.
-6. Update IoT Hub Connection string in simplesample_http.c
+6. Update IoT Hub Connection string in simplesample_mqtt.c
 
 ## ESP8266
 ##### Sparkfun Thing, Adafruit Feather Huzzah, or generic ESP8266 board
@@ -43,11 +43,11 @@ You should have the following ready before beginning with any board:
     * Open Boards Manager from Tools > Board menu and install esp8266 platform 2.2.0 or later 
     * Select your ESP8266 board from Tools > Board menu after installation
     
-2. Open the `simplesample_http` example from the Arduino IDE File->Examples->AzureIoTHub menu.
+2. Open the `simplesample_mqtt` example from the Arduino IDE File->Examples->AzureIoTHub menu.
 3. Update the sketch as directed by comments in the sample to support the ESP8266 board.
-4. Update Wifi SSID/Password in simplesample_http.ino 
+4. Update Wifi SSID/Password in simplesample_mqtt.ino 
     * Ensure you are using a wifi network that does not require additional manual steps after connection, such as opening a web browser.
-5. Update IoT Hub Connection string in simplesample_http.c
+5. Update IoT Hub Connection string in simplesample_mqtt.c
 6. Access the [SparkFun Get Started](https://azure.microsoft.com/en-us/documentation/samples/iot-hub-c-thingdev-getstartedkit/) tutorial to learn more about Microsoft Sparkfun Dev Kit.
 7. Access the [Huzzah Get Started](https://azure.microsoft.com/en-us/documentation/samples/iot-hub-c-huzzah-getstartedkit/) tutorial to learn more about Microsoft Huzzah Dev Kit.
 
@@ -61,11 +61,11 @@ You should have the following ready before beginning with any board:
 2. Install the [Adafruit WINC1500 wifi library](https://learn.adafruit.com/adafruit-feather-m0-wifi-atwinc1500/using-the-wifi-module)
 3. Install the `RTCZero` library from the Arduino IDE Library Manager.
 4. Install the `NTPClient` library from the Arduino IDE Library Manager.
-5. Open the `simplesample_http` example from the Arduino IDE File->Examples->AzureIoTHub menu.
+5. Open the `simplesample_mqtt` example from the Arduino IDE File->Examples->AzureIoTHub menu.
 6. Update the sketch as directed by comments in the sample to support the ESP8266 board.
-7. Update Wifi SSID/Password in simplesample_http.ino 
+7. Update Wifi SSID/Password in simplesample_mqtt.ino 
     * Ensure you are using a wifi network that does not require additional manual steps after connection, such as opening a web browser.
-8. Update IoT Hub Connection string in simplesample_http.c
+8. Update IoT Hub Connection string in simplesample_mqtt.c
 9. Access the [Feather M0 WiFi Get Started](https://azure.microsoft.com/en-us/documentation/samples/iot-hub-c-m0wifi-getstartedkit/) tutorial to learn more about Microsoft Feather M0 WiFi Dev Kit.
 
 ## License
