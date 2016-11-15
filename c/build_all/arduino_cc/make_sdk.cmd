@@ -18,7 +18,9 @@ for %%i in ("%Work_path%") do set Work_path=%%~fi
 set Libraries_path=%Work_path%\arduino\libraries\
 set AzureIoTHub_path=%Libraries_path%AzureIoTHub\
 set AzureIoTUtility_path=%Libraries_path%AzureIoTUtility\
-set AzureIoTProtocolHTTP_path=%Libraries_path%AzureIoTProtocol_HTTP\src\azure-uhttp-c\
+set AzureIoTProtocolHTTP_path=%Libraries_path%AzureIoTProtocol_HTTP\src\azure_uhttp_c\
+set AzureIoTProtocolMQTT_path=%Libraries_path%AzureIoTProtocol_MQTT\src\azure_umqtt_c\
+set AzureIoTProtocolAMQP_path=%Libraries_path%AzureIoTProtocol_AMQP\src\azure_uamqp_c\
 set SharedUtility_path=%AzureIoTUtility_path%src\azure_c_shared_utility\
 set Adapters_path=%AzureIoTUtility_path%src\adapters\
 set sdk_path=%AzureIoTHub_path%src\sdk\
@@ -34,6 +36,7 @@ if exist "%AzureIoTHub_path%" rd /s /q %AzureIoTHub_path%
 robocopy %~dp0\base-libraries\AzureIoTHub %AzureIoTHub_path% -MIR
 robocopy %~dp0\base-libraries\AzureIoTUtility %AzureIoTUtility_path% -MIR
 robocopy %~dp0\base-libraries\AzureIoTProtocol_HTTP %Libraries_path%AzureIoTProtocol_HTTP\ -MIR
+robocopy %~dp0\base-libraries\AzureIoTProtocol_MQTT %Libraries_path%AzureIoTProtocol_MQTT\ -MIR
 
 mkdir %sdk_path%
 
@@ -62,6 +65,9 @@ copy %AzureIoTSDKs_path%c\c-utility\adapters\*arduino.* %Adapters_path%
 mkdir %AzureIoTProtocolHTTP_path%
 copy %AzureIoTSDKs_path%c\c-utility\adapters\httpapi_compact.c %AzureIoTProtocolHTTP_path%
 
+mkdir %AzureIoTProtocolMQTT_path%
+copy %AzureIoTSDKs_path%c\umqtt\src %AzureIoTProtocolMQTT_path%
+copy %AzureIoTSDKs_path%c\umqtt\inc\azure_umqtt_c %AzureIoTProtocolMQTT_path%
 
 del %sdk_path%*amqp*.*
 del %sdk_path%*mqtt*.*
