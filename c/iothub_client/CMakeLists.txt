@@ -88,17 +88,29 @@ if(${use_amqp})
         ${iothub_client_ll_transport_c_files}
         ./src/iothubtransport_amqp_common.c
         ./src/iothubtransportamqp_auth.c
-        ./src/iothubtransportamqp_methods.c
         ./src/uamqp_messaging.c
     )
+
+    if(${wip_use_c2d_amqp_methods})
+        set(iothub_client_amqp_transport_common_c_files
+            ${iothub_client_amqp_transport_common_c_files}
+            ./src/iothubtransportamqp_methods.c
+        )
+    endif()
 
     set(iothub_client_amqp_transport_common_h_files
         ${iothub_client_ll_transport_h_files}
         ./inc/iothubtransport_amqp_common.h
         ./inc/iothubtransportamqp_auth.h
-        ./inc/iothubtransportamqp_methods.h
         ./inc/uamqp_messaging.h
     )
+
+    if(${wip_use_c2d_amqp_methods})
+        set(iothub_client_amqp_transport_common_h_files
+            ${iothub_client_amqp_transport_common_h_files}
+            ./inc/iothubtransportamqp_methods.h
+        )
+    endif()
 
     set(iothub_client_amqp_transport_c_files
         ${iothub_client_amqp_transport_common_c_files}

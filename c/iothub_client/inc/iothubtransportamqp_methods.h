@@ -4,6 +4,8 @@
 #ifndef IOTHUBTRANSPORTAMQP_METHODS_H
 #define IOTHUBTRANSPORTAMQP_METHODS_H
 
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
+
 #include "azure_uamqp_c/session.h"
 #include "azure_c_shared_utility/buffer_.h"
 #include "azure_c_shared_utility/umock_c_prod.h"
@@ -33,6 +35,8 @@ extern "C"
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
 
 #endif /* IOTHUBTRANSPORTAMQP_METHODS_H */

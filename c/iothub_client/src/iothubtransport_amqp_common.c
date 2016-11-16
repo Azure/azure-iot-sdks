@@ -34,7 +34,9 @@
 #include "iothub_client_options.h"
 #include "iothub_client_private.h"
 #include "iothubtransportamqp_auth.h"
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
 #include "iothubtransportamqp_methods.h"
+#endif
 #include "iothubtransport_amqp_common.h"
 #include "iothub_client_version.h"
 
@@ -129,12 +131,14 @@ typedef struct AMQP_TRANSPORT_DEVICE_STATE_TAG
 	PDLIST_ENTRY waitingToSend;
 	// Internal list with the items currently being processed/sent through uAMQP.
 	DLIST_ENTRY inProgress;
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
     // the methods portion
     IOTHUBTRANSPORT_AMQP_METHODS_HANDLE methods_handle;
     // is subscription for methods needed?
     int subscribe_methods_needed : 1;
     // is the transport subscribed for methods?
     int subscribed_for_methods : 1;
+#endif
 } AMQP_TRANSPORT_DEVICE_STATE;
 
 
@@ -440,6 +444,7 @@ static void on_connection_io_error(void* context)
     }
 }
 
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
 static void on_methods_error(void* context)
 {
     /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_030: [ `on_methods_error` shall do nothing. ]*/
@@ -519,6 +524,7 @@ static int subscribe_methods(AMQP_TRANSPORT_DEVICE_STATE* deviceState)
 
     return result;
 }
+#endif
 
 static void set_session_options(SESSION_HANDLE session)
 {
@@ -1065,8 +1071,10 @@ static void prepareDeviceForConnectionRetry(AMQP_TRANSPORT_DEVICE_STATE* device_
 		LogError("Failed resetting the authenticatication state of device %s", device_state->deviceId);
 	}
 
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
     iothubtransportamqp_methods_unsubscribe(device_state->methods_handle);
     device_state->subscribed_for_methods = 0;
+#endif
 
 	destroyMessageReceiver(device_state);
 	destroyEventSender(device_state);
@@ -1242,12 +1250,14 @@ static RESULT device_DoWork(AMQP_TRANSPORT_DEVICE_STATE* device_state)
 			}
 			break;
 		case AUTHENTICATION_STATUS_OK:
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
             /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_031: [ `iothubtransportamqp_methods_subscribe` shall only be called once (subsequent DoWork calls shall not call it if already subscribed). ]*/
             if ((device_state->subscribed_for_methods == 0) &&
                 (subscribe_methods(device_state) != 0))
             {
                 LogError("Failed subscribing for methods");
             }
+#endif
 
 			// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_145: [If the device authentication status is AUTHENTICATION_STATUS_OK, IoTHubTransport_AMQP_Common_DoWork shall proceed to sending events, registering for messages]
 
@@ -1432,11 +1442,16 @@ int IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE hand
     }
     else
     {
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
         AMQP_TRANSPORT_DEVICE_STATE* device_state = (AMQP_TRANSPORT_DEVICE_STATE*)handle;
         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_026: [ `IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod` shall remember that a subscribe is to be performed in the next call to DoWork and on success it shall return 0. ]*/
         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_005: [ If the transport is already subscribed to receive C2D method requests, `IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod` shall perform no additional action and return 0. ]*/
         device_state->subscribe_methods_needed = 1;
         result = 0;
+#else
+        LogError("Not implemented");
+        result = __LINE__;
+#endif
     }
 
     return result;
@@ -1451,6 +1466,7 @@ void IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE h
     }
     else
     {
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
         AMQP_TRANSPORT_DEVICE_STATE* device_state = (AMQP_TRANSPORT_DEVICE_STATE*)handle;
 
         /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_008: [ If the transport is not subscribed to receive C2D method requests then `IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod` shall do nothing. ]*/
@@ -1460,6 +1476,9 @@ void IoTHubTransport_AMQP_Common_Unsubscribe_DeviceMethod(IOTHUB_DEVICE_HANDLE h
             device_state->subscribe_methods_needed = 0;
             iothubtransportamqp_methods_unsubscribe(device_state->methods_handle);
         }
+#else
+        LogError("Not implemented");
+#endif
     }
 }
 
@@ -1717,8 +1736,10 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
                 device_state->message_sender_state = MESSAGE_SENDER_STATE_IDLE;
 				device_state->receiver_link = NULL;
 				device_state->sender_link = NULL;
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
                 device_state->subscribe_methods_needed = 0;
                 device_state->subscribed_for_methods = 0;
+#endif
 
 				// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_227: [IoTHubTransport_AMQP_Common_Register shall store a copy of config->deviceId into device_state->deviceId.]
 				if ((device_state->deviceId = STRING_construct(deviceId)) == NULL)
@@ -1750,7 +1771,8 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
 				}
 				else
 				{
-					/* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_010: [ `IoTHubTransport_AMQP_Common_Create` shall create a new iothubtransportamqp_methods instance by calling `iothubtransportamqp_methods_create` while passing to it the the fully qualified domain name and the device Id. ]*/
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
+                    /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_010: [ `IoTHubTransport_AMQP_Common_Create` shall create a new iothubtransportamqp_methods instance by calling `iothubtransportamqp_methods_create` while passing to it the the fully qualified domain name and the device Id. ]*/
 					device_state->methods_handle = iothubtransportamqp_methods_create(STRING_c_str(transport_state->iotHubHostFqdn), deviceId);
 					if (device_state->methods_handle == NULL)
 					{
@@ -1759,7 +1781,9 @@ IOTHUB_DEVICE_HANDLE IoTHubTransport_AMQP_Common_Register(TRANSPORT_LL_HANDLE ha
 						cleanup_required = true;
 					}
 					// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_231: [IoTHubTransport_AMQP_Common_Register shall add the device to transport_state->registered_devices using VECTOR_push_back().]
-					else if (VECTOR_push_back(transport_state->registered_devices, &device_state, 1) != 0)
+					else
+#endif
+                    if (VECTOR_push_back(transport_state->registered_devices, &device_state, 1) != 0)
 					{
 						// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_232: [If VECTOR_push_back() fails to add the new registered device, IoTHubTransport_AMQP_Common_Register shall clean the memory it allocated, fail and return NULL.]
 						LogError("IoTHubTransport_AMQP_Common_Register failed to add the new device to its list of registered devices (VECTOR_push_back failed).");
@@ -1865,8 +1889,10 @@ void IoTHubTransport_AMQP_Common_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
 				// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_217: [IoTHubTransport_AMQP_Common_Unregister shall destroy the authentication state of the device using authentication_destroy.]
 				authentication_destroy(device_state->authentication);
 
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
                 /* Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_012: [IoTHubTransport_AMQP_Common_Unregister shall destroy the C2D methods handler by calling iothubtransportamqp_methods_destroy.]*/
                 iothubtransportamqp_methods_destroy(device_state->methods_handle);
+#endif
 
 				// Codes_SRS_IOTHUBTRANSPORT_AMQP_COMMON_09_218: [IoTHubTransport_AMQP_Common_Unregister shall remove the device from its list of registered devices using VECTOR_erase().]
 				VECTOR_erase(device_state->transport_state->registered_devices, registered_device_state, 1);
