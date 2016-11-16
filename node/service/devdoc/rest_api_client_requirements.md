@@ -6,7 +6,7 @@ The `RestApiClient` class provides common methods for top-level clients that use
 ## Usage
 ```js
 var restClient = new RestApiClient({ host: 'host', sharedAccessSignature: 'sharedAccessSignature'});
-restClient.executeApiCall('GET', '/twins?api-version=2016-04-30', null, null, function(err, result, response) {
+restClient.executeApiCall('GET', '/twins?api-version=2016-11-14', null, null, function(err, result, response) {
   if (err) {
     console.error(restClient.translateError(result, response).toString());
   } else {

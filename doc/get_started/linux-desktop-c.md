@@ -57,7 +57,7 @@ Connection to Azure IoT Hub is secured through [TLS]. As part of [TLS] handshake
 
 Quick way to test to make sure underlying platform has Root CA as **trusted**, you can using following [curl] command with [verbose] -v option
 
-`curl -v -H "Authorization:SharedAccessSignature sr={My SAS}” https://{MyTestHub}.azure-devices.net/devices/{My Device}/messages/events?api-version=2016-02-03 -H "Content-Type:application/json" -d "{ \"My Key\": \"My Value\" }"`
+`curl -v -H "Authorization:SharedAccessSignature sr={My SAS}” https://{MyTestHub}.azure-devices.net/devices/{My Device}/messages/events?api-version=2016-11-14 -H "Content-Type:application/json" -d "{ \"My Key\": \"My Value\" }"`
 
 Replace {My SAS} with your corresponding device SAS. {MyTestHub} with your Azure IoT Hub name. {My Device} with your device ID. Remove {} parenthesis while filling it with your strings.
 
