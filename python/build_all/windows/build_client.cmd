@@ -76,9 +76,9 @@ REM -- C --
 cd %build-root%..\..\..\c\build_all\windows
 
 if %use-websockets% == ON (
-call build_client.cmd --platform %build-platform% --buildpython %build-python% --config %build-config% --use-websockets --skip-unittests
+call build_client.cmd --platform %build-platform% --buildpython %build-python% --config %build-config% --use-websockets --skip-unittests --python-path %PYTHON_PATH%
 ) else (
-call build_client.cmd --platform %build-platform% --buildpython %build-python% --config %build-config% --skip-unittests
+call build_client.cmd --platform %build-platform% --buildpython %build-python% --config %build-config% --skip-unittests --python-path %PYTHON_PATH%
 )
 
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
