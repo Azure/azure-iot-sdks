@@ -1,6 +1,8 @@
 @REM Copyright (c) Microsoft. All rights reserved.
 @REM Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+@echo off
+
 rem ensure python.exe exists
 where /q python.exe
 if errorlevel 1 goto :NeedPython
@@ -11,7 +13,6 @@ if errorlevel 1 goto :NeedPython
 call pyenv.bat
 
 @setlocal EnableExtensions EnableDelayedExpansion
-@echo off
 
 set build-root=%~dp0
 rem // resolve to fully qualified path
@@ -21,8 +22,6 @@ cd %build-root%
 rem -----------------------------------------------------------------------------
 rem -- check prerequisites
 rem -----------------------------------------------------------------------------
-
-
 
 rem -----------------------------------------------------------------------------
 rem -- detect Python x86 or x64 version, select build target accordingly

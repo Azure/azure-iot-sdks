@@ -22,6 +22,8 @@ try:
     else:
         if (plat[0] != "32bit"):
             raise PlatformError("Require Windows CPython >= 2.7 or >= 3.4 32bit or 64bit version")
+        print ("SET build-platform=Win32")
+            
     print ("SET PYTHON_PATH=%s" % os.path.dirname(sys.executable))
     print ("SET build-python=%s.%s" % (sys.version_info[0],sys.version_info[1]))
     sys.exit(0)
