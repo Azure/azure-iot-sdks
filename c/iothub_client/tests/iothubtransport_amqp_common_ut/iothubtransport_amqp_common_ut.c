@@ -177,6 +177,7 @@ extern "C"
 		real_DList_InitializeListHead(ListHead);
 	}
 
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
 	static ON_METHODS_ERROR g_on_methods_error;
 	static void* g_on_methods_error_context;
 	static ON_METHOD_REQUEST_RECEIVED g_on_method_request_received;
@@ -193,6 +194,7 @@ extern "C"
 		g_on_method_request_received_context = on_method_request_received_context;
 		return 0;
 	}
+#endif
 
 #ifdef __cplusplus
 }
@@ -220,7 +222,9 @@ static TEST_MUTEX_HANDLE g_dllByDll;
 #define TEST_STRING_HANDLE (STRING_HANDLE)0x101
 #define TEST_WAIT_TO_SEND_LIST ((PDLIST_ENTRY)0x201)
 #define TEST_AUTHENTICATION_STATE_HANDLE	((AUTHENTICATION_STATE_HANDLE)0x4243)
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
 #define TEST_IOTHUBTRANSPORTAMQP_METHODS	((IOTHUBTRANSPORT_AMQP_METHODS_HANDLE)0x4244)
+#endif
 #define TEST_SESSION						((SESSION_HANDLE)0x4245)
 #define TEST_METHOD_HANDLE                  ((IOTHUBTRANSPORT_AMQP_METHOD_HANDLE)0x4246)
 #define TEST_XIO_INTERFACE                  ((const IO_INTERFACE_DESCRIPTION*)0x4247)
@@ -331,10 +335,12 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
 	REGISTER_UMOCK_ALIAS_TYPE(AUTHENTICATION_STATE_HANDLE, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(MESSAGE_RECEIVER_HANDLE, void*);
 	REGISTER_UMOCK_ALIAS_TYPE(LINK_HANDLE, void*);
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
 	REGISTER_UMOCK_ALIAS_TYPE(IOTHUBTRANSPORT_AMQP_METHODS_HANDLE, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(ON_METHODS_ERROR, void*);
+    REGISTER_UMOCK_ALIAS_TYPE(ON_METHOD_REQUEST_RECEIVED, void*);
+#endif
 	REGISTER_UMOCK_ALIAS_TYPE(SESSION_HANDLE, void*);
-	REGISTER_UMOCK_ALIAS_TYPE(ON_METHODS_ERROR, void*);
-	REGISTER_UMOCK_ALIAS_TYPE(ON_METHOD_REQUEST_RECEIVED, void*);
     REGISTER_UMOCK_ALIAS_TYPE(XIO_HANDLE, void*);
     REGISTER_UMOCK_ALIAS_TYPE(ON_NEW_ENDPOINT, void*);
     REGISTER_UMOCK_ALIAS_TYPE(ON_CONNECTION_STATE_CHANGED, void*);
@@ -354,11 +360,15 @@ TEST_SUITE_INITIALIZE(TestClassInitialize)
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_malloc, my_gballoc_malloc);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_free, my_gballoc_free);
     REGISTER_GLOBAL_MOCK_HOOK(gballoc_realloc, my_gballoc_realloc);
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
     REGISTER_GLOBAL_MOCK_HOOK(iothubtransportamqp_methods_subscribe, my_iothubtransportamqp_methods_subscribe);
+#endif
     
 	REGISTER_GLOBAL_MOCK_RETURN(authentication_create, TEST_AUTHENTICATION_STATE_HANDLE);
 	REGISTER_GLOBAL_MOCK_RETURN(authentication_get_credential, test_transport_credential_ptr);
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
 	REGISTER_GLOBAL_MOCK_RETURN(iothubtransportamqp_methods_create, TEST_IOTHUBTRANSPORTAMQP_METHODS);
+#endif
 	REGISTER_GLOBAL_MOCK_RETURN(session_create, TEST_SESSION);
     REGISTER_GLOBAL_MOCK_RETURN(platform_get_default_tlsio, TEST_XIO_INTERFACE);
     REGISTER_GLOBAL_MOCK_RETURN(xio_create, TEST_XIO_HANDLE);
@@ -537,10 +547,12 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Register_creates_a_new_methods_handler
     EXPECTED_CALL(gballoc_malloc(IGNORED_NUM_ARG));
     EXPECTED_CALL(STRING_construct(IGNORED_PTR_ARG));
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
+
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG))
         .SetReturn(TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX);
-
     STRICT_EXPECTED_CALL(iothubtransportamqp_methods_create(TEST_IOT_HUB_NAME "." TEST_IOT_HUB_SUFFIX, "blah"));
+#endif
 
     EXPECTED_CALL(VECTOR_push_back(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1));
     EXPECTED_CALL(STRING_c_str(IGNORED_PTR_ARG));
@@ -559,6 +571,7 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Register_creates_a_new_methods_handler
     IoTHubTransport_AMQP_Common_Destroy(handle);
 }
 
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
 /* Tests_SRS_IOTHUBTRANSPORT_AMQP_COMMON_01_011: [ If `iothubtransportamqp_methods_create` fails, `IoTHubTransport_AMQP_Common_Register` shall fail and return NULL. ]*/
 TEST_FUNCTION(when_creating_the_methods_handler_fails_then_IoTHubTransport_AMQP_Common_Register_fails)
 {
@@ -626,6 +639,7 @@ TEST_FUNCTION(when_creating_the_methods_handler_fails_then_IoTHubTransport_AMQP_
     // cleanup
     IoTHubTransport_AMQP_Common_Destroy(handle);
 }
+#endif
 
 /* IoTHubTransport_AMQP_Common_Unregister */
 
@@ -668,7 +682,9 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Unregister_destroys_the_methods_handle
     EXPECTED_CALL(STRING_delete(IGNORED_PTR_ARG));
     EXPECTED_CALL(authentication_destroy(IGNORED_PTR_ARG));
 
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
     STRICT_EXPECTED_CALL(iothubtransportamqp_methods_destroy(TEST_IOTHUBTRANSPORTAMQP_METHODS));
+#endif
 
     EXPECTED_CALL(VECTOR_erase(IGNORED_PTR_ARG, IGNORED_PTR_ARG, 1));
     EXPECTED_CALL(gballoc_free(IGNORED_PTR_ARG));
@@ -682,6 +698,8 @@ TEST_FUNCTION(IoTHubTransport_AMQP_Common_Unregister_destroys_the_methods_handle
     // cleanup
     IoTHubTransport_AMQP_Common_Destroy(handle);
 }
+
+#ifdef WIP_C2D_METHODS_AMQP /* This feature is WIP, do not use yet */
 
 /* IoTHubTransport_AMQP_Common_Subscribe_DeviceMethod */
 
@@ -1322,5 +1340,6 @@ TEST_FUNCTION(on_methods_error_does_nothing)
     // cleanup
     IoTHubTransport_AMQP_Common_Destroy(handle);
 }
+#endif
 
 END_TEST_SUITE(iothubtransport_amqp_common_ut)

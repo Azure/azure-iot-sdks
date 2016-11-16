@@ -49,6 +49,15 @@ option(no_logging "disable logging" OFF)
 option(use_installed_dependencies "set use_installed_dependencies to ON to use installed packages instead of building dependencies from submodules" OFF)
 option(use_firmware_update "build the Raspberry PI firmware_update sample" OFF)
 
+#Work in progress features
+#=========================
+#These options turn on features that are either not complete or noy yet enabled in the IoTHub service
+option(wip_use_c2d_amqp_methods "this option enables the C2D method support over AMQP. THIS IS WORK IN PROGRESS, ONLY MEANT FOR DEVELOPMENT (default is OFF)" OFF)
+
+if(${wip_use_c2d_amqp_methods})
+    add_definitions(-DWIP_C2D_METHODS_AMQP)
+endif()
+
 if(WIN32)
     option(use_openssl "set use_openssl to ON to use OpenSSL." OFF)
 else()
