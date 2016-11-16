@@ -1,6 +1,15 @@
 @REM Copyright (c) Microsoft. All rights reserved.
 @REM Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+rem ensure python.exe exists
+where /q python.exe
+if errorlevel 1 goto :NeedPython
+
+python python_version_check.py >pyenv.bat
+if errorlevel 1 goto :NeedPython
+
+call pyenv.bat
+
 @setlocal EnableExtensions EnableDelayedExpansion
 @echo off
 
@@ -13,25 +22,18 @@ rem ----------------------------------------------------------------------------
 rem -- check prerequisites
 rem -----------------------------------------------------------------------------
 
-rem ensure python.exe exists
-where /q python.exe
-if errorlevel 1 goto :NeedPython
+
 
 rem -----------------------------------------------------------------------------
 rem -- detect Python x86 or x64 version, select build target accordingly
 rem -----------------------------------------------------------------------------
 
 REM target may be set to 64 bit build if a Python x64 detected
-set build-platform=Win32
 set build-config=Release
-set build-python=2.7
 set wheel=0
 set platname=win32
 set use-websockets=OFF
 
-python python_version_check.py >pyenv.bat
-if errorlevel 1 goto :NeedPython
-call pyenv.bat
 @Echo Using Python found in: %PYTHON_PATH%, building Python %build-python% %build-platform% extension
 goto :args-loop
 
@@ -76,9 +78,9 @@ REM -- C --
 cd %build-root%..\..\..\c\build_all\windows
 
 if %use-websockets% == ON (
-call build_client.cmd --platform %build-platform% --buildpython %build-python% --config %build-config% --use-websockets --skip-unittests --python-path %PYTHON_PATH%
+call build_client.cmd --platform %build-platform% --buildpython %build-python% --config %build-config% --use-websockets --skip-unittests
 ) else (
-call build_client.cmd --platform %build-platform% --buildpython %build-python% --config %build-config% --skip-unittests --python-path %PYTHON_PATH%
+call build_client.cmd --platform %build-platform% --buildpython %build-python% --config %build-config% --skip-unittests
 )
 
 if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
