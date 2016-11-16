@@ -17,5 +17,6 @@ module.exports = {
   SharedAccessSignature: require('./lib/shared_access_signature.js'),
   Amqp: require('./lib/amqp.js'),
   AmqpWs: require('./lib/amqp_ws.js'),
-  JobClient: require('./lib/job_client.js')
+  JobClient: require('./lib/job_client.js'),
+  Device: require('./lib/device.js')
 };

@@ -9,3 +9,4 @@ export import Amqp = require('./lib/amqp');
 export import AmqpWs = require('./lib/amqp_ws');
 export import DeviceMethodParams = require('./lib/device_method_params');
 export import JobClient = require('./lib/job_client');
+export import Device = require('./lib/device');
