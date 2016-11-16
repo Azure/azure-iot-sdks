@@ -65,7 +65,7 @@ You should have the following items ready before beginning the process:
 In order to monitor the device twin in the cloud, you can use the Device Explorer tool on a Windows machine.
 To build and run the Device Explorer tool with the Device Twin support:
 
-1. In your local clone of the azure-iot-sdks-preview repository, open the solution tools\\DeviceExplorer\\DeviceExplorer.sln in Visual Studio 2015.
+1. In your local clone of the azure-iot-sdks repository, open the solution tools\\DeviceExplorer\\DeviceExplorer.sln in Visual Studio 2015.
 1. Compile and run hitting F5
 1. Enter the IoT Hub owner Connection String to setup the tool, then you are all set to use the tool!
 1. In the tool search for the Twin tab for the device in order to visualize
