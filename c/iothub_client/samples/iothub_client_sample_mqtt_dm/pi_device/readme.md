@@ -7,7 +7,7 @@ Before jumping in, it is recommended to read through the following documentation
 
 ## Prerequisites
 You should have the following items ready before beginning the process:
--   Computer with Git client installed and access to the [azure-iot-sdks-preview](https://github.com/Azure/azure-iot-sdks-preview) GitHub public repository.
+-   Computer with Git client installed and access to the [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub public repository.
 -   SSH client on your desktop computer, such as [PuTTY](http://www.putty.org/), so you can remotely access the command line on the Raspberry Pi.
 -   If running MacOS or Linux, you are set.
 -   If running Windows 10:
@@ -38,7 +38,7 @@ The instructions below show how to trigger the firmware update after preparing a
 Once triggered, the application will download the new firmware image package, install it then reboot the device.
 The new firmware image contains the application already, which is setup to run as a service at boottime, reporting on the new firmware image version through Device Twins.
 
-The code for the sample application is available in the [azure-io-sdks](https://github.com/azure/azure-io-sdks-preview) repository, but to simplify the exercise, we have compiled and published the sample application in a package.
+The code for the sample application is available in the [azure-io-sdks](https://github.com/azure/azure-io-sdks) repository, but to simplify the exercise, we have compiled and published the sample application in a package.
 If you want to compile the application along with the rest of the SDK directly on the Pi, you can do so following these [instructions](../../../../../doc/get_started/raspbian-3gpi-c.md), but the below instructions assume that you are downloading the app package.
 
 ## Run the sample
@@ -76,8 +76,8 @@ Assuming you have an older version of Raspbian running on your Raspberry Pi, fol
 	
 	add the following lines to the /etc/apt/source.list files:
 	```
-	deb http://ppa.launchpad.net/aziotsdklinux/azureiot-preview/ubuntu vivid main
-	deb-src http://ppa.launchpad.net/aziotsdklinux/azureiot-preview/ubuntu vivid main
+	deb http://ppa.launchpad.net/aziotsdklinux/ppa-azureiot/ubuntu vivid main
+	deb-src http://ppa.launchpad.net/aziotsdklinux/ppa-azureiot/ubuntu vivid main
 	deb http://ppa.launchpad.net/aziotsdklinux/azureiot-firmware-update-sample/ubuntu vivid main 
 	deb-src http://ppa.launchpad.net/aziotsdklinux/azureiot-firmware-update-sample/ubuntu vivid main
 	```
