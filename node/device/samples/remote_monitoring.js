@@ -115,7 +115,7 @@ client.open(function (err) {
     client.on('error', function (err) {
       printErrorFor('client')(err);
       if (sendInterval) clearInterval(sendInterval);
-      client.close();
+      client.close(printErrorFor('client.close'));
     });
   }
 });

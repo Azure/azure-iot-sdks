@@ -38,8 +38,14 @@ The Python iothub_client supports python versions 2.7.x, 3.4.x or 3.5.x. Know th
 5. After a successful build, the `iothub_client.so` Python extension module is copied to the **python/device/samples** folder. Please follow instructions in [Sample applications](#samplecode) to run the Python samples.
 
 ###Known build issues: 
-1. On some small footprint Linux devices, like a *Raspberry Pi* using Raspbian OS, the following build error may occur: `virtual memory exhausted: Cannot allocate memory`. In such a case please try to increase the swap file size on your platform and retry the build. (If swap increase did not work consider running build.sh using --skip-unittests --use-websockets parameters)
-2. CentOS7: Only Python 2.7 is supported due to a missing boost-python3 library package
+
+1.) On building the Python client library (`iothub_client.so`) on Linux devices that have less than **1GB** RAM, you may see build getting **stuck** at **98%** while building `iothub_client_python.cpp` as shown below
+
+``[ 98%] Building CXX object python/src/CMakeFiles/iothub_client_python.dir/iothub_client_python.cpp.o``
+
+If you run into this issue, check the **memory consumption** of the device using `free -m command` in another terminal window during that time. If you are running out of memory while compiling iothub_client_python.cpp file, you may have to temporarily increase the **swap space** to get more available memory to successfully build the Python client side device SDK library.
+
+2.) CentOS7: Only Python 2.7 is supported due to a missing boost-python3 library package
 
 <a name="windows-wheels"/>
 ## Install the Python iothub_client module on Windows from [PyPI] 

@@ -17,4 +17,4 @@ The IoTHub C SDK relies on the Platform Abstraction Layer implemented by the azu
 ## PAL porting
 </a>
 
-In order to port the C IoTHub SDK, one needs to port the PAL following [this](https://www.github.com/Azure/azure-c-shared-utility/blob/doc/porting_guide.md) document. 
+In order to port the C IoTHub SDK, one needs to port the PAL following [this](https://www.github.com/Azure/azure-c-shared-utility/blob/master/doc/porting_guide.md) document. 
