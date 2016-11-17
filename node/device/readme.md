@@ -26,10 +26,6 @@ Device SDK subfolders under **node/device**:
 
 Protocol-independent device SDK package.
 
-### /doc
-
-Node device specific documentation.
-
 ### /node-red
 
 Node-RED module for Azure IoT Hub.
