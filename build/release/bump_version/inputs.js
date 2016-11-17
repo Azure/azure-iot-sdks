@@ -1135,7 +1135,7 @@ module.exports = [
     {
         "taskType": "xmlReplaceTask",
         "filePath": "java/service/iothub-service-sdk/pom.xml",
-        "search": "//project/version",
+        "search": "//project/parent/version",
         "replaceString": "java.service"
     },
     {
