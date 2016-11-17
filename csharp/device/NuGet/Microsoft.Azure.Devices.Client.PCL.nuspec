@@ -20,7 +20,7 @@ Use Microsoft.Azure.Devices.Client package which now supports PCL.
         <tags>Microsoft Azure IoT IoTHub Device Client .net HTTP PCL Android iOS</tags>
         <language>en-US</language>
         <dependencies>
-            <dependency id="Microsoft.Azure.Devices.Client" version="(0,2.0.0)" />
+            <dependency id="Microsoft.Azure.Devices.Client" version="(,2.0.0)" />
         </dependencies>
     </metadata>
     <files>
