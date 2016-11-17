@@ -29,11 +29,16 @@ receive_context = 0
 avg_wind_speed = 10.0
 message_count = 5
 received_count = 0
+twin_context = 0
+method_context = 0
 
 # global counters
 receive_callbacks = 0
 send_callbacks = 0
 blob_callbacks = 0
+twin_callbacks = 0
+send_reported_state_callbacks = 0
+method_callbacks = 0
 
 # String containing Hostname, Device Id & Device Key in the format:
 # "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"
@@ -47,7 +52,7 @@ class HubManager(object):
     def __init__(
             self,
             connection_string,
-            protocol=IoTHubTransportProvider.AMQP):
+            protocol=IoTHubTransportProvider.MQTT):
         self.client_protocol = protocol
         self.client = IoTHubClient(connection_string, protocol)
         if protocol == IoTHubTransportProvider.HTTP:
@@ -58,6 +63,8 @@ class HubManager(object):
         # some embedded platforms need certificate information
         # self.set_certificates()
         self.client.set_message_callback(self._receive_message_callback, receive_context)
+        self.client.set_device_twin_callback(self._device_twin_callback, twin_context)
+        self.client.set_device_method_callback(self._device_method_callback, method_context)
 
     def set_certificates(self):
         from iothub_client_cert import certificates
@@ -94,6 +101,37 @@ class HubManager(object):
         print("    Total calls confirmed: %d" % send_callbacks)
 
 
+    def _device_twin_callback(updateState, payLoad, user_context):
+        global twin_callbacks
+        print(
+            "\nTwin callback called with:\nupdateStatus = %s\npayload = %s\ncontext = %s" % 
+            (updateState, payLoad, user_context))
+        twin_callbacks += 1
+        print("Total calls confirmed: %d\n" % twin_callbacks)
+
+
+    def _send_reported_state_callback(status_code, user_context):
+        global send_reported_state_callbacks
+        print(
+            "Confirmation for reported state received with:\nstatus_code = [%d]\ncontext = %s" %
+            (status_code, user_context))
+        send_reported_state_callbacks += 1
+        print("    Total calls confirmed: %d" % send_reported_state_callbacks)
+
+
+    def _device_method_callback(method_name, payload, user_context):
+        global method_callbacks
+        print(
+            "\nMethod callback called with:\nmethodName = %s\npayload = %s\ncontext = %s" % 
+            (method_name, payload, user_context))
+        method_callbacks += 1
+        print("Total calls confirmed: %d\n" % method_callbacks)
+        deviceMethodReturnValue = DeviceMethodReturnValue()
+        deviceMethodReturnValue.response = "{ \"Response\": \"This is the response from the device\" }"
+        deviceMethodReturnValue.status = 200
+        return deviceMethodReturnValue
+        
+
     def _blob_upload_confirmation_callback(self, result, user_context):
         global blob_callbacks
         print("Blob upload confirmation[%d] received for message with result = %s" % (user_context, result))
@@ -112,6 +150,12 @@ class HubManager(object):
 
         self.client.send_event_async(
             event, self._send_confirmation_callback, send_context)
+
+
+    def send_reported_state(self, reportedState, size, user_context):
+        self.client.send_reported_state(
+            reportedState, size
+            self._send_reported_state_callback, user_context)
 
 
     def upload_to_blob(self, destinationfilename, source, size, usercontext):
@@ -137,6 +181,9 @@ def main(connection_string, protocol):
         filename= "hello_python_blob.txt"
         content = "Hello World from Python Blob APi"
         hub_manager.upload_to_blob(filename, content, len(content), 1001)
+
+        reportedState = "{\"newState\":\"standBy\"}"
+        hub_manager.send_reported_state(reportedState, len(reportedState), 1002)
 
         while True:
             # send a few messages every minute

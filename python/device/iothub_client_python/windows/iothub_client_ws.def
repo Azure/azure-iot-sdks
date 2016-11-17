@@ -48,6 +48,10 @@ EXPORTS
     AMQP_Protocol
 ;   iothubtransportmqtt.h
     MQTT_Protocol
+;   iothubtransportamqp_websockets.h
+    AMQP_Protocol_over_WebSocketsTls
+;   iothubtransportmqtt_websocket.h
+    MQTT_WebSocket_Protocol
 ;   map.h (c-utility)
     Map_Create
     Map_Destroy

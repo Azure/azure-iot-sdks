@@ -29,14 +29,20 @@ receive_context = 0
 avg_wind_speed = 10.0
 message_count = 5
 received_count = 0
+twin_context = 0
+send_reported_sate_context = 0
+method_context = 0
 
 # global counters
 receive_callbacks = 0
 send_callbacks = 0
 blob_callbacks = 0
+twin_callbacks = 0
+send_reported_state_callbacks = 0
+method_callbacks = 0
 
 # chose HTTP, AMQP or MQTT as transport protocol
-protocol = IoTHubTransportProvider.AMQP
+protocol = IoTHubTransportProvider.MQTT
 
 # String containing Hostname, Device Id & Device Key in the format:
 # "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"
@@ -85,6 +91,37 @@ def send_confirmation_callback(message, result, user_context):
     print("    Total calls confirmed: %d" % send_callbacks)
 
 
+def device_twin_callback(updateState, payLoad, user_context):
+    global twin_callbacks
+    print(
+        "\nTwin callback called with:\nupdateStatus = %s\npayload = %s\ncontext = %s" % 
+        (updateState, payLoad, user_context))
+    twin_callbacks += 1
+    print("Total calls confirmed: %d\n" % twin_callbacks)
+
+
+def send_reported_state_callback(status_code, user_context):
+    global send_reported_state_callbacks
+    print(
+        "Confirmation for reported state received with:\nstatus_code = [%d]\ncontext = %s" %
+        (status_code, user_context))
+    send_reported_state_callbacks += 1
+    print("    Total calls confirmed: %d" % send_reported_state_callbacks)
+
+
+def device_method_callback(method_name, payload, user_context):
+    global method_callbacks
+    print(
+        "\nMethod callback called with:\nmethodName = %s\npayload = %s\ncontext = %s" % 
+        (method_name, payload, user_context))
+    method_callbacks += 1
+    print("Total calls confirmed: %d\n" % method_callbacks)
+    deviceMethodReturnValue = DeviceMethodReturnValue()
+    deviceMethodReturnValue.response = "{ \"Response\": \"This is the response from the device\" }"
+    deviceMethodReturnValue.status = 200
+    return deviceMethodReturnValue
+
+
 def blob_upload_confirmation_callback(result, user_context):
     global blob_callbacks
     print("Blob upload confirmation[%d] received for message with result = %s" % (user_context, result))
@@ -101,12 +138,17 @@ def iothub_client_init():
     # set the time until a message times out
     iotHubClient.set_option("messageTimeout", message_timeout)
     # some embedded platforms need certificate information
-    # set_certificates(iotHubClient)
+    set_certificates(iotHubClient)
     # to enable MQTT logging set to 1
     if iotHubClient.protocol == IoTHubTransportProvider.MQTT:
         iotHubClient.set_option("logtrace", 0)
     iotHubClient.set_message_callback(
         receive_message_callback, receive_context)
+    if iotHubClient.protocol == IoTHubTransportProvider.MQTT:
+        iotHubClient.set_device_twin_callback(
+            device_twin_callback, twin_context)
+        iotHubClient.set_device_method_callback(
+            device_method_callback, method_context)
     return iotHubClient
 
 
@@ -135,6 +177,11 @@ def iothub_client_sample_run():
         iotHubClient.upload_blob_async(filename, content, len(content), blob_upload_confirmation_callback, 1001)
         print("IoTHubClient.upload_blob_async accepted the blob to upload to IoT Hub.")
 
+        if iotHubClient.protocol == IoTHubTransportProvider.MQTT:
+            print("IoTHubClient is reporting state")
+            reportedState = "{\"newState\":\"standBy\"}"
+            iotHubClient.send_reported_state(reportedState, len(reportedState), send_reported_state_callback, send_reported_sate_context)
+        
         while True:
             # send a few messages every minute
             print("IoTHubClient sending %d messages" % message_count)
@@ -181,7 +228,7 @@ def iothub_client_sample_run():
 
 def usage():
     print("Usage: iothub_client_sample.py -p <protocol> -c <connectionstring>")
-    print("    protocol        : <amqp, http, mqtt>")
+    print("    protocol        : <amqp, amqp_ws, http, mqtt, mqtt_ws>")
     print("    connectionstring: <HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>>")
 
 

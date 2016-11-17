@@ -18,7 +18,7 @@ class OptionError(Exception):
 def get_iothub_opt(
         argv,
         connection_string,
-        protocol=IoTHubTransportProvider.AMQP):
+        protocol=IoTHubTransportProvider.MQTT):
     if len(argv) > 0:
         try:
             opts, args = getopt.getopt(
@@ -31,12 +31,36 @@ def get_iothub_opt(
                 raise OptionError("Help:")
             elif opt in ("-p", "--protocol"):
                 protocol_string = arg.lower()
-                if (protocol_string == "amqp"):
-                    protocol = IoTHubTransportProvider.AMQP
+
+                if (protocol_string == "http"):
+                    if hasattr(IoTHubTransportProvider, "HTTP"):
+                        protocol = IoTHubTransportProvider.HTTP
+                    else:
+                        raise OptionError("Error: HTTP protocol is not supported")
+
+                elif (protocol_string == "amqp"):
+                    if hasattr(IoTHubTransportProvider, "AMQP"):
+                        protocol = IoTHubTransportProvider.AMQP
+                    else:
+                        raise OptionError("Error: AMQP protocol is not supported")
+
+                elif (protocol_string == "amqp_ws"):
+                    if hasattr(IoTHubTransportProvider, "AMQP_WS"):
+                        protocol = IoTHubTransportProvider.AMQP_WS
+                    else:
+                        raise OptionError("Error: AMQP_WS protocol is not supported")
+
                 elif (protocol_string == "mqtt"):
-                    protocol = IoTHubTransportProvider.MQTT
-                elif (protocol_string == "http"):
-                    protocol = IoTHubTransportProvider.HTTP
+                    if hasattr(IoTHubTransportProvider, "MQTT"):
+                        protocol = IoTHubTransportProvider.MQTT
+                    else:
+                        raise OptionError("Error: MQTT protocol is not supported")
+
+                elif hasattr(IoTHubTransportProvider, "MQTT_WS"):
+                    if hasattr(IoTHubTransportProvider, "MQTT_WS"):
+                        protocol = IoTHubTransportProvider.MQTT_WS
+                    else:
+                        raise OptionError("Error: MQTT_WS protocol is not supported")
                 else:
                     raise OptionError(
                         "Error: unknown protocol %s" %

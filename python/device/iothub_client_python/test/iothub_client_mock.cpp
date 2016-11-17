@@ -13,6 +13,8 @@
 #pragma warning(pop)
 #endif
 
+#pragma warning(disable:4996) /* This is because of we need strncpy */
+
 #include <string>
 #include <vector>
 #include <list>
@@ -24,6 +26,11 @@
 #include "iothubtransporthttp.h"
 #include "iothubtransportamqp.h"
 #include "iothubtransportmqtt.h"
+
+#ifdef USE_WEBSOCKETS
+#include "iothubtransportamqp_websockets.h"
+#include "iothubtransportmqtt_websockets.h"
+#endif
 
 #define IMPORT_NAME iothub_client_mock
 
@@ -207,6 +214,24 @@ IOTHUB_CLIENT_RESULT IoTHubClient_SetMessageCallback(IOTHUB_CLIENT_HANDLE iotHub
     return IOTHUB_CLIENT_OK;
 }
 
+IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceTwinCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_TWIN_CALLBACK deviceTwinCallback, void* userContextCallback)
+{
+    (void)iotHubClientHandle, deviceTwinCallback, userContextCallback;
+    return IOTHUB_CLIENT_OK;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_SendReportedState(IOTHUB_CLIENT_HANDLE iotHubClientHandle, const unsigned char* reportedState, size_t size ,  IOTHUB_CLIENT_REPORTED_STATE_CALLBACK reportedStateCallback, void* userContextCallback)
+{
+    (void)iotHubClientHandle, reportedState, size, reportedStateCallback, userContextCallback;
+    return IOTHUB_CLIENT_OK;
+}
+
+IOTHUB_CLIENT_RESULT IoTHubClient_SetDeviceMethodCallback(IOTHUB_CLIENT_HANDLE iotHubClientHandle, IOTHUB_CLIENT_DEVICE_METHOD_CALLBACK_ASYNC deviceMethodCallback, void* userContextCallback)
+{
+    (void)iotHubClientHandle, deviceMethodCallback, userContextCallback;
+    return IOTHUB_CLIENT_OK;
+}
+
 IOTHUB_CLIENT_RESULT IoTHubClient_GetLastMessageReceiveTime(IOTHUB_CLIENT_HANDLE iotHubClientHandle, time_t* lastMessageReceiveTime)
 {
     (void)iotHubClientHandle, lastMessageReceiveTime;
@@ -338,22 +363,41 @@ void IoTHubMessage_Destroy(IOTHUB_MESSAGE_HANDLE iotHubMessageHandle)
 
 // "iothubtransporthttp.h"
 TRANSPORT_PROVIDER *mockProtocol = (TRANSPORT_PROVIDER *)0x12345678;
-const TRANSPORT_PROVIDER* HTTP_Protocol(void)
-{
-    return mockProtocol;
-}
+extern "C" {
+    const TRANSPORT_PROVIDER* HTTP_Protocol(void)
+    {
+        return mockProtocol;
+    }
 
-// "iothubtransportamqp.h"
+    // "iothubtransportamqp.h"
 
-const TRANSPORT_PROVIDER* AMQP_Protocol(void)
-{
-    return mockProtocol;
-}
+    const TRANSPORT_PROVIDER* AMQP_Protocol(void)
+    {
+        return mockProtocol;
+    }
 
-// "iothubtransportmqtt.h"
+    // "iothubtransportmqtt.h"
 
-const TRANSPORT_PROVIDER* MQTT_Protocol(void)
-{
-    return mockProtocol;
-}
+    const TRANSPORT_PROVIDER* MQTT_Protocol(void)
+    {
+        return mockProtocol;
+    }
 
+#ifdef USE_WEBSOCKETS
+
+    // "iothubtransportamqp_webscokets.h"
+
+    const TRANSPORT_PROVIDER* AMQP_Protocol_over_WebSocketsTls(void)
+    {
+        return mockProtocol;
+    }
+
+    // "iothubtransportmqtt_websockets.h"
+
+    const TRANSPORT_PROVIDER* MQTT_WebSocket_Protocol(void)
+    {
+        return mockProtocol;
+    }
+#endif
+
+}/*extern "C"*/

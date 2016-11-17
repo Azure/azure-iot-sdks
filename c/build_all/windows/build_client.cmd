@@ -28,6 +28,7 @@ set CMAKE_use_wsio=OFF
 set CMAKE_build_python=OFF
 set CMAKE_build_javawrapper=OFF
 set CMAKE_no_logging=OFF
+set CMAKE_skip_unittests=OFF
 
 :args-loop
 if "%1" equ "" goto args-done
@@ -37,6 +38,7 @@ if "%1" equ "--use-websockets" goto arg-use-websockets
 if "%1" equ "--buildpython" goto arg-build-python
 if "%1" equ "--build-javawrapper" goto arg-build-javawrapper
 if "%1" equ "--no-logging" goto arg-no-logging
+if "%1" equ "--skip-unittests" goto arg-skip-unittests
 call :usage && exit /b 1
 
 :arg-build-config
@@ -72,6 +74,10 @@ goto args-continue
 set CMAKE_no_logging=ON 
 goto args-continue
 
+:arg-skip-unittests
+set CMAKE_skip_unittests=ON
+goto args-continue
+
 :args-continue
 shift
 goto args-loop
@@ -99,11 +105,11 @@ pushd %USERPROFILE%\%cmake-output%
 
 if %build-platform% == Win32 (
 	echo ***Running CMAKE for Win32***
-	cmake %build-root% -Duse_wsio:BOOL=%CMAKE_use_wsio% -Dbuild_python:STRING=%CMAKE_build_python% -Dbuild_javawrapper:BOOL=%CMAKE_build_javawrapper% -Dno_logging:BOOL=%CMAKE_no_logging%
+	cmake %build-root% -Dskip_unittests:BOOL=%CMAKE_skip_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% -Dbuild_python:STRING=%CMAKE_build_python% -Dbuild_javawrapper:BOOL=%CMAKE_build_javawrapper% -Dno_logging:BOOL=%CMAKE_no_logging%
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else (
 	echo ***Running CMAKE for Win64***
-	cmake %build-root% -G "Visual Studio 14 Win64" -Dbuild_python:STRING=%CMAKE_build_python% -Dbuild_javawrapper:BOOL=%CMAKE_build_javawrapper% -Dno_logging:BOOL=%CMAKE_no_logging%
+	cmake %build-root% -G "Visual Studio 14 Win64" -Dskip_unittests:BOOL=%CMAKE_skip_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% -Dbuild_python:STRING=%CMAKE_build_python% -Dbuild_javawrapper:BOOL=%CMAKE_build_javawrapper% -Dno_logging:BOOL=%CMAKE_no_logging%
 	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
@@ -130,4 +136,5 @@ echo  --config ^<value^>         [Debug] build configuration (e.g. Debug, Releas
 echo  --platform ^<value^>       [Win32] build platform (e.g. Win32, x64, ...)
 echo  --buildpython ^<value^>    [2.7]   build python extension (e.g. 2.7, 3.4, ...)
 echo  --no-logging               Disable logging
+echo  --use-websockets           Enable websocket support for AMQP and MQTT
 goto :eof

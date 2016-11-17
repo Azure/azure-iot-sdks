@@ -75,5 +75,9 @@ if(${use_mqtt})
     include_directories(${IOTHUB_CLIENT_MQTT_TRANSPORT_INC_FOLDER} ${MQTT_INC_FOLDER})
 endif()
 
+if(${use_wsio})
+    add_definitions(-DUSE_WEBSOCKETS)
+endif()
+
 add_subdirectory(src)
 add_subdirectory(test)
