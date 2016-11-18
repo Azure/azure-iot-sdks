@@ -10,7 +10,8 @@ if(NOT ${use_amqp})
 endif()
 
 set(remote_monitoring_c_files
-remote_monitoring.c
+	remote_monitoring.c
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.c
 )
 
 if(WIN32)
@@ -21,6 +22,7 @@ endif()
 
 set(remote_monitoring_h_files
 	remote_monitoring.h
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.h
 )
 
 IF(WIN32)
@@ -29,6 +31,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 include_directories(. ${IOTHUB_CLIENT_INC_FOLDER})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../certs)
 
 link_directories(${whatIsBuilding}_dll ${SHARED_UTIL_LIB_DIR})
 

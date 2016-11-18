@@ -11,10 +11,12 @@ endif()
 
 set(devicetwin_simplesample_c_files
     devicetwin_simplesample.c
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.c
 )
 
 set(devicetwin_simplesample_h_files
 	devicetwin_simplesample.h
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.h
 )
 
 IF(WIN32)
@@ -23,6 +25,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 include_directories(. ${SERIALIZER_INC_FOLDER} ${SHARED_UTIL_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../certs)
 
 add_executable(devicetwin_simplesample ${devicetwin_simplesample_c_files} ${devicetwin_simplesample_h_files})
 target_link_libraries(devicetwin_simplesample iothub_client_mqtt_transport serializer iothub_client)

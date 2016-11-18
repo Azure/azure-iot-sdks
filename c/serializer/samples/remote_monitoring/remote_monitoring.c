@@ -12,11 +12,7 @@
 #include "schemaserializer.h"
 #include "azure_c_shared_utility/threadapi.h"
 #include "azure_c_shared_utility/platform.h"
-
-#ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
-#endif // MBED_BUILD_TIMESTAMP
-
 
 static const char* deviceId = "[Device Id]";
 static const char* deviceKey = "[Device Key]";
@@ -167,13 +163,11 @@ void remote_monitoring_run(void)
             }
             else
             {
-#ifdef MBED_BUILD_TIMESTAMP
-                // For mbed add the certificate information
-                if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+				/* Set server certificate so we can validate server authenticity */
+				if (IoTHubClient_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
                 {
-                    printf("failure to set option \"TrustedCerts\"\r\n");
+                    (void)printf("Info: Cannot set the TrustedCerts option. It is possible that your platform already provides the certificate information.\r\n");
                 }
-#endif // MBED_BUILD_TIMESTAMP
 
                 Thermostat* thermostat = CREATE_MODEL_INSTANCE(Contoso, Thermostat);
                 if (thermostat == NULL)

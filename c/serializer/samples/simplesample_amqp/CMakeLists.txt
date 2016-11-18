@@ -10,7 +10,8 @@ if(NOT ${use_amqp})
 endif()
 
 set(simplesample_amqp_c_files
-simplesample_amqp.c
+	simplesample_amqp.c
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.c
 )
 
 if(WIN32)
@@ -20,7 +21,8 @@ else()
 endif()
 
 set(simplesample_amqp_h_files
-simplesample_amqp.h
+	simplesample_amqp.h
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.h
 )
 
 IF(WIN32)
@@ -29,6 +31,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 include_directories(. ${SHARED_UTIL_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../certs)
 link_directories(${whatIsBuilding}_dll ${SHARED_UTIL_LIB_DIR})
 
 add_executable(simplesample_amqp ${simplesample_amqp_c_files} ${simplesample_amqp_h_files})

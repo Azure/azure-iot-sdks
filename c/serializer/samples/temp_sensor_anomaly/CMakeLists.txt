@@ -9,10 +9,12 @@ endif()
 compileAsC99()
 
 set(temp_sensor_anomaly_c_files
-./windows/main.c
+	./windows/main.c
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.c
 )
 
 set(temp_sensor_anomaly_h_files
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.h
 )
 
 IF(WIN32)
@@ -21,6 +23,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 include_directories(. ${SHARED_UTIL_INC_FOLDER} ${IOTHUB_CLIENT_INC_FOLDER})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../certs)
 link_directories(${whatIsBuilding}_dll ${SHARED_UTIL_LIB_DIR})
 
 add_executable(temp_sensor_anomaly ${temp_sensor_anomaly_c_files} ${temp_sensor_anomaly_h_files})

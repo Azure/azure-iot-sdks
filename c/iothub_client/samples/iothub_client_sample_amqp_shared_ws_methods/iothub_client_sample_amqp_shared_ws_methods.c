@@ -10,7 +10,7 @@
 #include "iothub_client.h"
 #include "iothub_message.h"
 #include "iothubtransportamqp_websockets.h"
-#include "../../../certs/certs.h"
+#include "certs.h"
 
 static const char* hubName = "[IoT Hub Name]";
 static const char* hubSuffix = "[IoT Hub Suffix]";
@@ -99,7 +99,7 @@ void iothub_client_sample_amqp_shared_ws_methods_run(void)
             // Add certificate information
             if (IoTHubClient_SetOption(iotHubClientHandle1, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
             {
-				(void)printf("failure to set option \"TrustedCerts\"\r\n");
+				(void)printf("Info: Cannot set the TrustedCerts option. It is possible that your platform already provides the certificate information.\r\n");
             }
 
             /* Here subscribe for C2D methods */

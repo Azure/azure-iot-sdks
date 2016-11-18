@@ -11,10 +11,12 @@ compileAsC99()
 
 set(iothub_client_sample_mqtt_c_files
     iothub_client_sample_mqtt.c
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.c
 )
 
 set(iothub_client_sample_mqtt_h_files
     iothub_client_sample_mqtt.h
+	${CMAKE_CURRENT_SOURCE_DIR}/../../../certs/certs.h
 )
 
 IF(WIN32)
@@ -24,6 +26,7 @@ IF(WIN32)
 ENDIF(WIN32)
 
 include_directories(.)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../certs)
 
 add_executable(iothub_client_sample_mqtt ${iothub_client_sample_mqtt_c_files} ${iothub_client_sample_mqtt_h_files})
 

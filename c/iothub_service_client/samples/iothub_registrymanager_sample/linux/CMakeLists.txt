@@ -11,14 +11,17 @@ endif()
 set(AZUREIOT_INC_FOLDER ".." "/usr/include/azureiot")
 
 include_directories(${AZUREIOT_INC_FOLDER})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../certs)
 
 set(iothub_registrymanager_sample_c_files
     ../iothub_registrymanager_sample.c
     ./main.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../certs/certs.c
 )
 
 set(iothub_registrymanager_sample_h_files
     ../iothub_registrymanager_sample.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../../../certs/certs.h
 )
 
 add_executable(iothub_registrymanager_sample ${iothub_registrymanager_sample_c_files} ${iothub_registrymanager_sample_h_files})

@@ -19,10 +19,7 @@ and removing calls to _DoWork will yield the same results. */
 #include "iothub_message.h"
 #include "iothubtransporthttp.h"
 #endif
-
-#ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
-#endif // MBED_BUILD_TIMESTAMP
 
 /*String containing Hostname, Device Id & Device Key in the format:                         */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>"                */
@@ -147,13 +144,11 @@ void iothub_client_sample_http_run(void)
                 printf("failure to set option \"MinimumPollingTime\"\r\n");
             }
 
-#ifdef MBED_BUILD_TIMESTAMP
-            // For mbed add the certificate information
-            if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+			/* Set server certificate so we can validate server authenticity */
+			if (IoTHubClient_LL_SetOption(iotHubClientHandle, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
             {
-                printf("failure to set option \"TrustedCerts\"\r\n");
+                (void)printf("Info: Cannot set the TrustedCerts option. It is possible that your platform already provides the certificate information.\r\n");
             }
-#endif // MBED_BUILD_TIMESTAMP
 
             /* Setting Message call back, so we can receive Commands. */
             if (IoTHubClient_LL_SetMessageCallback(iotHubClientHandle, ReceiveMessageCallback, &receiveContext) != IOTHUB_CLIENT_OK)

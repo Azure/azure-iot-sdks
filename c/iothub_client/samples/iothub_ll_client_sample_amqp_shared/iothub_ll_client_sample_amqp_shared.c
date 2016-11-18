@@ -10,10 +10,7 @@
 #include "iothub_client.h"
 #include "iothub_message.h"
 #include "iothubtransportamqp.h"
-
-#ifdef MBED_BUILD_TIMESTAMP
 #include "certs.h"
-#endif // MBED_BUILD_TIMESTAMP
 
 static const char* hubName = "[IoT Hub Name]";
 static const char* hubSuffix = "[IoT Hub Suffix]";
@@ -27,7 +24,6 @@ static char msgText[1024];
 static char propText[1024];
 #define MESSAGE_COUNT       5
 #define DOWORK_LOOP_NUM     3
-
 
 typedef struct EVENT_INSTANCE_TAG
 {
@@ -233,13 +229,11 @@ void iothub_client_sample_amqp_run(void)
             bool traceOn = true;
             IoTHubClient_LL_SetOption(iotHubClientHandle1, "logtrace", &traceOn);
 
-#ifdef MBED_BUILD_TIMESTAMP
-            // For mbed add the certificate information
-            if (IoTHubClient_LL_SetOption(iotHubClientHandle1, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
+			/* Set server certificate so we can validate server authenticity */
+			if (IoTHubClient_LL_SetOption(iotHubClientHandle1, "TrustedCerts", certificates) != IOTHUB_CLIENT_OK)
             {
-                printf("failure to set option \"TrustedCerts\"\r\n");
+                (void)printf("Info: Cannot set the TrustedCerts option. It is possible that your platform already provides the certificate information.\r\n");
             }
-#endif // MBED_BUILD_TIMESTAMP
 
 			if (create_events(messages_device1, config1.deviceId) != 0 || create_events(messages_device2, config2.deviceId) != 0)
 			{
