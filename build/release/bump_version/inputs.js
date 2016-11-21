@@ -87,6 +87,22 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
+        "filePath": "c/build_all/arduino_cc/base-libraries/AzureIoTProtocol_MQTT/library.properties",
+        "search": "(version\\=)(.*)",
+        "replaceString": function (versions) {
+            return '$1' + versions.c_arduino.device;
+        }
+    },
+    {
+        "taskType": "regexReplaceTask",
+        "filePath": "c/build_all/arduino_cc/base-libraries/AzureIoTProtocol_MQTT/src/AzureIoTProtocol_MQTT.h",
+        "search": "(AzureIoTProtocolMQTTVersion\\=)([ ]+)(\".*\")",
+        "replaceString": function (versions) {
+            return '$1' + '$2' + '"' + versions.c_arduino.device + '"';
+        }
+    },
+    {
+        "taskType": "regexReplaceTask",
         "filePath": "c/build_all/arduino_cc/base-libraries/AzureIoTUtility/library.properties",
         "search": "(version\\=)(.*)",
         "replaceString": function (versions) {
