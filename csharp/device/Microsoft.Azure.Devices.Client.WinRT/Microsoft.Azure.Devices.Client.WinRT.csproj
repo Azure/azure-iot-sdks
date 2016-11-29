@@ -119,27 +119,10 @@
     <DeviceClientDir>..\Microsoft.Azure.Devices.Client</DeviceClientDir>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(DeviceClientDir)\AmqpConnectionPoolSettings.cs" />
-    <Compile Include="$(DeviceClientDir)\AmqpTransportSettings.cs" />
     <Compile Include="$(DeviceClientDir)\Common\ActionItem.cs" />
     <Compile Include="$(DeviceClientDir)\Common\Api\IotHubApiResources.cs" />
-    <Compile Include="$(DeviceClientDir)\Common\Client\IotHubAmqpProperty.cs" />
-    <Compile Include="$(DeviceClientDir)\Common\Data\AmqpErrorMapper.cs" />
-    <Compile Include="$(DeviceClientDir)\Common\FaultTolerantAmqpObject.cs" />
-    <Compile Include="$(DeviceClientDir)\Common\HashCode.cs" />
     <Compile Include="$(DeviceClientDir)\Common\IOThreadScheduler.cs" />
     <Compile Include="$(DeviceClientDir)\Common\IOThreadTimerSlim.cs" />
-    <Compile Include="$(DeviceClientDir)\Common\PerfectHash.cs" />
-    <Compile Include="$(DeviceClientDir)\IotHubConnection.cs" />
-    <Compile Include="$(DeviceClientDir)\IotHubDeviceMuxConnection.cs" />
-    <Compile Include="$(DeviceClientDir)\IotHubDeviceScopeConnectionPool.cs" />
-    <Compile Include="$(DeviceClientDir)\IotHubScopeConnectionPool.cs" />
-    <Compile Include="$(DeviceClientDir)\IotHubSingleTokenConnection.cs" />
-    <Compile Include="$(DeviceClientDir)\IotHubTokenRefresher.cs" />
-    <Compile Include="$(DeviceClientDir)\Transport\AmqpClientHelper.cs" />
-    <Compile Include="$(DeviceClientDir)\Transport\AmqpTransportHandler.cs" />
-    <Compile Include="$(DeviceClientDir)\Transport\RoutingDelegatingHandler.cs" />
-    <Compile Include="$(DeviceClientDir)\Transport\TransportHandler.cs" />
     <Compile Include="$(DeviceClientDir)\WinRTHelpers.cs" />
     <Compile Include="$(DeviceClientDir)\WinRTResources.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
