@@ -7,7 +7,6 @@ namespace Microsoft.Azure.Devices.Client
     using System.Collections.Generic;
     using System.Threading;
 
-#if !PCL
     class IotHubConnectionCache
     {
         readonly ConcurrentDictionary<IotHubConnectionString, IotHubScopeConnectionPool> hubScopeConnectionPools;
@@ -30,7 +29,7 @@ namespace Microsoft.Azure.Devices.Client
             }
             else
             {
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
                 // Client certificate is per device and must be overriden
                 this.amqpTransportSettings.ClientCertificate = amqpTransportSetting.ClientCertificate;
 #endif
@@ -159,5 +158,4 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
     }
-#endif
 }

@@ -1,5 +1,6 @@
 ﻿{
   "dependencies": {
+    "Microsoft.Azure.Amqp": "2.0.2",
     "Newtonsoft.Json": "6.0.8",
     "PCLCrypto": "1.0.86",
     "Validation": "2.2.8"

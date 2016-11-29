@@ -54,10 +54,37 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="$(DeviceClientDir)\DotNetHelpers.cs"> <Link>DotNetHelpers.cs</Link> </Compile>
+    <Compile Include="$(DeviceClientDir)\DotNetHelpers.cs">
+      <Link>DotNetHelpers.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.cs" />
+    <Compile Include="Timer.PCL.cs" />
     <Compile Include="TraceEventType.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices.Client\Common\Api\IotHubApiResources.cs" />
+    <Compile Include="..\Microsoft.Azure.Devices.Client\Common\Api\ApiResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ApiResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="..\Microsoft.Azure.Devices.Client\Common\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="..\Microsoft.Azure.Devices.Client\Common\IOThreadTimerSlim.cs">
+      <Link>IOThreadTimerSlim.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\Microsoft.Azure.Devices.Client\Common\Api\ApiResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ApiResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\Microsoft.Azure.Devices.Client\Common\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="..\Microsoft.Azure.Devices.Client.Shared\Microsoft.Azure.Devices.Client.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />

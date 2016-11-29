@@ -39,7 +39,11 @@ namespace Microsoft.Azure.Devices.Client.Common.Api {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
+#if !PCL
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Microsoft.Azure.Devices.Client.Common.Api.ApiResources", typeof(ApiResources).Assembly);
+#else
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager(typeof(ApiResources));
+#endif
                     resourceMan = temp;
                 }
                 return resourceMan;
