@@ -132,7 +132,7 @@ namespace Microsoft.Azure.Devices.Client
 
         protected static bool InitializeDisableServerCertificateValidation()
         {
-#if !WINDOWS_UWP && !PCL // No System.Configuration.ConfigurationManager in UWP
+#if !WINDOWS_UWP && !PCL // No System.Configuration.ConfigurationManager in UWP/PCL
             string value = ConfigurationManager.AppSettings[DisableServerCertificateValidationKeyName];
             if (!string.IsNullOrEmpty(value))
             {
@@ -329,7 +329,7 @@ namespace Microsoft.Azure.Devices.Client
             var tlsTransportSettings = new TlsTransportSettings(tcpTransportSettings)
             {
                 TargetHost = this.hostName,
-#if !WINDOWS_UWP && !PCL // Not supported in UWP
+#if !WINDOWS_UWP && !PCL // Not supported in UWP/PCL
                 Certificate = null,
                 CertificateValidationCallback = OnRemoteCertificateValidation
 #endif
@@ -345,7 +345,7 @@ namespace Microsoft.Azure.Devices.Client
             return tlsTransportSettings;
         }
 
-#if !WINDOWS_UWP && !PCL // Not supported in UWP
+#if !WINDOWS_UWP && !PCL // Not supported in UWP/PCL
         public static bool OnRemoteCertificateValidation(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
             if (sslPolicyErrors == SslPolicyErrors.None)

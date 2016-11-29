@@ -40,6 +40,9 @@ namespace System.Threading
                 throw new NotImplementedException("This stub implementation does not support this scenario.");
             }
 
+            // Cancel any previously running tasks (through Token).
+            Cancel();
+
             Task.Delay(dueTime, Token).ContinueWith(
                 (t, s) =>
                 {
