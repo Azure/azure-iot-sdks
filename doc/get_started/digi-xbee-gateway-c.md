@@ -31,8 +31,7 @@ This document describes how to connect a Digi XBee Gateway device running Digi E
 You should have the following items ready before beginning the process:
 
 -   A Linux machine with Git client installed and access to the
-    [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub
-    public repository.
+    [azure-iot-sdk-c](https://github.com/Azure/azure-iot-sdk-c) GitHub public repository.
 -   Digi XBee Gateway device.
 -   [Setup your IoT hub][lnk-setup-iot-hub]
 -   [Provision your device and get its credentials][lnk-manage-iot-hub]
@@ -52,12 +51,12 @@ ssh {username}@{IP address}
 <a name="Step-3-Build"></a>
 # Step 3: Build and Run the sample
 
-<a name="Step-3-1-Load"></a>
-## 3.1 Build SDK and sample
+<a name="Step-3-1-Install-Tools"></a>
+## 3.1 Install tools needed for cross-compile
 
 On your Linux machine:
 
--   Install the prerequisite packages for cross compiling the Microsoft Azure IoT Device SDK for C by issuing the following commands from the command line on your board:
+-   Install the prerequisite packages for cross compiling the Microsoft Azure IoT Device SDK for C by issuing the following commands:
 
 ```
         sudo apt-get update
@@ -78,6 +77,9 @@ On your Linux machine:
 ```
 sudo apt-get install gcc-arm-linux-gnueabi
 ```
+
+<a name="Step-3-2-Cross-Compile-OpenSSL"></a>
+## 3.1 Cross-compile OpenSSL
 
 -   Download OpenSSL 1.0.1m. This is needed by the SDK to establish secure a connection to the IoTHub.
 
@@ -109,16 +111,19 @@ Install the cross compiled OpenSSL:
 sudo make install
 ```
 
+<a name="Step-3-5-Cross-Compile-IoTHub-SDK-For-C"></a>
+## 3.1 Cross-compile the Azure IoTHub SDK for C
+
 -   Download the Microsoft Azure IoT Device SDK for C to the board by issuing the following command on the board:
 
 ```
 cd ~
-git clone --recursive https://github.com/Azure/azure-iot-sdks.git
+git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git
 ```
 
 -   Edit the following file using any text editor of your choice:
 
-        azure-iot-sdks/c/serializer/samples/simplesample_amqp/simplesample_amqp.c
+        azure-iot-sdk-c/serializer/samples/simplesample_amqp/simplesample_amqp.c
 
 -   Find the following place holder for IoT connection string:
 
@@ -154,7 +159,7 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 -   Build the SDK samples using the following command:
 
 ```
-cd ~/azure-iot-sdks/c
+cd ~/azure-iot-sdk-c
 mkdir cmake
 cd cmake
 cmake .. -DCMAKE_TOOLCHAIN_FILE=~/toolchain-arm.cmake -Dskip_unittests:bool=ON -Duse_http:bool=OFF -Duse_default_uuid:bool=ON -DCMAKE_C_FLAGS="-I/usr/openssl_arm_install/include -L/usr/openssl_arm_install/lib"
