@@ -237,7 +237,7 @@ SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 cd ~/azure-iot-sdk-python
 mkdir cmake
 cd cmake
-cmake ../c -DCMAKE_TOOLCHAIN_FILE=~/toolchain-arm.cmake -Dskip_unittests:bool=ON -Duse_http:bool=OFF -Duse_default_uuid:bool=ON -Dbuild_python:STRING="2.7" -DCMAKE_C_FLAGS="-I/usr/openssl_arm_install/include -L/usr/openssl_arm_install/lib" -DCMAKE_CXX_FLAGS="-I/usr/openssl_arm_install/include -I/usr/boost_local/include -I/home/{username}/Python-2.7.1 -I/home/{username}/Python-2.7.1/Include -L/usr/openssl_arm_install/lib -L/usr/boost_local/lib -L/home/{username}/Python-2.7.1 -Wno-deprecated-declarations" -DPYTHON_LIBRARIES=python2.7
+cmake ../c -DCMAKE_TOOLCHAIN_FILE=~/toolchain-arm.cmake -Dskip_unittests:bool=ON -Duse_http:bool=OFF -Duse_default_uuid:bool=ON -Dbuild_python:STRING="2.7" -DCMAKE_C_FLAGS="-I/usr/openssl_arm_install/include -L/usr/openssl_arm_install/lib" -DCMAKE_CXX_FLAGS="-I/usr/openssl_arm_install/include -I/usr/boost_local/include -I/home/{username}/Python-2.7.1 -I/home/{username}/Python-2.7.1/Include -L/usr/openssl_arm_install/lib -L/usr/boost_local/lib -L/home/{username}/Python-2.7.1 -Wno-deprecated-declarations" -DPYTHON_INCLUDE_DIR=/home/{username}/Python-2.7.1/Include -DBOOST_ROOT=/usr/boost_local -DPYTHON_LIBRARY=/home/{username}/python2.7
 cd python
 make
 ```
