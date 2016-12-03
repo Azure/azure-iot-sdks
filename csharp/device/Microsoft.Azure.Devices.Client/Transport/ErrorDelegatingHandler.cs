@@ -73,7 +73,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                     }
                     catch (Exception ex) when (IsTransportHandlerStillUsable(ex))
                     {
-                        this.Reset(openCompletionBeforeOperationStarted, handlerBeforeOperationStarted);
+                        await this.Reset(openCompletionBeforeOperationStarted, handlerBeforeOperationStarted);
                         throw;
                     }
                     catch (Exception ex) when (!ex.IsFatal())
@@ -158,7 +158,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                         }
                         throw new IotHubClientTransientException("Transient error occured, please retry.", ex);
                     }
-                    this.Reset(openCompletionBeforeOperationStarted, handlerBeforeOperationStarted);
+                    await this.Reset(openCompletionBeforeOperationStarted, handlerBeforeOperationStarted);
                     if (ex is IotHubClientTransientException)
                     {
                         throw;
@@ -167,7 +167,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 }
                 else
                 {
-                    this.Reset(openCompletionBeforeOperationStarted, handlerBeforeOperationStarted);
+                    await this.Reset(openCompletionBeforeOperationStarted, handlerBeforeOperationStarted);
                     throw;
                 }
             }
@@ -188,7 +188,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             return exception.Unwind(true).Any(e => TransientExceptions.Contains(e.GetType()));
         }
 
-        void Reset(TaskCompletionSource<int> openCompletionBeforeOperationStarted, IDelegatingHandler handlerBeforeOperationStarted)
+        async Task Reset(TaskCompletionSource<int> openCompletionBeforeOperationStarted, IDelegatingHandler handlerBeforeOperationStarted)
         {
             if (openCompletionBeforeOperationStarted == this.openCompletion)
             {
@@ -196,12 +196,12 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 if (Interlocked.CompareExchange(ref this.openCompletion, null, openCompletionBeforeOperationStarted) == openCompletionBeforeOperationStarted)
 #pragma warning restore 420
                 {
-                    Cleanup(handlerBeforeOperationStarted);
+                    await Cleanup(handlerBeforeOperationStarted);
                 }
             }
         }
 
-        static async void Cleanup(IDelegatingHandler handler)
+        static async Task Cleanup(IDelegatingHandler handler)
         {
             try
             {
