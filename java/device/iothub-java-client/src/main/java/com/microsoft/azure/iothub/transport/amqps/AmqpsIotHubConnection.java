@@ -199,12 +199,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_007: [If the AMQPS connection is already open, the function shall do nothing.]
         if(this.state == State.CLOSED)
         {
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_008: [The function shall create a new sasToken valid for the duration
-            // specified in config to be used for the communication with IoTHub.]
-            this.sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000L +
-                    this.config.getTokenValidSecs() + 1L).toString();
-
-			try
+	    try
             {
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_009: [The function shall trigger the Reactor (Proton) to begin running.]
                 openAsync();
@@ -275,7 +270,11 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
     private void openAsync() throws IOException
     {
-        if (this.reactor == null)
+        // [The function shall create a new sasToken valid for the duration
+        // specified in config to be used for the communication with IoTHub.]
+    	this.sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000L +
+	    	this.config.getTokenValidSecs() + 1L).toString();
+	if (this.reactor == null)
         {
             this.reactor = Proton.reactor(this);
         }
