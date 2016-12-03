@@ -37,12 +37,11 @@ namespace Microsoft.Azure.Devices.Client
                 return thisTaskCompletionSource != null && thisTaskCompletionSource.Task.Status == TaskStatus.RanToCompletion ? thisTaskCompletionSource.Task.Result : null;
             }
         }
-#if !PCL
+
         public Task OpenAsync(TimeSpan timeout, CancellationToken cancellationToken)
         {
             return this.GetOrCreateAsync(timeout, cancellationToken);
         }
-#endif
 
         public Task CloseAsync()
         {
@@ -69,7 +68,6 @@ namespace Microsoft.Azure.Devices.Client
             }
         }
 
-#if !PCL
         public async Task<TValue> GetOrCreateAsync(TimeSpan timeout, CancellationToken cancellationToken)
         {
             var timeoutHelper = new TimeoutHelper(timeout);
@@ -99,7 +97,6 @@ namespace Microsoft.Azure.Devices.Client
                 throw new TimeoutException("Timed out trying to create {0}".FormatInvariant(this.GetType().Name));
             }
         }
-#endif
 
         protected void Invalidate(TValue instance)
         {

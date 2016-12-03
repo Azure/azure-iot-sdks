@@ -10,8 +10,7 @@ namespace Microsoft.Azure.Devices.Client
     using System.Threading;
     using Microsoft.Azure.Devices.Client.Exceptions;
     using Microsoft.Azure.Devices.Client.Extensions;
-#if WINDOWS_UWP
-    using Windows.Storage.Streams;
+#if WINDOWS_UWP || PCL
     using Microsoft.Azure.Amqp;
     using System.Collections.Generic;
     using Microsoft.Azure.Devices.Client.Common.Api;
@@ -60,7 +59,7 @@ namespace Microsoft.Azure.Devices.Client
         long sizeInBytesCalled;
 #endif
 
-#if !PCL && !NETMF
+#if !NETMF
         AmqpMessage serializedAmqpMessage;
 #endif
 
@@ -113,7 +112,11 @@ namespace Microsoft.Azure.Devices.Client
         public Message(byte[] byteArray)
             : this(new MemoryStream(byteArray))
 #else
-        public Message([System.Runtime.InteropServices.WindowsRuntime.ReadOnlyArrayAttribute] byte[] byteArray)
+        public Message(
+#if WINDOWS_UWP
+            [System.Runtime.InteropServices.WindowsRuntime.ReadOnlyArrayAttribute]
+#endif
+            byte[] byteArray)
             : this(new MemoryStream(byteArray))
 #endif
         {
@@ -121,7 +124,7 @@ namespace Microsoft.Azure.Devices.Client
             this.ownsBodyStream = true;
         }
 
-#if !PCL && !NETMF
+#if !NETMF
         /// <summary>
         /// This constructor is only used in the receive path from Amqp path, 
         /// or in Cloning from a Message that has serialized.
@@ -389,7 +392,7 @@ namespace Microsoft.Azure.Devices.Client
         }
 #endif
 
-#if !WINDOWS_UWP && !PCL
+#if !WINDOWS_UWP
         public
 #endif
         Stream BodyStream
@@ -483,7 +486,7 @@ namespace Microsoft.Azure.Devices.Client
             return ReadFullStream(this.bodyStream);
         }
 
-#if !PCL && !NETMF
+#if !NETMF
         internal AmqpMessage ToAmqpMessage(bool setBodyCalled = true)
         {
             this.ThrowIfDisposed();
@@ -533,7 +536,7 @@ namespace Microsoft.Azure.Devices.Client
             {
                 this.bodyStream.Seek(position, SeekOrigin.Begin);
                 Interlocked.Exchange(ref this.getBodyCalled, 0);
-#if !PCL && !NETMF
+#if !NETMF
                 this.serializedAmqpMessage = null;
 #endif
                 return true;
@@ -594,7 +597,7 @@ namespace Microsoft.Azure.Devices.Client
 #endif
         }
 
-#if !PCL && !NETMF
+#if !NETMF
         AmqpMessage PopulateAmqpMessageForSend(AmqpMessage message)
         {
             MessageConverter.UpdateAmqpMessageHeadersAndProperties(message, this);
@@ -624,7 +627,7 @@ namespace Microsoft.Azure.Devices.Client
         {
             if (this.disposed)
             {
-#if NETMF || PCL
+#if NETMF
                 throw new Exception("Message disposed");
 #else
                 throw Fx.Exception.ObjectDisposed(ApiResources.MessageDisposed);

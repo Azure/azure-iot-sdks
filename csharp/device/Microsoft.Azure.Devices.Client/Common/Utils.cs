@@ -17,7 +17,7 @@ namespace Microsoft.Azure.Devices.Client
         {
         }
 
-#if !PCL && !WINDOWS_UWP && !NETMF
+#if !WINDOWS_UWP && !NETMF
         public static void ValidateBufferBounds(byte[] buffer, int offset, int size)
         {
             if (buffer == null)
@@ -31,31 +31,35 @@ namespace Microsoft.Azure.Devices.Client
         {
             if (offset < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(offset), offset, Resources.ArgumentMustBeNonNegative);
+                throw new ArgumentOutOfRangeException(nameof(offset), offset, Microsoft.Azure.Devices.Client.Common.Resources.ArgumentMustBeNonNegative);
             }
 
             if (offset > bufferSize)
             {
-                throw new ArgumentOutOfRangeException(nameof(offset), offset, Resources.OffsetExceedsBufferSize.FormatInvariant(bufferSize));
+                throw new ArgumentOutOfRangeException(nameof(offset), offset, Microsoft.Azure.Devices.Client.Common.Resources.OffsetExceedsBufferSize.FormatInvariant(bufferSize));
             }
 
             if (size <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(size), size, Resources.ArgumentMustBePositive);
+                throw new ArgumentOutOfRangeException(nameof(size), size, Microsoft.Azure.Devices.Client.Common.Resources.ArgumentMustBePositive);
             }
 
             int remainingBufferSpace = bufferSize - offset;
             if (size > remainingBufferSpace)
             {
-                throw new ArgumentOutOfRangeException(nameof(size), size, Resources.SizeExceedsRemainingBufferSpace.FormatInvariant(remainingBufferSpace));
+                throw new ArgumentOutOfRangeException(nameof(size), size, Microsoft.Azure.Devices.Client.Common.Resources.SizeExceedsRemainingBufferSpace.FormatInvariant(remainingBufferSpace));
             }
         }
 
         public static string GetClientVersion()
         {
+#if !PCL
             Assembly a = Assembly.GetExecutingAssembly();
             var attribute = (AssemblyInformationalVersionAttribute)a.GetCustomAttributes(typeof(AssemblyInformationalVersionAttribute), true)[0];
             return a.GetName().Name + "/" + attribute.InformationalVersion;
+#else
+            throw new NotImplementedException("GetClientVersion() is not supported for PCL.");
+#endif
         }
 
 #endif

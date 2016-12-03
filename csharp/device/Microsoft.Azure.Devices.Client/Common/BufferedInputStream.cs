@@ -2,10 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 namespace Microsoft.Azure.Devices.Client
 {
-#if !PCL
     using Microsoft.Azure.Devices.Client.Common;
-#endif
-
     using System;
     using System.IO;
     using System.Threading;

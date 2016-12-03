@@ -3,9 +3,7 @@
 
 namespace Microsoft.Azure.Devices.Client
 {
-#if !PCL
     using Microsoft.Azure.Devices.Client.Common;
-#endif
     using System;
     using System.Collections.Generic;
 

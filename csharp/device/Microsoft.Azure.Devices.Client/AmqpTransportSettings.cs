@@ -4,7 +4,7 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
     using System.Security.Cryptography.X509Certificates;
 #endif
 
@@ -76,7 +76,7 @@ namespace Microsoft.Azure.Devices.Client
 
         public uint PrefetchCount { get; set; }
 
-#if !WINDOWS_UWP
+#if !WINDOWS_UWP && !PCL
         public X509Certificate2 ClientCertificate { get; set; }
 #endif
 

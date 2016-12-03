@@ -204,35 +204,20 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AmqpConnectionPoolSettings.cs" />
-    <Compile Include="AmqpTransportSettings.cs" />
     <Compile Include="Common\ActionItem.cs" />
     <Compile Include="Common\Amqp\ClientWebSocketTransport.cs" />
     <Compile Include="Common\Amqp\LegacyClientWebSocketTransport.cs" />
     <Compile Include="Common\Api\IotHubApiResources.cs" />
-    <Compile Include="Common\Client\IotHubAmqpProperty.cs" />
-    <Compile Include="Common\Data\AmqpErrorMapper.cs" />
-    <Compile Include="Common\FaultTolerantAmqpObject.cs" />
-    <Compile Include="Common\HashCode.cs" />
     <Compile Include="Common\Interop\UnsafeNativeMethods.cs" />
     <Compile Include="Common\IOThreadScheduler.cs" />
     <Compile Include="Common\IOThreadTimer.cs" />
-    <Compile Include="Common\PerfectHash.cs" />
     <Compile Include="Common\ReadOnlyMergeDictionary.cs" />
     <Compile Include="Common\TaskUtils.cs" />
     <Compile Include="Common\UrlEncodedDictionarySerializer.cs" />
     <Compile Include="DeviceAuthenticationWithX509Certificate.cs" />
     <Compile Include="DotNetHelpers.cs" />
     <Compile Include="IotHubClientWebSocket.cs" />
-    <Compile Include="IotHubConnection.cs" />
-    <Compile Include="IotHubDeviceMuxConnection.cs" />
-    <Compile Include="IotHubDeviceScopeConnectionPool.cs" />
-    <Compile Include="IotHubScopeConnectionPool.cs" />
-    <Compile Include="IotHubSingleTokenConnection.cs" />
-    <Compile Include="IotHubTokenRefresher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Transport\AmqpClientHelper.cs" />
-    <Compile Include="Transport\AmqpTransportHandler.cs" />
     <Compile Include="Transport\FileUploadNotificationResponse.cs" />
     <Compile Include="Transport\FileUploadRequest.cs" />
     <Compile Include="Transport\FileUploadResponse.cs" />
@@ -258,8 +243,6 @@
     <Compile Include="Transport\Mqtt\Util.cs" />
     <Compile Include="Transport\Mqtt\WillMessage.cs" />
     <Compile Include="Transport\RetryDelegatingHandler.cs" />
-    <Compile Include="Transport\RoutingDelegatingHandler.cs" />
-    <Compile Include="Transport\TransportHandler.cs" />
     <Compile Include="Transport\WebSocketConstants.cs" />
   </ItemGroup>
   <ItemGroup>
