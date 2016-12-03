@@ -56,10 +56,10 @@ public final class MqttTransport implements IotHubTransport
     {
         // Codes_SRS_MQTTTRANSPORT_15_001: [The constructor shall initialize an empty transport queue
         // for adding messages to be sent as a batch.]
-        this.waitingList = new LinkedBlockingDeque<>();
+        this.waitingList = new LinkedList<IotHubOutboundPacket>();
         // Codes_SRS_MQTTTRANSPORT_15_002: [The constructor shall initialize an empty queue
         // for completed messages whose callbacks are waiting to be invoked.]
-        this.callbackList = new LinkedBlockingDeque<>();
+        this.callbackList = new LinkedList<IotHubCallbackPacket>();
         this.config = config;
         this.state = State.CLOSED;
     }

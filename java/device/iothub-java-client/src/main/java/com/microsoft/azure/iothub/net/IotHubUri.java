@@ -6,7 +6,6 @@ package com.microsoft.azure.iothub.net;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -26,7 +25,7 @@ public final class IotHubUri
 
     /** The charset used when URL-encoding the IoT Hub name and device ID. */
     public static final Charset IOTHUB_URL_ENCODING_CHARSET =
-            StandardCharsets.UTF_8;
+    		Charset.forName("UTF-8");
 
     /**
      * The IoT Hub resource URI is the hostname and path component that is

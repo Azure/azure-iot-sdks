@@ -43,16 +43,16 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
     private AmqpsIotHubConnection connection;
 
     /** Messages waiting to be sent to the IoT Hub. */
-    private final Queue<IotHubOutboundPacket> waitingMessages = new LinkedBlockingDeque<>();
+    private final Queue<IotHubOutboundPacket> waitingMessages = new LinkedBlockingDeque<IotHubOutboundPacket>();
 
     /** Messages which are sent to the IoT Hub but did not receive ack yet. */
-    private Map<Integer, IotHubOutboundPacket> inProgressMessages = new ConcurrentHashMap<>();
+    private Map<Integer, IotHubOutboundPacket> inProgressMessages = new ConcurrentHashMap<Integer, IotHubOutboundPacket>();
 
     /** Messages received from the IoT Hub */
-    private Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<>();
+    private Queue<AmqpsMessage> receivedMessages = new LinkedBlockingQueue<AmqpsMessage>();
 
     /** Messages whose callbacks that are waiting to be invoked. */
-    private final Queue<IotHubCallbackPacket> callbackList = new LinkedBlockingDeque<>();
+    private final Queue<IotHubCallbackPacket> callbackList = new LinkedList<IotHubCallbackPacket>();
 
     private final DeviceClientConfig config;
 
@@ -177,7 +177,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
             return;
         }
 
-        Collection<IotHubOutboundPacket> failedMessages = new ArrayList<>() ;
+        Collection<IotHubOutboundPacket> failedMessages = new ArrayList<IotHubOutboundPacket>() ;
 
         // Codes_SRS_AMQPSTRANSPORT_15_014: [The function shall attempt to send every message on its waiting list, one at a time.]
         while (!this.waitingMessages.isEmpty())
@@ -447,7 +447,7 @@ public final class AmqpsTransport implements IotHubTransport, ServerListener
         // Codes_SRS_AMQPSTRANSPORT_15_038: [The function shall add all user properties to the application properties of the Proton message.]
         if (message.getProperties().length > 0)
         {
-            Map<String, String> userProperties = new HashMap<>(message.getProperties().length);
+            Map<String, String> userProperties = new HashMap<String, String>(message.getProperties().length);
             for(MessageProperty messageProperty : message.getProperties())
             {
                 if (!MessageProperty.RESERVED_PROPERTY_NAMES.contains(messageProperty.getName()))

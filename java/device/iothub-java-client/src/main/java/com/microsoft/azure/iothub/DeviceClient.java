@@ -17,7 +17,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -78,7 +77,7 @@ public final class DeviceClient implements Closeable
      * The charset used for URL-encoding the device ID in the connection
      * string.
      */
-    public static final Charset CONNECTION_STRING_CHARSET = StandardCharsets.UTF_8;
+    public static final Charset CONNECTION_STRING_CHARSET = Charset.forName("UTF-8");
 
     protected DeviceClientConfig config;
     protected IotHubTransport transport;
@@ -383,7 +382,7 @@ public final class DeviceClient implements Closeable
             } else {
                 // Codes_SRS_DEVICECLIENT_02_004: [Value needs to have type long].
                 if (value instanceof Long) {
-                    this.RECEIVE_PERIOD_MILLIS = (long) value;
+                    this.RECEIVE_PERIOD_MILLIS = (Long) value;
                 } else {
                     throw new IllegalArgumentException("value is not long = " + value);
                 }
@@ -415,7 +414,7 @@ public final class DeviceClient implements Closeable
             long validTimeInSeconds;
 
             if (value instanceof Long) {
-                validTimeInSeconds = (long) value;
+                validTimeInSeconds = (Long) value;
             } else {
                 throw new IllegalArgumentException("value is not long = " + value);
             }
@@ -491,62 +490,50 @@ public final class DeviceClient implements Closeable
         // it shall throw IllegalArgumentException.]
         if (optionName == null) {
             throw new IllegalArgumentException("optionName is null");
-        } else {
-            switch (optionName) {
-                //**Codes_SRS_DEVICECLIENT_02_002: [**"SetMinimumPollingInterval" - time in miliseconds
-                // between 2 consecutive polls.**]**
-                case SET_MINIMUM_POLLING_INTERVAL: {
-                    // Codes_SRS_DEVICECLIENT_02_003: [Available only for HTTP.]
-                    if (this.transport.getClass() == HttpsTransport.class)
-                    {
-                        setOption_SetMinimumPollingInterval(value);
+        } else if (optionName == SET_MINIMUM_POLLING_INTERVAL) {
+        	//**Codes_SRS_DEVICECLIENT_02_002: [**"SetMinimumPollingInterval" - time in miliseconds
+            // between 2 consecutive polls.**]**
+        	// Codes_SRS_DEVICECLIENT_02_003: [Available only for HTTP.]
+            if (this.transport.getClass() == HttpsTransport.class)
+            {
+                setOption_SetMinimumPollingInterval(value);
 
-                    } else {
-                        // Codes_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option
-                        // handled by the client, then it shall throw IllegalArgumentException.]
-                        throw new IllegalArgumentException("optionName is unknown = " + optionName
-                                + " for " + this.transport.getClass());
+            } else {
+                // Codes_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option
+                // handled by the client, then it shall throw IllegalArgumentException.]
+                throw new IllegalArgumentException("optionName is unknown = " + optionName
+                        + " for " + this.transport.getClass());
 
-                    }
-                    break;
-                }
-                //**Codes_SRS_DEVICECLIENT_25_005: [**"SetCertificatePath" - path to the certificate to verify peer.**]**
-                case SET_CERTIFICATE_PATH: {
-                    //**Codes_SRS_DEVICECLIENT_25_006: [**"SetCertificatePath" is available only for AMQP.**]**
-
-                    if (this.transport.getClass() == AmqpsTransport.class)
-                    {
-                        setOption_SetCertificatePath(value);
-
-                    } else {
-                        // Codes_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option handled by the
-                        // client, then it shall throw IllegalArgumentException.]
-                        throw new IllegalArgumentException("optionName is unknown = " + optionName +
-                                " for " + this.transport.getClass());
-                    }
-                    break;
-                }
-                case SET_SAS_TOKEN_EXPIRY_TIME: {
-                    //**Codes__SRS_DEVICECLIENT_25_008: ["SetSASTokenExpiryTime" is available for HTTPS/AMQP/MQTT.]
-                    if (this.transport.getClass() == AmqpsTransport.class ||
-                            this.transport.getClass() == HttpsTransport.class ||
-                            this.transport.getClass() == MqttTransport.class)
-                    {
-                        setOption_SetSASTokenExpiryTime(value);
-
-                    } else {
-                        // Codes_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option handled by the
-                        // client, then it shall throw IllegalArgumentException.]
-                        throw new IllegalArgumentException("optionName is unknown = " + optionName +
-                                " for " + this.transport.getClass());
-                    }
-                    break;
-                }
-
-                default:
-                    throw new IllegalArgumentException("optionName is unknown = " + optionName);
             }
+        } else if (optionName == SET_CERTIFICATE_PATH) {
+        	  //**Codes_SRS_DEVICECLIENT_25_005: [**"SetCertificatePath" - path to the certificate to verify peer.**]**
+              //**Codes_SRS_DEVICECLIENT_25_006: [**"SetCertificatePath" is available only for AMQP.**]**
+              if (this.transport.getClass() == AmqpsTransport.class)
+              {
+                  setOption_SetCertificatePath(value);
 
+              } else {
+                  // Codes_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option handled by the
+                  // client, then it shall throw IllegalArgumentException.]
+                  throw new IllegalArgumentException("optionName is unknown = " + optionName +
+                          " for " + this.transport.getClass());
+              }
+        } else if (optionName == SET_SAS_TOKEN_EXPIRY_TIME) {
+        	//**Codes__SRS_DEVICECLIENT_25_008: ["SetSASTokenExpiryTime" is available for HTTPS/AMQP/MQTT.]
+            if (this.transport.getClass() == AmqpsTransport.class ||
+                    this.transport.getClass() == HttpsTransport.class ||
+                    this.transport.getClass() == MqttTransport.class)
+            {
+                setOption_SetSASTokenExpiryTime(value);
+
+            } else {
+                // Codes_SRS_DEVICECLIENT_02_001: [If optionName is null or not an option handled by the
+                // client, then it shall throw IllegalArgumentException.]
+                throw new IllegalArgumentException("optionName is unknown = " + optionName +
+                        " for " + this.transport.getClass());
+            }
+        } else {
+        	  throw new IllegalArgumentException("optionName is unknown = " + optionName);
         }
 
     }
