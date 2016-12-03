@@ -61,7 +61,8 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
         {
             if (propertyCount > 0)
             {
-                for (size_t index = 0; index < propertyCount; index++)
+                size_t index = 0;
+                for (index = 0; index < propertyCount; index++)
                 {
                     (void)printf("\tKey: %s Value: %s\r\n", keys[index], values[index]);
                 }
@@ -78,7 +79,9 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
 static void SendConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     EVENT_INSTANCE* eventInstance = (EVENT_INSTANCE*)userContextCallback;
-    (void)printf("Confirmation[%d] received for message tracking id = %zu with result = %s\r\n", callbackCounter, eventInstance->messageTrackingId, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+    size_t id = eventInstance->messageTrackingId;
+
+    (void)printf("Confirmation[%d] received for message tracking id = %d with result = %s\r\n", callbackCounter, (int)id, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
     /* Some device specific action code goes here... */
     callbackCounter++;
     IoTHubMessage_Destroy(eventInstance->messageHandle);
@@ -165,7 +168,8 @@ void iothub_client_sample_mqtt_run(void)
                 } while (g_continueRunning);
 
                 (void)printf("iothub_client_sample_mqtt has gotten quit message, call DoWork %d more time to complete final sending...\r\n", DOWORK_LOOP_NUM);
-                for (size_t index = 0; index < DOWORK_LOOP_NUM; index++)
+                size_t index = 0;
+                for (index = 0; index < DOWORK_LOOP_NUM; index++)
                 {
                     IoTHubClient_LL_DoWork(iotHubClientHandle);
                     ThreadAPI_Sleep(1);
