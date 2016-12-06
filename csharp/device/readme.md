@@ -39,7 +39,8 @@ Azure Function doesn't currently support [bindingRedirect][binding-redirect] **e
 </dependentAssembly>
 ```
 
-So workaround would be to directly install older version of **validation.dll** using [project.json][project-json]
+So **workaround** would be to directly install older version of **validation.dll** using [project.json][project-json] covered under [Package management][package-management] 
+
 
 **Example**
 
@@ -112,3 +113,4 @@ API reference documentation can be found online at https://msdn.microsoft.com/li
 [binding-redirect]:https://msdn.microsoft.com/en-us/library/eftw1fys(v=vs.110).aspx
 [github-issue-978]: https://github.com/Azure/azure-iot-sdks/issues/978
 [project-json]:https://docs.microsoft.com/en-us/azure/azure-functions/functions-reference-csharp
+[package-management]: https://docs.microsoft.com/en-us/azure/azure-functions/functions-reference-csharp#package-management
