@@ -28,7 +28,7 @@ For more information on how to use this library refer to the documents below:
 
 
 ### Using client SDK in [Azure Functions][azure-functions]
-Azure Function doesn't currently support [bindingredirect][binding-redirect] **element**
+Azure Function doesn't currently support [bindingRedirect][binding-redirect] **element**
 
 **Example**
 
