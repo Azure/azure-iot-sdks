@@ -26,6 +26,7 @@ For more information on how to use this library refer to the documents below:
 - [Running the C# samples on Windows][run-sample-on-desktop-windows]
 - [Running the C# samples on Windows IoT Core][run-sample-on-windows-iot-core]
 
+
 ### Using client SDK in [Azure Functions][azure-functions]
 Azure Function doesn't currently support [bindingredirect][binding-redirect] **element**
 
@@ -35,10 +36,10 @@ Azure Function doesn't currently support [bindingredirect][binding-redirect] **e
 <dependentAssembly>
         <assemblyIdentity name="Validation" publicKeyToken="2fc06f0d701809a7" culture="neutral" />
         <bindingRedirect oldVersion="0.0.0.0-2.2.0.0" newVersion="2.2.0.0" />
-      </dependentAssembly>
+</dependentAssembly>
 ```
 
-So workaround would be directly install older version of **validation.dll** via [project.json][project-json]
+So workaround would be to directly install older version of **validation.dll** via [project.json][project-json]
 
 **Example**
 
