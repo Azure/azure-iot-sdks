@@ -27,7 +27,7 @@ For more information on how to use this library refer to the documents below:
 - [Running the C# samples on Windows IoT Core][run-sample-on-windows-iot-core]
 
 ### Using client SDK in [Azure Functions][azure-functions]
-Azure Function doesn't current support [bindingredirect][binding-redirect] **element**
+Azure Function doesn't currently support [bindingredirect][binding-redirect] **element**
 
 **Example**
 
@@ -38,7 +38,7 @@ Azure Function doesn't current support [bindingredirect][binding-redirect] **ele
       </dependentAssembly>
 ```
 
-So workaround would be directly install older version of **validation.dll** via project.json
+So workaround would be directly install older version of **validation.dll** via [project.json][project-json]
 
 **Example**
 
@@ -47,7 +47,7 @@ So workaround would be directly install older version of **validation.dll** via 
 "frameworks": {
     "net46":{
         "dependencies": {
-            "Microsoft.Azure.Devices.Client": "1.1.1",
+            "Microsoft.Azure.Devices.Client":  "1.1.1",
              "Microsoft.Azure.Devices.Shared": "1.0.2",
              "Validation": "2.0.6.15003"
               }
@@ -55,7 +55,7 @@ So workaround would be directly install older version of **validation.dll** via 
         }
 }
 ```
-This is covered in more detail under GitHub issue [#978] [github-issue-978]
+> Note: This is covered in more detail under GitHub issue [#978] [github-issue-978]
 
 
 Other useful documents include:
@@ -111,3 +111,4 @@ API reference documentation can be found online at https://msdn.microsoft.com/li
 [azure-functions]: https://azure.microsoft.com/en-us/services/functions/
 [binding-redirect]:https://msdn.microsoft.com/en-us/library/eftw1fys(v=vs.110).aspx
 [github-issue-978]: https://github.com/Azure/azure-iot-sdks/issues/978
+[project-json]:https://docs.microsoft.com/en-us/azure/azure-functions/functions-reference-csharp
