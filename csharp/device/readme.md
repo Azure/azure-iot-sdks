@@ -48,11 +48,10 @@ So workaround would be to directly install older version of **validation.dll** u
 "frameworks": {
     "net46":{
         "dependencies": {
-            "Microsoft.Azure.Devices.Client":  "1.1.1",
-             "Microsoft.Azure.Devices.Shared": "1.0.2",
+            "Microsoft.Azure.Devices.Client": "1.1.1",
              "Validation": "2.0.6.15003"
-              }
-             }
+                    }
+                }
         }
 }
 ```
