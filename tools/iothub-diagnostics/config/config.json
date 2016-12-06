@@ -1,5 +1,0 @@
-{
-  "hostName": ".azure-devices.net",
-  "sharedAccessKeyName": "iothubowner",
-  "sharedAccessKey": ""
-}

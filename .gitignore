@@ -214,16 +214,12 @@ java/**/*.crt
 # C/C++ extension for VS Code
 .browse.VC.db*
 
-csharp/device/NuGet/*.exe
-csharp/device/NuGet/*.nupkg
-csharp/device/.vs/*
 service/java/.idea
 service/java/target
 service/java/iot.service.sdk.java.iml
 java/device/doc/api_reference
 java/service/doc/api_reference
 c/build_all/windows/nuget.exe
-csharp/device/build/nuget.exe
 
 # .NET Micro Framework Emulator files and folders
 OnBoardFlash.dat

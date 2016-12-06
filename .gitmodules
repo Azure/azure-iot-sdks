@@ -12,10 +12,6 @@
 [submodule "c/parson"]
 	path = c/parson
 	url = https://github.com/kgabis/parson
-[submodule "csharp/device/external_modules/dotnetty"]
-	path = csharp/device/external_modules/dotnetty
-	url = https://github.com/Azure/DotNetty.git
-	branch = dev
 [submodule "c/iothub_service_client/parson"]
 	path = c/iothub_service_client/parson
 	url = https://github.com/kgabis/parson
@@ -23,3 +19,21 @@
 	path = tools/device-discovery-cli
 	url = https://github.com/Azure/device-discovery-cli.git
 	branch = develop
+[submodule "node"]
+	path = node
+	url = https://github.com/azure/azure-iot-sdk-node
+[submodule "tools/iothub-explorer"]
+	path = tools/iothub-explorer
+	url = https://github.com/azure/iothub-explorer
+[submodule "tools/iothub-diagnostics"]
+	path = tools/iothub-diagnostics
+	url = https://github.com/azure/iothub-diagnostics
+[submodule "java"]
+	path = java
+	url = https://github.com/azure/azure-iot-sdk-java.git
+[submodule "javawrapper"]
+	path = javawrapper
+	url = https://github.com/azure/azure-iot-sdk-javawrapper.git
+[submodule "csharp"]
+	path = csharp
+	url = https://github.com/azure/azure-iot-sdk-csharp.git

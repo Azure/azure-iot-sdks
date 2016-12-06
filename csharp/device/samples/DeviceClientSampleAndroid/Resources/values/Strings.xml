@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="Hello">Send message to IotHub</string>
-    <string name="GetMessage">Get a message from IotHub</string>
-    <string name="ApplicationName">IotHub SDK sample Android app</string>
-</resources>
