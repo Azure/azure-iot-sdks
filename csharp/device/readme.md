@@ -26,6 +26,39 @@ For more information on how to use this library refer to the documents below:
 - [Running the C# samples on Windows][run-sample-on-desktop-windows]
 - [Running the C# samples on Windows IoT Core][run-sample-on-windows-iot-core]
 
+
+### Using client SDK in [Azure Functions][azure-functions]
+Azure Function doesn't currently support [bindingRedirect][binding-redirect] **element**
+
+**Example**
+
+```
+<dependentAssembly>
+        <assemblyIdentity name="Validation" publicKeyToken="2fc06f0d701809a7" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-2.2.0.0" newVersion="2.2.0.0" />
+</dependentAssembly>
+```
+
+So **workaround** would be to directly install older version of **validation.dll** using [project.json][project-json] covered under [Package management][package-management] 
+
+
+**Example**
+
+```
+{
+"frameworks": {
+    "net46":{
+        "dependencies": {
+            "Microsoft.Azure.Devices.Client": "1.1.1",
+             "Validation": "2.0.6.15003"
+                    }
+                }
+        }
+}
+```
+> Note: This is covered in more detail under GitHub issue [#978] [github-issue-978]
+
+
 Other useful documents include:
 - [Setup IoT Hub][setup-iothub]
 - [How to use Device Explorer][device-explorer]
@@ -76,3 +109,8 @@ API reference documentation can be found online at https://msdn.microsoft.com/li
 [device-explorer]: ../../tools/DeviceExplorer/readme.md
 [faq-doc]: ../../doc/faq.md
 [dotnet-api-ref]: https://msdn.microsoft.com/library/microsoft.azure.devices.aspx
+[azure-functions]: https://azure.microsoft.com/en-us/services/functions/
+[binding-redirect]:https://msdn.microsoft.com/en-us/library/eftw1fys(v=vs.110).aspx
+[github-issue-978]: https://github.com/Azure/azure-iot-sdks/issues/978
+[project-json]:https://docs.microsoft.com/en-us/azure/azure-functions/functions-reference-csharp
+[package-management]: https://docs.microsoft.com/en-us/azure/azure-functions/functions-reference-csharp#package-management
