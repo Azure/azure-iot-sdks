@@ -41,7 +41,7 @@ registry.get(deviceId, function (err, device) {
   if (err)
     serviceError(err);
   else {
-    var key = device.authentication.SymmetricKey.primaryKey || device.authentication.SymmetricKey.secondaryKey;
+    var key = device.authentication.symmetricKey.primaryKey || device.authentication.symmetricKey.secondaryKey;
     if (!key) {
       inputError('Cannot create a SAS for this device. It does not use symmetric key authentication.');
     }
