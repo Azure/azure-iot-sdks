@@ -1,10 +1,10 @@
 ---
 platform: custom linux
-device: vt-m2m-qk
+device: vt-m2m-qks
 language: python
 ---
 
-Run a simple PYTHON sample on VT-M2M-QK device running Custom Linux
+Run a simple PYTHON sample on VT-M2M-QKS device running Custom Linux
 ===
 ---
 
@@ -20,7 +20,7 @@ Run a simple PYTHON sample on VT-M2M-QK device running Custom Linux
 
 **About this document**
 
-This document describes how to connect VT-M2M-QK device running Custom Linux with Azure IoT SDK. This multi-step process includes:
+This document describes how to connect VT-M2M-QKS device running Custom Linux with Azure IoT SDK. This multi-step process includes:
 -   Configuring Azure IoT Hub
 -   Registering your IoT device
 -   Build and deploy Azure IoT SDK on device
@@ -33,11 +33,11 @@ You should have the following items ready before beginning the process:
 -   [Prepare your development environment][setup-devbox-python]
 -   [Setup your IoT hub][lnk-setup-iot-hub]
 -   [Provision your device and get its credentials][lnk-manage-iot-hub]
--   VT-M2M-QK device
+-   VT-M2M-QKS device
 
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
-   the URL for the device is http://vantrontech.com/hardwares/VT-M2M-QK.htm
+   the URL for the device is http://vantrontech.com/hardwares/VT-M2M-QKS.html
    
    The Python module builds on the Azure IoT device SDK for C. Please make sure you can build the C samples as described in [setup-devbox] before you continue in this section.
 
