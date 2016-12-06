@@ -26,13 +26,20 @@ For more information on how to use this library refer to the documents below:
 - [Running the C# samples on Windows][run-sample-on-desktop-windows]
 - [Running the C# samples on Windows IoT Core][run-sample-on-windows-iot-core]
 
-### Using client SDK in [Azure Functions] [https://azure.microsoft.com/en-us/services/functions/]
-Azure Function doesn't current support [bindingredirect][https://msdn.microsoft.com/en-us/library/eftw1fys(v=vs.110).aspx] element
-Example
-<bindingRedirect oldVersion="0.0.0.0-2.2.0.0" newVersion="2.2.0.0" />
-So workaround would be directly install older version of validation.dll
+### Using client SDK in [Azure Functions][azure-functions]
+Azure Function doesn't current support [bindingredirect][binding-redirect] **element**
 
-Use following in your project.json. This will install latest version of the available Azure IoT SDK assemblies but will install older version of validation.dll
+**Example**
+
+```
+<dependentAssembly>
+        <assemblyIdentity name="Validation" publicKeyToken="2fc06f0d701809a7" culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-2.2.0.0" newVersion="2.2.0.0" />
+      </dependentAssembly>
+```
+
+So workaround would be directly install older version of **validation.dll** via project.json
+
 **Example**
 
 ```
@@ -48,9 +55,7 @@ Use following in your project.json. This will install latest version of the avai
         }
 }
 ```
-This is covered in more detail under #978 [GitHub issue #978][https://github.com/Azure/azure-iot-sdks/issues/978]
-
-
+This is covered in more detail under GitHub issue [#978] [github-issue-978]
 
 
 Other useful documents include:
@@ -103,3 +108,6 @@ API reference documentation can be found online at https://msdn.microsoft.com/li
 [device-explorer]: ../../tools/DeviceExplorer/readme.md
 [faq-doc]: ../../doc/faq.md
 [dotnet-api-ref]: https://msdn.microsoft.com/library/microsoft.azure.devices.aspx
+[azure-functions]: https://azure.microsoft.com/en-us/services/functions/
+[binding-redirect]:https://msdn.microsoft.com/en-us/library/eftw1fys(v=vs.110).aspx
+[github-issue-978]: https://github.com/Azure/azure-iot-sdks/issues/978
