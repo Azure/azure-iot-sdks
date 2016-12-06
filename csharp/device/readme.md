@@ -26,6 +26,9 @@ For more information on how to use this library refer to the documents below:
 - [Running the C# samples on Windows][run-sample-on-desktop-windows]
 - [Running the C# samples on Windows IoT Core][run-sample-on-windows-iot-core]
 
+### Using client SDK in Azure Functions
+
+
 Other useful documents include:
 - [Setup IoT Hub][setup-iothub]
 - [How to use Device Explorer][device-explorer]
