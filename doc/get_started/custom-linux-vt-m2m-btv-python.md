@@ -1,10 +1,10 @@
 ---
 platform: custom linux
-device: vt-m2m-qk
+device: vt-m2m-btv
 language: python
 ---
 
-Run a simple PYTHON sample on VT-M2M-QK device running Custom Linux
+Run a simple PYTHON sample on VT-M2M-BTV device running Custom Linux
 ===
 ---
 
@@ -20,7 +20,7 @@ Run a simple PYTHON sample on VT-M2M-QK device running Custom Linux
 
 **About this document**
 
-This document describes how to connect VT-M2M-QK device running Custom Linux with Azure IoT SDK. This multi-step process includes:
+This document describes how to connect VT-M2M-BTV device running Custom Linux with Azure IoT SDK. This multi-step process includes:
 -   Configuring Azure IoT Hub
 -   Registering your IoT device
 -   Build and deploy Azure IoT SDK on device
@@ -33,11 +33,11 @@ You should have the following items ready before beginning the process:
 -   [Prepare your development environment][setup-devbox-python]
 -   [Setup your IoT hub][lnk-setup-iot-hub]
 -   [Provision your device and get its credentials][lnk-manage-iot-hub]
--   VT-M2M-QK device
+-   VT-M2M-BTV device
 
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
-   the URL for the device is http://vantrontech.com/hardwares/VT-M2M-QK.htm
+   the URL for the device is <http://vantrontech.com/hardwares/VT-M2M-BTV.htm>.
    
    The Python module builds on the Azure IoT device SDK for C. Please make sure you can build the C samples as described in [setup-devbox] before you continue in this section.
 
@@ -55,6 +55,7 @@ The Python iothub_client supports python versions 2.7.x, 3.4.x or 3.5.x. Know th
 
 <a name="Build"></a>
 # Step 3: Build and Run the sample
+
 ## 3.1 Build SDK and sample
 
 -   Open a XShell session and connect to the device.
