@@ -26,7 +26,31 @@ For more information on how to use this library refer to the documents below:
 - [Running the C# samples on Windows][run-sample-on-desktop-windows]
 - [Running the C# samples on Windows IoT Core][run-sample-on-windows-iot-core]
 
-### Using client SDK in Azure Functions
+### Using client SDK in [Azure Functions] [https://azure.microsoft.com/en-us/services/functions/]
+Azure Function doesn't current support [bindingredirect][https://msdn.microsoft.com/en-us/library/eftw1fys(v=vs.110).aspx] element
+Example
+<bindingRedirect oldVersion="0.0.0.0-2.2.0.0" newVersion="2.2.0.0" />
+So workaround would be directly install older version of validation.dll
+
+Use following in your project.json. This will install latest version of the available Azure IoT SDK assemblies but will install older version of validation.dll
+**Example**
+
+```
+{
+"frameworks": {
+    "net46":{
+        "dependencies": {
+            "Microsoft.Azure.Devices.Client": "1.1.1",
+             "Microsoft.Azure.Devices.Shared": "1.0.2",
+             "Validation": "2.0.6.15003"
+              }
+             }
+        }
+}
+```
+This is covered in more detail under #978 [GitHub issue #978][https://github.com/Azure/azure-iot-sdks/issues/978]
+
+
 
 
 Other useful documents include:
