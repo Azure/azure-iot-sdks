@@ -39,7 +39,7 @@ Azure Function doesn't currently support [bindingredirect][binding-redirect] **e
 </dependentAssembly>
 ```
 
-So workaround would be to directly install older version of **validation.dll** via [project.json][project-json]
+So workaround would be to directly install older version of **validation.dll** using [project.json][project-json]
 
 **Example**
 
