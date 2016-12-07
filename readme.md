@@ -6,6 +6,11 @@ This repository contains both IoT device SDKs and IoT service SDKs. Device SDKs 
 
 Visit http://azure.com/iotdev to learn more about developing applications for Azure IoT.
 
+> **Important Notice**
+>
+> All SDKs have now been moved in their own repositories (see links below).
+> We are going to deprecate the *develop* branch on Jan 31, 2016.
+> We are not accepting pull-requests on this repository anymore. If you have a pending pull-request, please move it to the appropriate SDK repository.
 
 ## Microsoft Azure IoT SDKs
 
