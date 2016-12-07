@@ -23,3 +23,6 @@
 [submodule "c"]
 	path = c
 	url = https://github.com/azure/azure-iot-sdk-c.git
+[submodule "python"]
+	path = python
+	url = https://github.com/azure/azure-iot-sdk-python.git
