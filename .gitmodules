@@ -20,3 +20,6 @@
 [submodule "csharp"]
 	path = csharp
 	url = https://github.com/azure/azure-iot-sdk-csharp.git
+[submodule "c"]
+	path = c
+	url = https://github.com/azure/azure-iot-sdk-c.git
