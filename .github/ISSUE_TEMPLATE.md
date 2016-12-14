@@ -13,10 +13,10 @@ It's going to be a lot easier for us to track and link your issue to its resolut
 If you think the issue you discovered belongs here more than in any specific SDK repository, please consider the following list of questions that will help us debug the issue:
 --> 
 
-- SDK used to discover the issue: 
-- Date/Time at which the issue was discovered: 
-- Name of the hub on which the issue happened (if it can be disclosed in public):
-- Device ID of the device that exhibited the issue:
+- SDK used when observing the issue: <!-- Please include the SDK language and version -->
+- Type of device: <!-- PC, Mac, Raspberry Pi, Arduino... -->
+- OS (with version) on which the code is running <!-- Ubuntu 15.04, Windows 10... -->
+
 
 Code sample exhibiting the issue: <!-- Please do not leave any connection string details in here -->
 
