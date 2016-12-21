@@ -38,7 +38,7 @@ You should have the following items ready before beginning the process:
 <a name="PrepareDevice"></a>
 # Step 2: Prepare your Device
 
--   Follow the instructions from [devices website]https://catalog.azureiotsuite.com/details?title=E7713D&source=partner-page
+-   Follow the instructions from [devices website][http://www.unistrong.com/]
 
 <a name="Build"></a>
 # Step 3: Build and Run the sample
