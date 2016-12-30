@@ -15,7 +15,7 @@ Use either of these tools to generate a device-specific connection string that y
 
 You can also use both of these tools to monitor the messages that your device sends to an IoT hub and send commands to you your devices from IoT Hub.
 
-<a name="iothub-explorer"/>
+<a name="iothub-explorer"></a>
 ## Use the iothub-explorer tool to provision a device
 
 The iothub-explorer tool is a cross-platform, command-line tool (written in Node.js) for managing your devices in IoT hub. You will need to pre-install Node.js for your platform including npm package manager from [nodejs.org](https://nodejs.org)
@@ -23,7 +23,7 @@ The iothub-explorer tool is a cross-platform, command-line tool (written in Node
 To install this tool in your environment, run the following command in a terminal/shell window on your machine:
 
 ```
-npm install -g iothub-explorer
+sudo npm install -g iothub-explorer
 ```
 
 See [Install iothub-explorer][lnk-install-iothub-explorer] for more information.
@@ -33,21 +33,25 @@ To provision a new device:
 1. Get the connection string for your IoT hub. See [Set up IoT Hub][setup-iothub] for more details.
 
 2.  Run the following command to register your device with your IoT hub. When you run the command, replace `<iothub-connection-string>` with the IoT Hub connection string from the previous step and replace `<device-name>` with a name for your device such as **mydevice**.
+  
+	```	
+	iothub-explorer login <iothub-connection-string>
+	```
 
-```
-iothub-explorer <iothub-connection-string> create <device-name> --connection-string
-```
+	```		
+	iothub-explorer create <device-name> --connection-string
+	```	
 
 You should see a response like this:
 
-```
-Created device mydevice
-
--
-...
--
-  connectionString: HostName=<hostname>;DeviceId=mydevice;SharedAccessKey=<device-key>
-```
+	
+	Created device mydevice
+	
+	-
+	...
+	-
+	  connectionString: HostName=<hostname>;DeviceId=mydevice;SharedAccessKey=<device-key>
+	
 
 Copy the device connection string information for later use. The samples in this repository use connection strings in the format `HostName=<iothub-name>.azure-devices.net;DeviceId=<device-name>;SharedAccessKey=<device-key>`.
 
@@ -62,7 +66,7 @@ For further information about using the iothub-explorer tool to perform tasks su
 - [Working with the device identity registry][lnk-iothub-explorer-identity]
 - [Working with devices][lnk-iothub-explorer-devices]
 
-<a name="device-explorer"/>
+<a name="device-explorer"></a>
 ## Use the Device Explorer tool to provision a device
 
 The Device Explorer tool is a Windows-only graphical tool for managing your devices in IoT Hub. 
