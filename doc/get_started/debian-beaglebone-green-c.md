@@ -11,7 +11,7 @@ Run a simple C sample on BeagleBone Green device running Debian
 # Table of Contents
 
 -   [Introduction](#Introduction)
--   [Step 1: Prerequisites](#Step-1-Prerequisites)
+-   [Step 1: Prerequisites](#Prerequisites)
 -   [Step 2: Prepare your Device](#Step-2-PrepareDevice)
 -   [Step 3: Build and Run the Sample](#Step-3-Build)
 -   [Tips](#tips)
@@ -26,13 +26,13 @@ This document describes how to connect BeagleBone Green device running Debian wi
 -   Registering your IoT device
 -   Build and deploy Azure IoT SDK on device
 
-<a name="Step-1-Prerequisites"></a>
+<a name="Prerequisites"></a>
 # Step 1: Prerequisites
 
 You should have the following items ready before beginning the process:
 
 -   Computer with Git client installed and access to the
-    [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub
+    [azure-iot-sdks-c](https://github.com/Azure/azure-iot-sdk-c.git) GitHub
     public repository.
 -   [BeagleBone Green](http://beagleboard.org/Green).
 -   USB Mini cable.
@@ -63,6 +63,22 @@ You should have the following items ready before beginning the process:
         sudo apt-get update
 
         sudo apt-get install -y curl libcurl4-openssl-dev build-essential cmake git
+
+-   Change the configuration in the file /etc/dphys-swapfile, in order to change swapfile size.
+
+	***Note:*** *It is recommended to allocate at least 1GB for the swap partition.*
+    -   default:
+
+            CONF_SWAPSIZE=100
+
+    -   change this to:
+
+            CONF_SWAPSIZE=1024
+
+    -   Restart the service
+
+            sudo /etc/init.d/dphys-swapfile stop
+            sudo /etc/init.d/dphys-swapfile start
         
     ***Note:*** *This setup process requires cmake version 2.8.12 or higher.* 
     
@@ -76,27 +92,29 @@ You should have the following items ready before beginning the process:
 
 -   Download the Microsoft Azure IoT Device SDK for C to the board by issuing the following command on the board::
 
-        git clone --recursive https://github.com/Azure/azure-iot-sdks.git
+        git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git
+
+	***Note:*** *It is recommended to get an USB disk and clone the SDK into it and do the compilation there.*
 
 -   Edit the following file using any text editor of your choice:
 
-        azure-iot-sdks/c/serializer/samples/simplesample_amqp/simplesample_amqp.c
+        azure-iot-sdk-c/serializer/samples/simplesample_amqp/simplesample_amqp.c
 
 -   Find the following place holder for IoT connection string:
 
         static const char* connectionString = "[device connection string]";
 
--   Replace the above placeholder with device connection string you obtained in [Step 1](#Step-1-Prerequisites) and save the changes.
+-   Replace the above placeholder with device connection string you obtained in [Step 1](#Prerequisites) and save the changes.
 
 -   Build the SDK samples using the following command:
 
-        sudo ./azure-iot-sdks/c/build_all/linux/build.sh
+        sudo ./azure-iot-sdk-c/build_all/linux/build.sh
 
 ## 3.2 Send/Receive messages to/from IoT Hub:
 
 -   Run the sample by issuing following command:
 
-        azure-iot-sdks/c/cmake/iotsdk_linux/serializer/samples/simplesample_amqp/simplesample_amqp
+        azure-iot-sdk-c/cmake/iotsdk_linux/serializer/samples/simplesample_amqp/simplesample_amqp
 
 -   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the application and how to send cloud-to-device messages to the application.
 
@@ -106,7 +124,7 @@ You should have the following items ready before beginning the process:
 
 -   If you just want to build the serializer samples, run the following commands:
 
-     	cd azure-iot-sdks/c/cmake/iotsdk_linux/serializer/samples
+     	cd azure-iot-sdk-c/cmake/iotsdk_linux/serializer/samples
         make -f Makefile all
 
 [lnk-setup-iot-hub]: ../setup_iothub.md
