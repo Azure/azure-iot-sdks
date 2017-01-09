@@ -208,6 +208,6 @@ Check software version. **cmake** version is 3.x or higher. **gcc** version is 4
 [setup-dey2.0]: http://www.digi.com/resources/documentation/digidocs/90001945-13/default.htm#task/yocto/t_install_dey.htm%3FTocPath%3DDigi%2520Embedded%2520Yocto%7CSystem%2520development%7CFirst%2520steps%7C_____1
 [create-dey2.0-image]: http://www.digi.com/resources/documentation/digidocs/90001945-13/default.htm#task/yocto/t_create_build_projects_yocto.htm%3FTocPath%3DDigi%2520Embedded%2520Yocto%7CSystem%2520development%7CFirst%2520steps%7C_____2
 [customize-network-setting]: http://www.digi.com/resources/documentation/digidocs/90001945-13/default.htm#task/yocto/t_customize_root_file_system_yocto.htm%3FTocPath%3DDigi%2520Embedded%2520Yocto%7CSystem%2520development%7CFirst%2520steps%7C_____3
-[setup-devbox-python]: https://github.com/Azure/azure-iot-sdks/blob/master/doc/get_started/python-devbox-setup.md
-[lnk-setup-iot-hub]: ../../setup_iothub.md
-[lnk-manage-iot-hub]: ../../manage_iot_hub.md
+[setup-devbox-python]: https://github.com/Azure/azure-iot-sdk-python/blob/master/doc/python-devbox-setup.md
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md

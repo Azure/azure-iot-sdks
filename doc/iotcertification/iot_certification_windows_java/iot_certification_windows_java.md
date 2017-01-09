@@ -16,7 +16,7 @@ How to certify IoT devices running Windows with Azure IoT SDK
     -   [4.3 Next steps](#Step_4_3)
 -   [Step 5: Troubleshooting](#Step_5)
 
-<a name="Introduction"/>
+<a name="Introduction"></a>
 # Introduction
 
 **About this document**
@@ -42,7 +42,7 @@ You should have the following items ready before beginning the process:
     command line.
 -   Required hardware to certify.
 
-<a name="Step_1"/>
+<a name="Step_1"></a>
 # Step 1: Sign Up To Azure IoT Hub
 
 Follow the instructions [here](https://account.windowsazure.com/signup?offer=ms-azr-0044p) on how to sign up to the Azure IoT Hub service.
@@ -53,7 +53,7 @@ As part of the sign up process, you will receive the connection string.
 
          HostName=[YourIoTHubName];SharedAccessKeyName=[YourAccessKeyName];SharedAccessKey=[YourAccessKey]
 
-<a name="Step_2"/>
+<a name="Step_2"></a>
 # Step 2: Register Device
 
 In this section, you will register your device using DeviceExplorer. The DeviceExplorer is a Windows application that interfaces with Azure IoT Hub and can perform the following operations:
@@ -95,19 +95,19 @@ To run DeviceExplorer tool, use following configuration string as described in
 
 ***Not running Windows on your PC?*** - Please follow the instructions [here](<https://github.com/Azure/azure-iot-sdks/blob/master/doc/manage_iot_hub.md>) to provision your device and get its credentials.
 
-<a name="Step_3"/>
+<a name="Step_3"></a>
 # Step 3: Build and Validate the sample using Java client libraries
 
 This section walks you through building, deploying and validating the IoT Client SDK on your device running a Windows operating system. You will install the necessary prerequisites on your device. Once done, you will build and deploy the IoT Client SDK, and validate the sample tests required for IoT certification with the Azure IoT SDK.
 
-<a name="Step_3_1"/>
+<a name="Step_3_1"></a>
 ## 3.1 Install Azure IoT Device SDK and prerequisites on device
 
 -   To run the SDK you will need Java SE 1.8.
 
 -   Install the prerequisite packages using command line on the device.
 
-<a name="Step_3_1_1"/>
+<a name="Step_3_1_1"></a>
 ### 3.1.1  Install Java JDK 1.8 and set up environment variables
         
 1.  For downloads and installation instructions go here: <http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html>
@@ -118,7 +118,7 @@ This section walks you through building, deploying and validating the IoT Client
 
 4.  You can test whether your PATH variable is set correctly by restarting your console and running `java -version`.
 
-<a name="Step_3_1_2"/>
+<a name="Step_3_1_2"></a>
 ### 3.1.2  Install Maven and set up environment variables
 Using Maven 3 is the recommended way to install Azure IoT device SDK for Java.
 
@@ -128,13 +128,13 @@ Using Maven 3 is the recommended way to install Azure IoT device SDK for Java.
 
 2.  You can verify that the environment variables necessary to run Maven 3 have been set correctly by restarting your console and running `mvn --version.`
   
-<a name="Step_3_1_3"/>
+<a name="Step_3_1_3"></a>
 ### 3.1.3  Install GIT
 
 -   For downloads and installation instructions go here:
 <http://git-scm.com/book/en/v2/Getting-Started-Installing-Git>
 
-<a name="Step_3_1_4"/>
+<a name="Step_3_1_4"></a>
 ### 3.1.4  Build Qpid JMS
 
 1.  Clone the repository for Qpid JMS to your local directory.
@@ -151,7 +151,7 @@ Using Maven 3 is the recommended way to install Azure IoT device SDK for Java.
     
         mvn install -DskipTests
 
-<a name="Step_3_1_5"/>
+<a name="Step_3_1_5"></a>
 ### 3.1.5 Build the Azure IoT Device SDK for Java
 
 1.  Download the SDK to the board by issuing the following command in PuTTY:
@@ -169,7 +169,7 @@ Using Maven 3 is the recommended way to install Azure IoT device SDK for Java.
 
         azure-iot-sdks/java/device/iothub-java-client/target/iothub-java-client-{version}-with-deps.jar
 
-<a name="Step_3_2"/>
+<a name="Step_3_2"></a>
 ## 3.2 Run and Validate the Samples
 
 In this section you will run the Azure IoT client SDK samples to validate
@@ -178,7 +178,7 @@ communication between your device and Azure IoT Hub. You will send messages to t
 ***Note:*** *Take screenshots of all the operations you will perform in this
 section. These will be needed in [Step 4](#Step_4_2).*
 
-<a name="Step_3_2_1"/>
+<a name="Step_3_2_1"></a>
 ### 3.2.1 Send Device Events to IoT Hub:
 
 1.  Launch the DeviceExplorer as explained in [Step 2](#Step_2) and navigate to **Data** tab. Select the device name you created from the drop-down list of device IDs and click **Monitor** button.
@@ -233,7 +233,7 @@ section. These will be needed in [Step 4](#Step_4_2).*
     **If using MQTT protocol:**  
     ![DeviceExplorer\_MQTT\_message\_received](images/device_explorer_mqtt_message_received.png)
 
-<a name="Step_3_2_2"/>
+<a name="Step_3_2_2"></a>
 ### 3.2.2 Receive messages from IoT Hub
 
 1.  To verify that you can send messages from the IoT Hub to your device, go to the **Messages To Device** tab in DeviceExplorer.
@@ -279,10 +279,10 @@ section. These will be needed in [Step 4](#Step_4_2).*
     **If using MQTT protocol:**  
     ![Terminal\_MQTT\_message\_received](images/terminal_mqtt_message_received.png)
 
-<a name="Step_4"/>
+<a name="Step_4"></a>
 # Step 4: Package and Share
 
-<a name="Step_4_1"/>
+<a name="Step_4_1"></a>
 ## 4.1 Package build logs and sample test results
 
 Package the following artifacts from your device:
@@ -298,17 +298,31 @@ Package the following artifacts from your device:
     
     As a guideline on how the instructions should look please refer the examples published on GitHub repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/doc/get_started>).
 
-<a name="Step_4_2"/>
+<a name="Step_4_2"></a>
 ## 4.2 Share with the Azure IoT Certification team
 
-Send the package in email to  <iotcert@microsoft.com>.
+1.  Go to [Partner Dashboard](<https://catalog.azureiotsuite.com/devices>).
+2.  Click on Upload icon at top-right corner of your device.
 
-<a name="Step_4_3"/>
+    ![Share\_Results\_upload\_icon](images/4_2_01.png)
+
+3.  This will open an upload dialog. Browse your file(s) by clicking **Upload** button.
+
+    ![Share\_Results\_upload\_dialog](images/4_2_02.png)
+
+    You can upload multiple files for same device.
+
+4.  Once you have uploaded all the files, click on **Submit for Review** button.
+
+    ***Note:*** *Please contact iotcert team to change/remove the files once you submit them for review.*
+ 
+
+<a name="Step_4_3"></a>
 ## 4.3 Next steps
 
 Once you shared the documents with us, we will contact you in the following 48 to 72 business hours with next steps.
 
-<a name="Step_5"/>
+<a name="Step_5"></a>
 # Step 5: Troubleshooting
 
 Please contact engineering support on <iotcert@microsoft.com> for help with troubleshooting.

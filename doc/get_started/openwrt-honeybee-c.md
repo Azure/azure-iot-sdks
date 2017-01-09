@@ -108,7 +108,7 @@ You might get an error message at this step(return code 127), but the certificat
 
 ***Note: To send a command to the device from iothub-explorer or DeviceExplorer, the command should be like {"Name":"TurnFanOff", "Parameters":{}}***
 
-[setup-devbox-linux]: ../../c/doc/devbox_setup.md
+[setup-devbox-linux]: https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md
 [setup-iothub]: ../setup_iothub.md
 [lnk-manage-iothub]: ../manage_iot_hub.md
 

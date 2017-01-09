@@ -276,7 +276,21 @@ Package following artifacts from your device:
 <a name="Share"></a>
 ## 4.2 Share package with Engineering Support
 
-Share the package in email to <iotcert@microsoft.com>.
+1.  Go to [Partner Dashboard](<https://catalog.azureiotsuite.com/devices>).
+2.  Click on Upload icon at top-right corner of your device.
+
+    ![Share\_Results\_upload\_icon](images/4_2_01.png)
+
+3.  This will open an upload dialog. Browse your file(s) by clicking **Upload** button.
+
+    ![Share\_Results\_upload\_dialog](images/4_2_02.png)
+
+    You can upload multiple files for same device.
+
+4.  Once you have uploaded all the files, click on **Submit for Review** button.
+
+    ***Note:*** *Please contact iotcert team to change/remove the files once you submit them for review.*
+ 
 
 <a name="Next"></a>
 ## 4.3 Next steps

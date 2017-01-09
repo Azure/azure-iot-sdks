@@ -13,7 +13,7 @@ Run a simple C sample on VHo1-X running Linux Beaglebone 3.2.0
 -   [Introduction](#Introduction)
 -   [Step 1: Prerequisites](#Prerequisites)
 -   [Step 2: Prepare your Device](#PrepareDevice)
--   [Step 3: Setup the development environment](#Setup)
+-   [Step 3: Setup the development environment][setup-devbox-linux]
 -   [Step 4: Build and Run the Sample](#Build)
 
 <a name="Introduction"></a>
@@ -159,6 +159,6 @@ This section shows you how to set up a development environment for the Azure IoT
 -   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to send cloud-to-device messages to the application.
 
 
-[setup-devbox-linux]: ../../c/doc/devbox_setup.md
+[setup-devbox-linux]: https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md
 [lnk-setup-iot-hub]: ../setup_iothub.md
 [lnk-manage-iot-hub]: ../manage_iot_hub.md
