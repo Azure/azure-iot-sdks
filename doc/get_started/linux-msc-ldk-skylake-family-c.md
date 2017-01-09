@@ -89,5 +89,5 @@ You should have the following items ready before beginning the process:
 
 [lnk-user-manual]:http://www.msc-technologies.eu/fileadmin/documentpool/Support-Center/COMExpress/C6C-SLU/20-Drivers/80-Linux/MSC_C6C-SLU-ldk-bsp-01003.pdf
 
-[lnk-setup-iot-hub]: ../../setup_iothub.md
-[lnk-manage-iot-hub]: ../../manage_iot_hub.md
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md

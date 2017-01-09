@@ -108,7 +108,7 @@ You might get an error message at this step(return code 127), but the certificat
 -   See [Manage IoT Hub][lnk-manage-iothub] for information about the tools you can use to monitor the messages your device sends to your IoT hub and to send commands to your devices.
 
 
-[setup-devbox-linux]: ../../c/doc/devbox_setup.md
+[setup-devbox-linux]: https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md
 [setup-iothub]: ../setup_iothub.md
 [lnk-manage-iothub]: ../manage_iot_hub.md
 

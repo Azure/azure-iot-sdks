@@ -6,20 +6,21 @@ How to certify IoT devices running Windows 10 with Azure IoT SDK
 # Table of Contents
 
 -   [Introduction](#Introduction)
--   [Step 1: Sign Up To Azure IoT Hub](#Step_1:_Sign_Up)
--   [Step 2: Register Device](#Step_2:_Register)
--   [Step 3: Build and Validate the Sample using Python Client Libraries](#Step_3:_Build_and_Validate)
-    -   [3.1 Connect the Device](#Step_3_1:_Connect)
-    -   [3.2 Setup your development environment](#Step_3_2:_Setup)
-    -   [3.3 Build the Python iothub_client module on Windows using Nuget packages (recommended)](#Step_3_3:_Build)
-    -   [3.4 Run and Validate the Samples](#Step_3_4:_Run)
--   [Step 4: Package and Share](#Step_4:_Package_Share)
-    -   [4.1 Package build logs and sample test results](#Step_4_1:_Package)
-    -   [4.2 Share package with Engineering Support](#Step_4_2:_Share)
-    -   [4.3 Next steps](#Step_4_3:_Next)
--   [Step 5: Troubleshooting](#Step_5:_Troubleshooting)
+-   [Step 1: Sign Up To Azure IoT Hub](#Step_1_Sign_Up)
+-   [Step 2: Register Device](#Step_2
+-   Register)
+-   [Step 3: Build and Validate the Sample using Python Client Libraries](#Step_3_Build_and_Validate)
+    -   [3.1 Connect the Device](#Step_3_1_Connect)
+    -   [3.2 Setup your development environment](#Step_3_2_Setup)
+    -   [3.3 Build the Python iothub_client module on Windows using Nuget packages (recommended)](#Step_3_3_Build)
+    -   [3.4 Run and Validate the Samples](#Step_3_4_Run)
+-   [Step 4: Package and Share](#Step_4_Package_Share)
+    -   [4.1 Package build logs and sample test results](#Step_4_1_Package)
+    -   [4.2 Share package with Engineering Support](#Step_4_2_Share)
+    -   [4.3 Next steps](#Step_4_3_Next)
+-   [Step 5: Troubleshooting](#Step_5_Troubleshooting)
 
-<a name="Introduction"/>
+<a name="Introduction"></a>
 # Introduction
 
 **About this document**
@@ -40,7 +41,7 @@ You should have the following items ready before beginning the process:
 -   Computer with GitHub installed and access to the [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub public repository.
 -   Install Visual Studio 2015 and Tools. You can install any edition of Visual Studio, including the free Community edition.
 
-<a name="Step_1:_Sign_Up"/>
+<a name="Step_1_Sign_Up"></a>
 # Step 1: Sign Up To Azure IoT Hub
 
 Follow the instructions [here](https://account.windowsazure.com/signup?offer=ms-azr-0044p) on how to sign up to the Azure IoT Hub service.
@@ -51,17 +52,17 @@ As part of the sign up process, you will receive the connection string.
 
         HostName=[YourIoTHubName];SharedAccessKeyName=[YourAccessKeyName];SharedAccessKey=[YourAccessKey]
 
-<a name="Step_2:_Register"/>
+<a name="Step_2_Register"></a>
 # Step 2: Register Device
 
 - [Provision your device and get its credentials](<https://github.com/Azure/azure-iot-sdks/blob/master/doc/manage_iot_hub.md>)
 
-<a name="Step_3:_Build_and_Validate"/>
+<a name="Step_3_Build_and_Validate"></a>
 # Step 3: Build and Validate the Sample using Python Client Libraries 
 
 This section walks you through building, deploying and validating the IoT Client SDK on your device running Windows 10 operating system. You will install the necessary prerequisites on your device. Once done, you will build and deploy the IoT Client SDK, and validate the sample tests required for IoT certification with the Azure IoT SDK.
 
-<a name="Step_3_1:_Connect"/>
+<a name="Step_3_1_Connect"></a>
 ## 3.1 Connect the Device
 
 1.  Connect the board to your network using an Ethernet cable. This step
@@ -69,7 +70,7 @@ This section walks you through building, deploying and validating the IoT Client
 
 2.  Plug the device into your computer using a micro-USB cable.
 
-<a name="Step_3_2:_Setup"/>
+<a name="Step_3_2_Setup"></a>
 ## 3.2  Setup your development environment
 
 Complete the following steps to set up your development environment:
@@ -84,7 +85,7 @@ Complete the following steps to set up your development environment:
 
 > You can install the latest x86 or x64 Python 2.7 client from [python-2.7](https://www.python.org/downloads/).
 
-<a name="Step_3_2:_Build"/>
+<a name="Step_3_2_Build"></a>
 ## 3.3  Build the Python iothub_client module on Windows using Nuget packages (recommended)
 
 The following instructions outline how you can build the libraries in Windows:
@@ -99,17 +100,17 @@ The following instructions outline how you can build the libraries in Windows:
 
 	![Navigation\_terminal](images/build_path_2.png)	
 
-<a name="Step_3_3:_Run"/>
+<a name="Step_3_3_Run"></a>
 ## 3.3 Run and Validate the Samples
     
 In this section you will run the Azure IoT client SDK samples to validate the communication between your device and Azure IoT Hub. You will send the messages to the Azure IoT Hub service and validate that IoT Hub has successfully receive the data. You will also monitor any messages sent from the Azure IoT Hub to client.
 
 ***Note:*** *Take screenshots of all the operations you will perform in this
-section. These will be needed in [Step 4](#Step_4_2:_Share).*
+section. These will be needed in [Step 4](#Step_4_2_Share).*
 
 ### 3.3.1 Send Device Events to IoT Hub
 
-1.  Launch the DeviceExplorer as explained in [Step 2](#Step_2:_Register) and navigate to **Data** tab. Select the device name you created from the drop-down list of device IDs and click **Monitor** button.
+1.  Launch the DeviceExplorer as explained in [Step 2](#Step_2_Register) and navigate to **Data** tab. Select the device name you created from the drop-down list of device IDs and click **Monitor** button.
 
     ![DeviceExplorer\_Monitor](images/3_3_1_01.png)
 
@@ -191,10 +192,10 @@ section. These will be needed in [Step 4](#Step_4_2:_Share).*
 
 	![DeviceExplorer\_Notification\_Send](images/terminal_message_receive_from_device_amqp.png)
     
-<a name="Step_4:_Package_Share"/>
+<a name="Step_4_Package_Share"></a>
 # Step 4: Package and Share
 
-<a name="Step_4_1:_Package"/>
+<a name="Step_4_1_Package"></a>
 ## 4.1 Package build logs and sample test results
   
 Package the following artifacts from your device:
@@ -211,17 +212,31 @@ Package the following artifacts from your device:
 	
 > As a guideline on how the instructions should look please refer the examples published on GitHub repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/doc/get_started>).
 
-<a name="Step_4_2:_Share"/>
+<a name="Step_4_2_Share"></a>
 ## 4.2 Share package with the Azure IoT Certification Team
 
-Send the package in email to <iotcert@microsoft.com>.
+1.  Go to [Partner Dashboard](<https://catalog.azureiotsuite.com/devices>).
+2.  Click on Upload icon at top-right corner of your device.
 
-<a name="Step_4_3:_Next"/>
+    ![Share\_Results\_upload\_icon](images/4_2_01.png)
+
+3.  This will open an upload dialog. Browse your file(s) by clicking **Upload** button.
+
+    ![Share\_Results\_upload\_dialog](images/4_2_02.png)
+
+    You can upload multiple files for same device.
+
+4.  Once you have uploaded all the files, click on **Submit for Review** button.
+
+    ***Note:*** *Please contact iotcert team to change/remove the files once you submit them for review.*
+ 
+
+<a name="Step_4_3_Next"></a>
 ## 4.3 Next steps
 
 Once you shared the documents with us, we will contact you in the following 48 to 72 business hours with next steps.
 
-<a name="Step_5:_Troubleshooting"/>
+<a name="Step_5_Troubleshooting"></a>
 # Step 5: Troubleshooting
 
 Please contact engineering support on <iotcert@microsoft.com> for help with  troubleshooting.

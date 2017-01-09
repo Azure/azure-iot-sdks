@@ -41,12 +41,11 @@ You should have the following items ready before beginning the process:
 
 -   Computer with GitHub installed and access to the
     [azure-iot-sdks](https://github.com/Azure/azure-iot-sdks) GitHub
-    private repository.
--   SSH client, such as [PuTTY](http://www.putty.org/), so you can access the
-    command line.
+    public repository.
+-   SSH client, such as [PuTTY](http://www.putty.org/), so you can access the command line.
 -   Required hardware to certify.
 
-***Note:*** *If you haven't contacted Microsoft about being an Azure Certified for IoT partner, please submit this [form](<https://iotcert.cloudapp.net/>) first to request it and then follow these instructions.*
+***Note:*** *If you haven't contacted Microsoft about being an Azure Certified for IoT partner, please submit this [form](<https://catalog.azureiotsuite.com/>) first to request it and then follow these instructions.*
 
 <a name="Step-1-Configure"></a>
 # Step 1: Sign Up To Azure IoT Hub
@@ -141,7 +140,7 @@ This section walks you through building, deploying and validating the IoT Client
     
 -   Download the SDK to the board by issuing the following command in PuTTY:
 
-        git clone --recursive https://github.com/Azure/azure-iot-sdks.git
+        git clone --recursive https://github.com/Azure/azure-iot-sdk-c.git
 
 -   Verify that you now have a copy of the source code under the
     directory ~/azure-iot-sdks.
@@ -153,15 +152,15 @@ This section walks you through building, deploying and validating the IoT Client
 
     **For AMQP protocol:**
 
-        nano azure-iot-sdks/c/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp.c
+        nano azure-iot-sdk-c/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp.c
 
     **For HTTP protocol:**
 
-        nano azure-iot-sdks/c/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http.c
+        nano azure-iot-sdk-c/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http.c
 
     **For MQTT protocol:**
 
-        nano azure-iot-sdks/c/iothub_client/samples/iothub_client_sample_mqtt/iothub_client_sample_mqtt.c
+        nano azure-iot-sdk-c/iothub_client/samples/iothub_client_sample_mqtt/iothub_client_sample_mqtt.c
 
 -   This launches a console-based text editor. Scroll down to the
     connection information.
@@ -181,7 +180,7 @@ This section walks you through building, deploying and validating the IoT Client
 
 -   Open **IOT_DEVICE_PARAMS.TXT** to edit.
 
-        nano azure-iot-sdks/tools/iot_hub_e2e_tests_params/iot_device_params.txt
+        nano azure-iot-sdk-c/tools/iot_hub_e2e_tests_params/iot_device_params.txt
 
 -   Set the values for all the variables listed in the file as explained below.
 
@@ -198,7 +197,7 @@ This section walks you through building, deploying and validating the IoT Client
 
 -   Set environment variables by running following command on your device:
 
-        cd ./azure-iot-sdks/tools/iot_hub_e2e_tests_params/
+        cd ./azure-iot-sdk-c/tools/iot_hub_e2e_tests_params/
         chmod +x setiotdeviceparametersfore2etests.sh
         sudo ./setiotdeviceparametersfore2etests.sh
 
@@ -236,17 +235,17 @@ section. These will be needed in [Step 4](#Step-4-2-Share)
 
     **If using AMQP protocol:** Run sample *iothub\_client\_sample\_amqp*
 
-		~/azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp
+		~/azure-iot-sdk-c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_amqp/iothub_client_sample_amqp
 
 
     **If using HTTP protocol:** Run sample *iothub\_client\_sample\_http*
 
-		~/azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http
+		~/azure-iot-sdk-c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_http/iothub_client_sample_http
 
 
     **If using MQTT protocol:** Run sample *iothub\_client\_sample\_mqtt*
 
-		~/azure-iot-sdks/c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_mqtt/iothub_client_sample_mqtt
+		~/azure-iot-sdk-c/cmake/iotsdk_linux/iothub_client/samples/iothub_client_sample_mqtt/iothub_client_sample_mqtt
 
 
 4.  Verify that the confirmation messages show an OK. If not, then you may have
@@ -322,7 +321,21 @@ Package following artifacts from your device:
 <a name="Step-4-2-Share"></a>
 ## 4.2 Share package with Microsoft Azure IoT team
 
-Share the package in email to  <iotcert@microsoft.com>.
+1.  Go to [Partner Dashboard](<https://catalog.azureiotsuite.com/devices>).
+2.  Click on Upload icon at top-right corner of your device.
+
+    ![Share\_Results\_upload\_icon](images/4_2_01.png)
+
+3.  This will open an upload dialog. Browse your file(s) by clicking **Upload** button.
+
+    ![Share\_Results\_upload\_dialog](images/4_2_02.png)
+
+    You can upload multiple files for same device.
+
+4.  Once you have uploaded all the files, click on **Submit for Review** button.
+
+    ***Note:*** *Please contact iotcert team to change/remove the files once you submit them for review.*
+ 
 
 <a name="Step-4-3-Next"></a>
 ## 4.3 Next steps

@@ -18,7 +18,7 @@ How to Certify IoT devices running Windows 10 IoT core OS with Azure IoT SDK
     -   [4.3 Next steps](#Step_4_3:_Next)
 -   [Step 5: Troubleshooting](#Step_5:_Troubleshooting)
 
-<a name="Introduction"/>
+<a name="Introduction"></a>
 # Introduction
 
 **About this document**
@@ -49,7 +49,7 @@ You should have the following items ready before beginning the process:
 
      ***Note:*** *If you need assistance installing Windows 10 IoT Core , please visit <https://www.windowsondevices.com> or contact us at <iotcert@microsoft.com>*
 
-<a name="Step_1:_Sign_Up"/>
+<a name="Step_1:_Sign_Up"></a>
 # Step 1: Sign Up To Azure IoT Hub
 
 Follow the instructions [here](https://account.windowsazure.com/signup?offer=ms-azr-0044p) on how to sign up to the Azure IoT Hub service.
@@ -60,17 +60,17 @@ As part of the sign up process, you will receive the connection string.
 
         HostName=[YourIoTHubName];SharedAccessKeyName=[YourAccessKeyName];SharedAccessKey=[YourAccessKey]
 
-<a name="Step_2:_Register"/>
+<a name="Step_2:_Register"></a>
 # Step 2: Register Device
 
 -   Follow the instructions [here](<https://github.com/Azure/azure-iot-sdks/blob/master/doc/manage_iot_hub.md>) on how to provision your device and get its credentials.
 
-<a name="Step_3:_Build_and_Validate"/>
+<a name="Step_3:_Build_and_Validate"></a>
 # Step 3: Build and Validate the Sample using Node.js Client Libraries 
 
 This section walks you through the steps to create a UWP Node.js wrapper over existing Node.js client SDK using Visual Studio. Once done, you will build and deploy the IoT Client SDK, and validate the sample tests required for IoT certification with the Azure IoT SDK.
 
-<a name="Step_3_1:_Connect"/>
+<a name="Step_3_1:_Connect"></a>
 ## 3.1 Connect the Device
 
 1.  Connect the board to your network using an Ethernet cable. This step
@@ -78,7 +78,7 @@ This section walks you through the steps to create a UWP Node.js wrapper over ex
 
 2.  Power the board using a micro-USB cable or power adapter.
 
-<a name="Step_3_2:_Build"/>
+<a name="Step_3_2:_Build"></a>
 ## 3.2  Build the Samples
 
 
@@ -143,7 +143,7 @@ This section walks you through the steps to create a UWP Node.js wrapper over ex
 17.  Build the solution.
 
 
-<a name="Step_3_3:_Run"/>
+<a name="Step_3_3:_Run"></a>
 ## 3.3 Run and Validate the Samples
     
 In this section you will run the Azure IoT client SDK samples to validate the
@@ -180,10 +180,10 @@ section. These will be needed in [Step 4](#Step_4_2:_Share).*
 
 4.  You should be able to see the message received in the Visual Studio Output window.
     
-<a name="Step_4:_Package_Share"/>
+<a name="Step_4:_Package_Share"></a>
 # Step 4: Package and Share
 
-<a name="Step_4_1:_Package"/>
+<a name="Step_4_1:_Package"></a>
 ## 4.1 Package build logs and sample test results
   
 Package the following artifacts from your device:
@@ -196,17 +196,31 @@ Package the following artifacts from your device:
     
     As a guideline on how the instructions should look please refer the examples published on GitHub repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/doc/get_started>).
 
-<a name="Step_4_2:_Share"/>
+<a name="Step_4_2:_Share"></a>
 ## 4.2 Share package with the Azure IoT Certification Team
 
-Send the package in email to <iotcert@microsoft.com>.
+1.  Go to [Partner Dashboard](<https://catalog.azureiotsuite.com/devices>).
+2.  Click on Upload icon at top-right corner of your device.
 
-<a name="Step_4_3:_Next"/>
+    ![Share\_Results\_upload\_icon](images/4_2_01.png)
+
+3.  This will open an upload dialog. Browse your file(s) by clicking **Upload** button.
+
+    ![Share\_Results\_upload\_dialog](images/4_2_02.png)
+
+    You can upload multiple files for same device.
+
+4.  Once you have uploaded all the files, click on **Submit for Review** button.
+
+    ***Note:*** *Please contact iotcert team to change/remove the files once you submit them for review.*
+ 
+
+<a name="Step_4_3:_Next"></a>
 ## 4.3 Next steps
 
 Once you shared the documents with us, we will contact you in the following 48 to 72 business hours with next steps.
 
-<a name="Step_5:_Troubleshooting"/>
+<a name="Step_5:_Troubleshooting"></a>
 # Step 5: Troubleshooting
 
 Please contact engineering support on <iotcert@microsoft.com> for help with troubleshooting.

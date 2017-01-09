@@ -88,7 +88,7 @@ Follow the instructions in the generic chapter "Getting Started" of the [devices
   and in the devshell
   
   
-[setup-devbox-linux]: https://github.com/Azure/azure-iot-sdks/blob/master/c/doc/devbox_setup.md
-[lnk-setup-iot-hub]: ../../setup_iothub.md
-[lnk-manage-iot-hub]: ../../manage_iot_hub.md
+[setup-devbox-linux]: https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md
 [link_manual]: http://www.msc-technologies.eu/fileadmin/documentpool/Support-Center/Qseven/Q7-BT/20-Drivers/80-Linux/MSC_Q7-BT-ldk-bsp-C984.pdf 

@@ -103,6 +103,6 @@ The Python iothub_client supports python versions 2.7.x, 3.4.x or 3.5.x. Know th
 
 -   See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to send cloud-to-device messages to the application.
 
-[setup-devbox-python]: https://github.com/Azure/azure-iot-sdks/blob/master/doc/get_started/python-devbox-setup.md
-[lnk-setup-iot-hub]: ../../setup_iothub.md
-[lnk-manage-iot-hub]: ../../manage_iot_hub.md
+[setup-devbox-python]: https://github.com/Azure/azure-iot-sdk-python/blob/master/doc/python-devbox-setup.md
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md

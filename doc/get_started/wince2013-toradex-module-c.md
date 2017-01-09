@@ -73,7 +73,7 @@ These instructions apply to [Colibri Modules][colibri-modules] running the [Wind
 
 8. See [Manage IoT Hub][lnk-manage-iot-hub] to learn how to observe the messages IoT Hub receives from the **iothub_client_sample_http** application and how to send cloud-to-device messages to the **iothub_client_sample_http** application.
 
-[devbox-setup]: https://github.com/Azure/azure-iot-sdks/blob/master/c/doc/devbox_setup.md
+[devbox-setup]: https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md
 [device-explorer]: https://github.com/Azure/azure-iot-sdks/blob/master/tools/DeviceExplorer/readme.md
 [colibri-modules]:https://www.toradex.com/computer-on-modules/colibri-arm-family
 [toradex-images]:http://developer.toradex.com/frequent-downloads#Windows_Embedded_Compact

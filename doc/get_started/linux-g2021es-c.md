@@ -94,6 +94,6 @@ Note: You can skip this step if you just want to build the sample application wi
 -	For addtion information and support, please get in touch with systems@pacificcontrols.net
 
 
-[setup-devbox-linux]: https://github.com/Azure/azure-iot-sdks/blob/master/c/doc/devbox_setup.md
+[setup-devbox-linux]: https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md
 [lnk-setup-iot-hub]: ../setup_iothub.md
 [lnk-manage-iot-hub]: ../manage_iot_hub.md

@@ -1,4 +1,4 @@
-﻿How to Certify IoT devices running Mbed OS with Azure IoT SDK
+How to Certify IoT devices running Mbed OS with Azure IoT SDK
 ===
 ---
 
@@ -18,7 +18,7 @@
     -   [4.3 Next steps](#Step-4-3-Next)
 -   [Step 5: Troubleshooting](#Step-5-Troubleshooting)
 
-<a name="Introduction"/>
+<a name="Introduction"></a>
 # Introduction
 
 **About this document**
@@ -45,7 +45,7 @@ You should have the following items ready before beginning the process:
 
 ***Note:*** *If you haven’t contacted Microsoft about being an Azure Certified for IoT partner, please submit this [form](<https://iotcert.cloudapp.net/>) first to request it and then follow these instructions.*
 
-<a name="Step-1-Configure"/>
+<a name="Step-1-Configure"></a>
 # Step 1: Sign Up To Azure IoT Hub
 
 Follow the instructions [here](https://account.windowsazure.com/signup?offer=ms-azr-0044p) on how to sign up to the Azure IoT Hub service.As part of the sign up process, you will receive the connection string.
@@ -55,7 +55,7 @@ Follow the instructions [here](https://account.windowsazure.com/signup?offer=ms-
 
          HostName=[YourIoTHubName];CredentialType=SharedAccessSignature;CredentialScope=[ContosoIotHub];SharedAccessKeyName=[YourAccessKeyName];SharedAccessKey=[YourAccessKey]
 
-<a name="Step-2-Register"/>
+<a name="Step-2-Register"></a>
 # Step 2: Register Device
 
 In this section, you will register your device using DeviceExplorer. The DeviceExplorer is a Windows application that interfaces with Azure IoT Hub and can perform the following operations:
@@ -93,12 +93,12 @@ To run DeviceExplorer tool, use following configuration string as described in [
 
 ***Not running Windows on your PC?*** - Please follow the instructions [here](<https://github.com/Azure/azure-iot-sdks/blob/master/doc/manage_iot_hub.md>) to provision your device and get its credentials.
 
-<a name="Step-3-Build"/>
+<a name="Step-3-Build"></a>
 # Step 3: Build and Validate the sample using C client libraries
 
 This section walks you through building, deploying and validating the IoT Client SDK on your device running a mbed operating system. You will install necessary prerequisites on your device.  Once done,  you will build and deploy the IoT Client SDK and validate the sample tests required for IoT certification with the Azure IoT SDK.
 
-<a name="Step-3-1-Load"/>
+<a name="Step-3-1-Load"></a>
 ## 3.1 Connect the Device
 
 1.  Connect the board to your network using an Ethernet cable. This step
@@ -111,7 +111,7 @@ This section walks you through building, deploying and validating the IoT Client
 
 4.  Install the 7-Zip software from [here](http://www.7-zip.org).
 
-<a name="Step-3-2-Build"/>
+<a name="Step-3-2-Build"></a>
 ## 3.2  Build the samples
 
 1. Clone [GitHub
@@ -211,7 +211,7 @@ This section walks you through building, deploying and validating the IoT Client
   ***Note:*** *You can safely ignore any warnings, but if the build
   generates errors, fix them before proceeding.*
 
-<a name="Step-3-3-Run"/>
+<a name="Step-3-3-Run"></a>
 ## 3.3 Run and Validate the samples
 
 In this section you will run the Azure IoT client SDK samples to validate
@@ -269,10 +269,10 @@ section. These will be needed in [Step 4](#Step-4-2-Share).*
 
     ![Terminal\_MessageReceive](images/3_3_2_02.png)
 
-<a name="Step-4-Package_Share"/>
+<a name="Step-4-Package_Share"></a>
 # Step 4: Package and Share
 
-<a name="Step-4-1-Package"/>
+<a name="Step-4-1-Package"></a>
 ## 4.1 Package build logs and sample test results
 
 Package following artifacts from your device:
@@ -286,17 +286,31 @@ Package following artifacts from your device:
     guideline on how the instructions should look please refer the
     examples published on github repository [here](<https://github.com/Azure/azure-iot-sdks/tree/master/doc/get_started>)
 
-<a name="Step-4-2-Share"/>
+<a name="Step-4-2-Share"></a>
 ## 4.2 Share package with Engineering Support
 
-Share the package in email to <iotcert@microsoft.com>.
+1.  Go to [Partner Dashboard](<https://catalog.azureiotsuite.com/devices>).
+2.  Click on Upload icon at top-right corner of your device.
 
-<a name="Step-4-3-Next"/>
+    ![Share\_Results\_upload\_icon](images/4_2_01.png)
+
+3.  This will open an upload dialog. Browse your file(s) by clicking **Upload** button.
+
+    ![Share\_Results\_upload\_dialog](images/4_2_02.png)
+
+    You can upload multiple files for same device.
+
+4.  Once you have uploaded all the files, click on **Submit for Review** button.
+
+    ***Note:*** *Please contact iotcert team to change/remove the files once you submit them for review.*
+ 
+
+<a name="Step-4-3-Next"></a>
 ## 4.3 Next steps
 
 Once you shared the documents with us, we will contact you in the following 48 to 72 business hours with next steps.
 
-<a name="Step-5-Troubleshooting"/>
+<a name="Step-5-Troubleshooting"></a>
 # Step 5: Troubleshooting
 
 Please contact engineering support on <iotcert@microsoft.com> for help with troubleshooting.

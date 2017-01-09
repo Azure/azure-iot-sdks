@@ -88,5 +88,5 @@ You should have the following items ready before beginning the process:
         ../temp/run.do_compile
 
 [lnk-user-manual]: http://www.msc-technologies.eu/fileadmin/documentpool/Support-Center/Qseven/Q7-BT/20-Drivers/80-Linux/MSC_Q7-BT-ldk-bsp-C984.pdf
-[lnk-setup-iot-hub]: ../../setup_iothub.md
-[lnk-manage-iot-hub]: ../../manage_iot_hub.md
+[lnk-setup-iot-hub]: ../setup_iothub.md
+[lnk-manage-iot-hub]: ../manage_iot_hub.md

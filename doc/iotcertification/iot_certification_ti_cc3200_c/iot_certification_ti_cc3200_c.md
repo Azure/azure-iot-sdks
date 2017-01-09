@@ -179,10 +179,8 @@ section. These will be needed in [Step 4](#Step_4_2).*
 
 9.  Update the wifi setting macros below the comment.
 
-    ```
-    #define SSID ""
-    #define SECURITY_KEY ""
-    ```
+        #define SSID ""
+        #define SECURITY_KEY ""
 
 10. Download the [elf2cc32 executable for Windows](https://github.com/tisb-vikram/azure-iot-sdks/blob/7da24633b2c4af3bc779998e9950146f061a8a10/c/serializer/samples/simplesample_http/tirtos/cc3200/tools/elf2cc32.exe?raw=true) or [elf2cc32 executable for Linux](https://github.com/tisb-vikram/azure-iot-sdks/blob/7da24633b2c4af3bc779998e9950146f061a8a10/c/serializer/samples/simplesample_http/tirtos/cc3200/tools/elf2cc32?raw=true) to the folder `azure-iot-sdks\c\serializer\samples\simplesample_http\tirtos\cc3200\tools`. 
 This tool is needed for converting the **simplesample_http.out** to **simplesample_http.bin** file.
@@ -252,7 +250,21 @@ Package the following artifacts from your device:
 <a name="Step_4_2"></a>
 ## 4.2 Share with the Azure IoT Certification team
 
-Send the package in email to  <iotcert@microsoft.com>.
+1.  Go to [Partner Dashboard](<https://catalog.azureiotsuite.com/devices>).
+2.  Click on Upload icon at top-right corner of your device.
+
+    ![Share\_Results\_upload\_icon](images/4_2_01.png)
+
+3.  This will open an upload dialog. Browse your file(s) by clicking **Upload** button.
+
+    ![Share\_Results\_upload\_dialog](images/4_2_02.png)
+
+    You can upload multiple files for same device.
+
+4.  Once you have uploaded all the files, click on **Submit for Review** button.
+
+    ***Note:*** *Please contact iotcert team to change/remove the files once you submit them for review.*
+ 
 
 <a name="Step_4_3"></a>
 ## 4.3 Next steps

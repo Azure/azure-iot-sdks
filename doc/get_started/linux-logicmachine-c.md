@@ -125,6 +125,7 @@ You should have the following items ready before beginning the process:
         cd ./c/serializer/build/linux
         make -f makefile.linux all
 
+[setup-devbox-linux]: https://github.com/Azure/azure-iot-sdk-c/blob/master/doc/devbox_setup.md
 [lnk-setup-iot-hub]: ../setup_iothub.md
 [lnk-manage-iot-hub]: ../manage_iot_hub.md
 [lnk-device-explorer]: ../../tools/DeviceExplorer/doc/how_to_use_device_explorer.md
