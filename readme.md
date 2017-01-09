@@ -44,7 +44,7 @@ You can find an exhaustive list of the OS platforms the various SDKs have been t
 
 ## Contribution, feedback and issues
 
-If you encounter any bugs, have suggestions for new features or if you would like to become an active contributor to this project please follow the instructions provided in the [contribution guidelines](CONTRIBUTING.md).
+If you encounter any bugs, have suggestions for new features or if you would like to become an active contributor to this project please follow the instructions provided in the contribution guideline for the corresponding repo.
 
 ## Support
 
