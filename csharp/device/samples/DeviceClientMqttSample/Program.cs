@@ -55,7 +55,7 @@ namespace Microsoft.Azure.Devices.Client.Samples
             for (int count = 0; count < MESSAGE_COUNT; count++)
             {
                 dataBuffer = Guid.NewGuid().ToString();
-                Message eventMessage = new Message(Encoding.UTF8.GetBytes(dataBuffer));
+                var eventMessage = new Message(Encoding.UTF8.GetBytes(dataBuffer));
                 Console.WriteLine("\t{0}> Sending message: {1}, Data: [{2}]", DateTime.Now.ToLocalTime(), count, dataBuffer);
 
                 await deviceClient.SendEventAsync(eventMessage);
@@ -66,7 +66,6 @@ namespace Microsoft.Azure.Devices.Client.Samples
         {
             Console.WriteLine("\nDevice waiting for commands from IoTHub...\n");
             Message receivedMessage = null;
-            string messageData;
 
             while (true)
             {
@@ -76,8 +75,14 @@ namespace Microsoft.Azure.Devices.Client.Samples
 
                     if (receivedMessage != null)
                     {
-                        messageData = Encoding.ASCII.GetString(receivedMessage.GetBytes());
+                        string messageData = Encoding.ASCII.GetString(receivedMessage.GetBytes());
                         Console.WriteLine("\t{0}> Received message: {1}", DateTime.Now.ToLocalTime(), messageData);
+
+                        int propCount = 0;
+                        foreach (var prop in receivedMessage.Properties)
+                        {
+                            Console.WriteLine("\t\tProperty[{0}> Key={1} : Value={2}", propCount++, prop.Key, prop.Value);
+                        }
 
                         await deviceClient.CompleteAsync(receivedMessage);
                     }

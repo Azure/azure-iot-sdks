@@ -105,7 +105,7 @@ Run the following commands in the terminal window connected to your Raspberry Pi
 -   Finally, build the sample applications:
 
     ```
-    ./c/build_all/linux/build.sh
+    ./c/build_all/linux/build.sh --skip-unittests
     ```
 
 <a name="buildsimplesample"/>

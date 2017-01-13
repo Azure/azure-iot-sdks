@@ -7,6 +7,8 @@
         public string Id { get; set; }
         public string PrimaryKey { get; set; }
         public string SecondaryKey { get; set; }
+        public string PrimaryThumbPrint { get; set; }
+        public string SecondaryThumbPrint { get; set; }
         public string ConnectionString { get; set; }
         public string ConnectionState { get; set; }
         public DateTime LastActivityTime { get; set; }
@@ -23,7 +25,7 @@
 
         public override string ToString()
         {
-            return$"Device ID = {this.Id}, Primary Key = {this.PrimaryKey}, Secondary Key = {this.SecondaryKey}, ConnectionString = {this.ConnectionString}, ConnState = {this.ConnectionState}, ActivityTime = {this.LastActivityTime}, LastConnState = {this.LastConnectionStateUpdatedTime}, LastStateUpdatedTime = {this.LastStateUpdatedTime}, MessageCount = {this.MessageCount}, State = {this.State}, SuspensionReason = {this.SuspensionReason}\r\n";
+            return$"Device ID = {this.Id}, Primary Key = {this.PrimaryKey}, Secondary Key = {this.SecondaryKey}, Primary Thumbprint = {this.PrimaryThumbPrint}, Secondary Thumbprint = {this.SecondaryThumbPrint}, ConnectionString = {this.ConnectionString}, ConnState = {this.ConnectionState}, ActivityTime = {this.LastActivityTime}, LastConnState = {this.LastConnectionStateUpdatedTime}, LastStateUpdatedTime = {this.LastStateUpdatedTime}, MessageCount = {this.MessageCount}, State = {this.State}, SuspensionReason = {this.SuspensionReason}\r\n";
         }
     }
 }

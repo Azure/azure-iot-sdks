@@ -9,10 +9,12 @@ var Device = require('../lib/device.js');
 var Registry = require('../lib/registry.js');
 var RegistryHttp = require('../lib/registry_http.js');
 
-var basicDeviceJson = JSON.stringify({
+var basicDevice = {
   deviceId: 'testDevice' + Math.random(),
   status: 'disabled'
-});
+};
+
+var basicDeviceJson = JSON.stringify(basicDevice);
 
 var deviceWithThumbprintJson = JSON.stringify({
   deviceId: 'testDevice' + Math.random(),
@@ -61,7 +63,7 @@ function badConfigTests(opName, badConnStrings, Transport, requestFn) {
   });
 }
 
-function runTests(Transport, goodConnectionString, badConnectionStrings, deviceId) {
+function runTests(Transport, goodConnectionString, badConnectionStrings) {
 
   /*Tests_SRS_NODE_IOTHUB_HTTP_05_001: [The Http constructor shall accept an object with three properties:
   host – (string) the fully-qualified DNS hostname of an IoT hub
@@ -189,19 +191,19 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, deviceI
       response - the Node.js http.ServerResponse object returned by the transport]*/
       it('returns information about the given device', function (done) {
         var registry = Registry.fromConnectionString(goodConnectionString, Transport);
-        registry.get(deviceId, function (err, dev) {
+        registry.get(basicDevice.deviceId, function (err, dev) {
           if (err) {
             done(err);
           } else {
             assert.instanceOf(dev, Device);
-            assert.equal(deviceId, dev.deviceId);
+            assert.equal(basicDevice.deviceId, dev.deviceId);
             done();
           }
         });
       });
 
       badConfigTests('get device information', badConnectionStrings, Transport, function (registry, done) {
-        registry.get(deviceId, done);
+        registry.get(basicDevice.deviceId, done);
       });
     });
 
@@ -318,7 +320,7 @@ function runTests(Transport, goodConnectionString, badConnectionStrings, deviceI
       });
 
       badConfigTests('delete device information', badConnectionStrings, Transport, function (registry, done) {
-        registry.delete(deviceId, done);
+        registry.delete(basicDevice.deviceId, done);
       });
     });
   });

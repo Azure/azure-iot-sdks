@@ -16,48 +16,10 @@ var results = require('azure-iot-common').results;
  *
  * @param {Object}  config      The configuration object derived from the connection string.
  */
-/*
- Codes_SRS_NODE_HTTP_12_001: MqttTransport shall accept the following argument:
-    config [
-        host: host address
-        deviceID: device name
-        sharedAccessSignature: SAS token  created for IoTHub
-        gatewayHostName: gateway host name]
- Codes_SRS_NODE_HTTP_12_002: [MqttTransport shall throw ReferenceError “Invalid transport configuration” error if either of the configuration field is falsy
- Codes_SRS_NODE_HTTP_12_003: [MqttTransport shall create a configuration structure for underlying MQTT.JS library and store it to a member variable
- Codes_SRS_NODE_HTTP_12_004: [MqttTransport shall return an instance itself
-*/
-function Mqtt(config, mqttprovider) {
-  if ((!config) ||
-    (!config.host) ||
-    (!config.deviceId) ||
-    (!config.sharedAccessSignature)) {
-    throw new ReferenceError('Invalid transport configuration');
-  }
-
+/*Codes_SRS_NODE_COMMON_MQTT_16_004: [The `Mqtt` constructor shall instanciate the default MQTT.JS library if no argument is passed to it.]*/
+/*Codes_SRS_NODE_COMMON_MQTT_16_005: [The `Mqtt` constructor shall use the object passed as argument instead of the default MQTT.JS library if it's not falsy.]*/
+function Mqtt(mqttprovider) {
   this.mqttprovider = mqttprovider ? mqttprovider : require('mqtt');
-
-  this._receiver = null;
-  this._hostName = 'mqtts://' + config.host;
-  this._topic_publish = "devices/" + config.deviceId + "/messages/events/";
-  this._topic_subscribe = "devices/" + config.deviceId + "/messages/devicebound/#";
-  debug('topic publish: ' + this._topic_publish);
-  debug('topic subscribe: ' + this._topic_subscribe);
-  var versionString = encodeURIComponent('azure-iot-device/' + PackageJson.version);
-  this._options =
-  {
-    cmd: 'connect',
-    protocolId: 'MQTT',
-    protocolVersion: 4,
-    clean: false,
-    clientId: config.deviceId,
-    username: config.host + '/' + config.deviceId + '/DeviceClientType=' + versionString,
-    password: new Buffer(config.sharedAccessSignature),
-    rejectUnauthorized: false,
-    reconnectPeriod: 0  // Client will handle reconnection at the higher level.
-  };
-  debug('username: ' + this._options.username);
-  debug('hostname: ' + this._hostName);
 }
 
 /**
@@ -66,14 +28,54 @@ function Mqtt(config, mqttprovider) {
  *
  * @param {Function}  done  Callback that shall be called when the connection is established.
  */
-/* SRS_NODE_HTTP_12_005: The CONNECT method shall call connect on MQTT.JS  library and return a promise with the result */
-Mqtt.prototype.connect = function (done) {
+Mqtt.prototype.connect = function (config, done) {
+  /*Codes_SRS_NODE_COMMON_MQTT_16_006: [The `connect` method shall throw a ReferenceError if the config argument is falsy, or if one of the following properties of the config argument is falsy: deviceId, host, and one of sharedAccessSignature or x509.cert and x509.key.]*/
+  if ((!config) ||
+    (!config.host) ||
+    (!config.deviceId) ||
+    (!config.sharedAccessSignature && (!config.x509 || !config.x509.cert || !config.x509.key))) {
+    throw new ReferenceError('Invalid transport configuration');
+  }
+
+  this._receiver = null;
+  this._hostName = 'mqtts://' + config.host;
+  this._topic_publish = "devices/" + config.deviceId + "/messages/events/";
+  this._topic_subscribe = "devices/" + config.deviceId + "/messages/devicebound/#";
+  debug('topic publish: ' + this._topic_publish);
+  debug('topic subscribe: ' + this._topic_subscribe);
+  var versionString = encodeURIComponent('azure-iot-device/' + PackageJson.version);
+
+  /*Codes_SRS_NODE_COMMON_MQTT_16_002: [The `connect` method shall use the authentication parameters contained in the `config` argument to connect to the server.]*/
+  this._options =
+  {
+    cmd: 'connect',
+    protocolId: 'MQTT',
+    protocolVersion: 4,
+    clean: false,
+    clientId: config.deviceId,
+    rejectUnauthorized: true,
+    username: config.host + '/' + config.deviceId + '/DeviceClientType=' + versionString,
+    reconnectPeriod: 0  // Client will handle reconnection at the higher level.
+  };
+
+  if (config.sharedAccessSignature) {
+    this._options.password = new Buffer(config.sharedAccessSignature);
+    debug('username: ' + this._options.username);
+    debug('hostname: ' + this._hostName);
+  } else {
+    this._options.cert = config.x509.cert;
+    this._options.key = config.x509.key;
+    this._options.passphrase = config.x509.passphrase;
+  }
+
   this.client = this.mqttprovider.connect(this._hostName, this._options);
+  /*Codes_SRS_NODE_COMMON_MQTT_16_007: [The `connect` method shall not throw if the `done` argument has not been passed.]*/
   if (done) {
     var errCallback = function (error) {
       done(error);
     };
-    
+
+  /*Codes_SRS_NODE_COMMON_MQTT_16_003: [The `connect` method shall call the `done` callback with a standard javascript `Error` object if the connection failed.]*/
     this.client.on('error', errCallback);
     this.client.on('close', errCallback);
     this.client.on('offline', errCallback);
@@ -92,6 +94,7 @@ Mqtt.prototype.connect = function (done) {
         this._receiver = null;
       }.bind(this));
 
+      /*Codes_SRS_NODE_COMMON_MQTT_12_005: [The `connect` method shall call connect on MQTT.JS  library and call the `done` callback with a `null` error object and the result as a second argument.]*/
       done(null, connack);
     }.bind(this));
   }

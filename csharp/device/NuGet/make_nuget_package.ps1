@@ -1,6 +1,8 @@
 # Copyright (c) Microsoft. All rights reserved.
 # Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+param([string]$buildPCL = "no")
+
 function GetAssemblyVersionFromFile($filename) {
     $regex = 'AssemblyInformationalVersion\("(\d{1,3}\.\d{1,3}\.\d{1,3}(?:-[A-Za-z0-9-]+)?)"\)'
     $values = select-string -Path $filename -Pattern $regex | % { $_.Matches } | % { $_.Groups } | % { $_.Value }
@@ -33,13 +35,25 @@ if($v1 -ne $v2) {
     return
 }
 
+if($v1 -ne $v3) {
+    Write-Host "Error: Mismatching assembly versions in files $dotNetFile and $dotNetPCLFile. Check AssemblyInformationalVersion attribute in each file." -foregroundcolor "red"
+    return
+}
+
 $id='Microsoft.Azure.Devices.Client'
-$id2='Microsoft.Azure.Devices.Client.PCL'
 
 echo "Creating NuGet package $id version $v1"
 
 .\NuGet.exe pack "$id.nuspec" -Prop Configuration=Release -Prop id=$id -Prop Version=$v1
 
-echo "Creating NuGet package $id2 version $v1"
+$id2='Microsoft.Azure.Devices.Client.PCL'
 
-.\NuGet.exe pack "$id2.nuspec" -Prop Configuration=Release -Prop id=$id2 -Prop Version=$v1
+# To build the PCL package, pass ` -buildPCL yes` on the command line
+# The PCL package is deprecated; it refers to the main package and has no other content
+
+if($buildPCL -eq "yes") {
+
+    echo "Creating NuGet package $id2 version $v1"
+
+    .\NuGet.exe pack "$id2.nuspec" -Prop Configuration=Release -Prop id=$id2 -Prop Version=$v1
+}

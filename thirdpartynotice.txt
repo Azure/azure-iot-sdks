@@ -1,4 +1,5 @@
-﻿Third Party Notices for Azure IoT SDKs project
+﻿
+Third Party Notices for Azure IoT SDKs project
 
 This project incorporates material from the project(s) listed below (collectively, “Third Party Code”).
 Microsoft Corporation is not the original author of the Third Party Code.

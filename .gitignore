@@ -124,6 +124,7 @@ ClientBin/
 *.[Pp]ublish.xml
 *.pfx
 *.publishsettings
+*.jar
 
 # RIA/Silverlight projects
 Generated_Code/
@@ -195,6 +196,7 @@ java/**/out/
 java/**/target/
 java/**/*.iml
 java/**/*dependency-reduced-pom.xml
+java/**/*.crt
 
 # Node.js
 **/.settings/

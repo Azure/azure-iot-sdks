@@ -14,20 +14,53 @@
         <tags>Microsoft Azure IoT IoTHub Device Client .net AMQP HTTP</tags>
         <language>en-US</language>
         <dependencies>
-            <group targetFramework="net45" >
+
+            <group>
                 <dependency id="Newtonsoft.Json" version="6.0.8" />
                 <dependency id="PCLCrypto" version="1.0.86" />
-                <dependency id="Microsoft.Azure.Amqp" version="1.1.5" />
-                <dependency id="DotNetty.Codecs.Mqtt-signed" version="0.3.1" />
-                <dependency id="DotNetty.Handlers-signed" version="0.3.1" />
-                <dependency id="EnterpriseLibrary.TransientFaultHandling" version="6.0.1304" />
-                <dependency id="Microsoft.AspNet.WebApi.Client" version="5.2.3" />
-                <dependency id="WindowsAzure.Storage" version="7.0.0" />
+                <dependency id="Validation" version="2.2.8" />
+            </group>
+
+            <group targetFramework="net45" >
+              <dependency id="PCLCrypto" version="1.0.86" />
+              <dependency id="Validation" version="2.2.8" />
+              <dependency id="Microsoft.Azure.Amqp" version="1.1.5" />
+              <dependency id="DotNetty.Codecs.Mqtt-signed" version="0.3.2" />
+              <dependency id="DotNetty.Handlers-signed" version="0.3.2" />
+              <dependency id="EnterpriseLibrary.TransientFaultHandling" version="6.0.1304" />
+              <dependency id="Microsoft.AspNet.WebApi.Client" version="5.2.3" />
+              <dependency id="WindowsAzure.Storage" version="7.0.0" />
             </group>
             <group targetFramework="uap">
                 <dependency id="PCLCrypto" version="1.0.86" />
+                <dependency id="Validation" version="2.2.8" />
                 <dependency id="Microsoft.Azure.Amqp" version="1.1.5" />
                 <dependency id="Microsoft.AspNet.WebApi.Client" version="5.2.3" />
+            </group>
+
+            <group targetFramework="win8">
+                <dependency id="PCLCrypto" version="1.0.86" />
+              <dependency id="Validation" version="2.2.8" />
+            </group>
+            <group targetFramework="wp8">
+                <dependency id="PCLCrypto" version="1.0.86" />
+                <dependency id="Validation" version="2.2.8" />
+            </group>
+            <group targetFramework="wpa81">
+              <dependency id="PCLCrypto" version="1.0.86" />
+              <dependency id="Validation" version="2.2.8" />
+            </group>
+            <group targetFramework="monoandroid">
+                <dependency id="PCLCrypto" version="1.0.86" />
+                <dependency id="Validation" version="2.2.8" />
+            </group>
+            <group targetFramework="monotouch">
+              <dependency id="PCLCrypto" version="1.0.86" />
+              <dependency id="Validation" version="2.2.8" />
+            </group>
+            <group targetFramework="Xamarin.iOS">
+                <dependency id="PCLCrypto" version="1.0.86" />
+                <dependency id="Validation" version="2.2.8" />
             </group>
         </dependencies>
     </metadata>
@@ -36,6 +69,8 @@
         <file src="..\Microsoft.Azure.Devices.Client\bin\release_delay_sign\Microsoft.Azure.Devices.Client.dll" target="lib\net45\Microsoft.Azure.Devices.Client.dll" />
         <file src="..\Microsoft.Azure.Devices.Client.WinRT\bin\release_delay_sign\Microsoft.Azure.Devices.Client.winmd" target="lib\uap10.0\Microsoft.Azure.Devices.Client.winmd" />
         <file src="..\Microsoft.Azure.Devices.Client.WinRT\bin\release_delay_sign\Microsoft.Azure.Devices.Client.winmd" target="lib\native\" />
+
+        <file src="..\Microsoft.Azure.Devices.Client.PCL\bin\release_delay_sign\Microsoft.Azure.Devices.Client.PCL.dll" target="lib\portable-net45+wp8+wpa81+win8+MonoAndroid10+MonoTouch10+Xamarin.iOS10+UAP10\Microsoft.Azure.Devices.Client.PCL.dll" />
 
         <!-- don't forget about the .targets file containing the reference -->
         <file src="Microsoft.Azure.Devices.Client.targets" target="build\native\" />

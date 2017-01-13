@@ -58,9 +58,10 @@ if not defined NUGET_API_KEY (
 		if not !errorlevel!==1 goto :eof
 		echo Publishing to Nuget.org with ApiKey: %NUGET_API_KEY%
 		nuget push %nuget_packages_path%\*.nupkg -ApiKey %NUGET_API_KEY% -NonInteractive
-		if not %errorlevel%==0 exit /b %errorlevel%
+		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 	) else (
 		nuget push %nuget_packages_path%\*.nupkg -ApiKey %NUGET_API_KEY% -Source %nuget_feed_path% -NonInteractive
+		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 	)
 )
 

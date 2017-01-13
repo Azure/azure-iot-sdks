@@ -1,4 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+﻿
+
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 namespace Microsoft.Azure.Devices.Client
@@ -8,7 +10,6 @@ namespace Microsoft.Azure.Devices.Client
     using System.Threading;
     using Microsoft.Azure.Devices.Client.Exceptions;
     using Microsoft.Azure.Devices.Client.Extensions;
-
 #if WINDOWS_UWP
     using Windows.Storage.Streams;
     using Microsoft.Azure.Amqp;
@@ -35,7 +36,7 @@ namespace Microsoft.Azure.Devices.Client
     /// The data structure represent the message that is used for interacting with IotHub.
     /// </summary>
     public sealed class Message :
-// TODO: this is a crazy mess, clean it up
+        // TODO: this is a crazy mess, clean it up
 #if !WINDOWS_UWP && !PCL && !NETMF
         IDisposable, IReadOnlyIndicator
 #elif NETMF
@@ -90,7 +91,7 @@ namespace Microsoft.Azure.Devices.Client
 #if WINDOWS_UWP
         private
 #else
-        public 
+        public
 #endif
             Message(Stream stream)
             : this()
@@ -248,46 +249,14 @@ namespace Microsoft.Azure.Devices.Client
 #endif
                 if (!deliveryAckAsString.IsNullOrWhiteSpace())
                 {
-                    switch (deliveryAckAsString)
-                    {
-                        case "none":
-                            return DeliveryAcknowledgement.None;
-                        case "positive":
-                            return DeliveryAcknowledgement.PositiveOnly;
-                        case "negative":
-                            return DeliveryAcknowledgement.NegativeOnly;
-                        case "full":
-                            return DeliveryAcknowledgement.Full;
-                        default:
-                            throw new IotHubException("Invalid Delivery Ack mode");
-                    }
+                    return Utils.ConvertDeliveryAckTypeFromString(deliveryAckAsString);
                 }
 
                 return DeliveryAcknowledgement.None;
             }
             set
             {
-                string valueToSet = null;
-
-                switch (value)
-                {
-                    case DeliveryAcknowledgement.None:
-                        valueToSet = "none";
-                        break;
-                    case DeliveryAcknowledgement.PositiveOnly:
-                        valueToSet = "positive";
-                        break;
-                    case DeliveryAcknowledgement.NegativeOnly:
-                        valueToSet = "negative";
-                        break;
-                    case DeliveryAcknowledgement.Full:
-                        valueToSet = "full";
-                        break;
-                    default:
-                        throw new IotHubException("Invalid Delivery Ack mode");
-                }
-
-                this.SystemProperties[MessageSystemPropertyNames.Ack] = valueToSet;
+                this.SystemProperties[MessageSystemPropertyNames.Ack] = Utils.ConvertDeliveryAckTypeToString(value);
             }
         }
 
@@ -301,7 +270,7 @@ namespace Microsoft.Azure.Devices.Client
 #if NETMF
                 return (ulong)(this.GetSystemProperty(MessageSystemPropertyNames.SequenceNumber) ?? 0);
 #else
-                return this.GetSystemProperty<ulong>(MessageSystemPropertyNames.SequenceNumber);                
+                return this.GetSystemProperty<ulong>(MessageSystemPropertyNames.SequenceNumber);
 #endif
             }
 
@@ -398,7 +367,7 @@ namespace Microsoft.Azure.Devices.Client
 #if NETMF
         public Hashtable Properties { get; private set; }
 #else
-         public IDictionary<string, string> Properties { get; private set; }
+        public IDictionary<string, string> Properties { get; private set; }
 #endif
 
         /// <summary>
@@ -564,12 +533,23 @@ namespace Microsoft.Azure.Devices.Client
             {
                 this.bodyStream.Seek(position, SeekOrigin.Begin);
                 Interlocked.Exchange(ref this.getBodyCalled, 0);
+#if !PCL && !NETMF
+                this.serializedAmqpMessage = null;
+#endif
                 return true;
             }
             return false;
         }
 
+#if NETMF
+        internal bool IsBodyCalled
+        {
+			// A safe comparison for one that will never actually perform an exchange (maybe not necessary?)
+            get { return Interlocked.CompareExchange(ref this.getBodyCalled, 9999, 9999) == 1; }
+        }
+#else
         internal bool IsBodyCalled => Volatile.Read(ref this.getBodyCalled) == 1;
+#endif
 
         void SetGetBodyCalled()
         {

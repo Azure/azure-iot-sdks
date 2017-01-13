@@ -8,7 +8,6 @@ package com.microsoft.azure.iothub.transport.amqps;
 import com.microsoft.azure.iothub.DeviceClientConfig;
 import com.microsoft.azure.iothub.IotHubMessageResult;
 import com.microsoft.azure.iothub.auth.IotHubSasToken;
-import com.microsoft.azure.iothub.net.IotHubUri;
 import com.microsoft.azure.iothub.transport.State;
 import com.microsoft.azure.iothub.transport.TransportUtils;
 import org.apache.qpid.proton.Proton;
@@ -18,15 +17,35 @@ import org.apache.qpid.proton.amqp.messaging.Source;
 import org.apache.qpid.proton.amqp.messaging.Target;
 import org.apache.qpid.proton.amqp.transport.DeliveryState;
 import org.apache.qpid.proton.amqp.transport.SenderSettleMode;
-import org.apache.qpid.proton.engine.*;
+import org.apache.qpid.proton.engine.BaseHandler;
+import org.apache.qpid.proton.engine.Connection;
+import org.apache.qpid.proton.engine.Delivery;
+import org.apache.qpid.proton.engine.Event;
+import org.apache.qpid.proton.engine.Link;
+import org.apache.qpid.proton.engine.Receiver;
+import org.apache.qpid.proton.engine.Sasl;
+import org.apache.qpid.proton.engine.Sender;
+import org.apache.qpid.proton.engine.Session;
+import org.apache.qpid.proton.engine.SslDomain;
+import org.apache.qpid.proton.engine.Transport;
 import org.apache.qpid.proton.engine.impl.WebSocketImpl;
 import org.apache.qpid.proton.message.Message;
 import org.apache.qpid.proton.reactor.FlowController;
 import org.apache.qpid.proton.reactor.Handshaker;
 import org.apache.qpid.proton.reactor.Reactor;
+import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.openssl.PEMWriter;
 
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOError;
 import java.io.IOException;
+import java.io.Reader;
 import java.nio.BufferOverflowException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +54,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -44,6 +64,7 @@ import java.util.concurrent.Future;
 public final class AmqpsIotHubConnection extends BaseHandler
 {
     private int maxWaitTimeForOpeningConnection = 30000;
+    private int maxWaitTimeForTerminateExecutor = 30;
     protected State state;
     private Future reactorFuture;
 
@@ -107,7 +128,9 @@ public final class AmqpsIotHubConnection extends BaseHandler
         }
         if(config.getDeviceKey() == null || config.getDeviceKey().length() == 0)
         {
-            throw new IllegalArgumentException("deviceKey cannot be null or empty.");
+            if(config.getSharedAccessToken() == null || config.getSharedAccessToken().length() == 0)
+
+                 throw new IllegalArgumentException("Both deviceKey and shared access signature cannot be null or empty.");
         }
 
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_002: [The constructor shall save the configuration into private member variables.]
@@ -161,15 +184,13 @@ public final class AmqpsIotHubConnection extends BaseHandler
         {
             // Codes_SRS_AMQPSIOTHUBCONNECTION_15_008: [The function shall create a new sasToken valid for the duration
             // specified in config to be used for the communication with IoTHub.]
-            this.sasToken = new IotHubSasToken(
-                    IotHubUri.getResourceUri(this.config.getIotHubHostname(), this.config.getDeviceId()),
-                    this.config.getDeviceKey(),
-                    System.currentTimeMillis() / 1000L + this.config.getTokenValidSecs() + 1L).toString();
+            this.sasToken = new IotHubSasToken(this.config, System.currentTimeMillis() / 1000L +
+                    this.config.getTokenValidSecs() + 1L).toString();
 
 			try
             {
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_009: [The function shall trigger the Reactor (Proton) to begin running.]
-                this.reactorFuture = this.startReactorAsync();
+                this.startReactorAsync();
 
                 // Codes_SRS_AMQPSIOTHUBCONNECTION_15_010: [The function shall wait for the reactor to be ready and for
                 // enough link credit to become available.]
@@ -195,21 +216,38 @@ public final class AmqpsIotHubConnection extends BaseHandler
     public void close()
     {
         // Codes_SRS_AMQPSIOTHUBCONNECTION_15_048 [If the AMQPS connection is already closed, the function shall do nothing.]
-        if (this.state != State.CLOSED)
-        {
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_012: [The function shall set the status of the AMQPS connection to CLOSED.]
-            this.state = State.CLOSED;
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_012: [The function shall set the status of the AMQPS connection to CLOSED.]
+        this.state = State.CLOSED;
 
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_013: [The function shall close the AMQPS sender and receiver links,
-            // the AMQPS session and the AMQPS connection.]
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_013: [The function shall close the AMQPS sender and receiver links,
+        // the AMQPS session and the AMQPS connection.]
+        if (this.sender != null)
             this.sender.close();
+        if (this.receiver != null)
             this.receiver.close();
+        if (this.session != null)
             this.session.close();
+        if (this.connection != null)
             this.connection.close();
 
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_014: [The function shall stop the Proton reactor.]
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_014: [The function shall stop the Proton reactor.]
+        if (this.reactorFuture != null)
             this.reactorFuture.cancel(true);
+        if (this.executorService != null) {
             this.executorService.shutdown();
+            try {
+                // Wait a while for existing tasks to terminate
+                if (!this.executorService.awaitTermination(maxWaitTimeForTerminateExecutor, TimeUnit.SECONDS)) {
+                    this.executorService.shutdownNow(); // Cancel currently executing tasks
+                    // Wait a while for tasks to respond to being cancelled
+                    if (!this.executorService.awaitTermination(maxWaitTimeForTerminateExecutor, TimeUnit.SECONDS)){
+                        System.err.println("Pool did not terminate");
+                    }
+                }
+            } catch (InterruptedException ie) {
+                // (Re-)Cancel if current thread also interrupted
+                this.executorService.shutdownNow();
+            }
         }
     }
 
@@ -360,9 +398,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             Sasl sasl = transport.sasl();
             sasl.plain(this.userName, this.sasToken);
 
-            // Codes_SRS_AMQPSIOTHUBCONNECTION_15_032: [The event handler shall set ANONYMOUS_PEER authentication mode on the domain of the Transport.]
             SslDomain domain = makeDomain(SslDomain.Mode.CLIENT);
-            domain.setPeerAuthentication(SslDomain.VerifyMode.ANONYMOUS_PEER);
             transport.ssl(domain);
         }
     }
@@ -524,7 +560,9 @@ public final class AmqpsIotHubConnection extends BaseHandler
 
         executorService = Executors.newFixedThreadPool(1);
         ReactorRunner reactorRunner = new ReactorRunner(iotHubReactor);
-        return executorService.submit(reactorRunner);
+        this.reactorFuture = executorService.submit(reactorRunner);
+        iotHubReactor.IotHubReactorSetFutureReactor(this.reactorFuture);
+        return this.reactorFuture;
     }
 
     /**
@@ -579,6 +617,7 @@ public final class AmqpsIotHubConnection extends BaseHandler
             {
                 try
                 {
+                    this.close();
                     System.out.println("Lost connection to the server. Reconnection attempt " + currentReconnectionAttempt++ + "...");
                     Thread.sleep(TransportUtils.generateSleepInterval(currentReconnectionAttempt));
                 }
@@ -630,8 +669,141 @@ public final class AmqpsIotHubConnection extends BaseHandler
     private SslDomain makeDomain(SslDomain.Mode mode)
     {
         SslDomain domain = Proton.sslDomain();
+        String trustedDB = getPemFormat(this.config.getPathToCertificate());
+
+        if (trustedDB != null )
+        {
+            domain.setTrustedCaDb(trustedDB);
+        }
+        // Codes_SRS_AMQPSIOTHUBCONNECTION_15_032: [The event handler shall set VERIFY_PEER authentication mode on the domain of the Transport.]
+        if (domain.getTrustedCaDb() != null)
+        {
+           domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
+        }
+        else
+        {
+            throw new IllegalStateException("SSL connection unsecured, could not find certificate");
+        }
         domain.init(mode);
 
         return domain;
     }
+
+    private String getPemFormat(String certPath) {
+        if (!isPemFile(certPath))
+            certPath = convertToPem(certPath);
+        return certPath;
+    }
+
+    private boolean isPemFile(String path) {
+        PEMReader pemReader = null;
+        Reader reader = null;
+        try {
+            reader = new FileReader(path);
+            pemReader = new PEMReader(reader, null);
+
+            for (String line = pemReader.readLine(); line != null; line = pemReader.readLine()) {
+                if (line.contains("-----BEGIN CERTIFICATE-----")) return true;
+            }
+        }
+        catch (IOException e)
+        {
+            throw new IOError(e);
+        }
+        finally
+        {
+            if (pemReader != null) {
+                try {
+                    pemReader.close();
+                } catch (IOException e) {
+                    System.out.println("Couldn't close PEM Reader");
+                }
+            }
+
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    System.out.println("Couldn't close reader");
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private String  convertToPem(String derPath) {
+        FileInputStream in = null;
+        FileWriter writer = null;
+        PEMWriter pemWriter = null;
+
+        try
+        {
+            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+            in = new FileInputStream(derPath);
+            Certificate cert = certFactory.generateCertificate(in);
+            writer = new FileWriter(derPath + ".pem");
+            try {
+                pemWriter = new PEMWriter(writer);
+                pemWriter.writeObject(cert);
+            }
+            catch (IOException e)
+            {
+                throw new IOError(e);
+            }
+
+        }
+        catch (IOException e)
+        {
+            throw new IOError(e);
+        }
+        catch (CertificateException e)
+        {
+            throw new IOError(e);
+        }
+        finally
+        {
+            if(pemWriter != null)
+            {
+                try
+                {
+                    pemWriter.close();
+                }
+                catch(IOException e)
+                {
+                    System.out.println("Couldn't close PEM writer");
+                }
+            }
+
+            if(writer != null)
+            {
+                try
+                {
+                    writer.close();
+                }
+                catch(IOException e)
+                {
+                    System.out.println("Couldn't close writer");
+                }
+            }
+
+            if(in != null)
+            {
+                try
+                {
+                    in.close();
+                }
+                catch(IOException e)
+                {
+                    System.out.println("Couldn't close Input Stream");
+                }
+            }
+
+        }
+
+        return derPath + ".pem" ;
+    }
+
+
 }
+

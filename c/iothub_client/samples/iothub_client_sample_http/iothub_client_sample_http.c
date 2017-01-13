@@ -29,6 +29,7 @@ and removing calls to _DoWork will yield the same results. */
 /*  "HostName=<host_name>;DeviceId=<device_id>;SharedAccessSignature=<device_sas_token>"    */
 static const char* connectionString = "[device connection string]";
 
+
 static int callbackCounter;
 static bool g_continueRunning;
 static char msgText[1024];
@@ -40,7 +41,7 @@ static char propText[1024];
 typedef struct EVENT_INSTANCE_TAG
 {
     IOTHUB_MESSAGE_HANDLE messageHandle;
-    int messageTrackingId;  // For tracking the messages within the user callback.
+    size_t messageTrackingId;  // For tracking the messages within the user callback.
 } EVENT_INSTANCE;
 
 static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HANDLE message, void* userContextCallback)
@@ -94,7 +95,9 @@ static IOTHUBMESSAGE_DISPOSITION_RESULT ReceiveMessageCallback(IOTHUB_MESSAGE_HA
 static void SendConfirmationCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void* userContextCallback)
 {
     EVENT_INSTANCE* eventInstance = (EVENT_INSTANCE*)userContextCallback;
-    (void)printf("Confirmation[%d] received for message tracking id = %d with result = %s\r\n", callbackCounter, eventInstance->messageTrackingId, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+    
+    (void)printf("Confirmation[%d] received for message tracking id = %zu with result = %s\r\n", callbackCounter, eventInstance->messageTrackingId, ENUM_TO_STRING(IOTHUB_CLIENT_CONFIRMATION_RESULT, result));
+    
     /* Some device specific action code goes here... */
     callbackCounter++;
     IoTHubMessage_Destroy(eventInstance->messageHandle);
@@ -179,7 +182,7 @@ void iothub_client_sample_http_run(void)
                             messages[iterator].messageTrackingId = iterator;
 
                             propMap = IoTHubMessage_Properties(messages[iterator].messageHandle);
-                            sprintf_s(propText, sizeof(propText), "PropMsg_%d", iterator);
+                            (void)sprintf_s(propText, sizeof(propText), "PropMsg_%zu", iterator);
                             if (Map_AddOrUpdate(propMap, "PropName", propText) != MAP_OK)
                             {
                                 (void)printf("ERROR: Map_AddOrUpdate Failed!\r\n");
@@ -192,6 +195,7 @@ void iothub_client_sample_http_run(void)
                             else
                             {
                                 (void)printf("IoTHubClient_LL_SendEventAsync accepted message [%zu] for transmission to IoT Hub.\r\n", iterator);
+                            
                             }
 
                         }
@@ -202,7 +206,7 @@ void iothub_client_sample_http_run(void)
                     iterator++;
                 } while (g_continueRunning);
                 
-                (void)printf("iothub_client_sample_mqtt has gotten quit message, call DoWork %d more time to complete final sending...\r\n", DOWORK_LOOP_NUM);
+                (void)printf("iothub_client_sample_http has gotten quit message, call DoWork %d more time to complete final sending...\r\n", DOWORK_LOOP_NUM);
                 for (size_t index = 0; index < DOWORK_LOOP_NUM; index++)
                 {
                     IoTHubClient_LL_DoWork(iotHubClientHandle);
@@ -217,6 +221,6 @@ void iothub_client_sample_http_run(void)
 
 int main(void)
 {
-    iothub_client_sample_http_run();
-    return 0;
+   iothub_client_sample_http_run();
+   return 0;
 }

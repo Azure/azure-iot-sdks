@@ -1,8 +1,8 @@
 <!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. --><project>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.microsoft.azure.iothub.service.sdk</groupId>
+    <groupId>com.microsoft.azure.iot.service.sdk</groupId>
     <artifactId>samples</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.9</version>
     <name>IoT Hub Service SDK Samples</name>
     <packaging>pom</packaging>
     <developers>
@@ -11,15 +11,20 @@
             <name>Microsoft</name>
         </developer>
     </developers>
+    <parent>
+        <groupId>com.microsoft.azure.iot.service.sdk</groupId>
+        <artifactId>iothub-service-sdk-with-samples</artifactId>
+        <version>1.0.9</version>
+    </parent>
     <modules>
         <module>device-manager-sample</module>
         <module>service-client-sample</module>
     </modules>
     <dependencies>
         <dependency>
-            <groupId>com.microsoft.azure.iothub.service.sdk</groupId>
+            <groupId>com.microsoft.azure.iot.service.sdk</groupId>
             <artifactId>iothub-service-sdk</artifactId>
-            <version>1.0.7</version>
+            <version>1.0.9</version>
         </dependency>
     </dependencies>
     <build>
@@ -34,6 +39,15 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>with-deps</shadedClassifierName>
                         </configuration>

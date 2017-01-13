@@ -37,30 +37,6 @@ namespace Microsoft.Azure.Devices.Client.Transport
         }
 
         /// <summary>
-        /// Close the DeviceClient instance
-        /// </summary>
-        /// <returns></returns>
-        public override async Task CloseAsync()
-        {
-            TaskCompletionSource<object> localOpenTaskCompletionSource;
-            lock (this.thisLock)
-            {
-                if (this.closed)
-                {
-                    return;
-                }
-
-                localOpenTaskCompletionSource = this.openTaskCompletionSource;
-                this.closed = true;
-            }
-
-            localOpenTaskCompletionSource?.TrySetCanceled();
-
-            await base.CloseAsync();
-            this.Dispose(true);
-        }
-
-        /// <summary>
         /// Receive a message from the device queue with the specified timeout
         /// </summary>
         /// <returns>The receive message or null if there was no message until the specified time has elapsed</returns>
@@ -129,6 +105,42 @@ namespace Microsoft.Azure.Devices.Client.Transport
         {
             await this.EnsureOpenedAsync(false);
             await base.SendEventAsync(messages);
+        }
+
+        /// <summary>
+        /// Close the DeviceClient instance
+        /// </summary>
+        /// <returns></returns>
+        public override async Task CloseAsync()
+        {
+            if (!this.TryCloseGate())
+            {
+                await base.CloseAsync();
+            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            this.TryCloseGate();
+            base.Dispose(disposing);
+        }
+
+        bool TryCloseGate()
+        {
+            TaskCompletionSource<object> localOpenTaskCompletionSource;
+            lock (this.thisLock)
+            {
+                if (this.closed)
+                {
+                    return false;
+                }
+
+                localOpenTaskCompletionSource = this.openTaskCompletionSource;
+                this.closed = true;
+            }
+
+            localOpenTaskCompletionSource?.TrySetCanceled();
+            return true;
         }
 
         Task EnsureOpenedAsync(bool explicitOpen)

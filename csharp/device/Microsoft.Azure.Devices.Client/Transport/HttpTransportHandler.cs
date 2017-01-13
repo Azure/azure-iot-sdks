@@ -138,7 +138,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
             {
                 throw Fx.Exception.ArgumentNull("message");
             }
-            
+
             var customHeaders = new Dictionary<string, string>(message.SystemProperties.Count + message.Properties.Count);
             foreach (var property in message.SystemProperties)
             {
@@ -151,9 +151,9 @@ namespace Microsoft.Azure.Devices.Client.Transport
             }
 
             return this.httpClientHelper.PostAsync<byte[]>(
-                GetRequestUri(this.deviceId, CommonConstants.DeviceEventPathTemplate, null), 
-                message.GetBytes(), 
-                ExceptionHandlingHelper.GetDefaultErrorMapping(), 
+                GetRequestUri(this.deviceId, CommonConstants.DeviceEventPathTemplate, null),
+                message.GetBytes(),
+                ExceptionHandlingHelper.GetDefaultErrorMapping(),
                 customHeaders,
                 CancellationToken.None);
         }
@@ -178,10 +178,16 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
         protected override void Dispose(bool disposing)
         {
-            base.Dispose(disposing);
-            if (disposing)
+            try
             {
-                this.httpClientHelper?.Dispose();
+                if (disposing)
+                {
+                    this.httpClientHelper?.Dispose();
+                }
+            }
+            finally
+            {
+                base.Dispose(disposing);
             }
         }
 
@@ -213,29 +219,25 @@ namespace Microsoft.Azure.Devices.Client.Transport
 #if !WINDOWS_UWP && !PCL
         internal async Task UploadToBlobAsync(String blobName, System.IO.Stream source)
         {
-            // 1. Construct GET request to get SAS URI for storage account
-            var responseMessage = await this.httpClientHelper.GetAsync<HttpResponseMessage>(
-            GetRequestUri(this.deviceId, CommonConstants.BlobUploadPathTemplate + blobName, null),
+            var fileUploadRequest = new FileUploadRequest()
+            {
+                BlobName = blobName
+            };
+
+            var fileUploadResponse = await this.httpClientHelper.PostAsync<FileUploadRequest, FileUploadResponse>(
+            GetRequestUri(this.deviceId, CommonConstants.BlobUploadPathTemplate, null),
+            fileUploadRequest,
             ExceptionHandlingHelper.GetDefaultErrorMapping(),
             null,
-            true,
             CancellationToken.None);
 
-            if (responseMessage.StatusCode != HttpStatusCode.OK)
-            {
-                throw new HttpRequestException(responseMessage.StatusCode.ToString());
-            }
-
-            var stringContent = await responseMessage.Content.ReadAsStringAsync();
-            var getResponseData = JsonConvert.DeserializeObject<FileUploadGetResponse>(stringContent);
-
             string putString = String.Format("https://{0}/{1}/{2}{3}",
-                getResponseData.HostName,
-                getResponseData.ContainerName,
-                getResponseData.BlobName,
-                getResponseData.SasToken);
+                fileUploadResponse.HostName,
+                fileUploadResponse.ContainerName,
+                fileUploadResponse.BlobName,
+                fileUploadResponse.SasToken);
 
-            FileUploadNotificationResponse notification = new FileUploadNotificationResponse();
+            var notification = new FileUploadNotificationResponse();
 
             try
             {
@@ -244,13 +246,14 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 var uploadTask = blob.UploadFromStreamAsync(source);
                 await uploadTask;
 
+                notification.CorrelationId = fileUploadResponse.CorrelationId;
                 notification.IsSuccess = uploadTask.IsCompleted;
                 notification.StatusCode = uploadTask.IsCompleted ? 0 : -1;
                 notification.StatusDescription = uploadTask.IsCompleted ? null : "Failed to upload to storage.";
 
                 // 3. POST to IoTHub with upload status
                 await this.httpClientHelper.PostAsync<FileUploadNotificationResponse>(
-                    GetRequestUri(this.deviceId, CommonConstants.BlobUploadPathTemplate + "notifications/" + getResponseData.CorrelationId, null),
+                    GetRequestUri(this.deviceId, CommonConstants.BlobUploadStatusPathTemplate + "notifications", null),
                     notification,
                     ExceptionHandlingHelper.GetDefaultErrorMapping(),
                     null,
@@ -264,7 +267,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 notification.StatusDescription = ex.Message;
 
                 await this.httpClientHelper.PostAsync<FileUploadNotificationResponse>(
-                    GetRequestUri(this.deviceId, CommonConstants.BlobUploadPathTemplate + "notifications/" + getResponseData.CorrelationId, null),
+                    GetRequestUri(this.deviceId, CommonConstants.BlobUploadStatusPathTemplate + "notifications/" + fileUploadResponse.CorrelationId, null),
                     notification,
                     ExceptionHandlingHelper.GetDefaultErrorMapping(),
                     null,
@@ -433,7 +436,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
         static IDictionary<string, string> PrepareCustomHeaders(string toHeader, string messageId, string operation)
         {
             var customHeaders = new Dictionary<string, string>
-            {   
+            {
                 { CustomHeaderConstants.To, toHeader },
                 { CustomHeaderConstants.Operation, operation },
             };
@@ -517,7 +520,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
                 writer.WriteEndArray();
                 // ]
 
-                return sw.ToString();                
+                return sw.ToString();
             }
         }
 
@@ -582,7 +585,7 @@ namespace Microsoft.Azure.Devices.Client.Transport
 
                     foreach (var property in message.Item2)
                     {
-                        writer.WritePropertyName(property.Key); 
+                        writer.WritePropertyName(property.Key);
                         writer.WriteValue(property.Value);
                     }
 

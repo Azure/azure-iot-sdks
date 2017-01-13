@@ -8,6 +8,7 @@
 #include "azure_c_shared_utility/gballoc.h"
 
 #include <time.h>
+#include "iothub_client_options.h"
 #include "iothub_client_version.h"
 #include "iothub_client_private.h"
 #include "iothub_transport_ll.h"
@@ -160,7 +161,7 @@ static void destroy_eventHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handle
     handleData->eventHTTPrequestHeaders = NULL;
 }
 
-static bool create_eventHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleData, const char * deviceId)
+static bool create_eventHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleData, const char * deviceId, bool is_x509_used)
 {
     /*Codes_SRS_TRANSPORTMULTITHTTP_17_021: [ IoTHubTransportHttp_Register shall create a set of HTTP headers (further called "event HTTP request headers") consisting of the following fixed field names and values: "iothub-to":"/devices/" + URL_ENCODED(deviceId) + "/messages/events"; "Authorization":""
     "Accept":"application/json"
@@ -198,7 +199,7 @@ static bool create_eventHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleD
             {
                 if (!(
                     (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "iothub-to", STRING_c_str(temp)) == HTTP_HEADERS_OK) &&
-                    (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Authorization", " ") == HTTP_HEADERS_OK) &&
+                    (is_x509_used || (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Authorization", " ") == HTTP_HEADERS_OK)) &&
                     (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Accept", "application/json") == HTTP_HEADERS_OK) &&
                     (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "Connection", "Keep-Alive") == HTTP_HEADERS_OK) &&
                     (HTTPHeaders_AddHeaderNameValuePair(handleData->eventHTTPrequestHeaders, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION) == HTTP_HEADERS_OK)
@@ -227,7 +228,7 @@ static void destroy_messageHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* hand
     handleData->messageHTTPrequestHeaders = NULL;
 }
 
-static bool create_messageHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleData)
+static bool create_messageHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handleData, bool is_x509_used)
 {
     /*Codes_SRS_TRANSPORTMULTITHTTP_17_132: [ IoTHubTransportHttp_Register shall create a set of HTTP headers (further called "message HTTP request headers") consisting of the following fixed field names and values:
     "Authorization": "" ]*/
@@ -242,7 +243,7 @@ static bool create_messageHTTPrequestHeaders(HTTPTRANSPORT_PERDEVICE_DATA* handl
     {
         if (!(
             (HTTPHeaders_AddHeaderNameValuePair(handleData->messageHTTPrequestHeaders, "User-Agent", CLIENT_DEVICE_TYPE_PREFIX CLIENT_DEVICE_BACKSLASH IOTHUB_SDK_VERSION) == HTTP_HEADERS_OK) &&
-            (HTTPHeaders_AddHeaderNameValuePair(handleData->messageHTTPrequestHeaders, "Authorization", " ") == HTTP_HEADERS_OK)
+            (is_x509_used || (HTTPHeaders_AddHeaderNameValuePair(handleData->messageHTTPrequestHeaders, "Authorization", " ") == HTTP_HEADERS_OK))
             ))
         {
             /*Codes_SRS_TRANSPORTMULTITHTTP_17_023: [ If creating message HTTP request headers then IoTHubTransportHttp_Register shall fail and return NULL. ]*/
@@ -485,19 +486,14 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE han
         LogError("Transport handle is NULL");
         result = NULL;
     }
-    else if (device->deviceId == NULL || ((device->deviceKey == NULL) && (device->deviceSasToken == NULL)) || waitingToSend == NULL || iotHubClientHandle == NULL)
+    else if (device->deviceId == NULL || ((device->deviceKey != NULL) && (device->deviceSasToken != NULL)) || waitingToSend == NULL || iotHubClientHandle == NULL)
     {
-        /*Codes_SRS_TRANSPORTMULTITHTTP_17_015: [ If IOTHUB_DEVICE_CONFIG fields deviceKey and deviceSasToken are NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
+        /*Codes_SRS_TRANSPORTMULTITHTTP_17_015: [ If IOTHUB_DEVICE_CONFIG fields deviceKey and deviceSasToken are NULL, then IoTHubTransportHttp_Register shall assume a x509 authentication. ]*/
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_014: [ If IOTHUB_DEVICE_CONFIG field deviceId is NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_016: [ If parameter waitingToSend is NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_143: [ If parameter iotHubClientHandle is NULL, then IoTHubTransportHttp_Register shall return NULL. ]*/
-        LogError("Some parameters expected to be non-NULL");
-        result = NULL;
-    }
-    else if ( (device->deviceKey != NULL) && (device->deviceSasToken != NULL) )
-    {
-        /* Codess_SRS_TRANSPORTMULTITHTTP_03_015: [If IOTHUB_DEVICE_CONFIG fields deviceKey and deviceSasToken are both NOT NULL, then IoTHubTransportHttp_Register shall return NULL.]*/
-        LogError("deviceKey & deviceSasToken cannot be both defined.");
+        LogError("invalid parameters detected TRANSPORT_LL_HANDLE handle=%p, const IOTHUB_DEVICE_CONFIG* device=%p, IOTHUB_CLIENT_LL_HANDLE iotHubClientHandle=%p, PDLIST_ENTRY waitingToSend=%p",
+            handle, device, iotHubClientHandle, waitingToSend);
         result = NULL;
     }
     else
@@ -516,36 +512,59 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE han
             bool was_create_deviceKey_ok = false;
             bool was_create_deviceSasToken_ok = false;
             bool was_sasObject_ok = false;
+            bool was_x509_ok = false; /*there's nothing "created" in the case of x509, it is a flag indicating that x509 is used*/
 
             /*Codes_SRS_TRANSPORTMULTITHTTP_17_038: [ Otherwise, IoTHubTransportHttp_Register shall allocate the IOTHUB_DEVICE_HANDLE structure. ]*/
-            bool was_resultCreated_ok = ((result = malloc(sizeof(HTTPTRANSPORT_PERDEVICE_DATA))) != NULL);
+            bool was_resultCreated_ok = ((result = (HTTPTRANSPORT_PERDEVICE_DATA *) malloc(sizeof(HTTPTRANSPORT_PERDEVICE_DATA))) != NULL);
             bool was_create_deviceId_ok = was_resultCreated_ok && create_deviceId(result, device->deviceId);
 
-            if (was_create_deviceId_ok && (device->deviceSasToken != NULL))
+            if (was_create_deviceId_ok)
             {
-                was_create_deviceSasToken_ok = create_deviceSasToken(result, device->deviceSasToken);
-                result->deviceKey = NULL;
-                result->sasObject = NULL;
-            }
-            if (was_create_deviceId_ok && (device->deviceKey != NULL))
-            {
-                was_create_deviceKey_ok = create_deviceKey(result, device->deviceKey);
-                result->deviceSasToken = NULL;
+                if (device->deviceSasToken != NULL)
+                {
+                    /*device->deviceKey is certainly NULL (because of the validation condition (else if (device->deviceId == NULL || ((device->deviceKey != NULL) && (device->deviceSasToken != NULL)) || waitingToSend == NULL || iotHubClientHandle == NULL))that does not accept that both satoken AND devicekey are non-NULL*/
+                    was_create_deviceSasToken_ok = create_deviceSasToken(result, device->deviceSasToken);
+                    result->deviceKey = NULL;
+                    result->sasObject = NULL;
+                }
+                else /*when deviceSasToken == NULL*/
+                {
+                    if (device->deviceKey != NULL)
+                    {
+                        was_create_deviceKey_ok = create_deviceKey(result, device->deviceKey);
+                        result->deviceSasToken = NULL;
+                    }
+                    else
+                    {
+                        /*when both of them are NULL*/
+                        was_x509_ok = true;
+                        result->deviceKey = NULL;
+                        result->deviceSasToken = NULL;
+                    }
+                }
             }
 
-            bool was_eventHTTPrelativePath_ok = (was_create_deviceKey_ok || was_create_deviceSasToken_ok) && create_eventHTTPrelativePath(result, device->deviceId);
+            bool was_eventHTTPrelativePath_ok = (was_create_deviceKey_ok || was_create_deviceSasToken_ok || was_x509_ok) && create_eventHTTPrelativePath(result, device->deviceId);
             bool was_messageHTTPrelativePath_ok = was_eventHTTPrelativePath_ok && create_messageHTTPrelativePath(result, device->deviceId);
-            bool was_eventHTTPrequestHeaders_ok = was_messageHTTPrelativePath_ok && create_eventHTTPrequestHeaders(result, device->deviceId);
-            bool was_messageHTTPrequestHeaders_ok = was_eventHTTPrequestHeaders_ok && create_messageHTTPrequestHeaders(result);
+            bool was_eventHTTPrequestHeaders_ok = was_messageHTTPrelativePath_ok && create_eventHTTPrequestHeaders(result, device->deviceId, was_x509_ok);
+            bool was_messageHTTPrequestHeaders_ok = was_eventHTTPrequestHeaders_ok && create_messageHTTPrequestHeaders(result, was_x509_ok);
             bool was_abandonHTTPrelativePathBegin_ok = was_messageHTTPrequestHeaders_ok && create_abandonHTTPrelativePathBegin(result, device->deviceId);
 
-            if (!was_create_deviceSasToken_ok)
+            if (was_x509_ok)
             {
-                was_sasObject_ok = was_abandonHTTPrelativePathBegin_ok && create_deviceSASObject(result, handleData->hostName, device->deviceId, device->deviceKey);
+                result->sasObject = NULL; /**/
+                was_sasObject_ok = true;
+            }
+            else
+            {
+                if (!was_create_deviceSasToken_ok)
+                {
+                    was_sasObject_ok = was_abandonHTTPrelativePathBegin_ok && create_deviceSASObject(result, handleData->hostName, device->deviceId, device->deviceKey);
+                }
             }
 
             /*Codes_SRS_TRANSPORTMULTITHTTP_17_041: [ IoTHubTransportHttp_Register shall call VECTOR_push_back to store the new device information. ]*/
-            bool was_list_add_ok = (was_sasObject_ok || was_create_deviceSasToken_ok) && (VECTOR_push_back(handleData->perDeviceList, &result, 1) == 0);
+            bool was_list_add_ok = (was_sasObject_ok || was_create_deviceSasToken_ok || was_x509_ok) && (VECTOR_push_back(handleData->perDeviceList, &result, 1) == 0);
 
             if (was_list_add_ok)
             {
@@ -557,7 +576,7 @@ static IOTHUB_DEVICE_HANDLE IoTHubTransportHttp_Register(TRANSPORT_LL_HANDLE han
                 result->iotHubClientHandle = iotHubClientHandle;
                 result->waitingToSend = waitingToSend;
                 DList_InitializeListHead(&(result->eventConfirmations));
-                result->transportHandle = handle;
+                result->transportHandle = (HTTPTRANSPORT_HANDLE_DATA *) handle;
             }
             else
             {
@@ -602,7 +621,7 @@ static IOTHUB_DEVICE_HANDLE* get_perDeviceDataItem(IOTHUB_DEVICE_HANDLE deviceHa
 
     HTTPTRANSPORT_HANDLE_DATA* handleData = deviceHandleData->transportHandle;
 
-    listItem = VECTOR_find_if(handleData->perDeviceList, findDeviceHandle, deviceHandle);
+    listItem = (IOTHUB_DEVICE_HANDLE *) VECTOR_find_if(handleData->perDeviceList, findDeviceHandle, deviceHandle);
     if (listItem == NULL)
     {
         LogError("device handle not found in transport device list");
@@ -649,35 +668,45 @@ static void IoTHubTransportHttp_Unregister(IOTHUB_DEVICE_HANDLE deviceHandle)
     return;
 }
 
-
-/*Codes_SRS_TRANSPORTMULTITHTTP_17_005: [Otherwise, IoTHubTransportHttp_Create shall create an immutable string (further called hostname) containing config->upperConfig->iotHubName + config->upperConfig->iotHubSuffix.]*/
+/*Codes_SRS_TRANSPORTMULTITHTTP_17_005: [If config->upperConfig->protocolGatewayHostName is NULL, `IoTHubTransportHttp_Create` shall create an immutable string (further called hostname) containing `config->transportConfig->iotHubName + config->transportConfig->iotHubSuffix`.]  */ 
+/*Codes_SRS_TRANSPORTMULTITHTTP_20_001: [If config->upperConfig->protocolGatewayHostName is not NULL, IoTHubTransportHttp_Create shall use it as hostname] */
 static void destroy_hostName(HTTPTRANSPORT_HANDLE_DATA* handleData)
 {
     STRING_delete(handleData->hostName);
     handleData->hostName = NULL;
 }
 
-/*Codes_SRS_TRANSPORTMULTITHTTP_17_005: [Otherwise, IoTHubTransportHttp_Create shall create an immutable string (further called hostname) containing config->upperConfig->iotHubName + config->upperConfig->iotHubSuffix.]*/
 static bool create_hostName(HTTPTRANSPORT_HANDLE_DATA* handleData, const IOTHUBTRANSPORT_CONFIG* config)
 {
     bool result;
-    handleData->hostName = STRING_construct(config->upperConfig->iotHubName);
-    if (handleData->hostName == NULL)
+    if (config->upperConfig->protocolGatewayHostName != NULL)
     {
-        result = false;
+        /*Codes_SRS_TRANSPORTMULTITHTTP_20_001: [If config->upperConfig->protocolGatewayHostName is not NULL, IoTHubTransportHttp_Create shall use it as hostname] */
+        handleData->hostName = STRING_construct(config->upperConfig->protocolGatewayHostName);
+        result = (handleData->hostName != NULL);
     }
     else
     {
-        if ((STRING_concat(handleData->hostName, ".") != 0) ||
-            (STRING_concat(handleData->hostName, config->upperConfig->iotHubSuffix) != 0))
+        /*Codes_SRS_TRANSPORTMULTITHTTP_17_005: [If config->upperConfig->protocolGatewayHostName is NULL, `IoTHubTransportHttp_Create` shall create an immutable string (further called hostname) containing `config->transportConfig->iotHubName + config->transportConfig->iotHubSuffix`.]  */ 
+        handleData->hostName = STRING_construct(config->upperConfig->iotHubName);
+
+        if (handleData->hostName == NULL)
         {
-            /*Codes_SRS_TRANSPORTMULTITHTTP_17_006: [ If creating the hostname fails then IoTHubTransportHttp_Create shall fail and return NULL. ] */
-            destroy_hostName(handleData);
             result = false;
         }
         else
         {
-            result = true;
+            if ((STRING_concat(handleData->hostName, ".") != 0) ||
+                (STRING_concat(handleData->hostName, config->upperConfig->iotHubSuffix) != 0))
+            {
+                /*Codes_SRS_TRANSPORTMULTITHTTP_17_006: [ If creating the hostname fails then IoTHubTransportHttp_Create shall fail and return NULL. ] */
+                destroy_hostName(handleData);
+                result = false;
+            }
+            else
+            {
+                result = true;
+            }
         }
     }
     return result;
@@ -813,15 +842,15 @@ static void IoTHubTransportHttp_Destroy(TRANSPORT_LL_HANDLE handle)
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_013: [ Otherwise, IoTHubTransportHttp_Destroy shall free all the resources currently in use. ]*/
         for (size_t i = 0; i < deviceListSize; i++)
         {
-            listItem = VECTOR_element(handleData->perDeviceList, i);
+            listItem = (IOTHUB_DEVICE_HANDLE *) VECTOR_element(handleData->perDeviceList, i);
             HTTPTRANSPORT_PERDEVICE_DATA* perDeviceItem = (HTTPTRANSPORT_PERDEVICE_DATA*)(*listItem);
             destroy_perDeviceData(perDeviceItem);
             free(perDeviceItem);
         }
 
-        destroy_hostName(handle);
-        destroy_httpApiExHandle(handle);
-        destroy_perDeviceList(handle);
+        destroy_hostName((HTTPTRANSPORT_HANDLE_DATA *) handle);
+        destroy_httpApiExHandle((HTTPTRANSPORT_HANDLE_DATA *) handle);
+        destroy_perDeviceList((HTTPTRANSPORT_HANDLE_DATA *)handle);
         free(handle);
     }
 }
@@ -1508,7 +1537,7 @@ static void DoEvent(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERDEVI
                                         }
                                         else
                                         {
-                                            unsigned int statusCode;
+                                            unsigned int statusCode = 0;
                                             HTTPAPIEX_RESULT r;
                                             if (deviceData->deviceSasToken != NULL)
                                             {
@@ -1676,7 +1705,7 @@ static void abandonOrAcceptMessage(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTR
                     }
                     else
                     {
-                        unsigned int statusCode;
+                        unsigned int statusCode = 0;
                         HTTPAPIEX_RESULT r;
                         if (deviceData->deviceSasToken != NULL)
                         {
@@ -1776,7 +1805,7 @@ static void DoMessages(HTTPTRANSPORT_HANDLE_DATA* handleData, HTTPTRANSPORT_PERD
                 }
                 else
                 {
-                    unsigned int statusCode;
+                    unsigned int statusCode = 0;
                     HTTPAPIEX_RESULT r;
                     if (deviceData->deviceSasToken != NULL)
                     {
@@ -2010,7 +2039,7 @@ static void IoTHubTransportHttp_DoWork(TRANSPORT_LL_HANDLE handle, IOTHUB_CLIENT
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_051: [ IF the list is empty, then IoTHubTransportHttp_DoWork shall do nothing. ]*/
         for (size_t i = 0; i < deviceListSize; i++)
         {
-            listItem = VECTOR_element(handleData->perDeviceList, i);
+            listItem = (IOTHUB_DEVICE_HANDLE *) VECTOR_element(handleData->perDeviceList, i);
             HTTPTRANSPORT_PERDEVICE_DATA* perDeviceItem = *(HTTPTRANSPORT_PERDEVICE_DATA**)(listItem);
             DoEvent(handleData, perDeviceItem, perDeviceItem->iotHubClientHandle);
             DoMessages(handleData, perDeviceItem, perDeviceItem->iotHubClientHandle);
@@ -2087,14 +2116,14 @@ static IOTHUB_CLIENT_RESULT IoTHubTransportHttp_SetOption(TRANSPORT_LL_HANDLE ha
     {
         HTTPTRANSPORT_HANDLE_DATA* handleData = (HTTPTRANSPORT_HANDLE_DATA*)handle;
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_120: ["Batching"] */
-        if (strcmp("Batching", option) == 0)
+        if (strcmp(OPTION_BATCHING, option) == 0)
         {
             /*Codes_SRS_TRANSPORTMULTITHTTP_17_117: [If optionName is an option handled by IoTHubTransportHttp then it shall be set.] */
             handleData->doBatchedTransfers = *(bool*)value;
             result = IOTHUB_CLIENT_OK;
         }
         /*Codes_SRS_TRANSPORTMULTITHTTP_17_121: ["MinimumPollingTime"] */
-        else if (strcmp("MinimumPollingTime", option) == 0)
+        else if (strcmp(OPTION_MIN_POLLING_TIME, option) == 0)
         {
             handleData->getMinimumPollingTime = *(unsigned int*)value;
             result = IOTHUB_CLIENT_OK;

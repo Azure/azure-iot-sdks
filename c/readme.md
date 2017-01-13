@@ -85,7 +85,7 @@ Contains libraries that provide modeling and JSON serialization capabilities on 
    * samples: contains the send event and receive message samples (with ports for the supported platforms).
    * tests: unit tests and end-to-end tests for source code.
 
-### /service
+### /iothub_service_client
 
 Contains libraries that enable interactions with the IoT Hub service to perform operations such as sending messages to devices and managing the device identity registry.
 

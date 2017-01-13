@@ -40,6 +40,8 @@ You should have the following items ready before beginning the process:
 
 -   Make sure desktop is ready as per instructions given on [Prepare your development environment][lnk-python-devbox-setup].
 
+> Note: On Windows, you can install the **iothub-client** module package using Pip as described in [Prepare your development environment][lnk-python-devbox-setup].
+
 <a name="Run"></a>
 # Step 3: Run the sample
 

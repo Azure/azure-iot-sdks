@@ -1,14 +1,14 @@
-﻿using Microsoft.Azure.Devices;
-using Microsoft.Azure.Devices.Common;
-using Microsoft.Azure.Devices.Common.Security;
-using Microsoft.ServiceBus.Messaging;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.Azure.Devices;
+using Microsoft.Azure.Devices.Common;
+using Microsoft.Azure.Devices.Common.Security;
+using Microsoft.ServiceBus.Messaging;
 
 namespace DeviceExplorer
 {
@@ -78,7 +78,6 @@ namespace DeviceExplorer
             updateDeviceButton.Enabled = false;
             deleteDeviceButton.Enabled = false;
             sasTokenButton.Enabled = false;
-
         }
 
         /// <summary>
@@ -121,10 +120,10 @@ namespace DeviceExplorer
                 string iotHubName = builder.HostName.Split('.')[0];
                 iotHubNameTextBox.Text = iotHubName;
                 eventHubNameTextBoxForDataTab.Text = iotHubName;
-                
+
                 activeIoTHubConnectionString = connectionString;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 if (!skipException)
                 {
@@ -136,24 +135,24 @@ namespace DeviceExplorer
         private async Task updateDeviceIdsComboBoxes(bool runIfNullOrEmpty = true)
         {
             if (!String.IsNullOrEmpty(activeIoTHubConnectionString) || runIfNullOrEmpty)
-        {
-            List<string> deviceIdsForEvent = new List<string>();
-            List<string> deviceIdsForC2DMessage = new List<string>();
-            RegistryManager registryManager = RegistryManager.CreateFromConnectionString(activeIoTHubConnectionString);
-
-            var devices = await registryManager.GetDevicesAsync(MAX_COUNT_OF_DEVICES);
-            foreach (var device in devices)
             {
-                deviceIdsForEvent.Add(device.Id);
-                deviceIdsForC2DMessage.Add(device.Id);
-            }
-            await registryManager.CloseAsync();
-            this.deviceIDsComboBoxForEvent.DataSource = deviceIdsForEvent.OrderBy(c => c).ToList();
-            this.deviceIDsComboBoxForCloudToDeviceMessage.DataSource = deviceIdsForC2DMessage.OrderBy(c => c).ToList();
+                List<string> deviceIdsForEvent = new List<string>();
+                List<string> deviceIdsForC2DMessage = new List<string>();
+                RegistryManager registryManager = RegistryManager.CreateFromConnectionString(activeIoTHubConnectionString);
 
-            deviceIDsComboBoxForEvent.SelectedIndex = deviceSelectedIndexForEvent;
-            deviceIDsComboBoxForCloudToDeviceMessage.SelectedIndex = deviceSelectedIndexForC2DMessage;
-        }
+                var devices = await registryManager.GetDevicesAsync(MAX_COUNT_OF_DEVICES);
+                foreach (var device in devices)
+                {
+                    deviceIdsForEvent.Add(device.Id);
+                    deviceIdsForC2DMessage.Add(device.Id);
+                }
+                await registryManager.CloseAsync();
+                this.deviceIDsComboBoxForEvent.DataSource = deviceIdsForEvent.OrderBy(c => c).ToList();
+                this.deviceIDsComboBoxForCloudToDeviceMessage.DataSource = deviceIdsForC2DMessage.OrderBy(c => c).ToList();
+
+                deviceIDsComboBoxForEvent.SelectedIndex = deviceSelectedIndexForEvent;
+                deviceIDsComboBoxForCloudToDeviceMessage.SelectedIndex = deviceSelectedIndexForC2DMessage;
+            }
         }
         private void persistSettingsToAppConfig()
         {
@@ -267,7 +266,7 @@ namespace DeviceExplorer
             var devicesList = await devicesProcessor.GetDevices();
             devicesList.Sort();
             var sortableDevicesBindingList = new SortableBindingList<DeviceEntity>(devicesList);
-            
+
             devicesGridView.DataSource = sortableDevicesBindingList;
             devicesGridView.ReadOnly = true;
             devicesGridView.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
@@ -542,7 +541,7 @@ namespace DeviceExplorer
             {
                 if (checkBox1.Checked)
                 {
-                    if(String.IsNullOrEmpty(textBoxMessage.Text))
+                    if (string.IsNullOrEmpty(textBoxMessage.Text))
                     {
                         cloudToDeviceMessage = DateTime.Now.ToLocalTime().ToString();
                     }
@@ -561,6 +560,23 @@ namespace DeviceExplorer
                 var serviceMessage = new Microsoft.Azure.Devices.Message(Encoding.ASCII.GetBytes(cloudToDeviceMessage));
                 serviceMessage.Ack = DeliveryAcknowledgement.Full;
                 serviceMessage.MessageId = Guid.NewGuid().ToString();
+
+                for (var i = 0; i < messagePropertiesGrid.Rows.Count - 1; i++)
+                {
+                    var row = messagePropertiesGrid.Rows[i];
+                    if (row.Cells[0].Value == null && row.Cells[1].Value == null)
+                    {
+                        continue;
+                    }
+
+                    if (row.Cells[0].Value == null || row.Cells[1].Value == null)
+                    {
+                        throw new InvalidOperationException("Properties have null key or value.");
+                    }
+
+                    serviceMessage.Properties.Add(row.Cells[0].Value?.ToString() ?? string.Empty, row.Cells[1].Value?.ToString() ?? string.Empty);
+                }
+
                 await serviceClient.SendAsync(deviceIDsComboBoxForCloudToDeviceMessage.SelectedItem.ToString(), serviceMessage);
 
                 messagesTextBox.Text += $"Sent to Device ID: [{deviceIDsComboBoxForCloudToDeviceMessage.SelectedItem.ToString()}], Message:\"{cloudToDeviceMessage}\", message Id: {serviceMessage.MessageId}\n";
@@ -599,7 +615,7 @@ namespace DeviceExplorer
             {
                 if (e.TabPage == tabData || e.TabPage == tabMessagesToDevice)
                 {
-                    await updateDeviceIdsComboBoxes(runIfNullOrEmpty:false);
+                    await updateDeviceIdsComboBoxes(runIfNullOrEmpty: false);
                 }
 
                 if (e.TabPage == tabManagement)
@@ -694,7 +710,7 @@ namespace DeviceExplorer
         {
             if (devicesGridView.SelectedRows.Count > 0)
             {
-                Clipboard.SetText(devicesGridView.Rows[devicesGridView.SelectedRows[0].Index].Cells[3].Value.ToString());
+                Clipboard.SetText(devicesGridView.Rows[devicesGridView.SelectedRows[0].Index].Cells[5].Value.ToString());
             }
         }
 

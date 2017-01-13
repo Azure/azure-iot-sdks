@@ -23,7 +23,7 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
-        "filePath": "build/release/release_mbed_project.cmd",
+        "filePath": "build/release/release_mbed.cmd",
         "search": "(hg\\_commit\\_message\\=)(\".*\")",
         "replaceString": function(versions) {
             return '$1' + '"' + versions.c.device + '"';
@@ -39,7 +39,7 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
-        "filePath": "c/iothub_client/tests/version_unittests/version_unittests.cpp",
+        "filePath": "c/iothub_client/tests/version_ut/version_ut.cpp",
         "search": "(\\\".*\\\")([ \t]*\\,[ \t]*IOTHUB\\_SDK\\_VERSION)",
         "replaceString": function(versions) {
             return '"' + versions.c.device + '"$2';
@@ -47,7 +47,7 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
-        "filePath": "c/iothub_client/tests/iothubclient_ll_u2b_unittests/iothub_client_ll_u2b_unittests.c",
+        "filePath": "c/iothub_client/tests/iothubclient_ll_u2b_ut/iothub_client_ll_u2b_ut.c",
         "search": "(TEST\\_IOTHUB\\_SDK\\_VERSION)([ ]+)(\".*\")",
         "replaceString": function(versions) {
             return '$1' + '$2' + '"' + versions.c.device + '"';
@@ -203,6 +203,654 @@ module.exports = [
                     },
                 "search": "//nu:package/nu:metadata/nu:version",
                 "replaceString":"c_nuget.device"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/iothub_client/samples/iothub_client_sample_amqp/windows/packages.config",
+        "search": [
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.C.SharedUtility']/@version",
+                "replaceString": "c_shared_utility_nuget"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.AmqpTransport']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.IoTHubClient']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.uamqp']/@version",
+                "replaceString": "uamqp_c_nuget"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/iothub_client/samples/iothub_client_sample_amqp/windows/iothub_client_sample_amqp.vcxproj",
+        "search": [
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.C.SharedUtility.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_shared_utility_nuget;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.IoTHubClient.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.AmqpTransport.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.uamqp.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.uamqp_c_nuget;
+                }
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/iothub_client/samples/iothub_client_sample_http/windows/packages.config",
+        "search": [
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.C.SharedUtility']/@version",
+                "replaceString": "c_shared_utility_nuget"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.HttpTransport']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.IoTHubClient']/@version",
+                "replaceString": "c_nuget.device"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/iothub_client/samples/iothub_client_sample_http/windows/iothub_client_sample_http.vcxproj",
+        "search": [
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.C.SharedUtility.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_shared_utility_nuget;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.IoTHubClient.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.HttpTransport.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/iothub_client/samples/iothub_client_sample_http_shared/windows/packages.config",
+        "search": [
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.C.SharedUtility']/@version",
+                "replaceString": "c_shared_utility_nuget"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.HttpTransport']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.IoTHubClient']/@version",
+                "replaceString": "c_nuget.device"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/iothub_client/samples/iothub_client_sample_http_shared/windows/iothub_client_sample_http.vcxproj",
+        "search": [
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.C.SharedUtility.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_shared_utility_nuget;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.IoTHubClient.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.HttpTransport.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/iothub_client/samples/iothub_client_sample_mqtt/windows/packages.config",
+        "search": [
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.C.SharedUtility']/@version",
+                "replaceString": "c_shared_utility_nuget"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.MqttTransport']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.IoTHubClient']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.umqtt']/@version",
+                "replaceString": "umqtt_c_nuget"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/iothub_client/samples/iothub_client_sample_mqtt/windows/iothub_client_sample_mqtt.vcxproj",
+        "search": [
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.C.SharedUtility.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_shared_utility_nuget;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.IoTHubClient.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.MqttTransport.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.umqtt.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.umqtt_c_nuget;
+                }
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/iothub_client/samples/iothub_client_sample_upload_to_blob/windows/packages.config",
+        "search": [
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.C.SharedUtility']/@version",
+                "replaceString": "c_shared_utility_nuget"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.HttpTransport']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.IoTHubClient']/@version",
+                "replaceString": "c_nuget.device"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/iothub_client/samples/iothub_client_sample_upload_to_blob/windows/iothub_client_sample_http.vcxproj",
+        "search": [
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.C.SharedUtility.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_shared_utility_nuget;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.IoTHubClient.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.HttpTransport.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/iothub_client/samples/iothub_client_sample_x509/windows/packages.config",
+        "search": [
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.C.SharedUtility']/@version",
+                "replaceString": "c_shared_utility_nuget"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.HttpTransport']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.IoTHubClient']/@version",
+                "replaceString": "c_nuget.device"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/iothub_client/samples/iothub_client_sample_x509/windows/iothub_client_sample_x509.vcxproj",
+        "search": [
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.C.SharedUtility.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_shared_utility_nuget;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.IoTHubClient.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.HttpTransport.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/serializer/samples/remote_monitoring/windows/packages.config",
+        "search": [
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.C.SharedUtility']/@version",
+                "replaceString": "c_shared_utility_nuget"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.AmqpTransport']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.IoTHubClient']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.Serializer']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.uamqp']/@version",
+                "replaceString": "uamqp_c_nuget"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/serializer/samples/remote_monitoring/windows/remote_monitoring.vcxproj",
+        "search": [
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.C.SharedUtility.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_shared_utility_nuget;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.IoTHubClient.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.Serializer.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.AmqpTransport.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.uamqp.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.uamqp_c_nuget;
+                }
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/serializer/samples/simplesample_amqp/windows/packages.config",
+        "search": [
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.C.SharedUtility']/@version",
+                "replaceString": "c_shared_utility_nuget"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.AmqpTransport']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.IoTHubClient']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.Serializer']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.uamqp']/@version",
+                "replaceString": "uamqp_c_nuget"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/serializer/samples/simplesample_amqp/windows/simplesample_amqp.vcxproj",
+        "search": [
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.C.SharedUtility.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_shared_utility_nuget;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.IoTHubClient.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.Serializer.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.AmqpTransport.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.uamqp.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.uamqp_c_nuget;
+                }
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/serializer/samples/simplesample_http/windows/packages.config",
+        "search": [
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.C.SharedUtility']/@version",
+                "replaceString": "c_shared_utility_nuget"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.HttpTransport']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.IoTHubClient']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.Serializer']/@version",
+                "replaceString": "c_nuget.device"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/serializer/samples/simplesample_http/windows/simplesample_http.vcxproj",
+        "search": [
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.C.SharedUtility.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_shared_utility_nuget;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.IoTHubClient.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.Serializer.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.HttpTransport.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/serializer/samples/simplesample_mqtt/windows/packages.config",
+        "search": [
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.C.SharedUtility']/@version",
+                "replaceString": "c_shared_utility_nuget"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.MqttTransport']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.IoTHubClient']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.Serializer']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.umqtt']/@version",
+                "replaceString": "umqtt_c_nuget"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/serializer/samples/simplesample_mqtt/windows/simplesample_mqtt.vcxproj",
+        "search": [
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.C.SharedUtility.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_shared_utility_nuget;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.IoTHubClient.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.Serializer.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.MqttTransport.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.umqtt.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.umqtt_c_nuget;
+                }
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/serializer/samples/temp_sensor_anomaly/windows/packages.config",
+        "search": [
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.C.SharedUtility']/@version",
+                "replaceString": "c_shared_utility_nuget"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.HttpTransport']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.IoTHubClient']/@version",
+                "replaceString": "c_nuget.device"
+            },
+            {
+                "taskType": "xmlAttributeReplaceTask",
+                "search": "//packages/package[@id = 'Microsoft.Azure.IoTHub.Serializer']/@version",
+                "replaceString": "c_nuget.device"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "c/serializer/samples/temp_sensor_anomaly/windows/temp_sensor_anomaly.vcxproj",
+        "search": [
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.C.SharedUtility.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_shared_utility_nuget;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.IoTHubClient.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.Serializer.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
+            },
+            {
+                "taskType": "regexReplaceTask",
+                "search": "(Microsoft.Azure.IoTHub.HttpTransport.)\\d+.\\d+.\\d+",
+                "replaceString": function(versions) {
+                    return '$1' + versions.c_nuget.device;
+                }
             }
         ]
     },
@@ -427,9 +1075,14 @@ module.exports = [
             },
             {
                 "taskType": "xmlReplaceTask",
-                "search": "//project/dependencies/dependency[groupId = 'com.microsoft.azure.iothub.service.sdk']/version",
+                "search": "//project/dependencies/dependency[groupId = 'com.microsoft.azure.iot.service.sdk']/version",
                 "replaceString": "java.service"
-            }
+            },
+	    {
+		"taskType": "xmlReplaceTask",
+		"search": "//project/parent[groupId = 'com.microsoft.azure.iot.service.sdk']/version",
+		"replaceString": "java.service"
+	    }
         ]
     },
     {
@@ -443,9 +1096,14 @@ module.exports = [
             },
             {
                 "taskType": "xmlReplaceTask",
-                "search": "//project/dependencies/dependency[groupId = 'com.microsoft.azure.iothub.service.sdk']/version",
+                "search": "//project/dependencies/dependency[groupId = 'com.microsoft.azure.iot.service.sdk']/version",
                 "replaceString": "java.service"
-            }
+            },
+	    {
+		"taskType": "xmlReplaceTask",
+		"search": "//project/parent[groupId = 'com.microsoft.azure.iot.service.sdk']/version",
+		"replaceString": "java.service"
+	    }
         ]
     },
     {
@@ -459,9 +1117,14 @@ module.exports = [
             },
             {
                 "taskType": "xmlReplaceTask",
-                "search": "//project/dependencies/dependency[groupId = 'com.microsoft.azure.iothub.service.sdk']/version",
+                "search": "//project/dependencies/dependency[groupId = 'com.microsoft.azure.iot.service.sdk']/version",
                 "replaceString": "java.service"
-            }
+            },
+	    {
+		"taskType": "xmlReplaceTask",
+		"search": "//project/parent[groupId = 'com.microsoft.azure.iot.service.sdk']/version",
+		"replaceString": "java.service"
+	    }
         ]
     },
         {
@@ -531,7 +1194,7 @@ module.exports = [
     },
     {
         "taskType": "regexReplaceTask",
-        "filePath": "node/device/core/readme.md",
+        "filePath": "node/device/readme.md",
         "search": "(http\\:\\/\\/azure.github.io\\/azure-iot-sdks\\/node\\/api_reference\\/azure-iot-device\\/).*(\\/index.html)",
         "replaceString": function(versions) {
             return '$1' + versions.node.device + '$2';
@@ -550,6 +1213,11 @@ module.exports = [
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-common",
                 "replaceString": "node.common"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-http-base",
+                "replaceString": "node.http-base"
             }
         ]
     },
@@ -673,6 +1341,11 @@ module.exports = [
             },
             {
                 "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-common",
+                "replaceString": "node.common"
+            },
+            {
+                "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-mqtt-base",
                 "replaceString": "node.mqtt-base"
             },
@@ -680,6 +1353,42 @@ module.exports = [
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-device",
                 "replaceString": "node.device"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "node/device/node-red/package.json",
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "version",
+                "replaceString": "node.node-red-contrib-azureiothubnode"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device",
+                "replaceString": "node.device"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-amqp",
+                "replaceString": "node.device-amqp"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-amqp-ws",
+                "replaceString": "node.device-amqp-ws"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-http",
+                "replaceString": "node.device-http"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-mqtt",
+                "replaceString": "node.device-mqtt"
             }
         ]
     },
@@ -709,8 +1418,18 @@ module.exports = [
             },
             {
                 "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-amqp-ws",
+                "replaceString": "node.device-amqp-ws"
+            },
+            {
+                "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-device-http",
                 "replaceString": "node.device-http"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-mqtt",
+                "replaceString": "node.device-mqtt"
             },
             {
                 "taskType": "jsonReplaceTask",
@@ -769,6 +1488,52 @@ module.exports = [
                 "taskType": "jsonReplaceTask",
                 "search": "dependencies.azure-iot-device",
                 "replaceString": "node.device"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iothub",
+                "replaceString": "node.service"
+            }
+        ]
+    },
+    {
+        "taskType": "multiTask",
+        "filePath": "tools/iothub-diagnostics/package.json",
+        "search": [
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "version",
+                "replaceString": "iothub-diagnostics"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-common",
+                "replaceString": "node.common"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device",
+                "replaceString": "node.device"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-amqp",
+                "replaceString": "node.device-amqp"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-amqp-ws",
+                "replaceString": "node.device-amqp-ws"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-http",
+                "replaceString": "node.device-http"
+            },
+            {
+                "taskType": "jsonReplaceTask",
+                "search": "dependencies.azure-iot-device-mqtt",
+                "replaceString": "node.device-mqtt"
             },
             {
                 "taskType": "jsonReplaceTask",

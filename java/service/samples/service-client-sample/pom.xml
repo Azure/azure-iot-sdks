@@ -1,8 +1,8 @@
 <!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. --><project>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.microsoft.azure.iothub.service.sdk</groupId>
+    <groupId>com.microsoft.azure.iot.service.sdk</groupId>
     <artifactId>ServiceClientSample</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.9</version>
     <name>Service Client Sample</name>
     <developers>
         <developer>
@@ -10,6 +10,11 @@
             <name>Microsoft</name>
         </developer>
     </developers>
+    <parent>
+        <groupId>com.microsoft.azure.iot.service.sdk</groupId>
+        <artifactId>samples</artifactId>
+        <version>1.0.9</version>
+    </parent>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -23,18 +28,27 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>samples.com.microsoft.azure.iot.service.sdk.DeviceManagerSample</mainClass>
+                            <mainClass>samples.com.microsoft.azure.iot.service.sdk.ServiceClientSample</mainClass>
                         </manifest>
                     </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.3</version>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
                 </configuration>
             </plugin>
         </plugins>
     </build>
     <dependencies>
         <dependency>
-            <groupId>com.microsoft.azure.iothub.service.sdk</groupId>
+            <groupId>com.microsoft.azure.iot.service.sdk</groupId>
             <artifactId>iothub-service-sdk</artifactId>
-            <version>1.0.7</version>
+            <version>1.0.9</version>
             <type>jar</type>
         </dependency>
     </dependencies>

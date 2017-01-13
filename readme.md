@@ -124,3 +124,4 @@ This folder contains the following documents that are relevant to all the langua
 This folder contains tools you will find useful when you are working with IoT Hub and the device SDKs.
 - [iothub-explorer](tools/iothub-explorer/readme.md): describes how to use the iothub-explorer node.js tool to provision a device for use in IoT Hub, monitor the messages from the device, and send commands to the device.
 - [Device Explorer](tools/DeviceExplorer/readme.md): this tool enables you to perform operations such as manage the devices registered to an IoT hub, view device-to-cloud messages sent to an IoT hub, and send cloud-to-device messages from an IoT hub. Note this tool only runs on Windows.
+- [iothub-diagnostics](tools/iothub-diagnostics/readme.md): this tool is provided to help diagnose issues with a device connecting to Azure IoT Hubs.

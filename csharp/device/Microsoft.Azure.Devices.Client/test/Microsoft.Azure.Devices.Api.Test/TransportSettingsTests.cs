@@ -6,6 +6,7 @@ namespace Microsoft.Azure.Devices.Client.Test
     using System;
     using Microsoft.Azure.Devices.Client;
     using Microsoft.Azure.Devices.Client.ApiTest;
+    using Microsoft.Azure.Devices.Client.Transport.Mqtt;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
@@ -178,6 +179,25 @@ namespace Microsoft.Azure.Devices.Client.Test
         [TestMethod]
         [TestCategory("CIT")]
         [TestCategory("TransportSettings")]
+        public void X509Certificate_MqttTransportSettingsTest()
+        {
+            string hostName = "acme.azure-devices.net";
+            var cert = CertificateHelper.InstallCertificateFromFile(LocalCertFilename, LocalCertPasswordFile);
+            var authMethod = new DeviceAuthenticationWithX509Certificate("device1", cert);
+
+            var deviceClient = DeviceClient.Create(hostName, authMethod, new ITransportSettings[]
+            {
+                new MqttTransportSettings(TransportType.Mqtt)
+                {
+                    ClientCertificate = cert,
+                    RemoteCertificateValidationCallback = (a, b, c, d) => true
+                }
+            });
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("TransportSettings")]
         [ExpectedException(typeof(ArgumentException))]
         public void NullX509Certificate_AmqpTransportSettingsTest()
         {
@@ -185,6 +205,22 @@ namespace Microsoft.Azure.Devices.Client.Test
             var authMethod = new DeviceAuthenticationWithX509Certificate("device1", null);
 
             var deviceClient = DeviceClient.Create(hostName, authMethod, new ITransportSettings[] { new AmqpTransportSettings(TransportType.Amqp_Tcp_Only, 100) });
+        }
+
+        [TestMethod]
+        [TestCategory("CIT")]
+        [TestCategory("TransportSettings")]
+        public void X509Certificate_MutipleClientAuthMechanism()
+        {
+            string hostName = "acme.azure-devices.net";
+            var amqpConnectionPoolSettings = new AmqpConnectionPoolSettings();
+            var transportSetting = new AmqpTransportSettings(TransportType.Amqp_Tcp_Only, 200, amqpConnectionPoolSettings);
+            var authMethod1 = new DeviceAuthenticationWithRegistrySymmetricKey("device1", "CQN2K33r45/0WeIjpqmErV5EIvX8JZrozt3NEHCEkG8=");
+            var deviceClient = DeviceClient.Create(hostName, authMethod1, new ITransportSettings[] { transportSetting });
+
+            var cert = CertificateHelper.InstallCertificateFromFile(LocalCertFilename, LocalCertPasswordFile);
+            var authMethod2 = new DeviceAuthenticationWithX509Certificate("device2", cert);
+            var device2Client = DeviceClient.Create(hostName, authMethod2, new ITransportSettings[] { new AmqpTransportSettings(TransportType.Amqp_Tcp_Only, 100) });
         }
     }
 }

@@ -93,7 +93,7 @@ static HTTP_HEADERS_HANDLE getContentHeaders(bool appendIfMatch)
     return httpHeader;
 }
 
-static int generateDeviceName(IOTHUB_ACCOUNT_INFO* accountInfo, const char* callerName)
+static int generateDeviceName(IOTHUB_ACCOUNT_INFO* accountInfo)
 {
     int result;
     char deviceGuid[DEVICE_GUID_SIZE];
@@ -133,7 +133,7 @@ static int retrieveConnStringInfo(IOTHUB_ACCOUNT_INFO* accountInfo)
 {
     int result;
     int beginName, endName, beginIothub, endIothub, beginHost, endHost, beginKey;
-    int totalLen = strlen(accountInfo->connString);
+    size_t totalLen = strlen(accountInfo->connString);
 
     if (sscanf(accountInfo->connString, "HostName=%n%*[^.]%n.%n%*[^;];%nSharedAccessKeyName=%n%*[^;];%nSharedAccessKey=%n", &beginHost, &endHost, &beginIothub, &endIothub, &beginName, &endName, &beginKey) != 0)
     {
@@ -214,7 +214,7 @@ static const char* getMbedParameter(const char* name)
 }
 #endif
 
-IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice, const char* callerName)
+IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice)
 {
     IOTHUB_ACCOUNT_INFO* iothub_account_info = malloc(sizeof(IOTHUB_ACCOUNT_INFO));
 	if (iothub_account_info == NULL)
@@ -279,7 +279,7 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice, const char* cal
                         }
                         else
                         {
-                            if (generateDeviceName(iothub_account_info, "") != 0)
+                            if (generateDeviceName(iothub_account_info) != 0)
                             {
                                 LogError("generateDeviceName failed\r\n");
                                 IoTHubMessaging_LL_Destroy(iothub_account_info->iothub_messaging_handle);
@@ -292,6 +292,18 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice, const char* cal
                             IOTHUB_REGISTRYMANAGER_RESULT iothub_registrymanager_result;
                             IOTHUB_REGISTRY_DEVICE_CREATE deviceCreateInfo;
                             IOTHUB_DEVICE deviceInfo;
+							deviceInfo.deviceId = NULL;
+							deviceInfo.primaryKey = NULL;
+							deviceInfo.secondaryKey = NULL;
+							deviceInfo.generationId = NULL;
+							deviceInfo.eTag = NULL;
+							deviceInfo.connectionStateUpdatedTime = NULL;
+							deviceInfo.statusReason = NULL;
+							deviceInfo.statusUpdatedTime = NULL;
+							deviceInfo.lastActivityTime = NULL;
+							deviceInfo.configuration = NULL;
+							deviceInfo.deviceProperties = NULL;
+							deviceInfo.serviceProperties = NULL;
 
                             deviceCreateInfo.deviceId = iothub_account_info->deviceId;
                             deviceCreateInfo.primaryKey = "";
@@ -314,18 +326,31 @@ IOTHUB_ACCOUNT_INFO_HANDLE IoTHubAccount_Init(bool createDevice, const char* cal
                                     LogError("mallocAndStrcpy_s failed for primaryKey\r\n");
                                 }
                             }
-                            free((char*)deviceInfo.deviceId);
-                            free((char*)deviceInfo.primaryKey);
-                            free((char*)deviceInfo.secondaryKey);
-                            free((char*)deviceInfo.generationId);
-                            free((char*)deviceInfo.eTag);
-                            free((char*)deviceInfo.connectionStateUpdatedTime);
-                            free((char*)deviceInfo.statusReason);
-                            free((char*)deviceInfo.statusUpdatedTime);
-                            free((char*)deviceInfo.lastActivityTime);
-                            free((char*)deviceInfo.configuration);
-                            free((char*)deviceInfo.deviceProperties);
-                            free((char*)deviceInfo.serviceProperties);
+
+                            if (deviceInfo.deviceId != NULL)
+                                free((char*)deviceInfo.deviceId);
+                            if (deviceInfo.primaryKey != NULL)
+                                free((char*)deviceInfo.primaryKey);
+                            if(deviceInfo.secondaryKey != NULL)
+                                free((char*)deviceInfo.secondaryKey);
+                            if(deviceInfo.generationId != NULL)
+                                free((char*)deviceInfo.generationId);
+                            if(deviceInfo.eTag != NULL)
+                                free((char*)deviceInfo.eTag);
+                            if(deviceInfo.connectionStateUpdatedTime != NULL)
+                                free((char*)deviceInfo.connectionStateUpdatedTime);
+                            if(deviceInfo.statusReason != NULL)
+                                free((char*)deviceInfo.statusReason);
+                            if(deviceInfo.statusUpdatedTime != NULL)
+                                free((char*)deviceInfo.statusUpdatedTime);
+                            if(deviceInfo.lastActivityTime != NULL)
+                                free((char*)deviceInfo.lastActivityTime);
+                            if(deviceInfo.configuration != NULL)
+                                free((char*)deviceInfo.configuration);
+                            if(deviceInfo.deviceProperties != NULL)
+                                free((char*)deviceInfo.deviceProperties);
+                            if(deviceInfo.serviceProperties != NULL)
+                                free((char*)deviceInfo.serviceProperties);
                         }
                     }
                 }

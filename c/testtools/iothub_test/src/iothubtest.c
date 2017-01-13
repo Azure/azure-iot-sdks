@@ -246,8 +246,8 @@ static size_t ResolvePartitionIndex(const char* partitionKey, size_t maxPartitio
         short sTruncateVal = (short)hashedValue;
         short logicalPartition = (short)abs(sTruncateVal % defaultLogicalPartitionCount);
 
-        double shortRangeWidth = floor(defaultLogicalPartitionCount/maxPartition);
-        int remainingLogicalPartitions = defaultLogicalPartitionCount - (maxPartition * (int)shortRangeWidth);
+        double shortRangeWidth = floor((double)defaultLogicalPartitionCount/ (double)maxPartition);
+        int remainingLogicalPartitions = defaultLogicalPartitionCount - ((int)maxPartition * (int)shortRangeWidth);
         int largeRangeWidth = ( (int)shortRangeWidth) + 1;
         int largeRangesLogicalPartitions = largeRangeWidth * remainingLogicalPartitions;
         result = logicalPartition < largeRangesLogicalPartitions ? logicalPartition / largeRangeWidth : remainingLogicalPartitions + ((logicalPartition - largeRangesLogicalPartitions) / (int)shortRangeWidth);
@@ -532,7 +532,7 @@ static AMQP_VALUE on_message_received(const void* context, MESSAGE_HANDLE messag
     {
         if (msg_received_context->msgCallback != NULL)
         {
-            if (msg_received_context->msgCallback(msg_received_context->context, binary_data.bytes, binary_data.length) != 0)
+            if (msg_received_context->msgCallback(msg_received_context->context, (const char*)binary_data.bytes, binary_data.length) != 0)
             {
                 msg_received_context->message_received = true;
             }
@@ -573,11 +573,16 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
             else
             {
                 /* create SASL plain handler */
-                SASL_PLAIN_CONFIG sasl_plain_config = { "iothubowner", STRING_c_str(devhubValInfo->eventhubAccessKey), NULL };
+                SASL_PLAIN_CONFIG sasl_plain_config;
+                sasl_plain_config.authcid = "iothubowner";
+                sasl_plain_config.passwd = STRING_c_str(devhubValInfo->eventhubAccessKey);
+                sasl_plain_config.authzid = NULL;
                 const SASL_MECHANISM_INTERFACE_DESCRIPTION* sasl_plain_interface_description;
                 SASL_MECHANISM_HANDLE sasl_mechanism_handle = NULL;
                 XIO_HANDLE tls_io = NULL;
-                TLSIO_CONFIG tls_io_config = { eh_hostname, 5671 };
+                TLSIO_CONFIG tls_io_config;
+                tls_io_config.hostname = eh_hostname;
+                tls_io_config.port = 5671;
                 const IO_INTERFACE_DESCRIPTION* tlsio_interface = NULL;
 
                 if ((sasl_plain_interface_description = saslplain_get_interface()) == NULL)
@@ -603,7 +608,9 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                 else
                 {
                     /* create the SASL client IO using the TLS IO */
-                    SASLCLIENTIO_CONFIG sasl_io_config = { tls_io, sasl_mechanism_handle };
+                    SASLCLIENTIO_CONFIG sasl_io_config;
+                    sasl_io_config.underlying_io = tls_io;
+                    sasl_io_config.sasl_mechanism = sasl_mechanism_handle;
                     if ((sasl_io = xio_create(saslclientio_get_interface_description(), &sasl_io_config)) == NULL)
                     {
                         LogError("Failed creating the SASL IO.");
@@ -631,111 +638,121 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_ListenForEvent(IOTHUB_TEST_HANDLE devhubHan
                         char tempBuffer[256];
                         const char filter_name[] = "apache.org:selector-filter:string";
                         int filter_string_length = sprintf(tempBuffer, "amqp.annotation.x-opt-enqueuedtimeutc > %llu", ((unsigned long long)receiveTimeRangeStart - 330) * 1000);
-
-                        /* create the filter set to be used for the source of the link */
-                        filter_set filter_set = amqpvalue_create_map();
-                        AMQP_VALUE filter_key = amqpvalue_create_symbol(filter_name);
-                        AMQP_VALUE descriptor = amqpvalue_create_symbol(filter_name);
-                        AMQP_VALUE filter_value = amqpvalue_create_string(tempBuffer);
-                        AMQP_VALUE described_filter_value = amqpvalue_create_described(descriptor, filter_value);
-                        amqpvalue_set_map_value(filter_set, filter_key, described_filter_value);
-                        amqpvalue_destroy(filter_key);
-
-                        if (filter_set == NULL)
+                        if (filter_string_length < 0)
                         {
                             LogError("Failed creating filter set with enqueuedtimeutc filter.");
                             result = IOTHUB_TEST_CLIENT_ERROR;
                         }
                         else
                         {
-                            AMQP_VALUE target = NULL;
-                            AMQP_VALUE source = NULL;
+                            /* create the filter set to be used for the source of the link */
+                            filter_set filter_set = amqpvalue_create_map();
+                            AMQP_VALUE filter_key = amqpvalue_create_symbol(filter_name);
+                            AMQP_VALUE descriptor = amqpvalue_create_symbol(filter_name);
+                            AMQP_VALUE filter_value = amqpvalue_create_string(tempBuffer);
+                            AMQP_VALUE described_filter_value = amqpvalue_create_described(descriptor, filter_value);
+                            amqpvalue_set_map_value(filter_set, filter_key, described_filter_value);
+                            amqpvalue_destroy(filter_key);
 
-                            /* create the source of the link */
-                            SOURCE_HANDLE source_handle = source_create();
-                            AMQP_VALUE address_value = amqpvalue_create_string(receive_address);
-                            source_set_address(source_handle, address_value);
-                            source_set_filter(source_handle, filter_set);
-                            amqpvalue_destroy(address_value);
-                            source = amqpvalue_create_source(source_handle);
-                            source_destroy(source_handle);
-
-                            if (source == NULL)
+                            if (filter_set == NULL)
                             {
-                                LogError("Failed creating source for link.");
+                                LogError("Failed creating filter set with enqueuedtimeutc filter.");
                                 result = IOTHUB_TEST_CLIENT_ERROR;
                             }
                             else
                             {
-                                target = messaging_create_target(receive_address);
-                                if (target == NULL)
+                                AMQP_VALUE target = NULL;
+                                AMQP_VALUE source = NULL;
+
+                                /* create the source of the link */
+                                SOURCE_HANDLE source_handle = source_create();
+                                AMQP_VALUE address_value = amqpvalue_create_string(receive_address);
+                                source_set_address(source_handle, address_value);
+                                source_set_filter(source_handle, filter_set);
+                                amqpvalue_destroy(address_value);
+                                source = amqpvalue_create_source(source_handle);
+                                source_destroy(source_handle);
+
+                                if (source == NULL)
                                 {
-                                    LogError("Failed creating target for link.");
-                                    result = IOTHUB_TEST_CLIENT_ERROR;
-                                }
-                                else if ((link = link_create(session, "receiver-link", role_receiver, source, target)) == NULL)
-                                {
-                                    LogError("Failed creating link.");
-                                    result = IOTHUB_TEST_CLIENT_ERROR;
-                                }
-                                else if (link_set_rcv_settle_mode(link, receiver_settle_mode_first) != 0)
-                                {
-                                    LogError("Failed setting link receive settle mode.");
+                                    LogError("Failed creating source for link.");
                                     result = IOTHUB_TEST_CLIENT_ERROR;
                                 }
                                 else
                                 {
-                                    MESSAGE_RECEIVER_CONTEXT message_receiver_context = { msgCallback , context, false };
-                                    MESSAGE_RECEIVER_HANDLE message_receiver = NULL;
-
-                                    /* create a message receiver */
-                                    message_receiver = messagereceiver_create(link, NULL, NULL);
-                                    if (message_receiver == NULL)
+                                    target = messaging_create_target(receive_address);
+                                    if (target == NULL)
                                     {
-                                        LogError("Failed creating message receiver.");
+                                        LogError("Failed creating target for link.");
                                         result = IOTHUB_TEST_CLIENT_ERROR;
                                     }
-                                    else if (messagereceiver_open(message_receiver, on_message_received, &message_receiver_context) != 0)
+                                    else if ((link = link_create(session, "receiver-link", role_receiver, source, target)) == NULL)
                                     {
-                                        LogError("Failed opening message receiver.");
+                                        LogError("Failed creating link.");
                                         result = IOTHUB_TEST_CLIENT_ERROR;
-                                        messagereceiver_destroy(message_receiver);
+                                    }
+                                    else if (link_set_rcv_settle_mode(link, receiver_settle_mode_first) != 0)
+                                    {
+                                        LogError("Failed setting link receive settle mode.");
+                                        result = IOTHUB_TEST_CLIENT_ERROR;
                                     }
                                     else
                                     {
-                                        time_t nowExecutionTime;
-                                        time_t beginExecutionTime = time(NULL);
-                                        double timespan;
+                                        MESSAGE_RECEIVER_CONTEXT message_receiver_context;
+                                        message_receiver_context.msgCallback = msgCallback;
+                                        message_receiver_context.context = context;
+                                        message_receiver_context.message_received = false;
+                                        MESSAGE_RECEIVER_HANDLE message_receiver = NULL;
 
-                                        while ((nowExecutionTime = time(NULL)), timespan = difftime(nowExecutionTime, beginExecutionTime), timespan < maxDrainTimeInSeconds)
+                                        /* create a message receiver */
+                                        message_receiver = messagereceiver_create(link, NULL, NULL);
+                                        if (message_receiver == NULL)
                                         {
-                                            connection_dowork(connection);
-                                            ThreadAPI_Sleep(10);
-
-                                            if (message_receiver_context.message_received)
-                                            {
-                                                break;
-                                            }
-                                        }
-
-                                        if (!message_receiver_context.message_received)
-                                        {
-                                            LogError("No message was received, timed out.");
+                                            LogError("Failed creating message receiver.");
                                             result = IOTHUB_TEST_CLIENT_ERROR;
+                                        }
+                                        else if (messagereceiver_open(message_receiver, on_message_received, &message_receiver_context) != 0)
+                                        {
+                                            LogError("Failed opening message receiver.");
+                                            result = IOTHUB_TEST_CLIENT_ERROR;
+                                            messagereceiver_destroy(message_receiver);
                                         }
                                         else
                                         {
-                                            result = IOTHUB_TEST_CLIENT_OK;
-                                        }
-                                        messagereceiver_destroy(message_receiver);
-                                    }
+                                            time_t nowExecutionTime;
+                                            time_t beginExecutionTime = time(NULL);
+                                            double timespan;
 
-                                    amqpvalue_destroy(target);
+                                            while ((nowExecutionTime = time(NULL)), timespan = difftime(nowExecutionTime, beginExecutionTime), timespan < maxDrainTimeInSeconds)
+                                            {
+                                                connection_dowork(connection);
+                                                ThreadAPI_Sleep(10);
+
+                                                if (message_receiver_context.message_received)
+                                                {
+                                                    break;
+                                                }
+                                            }
+
+                                            if (!message_receiver_context.message_received)
+                                            {
+                                                LogError("No message was received, timed out.");
+                                                result = IOTHUB_TEST_CLIENT_ERROR;
+                                            }
+                                            else
+                                            {
+                                                result = IOTHUB_TEST_CLIENT_OK;
+                                            }
+                                            messagereceiver_destroy(message_receiver);
+                                        }
+
+                                        amqpvalue_destroy(target);
+                                    }
+                                    amqpvalue_destroy(source);
                                 }
-                                amqpvalue_destroy(source);
+                                amqpvalue_destroy(described_filter_value);
+                                amqpvalue_destroy(filter_set);
                             }
-                            amqpvalue_destroy(described_filter_value);
-                            amqpvalue_destroy(filter_set);
                         }
                     }
                     link_destroy(link);
@@ -826,7 +843,10 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
                 }
                 else
                 {
-                    SASL_PLAIN_CONFIG sasl_plain_config = { authcid, STRING_c_str(devhubValInfo->iotSharedSig), NULL };
+                    SASL_PLAIN_CONFIG sasl_plain_config;
+                    sasl_plain_config.authcid = authcid;
+                    sasl_plain_config.passwd = STRING_c_str(devhubValInfo->iotSharedSig);
+                    sasl_plain_config.authzid = NULL;
                     const SASL_MECHANISM_INTERFACE_DESCRIPTION* sasl_mechanism_interface_description;
 
                     (void)sprintf_s(deviceDest, deviceDestLen + 1, AMQP_ADDRESS_PATH_FMT, STRING_c_str(devhubValInfo->deviceId));
@@ -844,7 +864,9 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
                     else
                     {
                         /* create the TLS IO */
-                        TLSIO_CONFIG tls_io_config = { devhubValInfo->hostName, 5671 };
+                        TLSIO_CONFIG tls_io_config;
+                        tls_io_config.hostname = devhubValInfo->hostName;
+                        tls_io_config.port = 5671;
                         const IO_INTERFACE_DESCRIPTION* tlsio_interface;
 
                         if ((tlsio_interface = platform_get_default_tlsio()) == NULL)
@@ -860,7 +882,9 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
                         else
                         {
                             /* create the SASL client IO using the TLS IO */
-                            SASLCLIENTIO_CONFIG sasl_io_config = { tls_io, sasl_mechanism_handle };
+                            SASLCLIENTIO_CONFIG sasl_io_config;
+                            sasl_io_config.underlying_io = tls_io;
+                            sasl_io_config.sasl_mechanism = sasl_mechanism_handle;
                             const IO_INTERFACE_DESCRIPTION* saslclientio_interface;
                             
                             if ((saslclientio_interface = saslclientio_get_interface_description()) == NULL)
@@ -932,7 +956,9 @@ IOTHUB_TEST_CLIENT_RESULT IoTHubTest_SendMessage(IOTHUB_TEST_HANDLE devhubHandle
                                 }
                                 else
                                 {
-                                    BINARY_DATA binary_data = { data, len };
+                                    BINARY_DATA binary_data;
+                                    binary_data.bytes = data;
+                                    binary_data.length = len;
                                     if (message_add_body_amqp_data(message, binary_data) != 0)
                                     {
                                         LogError("Could not add the binary data to the message.");

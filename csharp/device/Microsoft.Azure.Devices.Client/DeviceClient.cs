@@ -4,6 +4,7 @@
 namespace Microsoft.Azure.Devices.Client
 {
     using System;
+    using System.Linq;
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using Microsoft.Azure.Devices.Client.Extensions;
@@ -54,6 +55,65 @@ namespace Microsoft.Azure.Devices.Client
         Mqtt = 4
     }
 
+
+    /*
+     * Class Diagramm and Chain of Responsibility in Device Client 
+                             +--------------------+
+                             | <<interface>>      |
+                             | IDelegatingHandler |
+                             |  * Open            |
+                             |  * Close           |
+                             |  * SendEvent       |
+                             |  * SendEvents      |
+                             |  * Receive         |
+                             |  * Complete        |
+                             |  * Abandon         |
+                             |  * Reject          |
+                             +-------+------------+
+                                     |
+                                     |implements
+                                     |
+                                     |
+                             +-------+-------+
+                             |  <<abstract>> |     
+                             |  Default      |
+     +---+inherits----------->  Delegating   <------inherits-----------------+
+     |                       |  Handler      |                               |
+     |           +--inherits->               <--inherits----+                |
+     |           |           +-------^-------+              |                |
+     |           |                   |inherits              |                |
+     |           |                   |                      |                |
++------------+       +---+---------+      +--+----------+       +---+--------+       +--------------+
+|            |       |             |      |             |       |            |       | <<abstract>> |
+| GateKeeper |  use  | Retry       | use  |  Error      |  use  | Routing    |  use  | Transport    |
+| Delegating +-------> Delegating  +------>  Delegating +-------> Delegating +-------> Delegating   |
+| Handler    |       | Handler     |      |  Handler    |       | Handler    |       | Handler      |
+|            |       |             |      |             |       |            |       |              |
+| overrides: |       | overrides:  |      |  overrides  |       | overrides: |       | overrides:   |
+|  Open      |       |  Open       |      |   Open      |       |  Open      |       |  Receive     |
+|  Close     |       |  SendEvent  |      |   SendEvent |       |            |       |              |
+|            |       |  SendEvents |      |   SendEvents|       +------------+       +--^--^---^----+
++------------+       |  Receive    |      |   Receive   |                               |  |   |
+             |  Reject     |      |   Reject    |                               |  |   |
+             |  Abandon    |      |   Abandon   |                               |  |   |
+             |  Complete   |      |   Complete  |                               |  |   |
+             |             |      |             |                               |  |   |
+             +-------------+      +-------------+     +-------------+-+inherits-+  |   +---inherits-+-------------+
+                                                      |             |              |                |             |
+                                                      | AMQP        |              inherits         | HTTP        |
+                                                      | Transport   |              |                | Transport   |
+                                                      | Handler     |          +---+---------+      | Handler     |
+                                                      |             |          |             |      |             |
+                                                      | overrides:  |          | MQTT        |      | overrides:  |
+                                                      |  everything |          | Transport   |      |  everything |
+                                                      |             |          | Handler     |      |             |
+                                                      +-------------+          |             |      +-------------+
+                                                                               | overrides:  |
+                                                                               |  everything |
+                                                                               |             |
+                                                                               +-------------+
+
+*/
     /// <summary>
     /// Contains methods that a device can use to send messages to and receive from the service.
     /// </summary>
@@ -592,6 +652,14 @@ namespace Microsoft.Azure.Devices.Client
             {
                 throw Fx.Exception.ArgumentNull("source");
             }
+            if (blobName.Length > 1024)
+            {
+                throw Fx.Exception.Argument("blobName", "Length cannot exceed 1024 characters");
+            }
+            if (blobName.Split('/').Count() > 254)
+            {
+                throw Fx.Exception.Argument("blobName", "Path segment count cannot exceed 254");
+            }
 
             var httpTransport = new HttpTransportHandler(iotHubConnectionString);
             return httpTransport.UploadToBlobAsync(blobName, source);
@@ -644,6 +712,14 @@ namespace Microsoft.Azure.Devices.Client
                             ClientCertificate = connectionStringBuilder.Certificate
                         }
                     };
+                case TransportType.Mqtt:
+                    return new ITransportSettings[]
+                    {
+                        new MqttTransportSettings(TransportType.Mqtt) 
+                        {
+                            ClientCertificate = connectionStringBuilder.Certificate
+                        }
+                    };
                 default:
                     throw new InvalidOperationException("Unsupported Transport {0}".FormatInvariant(transportType));
             }
@@ -663,6 +739,9 @@ namespace Microsoft.Azure.Devices.Client
                         ((Http1TransportSettings)transportSetting).ClientCertificate = connectionStringBuilder.Certificate;
                         break;
                     case TransportType.Mqtt:
+                        ((MqttTransportSettings)transportSetting).ClientCertificate = connectionStringBuilder.Certificate;
+                        break;
+                    default:
                         throw new InvalidOperationException("Unsupported Transport {0}".FormatInvariant(transportSetting.GetTransportType()));
                 }
             }

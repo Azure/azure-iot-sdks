@@ -35,8 +35,3 @@ override_dh_auto_install:
 	cp $$(pwd)/obj-*/serializer/*.a $$(pwd)/debian/tmp/usr/lib/
 	cp $$(pwd)/iothub_client/inc/* $$(pwd)/debian/tmp/usr/include/azureiot
 	cp $$(pwd)/serializer/inc/* $$(pwd)/debian/tmp/usr/include/azureiot
-
-
-
-
-

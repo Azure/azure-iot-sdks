@@ -122,15 +122,11 @@ UWP uses the Windows Store resource model that replaces the hub-and-spoke model 
 To support resources in Microsoft.Azure.Devices.Client library, the existing Resource.resx file has been copied to Resource.resw. The two files will now need to be kept in sync. Unlike in the .NET version of the library, the UWP version does not contain generated C# files. Instead, a new file, WinRTResources.cs is introduced. Whenever a new string is added to the .resx/.resw file, a corresponding entry must be copied from Resources.Designer.cs to WinRTResources.cs (follow the existing entries as an example)
 
 <a name="notimpluwp"/>
-## NotImplementedException thrown when using UWP
+## System.NotImplementedException occurred in Microsoft.Azure.Devices.Client.winmd
+The Universal Windows Platform (UWP) version of the .NET client device library does **not** currently support **MQTT** protocol.
 
-The UWP version of the .NET device libraries does not support the AMQP protocol. If you see a **NotImplementedException** thrown in a UWP application that uses the Azure IoT device SDK for .NET, then check that you are using the HTTPS protocol and not the AMQP protocol.
-
-For example:
-
-```
-var deviceClient = DeviceClient.Create(iotHubUri, new DeviceAuthenticationWithRegistrySymmetricKey("myFirstDevice", deviceKey), TransportType.Http1);
-```
+For example, calling `DeviceClient deviceClient = DeviceClient.CreateFromConnectionString(DeviceConnectionString, TransportType.Mqtt);`
+will result in "Mqtt protocol is not supported" exception.
 
 <a name="httpexception"/>
 ## IotHubCommunicationException or FileNotFoundException thrown when using HTTP protocol
@@ -175,7 +171,7 @@ Windows: `set _JAVA_OPTIONS=-Xmx512M`
 
 Linux: `export _JAVA_OPTIONS=-Xmx512M`
 
-[1]: media/platformtoolset.png
+[1]: media/PlatformToolset.png
 
 <a name="nodepromisify"/>
 ## Using promises instead of callbacks with the device client
@@ -195,6 +191,6 @@ And there you have it. All the existing functions of the client still exist, and
 Events are unchanged, so you still subscribe to those the way you would with the un-promisified client.
 
 <a name="whyunotypescript" />
-## Why not use typescript instead of javascript for the SDK?
-At the time when the SDK development was started, pure javascript felt like a better choice in order to make contributions as easy as possible for any node developer, whether or not he or she was aware and proficient with typescript. 
-We regularly reevaluate this decision as we move forward and you are most welcome to provide feedback or contribute by opening issues or pull-requests and help us decide what to do in the future.
+## Why not use TypeScript instead of JavaScript for the SDK?
+At the time when the SDK development was started, pure JavaScript felt like a better choice in order to make contributions as easy as possible for any Node developer, whether or not he or she was aware and proficient with TypesSript. 
+We regularly re-evaluate this decision as we move forward and you are most welcome to provide feedback or contribute by opening issues or pull-requests and help us decide what to do in the future.

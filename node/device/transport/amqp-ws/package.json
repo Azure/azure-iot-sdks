@@ -1,24 +1,28 @@
 {
   "name": "azure-iot-device-amqp-ws",
-  "version": "1.0.9",
+  "version": "1.0.16",
   "description": "AMQP-over-WebSocket transport for Azure IoT device SDK",
   "author": "Microsoft Corporation",
   "license": "MIT",
+  "main": "index.js",
+  "typings": "index.d.ts",
   "dependencies": {
-    "azure-iot-common": "1.0.9",
-    "azure-iot-amqp-base": "1.0.9",
-    "azure-iot-device": "1.0.9",
-    "azure-iot-device-amqp": "1.0.9"
+    "azure-iot-common": "1.0.15",
+    "azure-iot-amqp-base": "1.0.16",
+    "azure-iot-device": "1.0.15",
+    "azure-iot-device-amqp": "1.0.15"
   },
   "devDependencies": {
-    "chai": "^3.3.0",
-    "istanbul": "^0.4.2",
-    "jshint": "^2.8.0",
-    "mocha": "^2.3.3",
-    "azure-iot-common": "1.0.3"
+    "azure-iothub": "^1.0.16",
+    "chai": "^3.5.0",
+    "istanbul": "^0.4.4",
+    "jshint": "^2.9.2",
+    "mocha": "^3.0.1",
+    "tslint": "^3.14.0",
+    "typescript": "^1.8.10"
   },
   "scripts": {
-    "lint": "jshint --show-non-errors .",
+    "lint": "jshint --show-non-errors . && tslint -c ../../../tslint.json \"{lib,.}/*.ts\"",
     "unittest-min": "echo \"No tests\"",
     "alltest-min": "istanbul cover --report none node_modules/mocha/bin/_mocha -- --reporter dot test/_*_test*.js",
     "unittest": "echo \"No tests\"",

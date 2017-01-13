@@ -39,6 +39,8 @@ set CMAKE_use_wsio=OFF
 set MAKE_NUGET_PKG=no
 set CMAKE_DIR=iotsdk_win32
 set build-samples=yes
+set make=yes
+set build_traceabilitytool=0
 
 :args-loop
 if "%1" equ "" goto args-done
@@ -52,6 +54,8 @@ if "%1" equ "--skip-unittests" goto arg-skip-unittests
 if "%1" equ "--use-websockets" goto arg-use-websockets
 if "%1" equ "--make_nuget" goto arg-build-nuget
 if "%1" equ "--cmake-root" goto arg-cmake-root
+if "%1" equ "--no-make" goto arg-no-make
+if "%1" equ "--build-traceabilitytool" goto arg-build-traceabilitytool
 call :usage && exit /b 1
 
 :arg-build-clean
@@ -88,7 +92,6 @@ set CMAKE_skip_unittests=ON
 goto args-continue
 
 :arg-use-websockets
-shift
 set CMAKE_use_wsio=ON
 goto args-continue
 
@@ -106,11 +109,27 @@ if "%1" equ "" call :usage && exit /b 1
 set cmake-root=%1
 goto args-continue
 
+:arg-no-make
+set make=no
+goto args-continue
+
+:arg-build-traceabilitytool
+set build_traceabilitytool=1
+goto args-continue
+
 :args-continue
 shift
 goto args-loop
 
 :args-done
+
+if %make% == no (
+	rem No point running tests if we are not building the code
+	set CMAKE_run_e2e_tests=OFF
+	set CMAKE_run_longhaul_tests=OFF
+	set CMAKE_skip_unittests=ON
+	set build-samples=no
+)
 
 rem -----------------------------------------------------------------------------
 rem -- restore packages for solutions
@@ -132,14 +151,22 @@ if %build-samples%==yes (
 	)
 
 	rem call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
+	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 	call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
+	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 	call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
+	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
 	call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
+	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 	call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
+	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 	call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
+	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 	call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
+	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 	call nuget restore -config "%current-path%\NuGet.Config" "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
+	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 )
 
 rem -----------------------------------------------------------------------------
@@ -150,30 +177,30 @@ if %build-clean%==1 (
 	if %build-samples%==yes (
 		rem call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
 		rem call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
-		rem if not %errorlevel%==0 exit /b %errorlevel%
+		rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 		call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
 		call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
-		if not %errorlevel%==0 exit /b %errorlevel%
+		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 		rem call nuget restore "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
 		rem call :clean-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
-		rem if not %errorlevel%==0 exit /b %errorlevel%
+		rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 		
 		call :clean-a-solution "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
-		if not %errorlevel%==0 exit /b %errorlevel%
+		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 		
 		call :clean-a-solution "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
-		if not %errorlevel%==0 exit /b %errorlevel%
+		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 		call :clean-a-solution "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
-		if not %errorlevel%==0 exit /b %errorlevel%
+		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 		
 		call :clean-a-solution "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
-		if not %errorlevel%==0 exit /b %errorlevel%
+		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 		
 		call :clean-a-solution "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
-		if not %errorlevel%==0 exit /b %errorlevel%
+		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 	)
 )
 
@@ -183,28 +210,28 @@ rem ----------------------------------------------------------------------------
 
 if %build-samples%==yes (
 	rem call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_amqp\windows\iothub_client_sample_amqp.sln"
-	rem if not %errorlevel%==0 exit /b %errorlevel%
+	rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 	call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_http\windows\iothub_client_sample_http.sln"
-	if not %errorlevel%==0 exit /b %errorlevel%
+	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 	rem call :build-a-solution "%build-root%\iothub_client\samples\iothub_client_sample_mqtt\windows\iothub_client_sample_mqtt.sln"
-	rem if not %errorlevel%==0 exit /b %errorlevel%
+	rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 	rem call :build-a-solution "%build-root%\serializer\samples\simplesample_amqp\windows\simplesample_amqp.sln"
-	rem if not %errorlevel%==0 exit /b %errorlevel%
+	rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 	call :build-a-solution "%build-root%\serializer\samples\simplesample_http\windows\simplesample_http.sln"
-	if not %errorlevel%==0 exit /b %errorlevel%
+	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 	rem call :build-a-solution "%build-root%\serializer\samples\simplesample_mqtt\windows\simplesample_mqtt.sln"
-	rem if not %errorlevel%==0 exit /b %errorlevel%
+	rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 	rem call :build-a-solution "%build-root%\serializer\samples\remote_monitoring\windows\remote_monitoring.sln"
-	rem if not %errorlevel%==0 exit /b %errorlevel%
+	rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 	rem call :build-a-solution "%build-root%\serializer\samples\temp_sensor_anomaly\windows\temp_sensor_anomaly.sln"
-	rem if not %errorlevel%==0 exit /b %errorlevel%
+	rem if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
 rem -----------------------------------------------------------------------------
@@ -227,18 +254,20 @@ pushd %cmake-root%\cmake\%CMAKE_DIR%
 
 if %MAKE_NUGET_PKG% == yes (
     echo ***Running CMAKE for Win32***
-	cmake %build-root% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Dskip_unittests:BOOL=%CMAKE_skip_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio%
-    if not %errorlevel%==0 exit /b %errorlevel%
+    cmake %build-root% -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Dskip_unittests:BOOL=%CMAKE_skip_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio%
+    if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
     popd
 	
     echo ***Running CMAKE for Win64***
-    if EXIST %cmake-root%\cmake\iotsdk_win64 (
-        rmdir /s/q %cmake-root%\cmake\iotsdk_win64
+    if EXIST %cmake-root%\cmake\iotsdk_x64 (
+        rmdir /s/q %cmake-root%\cmake\iotsdk_x64
     )
-	mkdir %cmake-root%\cmake\iotsdk_win64
-	pushd %cmake-root%\cmake\iotsdk_win64
+	mkdir %cmake-root%\cmake\iotsdk_x64
+	rem no error checking
+
+	pushd %cmake-root%\cmake\iotsdk_x64
 	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Dskip_unittests:BOOL=%CMAKE_skip_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% %build-root%  -G "Visual Studio 14 Win64"
-	if not %errorlevel%==0 exit /b %errorlevel%
+	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
     popd
 
     echo ***Running CMAKE for ARM***
@@ -246,48 +275,64 @@ if %MAKE_NUGET_PKG% == yes (
         rmdir /s/q %cmake-root%\cmake\iotsdk_arm
     )
 	mkdir %cmake-root%\cmake\iotsdk_arm
+	rem no error checking
+
 	pushd %cmake-root%\cmake\iotsdk_arm
 	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Dskip_unittests:BOOL=%CMAKE_skip_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% %build-root%  -G "Visual Studio 14 ARM"
-	if not %errorlevel%==0 exit /b %errorlevel%
+	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-) else if %build-platform% == Win64 (
+) else if %build-platform% == x64 (
 	echo ***Running CMAKE for Win64***
 	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Dskip_unittests:BOOL=%CMAKE_skip_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% %build-root%  -G "Visual Studio 14 Win64"
-	if not %errorlevel%==0 exit /b %errorlevel%
+	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else if %build-platform% == arm (
 	echo ***Running CMAKE for ARM***
 	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Dskip_unittests:BOOL=%CMAKE_skip_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% %build-root%  -G "Visual Studio 14 ARM"
-	if not %errorlevel%==0 exit /b %errorlevel%
+	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 ) else (
 	echo ***Running CMAKE for Win32***
 	cmake -Drun_longhaul_tests:BOOL=%CMAKE_run_longhaul_tests% -Drun_e2e_tests:BOOL=%CMAKE_run_e2e_tests% -Dskip_unittests:BOOL=%CMAKE_skip_unittests% -Duse_wsio:BOOL=%CMAKE_use_wsio% %build-root% 
-	if not %errorlevel%==0 exit /b %errorlevel%
+	if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 )
 
 if %MAKE_NUGET_PKG% == yes (
-    echo ***Building all configurations***
-	msbuild /m %cmake-root%\cmake\iotsdk_win32\azure_iot_sdks.sln /p:Configuration=Release
-	msbuild /m %cmake-root%\cmake\iotsdk_win32\azure_iot_sdks.sln /p:Configuration=Debug
-	if not %errorlevel%==0 exit /b %errorlevel%
+	if %make%==yes (
+		echo ***Building all configurations***
+		msbuild /m %cmake-root%\cmake\iotsdk_win32\azure_iot_sdks.sln /p:Configuration=Release
+		if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+		msbuild /m %cmake-root%\cmake\iotsdk_win32\azure_iot_sdks.sln /p:Configuration=Debug
+		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-	msbuild /m %cmake-root%\cmake\iotsdk_win64\azure_iot_sdks.sln /p:Configuration=Release
-	msbuild /m %cmake-root%\cmake\iotsdk_win64\azure_iot_sdks.sln /p:Configuration=Debug
-	if not %errorlevel%==0 exit /b %errorlevel%
+		msbuild /m %cmake-root%\cmake\iotsdk_x64\azure_iot_sdks.sln /p:Configuration=Release
+		if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+		msbuild /m %cmake-root%\cmake\iotsdk_x64\azure_iot_sdks.sln /p:Configuration=Debug
+		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
-	msbuild /m %cmake-root%\cmake\iotsdk_arm\azure_iot_sdks.sln /p:Configuration=Release
-	msbuild /m %cmake-root%\cmake\iotsdk_arm\azure_iot_sdks.sln /p:Configuration=Debug
-	if not %errorlevel%==0 exit /b %errorlevel%
-	
+		msbuild /m %cmake-root%\cmake\iotsdk_arm\azure_iot_sdks.sln /p:Configuration=Release
+		if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+		msbuild /m %cmake-root%\cmake\iotsdk_arm\azure_iot_sdks.sln /p:Configuration=Debug
+		if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+	)
 ) else (
-	msbuild /m azure_iot_sdks.sln
-	if not %errorlevel%==0 exit /b %errorlevel%
+	if %make%==yes (
+		msbuild /m azure_iot_sdks.sln
+		if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
 
-	if %build-platform% neq arm (
-		ctest -C "debug" -V
-		if not %errorlevel%==0 exit /b %errorlevel%
+		if %build-platform% neq arm (
+ 			ctest -C "debug" -V
+			if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
+		)
 	)
 )
+
 popd
+
+if %build_traceabilitytool%==1 (
+	rem invoke the traceabilitytool here instead of the second build step in Jenkins windows_c job
+	msbuild /m %build-root%\tools\traceabilitytool\traceabilitytool.sln
+	if !ERRORLEVEL! neq 0 exit /b !ERRORLEVEL!
+)
+
 goto :eof
 
 
@@ -307,14 +352,17 @@ goto :eof
 :usage
 echo build.cmd [options]
 echo options:
-echo  -c, --clean           delete artifacts from previous build before building
-echo  --config ^<value^>      [Debug] build configuration (e.g. Debug, Release)
-echo  --platform ^<value^>    [Win32] build platform (e.g. Win32, x64, arm, ...)
-echo  --run-e2e-tests       run end-to-end tests
-echo  --run-longhaul-tests  run long-haul tests
-echo  --use-websockets        Enables the support for AMQP over WebSockets.
-echo  --make_nuget ^<value^>  [no] generates the binaries to be used for nuget packaging (e.g. yes, no)
-echo  --cmake-root			Directory to place the cmake files used for building the project
+echo  -c, --clean               delete artifacts from previous build before building
+echo  --config ^<value^>        [Debug] build configuration (e.g. Debug, Release)
+echo  --platform ^<value^>      [Win32] build platform (e.g. Win32, x64, arm, ...)
+echo  --make_nuget ^<value^>    [no] generates the binaries to be used for nuget packaging (e.g. yes, no)
+echo  --run-e2e-tests           run end-to-end tests
+echo  --run-longhaul-tests      run long-haul tests
+echo  --use-websockets          Enables the support for AMQP over WebSockets.
+echo  --cmake-root			    Directory to place the cmake files used for building the project
+echo  --no-make                 Surpress building the code
+echo  --build-traceabilitytool  Builds an internal tool (traceabilitytool) to check for requirements/code/test consistency
+echo  --skip-unittests          Skips building and executing unit tests (not advisable)
 
 goto :eof
 
@@ -332,5 +380,5 @@ if "%~3" neq "" set build-config=%~3
 if "%~4" neq "" set build-platform=%~4
 
 msbuild /m %build-target% "/p:Configuration=%build-config%;Platform=%build-platform%" %2
-if not %errorlevel%==0 exit /b %errorlevel%
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 goto :eof

@@ -23,17 +23,16 @@ var Properties = function () {
 /**
  * Adds the key-value pair to the collection. The strings `'Authorization'`
  * and `'iothub-to'` are considered as reserved key names and will cause the
- * function to return `false` if those key names are used. Prefixes the
- * string `'iothub-app-'` to the key before adding it to the collection.
+ * function to return `false` if those key names are used.
  */
-/* Code_SRS_NODE_IOTHUB_PROPERTIES_07_003: [The getData function shall return a string representation of the body of the message.] */
+/* Codes_SRS_NODE_IOTHUB_PROPERTIES_07_003: [The getData function shall return a string representation of the body of the message.] */
 Properties.prototype.add = function (itemKey, itemValue) {
-  /* Code_SRS_NODE_IOTHUB_PROPERTIES_07_004: [If itemKey contains any of the reserved key names then the add function will return false] */
+  /* Codes_SRS_NODE_IOTHUB_PROPERTIES_07_004: [If itemKey contains any of the reserved key names then the add function will return false] */
   if (itemKey === 'Authorization' || itemKey === 'iothub-to') {
     return false;
   }
   else {
-    var objProperty = { key: 'iothub-app-' + itemKey, value: itemValue };
+    var objProperty = { key: itemKey, value: itemValue };
     this.propertyList.push(objProperty);
     return true;
   }
@@ -45,20 +44,21 @@ Properties.prototype.add = function (itemKey, itemValue) {
  *                    returned object has the properties `key` and `value`
  *                    corresponding to the key and value of the property.
  */
-/* Code_SRS_NODE_IOTHUB_PROPERTIES_07_001: [if the supplied index is greater or equal to zero and the is less than property map length then it shall return the property object.] */
+/* Codes_SRS_NODE_IOTHUB_PROPERTIES_07_001: [if the supplied index is greater or equal to zero and the is less than property map length then it shall return the property object.] */
 Properties.prototype.getItem = function (index) {
   if (index >= 0 && index < this.propertyList.length)
     return this.propertyList[index];
+
+  /*Codes_SRS_NODE_IOTHUB_PROPERTIES_13_001: [ If the supplied index is less than zero or greater than or equal to the property map length then it shall return undefined. ]*/
   return undefined;
 };
 
 /**
  * Returns the number of items in the collection.
  */
-/* Code_SRS_NODE_IOTHUB_PROPERTIES_07_002: [Properties.Count shall return the number of items in the Properties map.] */
+/* Codes_SRS_NODE_IOTHUB_PROPERTIES_07_002: [Properties.Count shall return the number of items in the Properties map.] */
 Properties.prototype.count = function () {
   return this.propertyList.length;
 };
-
 
 module.exports = Properties;

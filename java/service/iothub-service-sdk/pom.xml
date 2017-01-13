@@ -1,8 +1,6 @@
 <!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. --><project>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.microsoft.azure.iothub.service.sdk</groupId>
     <artifactId>iothub-service-sdk</artifactId>
-    <version>1.0.7</version>
     <name>IotHub Java Service SDK</name>
     <description>The Microsoft Azure IoT Service SDK for Java</description>
     <developers>
@@ -11,6 +9,11 @@
             <name>Microsoft</name>
         </developer>
     </developers>
+    <parent>
+        <groupId>com.microsoft.azure.iot.service.sdk</groupId>
+        <artifactId>iothub-service-sdk-with-samples</artifactId>
+        <version>1.0.9</version>
+    </parent>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <skipITs>true</skipITs>
@@ -115,6 +118,22 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>with-deps</shadedClassifierName>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

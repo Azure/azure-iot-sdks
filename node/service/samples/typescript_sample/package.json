@@ -1,0 +1,17 @@
+{
+  "name": "registry_sample",
+  "version": "0.0.1",
+  "private": true,
+  "main": "registry_sample.js",
+  "author": "Microsoft Corp.",
+  "license": "MIT",
+  "dependencies": {
+    "azure-iothub": "1.0.13"
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "lint": "tslint -c ../../../tslint.json --type-check --project tsconfig.json",
+    "test": "npm -s run lint",
+    "postinstall": "typings install"
+  }
+}

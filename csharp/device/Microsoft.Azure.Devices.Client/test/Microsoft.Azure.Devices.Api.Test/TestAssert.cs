@@ -37,11 +37,11 @@ namespace Microsoft.Azure.Devices.Client.Test
             return Throws<TException>(() => action().Wait(), errorMessage);
         }
 
-        public async static Task<TException> ThrowsAsync<TException>(Func<Task> action, string errorMessage = null) where TException : Exception
+        public static async Task<TException> ThrowsAsync<TException>(Func<Task> action, string errorMessage = null) where TException : Exception
         {
             errorMessage = errorMessage ?? "Failed";
             try
-            {
+            {   
                 await action();
             }
             catch (TException ex)

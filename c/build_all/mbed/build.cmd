@@ -1,3 +1,5 @@
+@REM Copyright (c) Microsoft. All rights reserved.
+@REM Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 @setlocal EnableExtensions EnableDelayedExpansion
 @echo off
@@ -14,14 +16,14 @@ rem ----------------------------------------------------------------------------
 rem -- build (clean) compilembed tool
 rem -----------------------------------------------------------------------------
 
-call "%repo-build-root%\tools\compilembed\build.cmd" --clean
-if not %errorlevel%==0 exit /b %errorlevel%
+call "%repo-build-root%\azure-c-shared-utility\tools\compilembed\build.cmd" --clean
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 rem -----------------------------------------------------------------------------
 rem -- build iothub client samples
 rem -----------------------------------------------------------------------------
 
 call %repo-build-root%\iothub_client\build\mbed\build.cmd %*
-if not %errorlevel%==0 exit /b %errorlevel%
+if not !ERRORLEVEL!==0 exit /b !ERRORLEVEL!
 
 goto :eof

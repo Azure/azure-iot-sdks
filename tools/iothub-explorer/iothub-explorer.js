@@ -203,7 +203,7 @@ else if (command === 'monitor-events') {
                 receiver.on('message', function (eventData) {
                   if (eventData.systemProperties['iothub-connection-device-id'] === arg1) {
                     console.log('Event received: ');
-                    console.log(eventData.body);
+                    console.log((typeof eventData.body === 'string') ? eventData.body : JSON.stringify(eventData.body, null, 2));
                     console.log('');
                   }
                 });
@@ -241,7 +241,9 @@ else if (command === 'send') {
             }
             console.log(colorsTmpl('\n{green}Message sent{/green}' + id));
           }
-          client.close();
+          client.close(function (err) {
+            if (err) serviceError(err);
+          });
         }
       });
     }
@@ -357,7 +359,19 @@ function endTime() {
 function connectionString(device) {
   return 'HostName=' + hostname + ';' +
     'DeviceId=' + device.deviceId + ';' +
-    'SharedAccessKey=' + device.authentication.SymmetricKey.primaryKey;
+    constructAuthenticationString(device.authentication);
+}
+
+function constructAuthenticationString(authenticationMechanism) {
+  var authString = '';
+
+  if (authenticationMechanism.SymmetricKey.primaryKey) {
+    authString = 'SharedAccessKey=' + authenticationMechanism.SymmetricKey.primaryKey;
+  } else if (authenticationMechanism.x509Thumbprint.primaryThumbprint || authenticationMechanism.x509Thumbprint.secondaryThumbprint) {
+    authString = 'x509=true';
+  }
+
+  return authString;
 }
 
 function printDevice(device) {
