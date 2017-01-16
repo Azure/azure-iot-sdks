@@ -69,9 +69,7 @@ Connect the STM32 Nucleo based sensor node to your PC using a mini USB cable.
 2. Unzip the package and open one of the pre-configured project files available in ```AZURE1_F4_V2.0.0/Projects/Multi/Applications/HTTPS_Azure```, according to the IDE installed (for [SystemWorkbench for STM32][lnk-ide-sw4stm32] project files are inside folder ```SW4STM32```). In [SystemWorkbench for STM32][lnk-ide-sw4stm32] select the project from menu ```File -> Import -> Existing Projects into Workspace```; browse folders and select as root directory ```AZURE1_F4_V2.0.0/Projects/Multi/Applications/HTTPS_Azure/SW4STM32/STM32F401RE-Nucleo```.
 3. Open  file ```AzureIOTSDKConfig.h``` (inside folder ```AZURE1_F4_V2.0.0/Projects/Multi/Applications/HTTPS_Azure/Inc```) and update ```AZUREIOTHUBCONNECTIONSTRING``` with the credentials retrieved after having registered the device in IoT Hub as described in [Step 1.1][lnk-setup-iot-hub].
 4. Build the project according to the selected IDE. In [SystemWorkbench for STM32][lnk-ide-sw4stm32], select the Build configuration with ```Project -> Build Configurations -> Set Active``` based on the sensors expansion board mounted; then select ```Project -> Build All``` (or shortcut ```Ctrl+B```).
-
 ![][2]
-
 5. Flash the binary to Nucleo board according to the selected IDE. In [SystemWorkbench for STM32][lnk-ide-sw4stm32] select ```Run -> Run Configurations```; click on ```New launch configuration``` and select available configuration (X-NUCLEO-IKS01A1 or X-NUCLEO-IKS01A2); then in text box ```C/C++ Applications``` type in X-NUCLEO-IKS01A1\STM32F4xx-Nucleo.elf or X-NUCLEO-IKS01A2\STM32F4xx-Nucleo.elf depending on the configuration built; then click on Apply and Run.
 
 ![][5]
@@ -140,7 +138,7 @@ A QuickStart guide to setup and run the application can also be downloaded [here
 [2]: ./media/nucleo2_setconf.png
 [3]: ./media/nucleo3.png
 [4]: ./media/nucleo4.png
-[5]: ./media/nucleo2_runconf.png
+[5]: ./media/nucleo5_runconf.png
 [6]: ./media/nucleo6_runconfApply.png
 
 
