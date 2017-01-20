@@ -26,3 +26,6 @@
 [submodule "python"]
 	path = python
 	url = https://github.com/azure/azure-iot-sdk-python.git
+[submodule "doc"]
+	path = doc
+	url = https://github.com/Azure/azure-iot-device-ecosystem
