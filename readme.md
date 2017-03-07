@@ -1,16 +1,14 @@
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
-
 # Microsoft Azure IoT SDKs
 
-This repository contains both IoT device SDKs and IoT service SDKs. Device SDKs enable you connect client devices to Azure IoT Hub. Service SDKs enable you to manage your IoT Hub service instance.
+This repository references Microsoft Azure IoT device SDKs and IoT service SDKs. Device SDKs enable you connect client devices to Azure IoT Hub. Service SDKs enable you to manage your IoT Hub service instance.
 
 Visit http://azure.com/iotdev to learn more about developing applications for Azure IoT.
 
 > **Important Notice**
 >
-> All SDKs have now been moved in their own repositories (see links below).
+> **All SDKs have now been moved in their own repositories (see links below).
 > We are going to deprecate the *develop* branch on Jan 31, 2016.
-> We are not accepting pull-requests on this repository anymore. If you have a pending pull-request, please move it to the appropriate SDK repository.
+> We are not accepting pull-requests on this repository anymore.**
 
 ## Microsoft Azure IoT SDKs
 
@@ -21,24 +19,15 @@ Devices and data sources in an IoT solution can range from a simple network-conn
 
 This repository serves as a landing page for all SDKs, each being actually maintained in their own repository, including sample code and documentation:
 
-### Device-only SDKs
 - [Azure IoT SDK for C](https://github.com/azure/azure-iot-sdk-c)
 - [Azure IoT SDK for Python](https://github.com/azure/azure-iot-sdk-python)
-
-### Device and Service SDKs
 - [Azure IoT SDK for Node.js](https://github.com/azure/azure-iot-sdk-node)
 - [Azure IoT SDK for Java](https://github.com/azure/azure-iot-sdk-java)
 - [Azure IoT SDK for .NET](https://github.com/azure/azure-iot-sdk-csharp)
 
 ### OS platforms and hardware compatibility
 
-Azure IoT device SDKs can be used with a broad range of OS platforms and devices. The minimum requirements are for the device platform to support the following:
-
-- Being capable of establishing an IP connection: only IP-capable devices can communicate directly with Azure IoT Hub.
-- Support TLS: required to establish a secure communication channel with Azure IoT Hub.
-- Support SHA-256: necessary to generate the secure token for authenticating the device with the service.
-- Have a Real Time Clock or implement code to connect to an NTP server: necessary for both establishing the TLS connection and generating the secure token for authentication.
-- Having at least 64KB of RAM: the memory footprint of the SDK depends on the SDK and protocol used as well as the platform targeted. The smallest footprint is achieved using the C SDK targeting microcontrollers.
+See individual languages repositories for details.
 
 You can find an exhaustive list of the OS platforms the various SDKs have been tested against in the [Azure Certified for IoT device catalog](https://catalog.azureiotsuite.com/). Note that you might still be able to use the SDKs on OS and hardware platforms that are not listed on this page: all the SDKs are open sourced and designed to be portable. If you have suggestions, feedback or issues to report, refer to the Contribution and Support sections below.
 
@@ -48,7 +37,7 @@ If you encounter any bugs, have suggestions for new features or if you would lik
 
 ## Support
 
-If you are having issues using one of the packages or using the Azure IoT Hub service that go beyond simple bug fixes or help requests that would be dealt within the [issues section](https://github.com/Azure/azure-iot-sdks/issues) of this project, the Microsoft Customer Support team will try and help out on a best effort basis.
+If you are having issues using one of the packages or using the Azure IoT Hub service that go beyond simple bug fixes or help requests that would be dealt within the issues section of the individual SDKs repositories, the Microsoft Customer Support team will try and help out on a best effort basis.
 To engage Microsoft support, you can create a support ticket directly from the [Azure portal](https://ms.portal.azure.com/#blade/Microsoft_Azure_Support/HelpAndSupportBlade).
 Escalated support requests for Azure IoT Hub SDKs development questions will only be available Monday thru Friday during normal coverage hours of 6 a.m. to 6 p.m. PST.
 Here is what you can expect Microsoft Support to be able to help with:
@@ -57,22 +46,4 @@ Here is what you can expect Microsoft Support to be able to help with:
 * **Portal Issues**: Issues related to the portal, that includes access, security, dashboard, devices, Alarms, Usage, Settings and Actions.
 * **REST/API Issues**: Using the IoT Hub REST/APIs that are documented in the [documentation]( https://msdn.microsoft.com/library/mt548492.aspx).
 
-## Additional Resources
-
-In addition to the language SDKs, this repository ([azure-iot-sdks](https://github.com/Azure/azure-iot-sdks)) contains the following folders:
-
-### /doc
-
-This folder contains the following documents that are relevant to all the language SDKs:
-
-- [Set up IoT Hub](doc/setup_iothub.md) describes how to configure your Azure IoT Hub service.
-- [Manage IoT Hub](doc/manage_iot_hub.md) describes how to provision devices in your Azure IoT Hub service.
-- [FAQ](doc/faq.md) contains frequently asked questions about the SDKs and libraries.
-- [Azure Certified for IoT device catalog](https://catalog.azureiotsuite.com/).
-
-### /tools
-
-This folder contains links to the repositories of tools you will find useful when you are working with IoT Hub and the device SDKs.
-- [iothub-explorer](https://github.com/azure/iothub-explorer): describes how to use the iothub-explorer node.js tool to provision a device for use in IoT Hub, monitor the messages from the device, and send commands to the device.
-- [Device Explorer](https://github.com/Azure/azure-iot-sdk-csharp/tree/master/tools/DeviceExplorer): this tool enables you to perform operations such as manage the devices registered to an IoT hub, view device-to-cloud messages sent to an IoT hub, and send cloud-to-device messages from an IoT hub. Note this tool only runs on Windows.
-- [iothub-diagnostics](https://github.com/azure/iothub-diagnostics): this tool is provided to help diagnose issues with a device connecting to Azure IoT Hubs.
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
