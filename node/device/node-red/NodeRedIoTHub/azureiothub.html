@@ -1,0 +1,76 @@
+<script type="text/javascript">
+    RED.nodes.registerType('azureiothub',{
+        category: 'cloud',
+        color: '#00abec',
+        defaults: {
+            name: {value:"Azure IoT Hub"},
+            protocol: {value:"amqp"}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "azureiothub.png",
+        label: function() {
+            return this.name||"Azure IoT Hub";
+        },
+        credentials: {
+            hostname: {type:"text"}
+        }
+    });
+
+    RED.nodes.registerType('azureiothubregistry',{
+        category: 'cloud',
+        color: '#00abec',
+        defaults: {
+            name: {value:"Azure IoT Hub Registry"}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "azureiothub.png",
+        label: function() {
+            return this.name||"Azure IoT Hub Registry";
+        },
+        credentials: {
+            connectionString: {type:"text"}
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="azureiothub">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-protocol"><i class="icon-tag"></i> Protocol</label>
+        <select id="node-input-protocol">
+            <option>http</option>
+            <option>amqp</option>
+            <option>mqtt</option>
+            <option>amqpWs</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-hostname"><i class="fa fa-bookmark"></i> Hostname</label>
+        <input type="text" id="node-input-hostname">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="azureiothub">
+    <p>A simple node that sends the message payloads to Azure IoT Hub</p>
+</script>
+
+<script type="text/x-red" data-template-name="azureiothubregistry">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-connectionString"><i class="fa fa-bookmark"></i> connectionString</label>
+        <input type="text" id="node-input-connectionString">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="azureiothubregistry">
+    <p>A simple node that registers devices with Azure IoT Hub</p>
+</script>
+
