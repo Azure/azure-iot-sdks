@@ -16,7 +16,7 @@ The Microsoft Azure IoT **Device** SDKs:
 - [Azure IoT Device SDK for Python](https://github.com/Azure/azure-iot-sdk-python/tree/master/device)
 - [Azure IoT Device SDK for Node.js](https://github.com/Azure/azure-iot-sdk-node/tree/master/device)
 - [Azure IoT Device SDK for Java](https://github.com/Azure/azure-iot-sdk-java/tree/master/device)
-- [Azure IoT Device SDK for .NET](https://github.com/Azure/azure-iot-sdk-csharp/tree/master/device)
+- [Azure IoT Device SDK for .NET](https://github.com/Azure/azure-iot-sdk-csharp/tree/master/iothub/device)
 
 The Microsoft Azure IoT **Service** SDKs:
 - [Azure IoT Service SDK for C](https://github.com/Azure/azure-iot-sdk-c/tree/master/iothub_service_client) written in ANSI C (C99) for portability and broad platform compatibility. There are two service client libraries for C, the low-level iothub_messaging_ll and iothub_messaging.
