@@ -11,19 +11,12 @@ Visit http://azure.com/iotdev to learn more about developing applications for Az
 
 ## Microsoft Azure IoT SDKs
 
-The Microsoft Azure IoT **Device** SDKs:
-- [Azure IoT Device SDK for C](https://github.com/Azure/azure-iot-sdk-c) written in ANSI C (C99) for portability and broad platform compatibility. There are two device client libraries for C, the low-level iothub_ll_client and the iothub_client (threaded).
-- [Azure IoT Device SDK for Python](https://github.com/Azure/azure-iot-sdk-python/tree/master/device)
-- [Azure IoT Device SDK for Node.js](https://github.com/Azure/azure-iot-sdk-node/tree/master/device)
-- [Azure IoT Device SDK for Java](https://github.com/Azure/azure-iot-sdk-java/tree/master/device)
-- [Azure IoT Device SDK for .NET](https://github.com/Azure/azure-iot-sdk-csharp/tree/master/iothub/device)
-
-The Microsoft Azure IoT **Service** SDKs:
-- [Azure IoT Service SDK for C](https://github.com/Azure/azure-iot-sdk-c/tree/master/iothub_service_client) written in ANSI C (C99) for portability and broad platform compatibility. There are two service client libraries for C, the low-level iothub_messaging_ll and iothub_messaging.
-- [Azure IoT Service SDK for Python](https://github.com/Azure/azure-iot-sdk-python/tree/master/service)
-- [Azure IoT Service SDK for Node.js](https://github.com/Azure/azure-iot-sdk-node/tree/master/service)
-- [Azure IoT Service SDK for Java](https://github.com/Azure/azure-iot-sdk-java/tree/master/service)
-- [Azure IoT Service SDK for .NET](https://github.com/Azure/azure-iot-sdk-csharp/tree/master/iothub/service)
+Microsoft Azure IoT SDKs for Azure IoT Hub and Azure IoT Hub Device Provisioning Service:
+- [Azure IoT SDK for C](https://github.com/Azure/azure-iot-sdk-c) written in ANSI C (C99) for portability and broad platform compatibility. There are two device client libraries for C, the low-level iothub_ll_client and the iothub_client (threaded).
+- [Azure IoT SDK for Python](https://github.com/Azure/azure-iot-sdk-python)
+- [Azure IoT SDK for Node.js](https://github.com/Azure/azure-iot-sdk-node)
+- [Azure IoT SDK for Java](https://github.com/Azure/azure-iot-sdk-java)
+- [Azure IoT SDK for .NET](https://github.com/Azure/azure-iot-sdk-csharp)
 
 ### OS platforms and hardware compatibility
 
