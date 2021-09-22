@@ -12,7 +12,9 @@ Visit http://azure.com/iotdev to learn more about developing applications for Az
 ## Microsoft Azure IoT SDKs
 
 Microsoft Azure IoT SDKs for Azure IoT Hub and Azure IoT Hub Device Provisioning Service:
-- [Azure IoT SDK for Embedded C](https://github.com/Azure/azure-sdk-for-c/tree/master/sdk/docs/iot) is an alternative for **constrained devices** which enables the BYO (bring your own) network approach: IoT developers have the freedom of choice to bring MQTT client, TLS and Socket of their choice to create a device solution
+- [Azure IoT SDK for Embedded C](https://github.com/Azure/azure-sdk-for-c/tree/master/sdk/docs/iot) is an alternative for **constrained devices** which enables the BYO (bring your own) network approach: IoT developers have the freedom of choice to bring MQTT client, TLS and Socket of their choice to create a device solution.
+- [Azure IoT middleware for Azure RTOS](https://github.com/azure-rtos/netxduo/tree/master/addons/azure_iot) builds on top of the embedded SDK and tightly couples with the Azure RTOS family of networking and OS products. This gives you very performant and small applications for real-time, constrained devices.
+- [Azure IoT middleware for FreeRTOS](https://github.com/Azure/azure-iot-middleware-freertos) builds on top of the embedded SDK and takes care of the MQTT stack while integrating with FreeRTOS. This maintains the focus on constrained devices and gives users a distilled Azure IoT feature set while allowing for flexibility with their networking stack.
 - [Azure IoT SDK for C](https://github.com/Azure/azure-iot-sdk-c) written in ANSI C (C99) for portability and broad platform compatibility. There are two device client libraries for C, the low-level iothub_ll_client and the iothub_client (threaded).
 - [Azure IoT SDK for Python](https://github.com/Azure/azure-iot-sdk-python)
 - [Azure IoT SDK for Node.js](https://github.com/Azure/azure-iot-sdk-node)
