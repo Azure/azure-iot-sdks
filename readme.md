@@ -43,14 +43,3 @@ Here is what you can expect Microsoft Support to be able to help with:
 * **REST/API Issues**: Using the IoT Hub REST/APIs that are documented in the [documentation]( https://msdn.microsoft.com/library/mt548492.aspx).
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
-
-# Long Term Support
-
-The project offers a Long Term Support (LTS) version to allow users that do not need the latest features to be shielded from unwanted changes.
-
-A new LTS version will be created every 6 months. The lifetime of an LTS branch is currently planned for one year. LTS branches receive all bug fixes that fall in one of these categories:
-
-- security bugfixes
-- critical bugfixes (crashes, memory leaks, etc.)
-
-Please see each language repo for details.
